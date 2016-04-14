@@ -1,0 +1,9 @@
+
+FLIGHT:
+    number: Int
+    departs: String
+    arrives: String
+
+PILOT:
+    name: String
+    based: String
