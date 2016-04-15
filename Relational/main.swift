@@ -373,3 +373,20 @@ do {
     print(flight.toRow())
     print(FLIGHT.fromRow(flight.toRow()))
 }
+
+do {
+    let flights = [
+        FLIGHT(number: 42, departs: "Earth", arrives: "Space"),
+        FLIGHT(number: 99, departs: "JFK", arrives: "JFK"),
+        FLIGHT(number: 123, departs: "Airport", arrives: "Another Airport"),
+        FLIGHT(number: 124, departs: "Q", arrives: "R"),
+    ]
+    
+    var relation = MakeRelation(["number", "departs", "arrives"])
+    flights.map({ $0.toRow() }).forEach({ relation.add($0) })
+    
+    show("flights", relation)
+    
+    let flights2 = relation.rows().map(FLIGHT.fromRow)
+    print(flights2)
+}
