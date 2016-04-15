@@ -107,22 +107,15 @@ extension Relation {
 
 extension Relation {
     var isEmpty: Bool {
-        var result = true
-        forEach({ row, stop in
-            result = false
-            stop()
-        })
-        return result
+        return rows().next() == nil
     }
 }
 
 extension Relation {
     public var description: String {
         let columns = scheme.attributes.sort()
-        var rows: [[String]] = []
-        self.forEach({ row, stop in
-            rows.append(columns.map({ row[$0] }))
-        })
+        let rows = self.rows().map({ row in columns.map({ row[$0] }) })
+        
         let all = ([columns.map({ $0.name })] + rows)
         let lengths = all.map({ $0.map({ $0.characters.count }) })
         let columnLengths = (0 ..< columns.count).map({ index in

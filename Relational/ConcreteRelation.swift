@@ -40,13 +40,13 @@ public struct ConcreteRelation: Relation {
     public mutating func change(rowToFind: Row, to: Row) {
         let rowsToUpdate = select(rowToFind)
         delete(rowToFind)
-        rowsToUpdate.forEach({ rowToUpdate, stop in
+        for rowToUpdate in rowsToUpdate.rows() {
             var rowToAdd = rowToUpdate
             for (attribute, value) in to.values {
                 rowToAdd[attribute] = value
             }
             self.add(rowToAdd)
-        })
+        }
     }
     
     public func rows() -> AnyGenerator<Row> {

@@ -19,22 +19,17 @@ extension FunctionalDependency: CustomStringConvertible {
 extension Relation {
     func satisfies(fd: FunctionalDependency) -> Bool {
         let leftValues = self.project(Scheme(attributes: fd.left))
-        var result = true
-        leftValues.forEach({ row, stop in
+        for row in leftValues.rows() {
             let rightRows = self.select(row).project(Scheme(attributes: fd.right))
-            var count = 0
-            rightRows.forEach({ row, stop in
-                count += 1
-                if count > 1 {
-                    result = false
-                    stop()
-                }
-            })
-            if result == false {
-                stop()
+            let gen = rightRows.rows()
+            
+            // See if there are two or more elements in rightRows
+            gen.next()
+            if gen.next() != nil {
+                return false
             }
-        })
-        return result
+        }
+        return false
     }
     
     func allSatisfiedFunctionalDependencies() -> [FunctionalDependency] {

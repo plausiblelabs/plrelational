@@ -34,10 +34,8 @@ extension SimpleDatabase {
         return Dictionary(relations.map({ (name, relation) -> (String, [String: AnyObject]) in
             let scheme = relation.scheme.attributes.map({ $0.name })
             
-            var values: [[String: String]] = []
-            relation.forEach({ row, stop in
-                let dict = Dictionary(row.values.map({ ($0.name, $1) }))
-                values.append(dict)
+            let values = relation.rows().map({ row in
+                Dictionary(row.values.map({ ($0.name, $1) }))
             })
             return (name, ["scheme": scheme, "values": values])
         }))
