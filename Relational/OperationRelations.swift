@@ -12,16 +12,9 @@ struct UnionRelation: Relation {
         return a.scheme
     }
     
-    func forEach(@noescape f: (Row, Void -> Void) -> Void) {
-        var localStop = false
-        a.forEach({ row, stop in f(row, { localStop = true; stop() }) })
-        if !localStop {
-            b.forEach({ row, stop in
-                if !a.contains(row) {
-                    f(row, stop)
-                }
-            })
-        }
+    func rows() -> AnyGenerator<Row> {
+        let bUnique = b.rows().lazy.filter({ !self.a.contains($0) })
+        return AnyGenerator([a.rows(), AnyGenerator(bUnique.generate())].flatten().generate())
     }
     
     func contains(row: Row) -> Bool {
@@ -43,11 +36,15 @@ struct IntersectionRelation: Relation {
         return a.scheme
     }
     
-    func forEach(@noescape f: (Row, Void -> Void) -> Void) {
-        a.forEach({ row, stop in
-            if b.contains(row) {
-                f(row, stop)
+    func rows() -> AnyGenerator<Row> {
+        let aGen = a.rows()
+        return AnyGenerator(body: {
+            while let row = aGen.next() {
+                if self.b.contains(row) {
+                    return row
+                }
             }
+            return nil
         })
     }
     
@@ -70,11 +67,15 @@ struct DifferenceRelation: Relation {
         return a.scheme
     }
     
-    func forEach(@noescape f: (Row, Void -> Void) -> Void) {
-        a.forEach({ row, stop in
-            if !b.contains(row) {
-                f(row, stop)
+    func rows() -> AnyGenerator<Row> {
+        let aGen = a.rows()
+        return AnyGenerator(body: {
+            while let row = aGen.next() {
+                if !self.b.contains(row) {
+                    return row
+                }
             }
+            return nil
         })
     }
     
@@ -93,15 +94,19 @@ struct ProjectRelation: Relation {
         self.scheme = scheme
     }
     
-    func forEach(@noescape f: (Row, Void -> Void) -> Void) {
+    func rows() -> AnyGenerator<Row> {
+        let gen = relation.rows()
         var seen: Set<Row> = []
-        relation.forEach({ row, stop in
-            let subvalues = scheme.attributes.map({ ($0, row[$0]) })
-            let row = Row(values: Dictionary(subvalues))
-            if !seen.contains(row) {
-                seen.insert(row)
-                f(row, stop)
+        return AnyGenerator(body: {
+            while let row = gen.next() {
+                let subvalues = self.scheme.attributes.map({ ($0, row[$0]) })
+                let row = Row(values: Dictionary(subvalues))
+                if !seen.contains(row) {
+                    seen.insert(row)
+                    return row
+                }
             }
+            return nil
         })
     }
     
@@ -126,11 +131,15 @@ struct SelectRelation: Relation {
         })
     }
     
-    func forEach(@noescape f: (Row, Void -> Void) -> Void) {
-        relation.forEach({ row, stop in
-            if rowMatches(row) {
-                f(row, stop)
+    func rows() -> AnyGenerator<Row> {
+        let gen = relation.rows()
+        return AnyGenerator(body: {
+            while let row = gen.next() {
+                if self.rowMatches(row) {
+                    return row
+                }
             }
+            return nil
         })
     }
     
@@ -147,23 +156,24 @@ struct EquijoinRelation: Relation {
     var scheme: Scheme {
         return Scheme(attributes: a.scheme.attributes.union(b.scheme.attributes))
     }
-    
-    func forEach(@noescape f: (Row, Void -> Void) -> Void) {
+
+    func rows() -> AnyGenerator<Row> {
         let aJustMatching = a.project(Scheme(attributes: Set(matching.keys)))
         let bJustMatching = b.project(Scheme(attributes: Set(matching.values)))
         let allCommon = aJustMatching.intersection(bJustMatching.renameAttributes(matching.reversed))
         
-        allCommon.forEach({ row, allStop in
-            let renamedRow = row.renameAttributes(matching)
-            let aMatching = a.select(row)
-            let bMatching = b.select(renamedRow)
-            aMatching.forEach({ aRow, aStop in
-                bMatching.forEach({ bRow, bStop in
-                    let combinedRow = Row(values: aRow.values + bRow.values)
-                    f(combinedRow, { aStop(); bStop(); allStop() })
-                })
-            })
+        let seq = allCommon.rows().lazy.flatMap({ row -> AnySequence<Row> in
+            let renamedRow = row.renameAttributes(self.matching)
+            let aMatching = self.a.select(row)
+            let bMatching = self.b.select(renamedRow)
+            
+            return AnySequence(aMatching.rows().lazy.flatMap({ aRow -> AnySequence<Row> in
+                return AnySequence(bMatching.rows().lazy.map({ bRow -> Row in
+                    return Row(values: aRow.values + bRow.values)
+                }))
+            }))
         })
+        return AnyGenerator(seq.generate())
     }
     
     func contains(row: Row) -> Bool {
@@ -182,10 +192,13 @@ struct RenameRelation: Relation {
         return Scheme(attributes: newAttributes)
     }
     
-    func forEach(@noescape f: (Row, Void -> Void) -> Void) {
-        relation.forEach({ row, stop in
-            f(row.renameAttributes(renames), stop)
-        })
+    func rows() -> AnyGenerator<Row> {
+        return AnyGenerator(
+            relation
+                .rows()
+                .lazy
+                .map({ $0.renameAttributes(self.renames) })
+                .generate())
     }
     
     func contains(row: Row) -> Bool {

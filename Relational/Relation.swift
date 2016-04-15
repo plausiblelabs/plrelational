@@ -2,8 +2,10 @@
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     
-    func forEach(@noescape f: (Row, Void -> Void) -> Void)
+    func rows() -> AnyGenerator<Row>
     func contains(row: Row) -> Bool
+    
+    func forEach(@noescape f: (Row, Void -> Void) -> Void)
     
     func union(other: Relation) -> Relation
     func intersection(other: Relation) -> Relation
@@ -22,6 +24,14 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
 }
 
 extension Relation {
+    public func forEach(@noescape f: (Row, Void -> Void) -> Void) {
+        for row in rows() {
+            var stop = false
+            f(row, { stop = true })
+            if stop { break }
+        }
+    }
+    
     public func union(other: Relation) -> Relation {
         return UnionRelation(a: self, b: other)
     }

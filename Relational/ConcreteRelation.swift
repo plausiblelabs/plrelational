@@ -49,12 +49,8 @@ public struct ConcreteRelation: Relation {
         })
     }
     
-    public func forEach(@noescape f: (Row, Void -> Void) -> Void) {
-        for row in values {
-            var stop = false
-            f(row, { stop = true })
-            if stop { break }
-        }
+    public func rows() -> AnyGenerator<Row> {
+        return AnyGenerator(values.generate())
     }
     
     public func contains(row: Row) -> Bool {
