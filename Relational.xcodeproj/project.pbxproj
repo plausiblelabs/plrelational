@@ -54,7 +54,7 @@
 
 /* Begin PBXFileReference section */
 		C21971A91CC030B900E84F7E /* ModelHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelHelpers.swift; sourceTree = "<group>"; };
-		C22921911CC6CDCC00518184 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = ../modules/module.modulemap; sourceTree = "<group>"; };
+		C22921911CC6CDCC00518184 /* makemodule.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = makemodule.sh; path = ../modules/makemodule.sh; sourceTree = "<group>"; };
 		C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteDatabase.swift; sourceTree = "<group>"; };
 		C22BF12C1CBC348500D3FE59 /* Relational */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Relational; sourceTree = BUILT_PRODUCTS_DIR; };
 		C22BF12F1CBC348500D3FE59 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -98,7 +98,7 @@
 		C22921951CC6D25100518184 /* Custom Module Map */ = {
 			isa = PBXGroup;
 			children = (
-				C22921911CC6CDCC00518184 /* module.modulemap */,
+				C22921911CC6CDCC00518184 /* makemodule.sh */,
 			);
 			name = "Custom Module Map";
 			path = Relational;
@@ -222,7 +222,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "OUT_DIR=\"$TARGET_BUILD_DIR/modules\"\nmkdir \"$OUT_DIR\"\n<modules/module.modulemap sed \"s#SDK#$SDKROOT#g\" > \"$OUT_DIR/module.modulemap\"";
+			shellScript = modules/makemodule.sh;
 		};
 /* End PBXShellScriptBuildPhase section */
 
