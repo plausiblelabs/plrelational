@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		C21971A81CC01D7B00E84F7E /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C257C7571CC01C3200234A89 /* Flight.model */; };
 		C21971AA1CC030B900E84F7E /* ModelHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C21971A91CC030B900E84F7E /* ModelHelpers.swift */; };
+		C22921931CC6CE0A00518184 /* SQLiteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */; };
 		C22BF1301CBC348500D3FE59 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF12F1CBC348500D3FE59 /* main.swift */; };
 		C22BF13B1CBC349400D3FE59 /* DictionaryConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */; };
 		C22BF13C1CBC349400D3FE59 /* DictionaryCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */; };
@@ -53,6 +54,8 @@
 
 /* Begin PBXFileReference section */
 		C21971A91CC030B900E84F7E /* ModelHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelHelpers.swift; sourceTree = "<group>"; };
+		C22921911CC6CDCC00518184 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = ../modules/module.modulemap; sourceTree = "<group>"; };
+		C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteDatabase.swift; sourceTree = "<group>"; };
 		C22BF12C1CBC348500D3FE59 /* Relational */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Relational; sourceTree = BUILT_PRODUCTS_DIR; };
 		C22BF12F1CBC348500D3FE59 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryConvenience.swift; sourceTree = "<group>"; };
@@ -83,11 +86,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C22921901CC6CD9500518184 /* SQLite */ = {
+			isa = PBXGroup;
+			children = (
+				C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */,
+			);
+			name = SQLite;
+			path = Relational;
+			sourceTree = "<group>";
+		};
+		C22921951CC6D25100518184 /* Custom Module Map */ = {
+			isa = PBXGroup;
+			children = (
+				C22921911CC6CDCC00518184 /* module.modulemap */,
+			);
+			name = "Custom Module Map";
+			path = Relational;
+			sourceTree = "<group>";
+		};
 		C22BF1231CBC348500D3FE59 = {
 			isa = PBXGroup;
 			children = (
 				C22BF12E1CBC348500D3FE59 /* Relational */,
 				C257C7551CC01BCD00234A89 /* Model */,
+				C22921901CC6CD9500518184 /* SQLite */,
+				C22921951CC6D25100518184 /* Custom Module Map */,
 				C22BF12D1CBC348500D3FE59 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -139,6 +162,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C22BF1331CBC348500D3FE59 /* Build configuration list for PBXNativeTarget "Relational" */;
 			buildPhases = (
+				C22921941CC6D0B500518184 /* Generate Modulemap */,
 				C22BF1281CBC348500D3FE59 /* Sources */,
 				C22BF1291CBC348500D3FE59 /* Frameworks */,
 				C22BF12A1CBC348500D3FE59 /* CopyFiles */,
@@ -185,6 +209,23 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		C22921941CC6D0B500518184 /* Generate Modulemap */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate Modulemap";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "OUT_DIR=\"$TARGET_BUILD_DIR/modules\"\nmkdir \"$OUT_DIR\"\n<modules/module.modulemap sed \"s#SDK#$SDKROOT#g\" > \"$OUT_DIR/module.modulemap\"";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		C22BF1281CBC348500D3FE59 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -198,6 +239,7 @@
 				C257C74A1CBD7F4500234A89 /* Comparator.swift in Sources */,
 				C257C7501CBEB18A00234A89 /* FunctionalDependency.swift in Sources */,
 				C22BF13F1CBC349400D3FE59 /* StringPad.swift in Sources */,
+				C22921931CC6CE0A00518184 /* SQLiteDatabase.swift in Sources */,
 				C22BF1301CBC348500D3FE59 /* main.swift in Sources */,
 				C257C74E1CBD8A9400234A89 /* StringConvenience.swift in Sources */,
 				C22BF13D1CBC349400D3FE59 /* PlaygroundMonospace.swift in Sources */,
@@ -253,6 +295,7 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
+				SWIFT_INCLUDE_PATHS = "$(TARGET_BUILD_DIR)/modules";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -291,6 +334,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
+				SWIFT_INCLUDE_PATHS = "$(TARGET_BUILD_DIR)/modules";
 			};
 			name = Release;
 		};
