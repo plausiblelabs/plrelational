@@ -1,3 +1,4 @@
+import Foundation
 
 func show(name: String, _ relation: Relation) {
     print("\(name) is:")
@@ -389,4 +390,12 @@ do {
     
     let flights2 = relation.rows().map(FLIGHT.fromRow)
     print(flights2)
+}
+
+do {
+    let dbpath = "/tmp/whatever.sqlite3"
+    _ = try? NSFileManager.defaultManager().removeItemAtPath(dbpath)
+    
+    let db = try! SQLiteDatabase(dbpath)
+    try! db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
 }
