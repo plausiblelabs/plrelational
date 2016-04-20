@@ -67,3 +67,17 @@ extension SQLiteDatabase {
         return SQLiteRelation(db: self, tableName: name)
     }
 }
+
+class SQLiteStatement {
+    let stmt: sqlite3_stmt
+    
+    init(@noescape sqliteCall: (inout sqlite3_stmt) throws -> Void) rethrows {
+        var localStmt: sqlite3_stmt = nil
+        try sqliteCall(&localStmt)
+        self.stmt = localStmt
+    }
+    
+    deinit {
+        sqlite3_finalize(stmt)
+    }
+}

@@ -403,4 +403,10 @@ do {
     try! FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
     try! FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
     try! FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
+    
+    for r in FLIGHTS.rows() {
+        print(r)
+    }
+    
+    print(FLIGHTS)
 }
