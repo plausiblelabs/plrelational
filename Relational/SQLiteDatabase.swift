@@ -1,13 +1,13 @@
 
 import sqlite3
 
-private typealias sqlite3 = COpaquePointer
-private typealias sqlite3_stmt = COpaquePointer
+typealias sqlite3 = COpaquePointer
+typealias sqlite3_stmt = COpaquePointer
 
-private let SQLITE_TRANSIENT = unsafeBitCast(-1, sqlite3_destructor_type.self)
+let SQLITE_TRANSIENT = unsafeBitCast(-1, sqlite3_destructor_type.self)
 
 class SQLiteDatabase {
-    private let db: sqlite3
+    let db: sqlite3
     
     init(_ path: String) throws {
         var localdb: sqlite3 = nil
@@ -30,7 +30,7 @@ extension SQLiteDatabase {
         var message: String
     }
     
-    private func errwrap(callResult: Int32) throws -> Int32 {
+    func errwrap(callResult: Int32) throws -> Int32 {
         switch callResult {
         case SQLITE_OK, SQLITE_ROW, SQLITE_DONE:
             return callResult
@@ -53,7 +53,7 @@ extension SQLiteDatabase {
         let columns = scheme.attributes.map({ escapeIdentifier($0.name) }).joinWithSeparator(", ")
         let sql = "CREATE TABLE \(escapeIdentifier(name)) (\(columns))"
         
-        var stmt: COpaquePointer = nil
+        var stmt: sqlite3_stmt = nil
         try errwrap(sqlite3_prepare_v2(db, sql, -1, &stmt, nil))
         defer { try! errwrap(sqlite3_finalize(stmt)) }
         
@@ -61,5 +61,9 @@ extension SQLiteDatabase {
         if result != SQLITE_DONE {
             throw Error(code: result, message: "Unexpected non-error result stepping CREATE TABLE statement: \(result)")
         }
+    }
+    
+    subscript(name: String) -> SQLiteRelation {
+        return SQLiteRelation(db: self, tableName: name)
     }
 }

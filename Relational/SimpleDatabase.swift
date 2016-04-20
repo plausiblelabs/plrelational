@@ -7,9 +7,9 @@ class SimpleDatabase {
         relations[name] = ConcreteRelation(scheme: scheme, values: [], defaultSort: nil)
     }
     
-    subscript(name: String) -> ConcreteRelation! {
+    subscript(name: String) -> ConcreteRelation {
         get {
-            return relations[name]
+            return relations[name]!
         }
         set {
             relations[name] = newValue

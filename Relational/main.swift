@@ -398,4 +398,9 @@ do {
     
     let db = try! SQLiteDatabase(dbpath)
     try! db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
+    
+    let FLIGHTS = db["FLIGHTS"]
+    try! FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
+    try! FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
+    try! FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
 }
