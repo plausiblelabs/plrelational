@@ -63,8 +63,8 @@ extension SQLiteDatabase {
         }
     }
     
-    subscript(name: String) -> SQLiteRelation {
-        return SQLiteRelation(db: self, tableName: name)
+    subscript(name: String) -> SQLiteTableRelation {
+        return SQLiteTableRelation(db: self, tableName: name)
     }
 }
 

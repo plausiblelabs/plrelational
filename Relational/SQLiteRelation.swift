@@ -3,15 +3,21 @@ import sqlite3
 
 class SQLiteRelation: Relation {
     let db: SQLiteDatabase
+    
     let tableName: String
     
     var tableNameForQuery: String {
         return db.escapeIdentifier(tableName)
     }
     
-    init(db: SQLiteDatabase, tableName: String) {
+    let query: String
+    let queryParameters: [String]
+    
+    init(db: SQLiteDatabase, tableName: String, query: String, queryParameters: [String]) {
         self.db = db
         self.tableName = tableName
+        self.query = query
+        self.queryParameters = queryParameters
     }
     
     var scheme: Scheme {
@@ -20,7 +26,7 @@ class SQLiteRelation: Relation {
     }
     
     func rows() -> AnyGenerator<Row> {
-        return try! query("SELECT * FROM \(tableNameForQuery)")
+        return try! query("SELECT * FROM (\(query))", queryParameters)
     }
     
     func contains(row: Row) -> Bool {
@@ -28,7 +34,11 @@ class SQLiteRelation: Relation {
     }
 }
 
-extension SQLiteRelation {
+class SQLiteTableRelation: SQLiteRelation {
+    init(db: SQLiteDatabase, tableName: String) {
+        super.init(db: db, tableName: tableName, query: db.escapeIdentifier(tableName), queryParameters: [])
+    }
+    
     func add(row: Row) throws {
         let orderedAttributes = Array(row.values.keys)
         let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.name) }).joinWithSeparator(", ")
@@ -57,7 +67,7 @@ extension SQLiteRelation {
 }
 
 extension SQLiteRelation {
-    func query(sql: String, _ parameters: [String] = []) throws -> AnyGenerator<Row> {
+    private func query(sql: String, _ parameters: [String] = []) throws -> AnyGenerator<Row> {
         let stmt = try SQLiteStatement(sqliteCall: { try db.errwrap(sqlite3_prepare_v2(db.db, sql, -1, &$0, nil)) })
         for (index, param) in parameters.enumerate() {
             try db.errwrap(sqlite3_bind_text(stmt.stmt, Int32(index + 1), param, -1, SQLITE_TRANSIENT))
@@ -83,5 +93,60 @@ extension SQLiteRelation {
             
             return row
         })
+    }
+}
+
+extension SQLiteRelation {
+    private func valueProviderToSQL(provider: ValueProvider) -> (String, String?)? {
+        switch provider {
+        case let provider as Attribute:
+            return (db.escapeIdentifier(provider.name), nil)
+        case let provider as String:
+            return ("?", provider)
+        default:
+            return nil
+        }
+    }
+    
+    private func comparatorToSQL(op: Comparator) -> String? {
+        switch op {
+        case is EqualityComparator:
+            return " = "
+        default:
+            return nil
+        }
+    }
+    
+    private func termsToSQL(terms: [ComparisonTerm]) -> (String, [String])? {
+        var sqlPieces: [String] = []
+        var sqlParameters: [String] = []
+        
+        for term in terms {
+            guard
+                let (lhs, lhsParam) = valueProviderToSQL(term.lhs),
+                let op = comparatorToSQL(term.op),
+                let (rhs, rhsParam) = valueProviderToSQL(term.rhs)
+                else { return nil }
+            
+            sqlPieces.append(lhs + op + rhs)
+            if let l = lhsParam {
+                sqlParameters.append(l)
+            }
+            if let r = rhsParam {
+                sqlParameters.append(r)
+            }
+        }
+        
+        let parenthesizedPieces = sqlPieces.map({ "(" + $0 + ")" })
+        
+        return (parenthesizedPieces.joinWithSeparator(" AND "), sqlParameters)
+    }
+    
+    func select(terms: [ComparisonTerm]) -> Relation {
+        if let (sql, parameters) = termsToSQL(terms) {
+            return SQLiteRelation(db: db, tableName: self.tableName, query: "SELECT * FROM (\(self.query)) WHERE \(sql)", queryParameters: self.queryParameters + parameters)
+        } else {
+            return SelectRelation(relation: self, terms: terms)
+        }
     }
 }

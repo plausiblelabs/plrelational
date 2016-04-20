@@ -401,6 +401,12 @@ do {
     
     let FLIGHTS = db["FLIGHTS"]
     try! FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
+    try! FLIGHTS.add(["NUMBER": "124", "FROM": "JFK", "TO": "A"])
+    try! FLIGHTS.add(["NUMBER": "125", "FROM": "JFK", "TO": "B"])
+    try! FLIGHTS.add(["NUMBER": "126", "FROM": "JFK", "TO": "C"])
+    try! FLIGHTS.add(["NUMBER": "127", "FROM": "JFK", "TO": "D"])
+    try! FLIGHTS.add(["NUMBER": "128", "FROM": "JFK", "TO": "A"])
+    try! FLIGHTS.add(["NUMBER": "129", "FROM": "JFK", "TO": "A"])
     try! FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
     try! FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
     
@@ -409,4 +415,8 @@ do {
     }
     
     print(FLIGHTS)
+    
+    print(FLIGHTS.select([ComparisonTerm(Attribute("NUMBER"), LTComparator(), "125")]))
+    print(FLIGHTS.select(["FROM": "JFK"]))
+    print(FLIGHTS.select(["FROM": "JFK"]).select(["TO": "A"]))
 }
