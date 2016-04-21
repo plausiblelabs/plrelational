@@ -125,21 +125,14 @@ class SQLiteTableRelation: SQLiteRelation {
     }
     
     func add(row: Row) throws {
-        let orderedAttributes = Array(row.values.keys)
-        let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.name) }).joinWithSeparator(", ")
+        let orderedAttributes = Array(row.values)
+        let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.0.name) }).joinWithSeparator(", ")
+        let parameters = orderedAttributes.map({ $0.1 })
         let valuesSQL = Array(count: orderedAttributes.count, repeatedValue: "?").joinWithSeparator(", ")
         let sql = "INSERT INTO \(tableNameForQuery) (\(attributesSQL)) VALUES (\(valuesSQL))"
         
-        let stmt = try SQLiteStatement(sqliteCall: { try db.errwrap(sqlite3_prepare_v2(db.db, sql, -1, &$0, nil)) })
-        
-        for (index, attribute) in orderedAttributes.enumerate() {
-            try db.errwrap(sqlite3_bind_text(stmt.stmt, Int32(index + 1), row[attribute], -1, SQLITE_TRANSIENT))
-        }
-        
-        let result = try db.errwrap(sqlite3_step(stmt.stmt))
-        if result != SQLITE_DONE {
-            throw SQLiteDatabase.Error(code: result, message: "Unexpected non-error result stepping INSERT INTO statement: \(result)")
-        }
+        let result = try query(sql, parameters)
+        precondition(Array(result) == [], "Shouldn't get results back from an insert query")
     }
     
     func delete(row: Row) {
