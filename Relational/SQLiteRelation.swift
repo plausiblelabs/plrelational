@@ -34,38 +34,6 @@ class SQLiteRelation: Relation {
     }
 }
 
-class SQLiteTableRelation: SQLiteRelation {
-    init(db: SQLiteDatabase, tableName: String) {
-        super.init(db: db, tableName: tableName, query: db.escapeIdentifier(tableName), queryParameters: [])
-    }
-    
-    func add(row: Row) throws {
-        let orderedAttributes = Array(row.values.keys)
-        let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.name) }).joinWithSeparator(", ")
-        let valuesSQL = Array(count: orderedAttributes.count, repeatedValue: "?").joinWithSeparator(", ")
-        let sql = "INSERT INTO \(tableNameForQuery) (\(attributesSQL)) VALUES (\(valuesSQL))"
-        
-        let stmt = try SQLiteStatement(sqliteCall: { try db.errwrap(sqlite3_prepare_v2(db.db, sql, -1, &$0, nil)) })
-        
-        for (index, attribute) in orderedAttributes.enumerate() {
-            try db.errwrap(sqlite3_bind_text(stmt.stmt, Int32(index + 1), row[attribute], -1, SQLITE_TRANSIENT))
-        }
-        
-        let result = try db.errwrap(sqlite3_step(stmt.stmt))
-        if result != SQLITE_DONE {
-            throw SQLiteDatabase.Error(code: result, message: "Unexpected non-error result stepping INSERT INTO statement: \(result)")
-        }
-    }
-    
-    func delete(row: Row) {
-        fatalError("unimplemented")
-    }
-    
-    func change(rowToFind: Row, to: Row) {
-        fatalError("unimplemented")
-    }
-}
-
 extension SQLiteRelation {
     private func query(sql: String, _ parameters: [String] = []) throws -> AnyGenerator<Row> {
         let stmt = try SQLiteStatement(sqliteCall: { try db.errwrap(sqlite3_prepare_v2(db.db, sql, -1, &$0, nil)) })
@@ -150,3 +118,47 @@ extension SQLiteRelation {
         }
     }
 }
+
+class SQLiteTableRelation: SQLiteRelation {
+    init(db: SQLiteDatabase, tableName: String) {
+        super.init(db: db, tableName: tableName, query: db.escapeIdentifier(tableName), queryParameters: [])
+    }
+    
+    func add(row: Row) throws {
+        let orderedAttributes = Array(row.values.keys)
+        let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.name) }).joinWithSeparator(", ")
+        let valuesSQL = Array(count: orderedAttributes.count, repeatedValue: "?").joinWithSeparator(", ")
+        let sql = "INSERT INTO \(tableNameForQuery) (\(attributesSQL)) VALUES (\(valuesSQL))"
+        
+        let stmt = try SQLiteStatement(sqliteCall: { try db.errwrap(sqlite3_prepare_v2(db.db, sql, -1, &$0, nil)) })
+        
+        for (index, attribute) in orderedAttributes.enumerate() {
+            try db.errwrap(sqlite3_bind_text(stmt.stmt, Int32(index + 1), row[attribute], -1, SQLITE_TRANSIENT))
+        }
+        
+        let result = try db.errwrap(sqlite3_step(stmt.stmt))
+        if result != SQLITE_DONE {
+            throw SQLiteDatabase.Error(code: result, message: "Unexpected non-error result stepping INSERT INTO statement: \(result)")
+        }
+    }
+    
+    func delete(row: Row) {
+        fatalError("unimplemented")
+    }
+    
+    func update(searchTerms: [ComparisonTerm], newValues: Row) throws {
+        if let (whereSQL, whereParameters) = termsToSQL(searchTerms) {
+            let orderedAttributes = Array(newValues.values)
+            let setParts = orderedAttributes.map({ db.escapeIdentifier($0.0.name) + " = ?" })
+            let setSQL = setParts.joinWithSeparator(", ")
+            let setParameters = orderedAttributes.map({ $0.1 })
+            
+            let sql = "UPDATE \(tableNameForQuery) SET \(setSQL) WHERE \(whereSQL)"
+            let result = try query(sql, setParameters + whereParameters)
+            precondition(Array(result) == [], "Shouldn't get results back from an update query")
+        } else {
+            fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL updates: \(searchTerms)")
+        }
+    }
+}
+
