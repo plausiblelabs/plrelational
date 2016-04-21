@@ -397,7 +397,7 @@ do {
     _ = try? NSFileManager.defaultManager().removeItemAtPath(dbpath)
     
     let db = try! SQLiteDatabase(dbpath)
-    try! db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
+    try! db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"], rowidAttribute: Attribute("objectID"))
     
     let FLIGHTS = db["FLIGHTS"]
     try! FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
@@ -425,4 +425,29 @@ do {
     
     try! FLIGHTS.delete([ComparisonTerm(Attribute("FROM"), EqualityComparator(), "JFK")])
     show("FLIGHTS", FLIGHTS)
+}
+
+do {
+    let dbpath = "/tmp/whatever.sqlite3"
+    _ = try? NSFileManager.defaultManager().removeItemAtPath(dbpath)
+    
+    let db = try! SQLiteDatabase(dbpath)
+    try! db.createRelation("FLIGHTS", scheme: ["objectID", "number", "departs", "arrives"], rowidAttribute: Attribute("objectID"))
+    
+    let flights = [
+        FLIGHT(number: 42, departs: "Earth", arrives: "Space"),
+        FLIGHT(number: 99, departs: "JFK", arrives: "JFK"),
+        FLIGHT(number: 123, departs: "Airport", arrives: "Another Airport"),
+        FLIGHT(number: 124, departs: "Q", arrives: "R"),
+        ]
+    
+    for flight in flights {
+        try! db["FLIGHTS"].add(flight.toRow())
+    }
+    
+    show("FLIGHTS", db["FLIGHTS"])
+    
+    for row in db["FLIGHTS"].rows() {
+        print(FLIGHT.fromRow(row))
+    }
 }

@@ -1,24 +1,32 @@
 
-struct MODELNAME {
+class MODELNAME {
+    var objectID: UInt64?
+    
     var FIELDNAME: FIELDTYPE
     
     init(
         FIELDNAME: FIELDTYPE,
-        _dummy_: Void = ()
+        objectID: UInt64? = nil
     ) {
         self.FIELDNAME = FIELDNAME
     }
     
     static func fromRow(row: Row) -> MODELNAME {
+        let objectID = row.values["objectID"].map(ConvertToUInt64)
+        
         return MODELNAME(
             FIELDNAME: ConvertToFIELDTYPE(row["FIELDNAME"]),
-            _dummy_: () // dummy parameter to allow a trailing comma on the fields above
+            objectID: objectID
         )
     }
     
     func toRow() -> Row {
-        return Row(values: [
+        var row = Row(values: [
             "FIELDNAME": ConvertFromFIELDTYPE(FIELDNAME),
         ])
+        if let objectID = objectID {
+            row["objectID"] = ConvertFromUInt64(objectID)
+        }
+        return row
     }
 }
