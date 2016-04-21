@@ -1,0 +1,24 @@
+
+struct MODELNAME {
+    var FIELDNAME: FIELDTYPE
+    
+    init(
+        FIELDNAME: FIELDTYPE,
+        _dummy_: Void = ()
+    ) {
+        self.FIELDNAME = FIELDNAME
+    }
+    
+    static func fromRow(row: Row) -> MODELNAME {
+        return MODELNAME(
+            FIELDNAME: ConvertToFIELDTYPE(row["FIELDNAME"]),
+            _dummy_: () // dummy parameter to allow a trailing comma on the fields above
+        )
+    }
+    
+    func toRow() -> Row {
+        return Row(values: [
+            "FIELDNAME": ConvertFromFIELDTYPE(FIELDNAME),
+        ])
+    }
+}

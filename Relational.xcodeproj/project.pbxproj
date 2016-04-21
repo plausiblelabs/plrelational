@@ -58,6 +58,7 @@
 		C22921911CC6CDCC00518184 /* makemodule.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = makemodule.sh; path = ../modules/makemodule.sh; sourceTree = "<group>"; };
 		C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteDatabase.swift; sourceTree = "<group>"; };
 		C22921961CC7E9E300518184 /* SQLiteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteRelation.swift; sourceTree = "<group>"; };
+		C22921981CC9245900518184 /* genmodel.template */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; fileEncoding = 4; path = genmodel.template; sourceTree = "<group>"; };
 		C22BF12C1CBC348500D3FE59 /* Relational */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Relational; sourceTree = BUILT_PRODUCTS_DIR; };
 		C22BF12F1CBC348500D3FE59 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryConvenience.swift; sourceTree = "<group>"; };
@@ -151,6 +152,7 @@
 			isa = PBXGroup;
 			children = (
 				C257C7561CC01BE200234A89 /* genmodel.swift */,
+				C22921981CC9245900518184 /* genmodel.template */,
 				C257C7571CC01C3200234A89 /* Flight.model */,
 				C21971A91CC030B900E84F7E /* ModelHelpers.swift */,
 			);
