@@ -414,12 +414,15 @@ do {
         print(r)
     }
     
-    print(FLIGHTS)
+    show("FLIGHTS", FLIGHTS)
     
     print(FLIGHTS.select([ComparisonTerm(Attribute("NUMBER"), LTComparator(), "125")]))
     print(FLIGHTS.select(["FROM": "JFK"]))
     print(FLIGHTS.select(["FROM": "JFK"]).select(["TO": "A"]))
     
     try! FLIGHTS.update([ComparisonTerm(Attribute("NUMBER"), EqualityComparator(), "888")], newValues: ["FROM": "Tennessee", "TO": "Spotsylvania"])
-    print(FLIGHTS)
+    show("FLIGHTS", FLIGHTS)
+    
+    try! FLIGHTS.delete([ComparisonTerm(Attribute("FROM"), EqualityComparator(), "JFK")])
+    show("FLIGHTS", FLIGHTS)
 }

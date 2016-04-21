@@ -135,8 +135,14 @@ class SQLiteTableRelation: SQLiteRelation {
         precondition(Array(result) == [], "Shouldn't get results back from an insert query")
     }
     
-    func delete(row: Row) {
-        fatalError("unimplemented")
+    func delete(searchTerms: [ComparisonTerm]) throws {
+        if let (whereSQL, whereParameters) = termsToSQL(searchTerms) {
+            let sql = "DELETE FROM \(tableNameForQuery) WHERE \(whereSQL)"
+            let result = try query(sql, whereParameters)
+            precondition(Array(result) == [], "Shouldn't get results back from a delete query")
+        } else {
+            fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL deletes: \(searchTerms)")
+        }
     }
     
     func update(searchTerms: [ComparisonTerm], newValues: Row) throws {
