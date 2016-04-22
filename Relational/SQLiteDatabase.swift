@@ -49,10 +49,18 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    func createRelation(name: String, scheme: Scheme, rowidAttribute: Attribute) throws {
-        let otherColumns = scheme.attributes.subtract([rowidAttribute]).map({ escapeIdentifier($0.name) })
-        let rowidColumn = "\(escapeIdentifier(rowidAttribute.name)) INTEGER PRIMARY KEY ASC"
-        let columnsSQL = ([rowidColumn] + otherColumns).joinWithSeparator(", ")
+    func createRelation(name: String, scheme: Scheme, rowidAttribute: Attribute?) throws {
+        let allColumns: [String]
+        
+        if let rowidAttribute = rowidAttribute {
+            let otherColumns = scheme.attributes.subtract([rowidAttribute]).map({ escapeIdentifier($0.name) })
+            let rowidColumn = "\(escapeIdentifier(rowidAttribute.name)) INTEGER PRIMARY KEY ASC"
+            allColumns = [rowidColumn] + otherColumns
+        } else {
+            allColumns = scheme.attributes.map({ escapeIdentifier($0.name) })
+        }
+        
+        let columnsSQL = allColumns.joinWithSeparator(", ")
         let sql = "CREATE TABLE IF NOT EXISTS \(escapeIdentifier(name)) (\(columnsSQL))"
         
         var stmt: sqlite3_stmt = nil

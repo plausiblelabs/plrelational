@@ -1,0 +1,7 @@
+
+Store:
+    name: String
+    employees: [Employee]
+
+Employee:
+    name: String

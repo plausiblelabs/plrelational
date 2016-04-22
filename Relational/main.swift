@@ -369,30 +369,6 @@ do {
 }
 
 do {
-    let flight = FLIGHT(number: 123, departs: "Here", arrives: "There")
-    print(flight)
-    print(flight.toRow())
-    print(FLIGHT.fromRow(flight.toRow()))
-}
-
-do {
-    let flights = [
-        FLIGHT(number: 42, departs: "Earth", arrives: "Space"),
-        FLIGHT(number: 99, departs: "JFK", arrives: "JFK"),
-        FLIGHT(number: 123, departs: "Airport", arrives: "Another Airport"),
-        FLIGHT(number: 124, departs: "Q", arrives: "R"),
-    ]
-    
-    var relation = MakeRelation(["number", "departs", "arrives"])
-    flights.map({ $0.toRow() }).forEach({ relation.add($0) })
-    
-    show("flights", relation)
-    
-    let flights2 = relation.rows().map(FLIGHT.fromRow)
-    print(flights2)
-}
-
-do {
     let dbpath = "/tmp/whatever.sqlite3"
     _ = try? NSFileManager.defaultManager().removeItemAtPath(dbpath)
     
@@ -432,41 +408,15 @@ do {
     let dbpath = "/tmp/whatever.sqlite3"
     _ = try? NSFileManager.defaultManager().removeItemAtPath(dbpath)
     
-    let db = try! SQLiteDatabase(dbpath)
-    try! db.createRelation("FLIGHTS", scheme: ["objectID", "number", "departs", "arrives"], rowidAttribute: Attribute("objectID"))
-    
-    let flights = [
-        FLIGHT(number: 42, departs: "Earth", arrives: "Space"),
-        FLIGHT(number: 99, departs: "JFK", arrives: "JFK"),
-        FLIGHT(number: 123, departs: "Airport", arrives: "Another Airport"),
-        FLIGHT(number: 124, departs: "Q", arrives: "R"),
-        ]
-    
-    for flight in flights {
-        try! db["FLIGHTS"].add(flight.toRow())
-    }
-    
-    show("FLIGHTS", db["FLIGHTS"])
-    
-    for row in db["FLIGHTS"].rows() {
-        print(FLIGHT.fromRow(row))
-    }
-    print("")
-}
-
-do {
-    let dbpath = "/tmp/whatever.sqlite3"
-    _ = try? NSFileManager.defaultManager().removeItemAtPath(dbpath)
-    
     let sqlite = try! SQLiteDatabase(dbpath)
     let db = ModelDatabase(sqlite)
     
     let flights = [
-        FLIGHT(number: 42, departs: "Earth", arrives: "Space"),
-        FLIGHT(number: 99, departs: "JFK", arrives: "JFK"),
-        FLIGHT(number: 100, departs: "JFK", arrives: "SFO"),
-        FLIGHT(number: 123, departs: "Airport", arrives: "Another Airport"),
-        FLIGHT(number: 124, departs: "Q", arrives: "R"),
+        FLIGHT(owningDatabase: db, number: 42, departs: "Earth", arrives: "Space"),
+        FLIGHT(owningDatabase: db, number: 99, departs: "JFK", arrives: "JFK"),
+        FLIGHT(owningDatabase: db, number: 100, departs: "JFK", arrives: "SFO"),
+        FLIGHT(owningDatabase: db, number: 123, departs: "Airport", arrives: "Another Airport"),
+        FLIGHT(owningDatabase: db, number: 124, departs: "Q", arrives: "R"),
         ]
     
     print("Original flights:")
@@ -488,5 +438,46 @@ do {
     
     print("JFK fetched flights:")
     fetchedFlights.select([.EQ(FLIGHT.Attributes.departs, "JFK")]).forEach({ print($0) })
+    print("---")
+}
+
+do {
+    let dbpath = "/tmp/whatever.sqlite3"
+    _ = try? NSFileManager.defaultManager().removeItemAtPath(dbpath)
+    
+    let sqlite = try! SQLiteDatabase(dbpath)
+    let db = ModelDatabase(sqlite)
+    
+    let store1 = Store(owningDatabase: db, name: "Joe's")
+    try! db.add(store1)
+    
+    let store2 = Store(owningDatabase: db, name: "CompuStern")
+    try! db.add(store2)
+    
+    let emp1 = Employee(owningDatabase: db, name: "Toddd")
+    try! db.add(emp1)
+    
+    let emp2 = Employee(owningDatabase: db, name: "Alex")
+    try! db.add(emp2)
+    
+    let emp3 = Employee(owningDatabase: db, name: "Ramius")
+    try! db.add(emp3)
+    
+    let emp4 = Employee(owningDatabase: db, name: "Phteven")
+    try! db.add(emp4)
+    
+    let joinRelation = try! db.getOrCreateToManyJoinRelation(from: Store.self, to: Employee.self)
+    try! joinRelation.add(["from ID": String(store1.objectID!), "to ID": String(emp1.objectID!)])
+    try! joinRelation.add(["from ID": String(store1.objectID!), "to ID": String(emp2.objectID!)])
+    try! joinRelation.add(["from ID": String(store1.objectID!), "to ID": String(emp3.objectID!)])
+    try! joinRelation.add(["from ID": String(store2.objectID!), "to ID": String(emp4.objectID!)])
+    
+    print("Store 1")
+    print(store1)
+    store1.employees.forEach({ print($0) })
+    print("---")
+    print("Store 2")
+    print(store2)
+    store2.employees.forEach({ print($0) })
     print("---")
 }

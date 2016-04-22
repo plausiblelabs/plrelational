@@ -8,8 +8,14 @@ struct Model {
         var type: String
     }
     
+    struct ToManyField {
+        var name: String
+        var type: String
+    }
+    
     var name: String
     var fields: [Field]
+    var toManyFields: [ToManyField]
 }
 
 enum TemplateLineComponent {
@@ -17,6 +23,8 @@ enum TemplateLineComponent {
     case ModelName
     case FieldName
     case FieldType
+    case ToManyFieldName
+    case ToManyFieldType
 }
 
 struct TemplateLine {
@@ -31,7 +39,16 @@ struct TemplateLine {
         })
     }
     
-    func render(modelName modelName: String, fieldName: String? = nil, fieldType: String? = nil) -> String {
+    var containsToManyFieldComponent: Bool {
+        return components.contains({
+            switch $0 {
+            case .ToManyFieldName, .ToManyFieldType: return true
+            default: return false
+            }
+        })
+    }
+    
+    func render(modelName modelName: String, fieldName: String? = nil, fieldType: String? = nil, toManyFieldName: String? = nil, toManyFieldType: String? = nil) -> String {
         let textComponents = components.map({ component -> String in
             switch component {
             case .Text(let text):
@@ -42,6 +59,10 @@ struct TemplateLine {
                 return fieldName!
             case .FieldType:
                 return fieldType!
+            case .ToManyFieldName:
+                return toManyFieldName!
+            case .ToManyFieldType:
+                return toManyFieldType!
             }
         })
         
@@ -101,7 +122,7 @@ func ReadModels(path: String) -> [Model] {
             }
             
             let name = String(trimmedLine.characters.dropLast())
-            results.append(Model(name: name, fields: []))
+            results.append(Model(name: name, fields: [], toManyFields: []))
         } else {
             if results.isEmpty {
                 error("Field declaration must appear after a model declaration")
@@ -123,7 +144,12 @@ func ReadModels(path: String) -> [Model] {
                 error("Field type must not be empty")
             }
             
-            results[results.count - 1].fields.append(Model.Field(name: name, type: type))
+            if type.hasPrefix("[") && type.hasSuffix("]") {
+                let innerType = type[type.startIndex.successor() ..< type.endIndex.predecessor()]
+                results[results.count - 1].toManyFields.append(Model.ToManyField(name: name, type: innerType))
+            } else {
+                results[results.count - 1].fields.append(Model.Field(name: name, type: type))
+            }
         }
     }
     
@@ -132,9 +158,11 @@ func ReadModels(path: String) -> [Model] {
 
 func ReadTemplate(path: String) -> [TemplateLine] {
     let specialTokens = [
-        "MODELNAME": TemplateLineComponent.ModelName,
-        "FIELDNAME": TemplateLineComponent.FieldName,
-        "FIELDTYPE": TemplateLineComponent.FieldType,
+        "MODEL_NAME": TemplateLineComponent.ModelName,
+        "FIELD_NAME": TemplateLineComponent.FieldName,
+        "FIELD_TYPE": TemplateLineComponent.FieldType,
+        "TO_MANY_FIELD_NAME": TemplateLineComponent.ToManyFieldName,
+        "TO_MANY_FIELD_TYPE": TemplateLineComponent.ToManyFieldType,
     ]
     
     let specialTokensRegex = specialTokens.keys.map(NSRegularExpression.escapedPatternForString).joinWithSeparator("|")
@@ -178,8 +206,14 @@ func WriteModels(models: [Model], _ template: [TemplateLine], _ path: String) {
     for model in models {
         for line in template {
             if line.containsFieldComponent {
+                precondition(!line.containsToManyFieldComponent, "A template line can't contain both a FIELD placeholder and a TO_MANY_FIELD placeholder")
                 for field in model.fields {
                     let output = line.render(modelName: model.name, fieldName: field.name, fieldType: field.type)
+                    fputs(output, file)
+                }
+            } else if line.containsToManyFieldComponent {
+                for field in model.toManyFields {
+                    let output = line.render(modelName: model.name, toManyFieldName: field.name, toManyFieldType: field.type)
                     fputs(output, file)
                 }
             } else {

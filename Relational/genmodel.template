@@ -9,41 +9,48 @@
 // To add additional functionality to these types, create
 // an extension in another file.
 
-final class MODELNAME: Model, CustomStringConvertible {
-    static let name = "MODELNAME"
+final class MODEL_NAME: Model, CustomStringConvertible {
+    static let name = "MODEL_NAME"
     
     static let attributes = [
-        Attribute("FIELDNAME"),
+        Attribute("FIELD_NAME"),
     ]
     
     struct Attributes {
-        static let FIELDNAME = Attribute("FIELDNAME")
+        static let FIELD_NAME = Attribute("FIELD_NAME")
     }
+    
+    var owningDatabase: ModelDatabase
     
     var objectID: Int64?
     
-    var FIELDNAME: FIELDTYPE
+    var FIELD_NAME: FIELD_TYPE
+    
+    var TO_MANY_FIELD_NAME: ModelRelation<TO_MANY_FIELD_TYPE> { return try! owningDatabase.fetch(TO_MANY_FIELD_TYPE.self, ownedBy: self) }
     
     init(
-        FIELDNAME: FIELDTYPE,
+        owningDatabase: ModelDatabase,
+        FIELD_NAME: FIELD_TYPE,
         objectID: Int64? = nil
     ) {
-        self.FIELDNAME = FIELDNAME
+        self.owningDatabase = owningDatabase
+        self.FIELD_NAME = FIELD_NAME
         self.objectID = objectID
     }
     
-    static func fromRow(row: Row) -> MODELNAME {
+    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) -> MODEL_NAME {
         let objectID = row.values["objectID"].map(ConvertToInt64)
         
-        return MODELNAME(
-            FIELDNAME: ConvertToFIELDTYPE(row["FIELDNAME"]),
+        return MODEL_NAME(
+            owningDatabase: owningDatabase,
+            FIELD_NAME: ConvertToFIELD_TYPE(row["FIELD_NAME"]),
             objectID: objectID
         )
     }
     
     func toRow() -> Row {
         var row = Row(values: [
-            "FIELDNAME": ConvertFromFIELDTYPE(FIELDNAME),
+            "FIELD_NAME": ConvertFromFIELD_TYPE(FIELD_NAME),
         ])
         if let objectID = objectID {
             row["objectID"] = ConvertFromInt64(objectID)
@@ -55,7 +62,7 @@ final class MODELNAME: Model, CustomStringConvertible {
         let objectIDString = objectID.map(String.init) ?? "NULL"
         let pieces = [
             "objectID: \(objectIDString)",
-            "FIELDNAME: \(String(reflecting: FIELDNAME))",
+            "FIELD_NAME: \(String(reflecting: FIELD_NAME))",
         ]
         let joined = pieces.joinWithSeparator(", ")
         let full = "\(self.dynamicType)(\(joined))"

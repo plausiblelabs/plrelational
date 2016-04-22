@@ -4,7 +4,7 @@ protocol Model: class {
     static var attributes: [Attribute] { get }
     
     func toRow() -> Row
-    static func fromRow(row: Row) -> Self
+    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) -> Self
     
     var objectID: Int64? { get set }
 }

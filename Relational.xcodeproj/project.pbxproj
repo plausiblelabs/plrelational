@@ -15,6 +15,7 @@
 		C22921A01CCA5EF200518184 /* ModelDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C229219F1CCA5EF200518184 /* ModelDatabase.swift */; };
 		C22921A21CCA84D100518184 /* ModelRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A11CCA84D100518184 /* ModelRelation.swift */; };
 		C22921A41CCA86CE00518184 /* ComparisonTerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A31CCA86CE00518184 /* ComparisonTerm.swift */; };
+		C22921A61CCA892800518184 /* Store.model in Sources */ = {isa = PBXBuildFile; fileRef = C22921A51CCA88E500518184 /* Store.model */; };
 		C22BF1301CBC348500D3FE59 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF12F1CBC348500D3FE59 /* main.swift */; };
 		C22BF13B1CBC349400D3FE59 /* DictionaryConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */; };
 		C22BF13C1CBC349400D3FE59 /* DictionaryCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */; };
@@ -67,6 +68,7 @@
 		C229219F1CCA5EF200518184 /* ModelDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelDatabase.swift; sourceTree = "<group>"; };
 		C22921A11CCA84D100518184 /* ModelRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelRelation.swift; sourceTree = "<group>"; };
 		C22921A31CCA86CE00518184 /* ComparisonTerm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonTerm.swift; sourceTree = "<group>"; };
+		C22921A51CCA88E500518184 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 		C22BF12C1CBC348500D3FE59 /* Relational */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Relational; sourceTree = BUILT_PRODUCTS_DIR; };
 		C22BF12F1CBC348500D3FE59 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryConvenience.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 			isa = PBXGroup;
 			children = (
 				C257C7571CC01C3200234A89 /* Flight.model */,
+				C22921A51CCA88E500518184 /* Store.model */,
 			);
 			name = "Model Definitions";
 			sourceTree = "<group>";
@@ -281,6 +284,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C21971A81CC01D7B00E84F7E /* Flight.model in Sources */,
+				C22921A61CCA892800518184 /* Store.model in Sources */,
 				C21971AA1CC030B900E84F7E /* ModelHelpers.swift in Sources */,
 				C257C7541CC017EB00234A89 /* SimpleDatabase.swift in Sources */,
 				C22BF13C1CBC349400D3FE59 /* DictionaryCreation.swift in Sources */,
