@@ -31,6 +31,18 @@ class ModelDatabase {
         let joined = joinRelationFiltered.equijoin(targetRelation, matching: ["to ID": "objectID"])
         return ModelToManyRelation(owningDatabase: self, underlyingRelation: joined, joinRelation: joinRelation, fromID: ownerID)
     }
+    
+    func fetch<T: Model, Child: Model>(type: T.Type, owning child: Child) throws -> ModelRelation<T> {
+        guard let childID = child.objectID else { fatalError("Can't fetch to-many target for an object with no ID") }
+        
+        let targetRelation = try getOrCreateRelation(type)
+        let joinRelation = try getOrCreateToManyJoinRelation(from: type, to: Child.self)
+        
+        let joinRelationFiltered = joinRelation.select([.EQ(Attribute("to ID"), String(childID))])
+        
+        let joined = joinRelationFiltered.equijoin(targetRelation, matching: ["from ID": "objectID"])
+        return ModelRelation(owningDatabase: self, underlyingRelation: joined)
+    }
 }
 
 extension ModelDatabase {

@@ -5,3 +5,4 @@ Store:
 
 Employee:
     name: String
+    directReports: [Employee]

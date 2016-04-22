@@ -463,6 +463,9 @@ do {
     let emp3 = Employee(owningDatabase: db, name: "Ramius")
     try! store1.employees.add(emp3)
     
+    try! emp1.directReports.add(emp2)
+    try! emp1.directReports.add(emp3)
+    
     let emp4 = Employee(owningDatabase: db, name: "Phteven")
     try! store2.employees.add(emp4)
     
@@ -474,4 +477,11 @@ do {
     print(store2)
     store2.employees.forEach({ print($0) })
     print("---")
+    print("\(emp1) direct reports")
+    emp1.directReports.forEach({ print($0) })
+    print("---")
+    
+    print("\(emp2) parent employee \(try! emp2.parentOfType(Employee.self))")
+    print("\(emp2) parent store \(try! emp2.parentOfType(Store.self))")
+    print("\(emp4) parent employee \(try! emp4.parentOfType(Employee.self))")
 }

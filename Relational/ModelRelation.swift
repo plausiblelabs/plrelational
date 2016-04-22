@@ -34,7 +34,9 @@ class ModelToManyRelation<T: Model>: ModelRelation<T> {
     }
     
     func add(obj: T) throws {
-        try owningDatabase.add(obj)
+        if obj.objectID == nil {
+            try owningDatabase.add(obj)
+        }
         try joinRelation.add(["from ID": String(fromID), "to ID": String(obj.objectID!)])
     }
 }
