@@ -22,3 +22,19 @@ extension ModelRelation {
         return ModelRelation(owningDatabase: owningDatabase, underlyingRelation: underlyingRelation.select(terms))
     }
 }
+
+class ModelToManyRelation<T: Model>: ModelRelation<T> {
+    let joinRelation: SQLiteTableRelation
+    let fromID: Int64
+    
+    init(owningDatabase: ModelDatabase, underlyingRelation: Relation, joinRelation: SQLiteTableRelation, fromID: Int64) {
+        self.joinRelation = joinRelation
+        self.fromID = fromID
+        super.init(owningDatabase: owningDatabase, underlyingRelation: underlyingRelation)
+    }
+    
+    func add(obj: T) throws {
+        try owningDatabase.add(obj)
+        try joinRelation.add(["from ID": String(fromID), "to ID": String(obj.objectID!)])
+    }
+}

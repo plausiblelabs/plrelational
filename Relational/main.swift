@@ -455,22 +455,16 @@ do {
     try! db.add(store2)
     
     let emp1 = Employee(owningDatabase: db, name: "Toddd")
-    try! db.add(emp1)
+    try! store1.employees.add(emp1)
     
     let emp2 = Employee(owningDatabase: db, name: "Alex")
-    try! db.add(emp2)
+    try! store1.employees.add(emp2)
     
     let emp3 = Employee(owningDatabase: db, name: "Ramius")
-    try! db.add(emp3)
+    try! store1.employees.add(emp3)
     
     let emp4 = Employee(owningDatabase: db, name: "Phteven")
-    try! db.add(emp4)
-    
-    let joinRelation = try! db.getOrCreateToManyJoinRelation(from: Store.self, to: Employee.self)
-    try! joinRelation.add(["from ID": String(store1.objectID!), "to ID": String(emp1.objectID!)])
-    try! joinRelation.add(["from ID": String(store1.objectID!), "to ID": String(emp2.objectID!)])
-    try! joinRelation.add(["from ID": String(store1.objectID!), "to ID": String(emp3.objectID!)])
-    try! joinRelation.add(["from ID": String(store2.objectID!), "to ID": String(emp4.objectID!)])
+    try! store2.employees.add(emp4)
     
     print("Store 1")
     print(store1)

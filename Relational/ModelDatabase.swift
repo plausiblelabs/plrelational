@@ -20,7 +20,7 @@ class ModelDatabase {
         return ModelRelation(owningDatabase: self, underlyingRelation: relation)
     }
     
-    func fetch<T: Model, Parent: Model>(type: T.Type, ownedBy: Parent) throws -> ModelRelation<T> {
+    func fetch<T: Model, Parent: Model>(type: T.Type, ownedBy: Parent) throws -> ModelToManyRelation<T> {
         guard let ownerID = ownedBy.objectID else { fatalError("Can't fetch to-many target for an object with no ID") }
         
         let targetRelation = try getOrCreateRelation(type)
@@ -29,7 +29,7 @@ class ModelDatabase {
         let joinRelationFiltered = joinRelation.select([.EQ(Attribute("from ID"), String(ownerID))])
         
         let joined = joinRelationFiltered.equijoin(targetRelation, matching: ["to ID": "objectID"])
-        return ModelRelation(owningDatabase: self, underlyingRelation: joined)
+        return ModelToManyRelation(owningDatabase: self, underlyingRelation: joined, joinRelation: joinRelation, fromID: ownerID)
     }
 }
 
