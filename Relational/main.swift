@@ -464,6 +464,7 @@ do {
     let flights = [
         FLIGHT(number: 42, departs: "Earth", arrives: "Space"),
         FLIGHT(number: 99, departs: "JFK", arrives: "JFK"),
+        FLIGHT(number: 100, departs: "JFK", arrives: "SFO"),
         FLIGHT(number: 123, departs: "Airport", arrives: "Another Airport"),
         FLIGHT(number: 124, departs: "Q", arrives: "R"),
         ]

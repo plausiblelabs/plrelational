@@ -15,12 +15,9 @@ class ModelDatabase {
         obj.objectID = objectID
     }
     
-    func fetchAll<T: Model>(type: T.Type) throws -> AnyGenerator<T> {
+    func fetchAll<T: Model>(type: T.Type) throws -> ModelRelation<T> {
         let relation = try getOrCreateRelation(type)
-        let rowGen = relation.rows()
-        return AnyGenerator(body: {
-            return rowGen.next().map(type.fromRow)
-        })
+        return ModelRelation(underlyingRelation: relation)
     }
 }
 
