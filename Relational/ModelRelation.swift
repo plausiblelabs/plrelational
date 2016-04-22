@@ -13,3 +13,9 @@ class ModelRelation<T: Model>: SequenceType {
         })
     }
 }
+
+extension ModelRelation {
+    func select(terms: [ComparisonTerm]) -> ModelRelation {
+        return ModelRelation(underlyingRelation: underlyingRelation.select(terms))
+    }
+}

@@ -19,18 +19,6 @@ extension String: ValueProvider {
     }
 }
 
-public struct ComparisonTerm {
-    var lhs: ValueProvider
-    var op: Comparator
-    var rhs: ValueProvider
-    
-    public init(_ lhs: ValueProvider, _ op: Comparator, _ rhs: ValueProvider) {
-        self.lhs = lhs
-        self.op = op
-        self.rhs = rhs
-    }
-}
-
 public struct EqualityComparator: Comparator {
     public init() {}
     

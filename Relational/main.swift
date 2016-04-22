@@ -485,4 +485,8 @@ do {
     print("Fetched flights:")
     fetchedFlights.forEach({ print($0) })
     print("---")
+    
+    print("JFK fetched flights:")
+    fetchedFlights.select([.EQ(FLIGHT.Attributes.departs, "JFK")]).forEach({ print($0) })
+    print("---")
 }

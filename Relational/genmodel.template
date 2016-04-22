@@ -16,6 +16,10 @@ final class MODELNAME: Model, CustomStringConvertible {
         Attribute("FIELDNAME"),
     ]
     
+    struct Attributes {
+        static let FIELDNAME = Attribute("FIELDNAME")
+    }
+    
     var objectID: Int64?
     
     var FIELDNAME: FIELDTYPE
