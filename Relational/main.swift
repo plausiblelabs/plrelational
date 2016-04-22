@@ -398,6 +398,7 @@ do {
     
     let db = try! SQLiteDatabase(dbpath)
     try! db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"], rowidAttribute: Attribute("objectID"))
+    try! db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"], rowidAttribute: Attribute("objectID"))
     
     let FLIGHTS = db["FLIGHTS"]
     try! FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
@@ -450,4 +451,37 @@ do {
     for row in db["FLIGHTS"].rows() {
         print(FLIGHT.fromRow(row))
     }
+    print("")
+}
+
+do {
+    let dbpath = "/tmp/whatever.sqlite3"
+    _ = try? NSFileManager.defaultManager().removeItemAtPath(dbpath)
+    
+    let sqlite = try! SQLiteDatabase(dbpath)
+    let db = ModelDatabase(sqlite)
+    
+    let flights = [
+        FLIGHT(number: 42, departs: "Earth", arrives: "Space"),
+        FLIGHT(number: 99, departs: "JFK", arrives: "JFK"),
+        FLIGHT(number: 123, departs: "Airport", arrives: "Another Airport"),
+        FLIGHT(number: 124, departs: "Q", arrives: "R"),
+        ]
+    
+    print("Original flights:")
+    flights.forEach({ print($0) })
+    print("---")
+    
+    for flight in flights {
+        try! db.add(flight)
+    }
+    
+    print("Added flights:")
+    flights.forEach({ print($0) })
+    print("---")
+    
+    let fetchedFlights = try! db.fetchAll(FLIGHT.self)
+    print("Fetched flights:")
+    fetchedFlights.forEach({ print($0) })
+    print("---")
 }

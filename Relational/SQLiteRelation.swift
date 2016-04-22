@@ -124,7 +124,7 @@ class SQLiteTableRelation: SQLiteRelation {
         super.init(db: db, tableName: tableName, query: db.escapeIdentifier(tableName), queryParameters: [])
     }
     
-    func add(row: Row) throws {
+    func add(row: Row) throws -> Int64 {
         let orderedAttributes = Array(row.values)
         let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.0.name) }).joinWithSeparator(", ")
         let parameters = orderedAttributes.map({ $0.1 })
@@ -133,6 +133,8 @@ class SQLiteTableRelation: SQLiteRelation {
         
         let result = try query(sql, parameters)
         precondition(Array(result) == [], "Shouldn't get results back from an insert query")
+        
+        return sqlite3_last_insert_rowid(db.db)
     }
     
     func delete(searchTerms: [ComparisonTerm]) throws {

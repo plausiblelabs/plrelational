@@ -16,10 +16,10 @@ func ConvertFromInt(int: Int) -> Value {
 }
 
 
-func ConvertToUInt64(value: Value) -> UInt64 {
-    return UInt64(value)!
+func ConvertToInt64(value: Value) -> Int64 {
+    return Int64(value)!
 }
 
-func ConvertFromUInt64(uint64: UInt64) -> Value {
-    return String(uint64)
+func ConvertFromInt64(int64: Int64) -> Value {
+    return String(int64)
 }

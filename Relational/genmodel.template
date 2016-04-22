@@ -1,18 +1,35 @@
+// GENERATED CODE DO NOT EDIT OR TOUCH
+//
+// Generated using genmodel.swift from genmodel.template.
+//
+// To make changes to all models, edit genmodel.template.
+// (Note: Xcode will not automatically rebuild after editing
+// that file. Clean build, or touch all .model files.)
+//
+// To add additional functionality to these types, create
+// an extension in another file.
 
-class MODELNAME {
-    var objectID: UInt64?
+final class MODELNAME: Model, CustomStringConvertible {
+    static let name = "MODELNAME"
+    
+    static let attributes = [
+        Attribute("FIELDNAME"),
+    ]
+    
+    var objectID: Int64?
     
     var FIELDNAME: FIELDTYPE
     
     init(
         FIELDNAME: FIELDTYPE,
-        objectID: UInt64? = nil
+        objectID: Int64? = nil
     ) {
         self.FIELDNAME = FIELDNAME
+        self.objectID = objectID
     }
     
     static func fromRow(row: Row) -> MODELNAME {
-        let objectID = row.values["objectID"].map(ConvertToUInt64)
+        let objectID = row.values["objectID"].map(ConvertToInt64)
         
         return MODELNAME(
             FIELDNAME: ConvertToFIELDTYPE(row["FIELDNAME"]),
@@ -25,8 +42,19 @@ class MODELNAME {
             "FIELDNAME": ConvertFromFIELDTYPE(FIELDNAME),
         ])
         if let objectID = objectID {
-            row["objectID"] = ConvertFromUInt64(objectID)
+            row["objectID"] = ConvertFromInt64(objectID)
         }
         return row
+    }
+    
+    var description: String {
+        let objectIDString = objectID.map(String.init) ?? "NULL"
+        let pieces = [
+            "objectID: \(objectIDString)",
+            "FIELDNAME: \(String(reflecting: FIELDNAME))",
+        ]
+        let joined = pieces.joinWithSeparator(", ")
+        let full = "\(self.dynamicType)(\(joined))"
+        return full
     }
 }

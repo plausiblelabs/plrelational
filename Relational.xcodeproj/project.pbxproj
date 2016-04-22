@@ -11,6 +11,8 @@
 		C21971AA1CC030B900E84F7E /* ModelHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C21971A91CC030B900E84F7E /* ModelHelpers.swift */; };
 		C22921931CC6CE0A00518184 /* SQLiteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */; };
 		C22921971CC7E9E300518184 /* SQLiteRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921961CC7E9E300518184 /* SQLiteRelation.swift */; };
+		C229219A1CCA5B1200518184 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921991CCA5B1200518184 /* Model.swift */; };
+		C22921A01CCA5EF200518184 /* ModelDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C229219F1CCA5EF200518184 /* ModelDatabase.swift */; };
 		C22BF1301CBC348500D3FE59 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF12F1CBC348500D3FE59 /* main.swift */; };
 		C22BF13B1CBC349400D3FE59 /* DictionaryConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */; };
 		C22BF13C1CBC349400D3FE59 /* DictionaryCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */; };
@@ -59,6 +61,8 @@
 		C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteDatabase.swift; sourceTree = "<group>"; };
 		C22921961CC7E9E300518184 /* SQLiteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteRelation.swift; sourceTree = "<group>"; };
 		C22921981CC9245900518184 /* genmodel.template */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; fileEncoding = 4; path = genmodel.template; sourceTree = "<group>"; };
+		C22921991CCA5B1200518184 /* Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		C229219F1CCA5EF200518184 /* ModelDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelDatabase.swift; sourceTree = "<group>"; };
 		C22BF12C1CBC348500D3FE59 /* Relational */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Relational; sourceTree = BUILT_PRODUCTS_DIR; };
 		C22BF12F1CBC348500D3FE59 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryConvenience.swift; sourceTree = "<group>"; };
@@ -108,6 +112,40 @@
 			path = Relational;
 			sourceTree = "<group>";
 		};
+		C229219B1CCA5EC300518184 /* genmodel */ = {
+			isa = PBXGroup;
+			children = (
+				C257C7561CC01BE200234A89 /* genmodel.swift */,
+				C22921981CC9245900518184 /* genmodel.template */,
+			);
+			name = genmodel;
+			sourceTree = "<group>";
+		};
+		C229219C1CCA5ECD00518184 /* Model Definitions */ = {
+			isa = PBXGroup;
+			children = (
+				C257C7571CC01C3200234A89 /* Flight.model */,
+			);
+			name = "Model Definitions";
+			sourceTree = "<group>";
+		};
+		C229219D1CCA5EDD00518184 /* Model Code */ = {
+			isa = PBXGroup;
+			children = (
+				C22921991CCA5B1200518184 /* Model.swift */,
+				C21971A91CC030B900E84F7E /* ModelHelpers.swift */,
+			);
+			name = "Model Code";
+			sourceTree = "<group>";
+		};
+		C229219E1CCA5EE300518184 /* Database */ = {
+			isa = PBXGroup;
+			children = (
+				C229219F1CCA5EF200518184 /* ModelDatabase.swift */,
+			);
+			name = Database;
+			sourceTree = "<group>";
+		};
 		C22BF1231CBC348500D3FE59 = {
 			isa = PBXGroup;
 			children = (
@@ -151,10 +189,10 @@
 		C257C7551CC01BCD00234A89 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				C257C7561CC01BE200234A89 /* genmodel.swift */,
-				C22921981CC9245900518184 /* genmodel.template */,
-				C257C7571CC01C3200234A89 /* Flight.model */,
-				C21971A91CC030B900E84F7E /* ModelHelpers.swift */,
+				C229219B1CCA5EC300518184 /* genmodel */,
+				C229219C1CCA5ECD00518184 /* Model Definitions */,
+				C229219D1CCA5EDD00518184 /* Model Code */,
+				C229219E1CCA5EE300518184 /* Database */,
 			);
 			name = Model;
 			path = Relational;
@@ -248,10 +286,12 @@
 				C22BF1301CBC348500D3FE59 /* main.swift in Sources */,
 				C257C74E1CBD8A9400234A89 /* StringConvenience.swift in Sources */,
 				C22BF13D1CBC349400D3FE59 /* PlaygroundMonospace.swift in Sources */,
+				C22921A01CCA5EF200518184 /* ModelDatabase.swift in Sources */,
 				C257C7521CBEBF6300234A89 /* SetPowerSet.swift in Sources */,
 				C2A7C41E1CBFE93F00248F92 /* OperationRelations.swift in Sources */,
 				C257C74C1CBD835600234A89 /* RelationParts.swift in Sources */,
 				C2A7C41C1CBFE56900248F92 /* ConcreteRelation.swift in Sources */,
+				C229219A1CCA5B1200518184 /* Model.swift in Sources */,
 				C22BF13B1CBC349400D3FE59 /* DictionaryConvenience.swift in Sources */,
 				C22921971CC7E9E300518184 /* SQLiteRelation.swift in Sources */,
 			);

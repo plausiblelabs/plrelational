@@ -53,7 +53,7 @@ extension SQLiteDatabase {
         let otherColumns = scheme.attributes.subtract([rowidAttribute]).map({ escapeIdentifier($0.name) })
         let rowidColumn = "\(escapeIdentifier(rowidAttribute.name)) INTEGER PRIMARY KEY ASC"
         let columnsSQL = ([rowidColumn] + otherColumns).joinWithSeparator(", ")
-        let sql = "CREATE TABLE \(escapeIdentifier(name)) (\(columnsSQL))"
+        let sql = "CREATE TABLE IF NOT EXISTS \(escapeIdentifier(name)) (\(columnsSQL))"
         
         var stmt: sqlite3_stmt = nil
         try errwrap(sqlite3_prepare_v2(db, sql, -1, &stmt, nil))
