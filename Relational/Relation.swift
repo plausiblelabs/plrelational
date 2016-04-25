@@ -114,7 +114,7 @@ extension Relation {
 extension Relation {
     public var description: String {
         let columns = scheme.attributes.sort()
-        let rows = self.rows().map({ row in columns.map({ row[$0] }) })
+        let rows = self.rows().map({ row in columns.map({ row[$0].description }) })
         
         let all = ([columns.map({ $0.name })] + rows)
         let lengths = all.map({ $0.map({ $0.characters.count }) })

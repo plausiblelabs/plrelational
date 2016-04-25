@@ -12,7 +12,7 @@ class ModelRelation<T: Model>: SequenceType {
     func generate() -> AnyGenerator<T> {
         let rows = underlyingRelation.rows()
         return AnyGenerator(body: {
-            return rows.next().map({ T.fromRow(self.owningDatabase, $0) })
+            return rows.next().map({ try! T.fromRow(self.owningDatabase, $0) })
         })
     }
 }
@@ -37,6 +37,6 @@ class ModelToManyRelation<T: Model>: ModelRelation<T> {
         if obj.objectID == nil {
             try owningDatabase.add(obj)
         }
-        try joinRelation.add(["from ID": String(fromID), "to ID": String(obj.objectID!)])
+        try joinRelation.add(["from ID": RelationValue(fromID), "to ID": RelationValue(obj.objectID!)])
     }
 }

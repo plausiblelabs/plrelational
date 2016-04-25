@@ -1,0 +1,124 @@
+
+/// Values which can be stored in a Relation. These are just the SQLite data types.
+/// We might want to do our own thing and not hew so closely to SQLite's way....
+public enum RelationValue {
+    case NULL
+    case Integer(Int64)
+    case Real(Double)
+    case Text(String)
+    case Blob([UInt8])
+}
+
+extension RelationValue: Equatable {}
+public func ==(a: RelationValue, b: RelationValue) -> Bool {
+    switch (a, b) {
+    case (.NULL, .NULL): return true
+    case (.Integer(let a), .Integer(let b)): return a == b
+    case (.Real(let a), .Real(let b)): return a == b
+    case (.Text(let a), .Text(let b)): return a == b
+    case (.Blob(let a), .Blob(let b)): return a == b
+    default: return false
+    }
+}
+
+extension RelationValue: Comparable {}
+public func <(a: RelationValue, b: RelationValue) -> Bool {
+    // Since this must provide a total ordering, sort in the order of the case statements.
+    // By doing the checks in order, we ensure the wildcards only catch later cases, not
+    // earlier ones.
+    switch (a, b) {
+    case (.NULL, .NULL): return false
+    case (.NULL, _): return true
+    case (_, .NULL): return false
+        
+    case (.Integer(let a), .Integer(let b)): return a < b
+    case (.Integer, _): return true
+    case (_, .Integer): return false
+        
+    case (.Real(let a), .Real(let b)): return a < b
+    case (.Real, _): return true
+    case (_, .Real): return false
+        
+    case (.Text(let a), .Text(let b)): return a < b
+    case (.Text, _): return true
+    case (_, .Text): return false
+        
+    case (.Blob(let a), .Blob(let b)): return a.lexicographicalCompare(b)
+    case (.Blob, _): return true
+    case (_, .Blob): return false
+        
+    default: fatalError("This should never execute, it's just here because the compiler can't seem to figure out that the previous cases are exhaustive")
+    }
+}
+
+extension RelationValue: Hashable {
+    public var hashValue: Int {
+        switch self {
+        case .NULL: return 0
+        case .Integer(let x): return 1 ^ x.hashValue
+        case .Real(let x): return 2 ^ x.hashValue
+        case .Text(let x): return 3 ^ x.hashValue
+        case .Blob(let x): return 4 ^ x.hashValueFromElements
+        }
+    }
+}
+
+extension RelationValue: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .NULL: return "NULL"
+        case .Integer(let x): return String(x)
+        case .Real(let x): return String(x)
+        case .Text(let x): return String(x)
+        case .Blob(let x): return String(x)
+        }
+    }
+}
+
+extension RelationValue {
+    init(_ int: Int64) {
+        self = .Integer(int)
+    }
+    
+    init(_ real: Double) {
+        self = .Real(real)
+    }
+    
+    init(_ text: String) {
+        self = .Text(text)
+    }
+    
+    init(_ blob: [UInt8]) {
+        self = .Blob(blob)
+    }
+}
+
+extension RelationValue: StringLiteralConvertible {
+    public init(extendedGraphemeClusterLiteral value: String) {
+        self = .Text(value)
+    }
+    
+    public init(unicodeScalarLiteral value: String) {
+        self = .Text(value)
+    }
+    
+    public init(stringLiteral value: String) {
+        self = .Text(value)
+    }
+}
+
+extension RelationValue {
+    func get() -> String? {
+        switch self {
+        case .Text(let x): return x
+        default: return nil
+        }
+    }
+    
+    func get() -> Int64? {
+        switch self {
+        case .Integer(let x): return x
+        default: return nil
+        }
+    }
+}

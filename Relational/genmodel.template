@@ -38,22 +38,30 @@ final class MODEL_NAME: Model, CustomStringConvertible {
         self.objectID = objectID
     }
     
-    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) -> MODEL_NAME {
-        let objectID = row.values["objectID"].map(ConvertToInt64)
+    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) throws -> MODEL_NAME {
+        let objectID = row.values["objectID"].flatMap({ $0.get() as Int64? })
         
         return MODEL_NAME(
             owningDatabase: owningDatabase,
-            FIELD_NAME: ConvertToFIELD_TYPE(row["FIELD_NAME"]),
+            FIELD_NAME: try unwrapOrThrow(row["FIELD_NAME"].get(), "FIELD_NAME"),
             objectID: objectID
         )
     }
     
+    private static func unwrapOrThrow<T>(value: T?, _ attribute: String) throws -> T {
+        if let value = value {
+            return value
+        } else {
+            throw ModelError.BadDataType(attribute: attribute)
+        }
+    }
+    
     func toRow() -> Row {
         var row = Row(values: [
-            "FIELD_NAME": ConvertFromFIELD_TYPE(FIELD_NAME),
+            "FIELD_NAME": RelationValue(FIELD_NAME),
         ])
         if let objectID = objectID {
-            row["objectID"] = ConvertFromInt64(objectID)
+            row["objectID"] = RelationValue(objectID)
         }
         return row
     }
@@ -62,7 +70,7 @@ final class MODEL_NAME: Model, CustomStringConvertible {
         let objectIDString = objectID.map(String.init) ?? "NULL"
         let pieces = [
             "objectID: \(objectIDString)",
-            "FIELD_NAME: \(String(reflecting: FIELD_NAME))",
+            "FIELD_NAME: \(FIELD_NAME)",
         ]
         let joined = pieces.joinWithSeparator(", ")
         let full = "\(self.dynamicType)(\(joined))"

@@ -21,7 +21,7 @@ public struct ConcreteRelation: Relation {
     
     public func sortedValues(attribute: Attribute?) -> [Row] {
         if let attribute = attribute where scheme.attributes.contains(attribute) {
-            return values.sort({ $0[attribute].numericLessThan($1[attribute]) })
+            return values.sort({ $0[attribute].description.numericLessThan($1[attribute].description) })
         } else {
             return Array(values)
         }
@@ -81,13 +81,13 @@ public struct ConcreteRelation: Relation {
 }
 
 extension ConcreteRelation: DictionaryLiteralConvertible {
-    public init(dictionaryLiteral elements: (Attribute, Value)...) {
+    public init(dictionaryLiteral elements: (Attribute, RelationValue)...) {
         scheme = Scheme(attributes: Set(elements.map({ $0.0 })))
         values = [Row(values: Dictionary(elements))]
     }
 }
 
-public func MakeRelation(attributes: [Attribute], _ rowValues: [Value]...) -> ConcreteRelation {
+public func MakeRelation(attributes: [Attribute], _ rowValues: [RelationValue]...) -> ConcreteRelation {
     let scheme = Scheme(attributes: Set(attributes))
     let rows = rowValues.map({ values -> Row in
         precondition(values.count == attributes.count)
@@ -100,7 +100,7 @@ extension ConcreteRelation: CustomStringConvertible, PlaygroundMonospace {
     public var description: String {
         let columns = scheme.attributes.sort()
         let rows = sortedValues(defaultSort).map({ row -> [String] in
-            return columns.map({ row[$0] })
+            return columns.map({ row[$0].description })
         })
         let all = ([columns.map({ $0.name })] + rows)
         let lengths = all.map({ $0.map({ $0.characters.count }) })

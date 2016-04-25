@@ -248,8 +248,8 @@ do {
     show("arrives before 1300", times.select([ComparisonTerm(Attribute("ARRIVES"), LTComparator(), "1300")]))
     
     let twoHoursLT = AnyComparator({ (lhs, rhs) in
-        let lhsN = Int(lhs) ?? -1
-        let rhsN = Int(rhs) ?? -1
+        let lhsN = lhs.get() as Int64? ?? -1
+        let rhsN = rhs.get() as Int64? ?? -1
         return ((rhsN + 2400) - lhsN) % 2400 >= 200
     })
     

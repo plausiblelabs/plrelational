@@ -16,6 +16,9 @@
 		C22921A21CCA84D100518184 /* ModelRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A11CCA84D100518184 /* ModelRelation.swift */; };
 		C22921A41CCA86CE00518184 /* ComparisonTerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A31CCA86CE00518184 /* ComparisonTerm.swift */; };
 		C22921A61CCA892800518184 /* Store.model in Sources */ = {isa = PBXBuildFile; fileRef = C22921A51CCA88E500518184 /* Store.model */; };
+		C22921A81CCE587900518184 /* RelationValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A71CCE587900518184 /* RelationValue.swift */; };
+		C22921AA1CCE605D00518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
+		C22921AC1CCE6C5B00518184 /* ModelError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921AB1CCE6C5B00518184 /* ModelError.swift */; };
 		C22BF1301CBC348500D3FE59 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF12F1CBC348500D3FE59 /* main.swift */; };
 		C22BF13B1CBC349400D3FE59 /* DictionaryConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */; };
 		C22BF13C1CBC349400D3FE59 /* DictionaryCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */; };
@@ -69,6 +72,9 @@
 		C22921A11CCA84D100518184 /* ModelRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelRelation.swift; sourceTree = "<group>"; };
 		C22921A31CCA86CE00518184 /* ComparisonTerm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonTerm.swift; sourceTree = "<group>"; };
 		C22921A51CCA88E500518184 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
+		C22921A71CCE587900518184 /* RelationValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValue.swift; sourceTree = "<group>"; };
+		C22921A91CCE605D00518184 /* ArrayHashing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayHashing.swift; sourceTree = "<group>"; };
+		C22921AB1CCE6C5B00518184 /* ModelError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelError.swift; sourceTree = "<group>"; };
 		C22BF12C1CBC348500D3FE59 /* Relational */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Relational; sourceTree = BUILT_PRODUCTS_DIR; };
 		C22BF12F1CBC348500D3FE59 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryConvenience.swift; sourceTree = "<group>"; };
@@ -140,6 +146,7 @@
 			isa = PBXGroup;
 			children = (
 				C22921991CCA5B1200518184 /* Model.swift */,
+				C22921AB1CCE6C5B00518184 /* ModelError.swift */,
 				C21971A91CC030B900E84F7E /* ModelHelpers.swift */,
 			);
 			name = "Model Code";
@@ -177,6 +184,7 @@
 			isa = PBXGroup;
 			children = (
 				C22BF12F1CBC348500D3FE59 /* main.swift */,
+				C22921A91CCE605D00518184 /* ArrayHashing.swift */,
 				C257C7491CBD7F4500234A89 /* Comparator.swift */,
 				C22921A31CCA86CE00518184 /* ComparisonTerm.swift */,
 				C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */,
@@ -187,6 +195,7 @@
 				C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */,
 				C22BF1391CBC349400D3FE59 /* Relation.swift */,
 				C257C74B1CBD835600234A89 /* RelationParts.swift */,
+				C22921A71CCE587900518184 /* RelationValue.swift */,
 				C257C7511CBEBF6300234A89 /* SetPowerSet.swift */,
 				C257C7531CC017EB00234A89 /* SimpleDatabase.swift */,
 				C257C74D1CBD8A9400234A89 /* StringConvenience.swift */,
@@ -284,8 +293,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				C21971A81CC01D7B00E84F7E /* Flight.model in Sources */,
+				C22921A81CCE587900518184 /* RelationValue.swift in Sources */,
 				C22921A61CCA892800518184 /* Store.model in Sources */,
 				C21971AA1CC030B900E84F7E /* ModelHelpers.swift in Sources */,
+				C22921AA1CCE605D00518184 /* ArrayHashing.swift in Sources */,
 				C257C7541CC017EB00234A89 /* SimpleDatabase.swift in Sources */,
 				C22BF13C1CBC349400D3FE59 /* DictionaryCreation.swift in Sources */,
 				C22BF13E1CBC349400D3FE59 /* Relation.swift in Sources */,
@@ -295,6 +306,7 @@
 				C257C7501CBEB18A00234A89 /* FunctionalDependency.swift in Sources */,
 				C22BF13F1CBC349400D3FE59 /* StringPad.swift in Sources */,
 				C22921931CC6CE0A00518184 /* SQLiteDatabase.swift in Sources */,
+				C22921AC1CCE6C5B00518184 /* ModelError.swift in Sources */,
 				C22BF1301CBC348500D3FE59 /* main.swift in Sources */,
 				C257C74E1CBD8A9400234A89 /* StringConvenience.swift in Sources */,
 				C22BF13D1CBC349400D3FE59 /* PlaygroundMonospace.swift in Sources */,

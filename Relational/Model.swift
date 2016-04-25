@@ -6,7 +6,7 @@ protocol Model: class {
     var owningDatabase: ModelDatabase { get }
     
     func toRow() -> Row
-    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) -> Self
+    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) throws -> Self
     
     var objectID: Int64? { get set }
 }

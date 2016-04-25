@@ -1,6 +1,4 @@
 
-public typealias Value = String
-
 public struct Attribute {
     public var name: String
     
@@ -59,13 +57,14 @@ public func ==(a: Scheme, b: Scheme) -> Bool {
 }
 
 public struct Row: Hashable {
-    public var values: [Attribute: Value]
+    public var values: [Attribute: RelationValue]
     
     public var hashValue: Int {
+        // Note: needs to ensure the same value is produced regardless of order, so no fancy stuff.
         return values.map({ $0.0.hashValue ^ $0.1.hashValue }).reduce(0, combine: ^)
     }
     
-    public subscript(attribute: Attribute) -> Value {
+    public subscript(attribute: Attribute) -> RelationValue {
         get {
             return values[attribute]!
         }
@@ -83,7 +82,7 @@ public struct Row: Hashable {
 }
 
 extension Row: DictionaryLiteralConvertible {
-    public init(dictionaryLiteral elements: (Attribute, Value)...) {
+    public init(dictionaryLiteral elements: (Attribute, RelationValue)...) {
         values = Dictionary(elements)
     }
 }

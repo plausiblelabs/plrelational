@@ -1,6 +1,6 @@
 
 FLIGHT:
-    number: Int
+    number: Int64
     departs: String
     arrives: String
 
