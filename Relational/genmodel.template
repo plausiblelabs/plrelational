@@ -14,6 +14,7 @@ final class MODEL_NAME: Model, CustomStringConvertible {
     
     static let attributes = [
         Attribute("FIELD_NAME"),
+        Attribute("objectID")
     ]
     
     struct Attributes {
@@ -22,7 +23,7 @@ final class MODEL_NAME: Model, CustomStringConvertible {
     
     var owningDatabase: ModelDatabase
     
-    var objectID: Int64?
+    var objectID: ModelObjectID
     
     var FIELD_NAME: FIELD_TYPE
     
@@ -31,7 +32,7 @@ final class MODEL_NAME: Model, CustomStringConvertible {
     init(
         owningDatabase: ModelDatabase,
         FIELD_NAME: FIELD_TYPE,
-        objectID: Int64? = nil
+        objectID: ModelObjectID = ModelObjectID.new()
     ) {
         self.owningDatabase = owningDatabase
         self.FIELD_NAME = FIELD_NAME
@@ -39,12 +40,10 @@ final class MODEL_NAME: Model, CustomStringConvertible {
     }
     
     static func fromRow(owningDatabase: ModelDatabase, _ row: Row) throws -> MODEL_NAME {
-        let objectID = row.values["objectID"].flatMap({ $0.get() as Int64? })
-        
         return MODEL_NAME(
             owningDatabase: owningDatabase,
             FIELD_NAME: try unwrapOrThrow(row["FIELD_NAME"].get(), "FIELD_NAME"),
-            objectID: objectID
+            objectID: ModelObjectID(value: try unwrapOrThrow(row["objectID"].get(), "objectID"))
         )
     }
     
@@ -57,19 +56,16 @@ final class MODEL_NAME: Model, CustomStringConvertible {
     }
     
     func toRow() -> Row {
-        var row = Row(values: [
+        let row = Row(values: [
             "FIELD_NAME": RelationValue(FIELD_NAME),
+            "objectID": RelationValue(objectID.value)
         ])
-        if let objectID = objectID {
-            row["objectID"] = RelationValue(objectID)
-        }
         return row
     }
     
     var description: String {
-        let objectIDString = objectID.map(String.init) ?? "NULL"
         let pieces = [
-            "objectID: \(objectIDString)",
+            "objectID: \(objectID)",
             "FIELD_NAME: \(FIELD_NAME)",
         ]
         let joined = pieces.joinWithSeparator(", ")

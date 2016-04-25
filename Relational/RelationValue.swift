@@ -108,6 +108,13 @@ extension RelationValue: StringLiteralConvertible {
 }
 
 extension RelationValue {
+    func get() -> Int64? {
+        switch self {
+        case .Integer(let x): return x
+        default: return nil
+        }
+    }
+    
     func get() -> String? {
         switch self {
         case .Text(let x): return x
@@ -115,9 +122,9 @@ extension RelationValue {
         }
     }
     
-    func get() -> Int64? {
+    func get() -> [UInt8]? {
         switch self {
-        case .Integer(let x): return x
+        case .Blob(let x): return x
         default: return nil
         }
     }

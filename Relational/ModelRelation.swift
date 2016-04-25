@@ -25,18 +25,18 @@ extension ModelRelation {
 
 class ModelToManyRelation<T: Model>: ModelRelation<T> {
     let joinRelation: SQLiteTableRelation
-    let fromID: Int64
+    let fromID: ModelObjectID
     
-    init(owningDatabase: ModelDatabase, underlyingRelation: Relation, joinRelation: SQLiteTableRelation, fromID: Int64) {
+    init(owningDatabase: ModelDatabase, underlyingRelation: Relation, joinRelation: SQLiteTableRelation, fromID: ModelObjectID) {
         self.joinRelation = joinRelation
         self.fromID = fromID
         super.init(owningDatabase: owningDatabase, underlyingRelation: underlyingRelation)
     }
     
     func add(obj: T) throws {
-        if obj.objectID == nil {
+        if try !owningDatabase.contains(obj) {
             try owningDatabase.add(obj)
         }
-        try joinRelation.add(["from ID": RelationValue(fromID), "to ID": RelationValue(obj.objectID!)])
+        try joinRelation.add(["from ID": RelationValue(fromID.value), "to ID": RelationValue(obj.objectID.value)])
     }
 }

@@ -373,8 +373,8 @@ do {
     _ = try? NSFileManager.defaultManager().removeItemAtPath(dbpath)
     
     let db = try! SQLiteDatabase(dbpath)
-    try! db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"], rowidAttribute: Attribute("objectID"))
-    try! db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"], rowidAttribute: Attribute("objectID"))
+    try! db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"])
+    try! db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"])
     
     let FLIGHTS = db["FLIGHTS"]
     try! FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
