@@ -14,12 +14,12 @@ protocol Model: class {
 }
 
 extension Model {
-    func parentsOfType<T: Model>(type: T.Type) throws -> ModelRelation<T> {
-        return try owningDatabase.fetch(type, owning: self)
+    func parentsOfType<T: Model>(type: T.Type) -> ModelRelation<T> {
+        return owningDatabase.fetch(type, owning: self)
     }
     
     func parentOfType<T: Model>(type: T.Type) throws -> T? {
-        let parents = try parentsOfType(type)
+        let parents = parentsOfType(type)
         let gen = parents.generate()
         
         // Get one parent.

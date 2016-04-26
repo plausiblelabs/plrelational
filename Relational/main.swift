@@ -376,7 +376,7 @@ do {
     try! db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"])
     try! db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"])
     
-    let FLIGHTS = db["FLIGHTS"]
+    let FLIGHTS = db["FLIGHTS", ["objectID", "NUMBER", "FROM", "TO"]]
     try! FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
     try! FLIGHTS.add(["NUMBER": "124", "FROM": "JFK", "TO": "A"])
     try! FLIGHTS.add(["NUMBER": "125", "FROM": "JFK", "TO": "B"])
@@ -431,7 +431,7 @@ do {
     flights.forEach({ print($0) })
     print("---")
     
-    let fetchedFlights = try! db.fetchAll(FLIGHT.self)
+    let fetchedFlights = db.fetchAll(FLIGHT.self)
     print("Fetched flights:")
     fetchedFlights.forEach({ print($0) })
     print("---")

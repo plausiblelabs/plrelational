@@ -28,10 +28,17 @@ class SQLiteDatabase {
     }
     
     private func queryTables() throws -> Set<String> {
-        let master = self["SQLITE_MASTER"]
+        let masterName = "SQLITE_MASTER"
+        let masterScheme = try schemeForTable(masterName)
+        let master = self[masterName, masterScheme]
         let tables = master.select([.EQ(Attribute("type"), "table")])
         let names = tables.rows().map({ $0["name"] })
         return Set(names.map({ $0.get()! }))
+    }
+    
+    private func schemeForTable(name: String) throws -> Scheme {
+        let columns = try executeQuery("pragma table_info(\(escapeIdentifier(name)))")
+        return Scheme(attributes: Set(columns.map({ Attribute($0["name"].get()!) })))
     }
 }
 
@@ -78,8 +85,63 @@ extension SQLiteDatabase {
         tables.insert(name)
     }
     
-    subscript(name: String) -> SQLiteTableRelation {
-        return SQLiteTableRelation(db: self, tableName: name)
+    subscript(name: String, scheme: Scheme) -> SQLiteTableRelation {
+        return SQLiteTableRelation(db: self, tableName: name, scheme: scheme)
+    }
+}
+
+extension SQLiteDatabase {
+    func executeQuery(sql: String, _ parameters: [RelationValue] = []) throws -> AnyGenerator<Row> {
+        let stmt = try SQLiteStatement(sqliteCall: { try self.errwrap(sqlite3_prepare_v2(self.db, sql, -1, &$0, nil)) })
+        for (index, param) in parameters.enumerate() {
+            try self.bindValue(stmt.stmt, Int32(index + 1), param)
+        }
+        
+        return AnyGenerator(body: {
+            let result = sqlite3_step(stmt.stmt)
+            if result == SQLITE_DONE { return nil }
+            if result != SQLITE_ROW {
+                fatalError("Got a result from sqlite3_step that I don't know how to handle: \(result)")
+            }
+            
+            var row = Row(values: [:])
+            
+            let columnCount = sqlite3_column_count(stmt.stmt)
+            for i in 0..<columnCount {
+                let name = String.fromCString(sqlite3_column_name(stmt.stmt, i))
+                let value = self.columnToValue(stmt.stmt, i)
+                row[Attribute(name!)] = value
+            }
+            
+            return row
+        })
+    }
+    
+    private func columnToValue(stmt: sqlite3_stmt, _ index: Int32) -> RelationValue {
+        let type = sqlite3_column_type(stmt, index)
+        switch type {
+        case SQLITE_NULL: return .NULL
+        case SQLITE_INTEGER: return .Integer(sqlite3_column_int64(stmt, index))
+        case SQLITE_FLOAT: return .Real(sqlite3_column_double(stmt, index))
+        case SQLITE_TEXT: return .Text(String.fromCString(UnsafePointer(sqlite3_column_text(stmt, index)))!)
+        case SQLITE_BLOB:
+            let ptr = UnsafePointer<UInt8>(sqlite3_column_blob(stmt, index))
+            let length = sqlite3_column_bytes(stmt, index)
+            let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: Int(length))
+            return .Blob(Array(buffer))
+        default:
+            fatalError("Got unknown column type \(type) from SQLite")
+        }
+    }
+    
+    private func bindValue(stmt: sqlite3_stmt, _ index: Int32, _ value: RelationValue) throws {
+        switch value {
+        case .NULL: try self.errwrap(sqlite3_bind_null(stmt, index))
+        case .Integer(let x): try self.errwrap(sqlite3_bind_int64(stmt, index, x))
+        case .Real(let x): try self.errwrap(sqlite3_bind_double(stmt, index, x))
+        case .Text(let x): try self.errwrap(sqlite3_bind_text(stmt, index, x, -1, SQLITE_TRANSIENT))
+        case .Blob(let x): try self.errwrap(sqlite3_bind_blob64(stmt, index, x, UInt64(x.count), SQLITE_TRANSIENT))
+        }
     }
 }
 
