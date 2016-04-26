@@ -1,11 +1,14 @@
 
+/// Silly placeholder until we figure out what the error type should actually look like.
+public typealias RelationError = ErrorType
+
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     
-    func rows() -> AnyGenerator<Row>
-    func contains(row: Row) -> Bool
+    func rows() -> AnyGenerator<Result<Row, RelationError>>
+    func contains(row: Row) -> Result<Bool, RelationError>
     
-    func forEach(@noescape f: (Row, Void -> Void) -> Void)
+    func forEach(@noescape f: (Row, Void -> Void) -> Void) -> Result<Void, RelationError>
     
     func union(other: Relation) -> Relation
     func intersection(other: Relation) -> Relation
@@ -24,12 +27,18 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
 }
 
 extension Relation {
-    public func forEach(@noescape f: (Row, Void -> Void) -> Void) {
+    public func forEach(@noescape f: (Row, Void -> Void) -> Void) -> Result<Void, RelationError>{
         for row in rows() {
-            var stop = false
-            f(row, { stop = true })
-            if stop { break }
+            switch row {
+            case .Ok(let row):
+                var stop = false
+                f(row, { stop = true })
+                if stop { break }
+            case .Err(let e):
+                return .Err(e)
+            }
         }
+        return .Ok()
     }
     
     public func union(other: Relation) -> Relation {
@@ -106,15 +115,23 @@ extension Relation {
 }
 
 extension Relation {
-    var isEmpty: Bool {
-        return rows().next() == nil
+    var isEmpty: Result<Bool, RelationError> {
+        switch rows().next() {
+        case .None: return .Ok(true)
+        case .Some(.Ok): return .Ok(false)
+        case .Some(.Err(let e)): return .Err(e)
+        }
     }
 }
 
 extension Relation {
     public var description: String {
         let columns = scheme.attributes.sort()
-        let rows = self.rows().map({ row in columns.map({ row[$0].description }) })
+        let rows = self.rows().map({ row in
+            columns.map({ col in
+                String(row.map({ $0[col] }))
+            })
+        })
         
         let all = ([columns.map({ $0.name })] + rows)
         let lengths = all.map({ $0.map({ $0.characters.count }) })

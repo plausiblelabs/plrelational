@@ -12,13 +12,13 @@ struct UnionRelation: Relation {
         return a.scheme
     }
     
-    func rows() -> AnyGenerator<Row> {
-        let bUnique = b.rows().lazy.filter({ !self.a.contains($0) })
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let bUnique = b.rows().lazy.filter({ !($0.then({ self.a.contains($0) }).ok ?? true) })
         return AnyGenerator([a.rows(), AnyGenerator(bUnique.generate())].flatten().generate())
     }
     
-    func contains(row: Row) -> Bool {
-        return a.contains(row) || b.contains(row)
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        return a.contains(row).combine(b.contains(row)).map({ $0 || $1 })
     }
 }
 
@@ -36,11 +36,22 @@ struct IntersectionRelation: Relation {
         return a.scheme
     }
     
-    func rows() -> AnyGenerator<Row> {
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
         let aGen = a.rows()
         return AnyGenerator(body: {
             while let row = aGen.next() {
-                if self.b.contains(row) {
+                switch row {
+                case .Ok(let row):
+                    let contains = self.b.contains(row)
+                    switch contains {
+                    case .Ok(let contains):
+                        if contains {
+                            return .Ok(row)
+                        }
+                    case .Err(let error):
+                        return .Err(error)
+                    }
+                case .Err:
                     return row
                 }
             }
@@ -48,8 +59,8 @@ struct IntersectionRelation: Relation {
         })
     }
     
-    func contains(row: Row) -> Bool {
-        return a.contains(row) && b.contains(row)
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        return a.contains(row).combine(b.contains(row)).map({ $0 && $1 })
     }
 }
 
@@ -67,11 +78,22 @@ struct DifferenceRelation: Relation {
         return a.scheme
     }
     
-    func rows() -> AnyGenerator<Row> {
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
         let aGen = a.rows()
         return AnyGenerator(body: {
             while let row = aGen.next() {
-                if !self.b.contains(row) {
+                switch row {
+                case .Ok(let row):
+                    let contains = self.b.contains(row)
+                    switch contains {
+                    case .Ok(let contains):
+                        if !contains {
+                            return .Ok(row)
+                        }
+                    case .Err(let error):
+                        return .Err(error)
+                    }
+                case .Err:
                     return row
                 }
             }
@@ -79,8 +101,8 @@ struct DifferenceRelation: Relation {
         })
     }
     
-    func contains(row: Row) -> Bool {
-        return a.contains(row) && !b.contains(row)
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        return a.contains(row).combine(b.contains(row)).map({ $0 && !$1 })
     }
 }
 
@@ -94,15 +116,20 @@ struct ProjectRelation: Relation {
         self.scheme = scheme
     }
     
-    func rows() -> AnyGenerator<Row> {
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
         let gen = relation.rows()
         var seen: Set<Row> = []
         return AnyGenerator(body: {
             while let row = gen.next() {
-                let subvalues = self.scheme.attributes.map({ ($0, row[$0]) })
-                let row = Row(values: Dictionary(subvalues))
-                if !seen.contains(row) {
-                    seen.insert(row)
+                switch row {
+                case .Ok(let row):
+                    let subvalues = self.scheme.attributes.map({ ($0, row[$0]) })
+                    let newRow = Row(values: Dictionary(subvalues))
+                    if !seen.contains(newRow) {
+                        seen.insert(newRow)
+                        return .Ok(newRow)
+                    }
+                case .Err:
                     return row
                 }
             }
@@ -110,8 +137,8 @@ struct ProjectRelation: Relation {
         })
     }
     
-    func contains(row: Row) -> Bool {
-        return !relation.select(row).isEmpty
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        return relation.select(row).isEmpty.map(!)
     }
 }
 
@@ -131,11 +158,16 @@ struct SelectRelation: Relation {
         })
     }
     
-    func rows() -> AnyGenerator<Row> {
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
         let gen = relation.rows()
         return AnyGenerator(body: {
             while let row = gen.next() {
-                if self.rowMatches(row) {
+                switch row {
+                case .Ok(let row):
+                    if self.rowMatches(row) {
+                        return .Ok(row)
+                    }
+                case .Err:
                     return row
                 }
             }
@@ -143,8 +175,8 @@ struct SelectRelation: Relation {
         })
     }
     
-    func contains(row: Row) -> Bool {
-        return relation.contains(row) && rowMatches(row)
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        return relation.contains(row).map({ $0 && rowMatches(row) })
     }
 }
 
@@ -157,27 +189,32 @@ struct EquijoinRelation: Relation {
         return Scheme(attributes: a.scheme.attributes.union(b.scheme.attributes))
     }
 
-    func rows() -> AnyGenerator<Row> {
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
         let aJustMatching = a.project(Scheme(attributes: Set(matching.keys)))
         let bJustMatching = b.project(Scheme(attributes: Set(matching.values)))
         let allCommon = aJustMatching.intersection(bJustMatching.renameAttributes(matching.reversed))
         
-        let seq = allCommon.rows().lazy.flatMap({ row -> AnySequence<Row> in
-            let renamedRow = row.renameAttributes(self.matching)
-            let aMatching = self.a.select(row)
-            let bMatching = self.b.select(renamedRow)
-            
-            return AnySequence(aMatching.rows().lazy.flatMap({ aRow -> AnySequence<Row> in
-                return AnySequence(bMatching.rows().lazy.map({ bRow -> Row in
-                    return Row(values: aRow.values + bRow.values)
+        let seq = allCommon.rows().lazy.flatMap({ row -> AnySequence<Result<Row, RelationError>> in
+            switch row {
+            case .Ok(let row):
+                let renamedRow = row.renameAttributes(self.matching)
+                let aMatching = self.a.select(row)
+                let bMatching = self.b.select(renamedRow)
+                
+                return AnySequence(aMatching.rows().lazy.flatMap({ aRow -> AnySequence<Result<Row, RelationError>> in
+                    return AnySequence(bMatching.rows().lazy.map({ bRow -> Result<Row, RelationError> in
+                        return aRow.combine(bRow).map({ Row(values: $0.values + $1.values) })
+                    }))
                 }))
-            }))
+            case .Err:
+                return AnySequence(CollectionOfOne(row))
+            }
         })
         return AnyGenerator(seq.generate())
     }
     
-    func contains(row: Row) -> Bool {
-        return !self.select(row).isEmpty
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        return self.select(row).isEmpty.map(!)
     }
 }
 
@@ -192,16 +229,16 @@ struct RenameRelation: Relation {
         return Scheme(attributes: newAttributes)
     }
     
-    func rows() -> AnyGenerator<Row> {
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
         return AnyGenerator(
             relation
                 .rows()
                 .lazy
-                .map({ $0.renameAttributes(self.renames) })
+                .map({ $0.map({ $0.renameAttributes(self.renames) }) })
                 .generate())
     }
     
-    func contains(row: Row) -> Bool {
+    func contains(row: Row) -> Result<Bool, RelationError> {
         return relation.contains(row.renameAttributes(renames.reversed))
     }
 }

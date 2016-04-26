@@ -20,25 +20,28 @@ class SQLiteDatabase {
         }
         self.db = localdb
         
-        tables = try self.queryTables()
+        tables = try self.queryTables().orThrow()
     }
     
     deinit {
-        try! errwrap(sqlite3_close_v2(db))
+        try! errwrap(sqlite3_close_v2(db)).orThrow()
     }
     
-    private func queryTables() throws -> Set<String> {
+    private func queryTables() -> Result<Set<String>, RelationError> {
         let masterName = "SQLITE_MASTER"
-        let masterScheme = try schemeForTable(masterName)
-        let master = self[masterName, masterScheme]
-        let tables = master.select([.EQ(Attribute("type"), "table")])
-        let names = tables.rows().map({ $0["name"] })
-        return Set(names.map({ $0.get()! }))
+        let masterScheme = schemeForTable(masterName)
+        return masterScheme.then({ (scheme: Scheme) -> Result<Set<String>, RelationError> in
+            let master = self[masterName, scheme]
+            let tables = master.select([.EQ(Attribute("type"), "table")])
+            let names = mapOk(tables.rows(), { (row: Row) -> String in row["name"].get()! as String })
+            return names.map({ Set($0) })
+        })
     }
     
-    private func schemeForTable(name: String) throws -> Scheme {
-        let columns = try executeQuery("pragma table_info(\(escapeIdentifier(name)))")
-        return Scheme(attributes: Set(columns.map({ Attribute($0["name"].get()!) })))
+    private func schemeForTable(name: String) -> Result<Scheme, RelationError> {
+        let columns = executeQuery("pragma table_info(\(escapeIdentifier(name)))")
+        let names = mapOk(columns, { $0["name"].get()! as String })
+        return names.map({ Scheme(attributes: Set($0.map({ Attribute($0) }))) })
     }
 }
 
@@ -48,13 +51,13 @@ extension SQLiteDatabase {
         var message: String
     }
     
-    func errwrap(callResult: Int32) throws -> Int32 {
+    func errwrap(callResult: Int32) -> Result<Int32, RelationError> {
         switch callResult {
         case SQLITE_OK, SQLITE_ROW, SQLITE_DONE:
-            return callResult
+            return .Ok(callResult)
         default:
             let message = String.fromCString(sqlite3_errmsg(db))
-            throw Error(code: callResult, message: message ?? "")
+            return .Err(Error(code: callResult, message: message ?? ""))
         }
     }
 }
@@ -67,22 +70,19 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    func createRelation(name: String, scheme: Scheme) throws {
+    func createRelation(name: String, scheme: Scheme) -> Result<Void, RelationError> {
         let allColumns: [String]  = scheme.attributes.map({ escapeIdentifier($0.name) })
         
         let columnsSQL = allColumns.joinWithSeparator(", ")
         let sql = "CREATE TABLE IF NOT EXISTS \(escapeIdentifier(name)) (\(columnsSQL))"
         
-        var stmt: sqlite3_stmt = nil
-        try errwrap(sqlite3_prepare_v2(db, sql, -1, &stmt, nil))
-        defer { try! errwrap(sqlite3_finalize(stmt)) }
-        
-        let result = try errwrap(sqlite3_step(stmt))
-        if result != SQLITE_DONE {
-            throw Error(code: result, message: "Unexpected non-error result stepping CREATE TABLE statement: \(result)")
-        }
-        
-        tables.insert(name)
+        let result = executeQuery(sql)
+        return result.map({ rows in
+            let array = Array(rows)
+            precondition(array.isEmpty, "Unexpected result from CREATE TABLE statement: \(array)")
+            tables.insert(name)
+            return ()
+        })
     }
     
     subscript(name: String, scheme: Scheme) -> SQLiteTableRelation {
@@ -91,29 +91,34 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    func executeQuery(sql: String, _ parameters: [RelationValue] = []) throws -> AnyGenerator<Row> {
-        let stmt = try SQLiteStatement(sqliteCall: { try self.errwrap(sqlite3_prepare_v2(self.db, sql, -1, &$0, nil)) })
-        for (index, param) in parameters.enumerate() {
-            try self.bindValue(stmt.stmt, Int32(index + 1), param)
-        }
-        
-        return AnyGenerator(body: {
-            let result = sqlite3_step(stmt.stmt)
-            if result == SQLITE_DONE { return nil }
-            if result != SQLITE_ROW {
-                fatalError("Got a result from sqlite3_step that I don't know how to handle: \(result)")
+    func executeQuery(sql: String, _ parameters: [RelationValue] = []) -> Result<AnyGenerator<Result<Row, RelationError>>, RelationError> {
+        return makeStatement({ sqlite3_prepare_v2(self.db, sql, -1, &$0, nil) }).then({ stmt -> Result<AnyGenerator<Result<Row, RelationError>>, RelationError> in
+            for (index, param) in parameters.enumerate() {
+                if let err = bindValue(stmt.value, Int32(index + 1), param).err {
+                    return .Err(err)
+                }
             }
             
-            var row = Row(values: [:])
-            
-            let columnCount = sqlite3_column_count(stmt.stmt)
-            for i in 0..<columnCount {
-                let name = String.fromCString(sqlite3_column_name(stmt.stmt, i))
-                let value = self.columnToValue(stmt.stmt, i)
-                row[Attribute(name!)] = value
-            }
-            
-            return row
+            return .Ok(AnyGenerator(body: {
+                let result = self.errwrap(sqlite3_step(stmt.value))
+                return result.map({ (code: Int32) -> Row? in
+                    if code == SQLITE_DONE { return nil }
+                    if code != SQLITE_ROW {
+                        fatalError("Got a result from sqlite3_step that I don't know how to handle: \(result)")
+                    }
+                    
+                    var row = Row(values: [:])
+                    
+                    let columnCount = sqlite3_column_count(stmt.value)
+                    for i in 0..<columnCount {
+                        let name = String.fromCString(sqlite3_column_name(stmt.value, i))
+                        let value = self.columnToValue(stmt.value, i)
+                        row[Attribute(name!)] = value
+                    }
+                    
+                    return row
+                })
+            }))
         })
     }
     
@@ -134,27 +139,27 @@ extension SQLiteDatabase {
         }
     }
     
-    private func bindValue(stmt: sqlite3_stmt, _ index: Int32, _ value: RelationValue) throws {
+    private func bindValue(stmt: sqlite3_stmt, _ index: Int32, _ value: RelationValue) -> Result<Void, RelationError> {
+        let result: Result<Int32, RelationError>
         switch value {
-        case .NULL: try self.errwrap(sqlite3_bind_null(stmt, index))
-        case .Integer(let x): try self.errwrap(sqlite3_bind_int64(stmt, index, x))
-        case .Real(let x): try self.errwrap(sqlite3_bind_double(stmt, index, x))
-        case .Text(let x): try self.errwrap(sqlite3_bind_text(stmt, index, x, -1, SQLITE_TRANSIENT))
-        case .Blob(let x): try self.errwrap(sqlite3_bind_blob64(stmt, index, x, UInt64(x.count), SQLITE_TRANSIENT))
+        case .NULL: result = self.errwrap(sqlite3_bind_null(stmt, index))
+        case .Integer(let x): result =  self.errwrap(sqlite3_bind_int64(stmt, index, x))
+        case .Real(let x): result =  self.errwrap(sqlite3_bind_double(stmt, index, x))
+        case .Text(let x): result =  self.errwrap(sqlite3_bind_text(stmt, index, x, -1, SQLITE_TRANSIENT))
+        case .Blob(let x): result =  self.errwrap(sqlite3_bind_blob64(stmt, index, x, UInt64(x.count), SQLITE_TRANSIENT))
         }
+        return result.map({ _ in })
     }
 }
 
-class SQLiteStatement {
-    let stmt: sqlite3_stmt
-    
-    init(@noescape sqliteCall: (inout sqlite3_stmt) throws -> Void) rethrows {
+extension SQLiteDatabase {
+    func makeStatement(@noescape sqliteCall: (inout sqlite3_stmt) -> Int32) -> Result<ValueWithDestructor<sqlite3_stmt>, RelationError> {
         var localStmt: sqlite3_stmt = nil
-        try sqliteCall(&localStmt)
-        self.stmt = localStmt
-    }
-    
-    deinit {
-        sqlite3_finalize(stmt)
+        return errwrap(sqliteCall(&localStmt)).map({ _ in
+            ValueWithDestructor(value: localStmt, destructor: {
+                // TODO: handle errors somehow?
+                sqlite3_finalize($0)
+            })
+        })
     }
 }

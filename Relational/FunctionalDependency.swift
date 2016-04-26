@@ -17,27 +17,44 @@ extension FunctionalDependency: CustomStringConvertible {
 }
 
 extension Relation {
-    func satisfies(fd: FunctionalDependency) -> Bool {
+    func satisfies(fd: FunctionalDependency) -> Result<Bool, RelationError> {
         let leftValues = self.project(Scheme(attributes: fd.left))
         for row in leftValues.rows() {
-            let rightRows = self.select(row).project(Scheme(attributes: fd.right))
-            let gen = rightRows.rows()
-            
-            // See if there are two or more elements in rightRows
-            gen.next()
-            if gen.next() != nil {
-                return false
+            switch row {
+            case .Ok(let row):
+                let rightRows = self.select(row).project(Scheme(attributes: fd.right))
+                let gen = rightRows.rows()
+                
+                // See if there are two or more elements in rightRows
+                gen.next()
+                if gen.next() != nil {
+                    return .Ok(false)
+                }
+            case .Err(let error):
+                return .Err(error)
             }
         }
-        return false
+        return .Ok(true)
     }
     
-    func allSatisfiedFunctionalDependencies() -> [FunctionalDependency] {
+    func allSatisfiedFunctionalDependencies() -> Result<[FunctionalDependency], RelationError> {
         let allDependencies = self.scheme.attributes.powerSet.flatMap({ left in
             self.scheme.attributes.subtract(left).powerSet.map({ right in
                 FunctionalDependency(left, determines: right)
             })
         })
-        return allDependencies.filter({ self.satisfies($0) })
+        
+        var result: [FunctionalDependency] = []
+        for dependency in allDependencies {
+            switch self.satisfies(dependency) {
+            case .Ok(true):
+                result.append(dependency)
+            case .Err(let e):
+                return .Err(e)
+            default:
+                break
+            }
+        }
+        return .Ok(result)
     }
 }

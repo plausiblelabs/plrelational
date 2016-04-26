@@ -15,9 +15,9 @@ class ModelDatabase {
         return search.generate().next() != nil
     }
     
-    func add(obj: Model) throws {
+    func add(obj: Model) -> Result<Void, RelationError> {
         let relation = relationForModel(obj.dynamicType)
-        try relation.add(obj.toRow())
+        return relation.add(obj.toRow()).map({ _ in })
     }
     
     func fetchAll<T: Model>(type: T.Type) -> ModelRelation<T> {

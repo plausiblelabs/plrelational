@@ -39,20 +39,13 @@ final class MODEL_NAME: Model, CustomStringConvertible {
         self.objectID = objectID
     }
     
-    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) throws -> MODEL_NAME {
-        return MODEL_NAME(
+    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) -> Result<MODEL_NAME, RelationError> {
+        guard let FIELD_NAME: FIELD_TYPE = row["FIELD_NAME"].get() else { return .Err(ModelError.BadDataType(attribute: "FIELD_NAME")) }
+        guard let objectID: [UInt8] = row["objectID"].get() else { return .Err(ModelError.BadDataType(attribute: "objectID")) }
+        return .Ok(MODEL_NAME(
             owningDatabase: owningDatabase,
-            FIELD_NAME: try unwrapOrThrow(row["FIELD_NAME"].get(), "FIELD_NAME"),
-            objectID: ModelObjectID(value: try unwrapOrThrow(row["objectID"].get(), "objectID"))
-        )
-    }
-    
-    private static func unwrapOrThrow<T>(value: T?, _ attribute: String) throws -> T {
-        if let value = value {
-            return value
-        } else {
-            throw ModelError.BadDataType(attribute: attribute)
-        }
+            FIELD_NAME: FIELD_NAME,
+            objectID: ModelObjectID(value: objectID)))
     }
     
     func toRow() -> Row {

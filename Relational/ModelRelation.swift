@@ -9,10 +9,14 @@ class ModelRelation<T: Model>: SequenceType {
         self.underlyingRelation = underlyingRelation
     }
     
-    func generate() -> AnyGenerator<T> {
+    func generate() -> AnyGenerator<Result<T, RelationError>> {
         let rows = underlyingRelation.rows()
         return AnyGenerator(body: {
-            return rows.next().map({ try! T.fromRow(self.owningDatabase, $0) })
+            if let row = rows.next() {
+                return row.then({ T.fromRow(self.owningDatabase, $0) })
+            } else {
+                return nil
+            }
         })
     }
 }
@@ -33,12 +37,15 @@ class ModelToManyRelation<T: Model>: ModelRelation<T> {
         super.init(owningDatabase: owningDatabase, underlyingRelation: underlyingRelation)
     }
     
-    func add(obj: T) throws {
+    func add(obj: T) -> Result<Void, RelationError> {
         if !owningDatabase.contains(obj) {
-            try owningDatabase.add(obj)
+            if let error = owningDatabase.add(obj).err {
+                return .Err(error)
+            }
         }
         
         let joinRelation = owningDatabase.joinRelation(from: fromType, to: T.self)
-        try joinRelation.add(["from ID": RelationValue(fromID.value), "to ID": RelationValue(obj.objectID.value)])
+        let result = joinRelation.add(["from ID": RelationValue(fromID.value), "to ID": RelationValue(obj.objectID.value)])
+        return result.map({ _ in })
     }
 }

@@ -8,7 +8,7 @@ protocol Model: class {
     var owningDatabase: ModelDatabase { get }
     
     func toRow() -> Row
-    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) throws -> Self
+    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) -> Result<Self, RelationError>
     
     var objectID: ModelObjectID { get set }
 }
@@ -18,17 +18,18 @@ extension Model {
         return owningDatabase.fetch(type, owning: self)
     }
     
-    func parentOfType<T: Model>(type: T.Type) throws -> T? {
+    func parentOfType<T: Model>(type: T.Type) -> Result<T?, RelationError> {
         let parents = parentsOfType(type)
         let gen = parents.generate()
         
         // Get one parent.
-        guard let result = gen.next() else { return nil }
+        guard let result = gen.next() else { return .Ok(nil) }
         
         // Ensure there's only one. If there's two, bail.
-        guard gen.next() == nil else { return nil }
+        guard gen.next() == nil else { return .Ok(nil) }
         
-        return result
+        // The map call makes the type optional, otherwise Result<T> isn't compatible with Result<T?>
+        return result.map({ $0 })
     }
 }
 

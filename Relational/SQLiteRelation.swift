@@ -22,11 +22,25 @@ class SQLiteRelation: Relation {
         self.queryParameters = queryParameters
     }
     
-    func rows() -> AnyGenerator<Row> {
-        return try! db.executeQuery("SELECT * FROM (\(query))", queryParameters)
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        var queryGenerator: AnyGenerator<Result<Row, RelationError>>? = nil
+        return AnyGenerator(body: {
+            if let queryGenerator = queryGenerator {
+                return queryGenerator.next()
+            } else {
+                let result = self.db.executeQuery("SELECT * FROM (\(self.query))", self.queryParameters)
+                switch result {
+                case .Ok(let generator):
+                    queryGenerator = generator
+                    return generator.next()
+                case .Err(let error):
+                    return .Err(error)
+                }
+            }
+        })
     }
     
-    func contains(row: Row) -> Bool {
+    func contains(row: Row) -> Result<Bool, RelationError> {
         fatalError("unimplemented")
     }
 }
@@ -93,9 +107,11 @@ class SQLiteTableRelation: SQLiteRelation {
         super.init(db: db, tableName: tableName, scheme: scheme, query: db.escapeIdentifier(tableName), queryParameters: [])
     }
     
-    func add(row: Row) throws -> Int64 {
+    func add(row: Row) -> Result<Int64, RelationError> {
         if !db.tables.contains(tableName) {
-            try db.createRelation(tableName, scheme: scheme)
+            if let err = db.createRelation(tableName, scheme: scheme).err {
+                return .Err(err)
+            }
         }
         
         let orderedAttributes = Array(row.values)
@@ -104,23 +120,29 @@ class SQLiteTableRelation: SQLiteRelation {
         let valuesSQL = Array(count: orderedAttributes.count, repeatedValue: "?").joinWithSeparator(", ")
         let sql = "INSERT INTO \(tableNameForQuery) (\(attributesSQL)) VALUES (\(valuesSQL))"
         
-        let result = try db.executeQuery(sql, parameters)
-        precondition(Array(result) == [], "Shouldn't get results back from an insert query")
-        
-        return sqlite3_last_insert_rowid(db.db)
+        let result = db.executeQuery(sql, parameters)
+        return result.map({ rows in
+            let array = Array(rows)
+            precondition(array.isEmpty, "Unexpected results from INSERT INTO statement: \(array)")
+            return sqlite3_last_insert_rowid(db.db)
+        })
     }
     
-    func delete(searchTerms: [ComparisonTerm]) throws {
+    func delete(searchTerms: [ComparisonTerm]) -> Result<Void, RelationError> {
         if let (whereSQL, whereParameters) = termsToSQL(searchTerms) {
             let sql = "DELETE FROM \(tableNameForQuery) WHERE \(whereSQL)"
-            let result = try db.executeQuery(sql, whereParameters)
-            precondition(Array(result) == [], "Shouldn't get results back from a delete query")
+            let result = db.executeQuery(sql, whereParameters)
+            return result.map({
+                let array = Array($0)
+                precondition(array.isEmpty, "Unexpected results from DELETE FROM statement: \(array)")
+                return ()
+            })
         } else {
             fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL deletes: \(searchTerms)")
         }
     }
     
-    func update(searchTerms: [ComparisonTerm], newValues: Row) throws {
+    func update(searchTerms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
         if let (whereSQL, whereParameters) = termsToSQL(searchTerms) {
             let orderedAttributes = Array(newValues.values)
             let setParts = orderedAttributes.map({ db.escapeIdentifier($0.0.name) + " = ?" })
@@ -128,8 +150,12 @@ class SQLiteTableRelation: SQLiteRelation {
             let setParameters = orderedAttributes.map({ $0.1 })
             
             let sql = "UPDATE \(tableNameForQuery) SET \(setSQL) WHERE \(whereSQL)"
-            let result = try db.executeQuery(sql, setParameters + whereParameters)
-            precondition(Array(result) == [], "Shouldn't get results back from an update query")
+            let result = db.executeQuery(sql, setParameters + whereParameters)
+            return result.map({
+                let array = Array($0)
+                precondition(array.isEmpty, "Unexpected results from UPDATE statement: \(array)")
+                return ()
+            })
         } else {
             fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL updates: \(searchTerms)")
         }

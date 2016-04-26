@@ -34,14 +34,18 @@ public struct ConcreteRelation: Relation {
     
     public mutating func delete(rowToDelete: Row) {
         let toDelete = select(rowToDelete)
-        values = Set(values.filter({ !toDelete.contains($0) }))
+        values = Set(values.filter({
+            // We know that the result of contains() can never fail here because it's ultimately our own implementation.
+            toDelete.contains($0).ok! == false
+        }))
     }
     
     public mutating func change(rowToFind: Row, to: Row) {
         let rowsToUpdate = select(rowToFind)
         delete(rowToFind)
         for rowToUpdate in rowsToUpdate.rows() {
-            var rowToAdd = rowToUpdate
+            // We know that rows never fail, because this is ultimately our own implementation.
+            var rowToAdd = rowToUpdate.ok!
             for (attribute, value) in to.values {
                 rowToAdd[attribute] = value
             }
@@ -49,12 +53,12 @@ public struct ConcreteRelation: Relation {
         }
     }
     
-    public func rows() -> AnyGenerator<Row> {
-        return AnyGenerator(values.generate())
+    public func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        return AnyGenerator(values.lazy.map(Result.Ok).generate())
     }
     
-    public func contains(row: Row) -> Bool {
-        return values.contains(row)
+    public func contains(row: Row) -> Result<Bool, RelationError> {
+        return .Ok(values.contains(row))
     }
     
 //    public func factor(attributes: [Attribute], link: Attribute) -> (Relation, Relation) {

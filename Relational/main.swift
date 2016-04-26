@@ -327,7 +327,7 @@ do {
     print("---")
     print()
     print("FLIGHTS satisfies:")
-    for fd in FLIGHTS.allSatisfiedFunctionalDependencies() {
+    for fd in FLIGHTS.allSatisfiedFunctionalDependencies().ok! {
         print("\t\(fd)")
     }
     print("NUMBER/FROM satisfies: \(FLIGHTS.project(["NUMBER", "FROM"]).allSatisfiedFunctionalDependencies())")
@@ -373,19 +373,19 @@ do {
     _ = try? NSFileManager.defaultManager().removeItemAtPath(dbpath)
     
     let db = try! SQLiteDatabase(dbpath)
-    try! db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"])
-    try! db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"])
+    db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"])
+    db.createRelation("FLIGHTS", scheme: ["objectID", "NUMBER", "FROM", "TO"])
     
     let FLIGHTS = db["FLIGHTS", ["objectID", "NUMBER", "FROM", "TO"]]
-    try! FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
-    try! FLIGHTS.add(["NUMBER": "124", "FROM": "JFK", "TO": "A"])
-    try! FLIGHTS.add(["NUMBER": "125", "FROM": "JFK", "TO": "B"])
-    try! FLIGHTS.add(["NUMBER": "126", "FROM": "JFK", "TO": "C"])
-    try! FLIGHTS.add(["NUMBER": "127", "FROM": "JFK", "TO": "D"])
-    try! FLIGHTS.add(["NUMBER": "128", "FROM": "JFK", "TO": "A"])
-    try! FLIGHTS.add(["NUMBER": "129", "FROM": "JFK", "TO": "A"])
-    try! FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
-    try! FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
+    FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
+    FLIGHTS.add(["NUMBER": "124", "FROM": "JFK", "TO": "A"])
+    FLIGHTS.add(["NUMBER": "125", "FROM": "JFK", "TO": "B"])
+    FLIGHTS.add(["NUMBER": "126", "FROM": "JFK", "TO": "C"])
+    FLIGHTS.add(["NUMBER": "127", "FROM": "JFK", "TO": "D"])
+    FLIGHTS.add(["NUMBER": "128", "FROM": "JFK", "TO": "A"])
+    FLIGHTS.add(["NUMBER": "129", "FROM": "JFK", "TO": "A"])
+    FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
+    FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
     
     for r in FLIGHTS.rows() {
         print(r)
@@ -397,10 +397,10 @@ do {
     print(FLIGHTS.select(["FROM": "JFK"]))
     print(FLIGHTS.select(["FROM": "JFK"]).select(["TO": "A"]))
     
-    try! FLIGHTS.update([ComparisonTerm(Attribute("NUMBER"), EqualityComparator(), "888")], newValues: ["FROM": "Tennessee", "TO": "Spotsylvania"])
+    FLIGHTS.update([ComparisonTerm(Attribute("NUMBER"), EqualityComparator(), "888")], newValues: ["FROM": "Tennessee", "TO": "Spotsylvania"])
     show("FLIGHTS", FLIGHTS)
     
-    try! FLIGHTS.delete([ComparisonTerm(Attribute("FROM"), EqualityComparator(), "JFK")])
+    FLIGHTS.delete([ComparisonTerm(Attribute("FROM"), EqualityComparator(), "JFK")])
     show("FLIGHTS", FLIGHTS)
 }
 
@@ -424,7 +424,7 @@ do {
     print("---")
     
     for flight in flights {
-        try! db.add(flight)
+        db.add(flight)
     }
     
     print("Added flights:")
@@ -449,25 +449,25 @@ do {
     let db = ModelDatabase(sqlite)
     
     let store1 = Store(owningDatabase: db, name: "Joe's")
-    try! db.add(store1)
+    db.add(store1)
     
     let store2 = Store(owningDatabase: db, name: "CompuStern")
-    try! db.add(store2)
+    db.add(store2)
     
     let emp1 = Employee(owningDatabase: db, name: "Toddd")
-    try! store1.employees.add(emp1)
+    store1.employees.add(emp1)
     
     let emp2 = Employee(owningDatabase: db, name: "Alex")
-    try! store1.employees.add(emp2)
+    store1.employees.add(emp2)
     
     let emp3 = Employee(owningDatabase: db, name: "Ramius")
-    try! store1.employees.add(emp3)
+    store1.employees.add(emp3)
     
-    try! emp1.directReports.add(emp2)
-    try! emp1.directReports.add(emp3)
+    emp1.directReports.add(emp2)
+    emp1.directReports.add(emp3)
     
     let emp4 = Employee(owningDatabase: db, name: "Phteven")
-    try! store2.employees.add(emp4)
+    store2.employees.add(emp4)
     
     print("Store 1")
     print(store1)
@@ -481,9 +481,9 @@ do {
     emp1.directReports.forEach({ print($0) })
     print("---")
     
-    print("\(emp2) parent employee \(try! emp2.parentOfType(Employee.self))")
-    print("\(emp2) parent store \(try! emp2.parentOfType(Store.self))")
-    print("\(emp4) parent employee \(try! emp4.parentOfType(Employee.self))")
+    print("\(emp2) parent employee \(emp2.parentOfType(Employee.self))")
+    print("\(emp2) parent store \(emp2.parentOfType(Store.self))")
+    print("\(emp4) parent employee \(emp4.parentOfType(Employee.self))")
     
     _ = try! SQLiteDatabase(dbpath)
 }
