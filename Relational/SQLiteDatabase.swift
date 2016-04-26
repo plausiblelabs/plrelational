@@ -9,6 +9,8 @@ let SQLITE_TRANSIENT = unsafeBitCast(-1, sqlite3_destructor_type.self)
 class SQLiteDatabase {
     let db: sqlite3
     
+    var tables: Set<String> = []
+    
     init(_ path: String) throws {
         var localdb: sqlite3 = nil
         let result = sqlite3_open_v2(path, &localdb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil)
@@ -17,10 +19,19 @@ class SQLiteDatabase {
             throw Error(code: result, message: message ?? "")
         }
         self.db = localdb
+        
+        tables = try self.queryTables()
     }
     
     deinit {
         try! errwrap(sqlite3_close_v2(db))
+    }
+    
+    private func queryTables() throws -> Set<String> {
+        let master = self["SQLITE_MASTER"]
+        let tables = master.select([.EQ(Attribute("type"), "table")])
+        let names = tables.rows().map({ $0["name"] })
+        return Set(names.map({ $0.get()! }))
     }
 }
 
@@ -63,6 +74,8 @@ extension SQLiteDatabase {
         if result != SQLITE_DONE {
             throw Error(code: result, message: "Unexpected non-error result stepping CREATE TABLE statement: \(result)")
         }
+        
+        tables.insert(name)
     }
     
     subscript(name: String) -> SQLiteTableRelation {

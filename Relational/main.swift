@@ -484,4 +484,6 @@ do {
     print("\(emp2) parent employee \(try! emp2.parentOfType(Employee.self))")
     print("\(emp2) parent store \(try! emp2.parentOfType(Store.self))")
     print("\(emp4) parent employee \(try! emp4.parentOfType(Employee.self))")
+    
+    _ = try! SQLiteDatabase(dbpath)
 }
