@@ -1,5 +1,6 @@
 
-/// Values which can be stored in a Relation. These are just the SQLite data types.
+/// Values which can be stored in a Relation. These are just the SQLite data types,
+/// Plus a "not found" value for when an attribute doesn't exist at all.
 /// We might want to do our own thing and not hew so closely to SQLite's way....
 public enum RelationValue {
     case NULL
@@ -7,6 +8,8 @@ public enum RelationValue {
     case Real(Double)
     case Text(String)
     case Blob([UInt8])
+    
+    case NotFound
 }
 
 extension RelationValue: Equatable {}
@@ -17,6 +20,7 @@ public func ==(a: RelationValue, b: RelationValue) -> Bool {
     case (.Real(let a), .Real(let b)): return a == b
     case (.Text(let a), .Text(let b)): return a == b
     case (.Blob(let a), .Blob(let b)): return a == b
+    case (.NotFound, .NotFound): return true
     default: return false
     }
 }
@@ -47,6 +51,10 @@ public func <(a: RelationValue, b: RelationValue) -> Bool {
     case (.Blob, _): return true
     case (_, .Blob): return false
         
+    case (.NotFound, .NotFound): return false
+    case (.NotFound, _): return true
+    case (_, .NotFound): return false
+        
     default: fatalError("This should never execute, it's just here because the compiler can't seem to figure out that the previous cases are exhaustive")
     }
 }
@@ -59,6 +67,7 @@ extension RelationValue: Hashable {
         case .Real(let x): return 2 ^ x.hashValue
         case .Text(let x): return 3 ^ x.hashValue
         case .Blob(let x): return 4 ^ x.hashValueFromElements
+        case .NotFound: return 5
         }
     }
 }
@@ -71,6 +80,7 @@ extension RelationValue: CustomStringConvertible {
         case .Real(let x): return String(x)
         case .Text(let x): return String(x)
         case .Blob(let x): return String(x)
+        case .NotFound: return "<value not found>"
         }
     }
 }

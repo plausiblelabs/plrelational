@@ -37,6 +37,7 @@ extension SimpleDatabase {
         case .Real(let x): return x
         case .Text(let x): return x
         case .Blob(let x): return NSData(bytes: x, length: x.count)
+        case .NotFound: fatalError("NotFound value should not be serialized!")
         }
     }
     

@@ -66,7 +66,7 @@ public struct Row: Hashable {
     
     public subscript(attribute: Attribute) -> RelationValue {
         get {
-            return values[attribute]!
+            return values[attribute] ?? .NotFound
         }
         set {
             values[attribute] = newValue

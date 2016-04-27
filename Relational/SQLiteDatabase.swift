@@ -143,10 +143,11 @@ extension SQLiteDatabase {
         let result: Result<Int32, RelationError>
         switch value {
         case .NULL: result = self.errwrap(sqlite3_bind_null(stmt, index))
-        case .Integer(let x): result =  self.errwrap(sqlite3_bind_int64(stmt, index, x))
-        case .Real(let x): result =  self.errwrap(sqlite3_bind_double(stmt, index, x))
-        case .Text(let x): result =  self.errwrap(sqlite3_bind_text(stmt, index, x, -1, SQLITE_TRANSIENT))
-        case .Blob(let x): result =  self.errwrap(sqlite3_bind_blob64(stmt, index, x, UInt64(x.count), SQLITE_TRANSIENT))
+        case .Integer(let x): result = self.errwrap(sqlite3_bind_int64(stmt, index, x))
+        case .Real(let x): result = self.errwrap(sqlite3_bind_double(stmt, index, x))
+        case .Text(let x): result = self.errwrap(sqlite3_bind_text(stmt, index, x, -1, SQLITE_TRANSIENT))
+        case .Blob(let x): result = self.errwrap(sqlite3_bind_blob64(stmt, index, x, UInt64(x.count), SQLITE_TRANSIENT))
+        case .NotFound: result = .Ok(0)
         }
         return result.map({ _ in })
     }
