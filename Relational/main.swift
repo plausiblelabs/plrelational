@@ -504,4 +504,7 @@ do {
     store.name = "Bob's"
     fetched.name = "Tom's"
     print((store, fetched))
+    
+    store.changeObservers.add({ print("\($0) changed") })
+    fetched.name = "Kate's"
 }

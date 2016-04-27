@@ -23,9 +23,11 @@ final class MODEL_NAME: Model, CustomStringConvertible {
     
     var owningDatabase: ModelDatabase
     
+    let changeObservers = ObserverSet<Model>()
+    
     var objectID: ModelObjectID
     
-    var FIELD_NAME: FIELD_TYPE
+    var FIELD_NAME: FIELD_TYPE { didSet { changeObservers.notify(self) } }
     
     var TO_MANY_FIELD_NAME: ModelToManyRelation<TO_MANY_FIELD_TYPE> { return owningDatabase.fetch(TO_MANY_FIELD_TYPE.self, ownedBy: self) }
     

@@ -7,10 +7,12 @@ protocol Model: class {
     
     var owningDatabase: ModelDatabase { get }
     
-    func toRow() -> Row
-    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) -> Result<Self, RelationError>
+    var changeObservers: ObserverSet<Model> { get }
     
     var objectID: ModelObjectID { get set }
+    
+    func toRow() -> Row
+    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) -> Result<Self, RelationError>
 }
 
 extension Model {
