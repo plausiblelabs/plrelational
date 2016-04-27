@@ -86,19 +86,19 @@ extension RelationValue: CustomStringConvertible {
 }
 
 extension RelationValue {
-    init(_ int: Int64) {
+    public init(_ int: Int64) {
         self = .Integer(int)
     }
     
-    init(_ real: Double) {
+    public init(_ real: Double) {
         self = .Real(real)
     }
     
-    init(_ text: String) {
+    public init(_ text: String) {
         self = .Text(text)
     }
     
-    init(_ blob: [UInt8]) {
+    public init(_ blob: [UInt8]) {
         self = .Blob(blob)
     }
 }
@@ -118,21 +118,21 @@ extension RelationValue: StringLiteralConvertible {
 }
 
 extension RelationValue {
-    func get() -> Int64? {
+    public func get() -> Int64? {
         switch self {
         case .Integer(let x): return x
         default: return nil
         }
     }
     
-    func get() -> String? {
+    public func get() -> String? {
         switch self {
         case .Text(let x): return x
         default: return nil
         }
     }
     
-    func get() -> [UInt8]? {
+    public func get() -> [UInt8]? {
         switch self {
         case .Blob(let x): return x
         default: return nil

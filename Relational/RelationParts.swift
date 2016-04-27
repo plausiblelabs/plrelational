@@ -59,6 +59,10 @@ public func ==(a: Scheme, b: Scheme) -> Bool {
 public struct Row: Hashable {
     public var values: [Attribute: RelationValue]
     
+    public init(values: [Attribute: RelationValue]) {
+        self.values = values
+    }
+    
     public var hashValue: Int {
         // Note: needs to ensure the same value is produced regardless of order, so no fancy stuff.
         return values.map({ $0.0.hashValue ^ $0.1.hashValue }).reduce(0, combine: ^)

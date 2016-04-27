@@ -9,6 +9,8 @@
 // To add additional functionality to these types, create
 // an extension in another file.
 
+import libRelational
+
 final class MODEL_NAME: Model, CustomStringConvertible {
     static let name = "MODEL_NAME"
     

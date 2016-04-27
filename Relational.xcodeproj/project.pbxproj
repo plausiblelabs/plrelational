@@ -54,6 +54,7 @@
 		C22921DF1CD12AA600518184 /* SQLiteRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921961CC7E9E300518184 /* SQLiteRelation.swift */; };
 		C22921E81CD12CF100518184 /* RelationalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921E71CD12CF100518184 /* RelationalTests.swift */; };
 		C22921EA1CD12CF100518184 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
+		C22921F01CD1302000518184 /* Store.model in Sources */ = {isa = PBXBuildFile; fileRef = C22921A51CCA88E500518184 /* Store.model */; };
 		C22BF1301CBC348500D3FE59 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF12F1CBC348500D3FE59 /* main.swift */; };
 		C22BF13B1CBC349400D3FE59 /* DictionaryConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */; };
 		C22BF13C1CBC349400D3FE59 /* DictionaryCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */; };
@@ -71,6 +72,17 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
+		C22921F11CD1309E00518184 /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.model";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_FILE_DIR)/${INPUT_FILE_BASE}.swift",
+			);
+			script = "$SRCROOT/Relational/genmodel.swift ${INPUT_FILE_PATH} ${DERIVED_FILE_DIR}/${INPUT_FILE_BASE}.swift";
+		};
 		C257C7581CC01CBF00234A89 /* PBXBuildRule */ = {
 			isa = PBXBuildRule;
 			compilerSpec = com.apple.compilers.proxy.script;
@@ -342,6 +354,7 @@
 				C22921E31CD12CF100518184 /* Resources */,
 			);
 			buildRules = (
+				C22921F11CD1309E00518184 /* PBXBuildRule */,
 			);
 			dependencies = (
 				C22921EC1CD12CF100518184 /* PBXTargetDependency */,
@@ -492,6 +505,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C22921E81CD12CF100518184 /* RelationalTests.swift in Sources */,
+				C22921F01CD1302000518184 /* Store.model in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

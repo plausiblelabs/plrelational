@@ -36,9 +36,13 @@ extension Model {
 }
 
 public struct ModelObjectID {
-    var value: [UInt8]
+    public var value: [UInt8]
     
-    static func new() -> ModelObjectID {
+    public init(value: [UInt8]) {
+        self.value = value
+    }
+    
+    public static func new() -> ModelObjectID {
         let uuidLength = 16
         var result = ModelObjectID(value: Array(count: uuidLength, repeatedValue: 0))
         NSUUID().getUUIDBytes(&result.value)

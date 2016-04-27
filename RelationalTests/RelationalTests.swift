@@ -26,7 +26,12 @@ class RelationalTests: XCTestCase {
     
     func testLib() {
         let db = makeDB().db
-        
         XCTAssertEqual(db.sqliteDatabase.tables, [])
+        
+        let store = Store(owningDatabase: db, name: "Joe's")
+        XCTAssertNotNil(db.add(store).ok)
+        
+        let store2 = db.fetchAll(Store.self).generate().next()!.ok!
+        XCTAssertEqual(store2.name, "Joe's")
     }
 }
