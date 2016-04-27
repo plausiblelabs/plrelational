@@ -21,6 +21,8 @@
 		C22921AC1CCE6C5B00518184 /* ModelError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921AB1CCE6C5B00518184 /* ModelError.swift */; };
 		C22921AE1CCFABA300518184 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921AD1CCFABA300518184 /* Result.swift */; };
 		C22921B01CCFEB6D00518184 /* ValueWithDestructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921AF1CCFEB6D00518184 /* ValueWithDestructor.swift */; };
+		C22921B21CD0F6B100518184 /* WeakValueDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921B11CD0F6B100518184 /* WeakValueDictionary.swift */; };
+		C22921B41CD0F70700518184 /* WeakReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921B31CD0F70700518184 /* WeakReference.swift */; };
 		C22BF1301CBC348500D3FE59 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF12F1CBC348500D3FE59 /* main.swift */; };
 		C22BF13B1CBC349400D3FE59 /* DictionaryConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */; };
 		C22BF13C1CBC349400D3FE59 /* DictionaryCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */; };
@@ -79,6 +81,8 @@
 		C22921AB1CCE6C5B00518184 /* ModelError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelError.swift; sourceTree = "<group>"; };
 		C22921AD1CCFABA300518184 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		C22921AF1CCFEB6D00518184 /* ValueWithDestructor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueWithDestructor.swift; sourceTree = "<group>"; };
+		C22921B11CD0F6B100518184 /* WeakValueDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WeakValueDictionary.swift; sourceTree = "<group>"; };
+		C22921B31CD0F70700518184 /* WeakReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WeakReference.swift; sourceTree = "<group>"; };
 		C22BF12C1CBC348500D3FE59 /* Relational */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Relational; sourceTree = BUILT_PRODUCTS_DIR; };
 		C22BF12F1CBC348500D3FE59 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryConvenience.swift; sourceTree = "<group>"; };
@@ -161,6 +165,8 @@
 			children = (
 				C229219F1CCA5EF200518184 /* ModelDatabase.swift */,
 				C22921A11CCA84D100518184 /* ModelRelation.swift */,
+				C22921B31CD0F70700518184 /* WeakReference.swift */,
+				C22921B11CD0F6B100518184 /* WeakValueDictionary.swift */,
 			);
 			name = Database;
 			sourceTree = "<group>";
@@ -311,6 +317,7 @@
 				C22921A41CCA86CE00518184 /* ComparisonTerm.swift in Sources */,
 				C22921A21CCA84D100518184 /* ModelRelation.swift in Sources */,
 				C22921B01CCFEB6D00518184 /* ValueWithDestructor.swift in Sources */,
+				C22921B21CD0F6B100518184 /* WeakValueDictionary.swift in Sources */,
 				C257C7501CBEB18A00234A89 /* FunctionalDependency.swift in Sources */,
 				C22BF13F1CBC349400D3FE59 /* StringPad.swift in Sources */,
 				C22921931CC6CE0A00518184 /* SQLiteDatabase.swift in Sources */,
@@ -322,6 +329,7 @@
 				C257C7521CBEBF6300234A89 /* SetPowerSet.swift in Sources */,
 				C2A7C41E1CBFE93F00248F92 /* OperationRelations.swift in Sources */,
 				C257C74C1CBD835600234A89 /* RelationParts.swift in Sources */,
+				C22921B41CD0F70700518184 /* WeakReference.swift in Sources */,
 				C2A7C41C1CBFE56900248F92 /* ConcreteRelation.swift in Sources */,
 				C229219A1CCA5B1200518184 /* Model.swift in Sources */,
 				C22BF13B1CBC349400D3FE59 /* DictionaryConvenience.swift in Sources */,

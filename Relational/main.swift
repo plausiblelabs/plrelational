@@ -487,3 +487,21 @@ do {
     
     _ = try! SQLiteDatabase(dbpath)
 }
+
+do {
+    let dbpath = "/tmp/whatever.sqlite3"
+    _ = try? NSFileManager.defaultManager().removeItemAtPath(dbpath)
+    
+    let sqlite = try! SQLiteDatabase(dbpath)
+    let db = ModelDatabase(sqlite)
+    
+    let store = Store(owningDatabase: db, name: "Joe's")
+    db.add(store)
+    
+    let fetched = db.fetchAll(Store.self).generate().next()!.ok!
+    print((ObjectIdentifier(store).uintValue, ObjectIdentifier(fetched).uintValue))
+    
+    store.name = "Bob's"
+    fetched.name = "Tom's"
+    print((store, fetched))
+}

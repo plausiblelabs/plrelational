@@ -2,6 +2,15 @@
 class ModelDatabase {
     let sqliteDatabase: SQLiteDatabase
     
+    /// A collection of all live model objects that came from this database. This lets multiple fetches
+    /// for the same value return the same actual object instead of having to manage different objects
+    /// representing the same value. I'm not sure yet if this is a good idea or not.
+    ///
+    /// The dictionary keys here are the Model types themselves. The values in the WeakValueDictionary
+    /// are Model instances, but Swift generics don't let us use Model as the generic type here, so
+    /// the type is just AnyObject instead.
+    private var liveModelObjects: [ObjectIdentifier: WeakValueDictionary<ModelObjectID, AnyObject>] = [:]
+    
     init(_ sqliteDatabase: SQLiteDatabase) {
         self.sqliteDatabase = sqliteDatabase
     }
@@ -17,7 +26,9 @@ class ModelDatabase {
     
     func add(obj: Model) -> Result<Void, RelationError> {
         let relation = relationForModel(obj.dynamicType)
-        return relation.add(obj.toRow()).map({ _ in })
+        return relation.add(obj.toRow()).map({ _ in
+            self.addLiveModelObject(obj)
+        })
     }
     
     func fetchAll<T: Model>(type: T.Type) -> ModelRelation<T> {
@@ -61,5 +72,32 @@ extension ModelDatabase {
 extension ModelDatabase {
     private func schemeForModel(type: Model.Type) -> Scheme {
         return Scheme(attributes: Set(type.attributes))
+    }
+}
+
+extension ModelDatabase {
+    func getLiveModelObject<T: Model>(type: T.Type, _ objectID: ModelObjectID) -> T? {
+        let obj = liveModelObjects[ObjectIdentifier(type)]?[objectID]
+        return obj as! T?
+    }
+    
+    func addLiveModelObject(obj: Model) {
+        let key = ObjectIdentifier(obj.dynamicType)
+        if liveModelObjects[key] == nil {
+            liveModelObjects[key] = WeakValueDictionary()
+        }
+        liveModelObjects[key]![obj.objectID] = obj
+    }
+    
+    func getOrMakeModelObject<T: Model>(type: T.Type, _ objectID: ModelObjectID, _ creatorFunction: Void -> Result<T, RelationError>) -> Result<T, RelationError> {
+        if let obj = getLiveModelObject(type, objectID) {
+            return .Ok(obj)
+        }
+        
+        let result = creatorFunction()
+        if let obj = result.ok {
+            addLiveModelObject(obj)
+        }
+        return result
     }
 }

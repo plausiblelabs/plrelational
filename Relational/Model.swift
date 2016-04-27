@@ -53,3 +53,14 @@ extension ModelObjectID: CustomStringConvertible {
         return result as String
     }
 }
+
+extension ModelObjectID: Equatable {}
+func ==(a: ModelObjectID, b: ModelObjectID) -> Bool {
+    return a.value == b.value
+}
+
+extension ModelObjectID: Hashable {
+    var hashValue: Int {
+        return value.hashValueFromElements
+    }
+}

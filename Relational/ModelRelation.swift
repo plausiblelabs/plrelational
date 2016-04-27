@@ -13,7 +13,14 @@ class ModelRelation<T: Model>: SequenceType {
         let rows = underlyingRelation.rows()
         return AnyGenerator(body: {
             if let row = rows.next() {
-                return row.then({ T.fromRow(self.owningDatabase, $0) })
+                return row.then({ row in
+                    guard let objectID: [UInt8] = row["objectID"].get() else {
+                        return .Err(ModelError.BadDataType(attribute: "objectID"))
+                    }
+                    return self.owningDatabase.getOrMakeModelObject(T.self, ModelObjectID(value: objectID), {
+                        T.fromRow(self.owningDatabase, row)
+                    })
+                })
             } else {
                 return nil
             }
