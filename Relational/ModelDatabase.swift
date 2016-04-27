@@ -87,6 +87,8 @@ extension ModelDatabase {
             liveModelObjects[key] = WeakValueDictionary()
         }
         liveModelObjects[key]![obj.objectID] = obj
+        
+        obj.changeObservers.add(self.modelChanged)
     }
     
     func getOrMakeModelObject<T: Model>(type: T.Type, _ objectID: ModelObjectID, _ creatorFunction: Void -> Result<T, RelationError>) -> Result<T, RelationError> {
@@ -99,5 +101,11 @@ extension ModelDatabase {
             addLiveModelObject(obj)
         }
         return result
+    }
+}
+
+extension ModelDatabase {
+    private func modelChanged(obj: Model) {
+        relationForModel(obj.dynamicType).update([.EQ(Attribute("objectID"), RelationValue(obj.objectID.value))], newValues: obj.toRow())
     }
 }

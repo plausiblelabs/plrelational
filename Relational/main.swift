@@ -507,4 +507,8 @@ do {
     
     store.changeObservers.add({ print("\($0) changed") })
     fetched.name = "Kate's"
+    
+    let sqlite2 = try! SQLiteDatabase(dbpath)
+    let db2 = ModelDatabase(sqlite2)
+    print(Array(db2.fetchAll(Store.self)))
 }
