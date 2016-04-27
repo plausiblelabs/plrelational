@@ -1,5 +1,5 @@
 
-class ModelRelation<T: Model>: SequenceType {
+public class ModelRelation<T: Model>: SequenceType {
     let owningDatabase: ModelDatabase
     
     let underlyingRelation: Relation
@@ -9,7 +9,7 @@ class ModelRelation<T: Model>: SequenceType {
         self.underlyingRelation = underlyingRelation
     }
     
-    func generate() -> AnyGenerator<Result<T, RelationError>> {
+    public func generate() -> AnyGenerator<Result<T, RelationError>> {
         let rows = underlyingRelation.rows()
         return AnyGenerator(body: {
             if let row = rows.next() {
@@ -29,12 +29,12 @@ class ModelRelation<T: Model>: SequenceType {
 }
 
 extension ModelRelation {
-    func select(terms: [ComparisonTerm]) -> ModelRelation {
+    public func select(terms: [ComparisonTerm]) -> ModelRelation {
         return ModelRelation(owningDatabase: owningDatabase, underlyingRelation: underlyingRelation.select(terms))
     }
 }
 
-class ModelToManyRelation<T: Model>: ModelRelation<T> {
+public class ModelToManyRelation<T: Model>: ModelRelation<T> {
     let fromType: Model.Type
     let fromID: ModelObjectID
     
@@ -44,7 +44,7 @@ class ModelToManyRelation<T: Model>: ModelRelation<T> {
         super.init(owningDatabase: owningDatabase, underlyingRelation: underlyingRelation)
     }
     
-    func add(obj: T) -> Result<Void, RelationError> {
+    public func add(obj: T) -> Result<Void, RelationError> {
         if !owningDatabase.contains(obj) {
             if let error = owningDatabase.add(obj).err {
                 return .Err(error)

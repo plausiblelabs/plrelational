@@ -52,6 +52,8 @@
 		C22921DD1CD12AA200518184 /* WeakValueDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921B11CD0F6B100518184 /* WeakValueDictionary.swift */; };
 		C22921DE1CD12AA600518184 /* SQLiteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */; };
 		C22921DF1CD12AA600518184 /* SQLiteRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921961CC7E9E300518184 /* SQLiteRelation.swift */; };
+		C22921E81CD12CF100518184 /* RelationalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921E71CD12CF100518184 /* RelationalTests.swift */; };
+		C22921EA1CD12CF100518184 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
 		C22BF1301CBC348500D3FE59 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF12F1CBC348500D3FE59 /* main.swift */; };
 		C22BF13B1CBC349400D3FE59 /* DictionaryConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */; };
 		C22BF13C1CBC349400D3FE59 /* DictionaryCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */; };
@@ -81,6 +83,16 @@
 			script = "$SRCROOT/Relational/genmodel.swift ${INPUT_FILE_PATH} ${DERIVED_FILE_DIR}/${INPUT_FILE_BASE}.swift";
 		};
 /* End PBXBuildRule section */
+
+/* Begin PBXContainerItemProxy section */
+		C22921EB1CD12CF100518184 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C22921BA1CD12A7100518184;
+			remoteInfo = libRelational;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		C22BF12A1CBC348500D3FE59 /* CopyFiles */ = {
@@ -114,6 +126,9 @@
 		C22921B31CD0F70700518184 /* WeakReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WeakReference.swift; sourceTree = "<group>"; };
 		C22921B51CD10BA800518184 /* ObserverSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObserverSet.swift; sourceTree = "<group>"; };
 		C22921BB1CD12A7100518184 /* liblibRelational.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblibRelational.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		C22921E51CD12CF100518184 /* RelationalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RelationalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C22921E71CD12CF100518184 /* RelationalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelationalTests.swift; sourceTree = "<group>"; };
+		C22921E91CD12CF100518184 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C22BF12C1CBC348500D3FE59 /* Relational */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Relational; sourceTree = BUILT_PRODUCTS_DIR; };
 		C22BF12F1CBC348500D3FE59 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryConvenience.swift; sourceTree = "<group>"; };
@@ -138,6 +153,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C22921E21CD12CF100518184 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C22921EA1CD12CF100518184 /* liblibRelational.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +232,15 @@
 			name = Database;
 			sourceTree = "<group>";
 		};
+		C22921E61CD12CF100518184 /* RelationalTests */ = {
+			isa = PBXGroup;
+			children = (
+				C22921E71CD12CF100518184 /* RelationalTests.swift */,
+				C22921E91CD12CF100518184 /* Info.plist */,
+			);
+			path = RelationalTests;
+			sourceTree = "<group>";
+		};
 		C22BF1231CBC348500D3FE59 = {
 			isa = PBXGroup;
 			children = (
@@ -216,6 +248,7 @@
 				C257C7551CC01BCD00234A89 /* Model */,
 				C22921901CC6CD9500518184 /* SQLite */,
 				C22921951CC6D25100518184 /* Custom Module Map */,
+				C22921E61CD12CF100518184 /* RelationalTests */,
 				C22BF12D1CBC348500D3FE59 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -225,6 +258,7 @@
 			children = (
 				C22BF12C1CBC348500D3FE59 /* Relational */,
 				C22921BB1CD12A7100518184 /* liblibRelational.dylib */,
+				C22921E51CD12CF100518184 /* RelationalTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -299,6 +333,24 @@
 			productReference = C22921BB1CD12A7100518184 /* liblibRelational.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
+		C22921E41CD12CF100518184 /* RelationalTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C22921ED1CD12CF100518184 /* Build configuration list for PBXNativeTarget "RelationalTests" */;
+			buildPhases = (
+				C22921E11CD12CF100518184 /* Sources */,
+				C22921E21CD12CF100518184 /* Frameworks */,
+				C22921E31CD12CF100518184 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C22921EC1CD12CF100518184 /* PBXTargetDependency */,
+			);
+			name = RelationalTests;
+			productName = RelationalTests;
+			productReference = C22921E51CD12CF100518184 /* RelationalTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		C22BF12B1CBC348500D3FE59 /* Relational */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C22BF1331CBC348500D3FE59 /* Build configuration list for PBXNativeTarget "Relational" */;
@@ -331,6 +383,9 @@
 					C22921BA1CD12A7100518184 = {
 						CreatedOnToolsVersion = 7.3.1;
 					};
+					C22921E41CD12CF100518184 = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
 					C22BF12B1CBC348500D3FE59 = {
 						CreatedOnToolsVersion = 7.3;
 					};
@@ -350,9 +405,20 @@
 			targets = (
 				C22BF12B1CBC348500D3FE59 /* Relational */,
 				C22921BA1CD12A7100518184 /* libRelational */,
+				C22921E41CD12CF100518184 /* RelationalTests */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C22921E31CD12CF100518184 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		C22921941CC6D0B500518184 /* Generate Modulemap */ = {
@@ -421,6 +487,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C22921E11CD12CF100518184 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C22921E81CD12CF100518184 /* RelationalTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C22BF1281CBC348500D3FE59 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -461,6 +535,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		C22921EC1CD12CF100518184 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C22921BA1CD12A7100518184 /* libRelational */;
+			targetProxy = C22921EB1CD12CF100518184 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		C22921C21CD12A7100518184 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -478,6 +560,28 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		C22921EE1CD12CF100518184 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = RelationalTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationalTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		C22921EF1CD12CF100518184 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = RelationalTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationalTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -588,6 +692,14 @@
 			buildConfigurations = (
 				C22921C21CD12A7100518184 /* Debug */,
 				C22921C31CD12A7100518184 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		C22921ED1CD12CF100518184 /* Build configuration list for PBXNativeTarget "RelationalTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C22921EE1CD12CF100518184 /* Debug */,
+				C22921EF1CD12CF100518184 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 		};

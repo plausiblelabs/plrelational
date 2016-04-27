@@ -6,12 +6,12 @@ typealias sqlite3_stmt = COpaquePointer
 
 let SQLITE_TRANSIENT = unsafeBitCast(-1, sqlite3_destructor_type.self)
 
-class SQLiteDatabase {
+public class SQLiteDatabase {
     let db: sqlite3
     
-    var tables: Set<String> = []
+    public var tables: Set<String> = []
     
-    init(_ path: String) throws {
+    public init(_ path: String) throws {
         var localdb: sqlite3 = nil
         let result = sqlite3_open_v2(path, &localdb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil)
         if result != SQLITE_OK {

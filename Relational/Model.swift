@@ -1,7 +1,7 @@
 
 import Foundation
 
-protocol Model: class {
+public protocol Model: class {
     static var name: String { get }
     static var attributes: [Attribute] { get }
     
@@ -35,7 +35,7 @@ extension Model {
     }
 }
 
-struct ModelObjectID {
+public struct ModelObjectID {
     var value: [UInt8]
     
     static func new() -> ModelObjectID {
@@ -47,7 +47,7 @@ struct ModelObjectID {
 }
 
 extension ModelObjectID: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         let result = NSMutableString()
         for byte in value {
             result.appendFormat("%02x", byte)
@@ -57,12 +57,12 @@ extension ModelObjectID: CustomStringConvertible {
 }
 
 extension ModelObjectID: Equatable {}
-func ==(a: ModelObjectID, b: ModelObjectID) -> Bool {
+public func ==(a: ModelObjectID, b: ModelObjectID) -> Bool {
     return a.value == b.value
 }
 
 extension ModelObjectID: Hashable {
-    var hashValue: Int {
+    public var hashValue: Int {
         return value.hashValueFromElements
     }
 }
