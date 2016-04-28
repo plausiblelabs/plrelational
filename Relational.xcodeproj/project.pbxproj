@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C21971A81CC01D7B00E84F7E /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C257C7571CC01C3200234A89 /* Flight.model */; };
 		C21971AA1CC030B900E84F7E /* ModelHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = C21971A91CC030B900E84F7E /* ModelHelpers.swift */; };
 		C22921931CC6CE0A00518184 /* SQLiteDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */; };
 		C22921971CC7E9E300518184 /* SQLiteRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921961CC7E9E300518184 /* SQLiteRelation.swift */; };
@@ -15,7 +14,6 @@
 		C22921A01CCA5EF200518184 /* ModelDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C229219F1CCA5EF200518184 /* ModelDatabase.swift */; };
 		C22921A21CCA84D100518184 /* ModelRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A11CCA84D100518184 /* ModelRelation.swift */; };
 		C22921A41CCA86CE00518184 /* ComparisonTerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A31CCA86CE00518184 /* ComparisonTerm.swift */; };
-		C22921A61CCA892800518184 /* Store.model in Sources */ = {isa = PBXBuildFile; fileRef = C22921A51CCA88E500518184 /* Store.model */; };
 		C22921A81CCE587900518184 /* RelationValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A71CCE587900518184 /* RelationValue.swift */; };
 		C22921AA1CCE605D00518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		C22921AC1CCE6C5B00518184 /* ModelError.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921AB1CCE6C5B00518184 /* ModelError.swift */; };
@@ -54,7 +52,6 @@
 		C22921DF1CD12AA600518184 /* SQLiteRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921961CC7E9E300518184 /* SQLiteRelation.swift */; };
 		C22921E81CD12CF100518184 /* RelationalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921E71CD12CF100518184 /* RelationalTests.swift */; };
 		C22921EA1CD12CF100518184 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
-		C22921F01CD1302000518184 /* Store.model in Sources */ = {isa = PBXBuildFile; fileRef = C22921A51CCA88E500518184 /* Store.model */; };
 		C22BF1301CBC348500D3FE59 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF12F1CBC348500D3FE59 /* main.swift */; };
 		C22BF13B1CBC349400D3FE59 /* DictionaryConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */; };
 		C22BF13C1CBC349400D3FE59 /* DictionaryCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */; };
@@ -69,6 +66,10 @@
 		C257C7541CC017EB00234A89 /* SimpleDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7531CC017EB00234A89 /* SimpleDatabase.swift */; };
 		C2A7C41C1CBFE56900248F92 /* ConcreteRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */; };
 		C2A7C41E1CBFE93F00248F92 /* OperationRelations.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */; };
+		C2BD29921CD251870081FD05 /* Flight.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
+		C2BD29931CD251870081FD05 /* Store.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
+		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
+		C2BD29951CD251A20081FD05 /* Store.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -128,7 +129,6 @@
 		C229219F1CCA5EF200518184 /* ModelDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelDatabase.swift; sourceTree = "<group>"; };
 		C22921A11CCA84D100518184 /* ModelRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelRelation.swift; sourceTree = "<group>"; };
 		C22921A31CCA86CE00518184 /* ComparisonTerm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonTerm.swift; sourceTree = "<group>"; };
-		C22921A51CCA88E500518184 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 		C22921A71CCE587900518184 /* RelationValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValue.swift; sourceTree = "<group>"; };
 		C22921A91CCE605D00518184 /* ArrayHashing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ArrayHashing.swift; path = Relational/ArrayHashing.swift; sourceTree = "<group>"; };
 		C22921AB1CCE6C5B00518184 /* ModelError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelError.swift; sourceTree = "<group>"; };
@@ -155,9 +155,10 @@
 		C257C7511CBEBF6300234A89 /* SetPowerSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SetPowerSet.swift; path = Relational/SetPowerSet.swift; sourceTree = "<group>"; };
 		C257C7531CC017EB00234A89 /* SimpleDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleDatabase.swift; sourceTree = "<group>"; };
 		C257C7561CC01BE200234A89 /* genmodel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = genmodel.swift; sourceTree = "<group>"; };
-		C257C7571CC01C3200234A89 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
 		C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConcreteRelation.swift; sourceTree = "<group>"; };
 		C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OperationRelations.swift; sourceTree = "<group>"; };
+		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
+		C2BD29911CD251870081FD05 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -214,15 +215,6 @@
 			name = genmodel;
 			sourceTree = "<group>";
 		};
-		C229219C1CCA5ECD00518184 /* Model Definitions */ = {
-			isa = PBXGroup;
-			children = (
-				C257C7571CC01C3200234A89 /* Flight.model */,
-				C22921A51CCA88E500518184 /* Store.model */,
-			);
-			name = "Model Definitions";
-			sourceTree = "<group>";
-		};
 		C229219D1CCA5EDD00518184 /* Model Code */ = {
 			isa = PBXGroup;
 			children = (
@@ -247,6 +239,8 @@
 		C22921E61CD12CF100518184 /* RelationalTests */ = {
 			isa = PBXGroup;
 			children = (
+				C2BD29901CD251870081FD05 /* Flight.model */,
+				C2BD29911CD251870081FD05 /* Store.model */,
 				C22921E71CD12CF100518184 /* RelationalTests.swift */,
 				C22921E91CD12CF100518184 /* Info.plist */,
 			);
@@ -297,7 +291,6 @@
 			isa = PBXGroup;
 			children = (
 				C229219B1CCA5EC300518184 /* genmodel */,
-				C229219C1CCA5ECD00518184 /* Model Definitions */,
 				C229219D1CCA5EDD00518184 /* Model Code */,
 				C229219E1CCA5EE300518184 /* Database */,
 			);
@@ -436,6 +429,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2BD29921CD251870081FD05 /* Flight.model in Resources */,
+				C2BD29931CD251870081FD05 /* Store.model in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -512,8 +507,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2BD29941CD251A20081FD05 /* Flight.model in Sources */,
+				C2BD29951CD251A20081FD05 /* Store.model in Sources */,
 				C22921E81CD12CF100518184 /* RelationalTests.swift in Sources */,
-				C22921F01CD1302000518184 /* Store.model in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,9 +519,7 @@
 			files = (
 				C22921AE1CCFABA300518184 /* Result.swift in Sources */,
 				C22921B61CD10BA800518184 /* ObserverSet.swift in Sources */,
-				C21971A81CC01D7B00E84F7E /* Flight.model in Sources */,
 				C22921A81CCE587900518184 /* RelationValue.swift in Sources */,
-				C22921A61CCA892800518184 /* Store.model in Sources */,
 				C21971AA1CC030B900E84F7E /* ModelHelpers.swift in Sources */,
 				C22921AA1CCE605D00518184 /* ArrayHashing.swift in Sources */,
 				C257C7541CC017EB00234A89 /* SimpleDatabase.swift in Sources */,
