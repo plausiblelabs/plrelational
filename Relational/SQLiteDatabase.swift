@@ -70,7 +70,7 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    func createRelation(name: String, scheme: Scheme) -> Result<Void, RelationError> {
+    public func createRelation(name: String, scheme: Scheme) -> Result<Void, RelationError> {
         let allColumns: [String]  = scheme.attributes.map({ escapeIdentifier($0.name) })
         
         let columnsSQL = allColumns.joinWithSeparator(", ")
@@ -85,7 +85,7 @@ extension SQLiteDatabase {
         })
     }
     
-    subscript(name: String, scheme: Scheme) -> SQLiteTableRelation {
+    public subscript(name: String, scheme: Scheme) -> SQLiteTableRelation {
         return SQLiteTableRelation(db: self, tableName: name, scheme: scheme)
     }
 }

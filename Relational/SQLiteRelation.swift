@@ -1,11 +1,11 @@
 
 import sqlite3
 
-class SQLiteRelation: Relation {
+public class SQLiteRelation: Relation {
     let db: SQLiteDatabase
     
     let tableName: String
-    let scheme: Scheme
+    public let scheme: Scheme
     
     var tableNameForQuery: String {
         return db.escapeIdentifier(tableName)
@@ -22,7 +22,7 @@ class SQLiteRelation: Relation {
         self.queryParameters = queryParameters
     }
     
-    func rows() -> AnyGenerator<Result<Row, RelationError>> {
+    public func rows() -> AnyGenerator<Result<Row, RelationError>> {
         var queryGenerator: AnyGenerator<Result<Row, RelationError>>? = nil
         return AnyGenerator(body: {
             if let queryGenerator = queryGenerator {
@@ -40,7 +40,7 @@ class SQLiteRelation: Relation {
         })
     }
     
-    func contains(row: Row) -> Result<Bool, RelationError> {
+    public func contains(row: Row) -> Result<Bool, RelationError> {
         fatalError("unimplemented")
     }
 }
@@ -93,7 +93,7 @@ extension SQLiteRelation {
         return (parenthesizedPieces.joinWithSeparator(" AND "), sqlParameters)
     }
     
-    func select(terms: [ComparisonTerm]) -> Relation {
+    public func select(terms: [ComparisonTerm]) -> Relation {
         if let (sql, parameters) = termsToSQL(terms) {
             return SQLiteRelation(db: db, tableName: self.tableName, scheme: scheme, query: "SELECT * FROM (\(self.query)) WHERE \(sql)", queryParameters: self.queryParameters + parameters)
         } else {
@@ -102,12 +102,12 @@ extension SQLiteRelation {
     }
 }
 
-class SQLiteTableRelation: SQLiteRelation {
+public class SQLiteTableRelation: SQLiteRelation {
     init(db: SQLiteDatabase, tableName: String, scheme: Scheme) {
         super.init(db: db, tableName: tableName, scheme: scheme, query: db.escapeIdentifier(tableName), queryParameters: [])
     }
     
-    func add(row: Row) -> Result<Int64, RelationError> {
+    public func add(row: Row) -> Result<Int64, RelationError> {
         if !db.tables.contains(tableName) {
             if let err = db.createRelation(tableName, scheme: scheme).err {
                 return .Err(err)
@@ -128,7 +128,7 @@ class SQLiteTableRelation: SQLiteRelation {
         })
     }
     
-    func delete(searchTerms: [ComparisonTerm]) -> Result<Void, RelationError> {
+    public func delete(searchTerms: [ComparisonTerm]) -> Result<Void, RelationError> {
         if let (whereSQL, whereParameters) = termsToSQL(searchTerms) {
             let sql = "DELETE FROM \(tableNameForQuery) WHERE \(whereSQL)"
             let result = db.executeQuery(sql, whereParameters)
@@ -142,7 +142,7 @@ class SQLiteTableRelation: SQLiteRelation {
         }
     }
     
-    func update(searchTerms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+    public func update(searchTerms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
         if let (whereSQL, whereParameters) = termsToSQL(searchTerms) {
             let orderedAttributes = Array(newValues.values)
             let setParts = orderedAttributes.map({ db.escapeIdentifier($0.0.name) + " = ?" })
