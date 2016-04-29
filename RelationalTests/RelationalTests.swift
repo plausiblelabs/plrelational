@@ -487,4 +487,28 @@ class RelationalTests: XCTestCase {
                         ["1145",    "1740",     "0940",    "1620",     "60",     "156"],
                         ["1145",    "2035",     "0940",    "1910",     "60",     "158"]))
     }
+    
+    func testSplit() {
+        let FLIGHTS = MakeRelation(
+            ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+            ["83",     "JFK",    "O'Hare",      "1130",    "1343"],
+            ["84",     "O'Hare", "JFK",         "1500",    "1755"],
+            ["109",    "JFK",    "Los Angeles", "2150",    "0252"],
+            ["213",    "JFK",    "Boston",      "1143",    "1245"],
+            ["214",    "Boston", "O'Hare",      "1420",    "1512"]
+        )
+        
+        let split = FLIGHTS.split([ComparisonTerm(Attribute("FROM"), EqualityComparator(), "JFK")])
+        AssertEqual(split.0,
+                    MakeRelation(
+                        ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                        ["83",     "JFK",    "O'Hare",      "1130",    "1343"],
+                        ["109",    "JFK",    "Los Angeles", "2150",    "0252"],
+                        ["213",    "JFK",    "Boston",      "1143",    "1245"]))
+        AssertEqual(split.1,
+                    MakeRelation(
+                        ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                        ["84",     "O'Hare", "JFK",         "1500",    "1755"],
+                        ["214",    "Boston", "O'Hare",      "1420",    "1512"]))
+    }
 }
