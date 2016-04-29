@@ -140,4 +140,51 @@ class RelationalTests: XCTestCase {
                         ["B"],
                         ["1"]))
     }
+    
+    func testSimpleMutation() {
+        var FLIGHTS = MakeRelation(
+            ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+            ["83",     "JFK",    "O'Hare",      "11:30a",  "1:43p"],
+            ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
+            ["109",    "JFK",    "Los Angeles", "9:50p",   "2:52a"],
+            ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+            ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]
+        )
+        
+        FLIGHTS.add(["NUMBER": "117", "FROM": "Atlanta", "TO": "Boston", "DEPARTS": "10:05p", "ARRIVES": "12:43a"])
+        AssertEqual(FLIGHTS,
+                    MakeRelation(
+                        ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                        ["83",     "JFK",    "O'Hare",      "11:30a",  "1:43p"],
+                        ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
+                        ["109",    "JFK",    "Los Angeles", "9:50p",   "2:52a"],
+                        ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+                        ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"],
+                        ["117",    "Atlanta", "Boston",     "10:05p",  "12:43a"]))
+        
+        FLIGHTS.delete(["NUMBER": "83"])
+        AssertEqual(FLIGHTS,
+                    MakeRelation(
+                        ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                        ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
+                        ["109",    "JFK",    "Los Angeles", "9:50p",   "2:52a"],
+                        ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+                        ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"],
+                        ["117",    "Atlanta", "Boston",     "10:05p",  "12:43a"]))
+        
+        AssertEqual(FLIGHTS.select(["FROM": "Boston"]),
+                    MakeRelation(
+                        ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                        ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]))
+        
+        FLIGHTS.change(["NUMBER": "109"], to: ["DEPARTS": "9:40p", "ARRIVES": "2:42a"])
+        AssertEqual(FLIGHTS,
+                    MakeRelation(
+                        ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                        ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
+                        ["109",    "JFK",    "Los Angeles", "9:40p",   "2:42a"],
+                        ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+                        ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"],
+                        ["117",    "Atlanta", "Boston",     "10:05p",  "12:43a"]))
+    }
 }
