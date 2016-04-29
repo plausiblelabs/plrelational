@@ -327,4 +327,13 @@ class RelationalTests: XCTestCase {
                         ["Doyle"],
                         ["Davis"]))
     }
+    
+    func testBuildFromJoinAndUnion() {
+        let pilots = (["PILOT": "Desmond"] as ConcreteRelation).join(["EQUIPMENT": "707"] as ConcreteRelation).union((["PILOT": "Davis"] as ConcreteRelation).join(["EQUIPMENT": "707"] as ConcreteRelation))
+        AssertEqual(pilots,
+                    MakeRelation(
+                        ["PILOT", "EQUIPMENT"],
+                        ["Desmond", "707"],
+                        ["Davis", "707"]))
+    }
 }
