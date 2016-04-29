@@ -18,6 +18,16 @@ func AssertEqual(a: Relation, _ b: Relation, file: StaticString = #file, line: U
     }
 }
 
+func AssertEqual<M1: Model, M2: Model, Seq: SequenceType where Seq.Generator.Element == Result<M1, RelationError>>(a: Seq, _ b: [M2], file: StaticString = #file, line: UInt = #line) {
+    let aRows = mapOk(a, { $0.toRow() })
+    let bRows = b.map({ $0.toRow() })
+    
+    XCTAssertNil(aRows.err, file: file, line: line)
+    aRows.map({
+        XCTAssertEqual(Set($0), Set(bRows), file: file, line: line)
+    })
+}
+
 class RelationalTests: XCTestCase {
     var dbPaths: [String] = []
     
@@ -600,14 +610,45 @@ class RelationalTests: XCTestCase {
             db.add(flight)
         }
         
-        let fetchedFlights = db.fetchAll(FLIGHT.self)
-        let rows = mapOk(fetchedFlights, { $0 })
-        XCTAssertNil(rows.err)
-        XCTAssertEqual(Set(rows.ok?.map({ $0.toRow() }) ?? []), Set(flights.map({ $0.toRow() })))
+        AssertEqual(db.fetchAll(FLIGHT.self), flights)
+        AssertEqual(db.fetchAll(FLIGHT.self).select([.EQ(FLIGHT.Attributes.departs, "JFK")]), flights.filter({ $0.departs == "JFK" }))
+    }
+    
+    func testModelToMany() {
+        let db = makeDB().db
         
-        let JFKFlights = fetchedFlights.select([.EQ(FLIGHT.Attributes.departs, "JFK")])
-        let JFKRows = mapOk(JFKFlights, { $0 })
-        XCTAssertNil(JFKRows.err)
-        XCTAssertEqual(Set(JFKRows.ok?.map({ $0.toRow() }) ?? []), Set(flights.filter({ $0.departs == "JFK" }).map({ $0.toRow() })))
+        let store1 = Store(owningDatabase: db, name: "Joe's")
+        XCTAssertNil(db.add(store1).err)
+        
+        let store2 = Store(owningDatabase: db, name: "CompuStern")
+        XCTAssertNil(db.add(store2).err)
+        
+        let emp1 = Employee(owningDatabase: db, name: "Toddd")
+        XCTAssertNil(store1.employees.add(emp1).err)
+        
+        let emp2 = Employee(owningDatabase: db, name: "Alex")
+        XCTAssertNil(store1.employees.add(emp2).err)
+        
+        let emp3 = Employee(owningDatabase: db, name: "Ramius")
+        XCTAssertNil(store1.employees.add(emp3).err)
+        
+        XCTAssertNil(emp1.directReports.add(emp2).err)
+        XCTAssertNil(emp1.directReports.add(emp3).err)
+        
+        let emp4 = Employee(owningDatabase: db, name: "Phteven")
+        XCTAssertNil(store2.employees.add(emp4).err)
+        
+        AssertEqual(store1.employees, [emp1, emp2, emp3])
+        AssertEqual(store2.employees, [emp4])
+        
+        AssertEqual(emp1.directReports, [emp2, emp3])
+        AssertEqual(emp2.directReports, [] as [Employee])
+        
+        XCTAssertEqual(emp2.parentOfType(Employee.self).ok??.toRow(), emp1.toRow())
+        XCTAssertEqual(emp2.parentOfType(Store.self).ok??.toRow(), store1.toRow())
+        
+        let emp4Supervisor = emp4.parentOfType(Employee.self)
+        XCTAssertNil(emp4Supervisor.err)
+        emp4Supervisor.map({ XCTAssertNil($0) })
     }
 }
