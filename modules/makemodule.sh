@@ -9,15 +9,18 @@
 # must be set to $(TARGET_BUILD_DIR)/modules for the compiler to see the output.
 
 OUT_DIR="$TARGET_BUILD_DIR/modules"
+OUT_FILE="$OUT_DIR/module.modulemap"
 
 mkdir -p "$OUT_DIR"
 
-cat > "$OUT_DIR/module.modulemap" <<MODULE
+if [ ! -f "$OUT_FILE" ] || [ "$0" -nt "$OUT_FILE" ]; then
+    cat > "$OUT_FILE" <<MODULE
 
-module sqlite3 [system] {
-    header "$SDKROOT/usr/include/sqlite3.h"
-    link "sqlite3"
-    export *
-}
+    module sqlite3 [system] {
+        header "$SDKROOT/usr/include/sqlite3.h"
+        link "sqlite3"
+        export *
+    }
 
 MODULE
+fi
