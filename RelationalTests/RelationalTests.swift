@@ -651,4 +651,29 @@ class RelationalTests: XCTestCase {
         XCTAssertNil(emp4Supervisor.err)
         emp4Supervisor.map({ XCTAssertNil($0) })
     }
+    
+    func testModelMutation() {
+        let (path, db) = makeDB()
+        
+        let store = Store(owningDatabase: db, name: "Joe's")
+        XCTAssertNil(db.add(store).err)
+        
+        let fetched = mapOk(db.fetchAll(Store.self), { $0 })
+        XCTAssertNil(fetched.err)
+        let fetchedStore = fetched.ok?.first
+        XCTAssertTrue(store === fetchedStore)
+        
+        store.name = "Bob's"
+        fetchedStore?.name = "Tom's"
+        XCTAssertEqual(store.name, fetchedStore?.name)
+        
+        var changed = false
+        store.changeObservers.add({ _ in changed = true })
+        fetchedStore?.name = "Kate's"
+        XCTAssertTrue(changed)
+        
+        let sqlite2 = try! SQLiteDatabase(path)
+        let db2 = ModelDatabase(sqlite2)
+        AssertEqual(db2.fetchAll(Store.self), fetched.ok ?? [])
+    }
 }
