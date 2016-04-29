@@ -458,4 +458,33 @@ class RelationalTests: XCTestCase {
                         ["84", 1500, 1755],
                         ["83", 1130, 1343]))
     }
+    
+    func testThetajoin() {
+        let timesab = MakeRelation(
+            ["NUMBER", "DEPARTS", "ARRIVES"],
+            ["60",  "0940", "1145"],
+            ["91",  "1250", "1447"],
+            ["112", "1605", "1815"],
+            ["306", "2030", "2225"],
+            ["40",  "2115", "2311"]
+        )
+        let timesbc = MakeRelation(
+            ["NUMBER", "DEPARTS", "ARRIVES"],
+            ["11",  "0830", "0952"],
+            ["60",  "1225", "1343"],
+            ["156", "1620", "1740"],
+            ["158", "1910", "2035"]
+        )
+        
+        let connectac = timesab.thetajoin(timesbc.renamePrime(), terms: [ComparisonTerm(Attribute("ARRIVES"), LTComparator(), Attribute("DEPARTS'"))])
+        AssertEqual(connectac,
+                    MakeRelation(
+                        ["ARRIVES", "ARRIVES'", "DEPARTS", "DEPARTS'", "NUMBER", "NUMBER'"],
+                        ["1815",    "2035",     "1605",    "1910",     "112",    "158"],
+                        ["1447",    "1740",     "1250",    "1620",     "91",     "156"],
+                        ["1447",    "2035",     "1250",    "1910",     "91",     "158"],
+                        ["1145",    "1343",     "0940",    "1225",     "60",     "60"],
+                        ["1145",    "1740",     "0940",    "1620",     "60",     "156"],
+                        ["1145",    "2035",     "0940",    "1910",     "60",     "158"]))
+    }
 }
