@@ -187,4 +187,41 @@ class RelationalTests: XCTestCase {
                         ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"],
                         ["117",    "Atlanta", "Boston",     "10:05p",  "12:43a"]))
     }
+    
+    func testMoreProject() {
+        let FLIGHTS = MakeRelation(
+            ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+            ["83",     "JFK",    "O'Hare",      "11:30a",  "1:43p"],
+            ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
+            ["109",    "JFK",    "Los Angeles", "9:50p",   "2:52a"],
+            ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+            ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]
+        )
+        
+        AssertEqual(FLIGHTS.project(["DEPARTS", "ARRIVES"]),
+                    MakeRelation(
+                        ["DEPARTS", "ARRIVES"],
+                        ["11:30a",  "1:43p"],
+                        ["3:00p",   "5:55p"],
+                        ["9:50p",   "2:52a"],
+                        ["11:43a",  "12:45p"],
+                        ["2:20p",   "3:12p"]))
+        
+        AssertEqual(FLIGHTS.project(["DEPARTS"]),
+                    MakeRelation(
+                        ["DEPARTS"],
+                        ["11:30a"],
+                        ["3:00p"],
+                        ["9:50p"],
+                        ["11:43a"],
+                        ["2:20p"]))
+        
+        AssertEqual(FLIGHTS.project(["FROM"]),
+                    MakeRelation(
+                        ["FROM"],
+                        ["JFK"],
+                        ["O'Hare"],
+                        ["JFK"],
+                        ["Boston"]))
+    }
 }
