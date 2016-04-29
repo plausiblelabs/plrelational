@@ -224,4 +224,66 @@ class RelationalTests: XCTestCase {
                         ["JFK"],
                         ["Boston"]))
     }
+    
+    func testMoreJoin() {
+        let usable = MakeRelation(
+            ["FLIGHT", "EQUIPMENT"],
+            ["83", "727"],
+            ["83", "747"],
+            ["84", "727"],
+            ["84", "747"],
+            ["109", "707"]
+        )
+        
+        let certified = MakeRelation(
+            ["PILOT", "EQUIPMENT"],
+            ["Simmons", "707"],
+            ["Simmons", "727"],
+            ["Barth", "747"],
+            ["Hill", "727"],
+            ["Hill", "747"]
+        )
+        
+        let options = usable.join(certified)
+        AssertEqual(options,
+                    MakeRelation(
+                        ["FLIGHT", "EQUIPMENT", "PILOT"],
+                        ["83", "727", "Simmons"],
+                        ["83", "727", "Hill"],
+                        ["83", "747", "Hill"],
+                        ["83", "747", "Barth"],
+                        ["84", "727", "Simmons"],
+                        ["84", "727", "Hill"],
+                        ["84", "747", "Hill"],
+                        ["84", "747", "Barth"],
+                        ["109", "707", "Simmons"]))
+        
+        AssertEqual(options.project(["FLIGHT", "PILOT"]),
+                    MakeRelation(
+                        ["FLIGHT", "PILOT"],
+                        ["83", "Simmons"],
+                        ["83", "Hill"],
+                        ["83", "Barth"],
+                        ["84", "Simmons"],
+                        ["84", "Hill"],
+                        ["84", "Barth"],
+                        ["109", "Simmons"]))
+        
+        AssertEqual(options.select(["FLIGHT": "84"]),
+                    MakeRelation(
+                        ["FLIGHT", "EQUIPMENT", "PILOT"],
+                        ["84", "727", "Simmons"],
+                        ["84", "727", "Hill"],
+                        ["84", "747", "Hill"],
+                        ["84", "747", "Barth"]))
+
+        let flight84 = MakeRelation(["FLIGHT"], ["84"])
+        AssertEqual(options.join(flight84),
+                    MakeRelation(
+                        ["FLIGHT", "EQUIPMENT", "PILOT"],
+                        ["84", "727", "Simmons"],
+                        ["84", "727", "Hill"],
+                        ["84", "747", "Hill"],
+                        ["84", "747", "Barth"]))
+    }
 }
