@@ -427,4 +427,35 @@ class RelationalTests: XCTestCase {
                         ["JFK",      "JFK",      "213",    "Terhune", "Boston"]))
 
     }
+    
+    func testSelectWithComparisons() {
+        let FLIGHTS = MakeRelation(
+            ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+            ["83",     "JFK",    "O'Hare",      1130,       1343],
+            ["84",     "O'Hare", "JFK",         1500,       1755],
+            ["109",    "JFK",    "Los Angeles", 2150,       252],
+            ["213",    "JFK",    "Boston",      1143,       1245],
+            ["214",    "Boston", "O'Hare",      1420,       1512]
+        )
+        
+        let times = FLIGHTS.project(["NUMBER", "DEPARTS", "ARRIVES"])
+        AssertEqual(times.select([ComparisonTerm(Attribute("ARRIVES"), LTComparator(), RelationValue.Integer(1300))]),
+                    MakeRelation(
+                        ["NUMBER", "DEPARTS", "ARRIVES"],
+                        ["109", 2150, 0252],
+                        ["213", 1143, 1245]))
+        
+        let twoHoursLT = AnyComparator({ (lhs, rhs) in
+            let lhsN = lhs.get() as Int64? ?? -1
+            let rhsN = rhs.get() as Int64? ?? -1
+            return ((rhsN + 2400) - lhsN) % 2400 >= 200
+        })
+        
+        AssertEqual(times.select([ComparisonTerm(Attribute("DEPARTS"), twoHoursLT, Attribute("ARRIVES"))]),
+                    MakeRelation(
+                        ["NUMBER", "DEPARTS", "ARRIVES"],
+                        ["109", 2150, 252],
+                        ["84", 1500, 1755],
+                        ["83", 1130, 1343]))
+    }
 }
