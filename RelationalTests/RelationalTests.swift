@@ -109,4 +109,35 @@ class RelationalTests: XCTestCase {
                         ["A1", "B1", "C1"],
                         ["A2", "B1", "C2"]))
     }
+    
+    func testJoin() {
+        let a = MakeRelation(
+            ["A", "B"],
+            ["X", "1"],
+            ["Y", "2"]
+        )
+        let b = MakeRelation(
+            ["B", "C"],
+            ["1", "T"],
+            ["3", "V"]
+        )
+        
+        AssertEqual(a.join(b),
+                    MakeRelation(
+                        ["A", "B", "C"],
+                        ["X", "1", "T"]))
+    }
+    
+    func testProject() {
+        let a = MakeRelation(
+            ["A", "B"],
+            ["X", "1"],
+            ["Y", "1"]
+        )
+        
+        AssertEqual(a.project(["B"]),
+                    MakeRelation(
+                        ["B"],
+                        ["1"]))
+    }
 }
