@@ -16,11 +16,11 @@ public protocol Model: class {
 }
 
 extension Model {
-    func parentsOfType<T: Model>(type: T.Type) -> ModelRelation<T> {
+    public func parentsOfType<T: Model>(type: T.Type) -> ModelRelation<T> {
         return owningDatabase.fetch(type, owning: self)
     }
     
-    func parentOfType<T: Model>(type: T.Type) -> Result<T?, RelationError> {
+    public func parentOfType<T: Model>(type: T.Type) -> Result<T?, RelationError> {
         let parents = parentsOfType(type)
         let gen = parents.generate()
         
