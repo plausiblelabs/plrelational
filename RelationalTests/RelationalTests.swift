@@ -395,4 +395,36 @@ class RelationalTests: XCTestCase {
                         ["60",      "6 Jan", "707-82"],
                         ["60",      "7 Jan", "727-6"]))
     }
+    
+    func testEquijoin() {
+        let routes = MakeRelation(
+            ["NUMBER", "FROM",    "TO"],
+            ["84",     "O'Hare",  "JFK"],
+            ["109",    "JFK",     "Los Angeles"],
+            ["117",    "Atlanta", "Boston"],
+            ["213",    "JFK",     "Boston"],
+            ["214",    "Boston",  "JFK"]
+        )
+        
+        let based = MakeRelation(
+            ["PILOT", "AIRPORT"],
+            ["Terhune", "JFK"],
+            ["Temple", "Atlanta"],
+            ["Taylor", "Atlanta"],
+            ["Tarbell", "Boston"],
+            ["Todd", "Los Angeles"],
+            ["Truman", "O'Hare"]
+        )
+        
+        AssertEqual(routes.equijoin(based, matching: ["FROM": "AIRPORT"]),
+                    MakeRelation(
+                        ["AIRPORT",  "FROM",     "NUMBER", "PILOT",   "TO"],
+                        ["O'Hare",   "O'Hare",   "84",     "Truman",  "JFK"],
+                        ["Atlanta",  "Atlanta",  "117",    "Taylor",  "Boston"],
+                        ["Atlanta",  "Atlanta",  "117",    "Temple",  "Boston"],
+                        ["Boston",   "Boston",   "214",    "Tarbell", "JFK"],
+                        ["JFK",      "JFK",      "109",    "Terhune", "Los Angeles"],
+                        ["JFK",      "JFK",      "213",    "Terhune", "Boston"]))
+
+    }
 }
