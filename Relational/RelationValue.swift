@@ -117,6 +117,12 @@ extension RelationValue: StringLiteralConvertible {
     }
 }
 
+extension RelationValue: IntegerLiteralConvertible {
+    public init(integerLiteral value: Int64) {
+        self = .Integer(value)
+    }
+}
+
 extension RelationValue {
     public func get() -> Int64? {
         switch self {
