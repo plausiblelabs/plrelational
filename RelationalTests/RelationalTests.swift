@@ -584,4 +584,30 @@ class RelationalTests: XCTestCase {
                         ["Tennessee","888",    "Spotsylvania"],
                         ["Atlanta",  "3",      "Atlanta"]))
     }
+    
+    func testModels() {
+        let db = makeDB().db
+        
+        let flights = [
+            FLIGHT(owningDatabase: db, number: 42, departs: "Earth", arrives: "Space"),
+            FLIGHT(owningDatabase: db, number: 99, departs: "JFK", arrives: "JFK"),
+            FLIGHT(owningDatabase: db, number: 100, departs: "JFK", arrives: "SFO"),
+            FLIGHT(owningDatabase: db, number: 123, departs: "Airport", arrives: "Another Airport"),
+            FLIGHT(owningDatabase: db, number: 124, departs: "Q", arrives: "R"),
+            ]
+        
+        for flight in flights {
+            db.add(flight)
+        }
+        
+        let fetchedFlights = db.fetchAll(FLIGHT.self)
+        let rows = mapOk(fetchedFlights, { $0 })
+        XCTAssertNil(rows.err)
+        XCTAssertEqual(Set(rows.ok?.map({ $0.toRow() }) ?? []), Set(flights.map({ $0.toRow() })))
+        
+        let JFKFlights = fetchedFlights.select([.EQ(FLIGHT.Attributes.departs, "JFK")])
+        let JFKRows = mapOk(JFKFlights, { $0 })
+        XCTAssertNil(JFKRows.err)
+        XCTAssertEqual(Set(JFKRows.ok?.map({ $0.toRow() }) ?? []), Set(flights.filter({ $0.departs == "JFK" }).map({ $0.toRow() })))
+    }
 }
