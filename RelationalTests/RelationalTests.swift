@@ -336,4 +336,63 @@ class RelationalTests: XCTestCase {
                         ["Desmond", "707"],
                         ["Davis", "707"]))
     }
+    
+    func testRename() {
+        let usedfor = MakeRelation(
+            ["FLIGHT", "DATE",  "PLANENUM"],
+            ["12",     "6 Jan", "707-82"],
+            ["12",     "7 Jan", "707-82"],
+            ["13",     "6 Jan", "707-82"],
+            ["26",     "6 Jan", "747-16"],
+            ["26",     "7 Jan", "747-18"],
+            ["27",     "6 Jan", "747-16"],
+            ["27",     "7 Jan", "747-2"],
+            ["60",     "6 Jan", "707-82"],
+            ["60",     "7 Jan", "727-6"]
+        )
+        
+        let usedforRenamed = usedfor.renameAttributes(["FLIGHT": "FLIGHT2"])
+        AssertEqual(usedforRenamed,
+                    MakeRelation(
+                        ["FLIGHT2", "DATE",  "PLANENUM"],
+                        ["12",      "6 Jan", "707-82"],
+                        ["12",      "7 Jan", "707-82"],
+                        ["13",      "6 Jan", "707-82"],
+                        ["26",      "6 Jan", "747-16"],
+                        ["26",      "7 Jan", "747-18"],
+                        ["27",      "6 Jan", "747-16"],
+                        ["27",      "7 Jan", "747-2"],
+                        ["60",      "6 Jan", "707-82"],
+                        ["60",      "7 Jan", "727-6"]))
+        
+        AssertEqual(usedfor.join(usedforRenamed).project(["FLIGHT", "FLIGHT2"]),
+                    MakeRelation(
+                        ["FLIGHT", "FLIGHT2"],
+                        ["12",     "12"],
+                        ["27",     "27"],
+                        ["27",     "26"],
+                        ["26",     "27"],
+                        ["26",     "26"],
+                        ["12",     "13"],
+                        ["12",     "60"],
+                        ["13",     "12"],
+                        ["13",     "13"],
+                        ["13",     "60"],
+                        ["60",     "12"],
+                        ["60",     "13"],
+                        ["60",     "60"]))
+        
+        AssertEqual(usedforRenamed.renameAttributes(["DATE": "PLANENUM", "PLANENUM": "DATE"]),
+                    MakeRelation(
+                        ["FLIGHT2", "PLANENUM", "DATE"],
+                        ["12",      "6 Jan", "707-82"],
+                        ["12",      "7 Jan", "707-82"],
+                        ["13",      "6 Jan", "707-82"],
+                        ["26",      "6 Jan", "747-16"],
+                        ["26",      "7 Jan", "747-18"],
+                        ["27",      "6 Jan", "747-16"],
+                        ["27",      "7 Jan", "747-2"],
+                        ["60",      "6 Jan", "707-82"],
+                        ["60",      "7 Jan", "727-6"]))
+    }
 }
