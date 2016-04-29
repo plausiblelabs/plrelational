@@ -12,7 +12,7 @@ public struct ComparisonTerm {
 }
 
 extension ComparisonTerm {
-    static func EQ(lhs: ValueProvider, _ rhs: ValueProvider) -> ComparisonTerm {
+    public static func EQ(lhs: ValueProvider, _ rhs: ValueProvider) -> ComparisonTerm {
         return self.init(lhs, EqualityComparator(), rhs)
     }
 }
