@@ -286,4 +286,45 @@ class RelationalTests: XCTestCase {
                         ["84", "747", "Hill"],
                         ["84", "747", "Barth"]))
     }
+    
+    func testDivide() {
+        let q = MakeRelation(
+            ["EQUIPMENT"],
+            ["707"],
+            ["727"],
+            ["747"]
+        )
+        
+        let s = MakeRelation(
+            ["EQUIPMENT"],
+            ["707"]
+        )
+        
+        let certified = MakeRelation(
+            ["PILOT", "EQUIPMENT"],
+            ["Desmond", "707"],
+            ["Desmond", "727"],
+            ["Desmond", "747"],
+            ["Doyle", "707"],
+            ["Doyle", "727"],
+            ["Davis", "707"],
+            ["Davis", "727"],
+            ["Davis", "747"],
+            ["Davis", "1011"],
+            ["Dow", "727"]
+            ).setDefaultSort("PILOT")
+        
+        AssertEqual(certified.divide(q),
+                    MakeRelation(
+                        ["PILOT"],
+                        ["Desmond"],
+                        ["Davis"]))
+        
+        AssertEqual(certified.divide(s),
+                    MakeRelation(
+                        ["PILOT"],
+                        ["Desmond"],
+                        ["Doyle"],
+                        ["Davis"]))
+    }
 }
