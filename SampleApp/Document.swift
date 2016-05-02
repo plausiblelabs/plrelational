@@ -65,7 +65,17 @@ class Document: NSDocument {
         docModel = DocModel()
         
         // Create the "views"
-        docOutlineView = ListView(outlineView: documentOutlineView, relation: docModel.pages)
+        do {
+            let data = ListView.Data(relation: docModel.pages, idAttribute: "id", textAttribute: "name")
+            let selection = ListView.Selection(
+                relation: docModel.selectedPage,
+                // TODO
+                set: { (id) in () },
+                // TODO
+                index: { nil }
+            )
+            docOutlineView = ListView(outlineView: documentOutlineView, data: data, selection: selection)
+        }
     }
     
     @IBAction func newPageAction(sender: NSMenuItem) {

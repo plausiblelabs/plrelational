@@ -13,6 +13,18 @@ import libRelational
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
 class ListView: NSObject {
 
+    struct Data {
+        let relation: Relation
+        let idAttribute: Attribute
+        let textAttribute: Attribute
+    }
+    
+    struct Selection {
+        let relation: SQLiteTableRelation
+        let set: (id: Int64?) -> Void
+        let index: () -> Int?
+    }
+    
     // XXX: This is basically a boxed version of the Row struct
     class RowData {
         let row: Row
@@ -22,20 +34,26 @@ class ListView: NSObject {
         }
     }
     
-    let outlineView: NSOutlineView
-    let relation: Relation
-    var rows: [RowData] = []
+    private let outlineView: NSOutlineView
+    private let data: Data
+    private let selection: Selection
+    private var rows: [RowData] = []
 
-    var observerRemoval: (Void -> Void)?
+    private var dataObserverRemoval: (Void -> Void)?
+    private var selectionObserverRemoval: (Void -> Void)?
+    private var selfInitiatedSelectionChange = false
     
-    init(outlineView: NSOutlineView, relation: Relation) {
+    init(outlineView: NSOutlineView, data: Data, selection: Selection) {
         self.outlineView = outlineView
-        self.relation = relation
+        self.data = data
+        self.selection = selection
         
         super.init()
         
-        rows = relation.rows().map{RowData($0.ok!)}
-        observerRemoval = relation.addChangeObserver({ [weak self] in self?.relationChanged() })
+        rows = data.relation.rows().map{RowData($0.ok!)}
+        dataObserverRemoval = data.relation.addChangeObserver({ [weak self] in self?.dataRelationChanged() })
+
+        selectionObserverRemoval = selection.relation.addChangeObserver({ [weak self] in self?.selectionRelationChanged() })
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
@@ -66,7 +84,7 @@ extension ListView: ExtOutlineViewDelegate {
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
             // TODO: Set up bidirectional binding
-            textField.stringValue = rowData.row["name"].get()!
+            textField.stringValue = rowData.row[data.textAttribute].get()!
         }
         return view
     }
@@ -78,13 +96,42 @@ extension ListView: ExtOutlineViewDelegate {
     func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
         return nil
     }
+    
+    func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
+        return true
+    }
+    
+    func outlineViewSelectionDidChange(notification: NSNotification) {
+        let itemID: Int64?
+        selfInitiatedSelectionChange = true
+        if outlineView.selectedRow >= 0 {
+            let rowData = rows[outlineView.selectedRow]
+            itemID = rowData.row[data.idAttribute].get()!
+        } else {
+            itemID = nil
+        }
+        selection.set(id: itemID)
+        selfInitiatedSelectionChange = true
+    }
 }
 
 extension ListView {
     
-    func relationChanged() {
+    func dataRelationChanged() {
         // TODO: Need fine-grained change observation
-        rows = relation.rows().map{RowData($0.ok!)}
+        rows = data.relation.rows().map{RowData($0.ok!)}
         outlineView.reloadData()
+    }
+    
+    func selectionRelationChanged() {
+        if selfInitiatedSelectionChange {
+            return
+        }
+        
+        if let index = selection.index() {
+            outlineView.selectRowIndexes(NSIndexSet(index: index), byExtendingSelection: false)
+        } else {
+            outlineView.deselectAll(nil)
+        }
     }
 }
