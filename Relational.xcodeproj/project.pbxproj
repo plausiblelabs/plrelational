@@ -15,6 +15,8 @@
 		37C611151CD7EFAE001DAF59 /* SampleAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611141CD7EFAE001DAF59 /* SampleAppTests.swift */; };
 		37C611201CD7EFAE001DAF59 /* SampleAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6111F1CD7EFAE001DAF59 /* SampleAppUITests.swift */; };
 		37C6112D1CD7F09B001DAF59 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
+		37C611311CD7F7D7001DAF59 /* BackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611301CD7F7D7001DAF59 /* BackgroundView.swift */; };
+		37C611331CD7F80F001DAF59 /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611321CD7F80F001DAF59 /* TextField.swift */; };
 		C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		C22921C51CD12A8700518184 /* Comparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7491CBD7F4500234A89 /* Comparator.swift */; };
 		C22921C61CD12A8700518184 /* ComparisonTerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A31CCA86CE00518184 /* ComparisonTerm.swift */; };
@@ -111,6 +113,8 @@
 		37C6111B1CD7EFAE001DAF59 /* SampleAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SampleAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C6111F1CD7EFAE001DAF59 /* SampleAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleAppUITests.swift; sourceTree = "<group>"; };
 		37C611211CD7EFAE001DAF59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		37C611301CD7F7D7001DAF59 /* BackgroundView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundView.swift; sourceTree = "<group>"; };
+		37C611321CD7F80F001DAF59 /* TextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextField.swift; sourceTree = "<group>"; };
 		C21971A91CC030B900E84F7E /* ModelHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelHelpers.swift; sourceTree = "<group>"; };
 		C22921911CC6CDCC00518184 /* makemodule.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = makemodule.sh; path = ../modules/makemodule.sh; sourceTree = "<group>"; };
 		C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteDatabase.swift; sourceTree = "<group>"; };
@@ -198,9 +202,8 @@
 				37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */,
 				37C611011CD7EFAE001DAF59 /* Document.swift */,
 				37C611031CD7EFAE001DAF59 /* Document.xib */,
-				37C611061CD7EFAE001DAF59 /* Assets.xcassets */,
-				37C611081CD7EFAE001DAF59 /* MainMenu.xib */,
-				37C6110B1CD7EFAE001DAF59 /* Info.plist */,
+				37C6112E1CD7F79A001DAF59 /* CustomViews */,
+				37C6112F1CD7F7A5001DAF59 /* Other Stuff */,
 			);
 			path = SampleApp;
 			sourceTree = "<group>";
@@ -221,6 +224,25 @@
 				37C611211CD7EFAE001DAF59 /* Info.plist */,
 			);
 			path = SampleAppUITests;
+			sourceTree = "<group>";
+		};
+		37C6112E1CD7F79A001DAF59 /* CustomViews */ = {
+			isa = PBXGroup;
+			children = (
+				37C611301CD7F7D7001DAF59 /* BackgroundView.swift */,
+				37C611321CD7F80F001DAF59 /* TextField.swift */,
+			);
+			name = CustomViews;
+			sourceTree = "<group>";
+		};
+		37C6112F1CD7F7A5001DAF59 /* Other Stuff */ = {
+			isa = PBXGroup;
+			children = (
+				37C611061CD7EFAE001DAF59 /* Assets.xcassets */,
+				37C611081CD7EFAE001DAF59 /* MainMenu.xib */,
+				37C6110B1CD7EFAE001DAF59 /* Info.plist */,
+			);
+			name = "Other Stuff";
 			sourceTree = "<group>";
 		};
 		C22921901CC6CD9500518184 /* SQLite */ = {
@@ -569,8 +591,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37C611311CD7F7D7001DAF59 /* BackgroundView.swift in Sources */,
 				37C611021CD7EFAE001DAF59 /* Document.swift in Sources */,
 				37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */,
+				37C611331CD7F80F001DAF59 /* TextField.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -891,6 +915,7 @@
 				37C611231CD7EFAE001DAF59 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37C611291CD7EFAE001DAF59 /* Build configuration list for PBXNativeTarget "SampleAppTests" */ = {
 			isa = XCConfigurationList;
@@ -899,6 +924,7 @@
 				37C611251CD7EFAE001DAF59 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37C6112A1CD7EFAE001DAF59 /* Build configuration list for PBXNativeTarget "SampleAppUITests" */ = {
 			isa = XCConfigurationList;
@@ -907,6 +933,7 @@
 				37C611271CD7EFAE001DAF59 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C22921C11CD12A7100518184 /* Build configuration list for PBXNativeTarget "libRelational" */ = {
 			isa = XCConfigurationList;
