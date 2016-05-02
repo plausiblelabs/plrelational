@@ -11,6 +11,9 @@ public class SQLiteDatabase {
     
     public var tables: Set<String> = []
     
+    private var changeObservers: [UInt64: Void -> Void] = [:]
+    private var changeObserverNextID: UInt64 = 0
+    
     public init(_ path: String) throws {
         var localdb: sqlite3 = nil
         let result = sqlite3_open_v2(path, &localdb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil)
@@ -162,5 +165,23 @@ extension SQLiteDatabase {
                 sqlite3_finalize($0)
             })
         })
+    }
+}
+
+extension SQLiteDatabase {
+    /// Add a change observer that fires for any changes to the database done through this object.s
+    public func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
+        let id = changeObserverNextID
+        changeObserverNextID += 1
+        
+        changeObservers[id] = f
+        
+        return { self.changeObservers.removeValueForKey(id) }
+    }
+    
+    public func notifyChangeObservers() {
+        for (_, f) in changeObservers {
+            f()
+        }
     }
 }

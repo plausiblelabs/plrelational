@@ -20,6 +20,12 @@ struct UnionRelation: Relation {
     func contains(row: Row) -> Result<Bool, RelationError> {
         return a.contains(row).combine(b.contains(row)).map({ $0 || $1 })
     }
+    
+    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
+        let aRemove = a.addChangeObserver(f)
+        let bRemove = b.addChangeObserver(f)
+        return { aRemove(); bRemove() }
+    }
 }
 
 struct IntersectionRelation: Relation {
@@ -61,6 +67,12 @@ struct IntersectionRelation: Relation {
     
     func contains(row: Row) -> Result<Bool, RelationError> {
         return a.contains(row).combine(b.contains(row)).map({ $0 && $1 })
+    }
+    
+    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
+        let aRemove = a.addChangeObserver(f)
+        let bRemove = b.addChangeObserver(f)
+        return { aRemove(); bRemove() }
     }
 }
 
@@ -104,6 +116,12 @@ struct DifferenceRelation: Relation {
     func contains(row: Row) -> Result<Bool, RelationError> {
         return a.contains(row).combine(b.contains(row)).map({ $0 && !$1 })
     }
+    
+    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
+        let aRemove = a.addChangeObserver(f)
+        let bRemove = b.addChangeObserver(f)
+        return { aRemove(); bRemove() }
+    }
 }
 
 struct ProjectRelation: Relation {
@@ -139,6 +157,10 @@ struct ProjectRelation: Relation {
     
     func contains(row: Row) -> Result<Bool, RelationError> {
         return relation.select(row).isEmpty.map(!)
+    }
+    
+    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
+        return relation.addChangeObserver(f)
     }
 }
 
@@ -178,6 +200,10 @@ struct SelectRelation: Relation {
     func contains(row: Row) -> Result<Bool, RelationError> {
         return relation.contains(row).map({ $0 && rowMatches(row) })
     }
+    
+    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
+        return relation.addChangeObserver(f)
+    }
 }
 
 struct EquijoinRelation: Relation {
@@ -216,6 +242,12 @@ struct EquijoinRelation: Relation {
     func contains(row: Row) -> Result<Bool, RelationError> {
         return self.select(row).isEmpty.map(!)
     }
+    
+    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
+        let aRemove = a.addChangeObserver(f)
+        let bRemove = b.addChangeObserver(f)
+        return { aRemove(); bRemove() }
+    }
 }
 
 struct RenameRelation: Relation {
@@ -240,5 +272,9 @@ struct RenameRelation: Relation {
     
     func contains(row: Row) -> Result<Bool, RelationError> {
         return relation.contains(row.renameAttributes(renames.reversed))
+    }
+    
+    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
+        return relation.addChangeObserver(f)
     }
 }

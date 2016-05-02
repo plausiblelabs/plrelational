@@ -43,6 +43,10 @@ public class SQLiteRelation: Relation {
     public func contains(row: Row) -> Result<Bool, RelationError> {
         fatalError("unimplemented")
     }
+    
+    public func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
+        return db.addChangeObserver(f)
+    }
 }
 
 extension SQLiteRelation {
@@ -124,7 +128,9 @@ public class SQLiteTableRelation: SQLiteRelation {
         return result.map({ rows in
             let array = Array(rows)
             precondition(array.isEmpty, "Unexpected results from INSERT INTO statement: \(array)")
-            return sqlite3_last_insert_rowid(db.db)
+            let rowid = sqlite3_last_insert_rowid(db.db)
+            db.notifyChangeObservers()
+            return rowid
         })
     }
     
@@ -135,6 +141,7 @@ public class SQLiteTableRelation: SQLiteRelation {
             return result.map({
                 let array = Array($0)
                 precondition(array.isEmpty, "Unexpected results from DELETE FROM statement: \(array)")
+                db.notifyChangeObservers()
                 return ()
             })
         } else {
@@ -154,6 +161,7 @@ public class SQLiteTableRelation: SQLiteRelation {
             return result.map({
                 let array = Array($0)
                 precondition(array.isEmpty, "Unexpected results from UPDATE statement: \(array)")
+                db.notifyChangeObservers()
                 return ()
             })
         } else {

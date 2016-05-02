@@ -676,4 +676,80 @@ class RelationalTests: XCTestCase {
         let db2 = ModelDatabase(sqlite2)
         AssertEqual(db2.fetchAll(Store.self), fetched.ok ?? [])
     }
+    
+    func testBasicObservation() {
+        let db = makeDB().db.sqliteDatabase
+        
+        XCTAssertNil(db.createRelation("test", scheme: ["column"]).err)
+        let r = db["test", ["column"]]
+        
+        var changeCount = 0
+        let removal = r.addChangeObserver({ changeCount += 1 })
+        
+        r.add(["column": "42"])
+        XCTAssertEqual(changeCount, 1)
+        
+        r.update([.EQ(Attribute("column"), "42")], newValues: ["column": "43"])
+        XCTAssertEqual(changeCount, 2)
+        
+        r.delete([.EQ(Attribute("column"), "43")])
+        XCTAssertEqual(changeCount, 3)
+        
+        removal()
+        r.add(["column": "123"])
+        XCTAssertEqual(changeCount, 3)
+    }
+    
+    func testJoinObservation() {
+        let db = makeDB().db.sqliteDatabase
+        
+        XCTAssertNil(db.createRelation("a", scheme: ["1", "2"]).err)
+        XCTAssertNil(db.createRelation("b", scheme: ["2", "3"]).err)
+        
+        let a = db["a", ["1", "2"]]
+        let b = db["b", ["2", "3"]]
+        
+        a.add(["1": "X", "2": "X"])
+        a.add(["1": "X", "2": "Y"])
+        a.add(["1": "Y", "2": "Z"])
+        
+        b.add(["2": "X", "3": "X"])
+        b.add(["2": "X", "3": "Y"])
+        b.add(["2": "Y", "3": "Z"])
+        
+        let joined = a.join(b)
+        AssertEqual(joined,
+                    MakeRelation(
+                        ["1", "2", "3"],
+                        ["X", "X", "X"],
+                        ["X", "X", "Y"],
+                        ["X", "Y", "Z"]))
+        
+        var changed = false
+        let removal = joined.addChangeObserver({ changed = true })
+        
+        changed = false
+        a.delete([.EQ(Attribute("2"), "Y")])
+        XCTAssertTrue(changed)
+        AssertEqual(joined,
+                    MakeRelation(
+                        ["1", "2", "3"],
+                        ["X", "X", "X"],
+                        ["X", "X", "Y"]))
+        
+        changed = false
+        b.add(["2": "Z", "3": "Z"])
+        XCTAssertTrue(changed)
+        AssertEqual(joined,
+                    MakeRelation(
+                        ["1", "2", "3"],
+                        ["X", "X", "X"],
+                        ["X", "X", "Y"],
+                        ["Y", "Z", "Z"]))
+        
+        removal()
+        changed = false
+        a.delete([.EQ(Attribute("1"), "X")])
+        XCTAssertFalse(changed)
+    }
 }
