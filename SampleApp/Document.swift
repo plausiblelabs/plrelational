@@ -7,39 +7,6 @@
 //
 
 import Cocoa
-import libRelational
-
-protocol ExtOutlineViewDelegate: NSOutlineViewDelegate {
-    func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu?
-}
-
-class ExtOutlineView: NSOutlineView {
-    
-    override func validateProposedFirstResponder(responder: NSResponder, forEvent event: NSEvent?) -> Bool {
-        // XXX: The following prevents the text field from becoming first responder if it is right-clicked
-        // (which should instead cause the context menu to be shown)
-        if let event = event {
-            if event.type == .RightMouseDown || (event.type == .LeftMouseDown && event.modifierFlags.contains(.ControlKeyMask)) {
-                return false
-            } else {
-                return super.validateProposedFirstResponder(responder, forEvent: event)
-            }
-        } else {
-            return super.validateProposedFirstResponder(responder, forEvent: event)
-        }
-    }
-    
-    override func menuForEvent(event: NSEvent) -> NSMenu? {
-        // Notify the delegate if a context menu is requested for an item
-        let point = self.convertPoint(event.locationInWindow, fromView: nil)
-        let row = self.rowAtPoint(point)
-        let item = self.itemAtRow(row)
-        if item == nil {
-            return nil
-        }
-        return (self.delegate() as! ExtOutlineViewDelegate).outlineView(self, menuForItem: item!)
-    }
-}
 
 class Document: NSDocument {
 
@@ -57,6 +24,10 @@ class Document: NSDocument {
     @IBOutlet var nameLabel: TextField!
     @IBOutlet var noSelectionLabel: TextField!
 
+    var docOutlineView: ListView!
+    
+    var docModel: DocModel!
+    
     override init() {
         super.init()
     }
@@ -90,30 +61,14 @@ class Document: NSDocument {
         inspectorOutlineView.backgroundColor = bg
         rightSidebarView.backgroundColor = bg
         
-        func makeDB() -> (path: String, db: SQLiteDatabase) {
-            let tmp = NSTemporaryDirectory() as NSString
-            let dbname = "testing-\(NSUUID()).db"
-            let path = tmp.stringByAppendingPathComponent(dbname)
-            _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
-            
-            let db = try! SQLiteDatabase(path)
-            
-            return (path, db)
-        }
+        // Create the document model
+        docModel = DocModel()
         
-        // Prepare the schemas
-        let db = makeDB().db
-        assert(db.createRelation("page", scheme: ["id", "name"]).ok != nil)
-        
-        // Prepare the default document data
-        var idval: Int64 = 1
-        let pages = db["page", ["id", "name"]]
-        func addPage(name: String) {
-            pages.add(["id": RelationValue(idval), "name": RelationValue(name)])
-            idval += 1
-        }
-        addPage("Page1")
-        addPage("Page2")
-        addPage("Page3")
+        // Create the "views"
+        docOutlineView = ListView(outlineView: documentOutlineView, relation: docModel.pages)
+    }
+    
+    @IBAction func newPageAction(sender: NSMenuItem) {
+        docModel.addPage("Page")
     }
 }

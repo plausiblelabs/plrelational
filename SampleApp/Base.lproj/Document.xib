@@ -252,7 +252,7 @@
                                             <constraint firstAttribute="width" constant="30" id="Aaz-vt-Fg2"/>
                                             <constraint firstAttribute="height" constant="26" id="oJA-Pg-qm1"/>
                                         </constraints>
-                                        <popUpButtonCell key="cell" type="smallSquare" bezelStyle="smallSquare" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" pullsDown="YES" arrowPosition="noArrow" autoenablesItems="NO" selectedItem="qHF-6O-WZM" id="Xgj-4x-UqU">
+                                        <popUpButtonCell key="cell" type="smallSquare" bezelStyle="smallSquare" imagePosition="only" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" pullsDown="YES" arrowPosition="noArrow" autoenablesItems="NO" id="Xgj-4x-UqU">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                             <font key="font" metaFont="menu"/>
                                             <menu key="menu" autoenablesItems="NO" id="ItQ-7S-xEx">
@@ -260,6 +260,9 @@
                                                     <menuItem state="on" image="NSAddTemplate" hidden="YES" id="qHF-6O-WZM"/>
                                                     <menuItem title="New Page" id="2MI-zP-Jwv" userLabel="New Page">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="newPageAction:" target="-2" id="9Im-Xl-Bdq"/>
+                                                        </connections>
                                                     </menuItem>
                                                 </items>
                                             </menu>
