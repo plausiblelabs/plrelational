@@ -69,9 +69,9 @@ class Document: NSDocument {
             let data = ListView.Data(relation: docModel.pages, idAttribute: "id", textAttribute: "name")
             let selection = ListView.Selection(
                 relation: docModel.selectedPage,
-                // TODO
+                // TODO: Submit a transaction that updates the selected_page relation
                 set: { (id) in () },
-                // TODO
+                // TODO: Map selected_page.page_id to an index relative to ordered pages
                 index: { nil }
             )
             docOutlineView = ListView(outlineView: documentOutlineView, data: data, selection: selection)
