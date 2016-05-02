@@ -752,4 +752,26 @@ class RelationalTests: XCTestCase {
         a.delete([.EQ(Attribute("1"), "X")])
         XCTAssertFalse(changed)
     }
+    
+    func testBinding() {
+        let db = makeDB().db.sqliteDatabase
+        
+        let scheme: Scheme = ["id", "name"]
+        XCTAssertNil(db.createRelation("people", scheme: scheme).err)
+        
+        let r = db["people", scheme]
+        XCTAssertNil(r.add(["id": 1, "name": "Joe"]).err)
+        XCTAssertNil(r.add(["id": 2, "name": "Steve"]).err)
+        XCTAssertNil(r.add(["id": 3, "name": "Jane"]).err)
+        
+        var currentName: String?
+        let binding = SQLiteBinding(database: db, tableName: "people", scheme: scheme, key: ["id": 2], attribute: "name", changeObserver: { currentName = $0.get() })
+        XCTAssertEqual(currentName, "Steve")
+        
+        binding.set("Roberta")
+        XCTAssertEqual(currentName, "Roberta")
+        
+        r.update([.EQ(Attribute("id"), RelationValue.Integer(2))], newValues: ["name": "Tina"])
+        XCTAssertEqual(currentName, "Tina")
+    }
 }

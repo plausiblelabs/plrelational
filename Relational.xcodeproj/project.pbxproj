@@ -41,6 +41,7 @@
 		C2BD29931CD251870081FD05 /* Store.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
 		C2BD29951CD251A20081FD05 /* Store.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
+		C2BD29991CD7ED900081FD05 /* SQLiteBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -105,6 +106,7 @@
 		C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OperationRelations.swift; sourceTree = "<group>"; };
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
 		C2BD29911CD251870081FD05 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
+		C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteBinding.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -129,6 +131,7 @@
 		C22921901CC6CD9500518184 /* SQLite */ = {
 			isa = PBXGroup;
 			children = (
+				C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */,
 				C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */,
 				C22921961CC7E9E300518184 /* SQLiteRelation.swift */,
 			);
@@ -388,6 +391,7 @@
 				C22921D11CD12A8700518184 /* Result.swift in Sources */,
 				C22921D21CD12A8700518184 /* SetPowerSet.swift in Sources */,
 				C22921D31CD12A8700518184 /* SimpleDatabase.swift in Sources */,
+				C2BD29991CD7ED900081FD05 /* SQLiteBinding.swift in Sources */,
 				C22921D41CD12A8700518184 /* StringConvenience.swift in Sources */,
 				C22921D51CD12A8700518184 /* StringPad.swift in Sources */,
 				C22921D61CD12A8700518184 /* ValueWithDestructor.swift in Sources */,
@@ -560,6 +564,7 @@
 				C22921C31CD12A7100518184 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C22921ED1CD12CF100518184 /* Build configuration list for PBXNativeTarget "RelationalTests" */ = {
 			isa = XCConfigurationList;
@@ -568,6 +573,7 @@
 				C22921EF1CD12CF100518184 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C22BF1271CBC348500D3FE59 /* Build configuration list for PBXProject "Relational" */ = {
 			isa = XCConfigurationList;
