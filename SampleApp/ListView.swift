@@ -14,7 +14,6 @@ struct ListViewModel {
     struct Data {
         let relation: Relation
         let idAttribute: Attribute
-        let textAttribute: Attribute
     }
     
     struct Selection {
@@ -23,8 +22,13 @@ struct ListViewModel {
         let index: () -> Int?
     }
     
+    struct Cell {
+        let text: BidiBinding<String>
+    }
+    
     let data: Data
     let selection: Selection
+    let cell: (Relation) -> Cell
 }
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
@@ -85,14 +89,12 @@ extension ListView: ExtOutlineViewDelegate {
         // TODO: Make this configurable
         let identifier = "PageCell"
         let rowData = item as! RowData
+        // TODO: Make selection more direct
+        let rowRelation = model.data.relation.select(rowData.row)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
+        let cellModel = model.cell(rowRelation)
         if let textField = view.textField as? TextField {
-            // TODO: Make selection more direct
-            let rowRelation = model.data.relation.select(rowData.row)
-            textField.string = BidiBinding(relation: rowRelation, attribute: model.data.textAttribute, change: Change{ (newValue, oldValue, commit) in
-                // TODO
-                Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
-            })
+            textField.string = cellModel.text
         }
         return view
     }
