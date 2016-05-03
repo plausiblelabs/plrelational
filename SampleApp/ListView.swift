@@ -83,8 +83,12 @@ extension ListView: ExtOutlineViewDelegate {
         let rowData = item as! RowData
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            // TODO: Set up bidirectional binding
-            textField.stringValue = rowData.row[data.textAttribute].get()!
+            // TODO: Make selection more direct
+            let rowRelation = data.relation.select(rowData.row)
+            textField.string = BidiBinding(relation: rowRelation, attribute: data.textAttribute, change: Change{ (newValue, oldValue, commit) in
+                // TODO
+                Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
+            })
         }
         return view
     }
