@@ -11,13 +11,16 @@ import libRelational
 
 class DocModel {
 
+    private let undoManager: UndoManager
     private let db: SQLiteDatabase
     let pages: SQLiteTableRelation
     let selectedPage: SQLiteTableRelation
     
     private var pageID: Int64 = 1
     
-    init() {
+    init(undoManager: UndoManager) {
+        self.undoManager = undoManager
+        
         func makeDB() -> (path: String, db: SQLiteDatabase) {
             let tmp = NSTemporaryDirectory() as NSString
             let dbname = "testing-\(NSUUID()).db"

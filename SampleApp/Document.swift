@@ -60,9 +60,14 @@ class Document: NSDocument {
         documentOutlineView.backgroundColor = bg
         inspectorOutlineView.backgroundColor = bg
         rightSidebarView.backgroundColor = bg
+
+        // Prepare the undo manager
+        let nsmanager = SPUndoManager()
+        self.undoManager = nsmanager
+        let undoManager = UndoManager(nsmanager: nsmanager)
         
         // Create the document model
-        docModel = DocModel()
+        docModel = DocModel(undoManager: undoManager)
         
         // Create the "views"
         do {
