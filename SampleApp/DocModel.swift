@@ -13,10 +13,21 @@ class DocModel {
 
     private let undoManager: UndoManager
     private let db: SQLiteDatabase
-    let pages: SQLiteTableRelation
-    let selectedPage: SQLiteTableRelation
-    
+    private let pages: SQLiteTableRelation
+    private let selectedPage: SQLiteTableRelation
     private var pageID: Int64 = 1
+
+    var docOutlineViewModel: ListViewModel {
+        let data = ListViewModel.Data(relation: pages, idAttribute: "id", textAttribute: "name")
+        let selection = ListViewModel.Selection(
+            relation: selectedPage,
+            // TODO: Submit a transaction that updates the selected_page relation
+            set: { (id) in () },
+            // TODO: Map selected_page.page_id to an index relative to ordered pages
+            index: { nil }
+        )
+        return ListViewModel(data: data, selection: selection)
+    }
     
     init(undoManager: UndoManager) {
         self.undoManager = undoManager
@@ -38,7 +49,7 @@ class DocModel {
         selectedPage = db["selected_page", ["id", "page_id"]]
         assert(db.createRelation("page", scheme: ["id", "name"]).ok != nil)
         assert(db.createRelation("selected_page", scheme: ["id", "page_id"]).ok != nil)
-        
+
         // Prepare the default document data
         addPage("Page1")
         addPage("Page2")

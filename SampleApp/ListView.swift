@@ -9,10 +9,8 @@
 import Cocoa
 import libRelational
 
-// Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
-// a single Document.xib, so this class simply manages a subset of views defined in that xib.
-class ListView: NSObject {
-
+struct ListViewModel {
+    
     struct Data {
         let relation: Relation
         let idAttribute: Attribute
@@ -25,6 +23,14 @@ class ListView: NSObject {
         let index: () -> Int?
     }
     
+    let data: Data
+    let selection: Selection
+}
+
+// Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
+// a single Document.xib, so this class simply manages a subset of views defined in that xib.
+class ListView: NSObject {
+
     // XXX: This is basically a boxed version of the Row struct
     class RowData {
         let row: Row
@@ -35,25 +41,23 @@ class ListView: NSObject {
     }
     
     private let outlineView: NSOutlineView
-    private let data: Data
-    private let selection: Selection
+    private let model: ListViewModel
     private var rows: [RowData] = []
 
     private var dataObserverRemoval: (Void -> Void)?
     private var selectionObserverRemoval: (Void -> Void)?
     private var selfInitiatedSelectionChange = false
     
-    init(outlineView: NSOutlineView, data: Data, selection: Selection) {
+    init(outlineView: NSOutlineView, model: ListViewModel) {
         self.outlineView = outlineView
-        self.data = data
-        self.selection = selection
+        self.model = model
         
         super.init()
         
-        rows = data.relation.rows().map{RowData($0.ok!)}
-        dataObserverRemoval = data.relation.addChangeObserver({ [weak self] in self?.dataRelationChanged() })
+        rows = model.data.relation.rows().map{RowData($0.ok!)}
+        dataObserverRemoval = model.data.relation.addChangeObserver({ [weak self] in self?.dataRelationChanged() })
 
-        selectionObserverRemoval = selection.relation.addChangeObserver({ [weak self] in self?.selectionRelationChanged() })
+        selectionObserverRemoval = model.selection.relation.addChangeObserver({ [weak self] in self?.selectionRelationChanged() })
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
@@ -84,8 +88,8 @@ extension ListView: ExtOutlineViewDelegate {
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
             // TODO: Make selection more direct
-            let rowRelation = data.relation.select(rowData.row)
-            textField.string = BidiBinding(relation: rowRelation, attribute: data.textAttribute, change: Change{ (newValue, oldValue, commit) in
+            let rowRelation = model.data.relation.select(rowData.row)
+            textField.string = BidiBinding(relation: rowRelation, attribute: model.data.textAttribute, change: Change{ (newValue, oldValue, commit) in
                 // TODO
                 Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
             })
@@ -110,11 +114,11 @@ extension ListView: ExtOutlineViewDelegate {
         selfInitiatedSelectionChange = true
         if outlineView.selectedRow >= 0 {
             let rowData = rows[outlineView.selectedRow]
-            itemID = rowData.row[data.idAttribute].get()!
+            itemID = rowData.row[model.data.idAttribute].get()!
         } else {
             itemID = nil
         }
-        selection.set(id: itemID)
+        model.selection.set(id: itemID)
         selfInitiatedSelectionChange = true
     }
 }
@@ -123,7 +127,7 @@ extension ListView {
     
     func dataRelationChanged() {
         // TODO: Need fine-grained change observation
-        rows = data.relation.rows().map{RowData($0.ok!)}
+        rows = model.data.relation.rows().map{RowData($0.ok!)}
         outlineView.reloadData()
     }
     
@@ -132,7 +136,7 @@ extension ListView {
             return
         }
         
-        if let index = selection.index() {
+        if let index = model.selection.index() {
             outlineView.selectRowIndexes(NSIndexSet(index: index), byExtendingSelection: false)
         } else {
             outlineView.deselectAll(nil)
