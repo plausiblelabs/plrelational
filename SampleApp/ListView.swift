@@ -11,11 +11,6 @@ import libRelational
 
 struct ListViewModel {
     
-    struct Data {
-        let relation: Relation
-        let idAttribute: Attribute
-    }
-    
     struct Selection {
         let relation: SQLiteTableRelation
         let set: (id: Int64?) -> Void
@@ -26,7 +21,7 @@ struct ListViewModel {
         let text: BidiBinding<String>
     }
     
-    let data: Data
+    let data: OrderedBinding
     let selection: Selection
     let cell: (Relation) -> Cell
 }
@@ -35,20 +30,9 @@ struct ListViewModel {
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
 class ListView: NSObject {
 
-    // XXX: This is basically a boxed version of the Row struct
-    class RowData {
-        let row: Row
-        
-        init(_ row: Row) {
-            self.row = row
-        }
-    }
-    
     private let outlineView: NSOutlineView
     private let model: ListViewModel
-    private var rows: [RowData] = []
 
-    private var dataObserverRemoval: (Void -> Void)?
     private var selectionObserverRemoval: (Void -> Void)?
     private var selfInitiatedSelectionChange = false
     
@@ -58,9 +42,7 @@ class ListView: NSObject {
         
         super.init()
         
-        rows = model.data.relation.rows().map{RowData($0.ok!)}
-        dataObserverRemoval = model.data.relation.addChangeObserver({ [weak self] in self?.dataRelationChanged() })
-
+        model.data.addObserver(self)
         selectionObserverRemoval = model.selection.relation.addChangeObserver({ [weak self] in self?.selectionRelationChanged() })
         
         outlineView.setDelegate(self)
@@ -71,11 +53,11 @@ class ListView: NSObject {
 extension ListView: NSOutlineViewDataSource {
     
     func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
-        return rows.count
+        return model.data.rows.count
     }
     
     func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
-        return rows[index]
+        return model.data.rows[index]
     }
     
     func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
@@ -88,9 +70,10 @@ extension ListView: ExtOutlineViewDelegate {
     func outlineView(outlineView: NSOutlineView, viewForTableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
         // TODO: Make this configurable
         let identifier = "PageCell"
-        let rowData = item as! RowData
-        // TODO: Make selection more direct
-        let rowRelation = model.data.relation.select(rowData.row)
+        let row = (item as! Box<Row>).value
+        // TODO: Ideally OrderedBinding.relation would be private; need a better way to observe
+        // a single value
+        let rowRelation = model.data.relation.select(row)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         let cellModel = model.cell(rowRelation)
         if let textField = view.textField as? TextField {
@@ -115,8 +98,8 @@ extension ListView: ExtOutlineViewDelegate {
         let itemID: Int64?
         selfInitiatedSelectionChange = true
         if outlineView.selectedRow >= 0 {
-            let rowData = rows[outlineView.selectedRow]
-            itemID = rowData.row[model.data.idAttribute].get()!
+            let row = model.data.rows[outlineView.selectedRow].value
+            itemID = row[model.data.idAttr].get()!
         } else {
             itemID = nil
         }
@@ -126,12 +109,6 @@ extension ListView: ExtOutlineViewDelegate {
 }
 
 extension ListView {
-    
-    func dataRelationChanged() {
-        // TODO: Need fine-grained change observation
-        rows = model.data.relation.rows().map{RowData($0.ok!)}
-        outlineView.reloadData()
-    }
     
     func selectionRelationChanged() {
         if selfInitiatedSelectionChange {
@@ -143,5 +120,22 @@ extension ListView {
         } else {
             outlineView.deselectAll(nil)
         }
+    }
+}
+
+extension ListView: OrderedBindingObserver {
+
+    func onInsert(index: Int) {
+        let rows = NSIndexSet(index: index)
+        outlineView.insertItemsAtIndexes(rows, inParent: nil, withAnimation: [.EffectFade])
+    }
+
+    func onDelete(index: Int) {
+        let rows = NSIndexSet(index: index)
+        outlineView.removeItemsAtIndexes(rows, inParent: nil, withAnimation: [.EffectFade])
+    }
+
+    func onMove(srcIndex srcIndex: Int, dstIndex: Int) {
+        outlineView.moveItemAtIndex(srcIndex, inParent: nil, toIndex: dstIndex, inParent: nil)
     }
 }

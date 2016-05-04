@@ -13,7 +13,7 @@ class DocModel {
 
     private let undoManager: UndoManager
     private let db: SQLiteDatabase
-    private let pages: SQLiteTableRelation
+    private let pages: OrderedBinding
     private let selectedPage: SQLiteTableRelation
     private var pageID: Int64 = 1
     
@@ -37,7 +37,8 @@ class DocModel {
             assert(db.createRelation(name, scheme: scheme).ok != nil)
             return db[name, scheme]
         }
-        self.pages = createRelation("page", ["id", "name"])
+        let pagesRelation = createRelation("page", ["id", "name", "order"])
+        self.pages = OrderedBinding(relation: pagesRelation, idAttr: "id", orderAttr: "order")
         self.selectedPage = createRelation("selected_page", ["id", "page_id"])
         self.db = db
         
@@ -48,7 +49,7 @@ class DocModel {
     }
     
     private func addPage(name: String) {
-        pages.add(["id": RelationValue(pageID), "name": RelationValue(name)])
+        pages.append(["id": RelationValue(pageID), "name": RelationValue(name)])
         pageID += 1
     }
     
@@ -62,18 +63,13 @@ class DocModel {
             },
             backward: {
                 // TODO: Update selected_page if needed
-                self.pages.delete([.EQ(Attribute("id"), RelationValue(id))])
+                self.pages.delete(RelationValue(id))
                 self.pageID -= 1
             }
         )
     }
 
     var docOutlineViewModel: ListViewModel {
-        let data = ListViewModel.Data(
-            relation: pages,
-            idAttribute: "id"
-        )
-
         let selection = ListViewModel.Selection(
             relation: selectedPage,
             // TODO: Submit a transaction that updates the selected_page relation
@@ -105,6 +101,6 @@ class DocModel {
             return ListViewModel.Cell(text: text)
         }
         
-        return ListViewModel(data: data, selection: selection, cell: cell)
+        return ListViewModel(data: pages, selection: selection, cell: cell)
     }
 }

@@ -130,7 +130,14 @@ extension RelationValue {
         default: return nil
         }
     }
-    
+
+    public func get() -> Double? {
+        switch self {
+        case .Real(let x): return x
+        default: return nil
+        }
+    }
+
     public func get() -> String? {
         switch self {
         case .Text(let x): return x
