@@ -70,6 +70,24 @@ class DocModel {
     }
 
     var docOutlineViewModel: ListViewModel {
+        let data = ListViewModel.Data(
+            binding: pages,
+            move: { (srcIndex, dstIndex) in
+                // Note: dstIndex is relative to the state of the array *before* the item is removed.
+                let dst = dstIndex < srcIndex ? dstIndex : dstIndex - 1
+                self.undoManager.registerChange(
+                    name: "Move Page",
+                    perform: true,
+                    forward: {
+                        self.pages.move(srcIndex: srcIndex, dstIndex: dst)
+                    },
+                    backward: {
+                        self.pages.move(srcIndex: dst, dstIndex: srcIndex)
+                    }
+                )
+            }
+        )
+        
         let selection = ListViewModel.Selection(
             relation: selectedPage,
             // TODO: Submit a transaction that updates the selected_page relation
@@ -101,6 +119,6 @@ class DocModel {
             return ListViewModel.Cell(text: text)
         }
         
-        return ListViewModel(data: pages, selection: selection, cell: cell)
+        return ListViewModel(data: data, selection: selection, cell: cell)
     }
 }

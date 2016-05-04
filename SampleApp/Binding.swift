@@ -120,29 +120,66 @@ public class OrderedBinding {
     }
     
     public func delete(id: RelationValue) {
-        let index = indexForID(id)
-        relation.delete([.EQ(idAttr, id)])
-        rows.removeAtIndex(index)
-        observers.forEach{$0.onDelete(index)}
+        if let index = indexForID(id) {
+            relation.delete([.EQ(idAttr, id)])
+            rows.removeAtIndex(index)
+            observers.forEach{$0.onDelete(index)}
+        }
     }
     
-    public func move(srcID: RelationValue, dstPos: Pos) {
-        // TODO
-    }
-    
-    public func move(srcID: RelationValue, order: RelationValue) {
-        // TODO
+    /// Note: dstIndex is relative to the state of the array *after* the item is removed.
+    public func move(srcIndex srcIndex: Int, dstIndex: Int) {
+        let row = rows.removeAtIndex(srcIndex)
+        rows.insert(row, atIndex: dstIndex)
+        
+        // XXX: This is embarrassing
+        let previousID: RelationValue?
+        if dstIndex == 0 {
+            previousID = nil
+        } else {
+            let previousRow = rows[dstIndex - 1].value
+            previousID = previousRow[idAttr]
+        }
+        let nextID: RelationValue?
+        if dstIndex >= rows.count - 1 {
+            nextID = nil
+        } else {
+            let nextRow = rows[dstIndex + 1].value
+            nextID = nextRow[idAttr]
+        }
+        
+        let newPos = Pos(previousID: previousID, nextID: nextID)
+        let newOrder = orderForPos(newPos)
+        row.value[orderAttr] = newOrder
+        
+        // TODO: Update the underlying table too
+        
+        observers.forEach{$0.onMove(srcIndex: srcIndex, dstIndex: dstIndex)}
     }
     
     public func orderForPos(pos: Pos) -> RelationValue {
         // TODO: Use a more appropriate data type for storing order
-        let lo: Double = pos.previousID?.get() ?? 1.0
-        let hi: Double = pos.nextID?.get() ?? 9.0
-        return RelationValue((hi - lo) / 2.0)
+        let lo: Double = orderForID(pos.previousID) ?? 1.0
+        let hi: Double = orderForID(pos.nextID) ?? 9.0
+        return RelationValue(lo + ((hi - lo) / 2.0))
+    }
+
+    // XXX
+    private func orderForID(id: RelationValue?) -> Double? {
+        if let id = id {
+            if let index = indexForID(id) {
+                let row = rows[index].value
+                return row[orderAttr].get()
+            } else {
+                return nil
+            }
+        } else {
+            return nil
+        }
     }
     
     /// Returns the index of the item with the given ID, relative to the sorted rows array.
-    private func indexForID(id: RelationValue) -> Int {
-        return rows.indexOf({ $0.value[idAttr] == id })!
+    public func indexForID(id: RelationValue) -> Int? {
+        return rows.indexOf({ $0.value[idAttr] == id })
     }
 }

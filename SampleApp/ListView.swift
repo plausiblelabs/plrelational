@@ -14,6 +14,12 @@ import libRelational
 private let PasteboardType = "coop.plausible.vp.pasteboard.ListViewItem"
 
 struct ListViewModel {
+
+    struct Data {
+        let binding: OrderedBinding
+        // Note: dstIndex is relative to the state of the array *before* the item is removed.
+        let move: (srcIndex: Int, dstIndex: Int) -> Void
+    }
     
     struct Selection {
         let relation: SQLiteTableRelation
@@ -25,7 +31,7 @@ struct ListViewModel {
         let text: BidiBinding<String>
     }
     
-    let data: OrderedBinding
+    let data: Data
     let selection: Selection
     let cell: (Relation) -> Cell
 }
@@ -46,7 +52,7 @@ class ListView: NSObject {
         
         super.init()
         
-        model.data.addObserver(self)
+        model.data.binding.addObserver(self)
         selectionObserverRemoval = model.selection.relation.addChangeObserver({ [weak self] in self?.selectionRelationChanged() })
         
         outlineView.setDelegate(self)
@@ -61,11 +67,11 @@ class ListView: NSObject {
 extension ListView: NSOutlineViewDataSource {
     
     func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
-        return model.data.rows.count
+        return model.data.binding.rows.count
     }
     
     func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
-        return model.data.rows[index]
+        return model.data.binding.rows[index]
     }
     
     func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
@@ -74,35 +80,36 @@ extension ListView: NSOutlineViewDataSource {
     
     func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
         let row = (item as! Box<Row>).value
-        let rowID: Int64 = row[model.data.idAttr].get()!
+        // TODO: Don't assume Int64
+        let rowID: Int64 = row[model.data.binding.idAttr].get()!
         let pboardItem = NSPasteboardItem()
         pboardItem.setString(String(rowID), forType: PasteboardType)
         return pboardItem
     }
     
     func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
-        // TODO
-//        let pboard = info.draggingPasteboard()
-//        if let pageID = pboard.stringForType(PasteboardType) {
-//            if let srcIndex = docViewModel.doc.pages.indexOf({$0.id == pageID}) {
-//                if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
-//                    return NSDragOperation.Move
-//                }
-//            }
-//        }
+        let pboard = info.draggingPasteboard()
+        if let rowIDString = pboard.stringForType(PasteboardType) {
+            let rowID = RelationValue(Int64(rowIDString)!)
+            if let srcIndex = model.data.binding.indexForID(rowID) {
+                if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
+                    return NSDragOperation.Move
+                }
+            }
+        }
         
         return NSDragOperation.None
     }
     
     func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
-        // TODO
-//        let pboard = info.draggingPasteboard()
-//        if let pageID = pboard.stringForType(PasteboardType) {
-//            if let srcIndex = docViewModel.doc.pages.indexOf({$0.id == pageID}) {
-//                docViewModel.movePageAtIndex(srcIndex, toIndex: index)
-//                return true
-//            }
-//        }
+        let pboard = info.draggingPasteboard()
+        if let rowIDString = pboard.stringForType(PasteboardType) {
+            let rowID = RelationValue(Int64(rowIDString)!)
+            if let srcIndex = model.data.binding.indexForID(rowID) {
+                model.data.move(srcIndex: srcIndex, dstIndex: index)
+                return true
+            }
+        }
         
         return false
     }
@@ -116,7 +123,7 @@ extension ListView: ExtOutlineViewDelegate {
         let row = (item as! Box<Row>).value
         // TODO: Ideally OrderedBinding.relation would be private; need a better way to observe
         // a single value
-        let rowRelation = model.data.relation.select(row)
+        let rowRelation = model.data.binding.relation.select(row)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         let cellModel = model.cell(rowRelation)
         if let textField = view.textField as? TextField {
@@ -141,8 +148,8 @@ extension ListView: ExtOutlineViewDelegate {
         let itemID: Int64?
         selfInitiatedSelectionChange = true
         if outlineView.selectedRow >= 0 {
-            let row = model.data.rows[outlineView.selectedRow].value
-            itemID = row[model.data.idAttr].get()!
+            let row = model.data.binding.rows[outlineView.selectedRow].value
+            itemID = row[model.data.binding.idAttr].get()!
         } else {
             itemID = nil
         }
