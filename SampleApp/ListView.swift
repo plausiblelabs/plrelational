@@ -23,8 +23,8 @@ struct ListViewModel {
     
     struct Selection {
         let relation: SQLiteTableRelation
-        let set: (id: Int64?) -> Void
-        let index: () -> Int?
+        let set: (id: RelationValue?) -> Void
+        let get: () -> RelationValue?
     }
     
     struct Cell {
@@ -145,27 +145,36 @@ extension ListView: ExtOutlineViewDelegate {
     }
     
     func outlineViewSelectionDidChange(notification: NSNotification) {
-        let itemID: Int64?
+        Swift.print("SELECTION DID CHANGE")
+        let itemID: RelationValue?
         selfInitiatedSelectionChange = true
         if outlineView.selectedRow >= 0 {
             let row = model.data.binding.rows[outlineView.selectedRow].value
-            itemID = row[model.data.binding.idAttr].get()!
+            itemID = row[model.data.binding.idAttr]
         } else {
             itemID = nil
         }
         model.selection.set(id: itemID)
-        selfInitiatedSelectionChange = true
+        selfInitiatedSelectionChange = false
     }
 }
 
 extension ListView {
     
     func selectionRelationChanged() {
+        Swift.print("SELECTION RELATION CHANGED: selfchange=\(selfInitiatedSelectionChange)")
+
         if selfInitiatedSelectionChange {
             return
         }
         
-        if let index = model.selection.index() {
+        var index: Int?
+        if let selectedID = model.selection.get() {
+            if let selectedIndex = model.data.binding.indexForID(selectedID) {
+                index = selectedIndex
+            }
+        }
+        if let index = index {
             outlineView.selectRowIndexes(NSIndexSet(index: index), byExtendingSelection: false)
         } else {
             outlineView.deselectAll(nil)

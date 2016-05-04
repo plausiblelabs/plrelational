@@ -69,6 +69,20 @@ class DocModel {
         )
     }
 
+    private func selectPage(id: RelationValue, update: Bool) {
+        print("SELECT PAGE: id=\(id) update=\(update)")
+        if update {
+            self.selectedPage.update([ComparisonTerm.EQ("id", RelationValue(Int64(1)))], newValues: ["page_id": id])
+        } else {
+            self.selectedPage.add(["id": 1, "page_id": id])
+        }
+    }
+    
+    private func deselectPage() {
+        print("DESELECT PAGE")
+        self.selectedPage.delete([ComparisonTerm.EQ("id", RelationValue(Int64(1)))])
+    }
+    
     var docOutlineViewModel: ListViewModel {
         let data = ListViewModel.Data(
             binding: pages,
@@ -88,12 +102,44 @@ class DocModel {
             }
         )
         
+        // TODO: Selection changes/transactions should be managed in-memory
         let selection = ListViewModel.Selection(
             relation: selectedPage,
-            // TODO: Submit a transaction that updates the selected_page relation
-            set: { (id) in () },
-            // TODO: Map selected_page.page_id to an index relative to ordered pages
-            index: { nil }
+            set: { (id) in
+                let selectedID = self.selectedPage.rows().next().map{$0.ok!["page_id"]}
+                if let id = id {
+                    self.undoManager.registerChange(
+                        name: "Select Page",
+                        perform: true,
+                        forward: {
+                            self.selectPage(id, update: selectedID != nil)
+                        },
+                        backward: {
+                            if let selected = selectedID {
+                                self.selectPage(selected, update: true)
+                            } else {
+                                self.deselectPage()
+                            }
+                        }
+                    )
+                } else {
+                    self.undoManager.registerChange(
+                        name: "Deselect Page",
+                        perform: true,
+                        forward: {
+                            self.deselectPage()
+                        },
+                        backward: {
+                            if let selected = selectedID {
+                                self.selectPage(selected, update: false)
+                            }
+                        }
+                    )
+                }
+            },
+            get: {
+                return self.selectedPage.rows().next().map{$0.ok!["page_id"]}
+            }
         )
 
         let cell = { (relation: Relation) -> ListViewModel.Cell in
