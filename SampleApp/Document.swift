@@ -74,6 +74,6 @@ class Document: NSDocument {
     }
     
     @IBAction func newPageAction(sender: NSMenuItem) {
-        docModel.addPage("Page")
+        docModel.newPage("Page")
     }
 }

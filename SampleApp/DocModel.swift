@@ -47,9 +47,25 @@ class DocModel {
         addPage("Page3")
     }
     
-    func addPage(name: String) {
+    private func addPage(name: String) {
         pages.add(["id": RelationValue(pageID), "name": RelationValue(name)])
         pageID += 1
+    }
+    
+    func newPage(name: String) {
+        let id = pageID
+        undoManager.registerChange(
+            name: "New Page",
+            perform: true,
+            forward: {
+                self.addPage(name)
+            },
+            backward: {
+                // TODO: Update selected_page if needed
+                self.pages.delete([.EQ(Attribute("id"), RelationValue(id))])
+                self.pageID -= 1
+            }
+        )
     }
 
     var docOutlineViewModel: ListViewModel {
