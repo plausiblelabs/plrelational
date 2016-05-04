@@ -9,6 +9,10 @@
 import Cocoa
 import libRelational
 
+// TODO: This needs to be configurable, or at least made unique so that only internal drag-and-drop
+// is allowed by default
+private let PasteboardType = "coop.plausible.vp.pasteboard.ListViewItem"
+
 struct ListViewModel {
     
     struct Selection {
@@ -47,6 +51,10 @@ class ListView: NSObject {
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
+        
+        // Enable drag-and-drop
+        outlineView.registerForDraggedTypes([PasteboardType])
+        outlineView.verticalMotionCanBeginDrag = true
     }
 }
 
@@ -61,6 +69,41 @@ extension ListView: NSOutlineViewDataSource {
     }
     
     func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
+        return false
+    }
+    
+    func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
+        let row = (item as! Box<Row>).value
+        let rowID: Int64 = row[model.data.idAttr].get()!
+        let pboardItem = NSPasteboardItem()
+        pboardItem.setString(String(rowID), forType: PasteboardType)
+        return pboardItem
+    }
+    
+    func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
+        // TODO
+//        let pboard = info.draggingPasteboard()
+//        if let pageID = pboard.stringForType(PasteboardType) {
+//            if let srcIndex = docViewModel.doc.pages.indexOf({$0.id == pageID}) {
+//                if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
+//                    return NSDragOperation.Move
+//                }
+//            }
+//        }
+        
+        return NSDragOperation.None
+    }
+    
+    func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
+        // TODO
+//        let pboard = info.draggingPasteboard()
+//        if let pageID = pboard.stringForType(PasteboardType) {
+//            if let srcIndex = docViewModel.doc.pages.indexOf({$0.id == pageID}) {
+//                docViewModel.movePageAtIndex(srcIndex, toIndex: index)
+//                return true
+//            }
+//        }
+        
         return false
     }
 }
