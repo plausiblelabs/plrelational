@@ -16,3 +16,9 @@ extension ComparisonTerm {
         return self.init(lhs, EqualityComparator(), rhs)
     }
 }
+
+infix operator *== {}
+
+public func *==(lhs: ValueProvider, rhs: ValueProvider) -> ComparisonTerm {
+    return ComparisonTerm(lhs, EqualityComparator(), rhs)
+}
