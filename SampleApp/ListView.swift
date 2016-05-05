@@ -145,7 +145,6 @@ extension ListView: ExtOutlineViewDelegate {
     }
     
     func outlineViewSelectionDidChange(notification: NSNotification) {
-        Swift.print("SELECTION DID CHANGE")
         let itemID: RelationValue?
         selfInitiatedSelectionChange = true
         if outlineView.selectedRow >= 0 {
@@ -162,8 +161,6 @@ extension ListView: ExtOutlineViewDelegate {
 extension ListView {
     
     func selectionRelationChanged() {
-        Swift.print("SELECTION RELATION CHANGED: selfchange=\(selfInitiatedSelectionChange)")
-
         if selfInitiatedSelectionChange {
             return
         }

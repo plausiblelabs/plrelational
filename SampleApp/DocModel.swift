@@ -70,17 +70,15 @@ class DocModel {
     }
 
     private func selectPage(id: RelationValue, update: Bool) {
-        print("SELECT PAGE: id=\(id) update=\(update)")
         if update {
-            self.selectedPage.update([ComparisonTerm.EQ("id", RelationValue(Int64(1)))], newValues: ["page_id": id])
+            selectedPage.update([Attribute("id") *== RelationValue(Int64(1))], newValues: ["page_id": id])
         } else {
-            self.selectedPage.add(["id": 1, "page_id": id])
+            selectedPage.add(["id": RelationValue(Int64(1)), "page_id": id])
         }
     }
     
     private func deselectPage() {
-        print("DESELECT PAGE")
-        self.selectedPage.delete([ComparisonTerm.EQ("id", RelationValue(Int64(1)))])
+        selectedPage.delete([Attribute("id") *== RelationValue(Int64(1))])
     }
     
     var docOutlineViewModel: ListViewModel {
@@ -145,7 +143,7 @@ class DocModel {
         let cell = { (relation: Relation) -> ListViewModel.Cell in
             func update(newValue: String) {
                 // TODO: This is ugly
-                //let searchTerms = [ComparisonTerm.EQ("id", RelationValue(Int64(1)))]
+                //let searchTerms = [Attribute("id") *== RelationValue(Int64(1))]
                 //assert(self.pages.update(searchTerms, newValues: ["name": RelationValue(newValue)]).ok != nil)
                 Swift.print("UPDATE: \(newValue)")
             }
