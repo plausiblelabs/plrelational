@@ -15,6 +15,7 @@ class DocModel {
     private let db: SQLiteDatabase
     private let pages: OrderedBinding
     private let selectedPage: SQLiteTableRelation
+    private let selectedPageItem: Relation
     private var pageID: Int64 = 1
     
     init(undoManager: UndoManager) {
@@ -40,6 +41,7 @@ class DocModel {
         let pagesRelation = createRelation("page", ["id", "name", "order"])
         self.pages = OrderedBinding(relation: pagesRelation, idAttr: "id", orderAttr: "order")
         self.selectedPage = createRelation("selected_page", ["id", "page_id"])
+        self.selectedPageItem = pagesRelation.renameAttributes(["id" : "page_id"]).join(selectedPage)
         self.db = db
         
         // Prepare the default document data
@@ -147,7 +149,7 @@ class DocModel {
                 //assert(self.pages.update(searchTerms, newValues: ["name": RelationValue(newValue)]).ok != nil)
                 Swift.print("UPDATE: \(newValue)")
             }
-            let text = BidiBinding(relation: relation, attribute: "name", change: Change<String>{ (newValue, oldValue, commit) in
+            let text = BidiBinding(relation: relation, attribute: "name", change: BidiChange<String>{ (newValue, oldValue, commit) in
                 Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
                 if commit {
                     self.undoManager.registerChange(
@@ -164,5 +166,13 @@ class DocModel {
         }
         
         return ListViewModel(data: data, selection: selection, cell: cell)
+    }
+    
+    var itemSelected: ExistsBinding {
+        return ExistsBinding(relation: selectedPageItem)
+    }
+    
+    var itemNotSelected: NotExistsBinding {
+        return NotExistsBinding(relation: selectedPageItem)
     }
 }
