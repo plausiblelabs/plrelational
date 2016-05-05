@@ -60,8 +60,9 @@ extension ChangeLoggingRelation: Relation {
             }
             return true
         })
-        let allRows = [myRows.rows(), AnyGenerator(filteredUnderlyingRows.generate())].flatten()
-        return AnyGenerator(allRows.generate())
+        
+        let allRows = myRows.rows().concat(filteredUnderlyingRows.generate())
+        return AnyGenerator(allRows)
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {

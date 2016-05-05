@@ -14,7 +14,7 @@ struct UnionRelation: Relation {
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
         let bUnique = b.rows().lazy.filter({ !($0.then({ self.a.contains($0) }).ok ?? true) })
-        return AnyGenerator([a.rows(), AnyGenerator(bUnique.generate())].flatten().generate())
+        return AnyGenerator(a.rows().concat(bUnique.generate()))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
