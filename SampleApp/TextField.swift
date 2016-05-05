@@ -10,7 +10,7 @@ import Cocoa
 
 class TextField: NSTextField, NSTextFieldDelegate {
 
-    var string: StringBinding? {
+    var string: ValueBinding<String?>? {
         didSet {
             stringBindingRemoval?()
             stringBindingRemoval = nil

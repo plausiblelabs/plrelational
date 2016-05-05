@@ -83,10 +83,10 @@ class DocModel {
     private func deselectPage() {
         selectedPage.delete([Attribute("id") *== RelationValue(Int64(1))])
     }
-    
-    var docOutlineViewModel: ListViewModel {
+
+    lazy var docOutlineViewModel: ListViewModel = { [unowned self] in
         let data = ListViewModel.Data(
-            binding: pages,
+            binding: self.pages,
             move: { (srcIndex, dstIndex) in
                 // Note: dstIndex is relative to the state of the array *before* the item is removed.
                 let dst = dstIndex < srcIndex ? dstIndex : dstIndex - 1
@@ -105,7 +105,7 @@ class DocModel {
         
         // TODO: Selection changes/transactions should be managed in-memory
         let selection = ListViewModel.Selection(
-            relation: selectedPage,
+            relation: self.selectedPage,
             set: { (id) in
                 let selectedID = self.selectedPage.rows().next().map{$0.ok!["page_id"]}
                 if let id = id {
@@ -158,21 +158,26 @@ class DocModel {
         }
         
         return ListViewModel(data: data, selection: selection, cell: cell)
-    }
+    }()
     
-    var itemSelected: ExistsBinding {
-        return ExistsBinding(relation: selectedPageItem)
-    }
+    lazy var itemSelected: ExistsBinding = { [unowned self] in
+        return ExistsBinding(relation: self.selectedPageItem)
+    }()
     
-    var itemNotSelected: NotExistsBinding {
-        return NotExistsBinding(relation: selectedPageItem)
-    }
+    lazy var itemNotSelected: NotExistsBinding = { [unowned self] in
+        return NotExistsBinding(relation: self.selectedPageItem)
+    }()
+
+    // TODO
+    lazy var selectedItemType: ValueBinding<String?> = { [unowned self] in
+        return StringBinding(relation: self.selectedPageItem, attribute: "page_id").map({ _ in "Page" })
+    }()
     
-    var selectedItemName: StringBidiBinding {
-        return pageNameBinding(selectedPageItem, id: {
+    lazy var selectedItemName: StringBidiBinding = { [unowned self] in
+        return self.pageNameBinding(self.selectedPageItem, id: {
             return self.selectedPageItem.rows().next()!.ok!["page_id"]
         })
-    }
+    }()
     
     private func pageNameBinding(relation: Relation, id: () -> RelationValue) -> StringBidiBinding {
 

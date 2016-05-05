@@ -39,6 +39,26 @@ public class ValueBinding<T> {
     }
 }
 
+extension ValueBinding {
+    func map<U>(transform: (T) -> U) -> ValueBinding<U> {
+        return MappedValueBinding(binding: self, transform: transform)
+    }
+}
+
+private class MappedValueBinding<T>: ValueBinding<T> {
+    private var removal: ObserverRemoval!
+
+    init<U>(binding: ValueBinding<U>, transform: (U) -> T) {
+        super.init(initialValue: transform(binding.value))
+        self.removal = binding.addChangeObserver({ [weak self] in
+            guard let weakSelf = self else { return }
+            // TODO: Don't notify if value is not actually changing
+            weakSelf.value = transform(binding.value)
+            weakSelf.notifyChangeObservers()
+        })
+    }
+}
+
 public class ExistsBinding: ValueBinding<Bool> {
     private let relation: Relation
     private var removal: ObserverRemoval!
