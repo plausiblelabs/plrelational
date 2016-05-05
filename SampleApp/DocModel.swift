@@ -143,8 +143,17 @@ class DocModel {
             }
         )
 
-        let cell = { (id: RelationValue, relation: Relation) -> ListViewModel.Cell in
-            let binding = self.pageNameBinding(relation, id: { id })
+        let cell = { (row: Row) -> ListViewModel.Cell in
+            // TODO: Ideally we'd have a way to create a projection Relation directly from
+            // an existing Row.  In the meantime, we'll select/project from the original
+            // relation.  The downside of that latter approach is that the cell text will
+            // disappear before the cell fades out in the case where the item is deleted.
+            // (If the cell was bound to a projection of the row, presumably it would
+            // continue to work even after the row has been deleted from the underlying
+            // relation.)
+            let rowID = row["id"]
+            let rowRelation = self.pagesRelation.select([Attribute("id") *== rowID])
+            let binding = self.pageNameBinding(rowRelation, id: { rowID })
             return ListViewModel.Cell(text: binding)
         }
         

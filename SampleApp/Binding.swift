@@ -138,7 +138,8 @@ public protocol OrderedBindingObserver: class {
 
 public class OrderedBinding {
     
-    let relation: SQLiteTableRelation
+    private let relation: SQLiteTableRelation
+    // TODO: Make this private
     let idAttr: Attribute
     private let orderAttr: Attribute
 

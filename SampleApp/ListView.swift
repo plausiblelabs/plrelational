@@ -33,7 +33,7 @@ struct ListViewModel {
     
     let data: Data
     let selection: Selection
-    let cell: (id: RelationValue, relation: Relation) -> Cell
+    let cell: (Row) -> Cell
 }
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
@@ -121,12 +121,8 @@ extension ListView: ExtOutlineViewDelegate {
         // TODO: Make this configurable
         let identifier = "PageCell"
         let row = (item as! Box<Row>).value
-        let rowID = row[model.data.binding.idAttr]
-        // TODO: Ideally OrderedBinding.relation would be private; need a better way to observe
-        // a single value
-        let rowRelation = model.data.binding.relation.select(row)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
-        let cellModel = model.cell(id: rowID, relation: rowRelation)
+        let cellModel = model.cell(row)
         if let textField = view.textField as? TextField {
             textField.string = cellModel.text
         }

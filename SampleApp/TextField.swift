@@ -19,6 +19,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
                 stringBindingRemoval = string.addChangeObserver({ [weak self] in
                     guard let weakSelf = self else { return }
                     if weakSelf.selfInitiatedChange { return }
+                    //Swift.print("UPDATING TextField.stringValue: \(string.value)")
                     weakSelf.stringValue = string.value ?? ""
                 })
             } else {
