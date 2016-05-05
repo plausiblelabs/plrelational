@@ -187,7 +187,7 @@ class RelationalTests: XCTestCase {
                         ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
                         ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]))
         
-        FLIGHTS.change(["NUMBER": "109"], to: ["DEPARTS": "9:40p", "ARRIVES": "2:42a"])
+        FLIGHTS.update(["NUMBER": "109"], to: ["DEPARTS": "9:40p", "ARRIVES": "2:42a"])
         AssertEqual(FLIGHTS,
                     MakeRelation(
                         ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],

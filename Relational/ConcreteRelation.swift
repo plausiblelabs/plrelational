@@ -48,9 +48,22 @@ public struct ConcreteRelation: Relation {
         }))
     }
     
-    public mutating func change(rowToFind: Row, to: Row) {
+    public mutating func update(rowToFind: Row, to: Row) {
         let rowsToUpdate = select(rowToFind)
         delete(rowToFind)
+        for rowToUpdate in rowsToUpdate.rows() {
+            // We know that rows never fail, because this is ultimately our own implementation.
+            var rowToAdd = rowToUpdate.ok!
+            for (attribute, value) in to.values {
+                rowToAdd[attribute] = value
+            }
+            self.add(rowToAdd)
+        }
+    }
+    
+    public mutating func update(terms: [ComparisonTerm], to: Row) {
+        let rowsToUpdate = select(terms)
+        delete(terms)
         for rowToUpdate in rowsToUpdate.rows() {
             // We know that rows never fail, because this is ultimately our own implementation.
             var rowToAdd = rowToUpdate.ok!

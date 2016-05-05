@@ -3,6 +3,7 @@ public class ChangeLoggingRelation {
     enum Change {
         case Add(Row)
         case Delete([ComparisonTerm])
+        case Update([ComparisonTerm], Row)
     }
     
     private let underlyingRelation: Relation
@@ -27,7 +28,8 @@ public class ChangeLoggingRelation {
     }
     
     public func update(searchTerms: [ComparisonTerm], newValues: Row) {
-        
+        log.append(.Update(searchTerms, newValues))
+        notifyChangeObservers()
     }
 }
 
@@ -38,30 +40,43 @@ extension ChangeLoggingRelation: Relation {
     
     public func rows() -> AnyGenerator<Result<Row, RelationError>> {
         var myRows = ConcreteRelation(scheme: scheme, values: [], defaultSort: nil)
-        var deletions: [[ComparisonTerm]] = []
         for change in log {
             switch change {
             case .Add(let row):
                 myRows.add(row)
             case .Delete(let terms):
                 myRows.delete(terms)
-                deletions.append(terms)
+            case .Update(let terms, let newValues):
+                myRows.update(terms, to: newValues)
             }
         }
         
         let underlyingRows = underlyingRelation.rows()
-        let filteredUnderlyingRows = underlyingRows.lazy.filter({
-            if let row = $0.ok {
-                for deletion in deletions {
-                    if ComparisonTerm.terms(deletion, matchRow: row) {
-                        return false
+        let alteredUnderlyingRows = underlyingRows.lazy.flatMap({ (row: Result<Row, RelationError>) -> Result<Row, RelationError>? in
+            if var row = row.ok {
+                for change in self.log {
+                    switch change {
+                    case .Add:
+                        break
+                    case .Delete(let terms):
+                        if ComparisonTerm.terms(terms, matchRow: row) {
+                            return nil
+                        }
+                    case .Update(let terms, let newValues):
+                        if ComparisonTerm.terms(terms, matchRow: row) {
+                            for (attribute, value) in newValues.values {
+                                row[attribute] = value
+                            }
+                        }
                     }
                 }
+                return .Ok(row)
+            } else {
+                return row
             }
-            return true
         })
         
-        let allRows = myRows.rows().concat(filteredUnderlyingRows.generate())
+        let allRows = myRows.rows().concat(alteredUnderlyingRows.generate())
         return AnyGenerator(allRows)
     }
     

@@ -103,4 +103,54 @@ class ChangeLoggingRelationTests: XCTestCase {
                         ["127",    "Wendy", "707"]
             ))
     }
+    
+    func testUpdate() {
+        let underlying = MakeRelation(
+            ["number", "pilot", "equipment"],
+            ["123",    "Jones", "707"],
+            ["124",    "Steve", "727"],
+            ["125",    "Martha", "747"],
+            ["126",    "Alice", "767"],
+            ["127",    "Wendy", "707"]
+        )
+        
+        let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
+        
+        loggingRelation.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
+        loggingRelation.update([Attribute("number") *== "42"], newValues: ["equipment": "DC-10"])
+        AssertEqual(loggingRelation,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["123",    "Jones", "707"],
+                        ["124",    "Steve", "727"],
+                        ["125",    "Martha", "747"],
+                        ["126",    "Alice", "767"],
+                        ["127",    "Wendy", "707"],
+                        ["42",     "Adams", "DC-10"]
+            ))
+        
+        loggingRelation.update([Attribute("number") *== "123"], newValues: ["equipment": "DC-10"])
+        AssertEqual(loggingRelation,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["123",    "Jones", "DC-10"],
+                        ["124",    "Steve", "727"],
+                        ["125",    "Martha", "747"],
+                        ["126",    "Alice", "767"],
+                        ["127",    "Wendy", "707"],
+                        ["42",     "Adams", "DC-10"]
+            ))
+        
+        loggingRelation.update([Attribute("equipment") *== "DC-10"], newValues: ["pilot": "JFK"])
+        AssertEqual(loggingRelation,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["123",    "JFK",   "DC-10"],
+                        ["124",    "Steve", "727"],
+                        ["125",    "Martha", "747"],
+                        ["126",    "Alice", "767"],
+                        ["127",    "Wendy", "707"],
+                        ["42",     "JFK",   "DC-10"]
+            ))
+    }
 }
