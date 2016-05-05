@@ -31,7 +31,7 @@ class PropertiesView {
 
         nameLabel.visible = docModel.itemSelected
 
-//        nameField.string = docModel.selectedItemName
+        nameField.string = docModel.selectedItemName
         nameField.visible = docModel.itemSelected
 
         noSelectionLabel.visible = docModel.itemNotSelected

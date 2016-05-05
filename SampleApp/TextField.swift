@@ -10,11 +10,19 @@ import Cocoa
 
 class TextField: NSTextField, NSTextFieldDelegate {
 
-    var string: BidiBinding<String>? {
+    var string: StringBinding? {
         didSet {
+            stringBindingRemoval?()
+            stringBindingRemoval = nil
             if let string = string {
-                // TODO: Observe changes
-                stringValue = string.get().ok!.get()!
+                stringValue = string.value ?? ""
+                stringBindingRemoval = string.addChangeObserver({ [weak self] in
+                    guard let weakSelf = self else { return }
+                    if weakSelf.selfInitiatedChange { return }
+                    weakSelf.stringValue = string.value ?? ""
+                })
+            } else {
+                stringValue = ""
             }
         }
     }
@@ -35,6 +43,8 @@ class TextField: NSTextField, NSTextFieldDelegate {
     private var previousCommittedValue: String?
     private var previousValue: String?
     
+    private var stringBindingRemoval: (Void -> Void)?
+    private var selfInitiatedChange = false
     private var visibleBindingRemoval: (Void -> Void)?
     
     required init?(coder: NSCoder) {
@@ -52,8 +62,10 @@ class TextField: NSTextField, NSTextFieldDelegate {
     override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
         //string.pokeValue(stringValue, oldValue: nil)
-        if let previousValue = previousValue {
-            string?.change(newValue: stringValue, oldValue: previousValue)
+        if let previousValue = previousValue, bidiBinding = string as? StringBidiBinding {
+            selfInitiatedChange = true
+            bidiBinding.change(newValue: stringValue, oldValue: previousValue)
+            selfInitiatedChange = false
         }
         previousValue = stringValue
     }
@@ -63,9 +75,11 @@ class TextField: NSTextField, NSTextFieldDelegate {
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value
         //Swift.print("CONTROL DID END EDITING!")
-        if let previousCommittedValue = previousCommittedValue {
+        if let previousCommittedValue = previousCommittedValue, bidiBinding = string as? StringBidiBinding {
             if stringValue != previousCommittedValue {
-                string?.commit(newValue: stringValue, oldValue: previousCommittedValue)
+                selfInitiatedChange = true
+                bidiBinding.commit(newValue: stringValue, oldValue: previousCommittedValue)
+                selfInitiatedChange = false
             }
         }
         previousCommittedValue = nil
