@@ -222,4 +222,72 @@ class ChangeLoggingRelationTests: DBTestCase {
         AssertEqual(table, referenceRelation)
         AssertEqual(table, loggingRelation)
     }
+    
+    func testDatabase() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let db = ChangeLoggingDatabase(sqliteDB)
+        let scheme: Scheme = ["number", "pilot", "equipment"]
+        db.createRelation("flights", scheme: scheme)
+        
+        var referenceRelation = ConcreteRelation(scheme: scheme)
+        
+        func add(row: Row) {
+            db["flights", scheme].add(row)
+            referenceRelation.add(row)
+        }
+        
+        func delete(terms: [ComparisonTerm]) {
+            db["flights", scheme].delete(terms)
+            referenceRelation.delete(terms)
+        }
+        
+        func update(terms: [ComparisonTerm], _ newValues: Row) {
+            db["flights", scheme].update(terms, newValues: newValues)
+            referenceRelation.update(terms, to: newValues)
+        }
+        
+        AssertEqual(db["flights", scheme],
+                    MakeRelation(
+                        ["number", "pilot", "equipment"]))
+        AssertEqual(sqliteDB["flights", scheme],
+                    MakeRelation(
+                        ["number", "pilot", "equipment"]))
+        
+        XCTAssertNil(db.save().err)
+        
+        AssertEqual(db["flights", scheme],
+                    MakeRelation(
+                        ["number", "pilot", "equipment"]))
+        AssertEqual(sqliteDB["flights", scheme],
+                    MakeRelation(
+                        ["number", "pilot", "equipment"]))
+        
+        add(["number": "1", "pilot": "Pat", "equipment": "A380"])
+        add(["number": "2", "pilot": "Sam", "equipment": "A320"])
+        add(["number": "3", "pilot": "Sue", "equipment": "A340"])
+        
+        AssertEqual(sqliteDB["flights", scheme],
+                    MakeRelation(
+                        ["number", "pilot", "equipment"]))
+        AssertEqual(db["flights", scheme], referenceRelation)
+        
+        XCTAssertNil(db.save().err)
+        
+        AssertEqual(sqliteDB["flights", scheme], db["flights", scheme])
+        AssertEqual(sqliteDB["flights", scheme], referenceRelation)
+        
+        add(["number": "4", "pilot": "Tim", "equipment": "A340"])
+        delete([Attribute("equipment") *== "A340"])
+        add(["number": "5", "pilot": "Ham", "equipment": "A340"])
+        add(["number": "6", "pilot": "Ham", "equipment": "A340"])
+        update([Attribute("pilot") *== "Ham"], ["pilot": "Stan"])
+        add(["number": "7", "pilot": "Ham", "equipment": "A340"])
+        delete([Attribute("pilot") *== "Ham"])
+        add(["number": "7", "pilot": "Stan", "equipment": "A340"])
+        
+        AssertEqual(db["flights", scheme], referenceRelation)
+        XCTAssertNil(db.save().err)
+        AssertEqual(sqliteDB["flights", scheme], referenceRelation)
+        AssertEqual(sqliteDB["flights", scheme], db["flights", scheme])
+    }
 }
