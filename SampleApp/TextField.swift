@@ -19,8 +19,23 @@ class TextField: NSTextField, NSTextFieldDelegate {
         }
     }
     
+    var visible: ValueBinding<Bool>? {
+        didSet {
+            visibleBindingRemoval?()
+            visibleBindingRemoval = nil
+            if let visible = visible {
+                hidden = !visible.value
+                visibleBindingRemoval = visible.addChangeObserver({ [weak self] in self?.hidden = !visible.value })
+            } else {
+                hidden = false
+            }
+        }
+    }
+    
     private var previousCommittedValue: String?
     private var previousValue: String?
+    
+    private var visibleBindingRemoval: (Void -> Void)?
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)

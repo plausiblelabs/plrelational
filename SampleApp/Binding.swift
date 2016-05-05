@@ -9,35 +9,89 @@
 import Foundation
 import libRelational
 
-public struct Change<T> {
+public enum BindingError: ErrorType {
+    case NoRows
+}
+
+public typealias ChangeObserver = Void -> Void
+public typealias ObserverRemoval = Void -> Void
+
+public class ValueBinding<T> {
+    private(set) public var value: T
+    private var changeObservers: [UInt64: ChangeObserver] = [:]
+    private var changeObserverNextID: UInt64 = 0
+
+    init(initialValue: T) {
+        self.value = initialValue
+    }
+    
+    public func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval {
+        let id = changeObserverNextID
+        changeObserverNextID += 1
+        changeObservers[id] = observer
+        return { self.changeObservers.removeValueForKey(id) }
+    }
+    
+    private func notifyChangeObservers() {
+        for (_, f) in changeObservers {
+            f()
+        }
+    }
+}
+
+public class ExistsBinding: ValueBinding<Bool> {
+    private let relation: Relation
+    private var removal: ObserverRemoval!
+    
+    init(relation: Relation) {
+        self.relation = relation
+        super.init(initialValue: relation.rows().next() != nil)
+        self.removal = relation.addChangeObserver({ [weak self] in
+            guard let weakSelf = self else { return }
+            let newValue = relation.rows().next() != nil
+            if newValue != weakSelf.value {
+                weakSelf.value = newValue
+                weakSelf.notifyChangeObservers()
+            }
+        })
+    }
+}
+
+public class NotExistsBinding: ValueBinding<Bool> {
+    private let relation: Relation
+    private var removal: ObserverRemoval!
+    
+    init(relation: Relation) {
+        self.relation = relation
+        super.init(initialValue: relation.rows().next() == nil)
+        self.removal = relation.addChangeObserver({ [weak self] in
+            guard let weakSelf = self else { return }
+            let newValue = relation.rows().next() == nil
+            if newValue != weakSelf.value {
+                weakSelf.value = newValue
+                weakSelf.notifyChangeObservers()
+            }
+        })
+    }
+}
+
+public struct BidiChange<T> {
     let f: (newValue: T, oldValue: T, commit: Bool) -> Void
 }
 
-public class Binding {
-    
-    public enum Error: ErrorType {
-        case NoRows
-    }
-
+public class BidiBinding<T> {
     let relation: Relation
     let attribute: Attribute
+    private let change: BidiChange<T>
     
-    init(relation: Relation, attribute: Attribute) {
+    init(relation: Relation, attribute: Attribute, change: BidiChange<T>) {
         self.relation = relation
         self.attribute = attribute
-    }
-}
-
-public class BidiBinding<T>: Binding {
-    private let change: Change<T>
-    
-    init(relation: Relation, attribute: Attribute, change: Change<T>) {
         self.change = change
-        super.init(relation: relation, attribute: attribute)
     }
     
     public func get() -> Result<RelationValue, RelationError> {
-        return relation.rows().generate().next()?.map({ $0[attribute] }) ?? .Err(Error.NoRows)
+        return relation.rows().generate().next()?.map({ $0[attribute] }) ?? .Err(BindingError.NoRows)
     }
     
     public func change(newValue newValue: T, oldValue: T) {

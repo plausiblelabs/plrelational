@@ -24,7 +24,8 @@ class Document: NSDocument {
     @IBOutlet var nameLabel: TextField!
     @IBOutlet var noSelectionLabel: TextField!
 
-    var docOutlineView: ListView!
+    var docOutlineView: DocOutlineView!
+    var propertiesView: PropertiesView!
     
     var docModel: DocModel!
     
@@ -70,7 +71,8 @@ class Document: NSDocument {
         docModel = DocModel(undoManager: undoManager)
         
         // Create the "views"
-        docOutlineView = ListView(outlineView: documentOutlineView, model: docModel.docOutlineViewModel)
+        docOutlineView = DocOutlineView(outlineView: documentOutlineView, docModel: docModel)
+        propertiesView = PropertiesView(itemTypeLabel: itemTypeLabel, nameLabel: nameLabel, nameField: nameTextField, noSelectionLabel: noSelectionLabel, docModel: docModel)
     }
     
     @IBAction func newPageAction(sender: NSMenuItem) {
