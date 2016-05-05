@@ -13,6 +13,7 @@ class DocModel {
 
     private let undoManager: UndoManager
     private let db: SQLiteDatabase
+    private let pagesRelation: SQLiteTableRelation
     private let pages: OrderedBinding
     private let selectedPage: SQLiteTableRelation
     private let selectedPageItem: Relation
@@ -38,7 +39,7 @@ class DocModel {
             assert(db.createRelation(name, scheme: scheme).ok != nil)
             return db[name, scheme]
         }
-        let pagesRelation = createRelation("page", ["id", "name", "order"])
+        self.pagesRelation = createRelation("page", ["id", "name", "order"])
         self.pages = OrderedBinding(relation: pagesRelation, idAttr: "id", orderAttr: "order")
         self.selectedPage = createRelation("selected_page", ["id", "page_id"])
         self.selectedPageItem = pagesRelation.renameAttributes(["id" : "page_id"]).join(selectedPage)
@@ -142,27 +143,9 @@ class DocModel {
             }
         )
 
-        let cell = { (relation: Relation) -> ListViewModel.Cell in
-            func update(newValue: String) {
-                // TODO: This is ugly
-                //let searchTerms = [Attribute("id") *== RelationValue(Int64(1))]
-                //assert(self.pages.update(searchTerms, newValues: ["name": RelationValue(newValue)]).ok != nil)
-                Swift.print("UPDATE: \(newValue)")
-            }
-            let text = StringBidiBinding(relation: relation, attribute: "name", change: BidiChange<String>{ (newValue, oldValue, commit) in
-                Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
-                if commit {
-                    self.undoManager.registerChange(
-                        name: "Rename Page",
-                        perform: true,
-                        forward: { update(newValue) },
-                        backward: { update(oldValue) }
-                    )
-                } else {
-                    update(newValue)
-                }
-            })
-            return ListViewModel.Cell(text: text)
+        let cell = { (id: RelationValue, relation: Relation) -> ListViewModel.Cell in
+            let binding = self.pageNameBinding(relation, id: { id })
+            return ListViewModel.Cell(text: binding)
         }
         
         return ListViewModel(data: data, selection: selection, cell: cell)
@@ -176,7 +159,38 @@ class DocModel {
         return NotExistsBinding(relation: selectedPageItem)
     }
     
-    var selectedItemName: StringBinding {
-        return StringBinding(relation: selectedPageItem, attribute: "name")
+    var selectedItemName: StringBidiBinding {
+        return pageNameBinding(selectedPageItem, id: {
+            return self.selectedPageItem.rows().next()!.ok!["page_id"]
+        })
+    }
+    
+    private func pageNameBinding(relation: Relation, id: () -> RelationValue) -> StringBidiBinding {
+
+        func update(newValue: String) {
+            // TODO: If we had writable views, and assuming the given Relation represents
+            // a single value, we should be able to update that relation rather than updating
+            // the original relation (in which case we would no longer need the hack that passes
+            // in a closure that returns the ID of the page whose name will be updated)
+            let idValue = id()
+            let terms = [Attribute("id") *== idValue]
+            let values: Row = ["name": RelationValue(newValue)]
+            Swift.print("UPDATE: \(newValue)")
+            assert(self.pagesRelation.update(terms, newValues: values).ok != nil)
+        }
+        
+        return StringBidiBinding(relation: relation, attribute: "name", change: BidiChange<String>{ (newValue, oldValue, commit) in
+            Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
+            if commit {
+                self.undoManager.registerChange(
+                    name: "Rename Page",
+                    perform: true,
+                    forward: { update(newValue) },
+                    backward: { update(oldValue) }
+                )
+            } else {
+                update(newValue)
+            }
+        })
     }
 }
