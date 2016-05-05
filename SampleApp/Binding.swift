@@ -45,6 +45,7 @@ public class ExistsBinding: ValueBinding<Bool> {
     
     init(relation: Relation) {
         self.relation = relation
+        // TODO: Need to see if the row result is OK
         super.init(initialValue: relation.rows().next() != nil)
         self.removal = relation.addChangeObserver({ [weak self] in
             guard let weakSelf = self else { return }
@@ -75,30 +76,51 @@ public class NotExistsBinding: ValueBinding<Bool> {
     }
 }
 
+public class StringBinding: ValueBinding<String?> {
+    private let relation: Relation
+    private let attribute: Attribute
+    private var removal: ObserverRemoval!
+
+    init(relation: Relation, attribute: Attribute) {
+        self.relation = relation
+        self.attribute = attribute
+        super.init(initialValue: StringBinding.get(relation, attribute))
+        self.removal = relation.addChangeObserver({ [weak self] in
+            guard let weakSelf = self else { return }
+            let newValue = StringBinding.get(relation, attribute)
+            if newValue != weakSelf.value {
+                weakSelf.value = newValue
+                weakSelf.notifyChangeObservers()
+            }
+        })
+    }
+    
+    private static func get(relation: Relation, _ attribute: Attribute) -> String? {
+        if let row = relation.rows().next()?.ok {
+            return row[attribute].get()
+        } else {
+            return nil
+        }
+    }
+}
+
 public struct BidiChange<T> {
     let f: (newValue: T, oldValue: T, commit: Bool) -> Void
 }
 
-public class BidiBinding<T> {
-    let relation: Relation
-    let attribute: Attribute
-    private let change: BidiChange<T>
+public class StringBidiBinding: StringBinding {
+    private let change: BidiChange<String>
     
-    init(relation: Relation, attribute: Attribute, change: BidiChange<T>) {
-        self.relation = relation
-        self.attribute = attribute
+    init(relation: Relation, attribute: Attribute, change: BidiChange<String>) {
         self.change = change
+        super.init(relation: relation, attribute: attribute)
     }
-    
-    public func get() -> Result<RelationValue, RelationError> {
-        return relation.rows().generate().next()?.map({ $0[attribute] }) ?? .Err(BindingError.NoRows)
-    }
-    
-    public func change(newValue newValue: T, oldValue: T) {
+
+    public func change(newValue newValue: String, oldValue: String) {
         change.f(newValue: newValue, oldValue: oldValue, commit: false)
     }
     
-    public func commit(newValue newValue: T, oldValue: T) {
+    public func commit(newValue newValue: String, oldValue: String) {
         change.f(newValue: newValue, oldValue: oldValue, commit: true)
     }
 }

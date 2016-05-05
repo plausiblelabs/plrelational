@@ -149,7 +149,7 @@ class DocModel {
                 //assert(self.pages.update(searchTerms, newValues: ["name": RelationValue(newValue)]).ok != nil)
                 Swift.print("UPDATE: \(newValue)")
             }
-            let text = BidiBinding(relation: relation, attribute: "name", change: BidiChange<String>{ (newValue, oldValue, commit) in
+            let text = StringBidiBinding(relation: relation, attribute: "name", change: BidiChange<String>{ (newValue, oldValue, commit) in
                 Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
                 if commit {
                     self.undoManager.registerChange(
@@ -174,5 +174,9 @@ class DocModel {
     
     var itemNotSelected: NotExistsBinding {
         return NotExistsBinding(relation: selectedPageItem)
+    }
+    
+    var selectedItemName: StringBinding {
+        return StringBinding(relation: selectedPageItem, attribute: "name")
     }
 }
