@@ -1,7 +1,7 @@
 import XCTest
 import libRelational
 
-class ChangeLoggingRelationTests: XCTestCase {
+class ChangeLoggingRelationTests: DBTestCase {
     func testBare() {
         let underlying = MakeRelation(
             ["number", "pilot", "equipment"],
@@ -152,5 +152,74 @@ class ChangeLoggingRelationTests: XCTestCase {
                         ["127",    "Wendy", "707"],
                         ["42",     "JFK",   "DC-10"]
             ))
+    }
+    
+    func testSave() {
+        let db = makeDB().db.sqliteDatabase
+        let scheme: Scheme = ["number", "pilot", "equipment"]
+        db.createRelation("flights", scheme: scheme)
+        let table = db["flights", scheme]
+        
+        let loggingRelation = ChangeLoggingRelation(underlyingRelation: table)
+        var referenceRelation = ConcreteRelation(scheme: scheme)
+        
+        func add(row: Row) {
+            loggingRelation.add(row)
+            referenceRelation.add(row)
+        }
+        
+        func delete(terms: [ComparisonTerm]) {
+            loggingRelation.delete(terms)
+            referenceRelation.delete(terms)
+        }
+        
+        func update(terms: [ComparisonTerm], _ newValues: Row) {
+            loggingRelation.update(terms, newValues: newValues)
+            referenceRelation.update(terms, to: newValues)
+        }
+        
+        AssertEqual(loggingRelation,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"]))
+        AssertEqual(table,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"]))
+        
+        XCTAssertNil(loggingRelation.save().err)
+        
+        AssertEqual(loggingRelation,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"]))
+        AssertEqual(table,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"]))
+        
+        add(["number": "1", "pilot": "Pat", "equipment": "A380"])
+        add(["number": "2", "pilot": "Sam", "equipment": "A320"])
+        add(["number": "3", "pilot": "Sue", "equipment": "A340"])
+        
+        AssertEqual(table,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"]))
+        AssertEqual(loggingRelation, referenceRelation)
+        
+        XCTAssertNil(loggingRelation.save().err)
+        
+        AssertEqual(table, loggingRelation)
+        AssertEqual(table, referenceRelation)
+        
+        add(["number": "4", "pilot": "Tim", "equipment": "A340"])
+        delete([Attribute("equipment") *== "A340"])
+        add(["number": "5", "pilot": "Ham", "equipment": "A340"])
+        add(["number": "6", "pilot": "Ham", "equipment": "A340"])
+        update([Attribute("pilot") *== "Ham"], ["pilot": "Stan"])
+        add(["number": "7", "pilot": "Ham", "equipment": "A340"])
+        delete([Attribute("pilot") *== "Ham"])
+        add(["number": "7", "pilot": "Stan", "equipment": "A340"])
+        
+        AssertEqual(loggingRelation, referenceRelation)
+        XCTAssertNil(loggingRelation.save().err)
+        AssertEqual(table, referenceRelation)
+        AssertEqual(table, loggingRelation)
     }
 }

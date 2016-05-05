@@ -57,6 +57,7 @@
 		C277E7FD1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */; };
 		C277E7FF1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FE1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift */; };
 		C277E8031CDB9D3400B7B8F6 /* GeneratorConcat.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */; };
+		C277E8051CDBD2A000B7B8F6 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		C2BD29921CD251870081FD05 /* Flight.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
 		C2BD29931CD251870081FD05 /* Store.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
@@ -168,6 +169,7 @@
 		C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelation.swift; sourceTree = "<group>"; };
 		C277E7FE1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelationTests.swift; sourceTree = "<group>"; };
 		C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GeneratorConcat.swift; path = Relational/GeneratorConcat.swift; sourceTree = "<group>"; };
+		C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DBTestCase.swift; sourceTree = "<group>"; };
 		C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConcreteRelation.swift; sourceTree = "<group>"; };
 		C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OperationRelations.swift; sourceTree = "<group>"; };
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
@@ -345,6 +347,7 @@
 				C2BD29911CD251870081FD05 /* Store.model */,
 				C22921E71CD12CF100518184 /* RelationalTests.swift */,
 				C22921E91CD12CF100518184 /* Info.plist */,
+				C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */,
 			);
 			path = RelationalTests;
 			sourceTree = "<group>";
@@ -721,6 +724,7 @@
 				C2BD29941CD251A20081FD05 /* Flight.model in Sources */,
 				C2BD29951CD251A20081FD05 /* Store.model in Sources */,
 				C277E7FF1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift in Sources */,
+				C277E8051CDBD2A000B7B8F6 /* DBTestCase.swift in Sources */,
 				C22921E81CD12CF100518184 /* RelationalTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

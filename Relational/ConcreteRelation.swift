@@ -5,6 +5,12 @@ public struct ConcreteRelation: Relation {
     
     var defaultSort: Attribute?
     
+    public init(scheme: Scheme, values: Set<Row> = [], defaultSort: Attribute? = nil) {
+        self.scheme = scheme
+        self.values = values
+        self.defaultSort = defaultSort
+    }
+    
     private func rowMatchesScheme(row: Row) -> Bool {
         return Set(row.values.keys) == scheme.attributes
     }

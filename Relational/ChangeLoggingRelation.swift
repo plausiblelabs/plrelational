@@ -1,19 +1,19 @@
 
-public class ChangeLoggingRelation {
-    enum Change {
-        case Add(Row)
-        case Delete([ComparisonTerm])
-        case Update([ComparisonTerm], Row)
-    }
+enum ChangeLoggingRelationChange {
+    case Add(Row)
+    case Delete([ComparisonTerm])
+    case Update([ComparisonTerm], Row)
+}
+
+public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
+    private let underlyingRelation: UnderlyingRelation
     
-    private let underlyingRelation: Relation
-    
-    private var log: [Change] = []
+    private var log: [ChangeLoggingRelationChange] = []
     
     private var changeObservers: [UInt64: Void -> Void] = [:]
     private var changeObserverNextID: UInt64 = 0
     
-    public init(underlyingRelation: Relation) {
+    public init(underlyingRelation: UnderlyingRelation) {
         self.underlyingRelation = underlyingRelation
     }
     
@@ -97,5 +97,26 @@ extension ChangeLoggingRelation: Relation {
         for (_, f) in changeObservers {
             f()
         }
+    }
+}
+
+extension ChangeLoggingRelation where UnderlyingRelation: SQLiteTableRelation {
+    public func save() -> Result<Void, RelationError> {
+        // TODO: transactions!
+        for change in log {
+            let err: RelationError?
+            switch change {
+            case .Add(let row):
+                err = underlyingRelation.add(row).err
+            case .Delete(let terms):
+                err = underlyingRelation.delete(terms).err
+            case .Update(let terms, let newValues):
+                err = underlyingRelation.update(terms, newValues: newValues).err
+            }
+            if let err = err {
+                return .Err(err)
+            }
+        }
+        return .Ok()
     }
 }
