@@ -54,6 +54,8 @@
 		C22921DF1CD12AA600518184 /* SQLiteRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921961CC7E9E300518184 /* SQLiteRelation.swift */; };
 		C22921E81CD12CF100518184 /* RelationalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921E71CD12CF100518184 /* RelationalTests.swift */; };
 		C22921EA1CD12CF100518184 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
+		C277E7FD1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */; };
+		C277E7FF1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FE1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift */; };
 		C2BD29921CD251870081FD05 /* Flight.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
 		C2BD29931CD251870081FD05 /* Store.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
@@ -162,6 +164,8 @@
 		C257C7511CBEBF6300234A89 /* SetPowerSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SetPowerSet.swift; path = Relational/SetPowerSet.swift; sourceTree = "<group>"; };
 		C257C7531CC017EB00234A89 /* SimpleDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleDatabase.swift; sourceTree = "<group>"; };
 		C257C7561CC01BE200234A89 /* genmodel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = genmodel.swift; sourceTree = "<group>"; };
+		C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelation.swift; sourceTree = "<group>"; };
+		C277E7FE1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelationTests.swift; sourceTree = "<group>"; };
 		C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConcreteRelation.swift; sourceTree = "<group>"; };
 		C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OperationRelations.swift; sourceTree = "<group>"; };
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
@@ -349,6 +353,7 @@
 				C22BF12E1CBC348500D3FE59 /* Relational */,
 				C257C7551CC01BCD00234A89 /* Model */,
 				C22921901CC6CD9500518184 /* SQLite */,
+				C277E7FB1CDA908E00B7B8F6 /* Change Logging */,
 				C2BD298F1CD250B30081FD05 /* Utilities */,
 				C22921951CC6D25100518184 /* Custom Module Map */,
 				C22921E61CD12CF100518184 /* RelationalTests */,
@@ -395,6 +400,16 @@
 				C229219E1CCA5EE300518184 /* Database */,
 			);
 			name = Model;
+			path = Relational;
+			sourceTree = "<group>";
+		};
+		C277E7FB1CDA908E00B7B8F6 /* Change Logging */ = {
+			isa = PBXGroup;
+			children = (
+				C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */,
+				C277E7FE1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift */,
+			);
+			name = "Change Logging";
 			path = Relational;
 			sourceTree = "<group>";
 		};
@@ -683,6 +698,7 @@
 				C22921D51CD12A8700518184 /* StringPad.swift in Sources */,
 				C22921D61CD12A8700518184 /* ValueWithDestructor.swift in Sources */,
 				C22921D71CD12A9E00518184 /* Model.swift in Sources */,
+				C277E7FD1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift in Sources */,
 				C22921D81CD12A9E00518184 /* ModelError.swift in Sources */,
 				C22921D91CD12A9E00518184 /* ModelHelpers.swift in Sources */,
 				C22921DA1CD12AA200518184 /* ModelDatabase.swift in Sources */,
@@ -700,6 +716,7 @@
 			files = (
 				C2BD29941CD251A20081FD05 /* Flight.model in Sources */,
 				C2BD29951CD251A20081FD05 /* Store.model in Sources */,
+				C277E7FF1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift in Sources */,
 				C22921E81CD12CF100518184 /* RelationalTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

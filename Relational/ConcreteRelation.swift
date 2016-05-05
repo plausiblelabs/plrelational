@@ -40,6 +40,14 @@ public struct ConcreteRelation: Relation {
         }))
     }
     
+    public mutating func delete(terms: [ComparisonTerm]) {
+        let toDelete = select(terms)
+        values = Set(values.filter({
+            // We know that the result of contains() can never fail here because it's ultimately our own implementation.
+            toDelete.contains($0).ok! == false
+        }))
+    }
+    
     public mutating func change(rowToFind: Row, to: Row) {
         let rowsToUpdate = select(rowToFind)
         delete(rowToFind)

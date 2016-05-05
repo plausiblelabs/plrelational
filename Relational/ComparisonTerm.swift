@@ -17,6 +17,16 @@ extension ComparisonTerm {
     }
 }
 
+extension ComparisonTerm {
+    public static func terms(terms: [ComparisonTerm], matchRow row: Row) -> Bool {
+        return !terms.contains({ term in
+            let lhs = term.lhs.valueForRow(row)
+            let rhs = term.rhs.valueForRow(row)
+            return !term.op.matches(lhs, rhs)
+        })
+    }
+}
+
 infix operator *== {}
 
 public func *==(lhs: ValueProvider, rhs: ValueProvider) -> ComparisonTerm {
