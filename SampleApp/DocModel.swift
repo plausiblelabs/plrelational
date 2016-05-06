@@ -9,13 +9,28 @@
 import Foundation
 import libRelational
 
+enum DocItem { case
+    Page(RelationValue),
+    Object(RelationValue)
+    
+    var typeName: String {
+        switch self {
+        case .Page:
+            return "Page"
+        case .Object:
+            return "Object"
+        }
+    }
+}
+
 class DocModel {
 
     private let undoManager: UndoManager
     private let db: SQLiteDatabase
-    private let pagesRelation: SQLiteTableRelation
-    private let pages: OrderedBinding
+    private let pages: SQLiteTableRelation
+    private let orderedPages: OrderedBinding
     private let selectedPage: SQLiteTableRelation
+    private let selectedInspectorItem: SQLiteTableRelation
     private let selectedPageItem: Relation
     private var pageID: Int64 = 1
     
@@ -39,10 +54,11 @@ class DocModel {
             assert(db.createRelation(name, scheme: scheme).ok != nil)
             return db[name, scheme]
         }
-        self.pagesRelation = createRelation("page", ["id", "name", "order"])
-        self.pages = OrderedBinding(relation: pagesRelation, idAttr: "id", orderAttr: "order")
+        self.pages = createRelation("page", ["id", "name", "order"])
+        self.orderedPages = OrderedBinding(relation: pages, idAttr: "id", orderAttr: "order")
         self.selectedPage = createRelation("selected_page", ["id", "page_id"])
-        self.selectedPageItem = pagesRelation.renameAttributes(["id" : "page_id"]).join(selectedPage)
+        self.selectedInspectorItem = createRelation("selected_inspector_item", ["id", "type", "fid"])
+        self.selectedPageItem = pages.renameAttributes(["id" : "page_id"]).join(selectedPage)
         self.db = db
         
         // Prepare the default document data
@@ -52,7 +68,7 @@ class DocModel {
     }
     
     private func addPage(name: String) {
-        pages.append(["id": RelationValue(pageID), "name": RelationValue(name)])
+        orderedPages.append(["id": RelationValue(pageID), "name": RelationValue(name)])
         pageID += 1
     }
     
@@ -66,7 +82,7 @@ class DocModel {
             },
             backward: {
                 // TODO: Update selected_page if needed
-                self.pages.delete(RelationValue(id))
+                self.orderedPages.delete(RelationValue(id))
                 self.pageID -= 1
             }
         )
@@ -86,7 +102,7 @@ class DocModel {
 
     lazy var docOutlineViewModel: ListViewModel = { [unowned self] in
         let data = ListViewModel.Data(
-            binding: self.pages,
+            binding: self.orderedPages,
             move: { (srcIndex, dstIndex) in
                 // Note: dstIndex is relative to the state of the array *before* the item is removed.
                 let dst = dstIndex < srcIndex ? dstIndex : dstIndex - 1
@@ -94,10 +110,10 @@ class DocModel {
                     name: "Move Page",
                     perform: true,
                     forward: {
-                        self.pages.move(srcIndex: srcIndex, dstIndex: dst)
+                        self.orderedPages.move(srcIndex: srcIndex, dstIndex: dst)
                     },
                     backward: {
-                        self.pages.move(srcIndex: dst, dstIndex: srcIndex)
+                        self.orderedPages.move(srcIndex: dst, dstIndex: srcIndex)
                     }
                 )
             }
@@ -152,7 +168,7 @@ class DocModel {
             // continue to work even after the row has been deleted from the underlying
             // relation.)
             let rowID = row["id"]
-            let rowRelation = self.pagesRelation.select([Attribute("id") *== rowID])
+            let rowRelation = self.pages.select([Attribute("id") *== rowID])
             let binding = self.pageNameBinding(rowRelation, id: { rowID })
             return ListViewModel.Cell(text: binding)
         }
@@ -168,9 +184,40 @@ class DocModel {
         return NotExistsBinding(relation: self.selectedPageItem)
     }()
 
-    // TODO
+    private lazy var selectedPageDocItem: ValueBinding<DocItem?> = { [unowned self] in
+        return Int64Binding(relation: self.selectedPageItem, attribute: "page_id").map{ value in
+            if let value = value {
+                return DocItem.Page(RelationValue(value))
+            } else {
+                return nil
+            }
+        }
+    }()
+
+    private lazy var selectedInspectorDocItem: ValueBinding<DocItem?> = { [unowned self] in
+        return SingleRowBinding(relation: self.selectedInspectorItem).map{ row in
+            if let row = row {
+                let type: Int64 = row["type"].get()!
+                let fid: Int64 = row["fid"].get()!
+                if type == 0 {
+                    return DocItem.Page(RelationValue(fid))
+                } else {
+                    return DocItem.Object(RelationValue(fid))
+                }
+            } else {
+                return nil
+            }
+        }
+    }()
+    
+    private lazy var selectedDocItem: ValueBinding<DocItem?> = { [unowned self] in
+        return self.selectedPageDocItem.zip(self.selectedInspectorDocItem).map{ (docItem, inspectorItem) in
+            return inspectorItem ?? docItem
+        }
+    }()
+    
     lazy var selectedItemType: ValueBinding<String?> = { [unowned self] in
-        return StringBinding(relation: self.selectedPageItem, attribute: "page_id").map({ _ in "Page" })
+        return self.selectedDocItem.map{ $0?.typeName }
     }()
     
     lazy var selectedItemName: StringBidiBinding = { [unowned self] in
@@ -190,7 +237,7 @@ class DocModel {
             let terms = [Attribute("id") *== idValue]
             let values: Row = ["name": RelationValue(newValue)]
             Swift.print("UPDATE: \(newValue)")
-            assert(self.pagesRelation.update(terms, newValues: values).ok != nil)
+            assert(self.pages.update(terms, newValues: values).ok != nil)
         }
         
         return StringBidiBinding(relation: relation, attribute: "name", change: BidiChange<String>{ (newValue, oldValue, commit) in

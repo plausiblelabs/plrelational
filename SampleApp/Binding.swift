@@ -43,6 +43,10 @@ extension ValueBinding {
     func map<U>(transform: (T) -> U) -> ValueBinding<U> {
         return MappedValueBinding(binding: self, transform: transform)
     }
+    
+    func zip<U>(other: ValueBinding<U>) -> ValueBinding<(T, U)> {
+        return ZippedValueBinding(self, other)
+    }
 }
 
 private class MappedValueBinding<T>: ValueBinding<T> {
@@ -54,6 +58,25 @@ private class MappedValueBinding<T>: ValueBinding<T> {
             guard let weakSelf = self else { return }
             // TODO: Don't notify if value is not actually changing
             weakSelf.value = transform(binding.value)
+            weakSelf.notifyChangeObservers()
+        })
+    }
+}
+
+public class ZippedValueBinding<U, V>: ValueBinding<(U, V)> {
+    private var removal1: ObserverRemoval!
+    private var removal2: ObserverRemoval!
+
+    init(_ binding1: ValueBinding<U>, _ binding2: ValueBinding<V>) {
+        super.init(initialValue: (binding1.value, binding2.value))
+        self.removal1 = binding1.addChangeObserver({ [weak self] in
+            guard let weakSelf = self else { return }
+            weakSelf.value = (binding1.value, binding2.value)
+            weakSelf.notifyChangeObservers()
+        })
+        self.removal2 = binding2.addChangeObserver({ [weak self] in
+            guard let weakSelf = self else { return }
+            weakSelf.value = (binding1.value, binding2.value)
             weakSelf.notifyChangeObservers()
         })
     }
@@ -96,31 +119,59 @@ public class NotExistsBinding: ValueBinding<Bool> {
     }
 }
 
-public class StringBinding: ValueBinding<String?> {
+public class SingleRowBinding: ValueBinding<Row?> {
+    private let relation: Relation
+    private var removal: ObserverRemoval!
+    
+    init(relation: Relation) {
+        self.relation = relation
+        super.init(initialValue: relation.rows().next()?.ok)
+        self.removal = relation.addChangeObserver({ [weak self] in
+            guard let weakSelf = self else { return }
+            let newValue = relation.rows().next()?.ok
+            weakSelf.value = newValue
+            weakSelf.notifyChangeObservers()
+        })
+    }
+}
+
+public class ConcreteValueBinding<T: Equatable>: ValueBinding<T?> {
     private let relation: Relation
     private let attribute: Attribute
     private var removal: ObserverRemoval!
-
-    init(relation: Relation, attribute: Attribute) {
+    
+    init(relation: Relation, attribute: Attribute, unwrap: (RelationValue) -> T?) {
         self.relation = relation
         self.attribute = attribute
-        super.init(initialValue: StringBinding.get(relation, attribute))
+        super.init(initialValue: ConcreteValueBinding.getValue(relation, attribute).flatMap(unwrap))
         self.removal = relation.addChangeObserver({ [weak self] in
             guard let weakSelf = self else { return }
-            let newValue = StringBinding.get(relation, attribute)
+            let newValue = ConcreteValueBinding.getValue(relation, attribute).flatMap(unwrap)
             if newValue != weakSelf.value {
                 weakSelf.value = newValue
                 weakSelf.notifyChangeObservers()
             }
         })
     }
-    
-    private static func get(relation: Relation, _ attribute: Attribute) -> String? {
+
+    private static func getValue(relation: Relation, _ attribute: Attribute) -> RelationValue? {
         if let row = relation.rows().next()?.ok {
-            return row[attribute].get()
+            return row[attribute]
         } else {
             return nil
         }
+    }
+}
+
+public class StringBinding: ConcreteValueBinding<String> {
+    init(relation: Relation, attribute: Attribute) {
+        super.init(relation: relation, attribute: attribute, unwrap: { $0.get() })
+    }
+}
+
+public class Int64Binding: ConcreteValueBinding<Int64> {
+    init(relation: Relation, attribute: Attribute) {
+        super.init(relation: relation, attribute: attribute, unwrap: { $0.get() })
     }
 }
 
