@@ -6,9 +6,9 @@ enum ChangeLoggingRelationChange {
 }
 
 public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
-    private let underlyingRelation: UnderlyingRelation
+    let underlyingRelation: UnderlyingRelation
     
-    private var log: [ChangeLoggingRelationChange] = []
+    var log: [ChangeLoggingRelationChange] = []
     
     private var changeObservers: [UInt64: Void -> Void] = [:]
     private var changeObserverNextID: UInt64 = 0
@@ -93,7 +93,7 @@ extension ChangeLoggingRelation: Relation {
         return { self.changeObservers.removeValueForKey(id) }
     }
     
-    private func notifyChangeObservers() {
+    func notifyChangeObservers() {
         for (_, f) in changeObservers {
             f()
         }

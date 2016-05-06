@@ -12,15 +12,8 @@ public class ChangeLoggingDatabase {
         return sqliteDatabase.createRelation(name, scheme: scheme)
     }
     
-    public subscript(name: String, scheme: Scheme) -> ChangeLoggingRelation<SQLiteTableRelation> {
-        if let relation = changeLoggingRelations[name] {
-            return relation
-        } else {
-            let table = sqliteDatabase[name, scheme]
-            let relation = ChangeLoggingRelation(underlyingRelation: table)
-            changeLoggingRelations[name] = relation
-            return relation
-        }
+    public subscript(name: String, scheme: Scheme) -> Relation {
+        return getLoggingRelation(name, scheme)
     }
     
     public func save() -> Result<Void, RelationError> {
@@ -32,5 +25,53 @@ public class ChangeLoggingDatabase {
             }
         }
         return .Ok()
+    }
+}
+
+extension ChangeLoggingDatabase {
+    private func getLoggingRelation(name: String, _ scheme: Scheme) -> ChangeLoggingRelation<SQLiteTableRelation> {
+        if let relation = changeLoggingRelations[name] {
+            return relation
+        } else {
+            let table = sqliteDatabase[name, scheme]
+            let relation = ChangeLoggingRelation(underlyingRelation: table)
+            changeLoggingRelations[name] = relation
+            return relation
+        }
+    }
+}
+
+extension ChangeLoggingDatabase {
+    public class Transaction {
+        private let db: ChangeLoggingDatabase
+        private var changeLoggingRelations: [String: ChangeLoggingRelation<ChangeLoggingRelation<SQLiteTableRelation>>] = [:]
+        
+        private init(db: ChangeLoggingDatabase) {
+            self.db = db
+        }
+        
+        public subscript(name: String, scheme: Scheme) -> ChangeLoggingRelation<ChangeLoggingRelation<SQLiteTableRelation>> {
+            if let relation = changeLoggingRelations[name] {
+                return relation
+            } else {
+                let table = db.getLoggingRelation(name, scheme)
+                let relation = ChangeLoggingRelation(underlyingRelation: table)
+                changeLoggingRelations[name] = relation
+                return relation
+            }
+        }
+    }
+    
+    public func transaction(transactionFunction: Transaction -> Void) {
+        let transaction = Transaction(db: self)
+        
+        transactionFunction(transaction)
+        
+        for (_, relation) in transaction.changeLoggingRelations {
+            relation.underlyingRelation.log.appendContentsOf(relation.log)
+        }
+        for (_, relation) in transaction.changeLoggingRelations {
+            relation.notifyChangeObservers()
+        }
     }
 }
