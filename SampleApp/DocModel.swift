@@ -61,6 +61,11 @@ class DocModel {
         self.selectedPageItem = pages.renameAttributes(["id" : "page_id"]).join(selectedPage)
         self.db = db
         
+        // XXX
+        //let collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
+        //let closures = createRelation("collection_closure", ["ancestor", "descendant", "depth"])
+        //let orderedCollections = OrderedTreeBinding(relation: collections, closures: closures, idAttr: "id", orderAttr: "order")
+        
         // Prepare the default document data
         addPage("Page1")
         addPage("Page2")

@@ -26,6 +26,8 @@
 		37C611441CDA7230001DAF59 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611431CDA7230001DAF59 /* Box.swift */; };
 		37C611481CDBCB4C001DAF59 /* DocOutlineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611471CDBCB4C001DAF59 /* DocOutlineView.swift */; };
 		37C6114B1CDBCB5C001DAF59 /* PropertiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114A1CDBCB5C001DAF59 /* PropertiesView.swift */; };
+		37C6114D1CDD603C001DAF59 /* OrderedBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114C1CDD603C001DAF59 /* OrderedBinding.swift */; };
+		37C6114F1CDD6084001DAF59 /* OrderedTreeBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114E1CDD6084001DAF59 /* OrderedTreeBinding.swift */; };
 		C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		C22921C51CD12A8700518184 /* Comparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7491CBD7F4500234A89 /* Comparator.swift */; };
 		C22921C61CD12A8700518184 /* ComparisonTerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A31CCA86CE00518184 /* ComparisonTerm.swift */; };
@@ -138,6 +140,8 @@
 		37C611431CDA7230001DAF59 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
 		37C611471CDBCB4C001DAF59 /* DocOutlineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocOutlineView.swift; sourceTree = "<group>"; };
 		37C6114A1CDBCB5C001DAF59 /* PropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertiesView.swift; sourceTree = "<group>"; };
+		37C6114C1CDD603C001DAF59 /* OrderedBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderedBinding.swift; sourceTree = "<group>"; };
+		37C6114E1CDD6084001DAF59 /* OrderedTreeBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderedTreeBinding.swift; sourceTree = "<group>"; };
 		C21971A91CC030B900E84F7E /* ModelHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelHelpers.swift; sourceTree = "<group>"; };
 		C22921911CC6CDCC00518184 /* makemodule.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = makemodule.sh; path = ../modules/makemodule.sh; sourceTree = "<group>"; };
 		C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteDatabase.swift; sourceTree = "<group>"; };
@@ -284,6 +288,8 @@
 			children = (
 				37C6113C1CD92F27001DAF59 /* Transaction.swift */,
 				37C6113E1CD93069001DAF59 /* Binding.swift */,
+				37C6114C1CDD603C001DAF59 /* OrderedBinding.swift */,
+				37C6114E1CDD6084001DAF59 /* OrderedTreeBinding.swift */,
 			);
 			name = "Relational Stuff";
 			sourceTree = "<group>";
@@ -679,10 +685,12 @@
 				37C611021CD7EFAE001DAF59 /* Document.swift in Sources */,
 				37C6113D1CD92F27001DAF59 /* Transaction.swift in Sources */,
 				37C611361CD7FB07001DAF59 /* ListView.swift in Sources */,
+				37C6114F1CDD6084001DAF59 /* OrderedTreeBinding.swift in Sources */,
 				37C6113F1CD93069001DAF59 /* Binding.swift in Sources */,
 				37C611441CDA7230001DAF59 /* Box.swift in Sources */,
 				37C6113A1CD80566001DAF59 /* DocModel.swift in Sources */,
 				37C6114B1CDBCB5C001DAF59 /* PropertiesView.swift in Sources */,
+				37C6114D1CDD603C001DAF59 /* OrderedBinding.swift in Sources */,
 				37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */,
 				37C611331CD7F80F001DAF59 /* TextField.swift in Sources */,
 				37C611381CD7FB9C001DAF59 /* ExtOutlineView.swift in Sources */,
