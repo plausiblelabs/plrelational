@@ -139,6 +139,7 @@ public class ConcreteValueBinding<T: Equatable>: ValueBinding<T?> {
     private let relation: Relation
     private let attribute: Attribute
     private var removal: ObserverRemoval!
+    private var selfInitiatedChange = false
     
     init(relation: Relation, attribute: Attribute, unwrap: (RelationValue) -> T?) {
         self.relation = relation
@@ -146,6 +147,9 @@ public class ConcreteValueBinding<T: Equatable>: ValueBinding<T?> {
         super.init(initialValue: ConcreteValueBinding.getValue(relation, attribute).flatMap(unwrap))
         self.removal = relation.addChangeObserver({ [weak self] in
             guard let weakSelf = self else { return }
+            
+            if weakSelf.selfInitiatedChange { return }
+            
             let newValue = ConcreteValueBinding.getValue(relation, attribute).flatMap(unwrap)
             if newValue != weakSelf.value {
                 weakSelf.value = newValue
@@ -188,11 +192,15 @@ public class StringBidiBinding: StringBinding {
     }
 
     public func change(newValue newValue: String, oldValue: String) {
+        selfInitiatedChange = true
         change.f(newValue: newValue, oldValue: oldValue, commit: false)
+        selfInitiatedChange = false
     }
     
     public func commit(newValue newValue: String, oldValue: String) {
+        selfInitiatedChange = true
         change.f(newValue: newValue, oldValue: oldValue, commit: true)
+        selfInitiatedChange = false
     }
 }
 

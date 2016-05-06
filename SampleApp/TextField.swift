@@ -18,9 +18,16 @@ class TextField: NSTextField, NSTextFieldDelegate {
                 stringValue = string.value ?? ""
                 stringBindingRemoval = string.addChangeObserver({ [weak self] in
                     guard let weakSelf = self else { return }
-                    if weakSelf.selfInitiatedChange { return }
-                    //Swift.print("UPDATING TextField.stringValue: \(string.value)")
-                    weakSelf.stringValue = string.value ?? ""
+                    // TODO: If the value becomes nil, it means that the underlying row
+                    // was deleted.  In practice, the TextField may be notified of the
+                    // change prior to other observers (such as the parent ListView),
+                    // which means that we may see the text disappear before the list
+                    // view item is removed (with a fade animation).  As a workaround,
+                    // if the value is transitioning to nil, we will leave the previous
+                    // text in place.
+                    if let value = string.value {
+                        weakSelf.stringValue = value
+                    }
                 })
             } else {
                 stringValue = ""
@@ -45,7 +52,6 @@ class TextField: NSTextField, NSTextFieldDelegate {
     private var previousValue: String?
     
     private var stringBindingRemoval: (Void -> Void)?
-    private var selfInitiatedChange = false
     private var visibleBindingRemoval: (Void -> Void)?
     
     required init?(coder: NSCoder) {
@@ -62,11 +68,8 @@ class TextField: NSTextField, NSTextFieldDelegate {
     
     override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
-        //string.pokeValue(stringValue, oldValue: nil)
         if let previousValue = previousValue, bidiBinding = string as? StringBidiBinding {
-            selfInitiatedChange = true
             bidiBinding.change(newValue: stringValue, oldValue: previousValue)
-            selfInitiatedChange = false
         }
         previousValue = stringValue
     }
@@ -78,9 +81,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
         //Swift.print("CONTROL DID END EDITING!")
         if let previousCommittedValue = previousCommittedValue, bidiBinding = string as? StringBidiBinding {
             if stringValue != previousCommittedValue {
-                selfInitiatedChange = true
                 bidiBinding.commit(newValue: stringValue, oldValue: previousCommittedValue)
-                selfInitiatedChange = false
             }
         }
         previousCommittedValue = nil
