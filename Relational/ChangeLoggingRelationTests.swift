@@ -175,7 +175,7 @@ class ChangeLoggingRelationTests: DBTestCase {
         
         func update(terms: [ComparisonTerm], _ newValues: Row) {
             loggingRelation.update(terms, newValues: newValues)
-            referenceRelation.update(terms, to: newValues)
+            referenceRelation.update(terms, newValues: newValues)
         }
         
         AssertEqual(loggingRelation,
@@ -249,7 +249,7 @@ class ChangeLoggingRelationTests: DBTestCase {
             db.transaction({
                 $0["flights", scheme].update(terms, newValues: newValues)
             })
-            referenceRelation.update(terms, to: newValues)
+            referenceRelation.update(terms, newValues: newValues)
         }
         
         AssertEqual(db["flights", scheme],

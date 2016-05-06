@@ -25,6 +25,13 @@ extension ComparisonTerm {
             return !term.op.matches(lhs, rhs)
         })
     }
+    
+    /// Return a set of ComparisonTerms that correspond to the given row. Each value
+    /// in the row will generate an EqualityComparator matching that attribute and
+    /// that value.
+    public static func termsFromRow(row: Row) -> [ComparisonTerm] {
+        return row.values.map({ $0 *== $1 })
+    }
 }
 
 infix operator *== {}

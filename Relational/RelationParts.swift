@@ -83,6 +83,17 @@ public struct Row: Hashable {
             return (newAttribute, value)
         })))
     }
+    
+    /// Create a new row containing only the values whose attributes are also in the attributes parameter.
+    public func rowWithAttributes<Seq: SequenceType where Seq.Generator.Element == Attribute>(attributes: Seq) -> Row {
+        return Row(values: Dictionary(attributes.flatMap({
+            if let value = self.values[$0] {
+                return ($0, value)
+            } else {
+                return nil
+            }
+        })))
+    }
 }
 
 extension Row: DictionaryLiteralConvertible {

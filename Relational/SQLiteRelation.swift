@@ -11,15 +11,15 @@ public class SQLiteRelation: Relation {
         return db.escapeIdentifier(tableName)
     }
     
-    let query: String
-    let queryParameters: [RelationValue]
+    let queryTerms: [ComparisonTerm]
     
-    init(db: SQLiteDatabase, tableName: String, scheme: Scheme, query: String, queryParameters: [RelationValue]) {
+    init(db: SQLiteDatabase, tableName: String, scheme: Scheme, queryTerms: [ComparisonTerm]) {
         self.db = db
         self.tableName = tableName
         self.scheme = scheme
-        self.query = query
-        self.queryParameters = queryParameters
+        self.queryTerms = queryTerms
+        
+        precondition(termsToSQL(queryTerms) != nil, "Query terms must be SQL compatible!")
     }
     
     public func rows() -> AnyGenerator<Result<Row, RelationError>> {
@@ -28,7 +28,8 @@ public class SQLiteRelation: Relation {
             if let queryGenerator = queryGenerator {
                 return queryGenerator.next()
             } else {
-                let result = self.db.executeQuery("SELECT * FROM (\(self.query))", self.queryParameters)
+                let (sql, parameters) = self.termsToSQL(self.queryTerms)!
+                let result = self.db.executeQuery("SELECT * FROM (\(self.tableNameForQuery)) WHERE \(sql)", parameters)
                 switch result {
                 case .Ok(let generator):
                     queryGenerator = generator
@@ -42,6 +43,26 @@ public class SQLiteRelation: Relation {
     
     public func contains(row: Row) -> Result<Bool, RelationError> {
         fatalError("unimplemented")
+    }
+    
+    public func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+        if let (whereSQL, whereParameters) = termsToSQL(terms + self.queryTerms) {
+            let orderedAttributes = Array(newValues.values)
+            let setParts = orderedAttributes.map({ db.escapeIdentifier($0.0.name) + " = ?" })
+            let setSQL = setParts.joinWithSeparator(", ")
+            let setParameters = orderedAttributes.map({ $0.1 })
+            
+            let sql = "UPDATE \(tableNameForQuery) SET \(setSQL) WHERE \(whereSQL)"
+            let result = db.executeQuery(sql, setParameters + whereParameters)
+            return result.map({
+                let array = Array($0)
+                precondition(array.isEmpty, "Unexpected results from UPDATE statement: \(array)")
+                db.notifyChangeObservers()
+                return ()
+            })
+        } else {
+            fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL updates: \(terms)")
+        }
     }
     
     public func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
@@ -73,6 +94,11 @@ extension SQLiteRelation {
     }
     
     private func termsToSQL(terms: [ComparisonTerm]) -> (String, [RelationValue])? {
+        // Special-case zero terms, because SQL doesn't like empty WHERE clauses
+        if terms.count == 0 {
+            return ("1", [])
+        }
+        
         var sqlPieces: [String] = []
         var sqlParameters: [RelationValue] = []
         
@@ -98,8 +124,8 @@ extension SQLiteRelation {
     }
     
     public func select(terms: [ComparisonTerm]) -> Relation {
-        if let (sql, parameters) = termsToSQL(terms) {
-            return SQLiteRelation(db: db, tableName: self.tableName, scheme: scheme, query: "SELECT * FROM (\(self.query)) WHERE \(sql)", queryParameters: self.queryParameters + parameters)
+        if termsToSQL(terms) != nil {
+            return SQLiteRelation(db: db, tableName: self.tableName, scheme: scheme, queryTerms: self.queryTerms + terms)
         } else {
             return SelectRelation(relation: self, terms: terms)
         }
@@ -108,7 +134,7 @@ extension SQLiteRelation {
 
 public class SQLiteTableRelation: SQLiteRelation {
     init(db: SQLiteDatabase, tableName: String, scheme: Scheme) {
-        super.init(db: db, tableName: tableName, scheme: scheme, query: db.escapeIdentifier(tableName), queryParameters: [])
+        super.init(db: db, tableName: tableName, scheme: scheme, queryTerms: [])
     }
     
     public func add(row: Row) -> Result<Int64, RelationError> {
@@ -146,26 +172,6 @@ public class SQLiteTableRelation: SQLiteRelation {
             })
         } else {
             fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL deletes: \(searchTerms)")
-        }
-    }
-    
-    public func update(searchTerms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
-        if let (whereSQL, whereParameters) = termsToSQL(searchTerms) {
-            let orderedAttributes = Array(newValues.values)
-            let setParts = orderedAttributes.map({ db.escapeIdentifier($0.0.name) + " = ?" })
-            let setSQL = setParts.joinWithSeparator(", ")
-            let setParameters = orderedAttributes.map({ $0.1 })
-            
-            let sql = "UPDATE \(tableNameForQuery) SET \(setSQL) WHERE \(whereSQL)"
-            let result = db.executeQuery(sql, setParameters + whereParameters)
-            return result.map({
-                let array = Array($0)
-                precondition(array.isEmpty, "Unexpected results from UPDATE statement: \(array)")
-                db.notifyChangeObservers()
-                return ()
-            })
-        } else {
-            fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL updates: \(searchTerms)")
         }
     }
 }

@@ -27,9 +27,10 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
         notifyChangeObservers()
     }
     
-    public func update(searchTerms: [ComparisonTerm], newValues: Row) {
+    public func update(searchTerms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
         log.append(.Update(searchTerms, newValues))
         notifyChangeObservers()
+        return .Ok()
     }
 }
 
@@ -47,7 +48,7 @@ extension ChangeLoggingRelation: Relation {
             case .Delete(let terms):
                 myRows.delete(terms)
             case .Update(let terms, let newValues):
-                myRows.update(terms, to: newValues)
+                myRows.update(terms, newValues: newValues)
             }
         }
         

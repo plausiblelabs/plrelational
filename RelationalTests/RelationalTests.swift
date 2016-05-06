@@ -140,7 +140,7 @@ class RelationalTests: DBTestCase {
                         ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
                         ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]))
         
-        FLIGHTS.update(["NUMBER": "109"], to: ["DEPARTS": "9:40p", "ARRIVES": "2:42a"])
+        FLIGHTS.update(["NUMBER": "109"], newValues: ["DEPARTS": "9:40p", "ARRIVES": "2:42a"])
         AssertEqual(FLIGHTS,
                     MakeRelation(
                         ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
@@ -726,5 +726,47 @@ class RelationalTests: DBTestCase {
         
         r.update([.EQ(Attribute("id"), RelationValue.Integer(2))], newValues: ["name": "Tina"])
         XCTAssertEqual(currentName, "Tina")
+    }
+    
+    func testUpdates() {
+        let db = makeDB().db.sqliteDatabase
+        
+        let peopleScheme: Scheme = ["id", "name", "houseID"]
+        XCTAssertNil(db.createRelation("people", scheme: peopleScheme).err)
+        
+        let housesScheme: Scheme = ["id", "address"]
+        XCTAssertNil(db.createRelation("houses", scheme: housesScheme).err)
+        
+        let people = db["people", peopleScheme]
+        let houses = db["houses", housesScheme]
+        
+        XCTAssertNil(people.add(["id": 1, "name": "Johnson", "houseID": 1]).err)
+        XCTAssertNil(people.add(["id": 2, "name": "Stanley", "houseID": 2]).err)
+        XCTAssertNil(people.add(["id": 3, "name": "Jones", "houseID": 2]).err)
+        
+        XCTAssertNil(houses.add(["id": 1, "address": "123 Main St."]).err)
+        XCTAssertNil(houses.add(["id": 2, "address": "456 West St."]).err)
+        
+        var joined = people.equijoin(houses.renameAttributes(["id": "renamed_house_id"]), matching: ["houseID": "renamed_house_id"])
+        XCTAssertNil(joined.update([Attribute("id") *== RelationValue(1 as Int64)], newValues: ["name": "Stevens"]).err)
+        XCTAssertNil(joined.update([Attribute("id") *== RelationValue(2 as Int64)], newValues: ["address": "999 Something Ln."]).err)
+        
+        AssertEqual(joined,
+                    MakeRelation(
+                        ["id", "name", "houseID", "renamed_house_id", "address"],
+                        [1, "Stevens", 1, 1, "123 Main St."],
+                        [2, "Stanley", 2, 2, "999 Something Ln."],
+                        [3, "Jones", 2, 2, "999 Something Ln."]))
+        AssertEqual(people,
+                    MakeRelation(
+                        ["id", "name", "houseID"],
+                        [1, "Stevens", 1],
+                        [2, "Stanley", 2],
+                        [3, "Jones", 2]))
+        AssertEqual(houses,
+                    MakeRelation(
+                        ["id", "address"],
+                        [1, "123 Main St."],
+                        [2, "999 Something Ln."]))
     }
 }

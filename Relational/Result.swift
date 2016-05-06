@@ -43,6 +43,16 @@ extension Result {
     }
 }
 
+extension Result {
+    public func and(other: Result<T, E>) -> Result<T, E> {
+        return self.ok == nil ? self : other
+    }
+    
+    public func or(other: Result<T, E>) -> Result<T, E> {
+        return self.err == nil ? self : other
+    }
+}
+
 /// For a Result that contains a sequence of Results, if it's Ok, iterate over the sequence, accumulating new Ok
 /// values. If the Result contains Err, or any of the sequence elements are Err, then produce the first Err.
 /// This is a free-standing function because I couldn't quite get it to work as an extension due to the extra

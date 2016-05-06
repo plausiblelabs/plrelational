@@ -10,6 +10,8 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     
     func forEach(@noescape f: (Row, Void -> Void) -> Void) -> Result<Void, RelationError>
     
+    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError>
+    
     /// Add an observer function which is called when the content of the Relation
     /// changes. The return value is a function which removes the observation when
     /// invoked. The caller can use that function to cancel the observation when

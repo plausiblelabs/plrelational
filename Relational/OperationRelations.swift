@@ -21,6 +21,12 @@ struct UnionRelation: Relation {
         return a.contains(row).combine(b.contains(row)).map({ $0 || $1 })
     }
     
+    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+        let aResult = a.update(terms, newValues: newValues)
+        let bResult = b.update(terms, newValues: newValues)
+        return aResult.and(bResult)
+    }
+    
     func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
         let aRemove = a.addChangeObserver(f)
         let bRemove = b.addChangeObserver(f)
@@ -67,6 +73,24 @@ struct IntersectionRelation: Relation {
     
     func contains(row: Row) -> Result<Bool, RelationError> {
         return a.contains(row).combine(b.contains(row)).map({ $0 && $1 })
+    }
+    
+    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+        let rowsToUpdate = mapOk(self.select(terms).rows(), { $0 })
+        return rowsToUpdate.then({ rows in
+            for row in rows {
+                let rowTerms = ComparisonTerm.termsFromRow(row)
+                let resultA = a.update(rowTerms, newValues: newValues)
+                if let err = resultA.err {
+                    return .Err(err)
+                }
+                let resultB = b.update(rowTerms, newValues: newValues)
+                if let err = resultB.err {
+                    return .Err(err)
+                }
+            }
+            return .Ok()
+        })
     }
     
     func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
@@ -117,6 +141,20 @@ struct DifferenceRelation: Relation {
         return a.contains(row).combine(b.contains(row)).map({ $0 && !$1 })
     }
     
+    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+        let rowsToUpdate = mapOk(self.select(terms).rows(), { $0 })
+        return rowsToUpdate.then({ rows in
+            for row in rows {
+                let rowTerms = ComparisonTerm.termsFromRow(row)
+                let result = a.update(rowTerms, newValues: newValues)
+                if let err = result.err {
+                    return .Err(err)
+                }
+            }
+            return .Ok()
+        })
+    }
+    
     func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
         let aRemove = a.addChangeObserver(f)
         let bRemove = b.addChangeObserver(f)
@@ -157,6 +195,10 @@ struct ProjectRelation: Relation {
     
     func contains(row: Row) -> Result<Bool, RelationError> {
         return relation.select(row).isEmpty.map(!)
+    }
+    
+    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+        return relation.update(terms, newValues: newValues)
     }
     
     func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
@@ -201,6 +243,10 @@ struct SelectRelation: Relation {
         return relation.contains(row).map({ $0 && rowMatches(row) })
     }
     
+    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+        return relation.update(terms + self.terms, newValues: newValues)
+    }
+    
     func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
         return relation.addChangeObserver(f)
     }
@@ -243,6 +289,32 @@ struct EquijoinRelation: Relation {
         return self.select(row).isEmpty.map(!)
     }
     
+    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+        let rowsToUpdate = mapOk(self.select(terms).rows(), { $0 })
+        return rowsToUpdate.then({ rows in
+            for row in rows {
+                let aRow = row.rowWithAttributes(a.scheme.attributes)
+                let aNewValues = newValues.rowWithAttributes(a.scheme.attributes)
+                if aNewValues.values.count > 0 {
+                    let resultA = a.update(ComparisonTerm.termsFromRow(aRow), newValues: aNewValues)
+                    if let err = resultA.err {
+                        return .Err(err)
+                    }
+                }
+                
+                let bRow = row.rowWithAttributes(b.scheme.attributes)
+                let bNewValues = newValues.rowWithAttributes(b.scheme.attributes)
+                if bNewValues.values.count > 0 {
+                    let resultB = b.update(ComparisonTerm.termsFromRow(bRow), newValues: bNewValues)
+                    if let err = resultB.err {
+                        return .Err(err)
+                    }
+                }
+            }
+            return .Ok()
+        })
+    }
+    
     func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
         let aRemove = a.addChangeObserver(f)
         let bRemove = b.addChangeObserver(f)
@@ -272,6 +344,22 @@ struct RenameRelation: Relation {
     
     func contains(row: Row) -> Result<Bool, RelationError> {
         return relation.contains(row.renameAttributes(renames.reversed))
+    }
+    
+    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+        let termRenames = self.renames.reversed
+        func renamedProvider(provider: ValueProvider) -> ValueProvider {
+            // Should this sort of logic be in ValueProvider itself?
+            if let attribute = provider as? Attribute, renamed = termRenames[attribute] {
+                return renamed
+            } else {
+                return provider
+            }
+        }
+        let renamedTerms = terms.map({
+            return ComparisonTerm(renamedProvider($0.lhs), $0.op, renamedProvider($0.rhs))
+        })
+        return relation.update(renamedTerms, newValues: newValues)
     }
     
     func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
