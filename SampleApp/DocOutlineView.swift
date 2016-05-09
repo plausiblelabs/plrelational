@@ -12,9 +12,11 @@ import Cocoa
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
 class DocOutlineView {
     
-    let listView: ListView
+    //let listView: ListView
+    let treeView: TreeView
     
     init(outlineView: NSOutlineView, docModel: DocModel) {
-        self.listView = ListView(outlineView: outlineView, model: docModel.docOutlineViewModel)
+        //self.listView = ListView(outlineView: outlineView, model: docModel.docOutlineViewModel)
+        self.treeView = TreeView(outlineView: outlineView, model: docModel.docOutlineTreeViewModel)
     }
 }

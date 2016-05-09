@@ -26,13 +26,23 @@ public protocol OrderedTreeBindingObserver: class {
 }
 
 public class OrderedTreeBinding {
+
+    public class Node {
+        let data: Row
+        var children: [Node]
+        
+        init(_ data: Row, children: [Node] = []) {
+            self.data = data
+            self.children = children
+        }
+    }
     
     private let relation: SQLiteTableRelation
     private let closures: SQLiteTableRelation
     private let idAttr: Attribute
     private let orderAttr: Attribute
     
-    private(set) public var rows: [Box<Row>] = []
+    private(set) public var nodes: [Node] = []
     
     private var observers: [OrderedTreeBindingObserver] = []
     
@@ -45,7 +55,9 @@ public class OrderedTreeBinding {
         // TODO: Depth
         // TODO: Sorting
         // TODO: Error handling
-        self.rows = relation.rows().map{Box($0.ok!)}
+        // TODO: For now, we'll load the whole tree structure eagerly
+        //let rows = relation.rows().map{$0.ok!}
+        self.nodes = []
     }
     
     public func addObserver(observer: OrderedTreeBindingObserver) {
@@ -53,12 +65,64 @@ public class OrderedTreeBinding {
             observers.append(observer)
         }
     }
-    
-    public func insert(row: Row, pos: TreePos) {
-        // TODO
+
+    private func nodeForID(id: Int64) -> Node? {
+        // TODO: Not efficient, but whatever
+        func findNode(node: Node) -> Node? {
+            let nodeID: Int64 = node.data[idAttr].get()!
+            if nodeID == id {
+                return node
+            }
+            
+            for child in node.children {
+                if let found = findNode(child) {
+                    return found
+                }
+            }
+            
+            return nil
+        }
+        
+        for node in nodes {
+            if let found = findNode(node) {
+                return found
+            }
+        }
+        
+        return nil
     }
     
-    public func delete(id: RelationValue) {
-        // TODO
+    // XXX: This is temporary
+    func add(row: Row, parentID: Int64?, order: Double) {
+        let parent: RelationValue
+        if let parentID = parentID {
+            parent = RelationValue(parentID)
+        } else {
+            parent = .NULL
+        }
+        
+        var mutableRow = row
+        mutableRow["parent"] = parent
+        mutableRow["order"] = RelationValue(order)
+        let node = Node(mutableRow)
+
+        // TODO: We'll ignore order for now and assume rows are provided in correct order
+        if let parentID = parentID {
+            nodeForID(parentID)!.children.append(node)
+        } else {
+            self.nodes.append(node)
+        }
+        relation.add(mutableRow)
+        
+        // TODO: Update closure table
+        // TODO: Notify observers
     }
+    
+//    public func insert(row: Row, pos: TreePos) {
+//        // TODO
+//    }
+
+//    public func delete(id: RelationValue) {
+//        // TODO
+//    }
 }

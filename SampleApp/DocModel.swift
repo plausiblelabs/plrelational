@@ -23,10 +23,18 @@ enum DocItem { case
     }
 }
 
+enum CollectionType: Int64 { case
+    Group = 0,
+    Collection = 1,
+    Page = 2
+}
+
 class DocModel {
 
     private let undoManager: UndoManager
     private let db: SQLiteDatabase
+    private let collections: SQLiteTableRelation
+    private let orderedCollections: OrderedTreeBinding
     private let pages: SQLiteTableRelation
     private let orderedPages: OrderedBinding
     private let selectedPage: SQLiteTableRelation
@@ -53,19 +61,34 @@ class DocModel {
         func createRelation(name: String, _ scheme: Scheme) -> SQLiteTableRelation {
             return db.getOrCreateRelation(name, scheme: scheme).ok!
         }
+        self.collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
+        let closures = createRelation("collection_closure", ["ancestor", "descendant", "depth"])
+        self.orderedCollections = OrderedTreeBinding(relation: collections, closures: closures, idAttr: "id", orderAttr: "order")
         self.pages = createRelation("page", ["id", "name", "order"])
         self.orderedPages = OrderedBinding(relation: pages, idAttr: "id", orderAttr: "order")
         self.selectedPage = createRelation("selected_page", ["id", "page_id"])
         self.selectedInspectorItem = createRelation("selected_inspector_item", ["id", "type", "fid"])
         self.selectedPageItem = pages.renameAttributes(["id" : "page_id"]).join(selectedPage)
         self.db = db
-        
-        // XXX
-        //let collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
-        //let closures = createRelation("collection_closure", ["ancestor", "descendant", "depth"])
-        //let orderedCollections = OrderedTreeBinding(relation: collections, closures: closures, idAttr: "id", orderAttr: "order")
-        
+
+        func addCollection(collectionID: Int64, name: String, type: CollectionType, parentID: Int64?, order: Double) {
+            let row: Row = [
+                "id": RelationValue(collectionID),
+                "type": RelationValue(type.rawValue),
+                "name": RelationValue(name)
+            ]
+            orderedCollections.add(row, parentID: parentID, order: order)
+        }
+
         // Prepare the default document data
+        addCollection(1, name: "Group1", type: .Group, parentID: nil, order: 1.0)
+        addCollection(2, name: "Collection1", type: .Collection, parentID: 1, order: 1.0)
+        addCollection(3, name: "Page1", type: .Page, parentID: 1, order: 2.0)
+        addCollection(4, name: "Page2", type: .Page, parentID: 1, order: 3.0)
+        addCollection(5, name: "Child1", type: .Page, parentID: 2, order: 1.0)
+        addCollection(6, name: "Child2", type: .Page, parentID: 2, order: 2.0)
+        addCollection(7, name: "Group2", type: .Group, parentID: nil, order: 2.0)
+        
         addPage("Page1")
         addPage("Page2")
         addPage("Page3")
@@ -180,6 +203,68 @@ class DocModel {
         return ListViewModel(data: data, selection: selection, cell: cell)
     }()
     
+    lazy var docOutlineTreeViewModel: TreeViewModel = { [unowned self] in
+        let data = TreeViewModel.Data(
+            binding: self.orderedCollections
+        )
+        
+        // TODO: s/Collection/Page/ depending on collection type
+        let selection = TreeViewModel.Selection(
+            relation: self.selectedPage,
+            set: { (id) in
+                let selectedID = self.selectedPage.rows().next().map{$0.ok!["page_id"]}
+                if let id = id {
+                    self.undoManager.registerChange(
+                        name: "Select Collection",
+                        perform: true,
+                        forward: {
+                            self.selectPage(id, update: selectedID != nil)
+                        },
+                        backward: {
+                            if let selected = selectedID {
+                                self.selectPage(selected, update: true)
+                            } else {
+                                self.deselectPage()
+                            }
+                        }
+                    )
+                } else {
+                    self.undoManager.registerChange(
+                        name: "Deselect Collection",
+                        perform: true,
+                        forward: {
+                            self.deselectPage()
+                        },
+                        backward: {
+                            if let selected = selectedID {
+                                self.selectPage(selected, update: false)
+                            }
+                        }
+                    )
+                }
+            },
+            get: {
+                return self.selectedPage.rows().next().map{$0.ok!["page_id"]}
+            }
+        )
+        
+        let cell = { (row: Row) -> TreeViewModel.Cell in
+            // TODO: Ideally we'd have a way to create a projection Relation directly from
+            // an existing Row.  In the meantime, we'll select/project from the original
+            // relation.  The downside of that latter approach is that the cell text will
+            // disappear before the cell fades out in the case where the item is deleted.
+            // (If the cell was bound to a projection of the row, presumably it would
+            // continue to work even after the row has been deleted from the underlying
+            // relation.)
+            let rowID = row["id"]
+            let rowRelation = self.collections.select([Attribute("id") *== rowID])
+            let binding = self.collectionNameBinding(rowRelation, id: { rowID })
+            return TreeViewModel.Cell(text: binding)
+        }
+        
+        return TreeViewModel(data: data, selection: selection, cell: cell)
+    }()
+
     lazy var itemSelected: ExistsBinding = { [unowned self] in
         return ExistsBinding(relation: self.selectedPageItem)
     }()
@@ -229,6 +314,32 @@ class DocModel {
             return self.selectedPageItem.rows().next()!.ok!["page_id"]
         })
     }()
+    
+    private func collectionNameBinding(relation: Relation, id: () -> RelationValue) -> StringBidiBinding {
+        
+        func update(newValue: String) {
+            let idValue = id()
+            let terms = [Attribute("id") *== idValue]
+            let values: Row = ["name": RelationValue(newValue)]
+            Swift.print("UPDATE: \(newValue)")
+            assert(self.collections.update(terms, newValues: values).ok != nil)
+        }
+        
+        return StringBidiBinding(relation: relation, attribute: "name", change: BidiChange<String>{ (newValue, oldValue, commit) in
+            Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
+            if commit {
+                // TODO: s/Collection/Page/ depending on collection type
+                self.undoManager.registerChange(
+                    name: "Rename Collection",
+                    perform: true,
+                    forward: { update(newValue) },
+                    backward: { update(oldValue) }
+                )
+            } else {
+                update(newValue)
+            }
+        })
+    }
     
     private func pageNameBinding(relation: Relation, id: () -> RelationValue) -> StringBidiBinding {
 
