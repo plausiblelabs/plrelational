@@ -52,7 +52,7 @@ public class ModelToManyRelation<T: Model>: ModelRelation<T> {
         }
         
         let joinRelation = owningDatabase.joinRelation(from: fromType, to: T.self)
-        let result = joinRelation.add(["from ID": RelationValue(fromID.value), "to ID": RelationValue(obj.objectID.value)])
+        let result = joinRelation.then({ $0.add(["from ID": RelationValue(fromID.value), "to ID": RelationValue(obj.objectID.value)]) })
         return result.map({ _ in })
     }
 }

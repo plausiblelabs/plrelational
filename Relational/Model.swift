@@ -16,22 +16,23 @@ public protocol Model: class {
 }
 
 extension Model {
-    public func parentsOfType<T: Model>(type: T.Type) -> ModelRelation<T> {
+    public func parentsOfType<T: Model>(type: T.Type) -> Result<ModelRelation<T>, RelationError> {
         return owningDatabase.fetch(type, owning: self)
     }
     
     public func parentOfType<T: Model>(type: T.Type) -> Result<T?, RelationError> {
-        let parents = parentsOfType(type)
-        let gen = parents.generate()
-        
-        // Get one parent.
-        guard let result = gen.next() else { return .Ok(nil) }
-        
-        // Ensure there's only one. If there's two, bail.
-        guard gen.next() == nil else { return .Ok(nil) }
-        
-        // The map call makes the type optional, otherwise Result<T> isn't compatible with Result<T?>
-        return result.map({ $0 })
+        return parentsOfType(type).then({ parents in
+            let gen = parents.generate()
+            
+            // Get one parent.
+            guard let result = gen.next() else { return .Ok(nil) }
+            
+            // Ensure there's only one. If there's two, bail.
+            guard gen.next() == nil else { return .Ok(nil) }
+            
+            // The map call makes the type optional, otherwise Result<T> isn't compatible with Result<T?>
+            return result.map({ $0 })
+        })
     }
 }
 

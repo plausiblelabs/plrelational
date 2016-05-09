@@ -6,7 +6,6 @@ public class SQLiteBinding {
     
     let database: SQLiteDatabase
     let tableName: String
-    let scheme: Scheme
     let key: Row
     let attribute: Attribute
     let changeObserver: RelationValue -> Void
@@ -15,15 +14,14 @@ public class SQLiteBinding {
     
     var removal: (Void -> Void)?
     
-    public init(database: SQLiteDatabase, tableName: String, scheme: Scheme, key: Row, attribute: Attribute, changeObserver: RelationValue -> Void) {
+    public init(database: SQLiteDatabase, tableName: String, key: Row, attribute: Attribute, changeObserver: RelationValue -> Void) {
         self.database = database
         self.tableName = tableName
-        self.scheme = scheme
         self.key = key
         self.attribute = attribute
         self.changeObserver = changeObserver
         
-        self.relation = database[tableName, scheme].select(key)
+        self.relation = database[tableName]!.select(key)
         self.removal = self.relation.addChangeObserver({ [weak self] in self?.changed() })
         
         self.changed()
@@ -39,7 +37,7 @@ public class SQLiteBinding {
     
     public func set(value: RelationValue) -> Result<Void, RelationError> {
         let searchTerms = key.values.map({ ComparisonTerm.EQ($0, $1) })
-        return database[tableName, scheme].update(searchTerms, newValues: [attribute: value])
+        return database[tableName]!.update(searchTerms, newValues: [attribute: value])
     }
     
     private func changed() {

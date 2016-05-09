@@ -9,11 +9,11 @@ public class ChangeLoggingDatabase {
     }
     
     public func createRelation(name: String, scheme: Scheme) -> Result<Void, RelationError> {
-        return sqliteDatabase.createRelation(name, scheme: scheme)
+        return sqliteDatabase.createRelation(name, scheme: scheme).map({ _ in })
     }
     
-    public subscript(name: String, scheme: Scheme) -> Relation {
-        return getLoggingRelation(name, scheme)
+    public subscript(name: String) -> Relation {
+        return getLoggingRelation(name)
     }
     
     public func save() -> Result<Void, RelationError> {
@@ -29,11 +29,11 @@ public class ChangeLoggingDatabase {
 }
 
 extension ChangeLoggingDatabase {
-    private func getLoggingRelation(name: String, _ scheme: Scheme) -> ChangeLoggingRelation<SQLiteTableRelation> {
+    private func getLoggingRelation(name: String) -> ChangeLoggingRelation<SQLiteTableRelation> {
         if let relation = changeLoggingRelations[name] {
             return relation
         } else {
-            let table = sqliteDatabase[name, scheme]
+            let table = sqliteDatabase[name]!
             let relation = ChangeLoggingRelation(underlyingRelation: table)
             changeLoggingRelations[name] = relation
             return relation
@@ -50,11 +50,11 @@ extension ChangeLoggingDatabase {
             self.db = db
         }
         
-        public subscript(name: String, scheme: Scheme) -> ChangeLoggingRelation<ChangeLoggingRelation<SQLiteTableRelation>> {
+        public subscript(name: String) -> ChangeLoggingRelation<ChangeLoggingRelation<SQLiteTableRelation>> {
             if let relation = changeLoggingRelations[name] {
                 return relation
             } else {
-                let table = db.getLoggingRelation(name, scheme)
+                let table = db.getLoggingRelation(name)
                 let relation = ChangeLoggingRelation(underlyingRelation: table)
                 changeLoggingRelations[name] = relation
                 return relation

@@ -31,7 +31,7 @@ final class MODEL_NAME: Model, CustomStringConvertible {
     
     var FIELD_NAME: FIELD_TYPE { didSet { changeObservers.notify(self) } }
     
-    var TO_MANY_FIELD_NAME: ModelToManyRelation<TO_MANY_FIELD_TYPE> { return owningDatabase.fetch(TO_MANY_FIELD_TYPE.self, ownedBy: self) }
+    var TO_MANY_FIELD_NAME: Result<ModelToManyRelation<TO_MANY_FIELD_TYPE>, RelationError> { return owningDatabase.fetch(TO_MANY_FIELD_TYPE.self, ownedBy: self) }
     
     init(
         owningDatabase: ModelDatabase,

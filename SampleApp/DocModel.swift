@@ -51,8 +51,7 @@ class DocModel {
         // Prepare the schemas
         let db = makeDB().db
         func createRelation(name: String, _ scheme: Scheme) -> SQLiteTableRelation {
-            assert(db.createRelation(name, scheme: scheme).ok != nil)
-            return db[name, scheme]
+            return db.getOrCreateRelation(name, scheme: scheme).ok!
         }
         self.pages = createRelation("page", ["id", "name", "order"])
         self.orderedPages = OrderedBinding(relation: pages, idAttr: "id", orderAttr: "order")

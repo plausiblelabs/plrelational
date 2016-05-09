@@ -9,7 +9,7 @@ let SQLITE_TRANSIENT = unsafeBitCast(-1, sqlite3_destructor_type.self)
 public class SQLiteDatabase {
     let db: sqlite3
     
-    public var tables: Set<String> = []
+    private var tables: [String: SQLiteTableRelation] = [:]
     
     private var changeObservers: [UInt64: Void -> Void] = [:]
     private var changeObserverNextID: UInt64 = 0
@@ -30,14 +30,21 @@ public class SQLiteDatabase {
         try! errwrap(sqlite3_close_v2(db)).orThrow()
     }
     
-    private func queryTables() -> Result<Set<String>, RelationError> {
+    private func queryTables() -> Result<[String: SQLiteTableRelation], RelationError> {
         let masterName = "SQLITE_MASTER"
         let masterScheme = schemeForTable(masterName)
-        return masterScheme.then({ (scheme: Scheme) -> Result<Set<String>, RelationError> in
-            let master = self[masterName, scheme]
+        return masterScheme.then({ (scheme: Scheme) -> Result<[String: SQLiteTableRelation], RelationError> in
+            let master = SQLiteTableRelation(db: self, tableName: masterName, scheme: scheme)
             let tables = master.select([.EQ(Attribute("type"), "table")])
             let names = mapOk(tables.rows(), { (row: Row) -> String in row["name"].get()! as String })
-            return names.map({ Set($0) })
+            return names.then({ names in
+                let schemes = names.map({ schemeForTable($0) })
+                let tables = zip(names, schemes).map({ (name, scheme) in
+                    scheme.map({ SQLiteTableRelation(db: self, tableName: name, scheme: $0) })
+                })
+                let tableDict = mapOk(tables, { ($0.tableName, $0) }).map({ Dictionary($0) })
+                return tableDict
+            })
         })
     }
     
@@ -73,7 +80,7 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    public func createRelation(name: String, scheme: Scheme) -> Result<Void, RelationError> {
+    public func createRelation(name: String, scheme: Scheme) -> Result<SQLiteTableRelation, RelationError> {
         let allColumns: [String]  = scheme.attributes.map({ escapeIdentifier($0.name) })
         
         let columnsSQL = allColumns.joinWithSeparator(", ")
@@ -83,13 +90,23 @@ extension SQLiteDatabase {
         return result.map({ rows in
             let array = Array(rows)
             precondition(array.isEmpty, "Unexpected result from CREATE TABLE statement: \(array)")
-            tables.insert(name)
-            return ()
+            
+            let relation = SQLiteTableRelation(db: self, tableName: name, scheme: scheme)
+            tables[name] = relation
+            return relation
         })
     }
     
-    public subscript(name: String, scheme: Scheme) -> SQLiteTableRelation {
-        return SQLiteTableRelation(db: self, tableName: name, scheme: scheme)
+    public func getOrCreateRelation(name: String, scheme: Scheme) -> Result<SQLiteTableRelation, RelationError> {
+        if let relation = self[name] {
+            return .Ok(relation)
+        } else {
+            return createRelation(name, scheme: scheme)
+        }
+    }
+    
+    public subscript(name: String) -> SQLiteTableRelation? {
+        return tables[name]
     }
 }
 

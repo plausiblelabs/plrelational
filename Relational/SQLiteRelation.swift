@@ -4,7 +4,7 @@ import sqlite3
 public class SQLiteRelation: Relation {
     let db: SQLiteDatabase
     
-    let tableName: String
+    public let tableName: String
     public let scheme: Scheme
     
     var tableNameForQuery: String {
@@ -138,12 +138,6 @@ public class SQLiteTableRelation: SQLiteRelation {
     }
     
     public func add(row: Row) -> Result<Int64, RelationError> {
-        if !db.tables.contains(tableName) {
-            if let err = db.createRelation(tableName, scheme: scheme).err {
-                return .Err(err)
-            }
-        }
-        
         let orderedAttributes = Array(row.values)
         let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.0.name) }).joinWithSeparator(", ")
         let parameters = orderedAttributes.map({ $0.1 })

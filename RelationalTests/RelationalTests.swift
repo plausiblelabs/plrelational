@@ -5,7 +5,6 @@ import libRelational
 class RelationalTests: DBTestCase {
     func testLib() {
         let db = makeDB().db
-        XCTAssertEqual(db.sqliteDatabase.tables, [])
         
         let store = Store(owningDatabase: db, name: "Joe's")
         XCTAssertNotNil(db.add(store).ok)
@@ -480,7 +479,7 @@ class RelationalTests: DBTestCase {
         db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
         db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
         
-        let FLIGHTS = db["FLIGHTS", ["NUMBER", "FROM", "TO"]]
+        let FLIGHTS = db["FLIGHTS"]!
         FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
         FLIGHTS.add(["NUMBER": "124", "FROM": "JFK", "TO": "A"])
         FLIGHTS.add(["NUMBER": "125", "FROM": "JFK", "TO": "B"])
@@ -577,25 +576,25 @@ class RelationalTests: DBTestCase {
         XCTAssertNil(db.add(store2).err)
         
         let emp1 = Employee(owningDatabase: db, name: "Toddd")
-        XCTAssertNil(store1.employees.add(emp1).err)
+        XCTAssertNil(store1.employees.ok!.add(emp1).err)
         
         let emp2 = Employee(owningDatabase: db, name: "Alex")
-        XCTAssertNil(store1.employees.add(emp2).err)
+        XCTAssertNil(store1.employees.ok!.add(emp2).err)
         
         let emp3 = Employee(owningDatabase: db, name: "Ramius")
-        XCTAssertNil(store1.employees.add(emp3).err)
+        XCTAssertNil(store1.employees.ok!.add(emp3).err)
         
-        XCTAssertNil(emp1.directReports.add(emp2).err)
-        XCTAssertNil(emp1.directReports.add(emp3).err)
+        XCTAssertNil(emp1.directReports.ok!.add(emp2).err)
+        XCTAssertNil(emp1.directReports.ok!.add(emp3).err)
         
         let emp4 = Employee(owningDatabase: db, name: "Phteven")
-        XCTAssertNil(store2.employees.add(emp4).err)
+        XCTAssertNil(store2.employees.ok!.add(emp4).err)
         
-        AssertEqual(store1.employees, [emp1, emp2, emp3])
-        AssertEqual(store2.employees, [emp4])
+        AssertEqual(store1.employees.ok!, [emp1, emp2, emp3])
+        AssertEqual(store2.employees.ok!, [emp4])
         
-        AssertEqual(emp1.directReports, [emp2, emp3])
-        AssertEqual(emp2.directReports, [] as [Employee])
+        AssertEqual(emp1.directReports.ok!, [emp2, emp3])
+        AssertEqual(emp2.directReports.ok!, [] as [Employee])
         
         XCTAssertEqual(emp2.parentOfType(Employee.self).ok??.toRow(), emp1.toRow())
         XCTAssertEqual(emp2.parentOfType(Store.self).ok??.toRow(), store1.toRow())
@@ -634,7 +633,7 @@ class RelationalTests: DBTestCase {
         let db = makeDB().db.sqliteDatabase
         
         XCTAssertNil(db.createRelation("test", scheme: ["column"]).err)
-        let r = db["test", ["column"]]
+        let r = db["test"]!
         
         var changeCount = 0
         let removal = r.addChangeObserver({ changeCount += 1 })
@@ -659,8 +658,8 @@ class RelationalTests: DBTestCase {
         XCTAssertNil(db.createRelation("a", scheme: ["1", "2"]).err)
         XCTAssertNil(db.createRelation("b", scheme: ["2", "3"]).err)
         
-        let a = db["a", ["1", "2"]]
-        let b = db["b", ["2", "3"]]
+        let a = db["a"]!
+        let b = db["b"]!
         
         a.add(["1": "X", "2": "X"])
         a.add(["1": "X", "2": "Y"])
@@ -712,13 +711,13 @@ class RelationalTests: DBTestCase {
         let scheme: Scheme = ["id", "name"]
         XCTAssertNil(db.createRelation("people", scheme: scheme).err)
         
-        let r = db["people", scheme]
+        let r = db["people"]!
         XCTAssertNil(r.add(["id": 1, "name": "Joe"]).err)
         XCTAssertNil(r.add(["id": 2, "name": "Steve"]).err)
         XCTAssertNil(r.add(["id": 3, "name": "Jane"]).err)
         
         var currentName: String?
-        let binding = SQLiteBinding(database: db, tableName: "people", scheme: scheme, key: ["id": 2], attribute: "name", changeObserver: { currentName = $0.get() })
+        let binding = SQLiteBinding(database: db, tableName: "people", key: ["id": 2], attribute: "name", changeObserver: { currentName = $0.get() })
         XCTAssertEqual(currentName, "Steve")
         
         binding.set("Roberta")
@@ -737,8 +736,8 @@ class RelationalTests: DBTestCase {
         let housesScheme: Scheme = ["id", "address"]
         XCTAssertNil(db.createRelation("houses", scheme: housesScheme).err)
         
-        let people = db["people", peopleScheme]
-        let houses = db["houses", housesScheme]
+        let people = db["people"]!
+        let houses = db["houses"]!
         
         XCTAssertNil(people.add(["id": 1, "name": "Johnson", "houseID": 1]).err)
         XCTAssertNil(people.add(["id": 2, "name": "Stanley", "houseID": 2]).err)
