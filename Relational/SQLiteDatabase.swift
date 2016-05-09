@@ -211,14 +211,31 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    public func transaction<Return>(@noescape transactionFunction: Void -> Return) -> Result<Return, RelationError> {
+    public enum TransactionResult {
+        case Commit
+        case Rollback
+    }
+    
+    public func transaction<Return>(@noescape transactionFunction: Void -> (Return, TransactionResult)) -> Result<Return, RelationError> {
         // TODO: it might make sense to pass a new DB into the object, but in fact changes affect the original database object.
         // This will matter if the caller tries to access the original database during the transaction and expects it not to
         // reflect the new changes.
         // TODO TOO: we'd want to retry on failed commits in some cases, and give the callee the ability to rollback.
         return executeQueryWithEmptyResults("BEGIN TRANSACTION").then({
-            let returnValue = transactionFunction()
-            return self.executeQueryWithEmptyResults("COMMIT TRANSACTION").map({ returnValue })
+            let result = transactionFunction()
+            let sql: String
+            switch result.1 {
+            case .Commit: sql = "COMMIT TRANSACTION"
+            case .Rollback: sql = "ROLLBACK TRANSACTION"
+            }
+            return self.executeQueryWithEmptyResults(sql).map({ result.0 })
+        })
+    }
+    
+    public func transaction(@noescape transactionFunction: Void -> TransactionResult) -> Result<Void, RelationError> {
+        return self.transaction({ Void -> ((), TransactionResult) in
+            let result = transactionFunction()
+            return ((), result)
         })
     }
 }

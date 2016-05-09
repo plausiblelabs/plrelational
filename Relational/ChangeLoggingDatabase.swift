@@ -17,10 +17,10 @@ public class ChangeLoggingDatabase {
             for (_, relation) in changeLoggingRelations {
                 let result = relation.save()
                 if let err = result.err {
-                    return .Err(err)
+                    return (.Err(err), .Rollback)
                 }
             }
-            return .Ok()
+            return (.Ok(), .Commit)
         }).then({ $0 })
     }
 }
