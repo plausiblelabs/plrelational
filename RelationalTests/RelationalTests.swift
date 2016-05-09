@@ -695,4 +695,110 @@ class RelationalTests: DBTestCase {
                         [1, "123 Main St."],
                         [2, "999 Something Ln."]))
     }
+    
+    func testProjectUpdate() {
+        let db = makeDB().db.sqliteDatabase
+        let r = db.getOrCreateRelation("people", scheme: ["first", "last", "pet"]).ok!
+        XCTAssertNil(r.add(["first": "Steve", "last": "Jobs", "pet": "cat"]).err)
+        XCTAssertNil(r.add(["first": "Lisa", "last": "Jobs", "pet": "cat"]).err)
+        XCTAssertNil(r.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
+        XCTAssertNil(r.add(["first": "Allen", "last": "Jones", "pet": "dog"]).err)
+        
+        var projected = r.project(["last", "pet"])
+        projected.update([Attribute("pet") *== "cat"], newValues: ["last": "Smith"])
+        
+        AssertEqual(r,
+                    MakeRelation(
+                        ["first", "last", "pet"],
+                        ["Steve", "Smith", "cat"],
+                        ["Lisa", "Smith", "cat"],
+                        ["Cindy", "Jobs", "dog"],
+                        ["Allen", "Jones", "dog"]))
+    }
+    
+    func testDifferenceUpdate() {
+        let db = makeDB().db.sqliteDatabase
+        let r1 = db.getOrCreateRelation("people1", scheme: ["first", "last", "pet"]).ok!
+        XCTAssertNil(r1.add(["first": "Steve", "last": "Jobs", "pet": "cat"]).err)
+        XCTAssertNil(r1.add(["first": "Lisa", "last": "Jobs", "pet": "cat"]).err)
+        XCTAssertNil(r1.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
+        XCTAssertNil(r1.add(["first": "Allen", "last": "Jones", "pet": "dog"]).err)
+        
+        let r2 = db.getOrCreateRelation("people2", scheme: ["first", "last", "pet"]).ok!
+        XCTAssertNil(r2.add(["first": "Steve", "last": "Jobs", "pet": "cat"]).err)
+        XCTAssertNil(r2.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
+        
+        var difference = r1.difference(r2)
+        difference.update([Attribute("pet") *== "cat"], newValues: ["last": "Smith"])
+        
+        AssertEqual(r1,
+                    MakeRelation(
+                        ["first", "last", "pet"],
+                        ["Steve", "Jobs", "cat"],
+                        ["Lisa", "Smith", "cat"],
+                        ["Cindy", "Jobs", "dog"],
+                        ["Allen", "Jones", "dog"]))
+        
+        AssertEqual(r2,
+                    MakeRelation(
+                        ["first", "last", "pet"],
+                        ["Steve", "Jobs", "cat"],
+                        ["Cindy", "Jobs", "dog"]))
+    }
+    
+    func testIntersectionUpdate() {
+        let db = makeDB().db.sqliteDatabase
+        let r1 = db.getOrCreateRelation("people1", scheme: ["first", "last", "pet"]).ok!
+        XCTAssertNil(r1.add(["first": "Steve", "last": "Jobs", "pet": "cat"]).err)
+        XCTAssertNil(r1.add(["first": "Lisa", "last": "Jobs", "pet": "cat"]).err)
+        XCTAssertNil(r1.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
+        XCTAssertNil(r1.add(["first": "Allen", "last": "Jones", "pet": "dog"]).err)
+        
+        let r2 = db.getOrCreateRelation("people2", scheme: ["first", "last", "pet"]).ok!
+        XCTAssertNil(r2.add(["first": "Steve", "last": "Jobs", "pet": "cat"]).err)
+        XCTAssertNil(r2.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
+        
+        var intersection = r1.intersection(r2)
+        intersection.update([Attribute("pet") *== "cat"], newValues: ["last": "Smith"])
+        
+        AssertEqual(r1,
+                    MakeRelation(
+                        ["first", "last", "pet"],
+                        ["Steve", "Smith", "cat"],
+                        ["Lisa", "Jobs", "cat"],
+                        ["Cindy", "Jobs", "dog"],
+                        ["Allen", "Jones", "dog"]))
+        
+        AssertEqual(r2,
+                    MakeRelation(
+                        ["first", "last", "pet"],
+                        ["Steve", "Smith", "cat"],
+                        ["Cindy", "Jobs", "dog"]))
+    }
+    
+    func testUnionUpdate() {
+        let db = makeDB().db.sqliteDatabase
+        let r1 = db.getOrCreateRelation("people1", scheme: ["first", "last", "pet"]).ok!
+        XCTAssertNil(r1.add(["first": "Lisa", "last": "Jobs", "pet": "cat"]).err)
+        XCTAssertNil(r1.add(["first": "Allen", "last": "Jones", "pet": "dog"]).err)
+        
+        let r2 = db.getOrCreateRelation("people2", scheme: ["first", "last", "pet"]).ok!
+        XCTAssertNil(r2.add(["first": "Steve", "last": "Jobs", "pet": "cat"]).err)
+        XCTAssertNil(r2.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
+        
+        var union = r1.union(r2)
+        union.update([Attribute("pet") *== "cat"], newValues: ["last": "Smith"])
+        
+        AssertEqual(r1,
+                    MakeRelation(
+                        ["first", "last", "pet"],
+                        ["Lisa", "Smith", "cat"],
+                        ["Allen", "Jones", "dog"]))
+        
+        AssertEqual(r2,
+                    MakeRelation(
+                        ["first", "last", "pet"],
+                        ["Steve", "Smith", "cat"],
+                        ["Cindy", "Jobs", "dog"]))
+    }
 }
