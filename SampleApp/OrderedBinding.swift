@@ -118,7 +118,7 @@ public class OrderedBinding {
         observers.forEach{$0.onMove(srcIndex: srcIndex, dstIndex: dstIndex)}
     }
     
-    public func orderForPos(pos: Pos) -> RelationValue {
+    private func orderForPos(pos: Pos) -> RelationValue {
         // TODO: Use a more appropriate data type for storing order
         let lo: Double = orderForID(pos.previousID) ?? 1.0
         let hi: Double = orderForID(pos.nextID) ?? 9.0

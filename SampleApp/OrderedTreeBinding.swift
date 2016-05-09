@@ -39,7 +39,8 @@ public class OrderedTreeBinding {
     
     private let relation: SQLiteTableRelation
     private let closures: SQLiteTableRelation
-    private let idAttr: Attribute
+    // TODO: Make this private
+    let idAttr: Attribute
     private let orderAttr: Attribute
     
     private(set) public var nodes: [Node] = []
@@ -66,7 +67,7 @@ public class OrderedTreeBinding {
         }
     }
 
-    private func nodeForID(id: Int64) -> Node? {
+    public func nodeForID(id: Int64) -> Node? {
         // TODO: Not efficient, but whatever
         func findNode(node: Node) -> Node? {
             let nodeID: Int64 = node.data[idAttr].get()!
@@ -93,20 +94,25 @@ public class OrderedTreeBinding {
     }
     
     // XXX: This is temporary
-    func add(row: Row, parentID: Int64?, order: Double) {
-        let parent: RelationValue
+    func add(row: Row, parentID: Int64?) {
+        let parentIDValue: RelationValue
+        let pos: TreePos
         if let parentID = parentID {
-            parent = RelationValue(parentID)
+            parentIDValue = RelationValue(parentID)
+            let parentNode = nodeForID(parentID)
+            pos = TreePos(parentID: parentIDValue, previousID: parentNode?.children.last?.data[idAttr], nextID: nil)
         } else {
-            parent = .NULL
+            parentIDValue = .NULL
+            pos = TreePos(parentID: nil, previousID: self.nodes.last?.data[idAttr], nextID: nil)
         }
         
+        let order: RelationValue = orderForPos(pos)
+        
         var mutableRow = row
-        mutableRow["parent"] = parent
-        mutableRow["order"] = RelationValue(order)
+        mutableRow["parent"] = parentIDValue
+        mutableRow["order"] = order
         let node = Node(mutableRow)
 
-        // TODO: We'll ignore order for now and assume rows are provided in correct order
         if let parentID = parentID {
             nodeForID(parentID)!.children.append(node)
         } else {
@@ -122,7 +128,30 @@ public class OrderedTreeBinding {
 //        // TODO
 //    }
 
-//    public func delete(id: RelationValue) {
-//        // TODO
-//    }
+    public func delete(id: RelationValue) {
+        // TODO
+    }
+    
+    private func orderForPos(pos: TreePos) -> RelationValue {
+        // TODO: Use a more appropriate data type for storing order
+        let lo: Double = orderForID(pos.previousID) ?? 1.0
+        let hi: Double = orderForID(pos.nextID) ?? 9.0
+        return RelationValue(lo + ((hi - lo) / 2.0))
+    }
+    
+    // XXX
+    private func orderForID(id: RelationValue?) -> Double? {
+        if let id = id {
+            // XXX: Don't assume Int64
+            let idval: Int64 = id.get()!
+            if let node = nodeForID(idval) {
+                let row = node.data
+                return row[orderAttr].get()
+            } else {
+                return nil
+            }
+        } else {
+            return nil
+        }
+    }
 }

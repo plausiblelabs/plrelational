@@ -35,12 +35,10 @@ class DocModel {
     private let db: SQLiteDatabase
     private let collections: SQLiteTableRelation
     private let orderedCollections: OrderedTreeBinding
-    private let pages: SQLiteTableRelation
-    private let orderedPages: OrderedBinding
-    private let selectedPage: SQLiteTableRelation
+    private let selectedCollection: SQLiteTableRelation
     private let selectedInspectorItem: SQLiteTableRelation
-    private let selectedPageItem: Relation
-    private var pageID: Int64 = 1
+    private let selectedCollectionItem: Relation
+    private var collectionID: Int64 = 1
     
     init(undoManager: UndoManager) {
         self.undoManager = undoManager
@@ -64,144 +62,84 @@ class DocModel {
         self.collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
         let closures = createRelation("collection_closure", ["ancestor", "descendant", "depth"])
         self.orderedCollections = OrderedTreeBinding(relation: collections, closures: closures, idAttr: "id", orderAttr: "order")
-        self.pages = createRelation("page", ["id", "name", "order"])
-        self.orderedPages = OrderedBinding(relation: pages, idAttr: "id", orderAttr: "order")
-        self.selectedPage = createRelation("selected_page", ["id", "page_id"])
+        self.selectedCollection = createRelation("selected_collection", ["id", "coll_id"])
         self.selectedInspectorItem = createRelation("selected_inspector_item", ["id", "type", "fid"])
-        self.selectedPageItem = pages.renameAttributes(["id" : "page_id"]).join(selectedPage)
+        self.selectedCollectionItem = collections.renameAttributes(["id" : "coll_id"]).join(selectedCollection)
         self.db = db
 
-        func addCollection(collectionID: Int64, name: String, type: CollectionType, parentID: Int64?, order: Double) {
-            let row: Row = [
-                "id": RelationValue(collectionID),
-                "type": RelationValue(type.rawValue),
-                "name": RelationValue(name)
-            ]
-            orderedCollections.add(row, parentID: parentID, order: order)
-        }
-
         // Prepare the default document data
-        addCollection(1, name: "Group1", type: .Group, parentID: nil, order: 1.0)
-        addCollection(2, name: "Collection1", type: .Collection, parentID: 1, order: 1.0)
-        addCollection(3, name: "Page1", type: .Page, parentID: 1, order: 2.0)
-        addCollection(4, name: "Page2", type: .Page, parentID: 1, order: 3.0)
-        addCollection(5, name: "Child1", type: .Page, parentID: 2, order: 1.0)
-        addCollection(6, name: "Child2", type: .Page, parentID: 2, order: 2.0)
-        addCollection(7, name: "Group2", type: .Group, parentID: nil, order: 2.0)
-        
-        addPage("Page1")
-        addPage("Page2")
-        addPage("Page3")
+        addCollection(1, name: "Group1", type: .Group, parentID: nil)
+        addCollection(2, name: "Collection1", type: .Collection, parentID: 1)
+        addCollection(3, name: "Page1", type: .Page, parentID: 1)
+        addCollection(4, name: "Page2", type: .Page, parentID: 1)
+        addCollection(5, name: "Child1", type: .Page, parentID: 2)
+        addCollection(6, name: "Child2", type: .Page, parentID: 2)
+        addCollection(7, name: "Group2", type: .Group, parentID: nil)
     }
     
-    private func addPage(name: String) {
-        orderedPages.append(["id": RelationValue(pageID), "name": RelationValue(name)])
-        pageID += 1
+    private func addCollection(collectionID: Int64?, name: String, type: CollectionType, parentID: Int64?) {
+        let id: Int64
+        if let collectionID = collectionID {
+            id = collectionID
+        } else {
+            id = self.collectionID
+            self.collectionID += 1
+        }
+
+        let row: Row = [
+            "id": RelationValue(id),
+            "type": RelationValue(type.rawValue),
+            "name": RelationValue(name)
+        ]
+        orderedCollections.add(row, parentID: parentID)
     }
     
     func newPage(name: String) {
-        let id = pageID
+        let id = collectionID
         undoManager.registerChange(
             name: "New Page",
             perform: true,
             forward: {
-                self.addPage(name)
+                self.addCollection(id, name: name, type: .Page, parentID: nil)
             },
             backward: {
-                // TODO: Update selected_page if needed
-                self.orderedPages.delete(RelationValue(id))
-                self.pageID -= 1
+                // TODO: Update selected_collection if needed
+                self.orderedCollections.delete(RelationValue(id))
+                self.collectionID -= 1
             }
         )
     }
 
-    private func selectPage(id: RelationValue, update: Bool) {
+    private func selectCollection(id: RelationValue, update: Bool) {
         if update {
-            selectedPage.update([Attribute("id") *== RelationValue(Int64(1))], newValues: ["page_id": id])
+            selectedCollection.update([Attribute("id") *== RelationValue(Int64(1))], newValues: ["coll_id": id])
         } else {
-            selectedPage.add(["id": RelationValue(Int64(1)), "page_id": id])
+            selectedCollection.add(["id": RelationValue(Int64(1)), "coll_id": id])
         }
     }
     
-    private func deselectPage() {
-        selectedPage.delete([Attribute("id") *== RelationValue(Int64(1))])
+    private func deselectCollection() {
+        selectedCollection.delete([Attribute("id") *== RelationValue(Int64(1))])
     }
 
-    lazy var docOutlineViewModel: ListViewModel = { [unowned self] in
-        let data = ListViewModel.Data(
-            binding: self.orderedPages,
-            move: { (srcIndex, dstIndex) in
-                // Note: dstIndex is relative to the state of the array *before* the item is removed.
-                let dst = dstIndex < srcIndex ? dstIndex : dstIndex - 1
-                self.undoManager.registerChange(
-                    name: "Move Page",
-                    perform: true,
-                    forward: {
-                        self.orderedPages.move(srcIndex: srcIndex, dstIndex: dst)
-                    },
-                    backward: {
-                        self.orderedPages.move(srcIndex: dst, dstIndex: srcIndex)
-                    }
-                )
-            }
-        )
-        
-        // TODO: Selection changes/transactions should be managed in-memory
-        let selection = ListViewModel.Selection(
-            relation: self.selectedPage,
-            set: { (id) in
-                let selectedID = self.selectedPage.rows().next().map{$0.ok!["page_id"]}
-                if let id = id {
-                    self.undoManager.registerChange(
-                        name: "Select Page",
-                        perform: true,
-                        forward: {
-                            self.selectPage(id, update: selectedID != nil)
-                        },
-                        backward: {
-                            if let selected = selectedID {
-                                self.selectPage(selected, update: true)
-                            } else {
-                                self.deselectPage()
-                            }
-                        }
-                    )
-                } else {
-                    self.undoManager.registerChange(
-                        name: "Deselect Page",
-                        perform: true,
-                        forward: {
-                            self.deselectPage()
-                        },
-                        backward: {
-                            if let selected = selectedID {
-                                self.selectPage(selected, update: false)
-                            }
-                        }
-                    )
-                }
-            },
-            get: {
-                return self.selectedPage.rows().next().map{$0.ok!["page_id"]}
-            }
-        )
-
-        let cell = { (row: Row) -> ListViewModel.Cell in
-            // TODO: Ideally we'd have a way to create a projection Relation directly from
-            // an existing Row.  In the meantime, we'll select/project from the original
-            // relation.  The downside of that latter approach is that the cell text will
-            // disappear before the cell fades out in the case where the item is deleted.
-            // (If the cell was bound to a projection of the row, presumably it would
-            // continue to work even after the row has been deleted from the underlying
-            // relation.)
-            let rowID = row["id"]
-            let rowRelation = self.pages.select([Attribute("id") *== rowID])
-            let binding = self.pageNameBinding(rowRelation, id: { rowID })
-            return ListViewModel.Cell(text: binding)
-        }
-        
-        return ListViewModel(data: data, selection: selection, cell: cell)
-    }()
+//    lazy var docOutlineViewModel: ListViewModel = { [unowned self] in
+//        let data = ListViewModel.Data(
+//            binding: self.orderedPages,
+//            move: { (srcIndex, dstIndex) in
+//                // Note: dstIndex is relative to the state of the array *before* the item is removed.
+//                let dst = dstIndex < srcIndex ? dstIndex : dstIndex - 1
+//                self.undoManager.registerChange(
+//                    name: "Move Page",
+//                    perform: true,
+//                    forward: {
+//                        self.orderedPages.move(srcIndex: srcIndex, dstIndex: dst)
+//                    },
+//                    backward: {
+//                        self.orderedPages.move(srcIndex: dst, dstIndex: srcIndex)
+//                    }
+//                )
+//            }
+//        )
     
     lazy var docOutlineTreeViewModel: TreeViewModel = { [unowned self] in
         let data = TreeViewModel.Data(
@@ -210,21 +148,21 @@ class DocModel {
         
         // TODO: s/Collection/Page/ depending on collection type
         let selection = TreeViewModel.Selection(
-            relation: self.selectedPage,
+            relation: self.selectedCollection,
             set: { (id) in
-                let selectedID = self.selectedPage.rows().next().map{$0.ok!["page_id"]}
+                let selectedID = self.selectedCollection.rows().next().map{$0.ok!["coll_id"]}
                 if let id = id {
                     self.undoManager.registerChange(
                         name: "Select Collection",
                         perform: true,
                         forward: {
-                            self.selectPage(id, update: selectedID != nil)
+                            self.selectCollection(id, update: selectedID != nil)
                         },
                         backward: {
                             if let selected = selectedID {
-                                self.selectPage(selected, update: true)
+                                self.selectCollection(selected, update: true)
                             } else {
-                                self.deselectPage()
+                                self.deselectCollection()
                             }
                         }
                     )
@@ -233,18 +171,18 @@ class DocModel {
                         name: "Deselect Collection",
                         perform: true,
                         forward: {
-                            self.deselectPage()
+                            self.deselectCollection()
                         },
                         backward: {
                             if let selected = selectedID {
-                                self.selectPage(selected, update: false)
+                                self.selectCollection(selected, update: false)
                             }
                         }
                     )
                 }
             },
             get: {
-                return self.selectedPage.rows().next().map{$0.ok!["page_id"]}
+                return self.selectedCollection.rows().next().map{$0.ok!["coll_id"]}
             }
         )
         
@@ -265,16 +203,16 @@ class DocModel {
         return TreeViewModel(data: data, selection: selection, cell: cell)
     }()
 
-    lazy var itemSelected: ExistsBinding = { [unowned self] in
-        return ExistsBinding(relation: self.selectedPageItem)
+    lazy var itemSelected: ValueBinding<Bool> = { [unowned self] in
+        return self.selectedDocItem.map{ $0 != nil }
     }()
     
-    lazy var itemNotSelected: NotExistsBinding = { [unowned self] in
-        return NotExistsBinding(relation: self.selectedPageItem)
+    lazy var itemNotSelected: ValueBinding<Bool> = { [unowned self] in
+        return self.selectedDocItem.map{ $0 == nil }
     }()
 
-    private lazy var selectedPageDocItem: ValueBinding<DocItem?> = { [unowned self] in
-        return Int64Binding(relation: self.selectedPageItem, attribute: "page_id").map{ value in
+    private lazy var selectedCollectionDocItem: ValueBinding<DocItem?> = { [unowned self] in
+        return Int64Binding(relation: self.selectedCollectionItem, attribute: "coll_id").map{ value in
             if let value = value {
                 return DocItem.Page(RelationValue(value))
             } else {
@@ -300,7 +238,7 @@ class DocModel {
     }()
     
     private lazy var selectedDocItem: ValueBinding<DocItem?> = { [unowned self] in
-        return self.selectedPageDocItem.zip(self.selectedInspectorDocItem).map{ (docItem, inspectorItem) in
+        return self.selectedCollectionDocItem.zip(self.selectedInspectorDocItem).map{ (docItem, inspectorItem) in
             return inspectorItem ?? docItem
         }
     }()
@@ -309,9 +247,10 @@ class DocModel {
         return self.selectedDocItem.map{ $0?.typeName }
     }()
     
+    // TODO: This should resolve to the name associated with selectedDocItem
     lazy var selectedItemName: StringBidiBinding = { [unowned self] in
-        return self.pageNameBinding(self.selectedPageItem, id: {
-            return self.selectedPageItem.rows().next()!.ok!["page_id"]
+        return self.collectionNameBinding(self.selectedCollectionItem, id: {
+            return self.selectedCollectionItem.rows().next()!.ok!["coll_id"]
         })
     }()
     
@@ -331,35 +270,6 @@ class DocModel {
                 // TODO: s/Collection/Page/ depending on collection type
                 self.undoManager.registerChange(
                     name: "Rename Collection",
-                    perform: true,
-                    forward: { update(newValue) },
-                    backward: { update(oldValue) }
-                )
-            } else {
-                update(newValue)
-            }
-        })
-    }
-    
-    private func pageNameBinding(relation: Relation, id: () -> RelationValue) -> StringBidiBinding {
-
-        func update(newValue: String) {
-            // TODO: If we had writable views, and assuming the given Relation represents
-            // a single value, we should be able to update that relation rather than updating
-            // the original relation (in which case we would no longer need the hack that passes
-            // in a closure that returns the ID of the page whose name will be updated)
-            let idValue = id()
-            let terms = [Attribute("id") *== idValue]
-            let values: Row = ["name": RelationValue(newValue)]
-            Swift.print("UPDATE: \(newValue)")
-            assert(self.pages.update(terms, newValues: values).ok != nil)
-        }
-        
-        return StringBidiBinding(relation: relation, attribute: "name", change: BidiChange<String>{ (newValue, oldValue, commit) in
-            Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
-            if commit {
-                self.undoManager.registerChange(
-                    name: "Rename Page",
                     perform: true,
                     forward: { update(newValue) },
                     backward: { update(oldValue) }

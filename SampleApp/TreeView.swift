@@ -135,17 +135,17 @@ extension TreeView: ExtOutlineViewDelegate {
     }
     
     func outlineViewSelectionDidChange(notification: NSNotification) {
-        // TODO
-//        let itemID: RelationValue?
-//        selfInitiatedSelectionChange = true
-//        if outlineView.selectedRow >= 0 {
-//            let row = model.data.binding.rows[outlineView.selectedRow].value
-//            itemID = row[model.data.binding.idAttr]
-//        } else {
-//            itemID = nil
-//        }
-//        model.selection.set(id: itemID)
-//        selfInitiatedSelectionChange = false
+        let itemID: RelationValue?
+        selfInitiatedSelectionChange = true
+        if outlineView.selectedRow >= 0 {
+            let node = outlineView.itemAtRow(outlineView.selectedRow)! as! OrderedTreeBinding.Node
+            let row = node.data
+            itemID = row[model.data.binding.idAttr]
+        } else {
+            itemID = nil
+        }
+        model.selection.set(id: itemID)
+        selfInitiatedSelectionChange = false
     }
 }
 
@@ -156,18 +156,18 @@ extension TreeView {
             return
         }
 
-        // TODO
-//        var index: Int?
-//        if let selectedID = model.selection.get() {
-//            if let selectedIndex = model.data.binding.indexForID(selectedID) {
-//                index = selectedIndex
-//            }
-//        }
-//        if let index = index {
-//            outlineView.selectRowIndexes(NSIndexSet(index: index), byExtendingSelection: false)
-//        } else {
-//            outlineView.deselectAll(nil)
-//        }
+        var index: Int?
+        if let selectedID = model.selection.get() {
+            if let selectedNode = model.data.binding.nodeForID(selectedID.get()!) {
+                // TODO: This is inefficient
+                index = outlineView.rowForItem(selectedNode)
+            }
+        }
+        if let index = index {
+            outlineView.selectRowIndexes(NSIndexSet(index: index), byExtendingSelection: false)
+        } else {
+            outlineView.deselectAll(nil)
+        }
     }
 }
 

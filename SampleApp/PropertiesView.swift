@@ -12,12 +12,12 @@ import Cocoa
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
 class PropertiesView {
     
-    let itemTypeLabel: TextField
-    let nameLabel: TextField
-    let nameField: TextField
-    let noSelectionLabel: TextField
+    private let itemTypeLabel: TextField
+    private let nameLabel: TextField
+    private let nameField: TextField
+    private let noSelectionLabel: TextField
     
-    let docModel: DocModel
+    private let docModel: DocModel
     
     init(itemTypeLabel: TextField, nameLabel: TextField, nameField: TextField, noSelectionLabel: TextField, docModel: DocModel) {
         self.itemTypeLabel = itemTypeLabel
