@@ -226,7 +226,7 @@ class ChangeLoggingRelationTests: DBTestCase {
         let sqliteDB = makeDB().db.sqliteDatabase
         let db = ChangeLoggingDatabase(sqliteDB)
         let scheme: Scheme = ["number", "pilot", "equipment"]
-        db.createRelation("flights", scheme: scheme)
+        sqliteDB.createRelation("flights", scheme: scheme)
         
         var referenceRelation = ConcreteRelation(scheme: scheme)
         
@@ -302,8 +302,8 @@ class ChangeLoggingRelationTests: DBTestCase {
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         let pilotsScheme: Scheme = ["name", "home"]
         
-        db.createRelation("flights", scheme: flightsScheme)
-        db.createRelation("pilots", scheme: pilotsScheme)
+        sqliteDB.createRelation("flights", scheme: flightsScheme)
+        sqliteDB.createRelation("pilots", scheme: pilotsScheme)
         
         db.transaction({
             let flights = $0["flights"]

@@ -142,6 +142,13 @@ extension SQLiteDatabase {
         })
     }
     
+    func executeQueryWithEmptyResults(sql: String, _ parameters: [RelationValue] = []) -> Result<Void, RelationError> {
+        return executeQuery(sql, parameters).map({
+            let rows = Array($0)
+            precondition(rows.isEmpty, "Unexpected result from \(sql) query: \(rows)")
+        })
+    }
+    
     private func columnToValue(stmt: sqlite3_stmt, _ index: Int32) -> RelationValue {
         let type = sqlite3_column_type(stmt, index)
         switch type {
@@ -200,5 +207,18 @@ extension SQLiteDatabase {
         for (_, f) in changeObservers {
             f()
         }
+    }
+}
+
+extension SQLiteDatabase {
+    public func transaction<Return>(@noescape transactionFunction: Void -> Return) -> Result<Return, RelationError> {
+        // TODO: it might make sense to pass a new DB into the object, but in fact changes affect the original database object.
+        // This will matter if the caller tries to access the original database during the transaction and expects it not to
+        // reflect the new changes.
+        // TODO TOO: we'd want to retry on failed commits in some cases, and give the callee the ability to rollback.
+        return executeQueryWithEmptyResults("BEGIN TRANSACTION").then({
+            let returnValue = transactionFunction()
+            return self.executeQueryWithEmptyResults("COMMIT TRANSACTION").map({ returnValue })
+        })
     }
 }

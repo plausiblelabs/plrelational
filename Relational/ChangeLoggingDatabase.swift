@@ -8,23 +8,20 @@ public class ChangeLoggingDatabase {
         self.sqliteDatabase = db
     }
     
-    public func createRelation(name: String, scheme: Scheme) -> Result<Void, RelationError> {
-        return sqliteDatabase.createRelation(name, scheme: scheme).map({ _ in })
-    }
-    
     public subscript(name: String) -> Relation {
         return getLoggingRelation(name)
     }
     
     public func save() -> Result<Void, RelationError> {
-        // TODO: transactions!
-        for (_, relation) in changeLoggingRelations {
-            let result = relation.save()
-            if let err = result.err {
-                return .Err(err)
+        return sqliteDatabase.transaction({
+            for (_, relation) in changeLoggingRelations {
+                let result = relation.save()
+                if let err = result.err {
+                    return .Err(err)
+                }
             }
-        }
-        return .Ok()
+            return .Ok()
+        }).then({ $0 })
     }
 }
 
