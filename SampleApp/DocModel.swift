@@ -68,16 +68,17 @@ class DocModel {
         self.db = db
 
         // Prepare the default document data
-        addCollection(1, name: "Group1", type: .Group, parentID: nil)
-        addCollection(2, name: "Collection1", type: .Collection, parentID: 1)
-        addCollection(3, name: "Page1", type: .Page, parentID: 1)
-        addCollection(4, name: "Page2", type: .Page, parentID: 1)
-        addCollection(5, name: "Child1", type: .Page, parentID: 2)
-        addCollection(6, name: "Child2", type: .Page, parentID: 2)
-        addCollection(7, name: "Group2", type: .Group, parentID: nil)
+        addCollection(1, name: "Group1", type: .Group, parentID: nil, previousID: nil)
+        addCollection(2, name: "Collection1", type: .Collection, parentID: 1, previousID: nil)
+        addCollection(3, name: "Page1", type: .Page, parentID: 1, previousID: 2)
+        addCollection(4, name: "Page2", type: .Page, parentID: 1, previousID: 3)
+        addCollection(5, name: "Child1", type: .Page, parentID: 2, previousID: nil)
+        addCollection(6, name: "Child2", type: .Page, parentID: 2, previousID: 5)
+        addCollection(7, name: "Group2", type: .Group, parentID: nil, previousID: 1)
+        collectionID = 8
     }
     
-    private func addCollection(collectionID: Int64?, name: String, type: CollectionType, parentID: Int64?) {
+    private func addCollection(collectionID: Int64?, name: String, type: CollectionType, parentID: Int64?, previousID: Int64?) {
         let id: Int64
         if let collectionID = collectionID {
             id = collectionID
@@ -91,16 +92,20 @@ class DocModel {
             "type": RelationValue(type.rawValue),
             "name": RelationValue(name)
         ]
-        orderedCollections.add(row, parentID: parentID)
+        let parent = parentID.map{RelationValue($0)}
+        let previous = previousID.map{RelationValue($0)}
+        let pos = TreePos(parentID: parent, previousID: previous, nextID: nil)
+        orderedCollections.insert(row, pos: pos)
     }
     
     func newPage(name: String) {
         let id = collectionID
+        let previousNodeID: Int64? = orderedCollections.nodes.last?.data["id"].get()
         undoManager.registerChange(
             name: "New Page",
             perform: true,
             forward: {
-                self.addCollection(id, name: name, type: .Page, parentID: nil)
+                self.addCollection(id, name: name, type: .Page, parentID: nil, previousID: previousNodeID)
             },
             backward: {
                 // TODO: Update selected_collection if needed

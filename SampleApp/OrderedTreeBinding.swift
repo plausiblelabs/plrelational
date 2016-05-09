@@ -16,7 +16,8 @@ public struct TreePos {
 }
 
 public struct TreePath {
-    let indexes: [Int]
+    let parent: OrderedTreeBinding.Node?
+    let index: Int
 }
 
 public protocol OrderedTreeBindingObserver: class {
@@ -67,10 +68,10 @@ public class OrderedTreeBinding {
         }
     }
 
-    public func nodeForID(id: Int64) -> Node? {
+    public func nodeForID(id: RelationValue) -> Node? {
         // TODO: Not efficient, but whatever
         func findNode(node: Node) -> Node? {
-            let nodeID: Int64 = node.data[idAttr].get()!
+            let nodeID = node.data[idAttr]
             if nodeID == id {
                 return node
             }
@@ -93,43 +94,83 @@ public class OrderedTreeBinding {
         return nil
     }
     
-    // XXX: This is temporary
-    func add(row: Row, parentID: Int64?) {
-        let parentIDValue: RelationValue
-        let pos: TreePos
-        if let parentID = parentID {
-            parentIDValue = RelationValue(parentID)
-            let parentNode = nodeForID(parentID)
-            pos = TreePos(parentID: parentIDValue, previousID: parentNode?.children.last?.data[idAttr], nextID: nil)
-        } else {
-            parentIDValue = .NULL
-            pos = TreePos(parentID: nil, previousID: self.nodes.last?.data[idAttr], nextID: nil)
-        }
-        
+    public func insert(row: Row, pos: TreePos) {
+        let parentIDValue = pos.parentID ?? .NULL
         let order: RelationValue = orderForPos(pos)
         
         var mutableRow = row
         mutableRow["parent"] = parentIDValue
-        mutableRow["order"] = order
+        mutableRow[orderAttr] = order
         let node = Node(mutableRow)
 
-        if let parentID = parentID {
-            nodeForID(parentID)!.children.append(node)
+        func insertNode(node: Node, inout _ nodes: [Node]) -> Int {
+            let orderVal: Double = order.get()!
+            
+            // XXX: This is an inefficient way to do an order-preserving insert
+            var index = 0
+            for n in nodes {
+                let o: Double = n.data[orderAttr].get()!
+                if o > orderVal {
+                    break
+                }
+                index += 1
+            }
+            
+            if index < nodes.count {
+                nodes.insert(node, atIndex: index)
+            } else {
+                nodes.append(node)
+            }
+            
+            return index
+        }
+
+        let parent: Node?
+        let index: Int
+        if let parentID = pos.parentID {
+            let parentNode = nodeForID(parentID)!
+            parent = parentNode
+            index = insertNode(node, &parentNode.children)
         } else {
-            self.nodes.append(node)
+            parent = nil
+            index = insertNode(node, &self.nodes)
         }
         relation.add(mutableRow)
         
         // TODO: Update closure table
-        // TODO: Notify observers
+        let path = TreePath(parent: parent, index: index)
+        observers.forEach{$0.onInsert(path)}
     }
     
-//    public func insert(row: Row, pos: TreePos) {
-//        // TODO
-//    }
-
     public func delete(id: RelationValue) {
-        // TODO
+        
+        func deleteNode(node: Node, inout _ nodes: [Node]) -> Int {
+            let index = nodes.indexOf({$0 === node})!
+            nodes.removeAtIndex(index)
+            return index
+        }
+        
+        // TODO: Delete all children too!
+        
+        if let node = nodeForID(id) {
+            let parent: Node?
+            let index: Int
+            // TODO: Make parent attribute name configurable
+            let parentID = node.data["parent"]
+            if parentID != .NULL {
+                let parentNode = nodeForID(parentID)!
+                parent = parentNode
+                index = deleteNode(node, &parentNode.children)
+            } else {
+                parent = nil
+                index = deleteNode(node, &self.nodes)
+            }
+            relation.delete([.EQ(idAttr, id)])
+            
+            // TODO: Update closure table
+            let path = TreePath(parent: parent, index: index)
+            observers.forEach{$0.onDelete(path)}
+        }
     }
     
     private func orderForPos(pos: TreePos) -> RelationValue {
@@ -143,8 +184,7 @@ public class OrderedTreeBinding {
     private func orderForID(id: RelationValue?) -> Double? {
         if let id = id {
             // XXX: Don't assume Int64
-            let idval: Int64 = id.get()!
-            if let node = nodeForID(idval) {
+            if let node = nodeForID(id) {
                 let row = node.data
                 return row[orderAttr].get()
             } else {

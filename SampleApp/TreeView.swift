@@ -158,7 +158,7 @@ extension TreeView {
 
         var index: Int?
         if let selectedID = model.selection.get() {
-            if let selectedNode = model.data.binding.nodeForID(selectedID.get()!) {
+            if let selectedNode = model.data.binding.nodeForID(selectedID) {
                 // TODO: This is inefficient
                 index = outlineView.rowForItem(selectedNode)
             }
@@ -174,19 +174,16 @@ extension TreeView {
 extension TreeView: OrderedTreeBindingObserver {
 
     func onInsert(path: TreePath) {
-        // TODO
-//        let rows = NSIndexSet(index: index)
-//        outlineView.insertItemsAtIndexes(rows, inParent: nil, withAnimation: [.EffectFade])
+        let rows = NSIndexSet(index: path.index)
+        outlineView.insertItemsAtIndexes(rows, inParent: path.parent, withAnimation: [.EffectFade])
     }
     
     func onDelete(path: TreePath) {
-        // TODO
-//        let rows = NSIndexSet(index: index)
-//        outlineView.removeItemsAtIndexes(rows, inParent: nil, withAnimation: [.EffectFade])
+        let rows = NSIndexSet(index: path.index)
+        outlineView.removeItemsAtIndexes(rows, inParent: path.parent, withAnimation: [.EffectFade])
     }
     
     func onMove(srcPath srcPath: TreePath, dstPath: TreePath) {
-        // TODO
-//        outlineView.moveItemAtIndex(srcIndex, inParent: nil, toIndex: dstIndex, inParent: nil)
+        outlineView.moveItemAtIndex(srcPath.index, inParent: srcPath.parent, toIndex: dstPath.index, inParent: dstPath.parent)
     }
 }
