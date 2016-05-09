@@ -249,7 +249,6 @@ public class OrderedTreeBinding {
     // XXX
     private func orderForID(id: RelationValue?) -> Double? {
         if let id = id {
-            // XXX: Don't assume Int64
             if let node = nodeForID(id) {
                 let row = node.data
                 return row[orderAttr].get()

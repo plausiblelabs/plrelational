@@ -189,12 +189,14 @@ public class StringBidiBinding: StringBinding {
 
     public func change(newValue newValue: String, oldValue: String) {
         selfInitiatedChange = true
+        self.value = newValue
         change.f(newValue: newValue, oldValue: oldValue, commit: false)
         selfInitiatedChange = false
     }
     
     public func commit(newValue newValue: String, oldValue: String) {
         selfInitiatedChange = true
+        self.value = newValue
         change.f(newValue: newValue, oldValue: oldValue, commit: true)
         selfInitiatedChange = false
     }
