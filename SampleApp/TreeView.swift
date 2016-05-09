@@ -17,6 +17,8 @@ struct TreeViewModel {
     
     struct Data {
         let binding: OrderedTreeBinding
+        // Note: dstIndex is relative to the state of the array *before* the item is removed.
+        let move: (parent: OrderedTreeBinding.Node?, srcIndex: Int, dstIndex: Int) -> Void
     }
     
     struct Selection {
@@ -92,17 +94,47 @@ extension TreeView: NSOutlineViewDataSource {
     }
     
     func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
-        // TODO
-        return nil
+        let node = item as! OrderedTreeBinding.Node
+        let row = node.data
+        // TODO: Don't assume Int64
+        let rowID: Int64 = row[model.data.binding.idAttr].get()!
+        let pboardItem = NSPasteboardItem()
+        pboardItem.setString(String(rowID), forType: PasteboardType)
+        return pboardItem
     }
     
     func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
-        // TODO
-        return NSDragOperation.None
+        let pboard = info.draggingPasteboard()
+        if let rowIDString = pboard.stringForType(PasteboardType) {
+            let rowID = RelationValue(Int64(rowIDString)!)
+            
+            // TODO: For now we only support reordering within the same parent
+            let parentNode = model.data.binding.parentForID(rowID)
+            if parentNode === proposedItem {
+                if let srcIndex = model.data.binding.indexForID(rowID) {
+                    if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
+                        return .Move
+                    }
+                }
+            }
+        }
+        
+        return .None
     }
     
     func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
-        // TODO
+        let pboard = info.draggingPasteboard()
+        if let rowIDString = pboard.stringForType(PasteboardType) {
+            let rowID = RelationValue(Int64(rowIDString)!)
+            
+            // TODO: For now we only support reordering within the same parent
+            let parentNode = model.data.binding.parentForID(rowID)
+            if let srcIndex = model.data.binding.indexForID(rowID) {
+                model.data.move(parent: parentNode, srcIndex: srcIndex, dstIndex: index)
+                return true
+            }
+        }
+        
         return false
     }
 }

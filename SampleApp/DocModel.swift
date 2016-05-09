@@ -127,28 +127,23 @@ class DocModel {
         selectedCollection.delete([Attribute("id") *== RelationValue(Int64(1))])
     }
 
-//    lazy var docOutlineViewModel: ListViewModel = { [unowned self] in
-//        let data = ListViewModel.Data(
-//            binding: self.orderedPages,
-//            move: { (srcIndex, dstIndex) in
-//                // Note: dstIndex is relative to the state of the array *before* the item is removed.
-//                let dst = dstIndex < srcIndex ? dstIndex : dstIndex - 1
-//                self.undoManager.registerChange(
-//                    name: "Move Page",
-//                    perform: true,
-//                    forward: {
-//                        self.orderedPages.move(srcIndex: srcIndex, dstIndex: dst)
-//                    },
-//                    backward: {
-//                        self.orderedPages.move(srcIndex: dst, dstIndex: srcIndex)
-//                    }
-//                )
-//            }
-//        )
-    
     lazy var docOutlineTreeViewModel: TreeViewModel = { [unowned self] in
         let data = TreeViewModel.Data(
-            binding: self.orderedCollections
+            binding: self.orderedCollections,
+            move: { (parent, srcIndex, dstIndex) in
+                // Note: dstIndex is relative to the state of the array *before* the item is removed.
+                let dst = dstIndex < srcIndex ? dstIndex : dstIndex - 1
+                self.undoManager.registerChange(
+                    name: "Move Collection",
+                    perform: true,
+                    forward: {
+                        self.orderedCollections.move(parent: parent, srcIndex: srcIndex, dstIndex: dst)
+                    },
+                    backward: {
+                        self.orderedCollections.move(parent: parent, srcIndex: dst, dstIndex: srcIndex)
+                    }
+                )
+            }
         )
         
         // TODO: s/Collection/Page/ depending on collection type
