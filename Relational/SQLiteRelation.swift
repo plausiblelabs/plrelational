@@ -42,7 +42,10 @@ public class SQLiteRelation: Relation {
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {
-        fatalError("unimplemented")
+        let terms = ComparisonTerm.termsFromRow(row)
+        let selected = select(terms)
+        let rowsResult = mapOk(selected.rows(), { $0 })
+        return rowsResult.map({ !$0.isEmpty })
     }
     
     public func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
