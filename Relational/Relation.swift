@@ -37,13 +37,17 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
 extension Relation {
     public func forEach(@noescape f: (Row, Void -> Void) -> Void) -> Result<Void, RelationError>{
         for row in rows() {
+            var stop = false
+            
             switch row {
             case .Ok(let row):
-                var stop = false
                 f(row, { stop = true })
-                if stop { break }
             case .Err(let e):
                 return .Err(e)
+            }
+            
+            if stop {
+                break
             }
         }
         return .Ok()

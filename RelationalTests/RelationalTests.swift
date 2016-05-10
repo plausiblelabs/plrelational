@@ -801,4 +801,22 @@ class RelationalTests: DBTestCase {
                         ["Steve", "Smith", "cat"],
                         ["Cindy", "Jobs", "dog"]))
     }
+    
+    func testForeach() {
+        let r1 = MakeRelation(
+            ["first", "last", "pet"],
+            ["Steve", "Smith", "cat"],
+            ["Lisa", "Jobs", "cat"],
+            ["Cindy", "Jobs", "dog"],
+            ["Allen", "Jones", "dog"])
+        var r2 = MakeRelation(
+            ["first", "last", "pet"])
+        
+        XCTAssertNil(r1.forEach({ row, stop in r2.add(row) }).err)
+        AssertEqual(r1, r2)
+        
+        var callCount = 0
+        XCTAssertNil(r1.forEach({ row, stop in callCount += 1; stop() }).err)
+        XCTAssertEqual(callCount, 1)
+    }
 }
