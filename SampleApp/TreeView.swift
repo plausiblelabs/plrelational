@@ -17,8 +17,9 @@ struct TreeViewModel {
     
     struct Data {
         let binding: OrderedTreeBinding
-        // Note: dstIndex is relative to the state of the array *before* the item is removed.
-        let move: (parent: OrderedTreeBinding.Node?, srcIndex: Int, dstIndex: Int) -> Void
+        let allowsChildren: (Row) -> Bool
+        // Note: dstPath.index is relative to the state of the array *before* the item is removed.
+        let move: (srcPath: TreePath, dstPath: TreePath) -> Void
     }
     
     struct Selection {
@@ -69,7 +70,7 @@ extension TreeView: NSOutlineViewDataSource {
     func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
         switch item {
         case nil:
-            return model.data.binding.nodes.count
+            return model.data.binding.root.children.count
         case let node as OrderedTreeBinding.Node:
             return node.children.count
         default:
@@ -80,7 +81,7 @@ extension TreeView: NSOutlineViewDataSource {
     func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
         switch item {
         case nil:
-            return model.data.binding.nodes[index]
+            return model.data.binding.root.children[index]
         case let node as OrderedTreeBinding.Node:
             return node.children[index]
         default:
@@ -90,7 +91,7 @@ extension TreeView: NSOutlineViewDataSource {
     
     func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
         let node = item as! OrderedTreeBinding.Node
-        return node.children.count > 0
+        return model.data.allowsChildren(node.data) && node.children.count > 0
     }
     
     func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
@@ -105,14 +106,34 @@ extension TreeView: NSOutlineViewDataSource {
     
     func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
+        
         if let rowIDString = pboard.stringForType(PasteboardType) {
             let rowID = RelationValue(Int64(rowIDString)!)
-            
-            // TODO: For now we only support reordering within the same parent
-            let parentNode = model.data.binding.parentForID(rowID)
-            if parentNode === proposedItem {
+            let currentParent = model.data.binding.parentForID(rowID)
+            let proposedParent = proposedItem as? OrderedTreeBinding.Node
+            if proposedParent === currentParent {
+                // We are reordering the node within its existing parent (or at the top level)
                 if let srcIndex = model.data.binding.indexForID(rowID) {
                     if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
+                        return .Move
+                    }
+                }
+            } else {
+                if let proposedParent = proposedParent {
+                    // We are reparenting the item.  Note that we only allow dragging onto an existing node (i.e.,
+                    // when proposedIndex < 0) for the case where the node is empty, since Cocoa doesn't propose
+                    // a specific insertion index for that case.
+                    if let currentNode = model.data.binding.nodeForID(rowID) {
+                        if model.data.allowsChildren(proposedParent.data) &&
+                            (proposedIndex >= 0 || proposedParent.children.isEmpty) &&
+                            !model.data.binding.isNodeDescendent(proposedParent, ofAncestor: currentNode)
+                        {
+                            return .Move
+                        }
+                    }
+                } else {
+                    // We are dragging the node into the top level
+                    if proposedIndex >= 0 {
                         return .Move
                     }
                 }
@@ -127,12 +148,26 @@ extension TreeView: NSOutlineViewDataSource {
         if let rowIDString = pboard.stringForType(PasteboardType) {
             let rowID = RelationValue(Int64(rowIDString)!)
             
-            // TODO: For now we only support reordering within the same parent
-            let parentNode = model.data.binding.parentForID(rowID)
-            if let srcIndex = model.data.binding.indexForID(rowID) {
-                model.data.move(parent: parentNode, srcIndex: srcIndex, dstIndex: index)
-                return true
+            let currentParent = model.data.binding.parentForID(rowID)
+            let proposedParent = item as? OrderedTreeBinding.Node
+
+            // Determine the destination index of the node relative to its new parent
+            let srcIndex = model.data.binding.indexForID(rowID)!
+            let dstIndex: Int
+            if proposedParent === currentParent {
+                // The node is being reordered within its existing parent
+                dstIndex = index < srcIndex ? index : index - 1
+            } else {
+                // The node is being dragged onto or inside another node; note that index will
+                // be -1 in the case where it is being dragged onto another node, but we will
+                // account for that in OrderedTreeBinding.move()
+                dstIndex = index
             }
+
+            let srcPath = TreePath(parent: currentParent, index: srcIndex)
+            let dstPath = TreePath(parent: proposedParent, index: dstIndex)
+            model.data.move(srcPath: srcPath, dstPath: dstPath)
+            return true
         }
         
         return false
@@ -216,6 +251,24 @@ extension TreeView: OrderedTreeBindingObserver {
     }
     
     func onMove(srcPath srcPath: TreePath, dstPath: TreePath) {
+        outlineView.beginUpdates()
+        
         outlineView.moveItemAtIndex(srcPath.index, inParent: srcPath.parent, toIndex: dstPath.index, inParent: dstPath.parent)
+
+        // XXX: NSOutlineView doesn't appear to hide/show the disclosure triangle in the case where
+        // the parent's emptiness is changing, so we have to do that manually
+        if let srcParent = srcPath.parent {
+            if srcParent.children.count == 0 {
+                outlineView.reloadItem(srcParent)
+            }
+        }
+        if let dstParent = dstPath.parent {
+            if dstParent.children.count == 1 {
+                outlineView.reloadItem(dstParent)
+                outlineView.expandItem(dstParent)
+            }
+        }
+        
+        outlineView.endUpdates()
     }
 }
