@@ -100,7 +100,7 @@ class DocModel {
     
     func newPage(name: String) {
         let id = collectionID
-        let previousNodeID: Int64? = orderedCollections.nodes.last?.data["id"].get()
+        let previousNodeID: Int64? = orderedCollections.root.children.last?.data["id"].get()
         undoManager.registerChange(
             name: "New Page",
             perform: true,
@@ -130,17 +130,19 @@ class DocModel {
     lazy var docOutlineTreeViewModel: TreeViewModel = { [unowned self] in
         let data = TreeViewModel.Data(
             binding: self.orderedCollections,
-            move: { (parent, srcIndex, dstIndex) in
-                // Note: dstIndex is relative to the state of the array *before* the item is removed.
-                let dst = dstIndex < srcIndex ? dstIndex : dstIndex - 1
+            allowsChildren: { row in
+                let rawType: Int64 = row["type"].get()!
+                return rawType != CollectionType.Page.rawValue
+            },
+            move: { (srcPath, dstPath) in
                 self.undoManager.registerChange(
                     name: "Move Collection",
                     perform: true,
                     forward: {
-                        self.orderedCollections.move(parent: parent, srcIndex: srcIndex, dstIndex: dst)
+                        self.orderedCollections.move(srcPath: srcPath, dstPath: dstPath)
                     },
                     backward: {
-                        self.orderedCollections.move(parent: parent, srcIndex: dst, dstIndex: srcIndex)
+                        self.orderedCollections.move(srcPath: dstPath, dstPath: srcPath)
                     }
                 )
             }
