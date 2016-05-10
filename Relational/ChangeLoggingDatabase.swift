@@ -102,4 +102,12 @@ extension ChangeLoggingDatabase {
             relation.notifyChangeObservers()
         }
     }
+    
+    /// A wrapper function that performs a transaction and provides before and after snapshots to the caller.
+    public func transactionWithSnapshots(transactionFunction: Transaction -> Void) -> (before: ChangeLoggingDatabaseSnapshot, after: ChangeLoggingDatabaseSnapshot) {
+        let before = takeSnapshot()
+        transaction(transactionFunction)
+        let after = takeSnapshot()
+        return (before, after)
+    }
 }
