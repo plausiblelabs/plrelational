@@ -1,4 +1,8 @@
 
+public struct ChangeLoggingDatabaseSnapshot {
+    var relationSnapshots: [(ChangeLoggingRelation<SQLiteTableRelation>, ChangeLoggingRelationSnapshot)]
+}
+
 public class ChangeLoggingDatabase {
     let sqliteDatabase: SQLiteDatabase
     
@@ -68,6 +72,33 @@ extension ChangeLoggingDatabase {
             relation.underlyingRelation.log.appendContentsOf(relation.log)
         }
         for (_, relation) in transaction.changeLoggingRelations {
+            relation.notifyChangeObservers()
+        }
+    }
+}
+
+extension ChangeLoggingDatabase {
+    public func takeSnapshot() -> ChangeLoggingDatabaseSnapshot {
+        let relationSnapshots = changeLoggingRelations.values.map({ ($0, $0.takeSnapshot()) })
+        return ChangeLoggingDatabaseSnapshot(relationSnapshots: Array(relationSnapshots))
+    }
+    
+    public func restoreSnapshot(snapshot: ChangeLoggingDatabaseSnapshot) {
+        // Restore all the snapshotted relations.
+        for (relation, snapshot) in snapshot.relationSnapshots {
+            relation.restoreSnapshot(snapshot, notifyObservers: false)
+        }
+        
+        // Any relations that were created after the snapshot was taken won't be captured.
+        // Figure out what those are, if any, and restore them to emptiness. This is sorta ugly!
+        let snapshottedRelations = Set(snapshot.relationSnapshots.map({ ObjectIdentifier($0.0) }))
+        for (_, relation) in changeLoggingRelations {
+            if !snapshottedRelations.contains(ObjectIdentifier(relation)) {
+                relation.restoreEmptySnapshot(notifyObservers: false)
+            }
+        }
+        
+        for (_, relation) in changeLoggingRelations {
             relation.notifyChangeObservers()
         }
     }

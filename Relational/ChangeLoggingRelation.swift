@@ -5,6 +5,10 @@ enum ChangeLoggingRelationChange {
     case Update([ComparisonTerm], Row)
 }
 
+public struct ChangeLoggingRelationSnapshot {
+    var savedLog: [ChangeLoggingRelationChange]
+}
+
 public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
     let underlyingRelation: UnderlyingRelation
     
@@ -119,5 +123,25 @@ extension ChangeLoggingRelation where UnderlyingRelation: SQLiteTableRelation {
             }
         }
         return .Ok()
+    }
+}
+
+extension ChangeLoggingRelation {
+    public func takeSnapshot() -> ChangeLoggingRelationSnapshot {
+        return ChangeLoggingRelationSnapshot(savedLog: self.log)
+    }
+    
+    public func restoreSnapshot(snapshot: ChangeLoggingRelationSnapshot, notifyObservers: Bool = true) {
+        self.log = snapshot.savedLog
+        if notifyObservers {
+            notifyChangeObservers()
+        }
+    }
+    
+    public func restoreEmptySnapshot(notifyObservers notifyObservers: Bool = true) {
+        self.log = []
+        if notifyObservers {
+            notifyChangeObservers()
+        }
     }
 }

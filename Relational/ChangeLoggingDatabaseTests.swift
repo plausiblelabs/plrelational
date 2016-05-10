@@ -1,7 +1,7 @@
 import XCTest
 import libRelational
 
-class ChangeLoggingRelationTests: DBTestCase {
+class ChangeLoggingDatabaseTests: DBTestCase {
     func testBare() {
         let underlying = MakeRelation(
             ["number", "pilot", "equipment"],
@@ -452,5 +452,79 @@ class ChangeLoggingRelationTests: DBTestCase {
                         ["Jones", "Boston"],
                         ["Smith", "Chicago"],
                         ["Horton", "Miami"]))
+    }
+    
+    func testSnapshots() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let db = ChangeLoggingDatabase(sqliteDB)
+        let flightsScheme: Scheme = ["number", "pilot", "equipment"]
+        let pilotsScheme: Scheme = ["name", "home"]
+        
+        sqliteDB.createRelation("flights", scheme: flightsScheme)
+        sqliteDB.createRelation("pilots", scheme: pilotsScheme)
+        
+        var snapshots: [(ChangeLoggingDatabaseSnapshot, Relation, Relation)] = []
+        
+        snapshots.append((db.takeSnapshot(), MakeRelation(["number", "pilot", "equipment"]), MakeRelation(["name", "home"])))
+        
+        db.transaction({
+            let flights = $0["flights"]
+            let pilots = $0["pilots"]
+            
+            flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
+            flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
+            flights.add(["number": 3, "pilot": "Johnson", "equipment": "797"])
+            
+            pilots.add(["name": "Jones", "home": "New York"])
+            pilots.add(["name": "Smith", "home": "Chicago"])
+            pilots.add(["name": "Johnson", "home": "Seattle"])
+        })
+        
+        snapshots.append((db.takeSnapshot(),
+            MakeRelation(
+                ["number", "pilot", "equipment"],
+                [1, "Jones", "777"],
+                [2, "Smith", "787"],
+                [3, "Johnson", "797"]),
+            MakeRelation(
+                ["name", "home"],
+                ["Jones", "New York"],
+                ["Smith", "Chicago"],
+                ["Johnson", "Seattle"])))
+        
+        
+        db.transaction({
+            let flights = $0["flights"]
+            let pilots = $0["pilots"]
+            
+            flights.add(["number": 4, "pilot": "Jones", "equipment": "DC-10"])
+            flights.update([Attribute("number") *== RelationValue(1 as Int64)], newValues: ["pilot": "Smith"])
+            flights.delete([Attribute("equipment") *== "797"])
+            
+            pilots.add(["name": "Horton", "home": "Miami"])
+            pilots.update([Attribute("name") *== "Jones"], newValues: ["home": "Boston"])
+            pilots.delete([Attribute("home") *== "Seattle"])
+        })
+        
+        snapshots.append((db.takeSnapshot(),
+            MakeRelation(
+                ["number", "pilot", "equipment"],
+                [1, "Smith", "777"],
+                [2, "Smith", "787"],
+                [4, "Jones", "DC-10"]),
+            MakeRelation(
+                ["name", "home"],
+                ["Jones", "Boston"],
+                ["Smith", "Chicago"],
+                ["Horton", "Miami"])))
+        
+        var i = 0
+        for (snapshot, flights, pilots) in snapshots + snapshots.reverse() {
+            i += 1
+            print("iteration \(i)")
+            db.restoreSnapshot(snapshot)
+            AssertEqual(db["flights"], flights)
+            AssertEqual(db["pilots"], pilots)
+        }
     }
 }

@@ -60,7 +60,7 @@
 		C22921E81CD12CF100518184 /* RelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921E71CD12CF100518184 /* RelationTests.swift */; };
 		C22921EA1CD12CF100518184 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
 		C277E7FD1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */; };
-		C277E7FF1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FE1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift */; };
+		C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */; };
 		C277E8031CDB9D3400B7B8F6 /* GeneratorConcat.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */; };
 		C277E8051CDBD2A000B7B8F6 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		C277E8071CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8061CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift */; };
@@ -180,7 +180,7 @@
 		C257C7531CC017EB00234A89 /* SimpleDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleDatabase.swift; sourceTree = "<group>"; };
 		C257C7561CC01BE200234A89 /* genmodel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = genmodel.swift; sourceTree = "<group>"; };
 		C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelation.swift; sourceTree = "<group>"; };
-		C277E7FE1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelationTests.swift; sourceTree = "<group>"; };
+		C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingDatabaseTests.swift; sourceTree = "<group>"; };
 		C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GeneratorConcat.swift; path = Relational/GeneratorConcat.swift; sourceTree = "<group>"; };
 		C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DBTestCase.swift; sourceTree = "<group>"; };
 		C277E8061CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingDatabase.swift; sourceTree = "<group>"; };
@@ -451,8 +451,8 @@
 			isa = PBXGroup;
 			children = (
 				C277E8061CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift */,
+				C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */,
 				C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */,
-				C277E7FE1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift */,
 			);
 			name = "Change Logging";
 			path = Relational;
@@ -771,7 +771,7 @@
 				C277E80E1CE25E8F00B7B8F6 /* ModelDatabaseTests.swift in Sources */,
 				C2BD29951CD251A20081FD05 /* Store.model in Sources */,
 				C277E80C1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift in Sources */,
-				C277E7FF1CDA960400B7B8F6 /* ChangeLoggingRelationTests.swift in Sources */,
+				C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */,
 				C277E8051CDBD2A000B7B8F6 /* DBTestCase.swift in Sources */,
 				C22921E81CD12CF100518184 /* RelationTests.swift in Sources */,
 			);
