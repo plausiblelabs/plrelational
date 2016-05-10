@@ -104,10 +104,7 @@ extension Relation {
     public func select(rowToFind: Row) -> Relation {
         let rowScheme = Set(rowToFind.values.map({ $0.0 }))
         precondition(rowScheme.isSubsetOf(scheme.attributes))
-        let rowTerms = rowToFind.values.map({
-            ComparisonTerm($0, EqualityComparator(), $1)
-        })
-        return select(rowTerms)
+        return select(ComparisonTerm.termsFromRow(rowToFind))
     }
     
     public func select(terms: [ComparisonTerm]) -> Relation {
