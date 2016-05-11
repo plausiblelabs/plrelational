@@ -2,6 +2,12 @@
 /// Silly placeholder until we figure out what the error type should actually look like.
 public typealias RelationError = ErrorType
 
+public enum RelationChange {
+    case Add(Row)
+    case Delete([ComparisonTerm])
+    case Update([ComparisonTerm], Row)
+}
+
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     
@@ -16,7 +22,7 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// changes. The return value is a function which removes the observation when
     /// invoked. The caller can use that function to cancel the observation when
     /// it no longer needs it.
-    func addChangeObserver(f: Void -> Void) -> (Void -> Void)
+    func addChangeObserver(f: [RelationChange] -> Void) -> (Void -> Void)
     
     func union(other: Relation) -> Relation
     func intersection(other: Relation) -> Relation
@@ -154,12 +160,12 @@ extension Relation {
 }
 
 extension Relation {
-    func addWeakChangeObserver<T: AnyObject>(target: T, method: T -> Void -> Void) {
+    func addWeakChangeObserver<T: AnyObject>(target: T, method: T -> [RelationChange] -> Void) {
         var remove: (Void -> Void)? = nil
         
         remove = self.addChangeObserver({ [weak target] in
             if let target = target {
-                method(target)()
+                method(target)($0)
             } else {
                 guard let remove = remove else { preconditionFailure("Change observer fired but remove function was never set!") }
                 remove()

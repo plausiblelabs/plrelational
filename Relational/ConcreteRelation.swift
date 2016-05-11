@@ -111,7 +111,7 @@ public struct ConcreteRelation: Relation {
 //        return (one, two)
 //    }
     
-    public func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
+    public func addChangeObserver(f: [RelationChange] -> Void) -> (Void -> Void) {
         fatalError("Change observation isn't implemented for ConcreteRelation. Its implementation as a value type makes that weird. We might change that if we ever need it.")
     }
 }

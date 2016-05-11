@@ -1,9 +1,6 @@
 
-enum ChangeLoggingRelationChange {
-    case Add(Row)
-    case Delete([ComparisonTerm])
-    case Update([ComparisonTerm], Row)
-}
+/// Temporary typealias while we figure out the types. Should these be identical? Does the this code need more?
+typealias ChangeLoggingRelationChange = RelationChange
 
 public struct ChangeLoggingRelationSnapshot {
     var savedLog: [ChangeLoggingRelationChange]
@@ -14,8 +11,7 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
     
     var log: [ChangeLoggingRelationChange] = []
     
-    private var changeObservers: [UInt64: Void -> Void] = [:]
-    private var changeObserverNextID: UInt64 = 0
+    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     public init(underlyingRelation: UnderlyingRelation) {
         self.underlyingRelation = underlyingRelation
@@ -23,22 +19,22 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
     
     public func add(row: Row) {
         log.append(.Add(row))
-        notifyChangeObservers()
+        notifyChangeObservers([.Add(row)])
     }
     
     public func delete(searchTerms: [ComparisonTerm]) {
         log.append(.Delete(searchTerms))
-        notifyChangeObservers()
+        notifyChangeObservers([.Delete(searchTerms)])
     }
     
     public func update(searchTerms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
         log.append(.Update(searchTerms, newValues))
-        notifyChangeObservers()
+        notifyChangeObservers([.Update(searchTerms, newValues)])
         return .Ok()
     }
 }
 
-extension ChangeLoggingRelation: Relation {
+extension ChangeLoggingRelation: Relation, RelationDefaultChangeObserverImplementation {
     public var scheme: Scheme {
         return underlyingRelation.scheme
     }
@@ -88,21 +84,6 @@ extension ChangeLoggingRelation: Relation {
     public func contains(row: Row) -> Result<Bool, RelationError> {
         return underlyingRelation.contains(row)
     }
-    
-    public func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
-        let id = changeObserverNextID
-        changeObserverNextID += 1
-        
-        changeObservers[id] = f
-        
-        return { self.changeObservers.removeValueForKey(id) }
-    }
-    
-    func notifyChangeObservers() {
-        for (_, f) in changeObservers {
-            f()
-        }
-    }
 }
 
 extension ChangeLoggingRelation where UnderlyingRelation: SQLiteTableRelation {
@@ -134,14 +115,16 @@ extension ChangeLoggingRelation {
     public func restoreSnapshot(snapshot: ChangeLoggingRelationSnapshot, notifyObservers: Bool = true) {
         self.log = snapshot.savedLog
         if notifyObservers {
-            notifyChangeObservers()
+            // XXX TODO: we need to provide the actual changes here!
+            notifyChangeObservers([])
         }
     }
     
     public func restoreEmptySnapshot(notifyObservers notifyObservers: Bool = true) {
         self.log = []
         if notifyObservers {
-            notifyChangeObservers()
+            // XXX TODO: we need to provide the actual changes here!
+            notifyChangeObservers([])
         }
     }
 }

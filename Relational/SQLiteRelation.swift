@@ -1,11 +1,13 @@
 
 import sqlite3
 
-public class SQLiteRelation: Relation {
+public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementation {
     let db: SQLiteDatabase
     
     public let tableName: String
     public let scheme: Scheme
+    
+    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     var tableNameForQuery: String {
         return db.escapeIdentifier(tableName)
@@ -60,16 +62,12 @@ public class SQLiteRelation: Relation {
             return result.map({
                 let array = Array($0)
                 precondition(array.isEmpty, "Unexpected results from UPDATE statement: \(array)")
-                db.notifyChangeObservers()
+                self.notifyChangeObservers([.Update(terms, newValues)])
                 return ()
             })
         } else {
             fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL updates: \(terms)")
         }
-    }
-    
-    public func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
-        return db.addChangeObserver(f)
     }
 }
 
@@ -152,7 +150,7 @@ public class SQLiteTableRelation: SQLiteRelation {
             let array = Array(rows)
             precondition(array.isEmpty, "Unexpected results from INSERT INTO statement: \(array)")
             let rowid = sqlite3_last_insert_rowid(db.db)
-            db.notifyChangeObservers()
+            self.notifyChangeObservers([.Add(row)])
             return rowid
         })
     }
@@ -164,7 +162,7 @@ public class SQLiteTableRelation: SQLiteRelation {
             return result.map({
                 let array = Array($0)
                 precondition(array.isEmpty, "Unexpected results from DELETE FROM statement: \(array)")
-                db.notifyChangeObservers()
+                self.notifyChangeObservers([.Delete(searchTerms)])
                 return ()
             })
         } else {

@@ -72,7 +72,7 @@ extension ChangeLoggingDatabase {
             relation.underlyingRelation.log.appendContentsOf(relation.log)
         }
         for (_, relation) in transaction.changeLoggingRelations {
-            relation.notifyChangeObservers()
+            relation.notifyChangeObservers(relation.log)
         }
     }
 }
@@ -99,7 +99,8 @@ extension ChangeLoggingDatabase {
         }
         
         for (_, relation) in changeLoggingRelations {
-            relation.notifyChangeObservers()
+            // XXX TODO: we need to provide the actual changes here!
+            relation.notifyChangeObservers([])
         }
     }
     

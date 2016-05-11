@@ -22,7 +22,7 @@ public class SQLiteBinding {
         self.changeObserver = changeObserver
         
         self.relation = database[tableName]!.select(key)
-        self.removal = self.relation.addChangeObserver({ [weak self] in self?.changed() })
+        self.removal = self.relation.addChangeObserver({ [weak self] _ in self?.changed() })
         
         self.changed()
     }

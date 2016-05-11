@@ -138,7 +138,7 @@ class SQLiteDatabaseTests: DBTestCase {
         let r = db["test"]!
         
         var changeCount = 0
-        let removal = r.addChangeObserver({ changeCount += 1 })
+        let removal = r.addChangeObserver({ _ in changeCount += 1 })
         
         r.add(["column": "42"])
         XCTAssertEqual(changeCount, 1)
@@ -180,7 +180,7 @@ class SQLiteDatabaseTests: DBTestCase {
                         ["X", "Y", "Z"]))
         
         var changed = false
-        let removal = joined.addChangeObserver({ changed = true })
+        let removal = joined.addChangeObserver({ _ in changed = true })
         
         changed = false
         a.delete([.EQ(Attribute("2"), "Y")])

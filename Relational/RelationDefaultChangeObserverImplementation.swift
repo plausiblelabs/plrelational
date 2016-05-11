@@ -2,7 +2,7 @@
 /// A mixin protocol which provides a default implementation to manage change
 /// observers. Types which conform must provide the one stored property in
 /// the protocol, then get the implementation provided.
-protocol RelationDefaultChangeObserverImplementation: class, Relation {
+public protocol RelationDefaultChangeObserverImplementation: class, Relation {
     var changeObserverData: RelationDefaultChangeObserverImplementationData { get set }
     
     /// This function is called the first time an observer is added. This allows
@@ -11,14 +11,14 @@ protocol RelationDefaultChangeObserverImplementation: class, Relation {
     func onAddFirstObserver()
 }
 
-struct RelationDefaultChangeObserverImplementationData {
+public struct RelationDefaultChangeObserverImplementationData {
     private var didAddFirstObserver = false
-    private var observers: [UInt64: Void -> Void] = [:]
+    private var observers: [UInt64: [RelationChange] -> Void] = [:]
     private var nextID: UInt64 = 0
 }
 
 extension RelationDefaultChangeObserverImplementation {
-    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
+    public func addChangeObserver(f: [RelationChange] -> Void) -> (Void -> Void) {
         let id = changeObserverData.nextID
         changeObserverData.nextID += 1
         
@@ -32,11 +32,11 @@ extension RelationDefaultChangeObserverImplementation {
         return { self.changeObserverData.observers.removeValueForKey(id) }
     }
     
-    func onAddFirstObserver() {}
+    public func onAddFirstObserver() {}
     
-    func notifyChangeObservers() {
+    func notifyChangeObservers(changes: [RelationChange]) {
         for (_, f) in changeObserverData.observers {
-            f()
+            f(changes)
         }
     }
 }
