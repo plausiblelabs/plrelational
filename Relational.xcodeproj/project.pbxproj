@@ -20,7 +20,6 @@
 		37C611361CD7FB07001DAF59 /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611351CD7FB07001DAF59 /* ListView.swift */; };
 		37C611381CD7FB9C001DAF59 /* ExtOutlineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611371CD7FB9C001DAF59 /* ExtOutlineView.swift */; };
 		37C6113A1CD80566001DAF59 /* DocModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611391CD80566001DAF59 /* DocModel.swift */; };
-		37C6113D1CD92F27001DAF59 /* Transaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6113C1CD92F27001DAF59 /* Transaction.swift */; };
 		37C6113F1CD93069001DAF59 /* Binding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6113E1CD93069001DAF59 /* Binding.swift */; };
 		37C611421CD94784001DAF59 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
 		37C611441CDA7230001DAF59 /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611431CDA7230001DAF59 /* Box.swift */; };
@@ -139,7 +138,6 @@
 		37C611351CD7FB07001DAF59 /* ListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		37C611371CD7FB9C001DAF59 /* ExtOutlineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtOutlineView.swift; sourceTree = "<group>"; };
 		37C611391CD80566001DAF59 /* DocModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocModel.swift; sourceTree = "<group>"; };
-		37C6113C1CD92F27001DAF59 /* Transaction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transaction.swift; sourceTree = "<group>"; };
 		37C6113E1CD93069001DAF59 /* Binding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Binding.swift; sourceTree = "<group>"; };
 		37C611411CD94784001DAF59 /* UndoManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UndoManager.swift; sourceTree = "<group>"; };
 		37C611431CDA7230001DAF59 /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
@@ -298,7 +296,6 @@
 		37C6113B1CD92F0A001DAF59 /* Relational Stuff */ = {
 			isa = PBXGroup;
 			children = (
-				37C6113C1CD92F27001DAF59 /* Transaction.swift */,
 				37C6113E1CD93069001DAF59 /* Binding.swift */,
 				37C6114C1CDD603C001DAF59 /* OrderedBinding.swift */,
 				37C6114E1CDD6084001DAF59 /* OrderedTreeBinding.swift */,
@@ -699,7 +696,6 @@
 				37C611531CE3A942001DAF59 /* ContextMenu.swift in Sources */,
 				37C611311CD7F7D7001DAF59 /* BackgroundView.swift in Sources */,
 				37C611021CD7EFAE001DAF59 /* Document.swift in Sources */,
-				37C6113D1CD92F27001DAF59 /* Transaction.swift in Sources */,
 				37C611511CE10770001DAF59 /* TreeView.swift in Sources */,
 				37C611361CD7FB07001DAF59 /* ListView.swift in Sources */,
 				37C6114F1CDD6084001DAF59 /* OrderedTreeBinding.swift in Sources */,

@@ -130,6 +130,10 @@ public class OrderedTreeBinding {
         return false
     }
     
+    public func insert(transaction: ChangeLoggingDatabase.Transaction, row: Row, pos: TreePos) {
+        // TODO
+    }
+    
     public func insert(row: Row, pos: TreePos) {
         let parentIDValue = pos.parentID ?? .NULL
         let order: RelationValue = orderForPos(pos)
@@ -177,6 +181,10 @@ public class OrderedTreeBinding {
         observers.forEach{$0.onInsert(path)}
     }
     
+    public func delete(transaction: ChangeLoggingDatabase.Transaction, id: RelationValue) {
+        // TODO
+    }
+    
     public func delete(id: RelationValue) {
         
         func deleteNode(node: Node, inout _ nodes: [Node]) -> Int {
@@ -205,7 +213,12 @@ public class OrderedTreeBinding {
             observers.forEach{$0.onDelete(path)}
         }
     }
-    
+
+    /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
+    public func move(transaction: ChangeLoggingDatabase.Transaction, srcPath: TreePath, dstPath: TreePath) {
+        // TODO
+    }
+
     /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
     public func move(srcPath srcPath: TreePath, dstPath: TreePath) {
         let srcParent = srcPath.parent ?? root
