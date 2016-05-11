@@ -97,7 +97,8 @@ extension ChangeLoggingRelation where UnderlyingRelation: SQLiteTableRelation {
             case .Delete(let terms):
                 err = underlyingRelation.delete(terms).err
             case .Update(let terms, let newValues):
-                err = underlyingRelation.update(terms, newValues: newValues).err
+                // Note: without the `as SQLiteTableRelation`, this generates an error due to ambiguity for some reason.
+                err = (underlyingRelation as SQLiteTableRelation).update(terms, newValues: newValues).err
             }
             if let err = err {
                 return .Err(err)
