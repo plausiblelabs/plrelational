@@ -27,6 +27,14 @@ enum CollectionType: Int64 { case
     Group = 0,
     Collection = 1,
     Page = 2
+    
+    var name: String {
+        switch self {
+        case .Group: return "Group"
+        case .Collection: return "Collection"
+        case .Page: return "Page"
+        }
+    }
 }
 
 class DocModel {
@@ -77,17 +85,9 @@ class DocModel {
         collectionID = 8
     }
     
-    private func addCollection(collectionID: Int64?, name: String, type: CollectionType, parentID: Int64?, previousID: Int64?) {
-        let id: Int64
-        if let collectionID = collectionID {
-            id = collectionID
-        } else {
-            id = self.collectionID
-            self.collectionID += 1
-        }
-
+    private func addCollection(collectionID: Int64, name: String, type: CollectionType, parentID: Int64?, previousID: Int64?) {
         let row: Row = [
-            "id": RelationValue(id),
+            "id": RelationValue(collectionID),
             "type": RelationValue(type.rawValue),
             "name": RelationValue(name)
         ]
@@ -97,19 +97,31 @@ class DocModel {
         orderedCollections.insert(row, pos: pos)
     }
     
-    func newPage(name: String) {
+    func newCollection(name: String, type: CollectionType) {
         let id = collectionID
+        collectionID += 1
         let previousNodeID: Int64? = orderedCollections.root.children.last?.data["id"].get()
         undoManager.registerChange(
-            name: "New Page",
+            name: "New \(type.name)",
             perform: true,
             forward: {
-                self.addCollection(id, name: name, type: .Page, parentID: nil, previousID: previousNodeID)
+                self.addCollection(id, name: name, type: type, parentID: nil, previousID: previousNodeID)
             },
             backward: {
-                // TODO: Update selected_collection if needed
                 self.orderedCollections.delete(RelationValue(id))
-                self.collectionID -= 1
+            }
+        )
+    }
+    
+    func deleteCollection(id: RelationValue, type: CollectionType) {
+        undoManager.registerChange(
+            name: "Delete \(type.name)",
+            perform: true,
+            forward: {
+                self.orderedCollections.delete(id)
+            },
+            backward: {
+                // TODO
             }
         )
     }
@@ -133,7 +145,17 @@ class DocModel {
                 let rawType: Int64 = row["type"].get()!
                 return rawType != CollectionType.Page.rawValue
             },
+            contextMenu: { row in
+                let collectionID = row["id"]
+                let collectionType = CollectionType(rawValue: row["type"].get()!)!
+                return ContextMenu(items: [
+                    .Titled(title: "New Page", action: { self.newCollection("Page", type: .Page) }),
+                    .Separator,
+                    .Titled(title: "Delete", action: { self.deleteCollection(collectionID, type: collectionType) })
+                ])
+            },
             move: { (srcPath, dstPath) in
+                // TODO: s/Collection/type.name/
                 self.undoManager.registerChange(
                     name: "Move Collection",
                     perform: true,
@@ -147,7 +169,7 @@ class DocModel {
             }
         )
         
-        // TODO: s/Collection/Page/ depending on collection type
+        // TODO: s/Collection/type.name/
         let selection = TreeViewModel.Selection(
             relation: self.selectedCollection,
             set: { (id) in
@@ -268,7 +290,7 @@ class DocModel {
         return StringBidiBinding(relation: relation, attribute: "name", change: BidiChange<String>{ (newValue, oldValue, commit) in
             Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
             if commit {
-                // TODO: s/Collection/Page/ depending on collection type
+                // TODO: s/Collection/type.name/
                 self.undoManager.registerChange(
                     name: "Rename Collection",
                     perform: true,

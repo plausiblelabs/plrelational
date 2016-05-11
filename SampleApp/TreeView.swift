@@ -18,6 +18,7 @@ struct TreeViewModel {
     struct Data {
         let binding: OrderedTreeBinding
         let allowsChildren: (Row) -> Bool
+        let contextMenu: (Row) -> ContextMenu?
         // Note: dstPath.index is relative to the state of the array *before* the item is removed.
         let move: (srcPath: TreePath, dstPath: TreePath) -> Void
     }
@@ -194,7 +195,8 @@ extension TreeView: ExtOutlineViewDelegate {
     }
     
     func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
-        return nil
+        let node = item as! OrderedTreeBinding.Node
+        return model.data.contextMenu(node.data).map{$0.nsmenu}
     }
     
     func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
@@ -202,6 +204,10 @@ extension TreeView: ExtOutlineViewDelegate {
     }
     
     func outlineViewSelectionDidChange(notification: NSNotification) {
+        if selfInitiatedSelectionChange {
+            return
+        }
+        
         let itemID: RelationValue?
         selfInitiatedSelectionChange = true
         if outlineView.selectedRow >= 0 {
@@ -230,11 +236,13 @@ extension TreeView {
                 index = outlineView.rowForItem(selectedNode)
             }
         }
+        selfInitiatedSelectionChange = true
         if let index = index {
             outlineView.selectRowIndexes(NSIndexSet(index: index), byExtendingSelection: false)
         } else {
             outlineView.deselectAll(nil)
         }
+        selfInitiatedSelectionChange = false
     }
 }
 
