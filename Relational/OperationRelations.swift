@@ -1,6 +1,8 @@
-class UnionRelation: Relation {
+class UnionRelation: Relation, RelationDefaultChangeObserverImplementation {
     var a: Relation
     var b: Relation
+    
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     init(a: Relation, b: Relation) {
         precondition(a.scheme == b.scheme)
@@ -27,16 +29,17 @@ class UnionRelation: Relation {
         return aResult.and(bResult)
     }
     
-    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
-        let aRemove = a.addChangeObserver(f)
-        let bRemove = b.addChangeObserver(f)
-        return { aRemove(); bRemove() }
+    func onAddFirstObserver() {
+        a.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
+        b.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
     }
 }
 
-class IntersectionRelation: Relation {
+class IntersectionRelation: Relation, RelationDefaultChangeObserverImplementation {
     var a: Relation
     var b: Relation
+    
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     init(a: Relation, b: Relation) {
         precondition(a.scheme == b.scheme)
@@ -93,17 +96,18 @@ class IntersectionRelation: Relation {
         })
     }
     
-    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
-        let aRemove = a.addChangeObserver(f)
-        let bRemove = b.addChangeObserver(f)
-        return { aRemove(); bRemove() }
+    func onAddFirstObserver() {
+        a.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
+        b.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
     }
 }
 
-class DifferenceRelation: Relation {
+class DifferenceRelation: Relation, RelationDefaultChangeObserverImplementation {
     var a: Relation
     var b: Relation
 
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    
     init(a: Relation, b: Relation) {
         precondition(a.scheme == b.scheme)
         self.a = a
@@ -155,16 +159,17 @@ class DifferenceRelation: Relation {
         })
     }
     
-    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
-        let aRemove = a.addChangeObserver(f)
-        let bRemove = b.addChangeObserver(f)
-        return { aRemove(); bRemove() }
+    func onAddFirstObserver() {
+        a.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
+        b.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
     }
 }
 
-class ProjectRelation: Relation {
+class ProjectRelation: Relation, RelationDefaultChangeObserverImplementation {
     var relation: Relation
-    var scheme: Scheme
+    let scheme: Scheme
+    
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     init(relation: Relation, scheme: Scheme) {
         precondition(scheme.attributes.isSubsetOf(relation.scheme.attributes))
@@ -201,14 +206,16 @@ class ProjectRelation: Relation {
         return relation.update(terms, newValues: newValues)
     }
     
-    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
-        return relation.addChangeObserver(f)
+    func onAddFirstObserver() {
+        relation.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
     }
 }
 
-class SelectRelation: Relation {
+class SelectRelation: Relation, RelationDefaultChangeObserverImplementation {
     var relation: Relation
-    var terms: [ComparisonTerm]
+    let terms: [ComparisonTerm]
+    
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     init(relation: Relation, terms: [ComparisonTerm]) {
         self.relation = relation
@@ -252,15 +259,17 @@ class SelectRelation: Relation {
         return relation.update(terms + self.terms, newValues: newValues)
     }
     
-    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
-        return relation.addChangeObserver(f)
+    func onAddFirstObserver() {
+        relation.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
     }
 }
 
-class EquijoinRelation: Relation {
+class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
     var a: Relation
     var b: Relation
-    var matching: [Attribute: Attribute]
+    let matching: [Attribute: Attribute]
+    
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     init(a: Relation, b: Relation, matching: [Attribute: Attribute]) {
         self.a = a
@@ -326,16 +335,17 @@ class EquijoinRelation: Relation {
         })
     }
     
-    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
-        let aRemove = a.addChangeObserver(f)
-        let bRemove = b.addChangeObserver(f)
-        return { aRemove(); bRemove() }
+    func onAddFirstObserver() {
+        a.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
+        b.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
     }
 }
 
-class RenameRelation: Relation {
+class RenameRelation: Relation, RelationDefaultChangeObserverImplementation {
     var relation: Relation
-    var renames: [Attribute: Attribute]
+    let renames: [Attribute: Attribute]
+    
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     init(relation: Relation, renames: [Attribute: Attribute]) {
         self.relation = relation
@@ -378,7 +388,7 @@ class RenameRelation: Relation {
         return relation.update(renamedTerms, newValues: newValues)
     }
     
-    func addChangeObserver(f: Void -> Void) -> (Void -> Void) {
-        return relation.addChangeObserver(f)
+    func onAddFirstObserver() {
+        relation.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
     }
 }

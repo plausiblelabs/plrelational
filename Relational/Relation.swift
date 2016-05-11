@@ -152,3 +152,18 @@ extension Relation {
         return joined.joinWithSeparator("\n")
     }
 }
+
+extension Relation {
+    func addWeakChangeObserver<T: AnyObject>(target: T, method: T -> Void -> Void) {
+        var remove: (Void -> Void)? = nil
+        
+        remove = self.addChangeObserver({ [weak target] in
+            if let target = target {
+                method(target)()
+            } else {
+                guard let remove = remove else { preconditionFailure("Change observer fired but remove function was never set!") }
+                remove()
+            }
+        })
+    }
+}
