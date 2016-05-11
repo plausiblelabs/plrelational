@@ -1,4 +1,4 @@
-struct UnionRelation: Relation {
+class UnionRelation: Relation {
     var a: Relation
     var b: Relation
     
@@ -21,7 +21,7 @@ struct UnionRelation: Relation {
         return a.contains(row).combine(b.contains(row)).map({ $0 || $1 })
     }
     
-    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
         let aResult = a.update(terms, newValues: newValues)
         let bResult = b.update(terms, newValues: newValues)
         return aResult.and(bResult)
@@ -34,7 +34,7 @@ struct UnionRelation: Relation {
     }
 }
 
-struct IntersectionRelation: Relation {
+class IntersectionRelation: Relation {
     var a: Relation
     var b: Relation
     
@@ -75,7 +75,7 @@ struct IntersectionRelation: Relation {
         return a.contains(row).combine(b.contains(row)).map({ $0 && $1 })
     }
     
-    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
         let rowsToUpdate = mapOk(self.select(terms).rows(), { $0 })
         return rowsToUpdate.then({ rows in
             for row in rows {
@@ -100,7 +100,7 @@ struct IntersectionRelation: Relation {
     }
 }
 
-struct DifferenceRelation: Relation {
+class DifferenceRelation: Relation {
     var a: Relation
     var b: Relation
 
@@ -141,7 +141,7 @@ struct DifferenceRelation: Relation {
         return a.contains(row).combine(b.contains(row)).map({ $0 && !$1 })
     }
     
-    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
         let rowsToUpdate = mapOk(self.select(terms).rows(), { $0 })
         return rowsToUpdate.then({ rows in
             for row in rows {
@@ -162,7 +162,7 @@ struct DifferenceRelation: Relation {
     }
 }
 
-struct ProjectRelation: Relation {
+class ProjectRelation: Relation {
     var relation: Relation
     var scheme: Scheme
     
@@ -197,7 +197,7 @@ struct ProjectRelation: Relation {
         return relation.select(row).isEmpty.map(!)
     }
     
-    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
         return relation.update(terms, newValues: newValues)
     }
     
@@ -206,9 +206,14 @@ struct ProjectRelation: Relation {
     }
 }
 
-struct SelectRelation: Relation {
+class SelectRelation: Relation {
     var relation: Relation
     var terms: [ComparisonTerm]
+    
+    init(relation: Relation, terms: [ComparisonTerm]) {
+        self.relation = relation
+        self.terms = terms
+    }
     
     var scheme: Scheme {
         return relation.scheme
@@ -243,7 +248,7 @@ struct SelectRelation: Relation {
         return relation.contains(row).map({ $0 && rowMatches(row) })
     }
     
-    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
         return relation.update(terms + self.terms, newValues: newValues)
     }
     
@@ -252,10 +257,16 @@ struct SelectRelation: Relation {
     }
 }
 
-struct EquijoinRelation: Relation {
+class EquijoinRelation: Relation {
     var a: Relation
     var b: Relation
     var matching: [Attribute: Attribute]
+    
+    init(a: Relation, b: Relation, matching: [Attribute: Attribute]) {
+        self.a = a
+        self.b = b
+        self.matching = matching
+    }
     
     var scheme: Scheme {
         return Scheme(attributes: a.scheme.attributes.union(b.scheme.attributes))
@@ -289,7 +300,7 @@ struct EquijoinRelation: Relation {
         return self.select(row).isEmpty.map(!)
     }
     
-    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
         let rowsToUpdate = mapOk(self.select(terms).rows(), { $0 })
         return rowsToUpdate.then({ rows in
             for row in rows {
@@ -322,9 +333,14 @@ struct EquijoinRelation: Relation {
     }
 }
 
-struct RenameRelation: Relation {
+class RenameRelation: Relation {
     var relation: Relation
     var renames: [Attribute: Attribute]
+    
+    init(relation: Relation, renames: [Attribute: Attribute]) {
+        self.relation = relation
+        self.renames = renames
+    }
     
     var scheme: Scheme {
         let newAttributes = Set(relation.scheme.attributes.map({ renames[$0] ?? $0 }))
@@ -346,7 +362,7 @@ struct RenameRelation: Relation {
         return relation.contains(row.renameAttributes(renames.reversed))
     }
     
-    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
         let termRenames = self.renames.reversed
         func renamedProvider(provider: ValueProvider) -> ValueProvider {
             // Should this sort of logic be in ValueProvider itself?
