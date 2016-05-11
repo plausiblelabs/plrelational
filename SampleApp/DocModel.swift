@@ -43,10 +43,10 @@ class DocModel {
     
     private let undoManager: UndoManager
     private let db: ChangeLoggingDatabase
-    private let collections: SQLiteTableRelation
+    private let collections: ChangeLoggingRelation<SQLiteTableRelation>
     private let orderedCollections: OrderedTreeBinding
-    private let selectedCollection: SQLiteTableRelation
-    private let selectedInspectorItem: SQLiteTableRelation
+    private let selectedCollection: ChangeLoggingRelation<SQLiteTableRelation>
+    private let selectedInspectorItem: ChangeLoggingRelation<SQLiteTableRelation>
     private let selectedCollectionItem: Relation
     private var collectionID: Int64 = 1
     
@@ -67,11 +67,12 @@ class DocModel {
         // Prepare the schemas
         let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
-        func createRelation(name: String, _ scheme: Scheme) -> SQLiteTableRelation {
-            return sqliteDB.getOrCreateRelation(name, scheme: scheme).ok!
+        func createRelation(name: String, _ scheme: Scheme) -> ChangeLoggingRelation<SQLiteTableRelation> {
+            assert(sqliteDB.createRelation(name, scheme: scheme).ok != nil)
+            return db[name]
         }
         self.collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
-        self.orderedCollections = OrderedTreeBinding(relation: collections, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        self.orderedCollections = OrderedTreeBinding(relation: collections, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
         self.selectedCollection = createRelation("selected_collection", ["id", "coll_id"])
         self.selectedInspectorItem = createRelation("selected_inspector_item", ["id", "type", "fid"])
         self.selectedCollectionItem = collections.renameAttributes(["id" : "coll_id"]).join(selectedCollection)
@@ -135,18 +136,22 @@ class DocModel {
         })
     }
 
-    private func selectCollection(transaction: Transaction, id: RelationValue, update: Bool) {
-        let selectedCollection = transaction["selected_collection"]
-        if update {
-            selectedCollection.update([Attribute("id") *== RelationValue(Int64(1))], newValues: ["coll_id": id])
-        } else {
-            selectedCollection.add(["id": RelationValue(Int64(1)), "coll_id": id])
-        }
+    private func selectCollection(id: RelationValue, update: Bool) {
+        self.performUndoableAction("Select Collection", {
+            let selectedCollection = $0["selected_collection"]
+            if update {
+                selectedCollection.update([Attribute("id") *== RelationValue(Int64(1))], newValues: ["coll_id": id])
+            } else {
+                selectedCollection.add(["id": RelationValue(Int64(1)), "coll_id": id])
+            }
+        })
     }
     
-    private func deselectCollection(transaction: Transaction) {
-        let selectedCollection = transaction["selected_collection"]
-        selectedCollection.delete([Attribute("id") *== RelationValue(Int64(1))])
+    private func deselectCollection() {
+        self.performUndoableAction("Deselect Collection", {
+            let selectedCollection = $0["selected_collection"]
+            selectedCollection.delete([Attribute("id") *== RelationValue(Int64(1))])
+        })
     }
 
     lazy var docOutlineTreeViewModel: TreeViewModel = { [unowned self] in
@@ -179,13 +184,9 @@ class DocModel {
             set: { id in
                 let selectedID = self.selectedCollection.rows().next().map{$0.ok!["coll_id"]}
                 if let id = id {
-                    self.performUndoableAction("Select Collection", {
-                        self.selectCollection($0, id: id, update: selectedID != nil)
-                    })
+                    self.selectCollection(id, update: selectedID != nil)
                 } else {
-                    self.performUndoableAction("Deselect Collection", {
-                        self.deselectCollection($0)
-                    })
+                    self.deselectCollection()
                 }
             },
             get: {

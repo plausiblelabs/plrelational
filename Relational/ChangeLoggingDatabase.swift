@@ -12,7 +12,7 @@ public class ChangeLoggingDatabase {
         self.sqliteDatabase = db
     }
     
-    public subscript(name: String) -> Relation {
+    public subscript(name: String) -> ChangeLoggingRelation<SQLiteTableRelation> {
         return getLoggingRelation(name)
     }
     
@@ -72,7 +72,7 @@ extension ChangeLoggingDatabase {
             relation.underlyingRelation.log.appendContentsOf(relation.log)
         }
         for (_, relation) in transaction.changeLoggingRelations {
-            relation.notifyChangeObservers(relation.log)
+            relation.underlyingRelation.notifyChangeObservers(relation.log)
         }
     }
 }

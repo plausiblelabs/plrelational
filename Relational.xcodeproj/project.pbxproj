@@ -12,7 +12,6 @@
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
 		37C611071CD7EFAE001DAF59 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37C611061CD7EFAE001DAF59 /* Assets.xcassets */; };
 		37C6110A1CD7EFAE001DAF59 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611081CD7EFAE001DAF59 /* MainMenu.xib */; };
-		37C611151CD7EFAE001DAF59 /* SampleAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611141CD7EFAE001DAF59 /* SampleAppTests.swift */; };
 		37C611201CD7EFAE001DAF59 /* SampleAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6111F1CD7EFAE001DAF59 /* SampleAppUITests.swift */; };
 		37C6112D1CD7F09B001DAF59 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
 		37C611311CD7F7D7001DAF59 /* BackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611301CD7F7D7001DAF59 /* BackgroundView.swift */; };
@@ -29,6 +28,8 @@
 		37C6114F1CDD6084001DAF59 /* OrderedTreeBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114E1CDD6084001DAF59 /* OrderedTreeBinding.swift */; };
 		37C611511CE10770001DAF59 /* TreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611501CE10770001DAF59 /* TreeView.swift */; };
 		37C611531CE3A942001DAF59 /* ContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611521CE3A942001DAF59 /* ContextMenu.swift */; };
+		37C611551CE3F26F001DAF59 /* OrderedTreeBindingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611541CE3F26F001DAF59 /* OrderedTreeBindingTests.swift */; };
+		37C611591CE3F7C0001DAF59 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
 		C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */; };
 		C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		C22921C51CD12A8700518184 /* Comparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7491CBD7F4500234A89 /* Comparator.swift */; };
@@ -128,7 +129,6 @@
 		37C611091CD7EFAE001DAF59 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		37C6110B1CD7EFAE001DAF59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		37C611101CD7EFAE001DAF59 /* SampleAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SampleAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		37C611141CD7EFAE001DAF59 /* SampleAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleAppTests.swift; sourceTree = "<group>"; };
 		37C611161CD7EFAE001DAF59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		37C6111B1CD7EFAE001DAF59 /* SampleAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SampleAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C6111F1CD7EFAE001DAF59 /* SampleAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleAppUITests.swift; sourceTree = "<group>"; };
@@ -147,6 +147,7 @@
 		37C6114E1CDD6084001DAF59 /* OrderedTreeBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderedTreeBinding.swift; sourceTree = "<group>"; };
 		37C611501CE10770001DAF59 /* TreeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeView.swift; sourceTree = "<group>"; };
 		37C611521CE3A942001DAF59 /* ContextMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextMenu.swift; sourceTree = "<group>"; };
+		37C611541CE3F26F001DAF59 /* OrderedTreeBindingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OrderedTreeBindingTests.swift; sourceTree = "<group>"; };
 		C21971A91CC030B900E84F7E /* ModelHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelHelpers.swift; sourceTree = "<group>"; };
 		C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDefaultChangeObserverImplementation.swift; sourceTree = "<group>"; };
 		C22921911CC6CDCC00518184 /* makemodule.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = makemodule.sh; path = ../modules/makemodule.sh; sourceTree = "<group>"; };
@@ -208,6 +209,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37C611591CE3F7C0001DAF59 /* liblibRelational.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -255,7 +257,6 @@
 		37C611131CD7EFAE001DAF59 /* SampleAppTests */ = {
 			isa = PBXGroup;
 			children = (
-				37C611141CD7EFAE001DAF59 /* SampleAppTests.swift */,
 				37C611161CD7EFAE001DAF59 /* Info.plist */,
 			);
 			path = SampleAppTests;
@@ -299,6 +300,7 @@
 				37C6113E1CD93069001DAF59 /* Binding.swift */,
 				37C6114C1CDD603C001DAF59 /* OrderedBinding.swift */,
 				37C6114E1CDD6084001DAF59 /* OrderedTreeBinding.swift */,
+				37C611541CE3F26F001DAF59 /* OrderedTreeBindingTests.swift */,
 			);
 			name = "Relational Stuff";
 			sourceTree = "<group>";
@@ -715,7 +717,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37C611151CD7EFAE001DAF59 /* SampleAppTests.swift in Sources */,
+				37C611551CE3F26F001DAF59 /* OrderedTreeBindingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

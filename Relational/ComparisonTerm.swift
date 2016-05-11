@@ -2,7 +2,8 @@
 public struct ComparisonTerm {
     var lhs: ValueProvider
     var op: Comparator
-    var rhs: ValueProvider
+    // XXX: Temporarily public to allow for extracting e.g. identifiers from term parts
+    public var rhs: ValueProvider
     
     public init(_ lhs: ValueProvider, _ op: Comparator, _ rhs: ValueProvider) {
         self.lhs = lhs

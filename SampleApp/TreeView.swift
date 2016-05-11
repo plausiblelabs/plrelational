@@ -24,7 +24,7 @@ struct TreeViewModel {
     }
     
     struct Selection {
-        let relation: SQLiteTableRelation
+        let relation: ChangeLoggingRelation<SQLiteTableRelation>
         let set: (id: RelationValue?) -> Void
         let get: () -> RelationValue?
     }
