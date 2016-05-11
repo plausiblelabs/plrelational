@@ -86,7 +86,7 @@ public class ExistsBinding: ValueBinding<Bool> {
         self.relation = relation
         // TODO: Need to see if the row result is OK
         super.init(initialValue: relation.rows().next() != nil)
-        self.removal = relation.addChangeObserver({ [weak self] in
+        self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
             let newValue = relation.rows().next() != nil
             if newValue != weakSelf.value {
@@ -104,7 +104,7 @@ public class NotExistsBinding: ValueBinding<Bool> {
     init(relation: Relation) {
         self.relation = relation
         super.init(initialValue: relation.rows().next() == nil)
-        self.removal = relation.addChangeObserver({ [weak self] in
+        self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
             let newValue = relation.rows().next() == nil
             if newValue != weakSelf.value {
@@ -122,7 +122,7 @@ public class SingleRowBinding: ValueBinding<Row?> {
     init(relation: Relation) {
         self.relation = relation
         super.init(initialValue: relation.rows().next()?.ok)
-        self.removal = relation.addChangeObserver({ [weak self] in
+        self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
             let newValue = relation.rows().next()?.ok
             weakSelf.value = newValue
@@ -141,7 +141,7 @@ public class ConcreteValueBinding<T: Equatable>: ValueBinding<T?> {
         self.relation = relation
         self.attribute = attribute
         super.init(initialValue: ConcreteValueBinding.getValue(relation, attribute).flatMap(unwrap))
-        self.removal = relation.addChangeObserver({ [weak self] in
+        self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
             
             if weakSelf.selfInitiatedChange { return }

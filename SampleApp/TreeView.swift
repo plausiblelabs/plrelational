@@ -24,7 +24,7 @@ struct TreeViewModel {
     }
     
     struct Selection {
-        let relation: SQLiteTableRelation
+        let relation: ChangeLoggingRelation<SQLiteTableRelation>
         let set: (id: RelationValue?) -> Void
         let get: () -> RelationValue?
     }
@@ -55,7 +55,7 @@ class TreeView: NSObject {
         super.init()
         
         model.data.binding.addObserver(self)
-        selectionObserverRemoval = model.selection.relation.addChangeObserver({ [weak self] in self?.selectionRelationChanged() })
+        selectionObserverRemoval = model.selection.relation.addChangeObserver({ [weak self] _ in self?.selectionRelationChanged() })
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)

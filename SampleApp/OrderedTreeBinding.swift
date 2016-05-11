@@ -38,7 +38,8 @@ public class OrderedTreeBinding {
         }
     }
     
-    private let relation: SQLiteTableRelation
+    private let relation: ChangeLoggingRelation<SQLiteTableRelation>
+    private let tableName: String
     // TODO: Make this private
     let idAttr: Attribute
     private let parentAttr: Attribute
@@ -46,10 +47,12 @@ public class OrderedTreeBinding {
     
     public let root: Node = Node(Row())
     
+    private var removal: ObserverRemoval!
     private var observers: [OrderedTreeBindingObserver] = []
     
-    init(relation: SQLiteTableRelation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
+    init(relation: ChangeLoggingRelation<SQLiteTableRelation>, tableName: String, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
         self.relation = relation
+        self.tableName = tableName
         self.idAttr = idAttr
         self.parentAttr = parentAttr
         self.orderAttr = orderAttr
@@ -59,6 +62,19 @@ public class OrderedTreeBinding {
         // TODO: Error handling
         // TODO: For now, we'll load the whole tree structure eagerly
         //let rows = relation.rows().map{$0.ok!}
+        
+        self.removal = relation.addChangeObserver({ changes in
+            for change in changes {
+                switch change {
+                case let .Add(row):
+                    self.onInsert(row)
+                case let .Delete(terms):
+                    self.onDelete(terms)
+                case let .Update(terms, row):
+                    self.onUpdate(terms, row: row)
+                }
+            }
+        })
     }
     
     public func addObserver(observer: OrderedTreeBindingObserver) {
@@ -130,17 +146,21 @@ public class OrderedTreeBinding {
         return false
     }
     
-    public func insert(row: Row, pos: TreePos) {
+    public func insert(transaction: ChangeLoggingDatabase.Transaction, row: Row, pos: TreePos) {
         let parentIDValue = pos.parentID ?? .NULL
         let order: RelationValue = orderForPos(pos)
         
         var mutableRow = row
         mutableRow[parentAttr] = parentIDValue
         mutableRow[orderAttr] = order
-        let node = Node(mutableRow)
+
+        transaction[tableName].add(mutableRow)
+    }
+    
+    private func onInsert(row: Row) {
 
         func insertNode(node: Node, parent: Node) -> Int {
-            let orderVal: Double = order.get()!
+            let orderVal: Double = row[orderAttr].get()!
             
             // XXX: This is an inefficient way to do an order-preserving insert
             var index = 0
@@ -161,9 +181,11 @@ public class OrderedTreeBinding {
             return index
         }
 
+        let node = Node(row)
+        let parentID = row[parentAttr]
         let parent: Node?
         let index: Int
-        if let parentID = pos.parentID {
+        if parentID != .NULL {
             let parentNode = nodeForID(parentID)!
             parent = parentNode
             index = insertNode(node, parent: parentNode)
@@ -171,13 +193,16 @@ public class OrderedTreeBinding {
             parent = nil
             index = insertNode(node, parent: root)
         }
-        relation.add(mutableRow)
         
         let path = TreePath(parent: parent, index: index)
         observers.forEach{$0.onInsert(path)}
     }
     
-    public func delete(id: RelationValue) {
+    public func delete(transaction: ChangeLoggingDatabase.Transaction, id: RelationValue) {
+        transaction[tableName].delete([.EQ(idAttr, id)])
+    }
+    
+    private func onDelete(terms: [ComparisonTerm]) {
         
         func deleteNode(node: Node, inout _ nodes: [Node]) -> Int {
             let index = nodes.indexOf({$0 === node})!
@@ -185,6 +210,9 @@ public class OrderedTreeBinding {
             return index
         }
         
+        // XXX: We have to dig out the identifier of the item to be deleted here
+        let id = terms.first!.rhs as! RelationValue
+
         // TODO: Delete all children too!
         
         if let node = nodeForID(id) {
@@ -205,9 +233,57 @@ public class OrderedTreeBinding {
             observers.forEach{$0.onDelete(path)}
         }
     }
-    
+
     /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
-    public func move(srcPath srcPath: TreePath, dstPath: TreePath) {
+    public func move(transaction: ChangeLoggingDatabase.Transaction, srcPath: TreePath, dstPath: TreePath) {
+        let srcParent = srcPath.parent ?? root
+        let node = srcParent.children[srcPath.index]
+        let srcID = node.data[idAttr]
+        
+        let dstParentID: RelationValue
+        if let dstParent = dstPath.parent {
+            dstParentID = dstParent.data[idAttr]
+        } else {
+            dstParentID = .NULL
+        }
+
+        // TODO: Calculate new order value
+//        // XXX: This is embarrassing
+//        let previousID: RelationValue?
+//        if dstIndex == 0 {
+//            previousID = nil
+//        } else {
+//            let previousNode = dstParent.children[dstIndex - 1]
+//            previousID = previousNode.data[idAttr]
+//        }
+//        let nextID: RelationValue?
+//        if dstIndex >= dstParent.children.count - 1 {
+//            nextID = nil
+//        } else {
+//            let nextNode = dstParent.children[dstIndex + 1]
+//            nextID = nextNode.data[idAttr]
+//        }
+//        
+//        let newPos = TreePos(parentID: dstPath.parent?.data[idAttr], previousID: previousID, nextID: nextID)
+//        let newOrder = orderForPos(newPos)
+        let newOrder = RelationValue(5.0)
+        
+        transaction[tableName].update([.EQ(idAttr, srcID)], newValues: [
+            parentAttr: dstParentID,
+            orderAttr: newOrder
+        ])
+    }
+
+    private func onUpdate(terms: [ComparisonTerm], row: Row) {
+        // XXX: We have to dig out the identifier of the item to be moved here
+        let id = terms.first!.rhs as! RelationValue
+
+        // TODO: Get tree path for item at `id`
+        // TODO: Determine destination tree path using updated row values
+        //onMove(srcPath: srcPath, dstPath: dstPath)
+    }
+    
+    private func onMove(srcPath srcPath: TreePath, dstPath: TreePath) {
         let srcParent = srcPath.parent ?? root
         let dstParent = dstPath.parent ?? root
         
@@ -232,28 +308,6 @@ public class OrderedTreeBinding {
         } else {
             dstParent.children.append(node)
         }
-        
-        // XXX: This is embarrassing
-        let previousID: RelationValue?
-        if dstIndex == 0 {
-            previousID = nil
-        } else {
-            let previousNode = dstParent.children[dstIndex - 1]
-            previousID = previousNode.data[idAttr]
-        }
-        let nextID: RelationValue?
-        if dstIndex >= dstParent.children.count - 1 {
-            nextID = nil
-        } else {
-            let nextNode = dstParent.children[dstIndex + 1]
-            nextID = nextNode.data[idAttr]
-        }
-        
-        let newPos = TreePos(parentID: dstPath.parent?.data[idAttr], previousID: previousID, nextID: nextID)
-        let newOrder = orderForPos(newPos)
-        node.data[orderAttr] = newOrder
-        
-        // TODO: Update the underlying tables too!
         
         // Create fresh paths using the adjusted index values since NSOutlineView will balk at
         // a negative source index

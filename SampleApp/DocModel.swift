@@ -39,12 +39,14 @@ enum CollectionType: Int64 { case
 
 class DocModel {
 
+    typealias Transaction = ChangeLoggingDatabase.Transaction
+    
     private let undoManager: UndoManager
-    private let db: SQLiteDatabase
-    private let collections: SQLiteTableRelation
+    private let db: ChangeLoggingDatabase
+    private let collections: ChangeLoggingRelation<SQLiteTableRelation>
     private let orderedCollections: OrderedTreeBinding
-    private let selectedCollection: SQLiteTableRelation
-    private let selectedInspectorItem: SQLiteTableRelation
+    private let selectedCollection: ChangeLoggingRelation<SQLiteTableRelation>
+    private let selectedInspectorItem: ChangeLoggingRelation<SQLiteTableRelation>
     private let selectedCollectionItem: Relation
     private var collectionID: Int64 = 1
     
@@ -63,17 +65,25 @@ class DocModel {
         }
         
         // Prepare the schemas
-        let db = makeDB().db
-        func createRelation(name: String, _ scheme: Scheme) -> SQLiteTableRelation {
-            return db.getOrCreateRelation(name, scheme: scheme).ok!
+        let sqliteDB = makeDB().db
+        let db = ChangeLoggingDatabase(sqliteDB)
+        func createRelation(name: String, _ scheme: Scheme) -> ChangeLoggingRelation<SQLiteTableRelation> {
+            assert(sqliteDB.createRelation(name, scheme: scheme).ok != nil)
+            return db[name]
         }
         self.collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
-        self.orderedCollections = OrderedTreeBinding(relation: collections, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        self.orderedCollections = OrderedTreeBinding(relation: collections, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
         self.selectedCollection = createRelation("selected_collection", ["id", "coll_id"])
         self.selectedInspectorItem = createRelation("selected_inspector_item", ["id", "type", "fid"])
         self.selectedCollectionItem = collections.renameAttributes(["id" : "coll_id"]).join(selectedCollection)
         self.db = db
 
+        func addCollection(collectionID: Int64, name: String, type: CollectionType, parentID: Int64?, previousID: Int64?) {
+            db.transaction({
+                self.addCollection($0, collectionID: collectionID, name: name, type: type, parentID: parentID, previousID: previousID)
+            })
+        }
+        
         // Prepare the default document data
         addCollection(1, name: "Group1", type: .Group, parentID: nil, previousID: nil)
         addCollection(2, name: "Collection1", type: .Collection, parentID: 1, previousID: nil)
@@ -85,7 +95,21 @@ class DocModel {
         collectionID = 8
     }
     
-    private func addCollection(collectionID: Int64, name: String, type: CollectionType, parentID: Int64?, previousID: Int64?) {
+    private func performUndoableAction(name: String, _ transactionFunc: Transaction -> Void) {
+        let (before, after) = db.transactionWithSnapshots(transactionFunc)
+        undoManager.registerChange(
+            name: name,
+            perform: false,
+            forward: {
+                self.db.restoreSnapshot(after)
+            },
+            backward: {
+                self.db.restoreSnapshot(before)
+            }
+        )
+    }
+    
+    private func addCollection(transaction: Transaction, collectionID: Int64, name: String, type: CollectionType, parentID: Int64?, previousID: Int64?) {
         let row: Row = [
             "id": RelationValue(collectionID),
             "type": RelationValue(type.rawValue),
@@ -94,48 +118,40 @@ class DocModel {
         let parent = parentID.map{RelationValue($0)}
         let previous = previousID.map{RelationValue($0)}
         let pos = TreePos(parentID: parent, previousID: previous, nextID: nil)
-        orderedCollections.insert(row, pos: pos)
+        orderedCollections.insert(transaction, row: row, pos: pos)
     }
     
     func newCollection(name: String, type: CollectionType) {
         let id = collectionID
         collectionID += 1
         let previousNodeID: Int64? = orderedCollections.root.children.last?.data["id"].get()
-        undoManager.registerChange(
-            name: "New \(type.name)",
-            perform: true,
-            forward: {
-                self.addCollection(id, name: name, type: type, parentID: nil, previousID: previousNodeID)
-            },
-            backward: {
-                self.orderedCollections.delete(RelationValue(id))
-            }
-        )
+        performUndoableAction("New \(type.name)", {
+            self.addCollection($0, collectionID: id, name: name, type: type, parentID: nil, previousID: previousNodeID)
+        })
     }
     
     func deleteCollection(id: RelationValue, type: CollectionType) {
-        undoManager.registerChange(
-            name: "Delete \(type.name)",
-            perform: true,
-            forward: {
-                self.orderedCollections.delete(id)
-            },
-            backward: {
-                // TODO
-            }
-        )
+        performUndoableAction("Delete \(type.name)", {
+            self.orderedCollections.delete($0, id: id)
+        })
     }
 
     private func selectCollection(id: RelationValue, update: Bool) {
-        if update {
-            selectedCollection.update([Attribute("id") *== RelationValue(Int64(1))], newValues: ["coll_id": id])
-        } else {
-            selectedCollection.add(["id": RelationValue(Int64(1)), "coll_id": id])
-        }
+        self.performUndoableAction("Select Collection", {
+            let selectedCollection = $0["selected_collection"]
+            if update {
+                selectedCollection.update([Attribute("id") *== RelationValue(Int64(1))], newValues: ["coll_id": id])
+            } else {
+                selectedCollection.add(["id": RelationValue(Int64(1)), "coll_id": id])
+            }
+        })
     }
     
     private func deselectCollection() {
-        selectedCollection.delete([Attribute("id") *== RelationValue(Int64(1))])
+        self.performUndoableAction("Deselect Collection", {
+            let selectedCollection = $0["selected_collection"]
+            selectedCollection.delete([Attribute("id") *== RelationValue(Int64(1))])
+        })
     }
 
     lazy var docOutlineTreeViewModel: TreeViewModel = { [unowned self] in
@@ -156,52 +172,21 @@ class DocModel {
             },
             move: { (srcPath, dstPath) in
                 // TODO: s/Collection/type.name/
-                self.undoManager.registerChange(
-                    name: "Move Collection",
-                    perform: true,
-                    forward: {
-                        self.orderedCollections.move(srcPath: srcPath, dstPath: dstPath)
-                    },
-                    backward: {
-                        self.orderedCollections.move(srcPath: dstPath, dstPath: srcPath)
-                    }
-                )
+                self.performUndoableAction("Move Collection", {
+                    self.orderedCollections.move($0, srcPath: srcPath, dstPath: dstPath)
+                })
             }
         )
         
         // TODO: s/Collection/type.name/
         let selection = TreeViewModel.Selection(
             relation: self.selectedCollection,
-            set: { (id) in
+            set: { id in
                 let selectedID = self.selectedCollection.rows().next().map{$0.ok!["coll_id"]}
                 if let id = id {
-                    self.undoManager.registerChange(
-                        name: "Select Collection",
-                        perform: true,
-                        forward: {
-                            self.selectCollection(id, update: selectedID != nil)
-                        },
-                        backward: {
-                            if let selected = selectedID {
-                                self.selectCollection(selected, update: true)
-                            } else {
-                                self.deselectCollection()
-                            }
-                        }
-                    )
+                    self.selectCollection(id, update: selectedID != nil)
                 } else {
-                    self.undoManager.registerChange(
-                        name: "Deselect Collection",
-                        perform: true,
-                        forward: {
-                            self.deselectCollection()
-                        },
-                        backward: {
-                            if let selected = selectedID {
-                                self.selectCollection(selected, update: false)
-                            }
-                        }
-                    )
+                    self.deselectCollection()
                 }
             },
             get: {
