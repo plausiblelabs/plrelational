@@ -39,19 +39,19 @@ public class OrderedTreeBinding {
     }
     
     private let relation: SQLiteTableRelation
-    private let closures: SQLiteTableRelation
     // TODO: Make this private
     let idAttr: Attribute
+    private let parentAttr: Attribute
     private let orderAttr: Attribute
     
     public let root: Node = Node(Row())
     
     private var observers: [OrderedTreeBindingObserver] = []
     
-    init(relation: SQLiteTableRelation, closures: SQLiteTableRelation, idAttr: Attribute, orderAttr: Attribute) {
+    init(relation: SQLiteTableRelation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
         self.relation = relation
-        self.closures = closures
         self.idAttr = idAttr
+        self.parentAttr = parentAttr
         self.orderAttr = orderAttr
         
         // TODO: Depth
@@ -98,7 +98,7 @@ public class OrderedTreeBinding {
 
     /// Returns the parent of the given node.
     public func parentForNode(node: Node) -> Node? {
-        let parentID = node.data["parent"]
+        let parentID = node.data[parentAttr]
         return nodeForID(parentID)
     }
 
@@ -135,7 +135,7 @@ public class OrderedTreeBinding {
         let order: RelationValue = orderForPos(pos)
         
         var mutableRow = row
-        mutableRow["parent"] = parentIDValue
+        mutableRow[parentAttr] = parentIDValue
         mutableRow[orderAttr] = order
         let node = Node(mutableRow)
 
@@ -173,7 +173,6 @@ public class OrderedTreeBinding {
         }
         relation.add(mutableRow)
         
-        // TODO: Update closure table
         let path = TreePath(parent: parent, index: index)
         observers.forEach{$0.onInsert(path)}
     }
@@ -191,8 +190,7 @@ public class OrderedTreeBinding {
         if let node = nodeForID(id) {
             let parent: Node?
             let index: Int
-            // TODO: Make parent attribute name configurable
-            let parentID = node.data["parent"]
+            let parentID = node.data[parentAttr]
             if parentID != .NULL {
                 let parentNode = nodeForID(parentID)!
                 parent = parentNode
@@ -203,7 +201,6 @@ public class OrderedTreeBinding {
             }
             relation.delete([.EQ(idAttr, id)])
             
-            // TODO: Update closure table
             let path = TreePath(parent: parent, index: index)
             observers.forEach{$0.onDelete(path)}
         }

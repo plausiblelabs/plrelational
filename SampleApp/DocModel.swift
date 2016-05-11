@@ -60,8 +60,7 @@ class DocModel {
             return db.getOrCreateRelation(name, scheme: scheme).ok!
         }
         self.collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
-        let closures = createRelation("collection_closure", ["ancestor", "descendant", "depth"])
-        self.orderedCollections = OrderedTreeBinding(relation: collections, closures: closures, idAttr: "id", orderAttr: "order")
+        self.orderedCollections = OrderedTreeBinding(relation: collections, idAttr: "id", parentAttr: "parent", orderAttr: "order")
         self.selectedCollection = createRelation("selected_collection", ["id", "coll_id"])
         self.selectedInspectorItem = createRelation("selected_inspector_item", ["id", "type", "fid"])
         self.selectedCollectionItem = collections.renameAttributes(["id" : "coll_id"]).join(selectedCollection)
