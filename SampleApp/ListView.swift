@@ -53,7 +53,7 @@ class ListView: NSObject {
         super.init()
         
         model.data.binding.addObserver(self)
-        selectionObserverRemoval = model.selection.relation.addChangeObserver({ [weak self] in self?.selectionRelationChanged() })
+        selectionObserverRemoval = model.selection.relation.addChangeObserver({ [weak self] _ in self?.selectionRelationChanged() })
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)

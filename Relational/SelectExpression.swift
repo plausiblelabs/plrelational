@@ -28,9 +28,9 @@ extension Int: SelectExpression {
 }
 
 public struct SelectExpressionBinaryOperator: SelectExpression {
-    var lhs: SelectExpression
-    var op: Comparator
-    var rhs: SelectExpression
+    public var lhs: SelectExpression
+    public var op: Comparator
+    public var rhs: SelectExpression
     
     public init(lhs: SelectExpression, op: Comparator, rhs: SelectExpression) {
         self.lhs = lhs
