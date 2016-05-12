@@ -20,6 +20,11 @@ public struct TreePath {
     let index: Int
 }
 
+extension TreePath: Equatable {}
+public func ==(a: TreePath, b: TreePath) -> Bool {
+    return a.parent?.id == b.parent?.id && a.index == b.index
+}
+
 public protocol OrderedTreeBindingObserver: class {
     func onInsert(path: TreePath)
     func onDelete(path: TreePath)
@@ -29,10 +34,12 @@ public protocol OrderedTreeBindingObserver: class {
 public class OrderedTreeBinding {
 
     public class Node {
+        let id: RelationValue
         var data: Row
         var children: [Node]
         
-        init(_ data: Row, children: [Node] = []) {
+        init(id: RelationValue, data: Row, children: [Node] = []) {
+            self.id = id
             self.data = data
             self.children = children
         }
@@ -45,7 +52,7 @@ public class OrderedTreeBinding {
     private let parentAttr: Attribute
     private let orderAttr: Attribute
     
-    public let root: Node = Node(Row())
+    public let root: Node = Node(id: -1, data: Row())
     
     private var removal: ObserverRemoval!
     private var observers: [OrderedTreeBindingObserver] = []
@@ -169,7 +176,7 @@ public class OrderedTreeBinding {
             return parent.children.insertSorted(node, { self.orderForNode($0) })
         }
 
-        let node = Node(row)
+        let node = Node(id: row[idAttr], data: row)
         let parentID = row[parentAttr]
         let parent: Node?
         let index: Int

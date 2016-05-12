@@ -10,6 +10,22 @@ import XCTest
 import libRelational
 @testable import SampleApp
 
+enum OrderedTreeBindingChange { case
+    Insert(TreePath),
+    Delete(TreePath),
+    Move(src: TreePath, dst: TreePath)
+}
+
+extension OrderedTreeBindingChange: Equatable {}
+func ==(a: OrderedTreeBindingChange, b: OrderedTreeBindingChange) -> Bool {
+    switch (a, b) {
+    case let (.Insert(a), .Insert(b)): return a == b
+    case let (.Delete(a), .Delete(b)): return a == b
+    case let (.Move(asrc, adst), .Move(bsrc, bdst)): return asrc == bsrc && adst == bdst
+    default: return false
+    }
+}
+
 class OrderedTreeBindingTests: XCTestCase {
 
     var dbPaths: [String] = []
@@ -109,6 +125,25 @@ class OrderedTreeBindingTests: XCTestCase {
         let relation = db["collection"]
         let treeBinding = OrderedTreeBinding(relation: relation, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
         XCTAssertEqual(treeBinding.root.children.count, 0)
+
+        class Observer: OrderedTreeBindingObserver {
+            var changes: [OrderedTreeBindingChange] = []
+            
+            func onInsert(path: TreePath) {
+                changes.append(.Insert(path))
+            }
+            
+            func onDelete(path: TreePath) {
+                changes.append(.Delete(path))
+            }
+            
+            func onMove(srcPath srcPath: TreePath, dstPath: TreePath) {
+                changes.append(.Move(src: srcPath, dst: dstPath))
+            }
+        }
+        
+        let observer = Observer()
+        treeBinding.addObserver(observer)
         
         func addCollection(collectionID: Int64, name: String, parentID: Int64?, previousID: Int64?) {
             db.transaction({
@@ -140,6 +175,16 @@ class OrderedTreeBindingTests: XCTestCase {
             XCTAssertEqual(prettyRoot(treeBinding), s)
         }
         
+        func verifyChanges(expected: [OrderedTreeBindingChange]) {
+            XCTAssertEqual(observer.changes, expected)
+            observer.changes = []
+        }
+        
+        func path(parentID: Int64?, _ index: Int) -> TreePath {
+            let parent = parentID.flatMap{ treeBinding.nodeForID(RelationValue($0)) }
+            return TreePath(parent: parent, index: index)
+        }
+        
         // Insert some collections
         addCollection(1, name: "Group1", parentID: nil, previousID: nil)
         addCollection(2, name: "Collection1", parentID: 1, previousID: nil)
@@ -159,14 +204,21 @@ class OrderedTreeBindingTests: XCTestCase {
             "  Page2",
             "Group2"
         ])
+        verifyChanges([
+            .Insert(path(nil, 0)),
+            .Insert(path(1, 0)),
+            .Insert(path(1, 1)),
+            .Insert(path(1, 2)),
+            .Insert(path(2, 0)),
+            .Insert(path(2, 1)),
+            .Insert(path(2, 2)),
+            .Insert(path(nil, 1)),
+        ])
         
         // TODO: Call db.save() and verify SQLite table structure
 
         // Re-order a collection within its parent
-        moveCollection(
-            srcPath: TreePath(parent: treeBinding.nodeForID(2), index: 2),
-            dstPath: TreePath(parent: treeBinding.nodeForID(2), index: 0)
-        )
+        moveCollection(srcPath: path(2, 2), dstPath: path(2, 0))
         verifyTree([
             "Group1",
             "  Collection1",
@@ -177,12 +229,12 @@ class OrderedTreeBindingTests: XCTestCase {
             "  Page2",
             "Group2"
         ])
+        verifyChanges([
+            .Move(src: path(2, 2), dst: path(2, 0))
+        ])
         
         // Move a collection to a new parent
-        moveCollection(
-            srcPath: TreePath(parent: treeBinding.nodeForID(1), index: 0),
-            dstPath: TreePath(parent: treeBinding.nodeForID(8), index: 0)
-        )
+        moveCollection(srcPath: path(1, 0), dstPath: path(8, 0))
         verifyTree([
             "Group1",
             "  Page1",
@@ -193,12 +245,12 @@ class OrderedTreeBindingTests: XCTestCase {
             "    Child1",
             "    Child2"
         ])
+        verifyChanges([
+            .Move(src: path(1, 0), dst: path(8, 0))
+        ])
         
         // Move a collection to the top level
-        moveCollection(
-            srcPath: TreePath(parent: treeBinding.nodeForID(2), index: 1),
-            dstPath: TreePath(parent: nil, index: 1)
-        )
+        moveCollection(srcPath: path(2, 1), dstPath: path(nil, 1))
         verifyTree([
             "Group1",
             "  Page1",
@@ -209,6 +261,9 @@ class OrderedTreeBindingTests: XCTestCase {
             "    Child3",
             "    Child2"
         ])
+        verifyChanges([
+            .Move(src: path(2, 1), dst: path(nil, 1))
+        ])
         
         // Delete a couple collections
         deleteCollection(4)
@@ -218,6 +273,10 @@ class OrderedTreeBindingTests: XCTestCase {
             "  Page1",
             "Child1",
             "Group2"
+        ])
+        verifyChanges([
+            .Delete(path(1, 1)),
+            .Delete(path(8, 0))
         ])
     }
 }
