@@ -75,6 +75,15 @@ extension SQLiteRelation {
         }
     }
     
+    private func operatorToSQL(op: UnaryOperator) -> String? {
+        switch op {
+        case is NotOperator:
+            return "NOT"
+        default:
+            return nil
+        }
+    }
+    
     private func queryToSQL(query: SelectExpression?) -> (String, [RelationValue])? {
         switch query {
         case nil:
@@ -93,6 +102,12 @@ extension SQLiteRelation {
                 opSQL = comparatorToSQL(value.op),
                 rhs = queryToSQL(value.rhs) {
                 return ("(\(lhs.0)) \(opSQL) (\(rhs.0))", lhs.1 + rhs.1)
+            }
+        case let value as SelectExpressionUnaryOperator:
+            if let
+                opSQL = operatorToSQL(value.op),
+                expr = queryToSQL(value.expr) {
+                return ("\(opSQL) (\(expr.0))", expr.1)
             }
         default:
             break

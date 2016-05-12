@@ -481,4 +481,31 @@ class RelationTests: DBTestCase {
         XCTAssertNil(r1.forEach({ row, stop in callCount += 1; stop() }).err)
         XCTAssertEqual(callCount, 1)
     }
+    
+    func testNotSelect() {
+        let FLIGHTS = MakeRelation(
+            ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+            ["83",     "JFK",    "O'Hare",      "11:30a",  "1:43p"],
+            ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
+            ["109",    "JFK",    "Los Angeles", "9:50p",   "2:52a"],
+            ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+            ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]
+        )
+        
+        AssertEqual(FLIGHTS.select(*!(Attribute("NUMBER") *== "83")),
+                    MakeRelation(
+                        ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                        ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
+                        ["109",    "JFK",    "Los Angeles", "9:50p",   "2:52a"],
+                        ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+                        ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]))
+        
+        AssertEqual(FLIGHTS.select(*!(Attribute("NUMBER") *== "83") *&& *!(Attribute("NUMBER") *== "84")),
+                    MakeRelation(
+                        ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                        ["109",    "JFK",    "Los Angeles", "9:50p",   "2:52a"],
+                        ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+                        ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]))
+        
+    }
 }

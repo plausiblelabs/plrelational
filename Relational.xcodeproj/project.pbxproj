@@ -62,6 +62,7 @@
 		C22921DF1CD12AA600518184 /* SQLiteRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921961CC7E9E300518184 /* SQLiteRelation.swift */; };
 		C22921E81CD12CF100518184 /* RelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921E71CD12CF100518184 /* RelationTests.swift */; };
 		C22921EA1CD12CF100518184 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
+		C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C263BBF21CE51B51006B7662 /* UnaryOperator.swift */; };
 		C277E7FD1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */; };
 		C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */; };
 		C277E8031CDB9D3400B7B8F6 /* GeneratorConcat.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */; };
@@ -186,6 +187,7 @@
 		C257C7511CBEBF6300234A89 /* SetPowerSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SetPowerSet.swift; path = Relational/SetPowerSet.swift; sourceTree = "<group>"; };
 		C257C7531CC017EB00234A89 /* SimpleDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleDatabase.swift; sourceTree = "<group>"; };
 		C257C7561CC01BE200234A89 /* genmodel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = genmodel.swift; sourceTree = "<group>"; };
+		C263BBF21CE51B51006B7662 /* UnaryOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnaryOperator.swift; sourceTree = "<group>"; };
 		C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelation.swift; sourceTree = "<group>"; };
 		C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingDatabaseTests.swift; sourceTree = "<group>"; };
 		C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = GeneratorConcat.swift; path = Relational/GeneratorConcat.swift; sourceTree = "<group>"; };
@@ -446,6 +448,7 @@
 				C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */,
 				C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */,
 				C257C7531CC017EB00234A89 /* SimpleDatabase.swift */,
+				C263BBF21CE51B51006B7662 /* UnaryOperator.swift */,
 			);
 			path = Relational;
 			sourceTree = "<group>";
@@ -745,6 +748,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */,
+				C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */,
 				C22921C51CD12A8700518184 /* Comparator.swift in Sources */,
 				C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */,
 				C277E8031CDB9D3400B7B8F6 /* GeneratorConcat.swift in Sources */,

@@ -43,6 +43,10 @@ extension Attribute: StringLiteralConvertible {
 
 public struct Scheme {
     public var attributes: Set<Attribute> = []
+    
+    public init(attributes: Set<Attribute>) {
+        self.attributes = attributes
+    }
 }
 
 extension Scheme: ArrayLiteralConvertible {

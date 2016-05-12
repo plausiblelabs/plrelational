@@ -46,6 +46,20 @@ public struct SelectExpressionBinaryOperator: SelectExpression {
     }
 }
 
+public struct SelectExpressionUnaryOperator: SelectExpression {
+    public var op: UnaryOperator
+    public var expr: SelectExpression
+    
+    public init(op: UnaryOperator, expr: SelectExpression) {
+        self.op = op
+        self.expr = expr
+    }
+    
+    public func valueWithRow(row: Row) -> RelationValue {
+        return op.transform(expr.valueWithRow(row))
+    }
+}
+
 /// Return a SelectExpression that corresponds to the given row. Each value
 /// in the row will generate an EqualityComparator matching that attribute and
 /// that value, and the whole mess will be ANDed together.
@@ -74,6 +88,10 @@ extension SelectExpression {
                 lhs: binary.lhs.withRenamedAttributes(renames),
                 op: binary.op,
                 rhs: binary.rhs.withRenamedAttributes(renames))
+        case let unary as SelectExpressionUnaryOperator:
+            return SelectExpressionUnaryOperator(
+                op: unary.op,
+                expr: unary.expr.withRenamedAttributes(renames))
         default:
             return self
         }

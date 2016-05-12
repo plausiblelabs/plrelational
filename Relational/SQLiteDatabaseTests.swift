@@ -3,6 +3,22 @@ import XCTest
 import libRelational
 
 class SQLiteDatabaseTests: DBTestCase {
+    func makeSQLRelation(name: String, _ attributes: [Attribute], _ rowValues: [RelationValue]...) -> SQLiteTableRelation {
+        let db = makeDB().db.sqliteDatabase
+        
+        let scheme = Scheme(attributes: Set(attributes))
+        let rows = rowValues.map({ values -> Row in
+            precondition(values.count == attributes.count)
+            return Row(values: Dictionary(zip(attributes, values)))
+        })
+        
+        let relation = db.createRelation(name, scheme: scheme).ok!
+        for row in rows {
+            XCTAssertNil(relation.add(row).err)
+        }
+        return relation
+    }
+    
     func testSQLiteBasics() {
         let db = makeDB().db.sqliteDatabase
         db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
@@ -375,5 +391,54 @@ class SQLiteDatabaseTests: DBTestCase {
                         ["first", "last", "pet"],
                         ["Steve", "Smith", "cat"],
                         ["Cindy", "Jobs", "dog"]))
+    }
+    
+    func testNotSelect() {
+        let FLIGHTS = makeSQLRelation("FLIGHTS",
+                                      ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                                      ["83",     "JFK",    "O'Hare",      "11:30a",  "1:43p"],
+                                      ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
+                                      ["109",    "JFK",    "Los Angeles", "9:50p",   "2:52a"],
+                                      ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+                                      ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]
+        )
+        
+        AssertEqual(FLIGHTS.select(*!(Attribute("NUMBER") *== "83")),
+                    MakeRelation(
+                        ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                        ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
+                        ["109",    "JFK",    "Los Angeles", "9:50p",   "2:52a"],
+                        ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+                        ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]))
+        
+        AssertEqual(FLIGHTS.select(*!(Attribute("NUMBER") *== "83") *&& *!(Attribute("NUMBER") *== "84")),
+                    MakeRelation(
+                        ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                        ["109",    "JFK",    "Los Angeles", "9:50p",   "2:52a"],
+                        ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+                        ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]))
+        
+    }
+    
+    func testNotUpdate() {
+        let FLIGHTS = makeSQLRelation("FLIGHTS",
+                                      ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                                      ["83",     "JFK",    "O'Hare",      "11:30a",  "1:43p"],
+                                      ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
+                                      ["109",    "JFK",    "Los Angeles", "9:50p",   "2:52a"],
+                                      ["213",    "JFK",    "Boston",      "11:43a",  "12:45p"],
+                                      ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]
+        )
+        
+        FLIGHTS.update(*!(Attribute("NUMBER") *== "83") *&& *!(Attribute("NUMBER") *== "84"), newValues: ["FROM": "Miami"])
+        
+        AssertEqual(FLIGHTS,
+                    MakeRelation(
+                        ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
+                        ["83",     "JFK",    "O'Hare",      "11:30a",  "1:43p"],
+                        ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
+                        ["109",    "Miami",  "Los Angeles", "9:50p",   "2:52a"],
+                        ["213",    "Miami",  "Boston",      "11:43a",  "12:45p"],
+                        ["214",    "Miami",  "O'Hare",      "2:20p",   "3:12p"]))
     }
 }
