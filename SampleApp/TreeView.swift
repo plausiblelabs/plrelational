@@ -152,18 +152,10 @@ extension TreeView: NSOutlineViewDataSource {
             let currentParent = model.data.binding.parentForID(rowID)
             let proposedParent = item as? OrderedTreeBinding.Node
 
-            // Determine the destination index of the node relative to its new parent
+            // Note that `index` will be -1 in the case where it is being dragged onto
+            // another node, but we will account for that in OrderedTreeBinding.move()
             let srcIndex = model.data.binding.indexForID(rowID)!
-            let dstIndex: Int
-            if proposedParent === currentParent {
-                // The node is being reordered within its existing parent
-                dstIndex = index < srcIndex ? index : index - 1
-            } else {
-                // The node is being dragged onto or inside another node; note that index will
-                // be -1 in the case where it is being dragged onto another node, but we will
-                // account for that in OrderedTreeBinding.move()
-                dstIndex = index
-            }
+            let dstIndex = index
 
             let srcPath = TreePath(parent: currentParent, index: srcIndex)
             let dstPath = TreePath(parent: proposedParent, index: dstIndex)

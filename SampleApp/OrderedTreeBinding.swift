@@ -127,7 +127,13 @@ public class OrderedTreeBinding {
             return nil
         }
     }
-    
+
+    /// Returns the index of the given node relative to its parent.
+    public func indexForNode(node: Node) -> Int? {
+        let parent = parentForNode(node) ?? root
+        return parent.children.indexOf({$0 === node})
+    }
+
     /// Returns true if the first node is a descendent of (or the same as) the second node.
     func isNodeDescendent(node: Node, ofAncestor ancestor: Node) -> Bool {
         if node === ancestor {
@@ -160,7 +166,7 @@ public class OrderedTreeBinding {
     private func onInsert(row: Row) {
 
         func insertNode(node: Node, parent: Node) -> Int {
-            return parent.children.insertSorted(node, { (n) -> Double in n.data[self.orderAttr].get()! })
+            return parent.children.insertSorted(node, { self.orderForNode($0) })
         }
 
         let node = Node(row)
@@ -219,8 +225,10 @@ public class OrderedTreeBinding {
     /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
     public func move(transaction: ChangeLoggingDatabase.Transaction, srcPath: TreePath, dstPath: TreePath) {
         let srcParent = srcPath.parent ?? root
-        let node = srcParent.children[srcPath.index]
-        let srcID = node.data[idAttr]
+        let dstParent = dstPath.parent ?? root
+
+        let srcNode = srcParent.children[srcPath.index]
+        let srcID = srcNode.data[idAttr]
         
         let dstParentID: RelationValue
         if let dstParent = dstPath.parent {
@@ -228,27 +236,18 @@ public class OrderedTreeBinding {
         } else {
             dstParentID = .NULL
         }
-
-        // TODO: Calculate new order value
-//        // XXX: This is embarrassing
-//        let previousID: RelationValue?
-//        if dstIndex == 0 {
-//            previousID = nil
-//        } else {
-//            let previousNode = dstParent.children[dstIndex - 1]
-//            previousID = previousNode.data[idAttr]
-//        }
-//        let nextID: RelationValue?
-//        if dstIndex >= dstParent.children.count - 1 {
-//            nextID = nil
-//        } else {
-//            let nextNode = dstParent.children[dstIndex + 1]
-//            nextID = nextNode.data[idAttr]
-//        }
-//        
-//        let newPos = TreePos(parentID: dstPath.parent?.data[idAttr], previousID: previousID, nextID: nextID)
-//        let newOrder = orderForPos(newPos)
-        let newOrder = RelationValue(5.0)
+        
+        // Note that dstPath.index of -1 can occur in the case where a node is being dragged onto another
+        let dstIndex: Int
+        if dstPath.index < 0 {
+            dstIndex = dstParent.children.count
+        } else {
+            dstIndex = dstPath.index
+        }
+        
+        // Determine the order of the node in its new parent and/or position
+        let (previous, next) = adjacentNodesForIndex(dstIndex, inParent: dstParent, notMatching: srcNode)
+        let newOrder = orderWithinParent(dstParent, previous: previous, next: next)
         
         transaction[tableName].update(idAttr *== srcID, newValues: [
             parentAttr: dstParentID,
@@ -257,65 +256,107 @@ public class OrderedTreeBinding {
     }
 
     private func onUpdate(query: SelectExpression, row: Row) {
-        // XXX: We have to dig out the identifier of the item to be moved here
-        //let id = terms.first!.rhs as! RelationValue
+        let newParentID = row[parentAttr]
+        let newOrder = row[orderAttr]
+        if newParentID == .NotFound || newOrder == .NotFound {
+            // TODO: We should be able to perform the move if only one of parent/order were updated
+            return
+        }
 
-        // TODO: Get tree path for item at `id`
-        // TODO: Determine destination tree path using updated row values
-        //onMove(srcPath: srcPath, dstPath: dstPath)
+        // XXX: We have to dig out the identifier of the item to be moved here
+        let srcID = (query as! SelectExpressionBinaryOperator).rhs as! RelationValue
+        let srcNode = nodeForID(srcID)!
+        onMove(srcNode, dstParentID: newParentID, dstOrder: newOrder)
     }
     
-    private func onMove(srcPath srcPath: TreePath, dstPath: TreePath) {
-        let srcParent = srcPath.parent ?? root
-        let dstParent = dstPath.parent ?? root
-        
-        // Note that dstPath.index of -1 can occur in the case where a node is being dragged onto another
-        // (and srcPath.index can also be -1 in the undo case)
-        let srcIndex: Int
-        if srcPath.index < 0 {
-            srcIndex = 0
+    private func onMove(node: Node, dstParentID: RelationValue, dstOrder: RelationValue) {
+        let optSrcParent = parentForNode(node)
+        let optDstParent: Node?
+        if dstParentID == .NULL {
+            optDstParent = nil
         } else {
-            srcIndex = srcPath.index
+            optDstParent = nodeForID(dstParentID)!
         }
-        let dstIndex: Int
-        if dstPath.index < 0 {
-            dstIndex = dstParent.children.count
-        } else {
-            dstIndex = dstPath.index
-        }
+
+        let srcParent = optSrcParent ?? root
+        let dstParent = optDstParent ?? root
+
+        // Remove the node from its current parent
+        let srcIndex = srcParent.children.indexOf({ $0 === node })!
+        srcParent.children.removeAtIndex(srcIndex)
         
-        let node = srcParent.children.removeAtIndex(srcIndex)
-        if dstIndex < dstParent.children.count {
-            dstParent.children.insert(node, atIndex: dstIndex)
-        } else {
-            dstParent.children.append(node)
-        }
-        
-        // Create fresh paths using the adjusted index values since NSOutlineView will balk at
-        // a negative source index
-        let newSrcPath = TreePath(parent: srcPath.parent, index: srcIndex)
-        let newDstPath = TreePath(parent: dstPath.parent, index: dstIndex)
+        // Update the values in the node's row
+        node.data[parentAttr] = dstParentID
+        node.data[orderAttr] = dstOrder
+
+        // Insert the node in its new parent
+        let dstIndex = dstParent.children.insertSorted(node, { self.orderForNode($0) })
+
+        // Notify observers
+        let newSrcPath = TreePath(parent: optSrcParent, index: srcIndex)
+        let newDstPath = TreePath(parent: optDstParent, index: dstIndex)
         observers.forEach{$0.onMove(srcPath: newSrcPath, dstPath: newDstPath)}
     }
-    
-    private func orderForPos(pos: TreePos) -> RelationValue {
-        // TODO: Use a more appropriate data type for storing order
-        let lo: Double = orderForID(pos.previousID) ?? 1.0
-        let hi: Double = orderForID(pos.nextID) ?? 9.0
-        return RelationValue(lo + ((hi - lo) / 2.0))
-    }
-    
-    // XXX
-    private func orderForID(id: RelationValue?) -> Double? {
-        if let id = id {
-            if let node = nodeForID(id) {
-                let row = node.data
-                return row[orderAttr].get()
+
+    private func adjacentNodesForIndex(index: Int, inParent parent: Node, notMatching node: Node) -> (Node?, Node?) {
+        // Note: In the case where a node is being reordered within its existing parent, `parent` will
+        // still contain that node, but `index` represents the new position assuming it was already removed,
+        // so we use the `notMatching` node to avoid choosing that same node again.
+        
+        func safeGet(i: Int) -> Node? {
+            if i >= 0 && i < parent.children.count {
+                return parent.children[i]
             } else {
                 return nil
             }
-        } else {
-            return nil
         }
+        
+        func nodeAtIndex(i: Int, alt: Int) -> Node? {
+            if let n = safeGet(i) {
+                if n !== node {
+                    return n
+                } else {
+                    return safeGet(alt)
+                }
+            } else {
+                return nil
+            }
+        }
+        
+        let lo = nodeAtIndex(index - 1, alt: index - 2)
+        let hi = nodeAtIndex(index,     alt: index + 1)
+        return (lo, hi)
+    }
+    
+    private func orderWithinParent(parent: Node, previous: Node?, next: Node?) -> RelationValue {
+        let prev: Node?
+        if previous == nil && next == nil {
+            // Add after the last child
+            prev = parent.children.last
+        } else {
+            // Insert after previous child
+            prev = previous
+        }
+        let lo: Double = prev.map(orderForNode) ?? 1.0
+        let hi: Double = next.map(orderForNode) ?? 9.0
+        return RelationValue(lo + ((hi - lo) / 2.0))
+    }
+    
+    private func orderForPos(pos: TreePos) -> RelationValue {
+        let parent: Node
+        if let parentID = pos.parentID {
+            parent = nodeForID(parentID)!
+        } else {
+            parent = root
+        }
+        
+        let previous = pos.previousID.flatMap(nodeForID)
+        let next = pos.nextID.flatMap(nodeForID)
+        
+        return orderWithinParent(parent, previous: previous, next: next)
+    }
+    
+    private func orderForNode(node: Node) -> Double {
+        return node.data[orderAttr].get()!
     }
 }
