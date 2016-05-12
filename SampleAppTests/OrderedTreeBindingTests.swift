@@ -33,6 +33,24 @@ class OrderedTreeBindingTests: XCTestCase {
         return (path, db)
     }
     
+    func pretty(node: OrderedTreeBinding.Node, _ accum: String, _ indent: Int) -> String {
+        var mutstr = accum
+        let pad = Array(count: indent, repeatedValue: "  ").joinWithSeparator("")
+        mutstr.appendContentsOf("\(pad)\(node.data["name"])\n")
+        for child in node.children {
+            mutstr = pretty(child, mutstr, indent + 1)
+        }
+        return mutstr
+    }
+    
+    func prettyRoot(binding: OrderedTreeBinding) -> String {
+        var s = ""
+        for node in binding.root.children {
+            s = pretty(node, s, 0)
+        }
+        return s
+    }
+    
     func testInit() {
         let sqliteDB = makeDB().db
         let sqliteRelation = sqliteDB.createRelation("collection", scheme: ["id", "name", "parent", "order"]).ok!
@@ -65,11 +83,25 @@ class OrderedTreeBindingTests: XCTestCase {
         let relation = db["collection"]
         let treeBinding = OrderedTreeBinding(relation: relation, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
         
+        func verifyTree(expected: [String]) {
+            let s = "\(expected.joinWithSeparator("\n"))\n"
+            XCTAssertEqual(prettyRoot(treeBinding), s)
+        }
+
         // TODO: Verify that in-memory tree structure was built correctly during initialization
-        //XCTAssertEqual(treeBinding.root.children.count, 2)
+//        verifyTree([
+//            "Group1",
+//            "  Collection1",
+//            "    Child1",
+//            "    Child2",
+//            "    Child3",
+//            "  Page1",
+//            "  Page2",
+//            "Group2"
+//        ])
     }
     
-    func testInsert() {
+    func testInsertMoveDelete() {
         let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
         
@@ -91,31 +123,101 @@ class OrderedTreeBindingTests: XCTestCase {
             })
         }
         
+        func deleteCollection(collectionID: Int64) {
+            db.transaction({
+                treeBinding.delete($0, id: RelationValue(collectionID))
+            })
+        }
+        
+        func moveCollection(srcPath srcPath: TreePath, dstPath: TreePath) {
+            db.transaction({
+                treeBinding.move($0, srcPath: srcPath, dstPath: dstPath)
+            })
+        }
+        
+        func verifyTree(expected: [String]) {
+            let s = "\(expected.joinWithSeparator("\n"))\n"
+            XCTAssertEqual(prettyRoot(treeBinding), s)
+        }
+        
+        // Insert some collections
         addCollection(1, name: "Group1", parentID: nil, previousID: nil)
         addCollection(2, name: "Collection1", parentID: 1, previousID: nil)
         addCollection(3, name: "Page1", parentID: 1, previousID: 2)
         addCollection(4, name: "Page2", parentID: 1, previousID: 3)
         addCollection(5, name: "Child1", parentID: 2, previousID: nil)
         addCollection(6, name: "Child2", parentID: 2, previousID: 5)
-        addCollection(7, name: "Group2", parentID: nil, previousID: 1)
-        
-        // Verify in-memory tree structure
-        let root = treeBinding.root
-        XCTAssertEqual(root.children.count, 2)
-        XCTAssertEqual(root.children[0].data["name"], "Group1")
-        XCTAssertEqual(root.children[1].data["name"], "Group2")
-        let group1 = root.children[0]
-        XCTAssertEqual(group1.children.count, 3)
-        XCTAssertEqual(group1.children[0].data["name"], "Collection1")
-        XCTAssertEqual(group1.children[1].data["name"], "Page1")
-        XCTAssertEqual(group1.children[2].data["name"], "Page2")
-        let group2 = root.children[1]
-        XCTAssertEqual(group2.children.count, 0)
-        let coll1 = group1.children[0]
-        XCTAssertEqual(coll1.children.count, 2)
-        XCTAssertEqual(coll1.children[0].data["name"], "Child1")
-        XCTAssertEqual(coll1.children[1].data["name"], "Child2")
+        addCollection(7, name: "Child3", parentID: 2, previousID: 6)
+        addCollection(8, name: "Group2", parentID: nil, previousID: 1)
+        verifyTree([
+            "Group1",
+            "  Collection1",
+            "    Child1",
+            "    Child2",
+            "    Child3",
+            "  Page1",
+            "  Page2",
+            "Group2"
+        ])
         
         // TODO: Call db.save() and verify SQLite table structure
+
+        // Re-order a collection within its parent
+        moveCollection(
+            srcPath: TreePath(parent: treeBinding.nodeForID(2), index: 2),
+            dstPath: TreePath(parent: treeBinding.nodeForID(2), index: 0)
+        )
+        verifyTree([
+            "Group1",
+            "  Collection1",
+            "    Child3",
+            "    Child1",
+            "    Child2",
+            "  Page1",
+            "  Page2",
+            "Group2"
+        ])
+        
+        // Move a collection to a new parent
+        moveCollection(
+            srcPath: TreePath(parent: treeBinding.nodeForID(1), index: 0),
+            dstPath: TreePath(parent: treeBinding.nodeForID(8), index: 0)
+        )
+        verifyTree([
+            "Group1",
+            "  Page1",
+            "  Page2",
+            "Group2",
+            "  Collection1",
+            "    Child3",
+            "    Child1",
+            "    Child2"
+        ])
+        
+        // Move a collection to the top level
+        moveCollection(
+            srcPath: TreePath(parent: treeBinding.nodeForID(2), index: 1),
+            dstPath: TreePath(parent: nil, index: 1)
+        )
+        verifyTree([
+            "Group1",
+            "  Page1",
+            "  Page2",
+            "Child1",
+            "Group2",
+            "  Collection1",
+            "    Child3",
+            "    Child2"
+        ])
+        
+        // Delete a couple collections
+        deleteCollection(4)
+        deleteCollection(2)
+        verifyTree([
+            "Group1",
+            "  Page1",
+            "Child1",
+            "Group2"
+        ])
     }
 }
