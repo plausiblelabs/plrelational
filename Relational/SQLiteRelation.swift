@@ -13,15 +13,17 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
         return db.escapeIdentifier(tableName)
     }
     
-    let queryTerms: [ComparisonTerm]
+    /// The query that this relation performs on the underlying table.
+    /// If nil, then it represents the entire table.
+    let query: SelectExpression?
     
-    init(db: SQLiteDatabase, tableName: String, scheme: Scheme, queryTerms: [ComparisonTerm]) {
+    init(db: SQLiteDatabase, tableName: String, scheme: Scheme, query: SelectExpression?) {
         self.db = db
         self.tableName = tableName
         self.scheme = scheme
-        self.queryTerms = queryTerms
+        self.query = query
         
-        precondition(termsToSQL(queryTerms) != nil, "Query terms must be SQL compatible!")
+        precondition(queryToSQL(query) != nil, "Query terms must be SQL compatible!")
     }
     
     public func rows() -> AnyGenerator<Result<Row, RelationError>> {
@@ -30,7 +32,7 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
             if let queryGenerator = queryGenerator {
                 return queryGenerator.next()
             } else {
-                let (sql, parameters) = self.termsToSQL(self.queryTerms)!
+                let (sql, parameters) = self.queryToSQL(self.query)!
                 let result = self.db.executeQuery("SELECT * FROM (\(self.tableNameForQuery)) WHERE \(sql)", parameters)
                 switch result {
                 case .Ok(let generator):
@@ -44,93 +46,89 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {
-        let terms = ComparisonTerm.termsFromRow(row)
-        let selected = select(terms)
+        let query = SelectExpressionFromRow(row)
+        let selected = select(query)
         let rowsResult = mapOk(selected.rows(), { $0 })
         return rowsResult.map({ !$0.isEmpty })
     }
     
-    public func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
+    public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let baseTable = db[tableName]!
-        return baseTable.update(terms + self.queryTerms, newValues: newValues)
+        return baseTable.update(self.queryAndedWithOtherQuery(query), newValues: newValues)
     }
     
     public func onAddFirstObserver() {
-        // If we have no query terms then we're the original, base table and have nothing to do.
-        guard queryTerms.count > 0 else { return }
-        
         let baseTable = db[tableName]!
         baseTable.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
     }
 }
 
 extension SQLiteRelation {
-    private func valueProviderToSQL(provider: ValueProvider) -> (String, RelationValue?)? {
-        switch provider {
-        case let provider as Attribute:
-            return (db.escapeIdentifier(provider.name), nil)
-        case let provider as String:
-            return ("?", RelationValue.Text(provider))
-        case let provider as RelationValue:
-            return ("?", provider)
-        default:
-            return nil
-        }
-    }
-    
     private func comparatorToSQL(op: Comparator) -> String? {
         switch op {
         case is EqualityComparator:
-            return " = "
+            return "="
+        case is AndComparator:
+            return "AND"
         default:
             return nil
         }
     }
     
-    private func termsToSQL(terms: [ComparisonTerm]) -> (String, [RelationValue])? {
-        // Special-case zero terms, because SQL doesn't like empty WHERE clauses
-        if terms.count == 0 {
+    private func queryToSQL(query: SelectExpression?) -> (String, [RelationValue])? {
+        switch query {
+        case nil:
             return ("1", [])
-        }
-        
-        var sqlPieces: [String] = []
-        var sqlParameters: [RelationValue] = []
-        
-        for term in terms {
-            guard
-                let (lhs, lhsParam) = valueProviderToSQL(term.lhs),
-                let op = comparatorToSQL(term.op),
-                let (rhs, rhsParam) = valueProviderToSQL(term.rhs)
-                else { return nil }
-            
-            sqlPieces.append(lhs + op + rhs)
-            if let l = lhsParam {
-                sqlParameters.append(l)
+        case let value as RelationValue:
+            return ("?", [value])
+        case let value as Attribute:
+            return (db.escapeIdentifier(value.name), [])
+        case let value as String:
+            return ("?", [RelationValue(value)])
+        case let value as Int:
+            return ("?", [RelationValue(Int64(value))])
+        case let value as SelectExpressionBinaryOperator:
+            if let
+                lhs = queryToSQL(value.lhs),
+                opSQL = comparatorToSQL(value.op),
+                rhs = queryToSQL(value.rhs) {
+                return ("(\(lhs.0)) \(opSQL) (\(rhs.0))", lhs.1 + rhs.1)
             }
-            if let r = rhsParam {
-                sqlParameters.append(r)
-            }
+        default:
+            break
         }
-        
-        let parenthesizedPieces = sqlPieces.map({ "(" + $0 + ")" })
-        
-        return (parenthesizedPieces.joinWithSeparator(" AND "), sqlParameters)
+        return nil
     }
     
-    public func select(terms: [ComparisonTerm]) -> Relation {
-        if terms.isEmpty {
-            return self
-        } else if termsToSQL(terms) != nil {
-            return SQLiteRelation(db: db, tableName: self.tableName, scheme: scheme, queryTerms: self.queryTerms + terms)
+    /// Return self.query ANDed with another query. If self.query is nil,
+    /// returns the other query directly.
+    private func queryAndedWithOtherQuery(otherQuery: SelectExpression) -> SelectExpression {
+        if let myQuery = self.query {
+            return myQuery *&& otherQuery
         } else {
-            return SelectRelation(relation: self, terms: terms)
+            return otherQuery
+        }
+    }
+    
+    public func select(query: SelectExpression) -> Relation {
+        // Short circuit when the query is a simple true, just for useless efficiency.
+        if let query = query as? RelationValue where query.boolValue == true {
+            return self
+        } else if queryToSQL(query) != nil {
+            return SQLiteRelation(db: db, tableName: self.tableName, scheme: scheme, query: self.queryAndedWithOtherQuery(query))
+        } else {
+            return SelectRelation(relation: self, query: query)
         }
     }
 }
 
 public class SQLiteTableRelation: SQLiteRelation {
     init(db: SQLiteDatabase, tableName: String, scheme: Scheme) {
-        super.init(db: db, tableName: tableName, scheme: scheme, queryTerms: [])
+        super.init(db: db, tableName: tableName, scheme: scheme, query: nil)
+    }
+    
+    public override func onAddFirstObserver() {
+        // If we're the original, base table then we have nothing to do.
     }
     
     public func add(row: Row) -> Result<Int64, RelationError> {
@@ -150,23 +148,23 @@ public class SQLiteTableRelation: SQLiteRelation {
         })
     }
     
-    public func delete(searchTerms: [ComparisonTerm]) -> Result<Void, RelationError> {
-        if let (whereSQL, whereParameters) = termsToSQL(searchTerms) {
+    public func delete(query: SelectExpression) -> Result<Void, RelationError> {
+        if let (whereSQL, whereParameters) = queryToSQL(query) {
             let sql = "DELETE FROM \(tableNameForQuery) WHERE \(whereSQL)"
             let result = db.executeQuery(sql, whereParameters)
             return result.map({
                 let array = Array($0)
                 precondition(array.isEmpty, "Unexpected results from DELETE FROM statement: \(array)")
-                self.notifyChangeObservers([.Delete(searchTerms)])
+                self.notifyChangeObservers([.Delete(query)])
                 return ()
             })
         } else {
-            fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL deletes: \(searchTerms)")
+            fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL deletes: \(query)")
         }
     }
     
-    override public func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
-        if let (whereSQL, whereParameters) = termsToSQL(terms + self.queryTerms) {
+    override public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        if let (whereSQL, whereParameters) = queryToSQL(self.queryAndedWithOtherQuery(query)) {
             let orderedAttributes = Array(newValues.values)
             let setParts = orderedAttributes.map({ db.escapeIdentifier($0.0.name) + " = ?" })
             let setSQL = setParts.joinWithSeparator(", ")
@@ -177,11 +175,11 @@ public class SQLiteTableRelation: SQLiteRelation {
             return result.map({
                 let array = Array($0)
                 precondition(array.isEmpty, "Unexpected results from UPDATE statement: \(array)")
-                self.notifyChangeObservers([.Update(terms, newValues)])
+                self.notifyChangeObservers([.Update(query, newValues)])
                 return ()
             })
         } else {
-            fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL updates: \(terms)")
+            fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL updates: \(query)")
         }
     }
 }

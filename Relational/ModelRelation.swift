@@ -29,8 +29,8 @@ public class ModelRelation<T: Model>: SequenceType {
 }
 
 extension ModelRelation {
-    public func select(terms: [ComparisonTerm]) -> ModelRelation {
-        return ModelRelation(owningDatabase: owningDatabase, underlyingRelation: underlyingRelation.select(terms))
+    public func select(query: SelectExpression) -> ModelRelation {
+        return ModelRelation(owningDatabase: owningDatabase, underlyingRelation: underlyingRelation.select(query))
     }
 }
 

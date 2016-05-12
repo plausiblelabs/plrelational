@@ -22,14 +22,14 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
         notifyChangeObservers([.Add(row)])
     }
     
-    public func delete(searchTerms: [ComparisonTerm]) {
-        log.append(.Delete(searchTerms))
-        notifyChangeObservers([.Delete(searchTerms)])
+    public func delete(query: SelectExpression) {
+        log.append(.Delete(query))
+        notifyChangeObservers([.Delete(query)])
     }
     
-    public func update(searchTerms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
-        log.append(.Update(searchTerms, newValues))
-        notifyChangeObservers([.Update(searchTerms, newValues)])
+    public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        log.append(.Update(query, newValues))
+        notifyChangeObservers([.Update(query, newValues)])
         return .Ok()
     }
 }
@@ -59,12 +59,12 @@ extension ChangeLoggingRelation: Relation, RelationDefaultChangeObserverImplemen
                     switch change {
                     case .Add:
                         break
-                    case .Delete(let terms):
-                        if ComparisonTerm.terms(terms, matchRow: row) {
+                    case .Delete(let query):
+                        if query.valueWithRow(row).boolValue {
                             return nil
                         }
-                    case .Update(let terms, let newValues):
-                        if ComparisonTerm.terms(terms, matchRow: row) {
+                    case .Update(let query, let newValues):
+                        if query.valueWithRow(row).boolValue {
                             for (attribute, value) in newValues.values {
                                 row[attribute] = value
                             }

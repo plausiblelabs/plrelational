@@ -20,7 +20,7 @@ public class ModelDatabase {
             return false
         }
         
-        let search = fetchAll(obj.dynamicType).select([.EQ(Attribute("objectID"), RelationValue(obj.objectID.value))])
+        let search = fetchAll(obj.dynamicType).select(Attribute("objectID") *== RelationValue(obj.objectID.value))
         return search.generate().next() != nil
     }
     
@@ -43,7 +43,7 @@ public class ModelDatabase {
         let joinRelation = self.joinRelation(from: Parent.self, to: type)
         
         return targetRelation.combine(joinRelation).map({
-            let joinRelationFiltered = $1.select([.EQ(Attribute("from ID"), RelationValue(ownedBy.objectID.value))])
+            let joinRelationFiltered = $1.select(Attribute("from ID") *== RelationValue(ownedBy.objectID.value))
             
             let joined = joinRelationFiltered.equijoin($0, matching: ["to ID": "objectID"])
             return ModelToManyRelation(owningDatabase: self, underlyingRelation: joined, fromType: Parent.self, fromID: ownedBy.objectID)
@@ -55,7 +55,7 @@ public class ModelDatabase {
         let joinRelation = self.joinRelation(from: type, to: Child.self)
         
         return targetRelation.combine(joinRelation).map({
-            let joinRelationFiltered = $1.select([.EQ(Attribute("to ID"), RelationValue(child.objectID.value))])
+            let joinRelationFiltered = $1.select(Attribute("to ID") *== RelationValue(child.objectID.value))
             
             let joined = joinRelationFiltered.equijoin($0, matching: ["from ID": "objectID"])
             return ModelRelation(owningDatabase: self, underlyingRelation: joined)
@@ -112,6 +112,6 @@ extension ModelDatabase {
 
 extension ModelDatabase {
     private func modelChanged(obj: Model) {
-        relationForModel(obj.dynamicType).map({ $0.update([.EQ(Attribute("objectID"), RelationValue(obj.objectID.value))], newValues: obj.toRow()) })
+        relationForModel(obj.dynamicType).map({ $0.update(Attribute("objectID") *== RelationValue(obj.objectID.value), newValues: obj.toRow()) })
     }
 }

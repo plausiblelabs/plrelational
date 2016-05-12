@@ -23,9 +23,9 @@ class UnionRelation: Relation, RelationDefaultChangeObserverImplementation {
         return a.contains(row).combine(b.contains(row)).map({ $0 || $1 })
     }
     
-    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
-        let aResult = a.update(terms, newValues: newValues)
-        let bResult = b.update(terms, newValues: newValues)
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        let aResult = a.update(query, newValues: newValues)
+        let bResult = b.update(query, newValues: newValues)
         return aResult.and(bResult)
     }
     
@@ -78,16 +78,16 @@ class IntersectionRelation: Relation, RelationDefaultChangeObserverImplementatio
         return a.contains(row).combine(b.contains(row)).map({ $0 && $1 })
     }
     
-    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
-        let rowsToUpdate = mapOk(self.select(terms).rows(), { $0 })
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        let rowsToUpdate = mapOk(self.select(query).rows(), { $0 })
         return rowsToUpdate.then({ rows in
             for row in rows {
-                let rowTerms = ComparisonTerm.termsFromRow(row)
-                let resultA = a.update(rowTerms, newValues: newValues)
+                let rowQuery = SelectExpressionFromRow(row)
+                let resultA = a.update(rowQuery, newValues: newValues)
                 if let err = resultA.err {
                     return .Err(err)
                 }
-                let resultB = b.update(rowTerms, newValues: newValues)
+                let resultB = b.update(rowQuery, newValues: newValues)
                 if let err = resultB.err {
                     return .Err(err)
                 }
@@ -145,12 +145,12 @@ class DifferenceRelation: Relation, RelationDefaultChangeObserverImplementation 
         return a.contains(row).combine(b.contains(row)).map({ $0 && !$1 })
     }
     
-    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
-        let rowsToUpdate = mapOk(self.select(terms).rows(), { $0 })
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        let rowsToUpdate = mapOk(self.select(query).rows(), { $0 })
         return rowsToUpdate.then({ rows in
             for row in rows {
-                let rowTerms = ComparisonTerm.termsFromRow(row)
-                let result = a.update(rowTerms, newValues: newValues)
+                let rowQuery = SelectExpressionFromRow(row)
+                let result = a.update(rowQuery, newValues: newValues)
                 if let err = result.err {
                     return .Err(err)
                 }
@@ -202,8 +202,8 @@ class ProjectRelation: Relation, RelationDefaultChangeObserverImplementation {
         return relation.select(row).isEmpty.map(!)
     }
     
-    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
-        return relation.update(terms, newValues: newValues)
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        return relation.update(query, newValues: newValues)
     }
     
     func onAddFirstObserver() {
@@ -213,25 +213,17 @@ class ProjectRelation: Relation, RelationDefaultChangeObserverImplementation {
 
 class SelectRelation: Relation, RelationDefaultChangeObserverImplementation {
     var relation: Relation
-    let terms: [ComparisonTerm]
+    let query: SelectExpression
     
     var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    init(relation: Relation, terms: [ComparisonTerm]) {
+    init(relation: Relation, query: SelectExpression) {
         self.relation = relation
-        self.terms = terms
+        self.query = query
     }
     
     var scheme: Scheme {
         return relation.scheme
-    }
-    
-    private func rowMatches(row: Row) -> Bool {
-        return !terms.contains({ term in
-            let lhs = term.lhs.valueForRow(row)
-            let rhs = term.rhs.valueForRow(row)
-            return !term.op.matches(lhs, rhs)
-        })
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
@@ -240,7 +232,7 @@ class SelectRelation: Relation, RelationDefaultChangeObserverImplementation {
             while let row = gen.next() {
                 switch row {
                 case .Ok(let row):
-                    if self.rowMatches(row) {
+                    if self.query.valueWithRow(row).boolValue {
                         return .Ok(row)
                     }
                 case .Err:
@@ -252,11 +244,11 @@ class SelectRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
-        return relation.contains(row).map({ $0 && rowMatches(row) })
+        return relation.contains(row).map({ $0 && self.query.valueWithRow(row).boolValue })
     }
     
-    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
-        return relation.update(terms + self.terms, newValues: newValues)
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        return relation.update(query *&& self.query, newValues: newValues)
     }
     
     func onAddFirstObserver() {
@@ -309,14 +301,14 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
         return self.select(row).isEmpty.map(!)
     }
     
-    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
-        let rowsToUpdate = mapOk(self.select(terms).rows(), { $0 })
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        let rowsToUpdate = mapOk(self.select(query).rows(), { $0 })
         return rowsToUpdate.then({ rows in
             for row in rows {
                 let aRow = row.rowWithAttributes(a.scheme.attributes)
                 let aNewValues = newValues.rowWithAttributes(a.scheme.attributes)
                 if aNewValues.values.count > 0 {
-                    let resultA = a.update(ComparisonTerm.termsFromRow(aRow), newValues: aNewValues)
+                    let resultA = a.update(SelectExpressionFromRow(aRow), newValues: aNewValues)
                     if let err = resultA.err {
                         return .Err(err)
                     }
@@ -325,7 +317,7 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
                 let bRow = row.rowWithAttributes(b.scheme.attributes)
                 let bNewValues = newValues.rowWithAttributes(b.scheme.attributes)
                 if bNewValues.values.count > 0 {
-                    let resultB = b.update(ComparisonTerm.termsFromRow(bRow), newValues: bNewValues)
+                    let resultB = b.update(SelectExpressionFromRow(bRow), newValues: bNewValues)
                     if let err = resultB.err {
                         return .Err(err)
                     }
@@ -372,20 +364,11 @@ class RenameRelation: Relation, RelationDefaultChangeObserverImplementation {
         return relation.contains(row.renameAttributes(renames.reversed))
     }
     
-    func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
-        let termRenames = self.renames.reversed
-        func renamedProvider(provider: ValueProvider) -> ValueProvider {
-            // Should this sort of logic be in ValueProvider itself?
-            if let attribute = provider as? Attribute, renamed = termRenames[attribute] {
-                return renamed
-            } else {
-                return provider
-            }
-        }
-        let renamedTerms = terms.map({
-            return ComparisonTerm(renamedProvider($0.lhs), $0.op, renamedProvider($0.rhs))
-        })
-        return relation.update(renamedTerms, newValues: newValues)
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        let reverseRenames = self.renames.reversed
+        let renamedQuery = query.withRenamedAttributes(reverseRenames)
+        let renamedNewValues = newValues.renameAttributes(reverseRenames)
+        return relation.update(renamedQuery, newValues: renamedNewValues)
     }
     
     func onAddFirstObserver() {

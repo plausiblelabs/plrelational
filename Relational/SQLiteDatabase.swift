@@ -32,7 +32,7 @@ public class SQLiteDatabase {
         let masterScheme = schemeForTable(masterName)
         return masterScheme.then({ (scheme: Scheme) -> Result<[String: SQLiteTableRelation], RelationError> in
             let master = SQLiteTableRelation(db: self, tableName: masterName, scheme: scheme)
-            let tables = master.select([.EQ(Attribute("type"), "table")])
+            let tables = master.select(Attribute("type") *== "table")
             let names = mapOk(tables.rows(), { (row: Row) -> String in row["name"].get()! as String })
             return names.then({ names in
                 let schemes = names.map({ schemeForTable($0) })

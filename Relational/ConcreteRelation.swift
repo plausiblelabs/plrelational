@@ -46,8 +46,8 @@ public struct ConcreteRelation: Relation {
         }))
     }
     
-    public mutating func delete(terms: [ComparisonTerm]) {
-        let toDelete = select(terms)
+    public mutating func delete(query: SelectExpression) {
+        let toDelete = select(query)
         values = Set(values.filter({
             // We know that the result of contains() can never fail here because it's ultimately our own implementation.
             toDelete.contains($0).ok! == false
@@ -67,9 +67,9 @@ public struct ConcreteRelation: Relation {
         }
     }
     
-    public mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError> {
-        let rowsToUpdate = select(terms)
-        delete(terms)
+    public mutating func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        let rowsToUpdate = select(query)
+        delete(query)
         for rowToUpdate in rowsToUpdate.rows() {
             // We know that rows never fail, because this is ultimately our own implementation.
             var rowToAdd = rowToUpdate.ok!

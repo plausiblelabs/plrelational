@@ -152,3 +152,14 @@ extension RelationValue {
         }
     }
 }
+
+extension RelationValue {
+    /// Interpret the value as a boolean, producing either true or false.
+    /// SQLite has weird rules about true and false: it converts the value
+    /// to a number (if it isn't already) and then considers 0 to be false.
+    /// That means that, for example, the string "0" is false. For now,
+    /// we'll skip that and just say that Integer(0) is the only false.
+    var boolValue: Bool {
+        return self != .Integer(0)
+    }
+}

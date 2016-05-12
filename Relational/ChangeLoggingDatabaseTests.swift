@@ -82,7 +82,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["42",     "Adams", "MD-11"]
             ))
         
-        loggingRelation.delete([Attribute("number") *== "42"])
+        loggingRelation.delete(Attribute("number") *== "42")
         AssertEqual(loggingRelation,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
@@ -93,7 +93,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["127",    "Wendy", "707"]
             ))
         
-        loggingRelation.delete([Attribute("number") *== "123"])
+        loggingRelation.delete(Attribute("number") *== "123")
         AssertEqual(loggingRelation,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
@@ -117,7 +117,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
         
         loggingRelation.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
-        loggingRelation.update([Attribute("number") *== "42"], newValues: ["equipment": "DC-10"])
+        loggingRelation.update(Attribute("number") *== "42", newValues: ["equipment": "DC-10"])
         AssertEqual(loggingRelation,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
@@ -129,7 +129,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["42",     "Adams", "DC-10"]
             ))
         
-        loggingRelation.update([Attribute("number") *== "123"], newValues: ["equipment": "DC-10"])
+        loggingRelation.update(Attribute("number") *== "123", newValues: ["equipment": "DC-10"])
         AssertEqual(loggingRelation,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
@@ -141,7 +141,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["42",     "Adams", "DC-10"]
             ))
         
-        loggingRelation.update([Attribute("equipment") *== "DC-10"], newValues: ["pilot": "JFK"])
+        loggingRelation.update(Attribute("equipment") *== "DC-10", newValues: ["pilot": "JFK"])
         AssertEqual(loggingRelation,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
@@ -167,14 +167,14 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             referenceRelation.add(row)
         }
         
-        func delete(terms: [ComparisonTerm]) {
-            loggingRelation.delete(terms)
-            referenceRelation.delete(terms)
+        func delete(query: SelectExpression) {
+            loggingRelation.delete(query)
+            referenceRelation.delete(query)
         }
         
-        func update(terms: [ComparisonTerm], _ newValues: Row) {
-            loggingRelation.update(terms, newValues: newValues)
-            referenceRelation.update(terms, newValues: newValues)
+        func update(query: SelectExpression, _ newValues: Row) {
+            loggingRelation.update(query, newValues: newValues)
+            referenceRelation.update(query, newValues: newValues)
         }
         
         AssertEqual(loggingRelation,
@@ -208,12 +208,12 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         AssertEqual(table, referenceRelation)
         
         add(["number": "4", "pilot": "Tim", "equipment": "A340"])
-        delete([Attribute("equipment") *== "A340"])
+        delete(Attribute("equipment") *== "A340")
         add(["number": "5", "pilot": "Ham", "equipment": "A340"])
         add(["number": "6", "pilot": "Ham", "equipment": "A340"])
-        update([Attribute("pilot") *== "Ham"], ["pilot": "Stan"])
+        update(Attribute("pilot") *== "Ham", ["pilot": "Stan"])
         add(["number": "7", "pilot": "Ham", "equipment": "A340"])
-        delete([Attribute("pilot") *== "Ham"])
+        delete(Attribute("pilot") *== "Ham")
         add(["number": "7", "pilot": "Stan", "equipment": "A340"])
         
         AssertEqual(loggingRelation, referenceRelation)
@@ -237,18 +237,18 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             referenceRelation.add(row)
         }
         
-        func delete(terms: [ComparisonTerm]) {
+        func delete(query: SelectExpression) {
             db.transaction({
-                $0["flights"].delete(terms)
+                $0["flights"].delete(query)
             })
-            referenceRelation.delete(terms)
+            referenceRelation.delete(query)
         }
         
-        func update(terms: [ComparisonTerm], _ newValues: Row) {
+        func update(query: SelectExpression, _ newValues: Row) {
             db.transaction({
-                $0["flights"].update(terms, newValues: newValues)
+                $0["flights"].update(query, newValues: newValues)
             })
-            referenceRelation.update(terms, newValues: newValues)
+            referenceRelation.update(query, newValues: newValues)
         }
         
         AssertEqual(db["flights"],
@@ -282,12 +282,12 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         AssertEqual(sqliteDB["flights"]!, referenceRelation)
         
         add(["number": "4", "pilot": "Tim", "equipment": "A340"])
-        delete([Attribute("equipment") *== "A340"])
+        delete(Attribute("equipment") *== "A340")
         add(["number": "5", "pilot": "Ham", "equipment": "A340"])
         add(["number": "6", "pilot": "Ham", "equipment": "A340"])
-        update([Attribute("pilot") *== "Ham"], ["pilot": "Stan"])
+        update(Attribute("pilot") *== "Ham", ["pilot": "Stan"])
         add(["number": "7", "pilot": "Ham", "equipment": "A340"])
-        delete([Attribute("pilot") *== "Ham"])
+        delete(Attribute("pilot") *== "Ham")
         add(["number": "7", "pilot": "Stan", "equipment": "A340"])
         
         AssertEqual(db["flights"], referenceRelation)
@@ -373,12 +373,12 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             let pilots = $0["pilots"]
             
             flights.add(["number": 4, "pilot": "Jones", "equipment": "DC-10"])
-            flights.update([Attribute("number") *== RelationValue(1 as Int64)], newValues: ["pilot": "Smith"])
-            flights.delete([Attribute("equipment") *== "797"])
+            flights.update(Attribute("number") *== RelationValue(1 as Int64), newValues: ["pilot": "Smith"])
+            flights.delete(Attribute("equipment") *== "797")
             
             pilots.add(["name": "Horton", "home": "Miami"])
-            pilots.update([Attribute("name") *== "Jones"], newValues: ["home": "Boston"])
-            pilots.delete([Attribute("home") *== "Seattle"])
+            pilots.update(Attribute("name") *== "Jones", newValues: ["home": "Boston"])
+            pilots.delete(Attribute("home") *== "Seattle")
             
             // Assert that the database still has the old data
             AssertEqual(db["flights"],
@@ -498,12 +498,12 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             let pilots = $0["pilots"]
             
             flights.add(["number": 4, "pilot": "Jones", "equipment": "DC-10"])
-            flights.update([Attribute("number") *== RelationValue(1 as Int64)], newValues: ["pilot": "Smith"])
-            flights.delete([Attribute("equipment") *== "797"])
+            flights.update(Attribute("number") *== RelationValue(1 as Int64), newValues: ["pilot": "Smith"])
+            flights.delete(Attribute("equipment") *== "797")
             
             pilots.add(["name": "Horton", "home": "Miami"])
-            pilots.update([Attribute("name") *== "Jones"], newValues: ["home": "Boston"])
-            pilots.delete([Attribute("home") *== "Seattle"])
+            pilots.update(Attribute("name") *== "Jones", newValues: ["home": "Boston"])
+            pilots.delete(Attribute("home") *== "Seattle")
         })
         
         snapshots.append((db.takeSnapshot(),

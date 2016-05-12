@@ -32,7 +32,7 @@ class SQLiteDatabaseTests: DBTestCase {
                         ["Here",     "888",    "There"],
                         ["Atlanta",  "3",      "Atlanta"]))
         
-        AssertEqual(FLIGHTS.select([ComparisonTerm(Attribute("NUMBER"), LTComparator(), "125")]),
+        AssertEqual(FLIGHTS.select(SelectExpressionBinaryOperator(lhs: Attribute("NUMBER"), op: LTComparator(), rhs: "125")),
                     MakeRelation(
                         ["FROM",     "NUMBER", "TO"],
                         ["JFK",      "123",    "Unknown"],
@@ -54,7 +54,7 @@ class SQLiteDatabaseTests: DBTestCase {
                         ["JFK",      "128",    "A"],
                         ["JFK",      "129",    "A"]))
         
-        FLIGHTS.update([ComparisonTerm(Attribute("NUMBER"), EqualityComparator(), "888")], newValues: ["FROM": "Tennessee", "TO": "Spotsylvania"])
+        FLIGHTS.update(Attribute("NUMBER") *== "888", newValues: ["FROM": "Tennessee", "TO": "Spotsylvania"])
         AssertEqual(FLIGHTS,
                     MakeRelation(
                         ["FROM",     "NUMBER", "TO"],
@@ -68,7 +68,7 @@ class SQLiteDatabaseTests: DBTestCase {
                         ["Tennessee","888",    "Spotsylvania"],
                         ["Atlanta",  "3",      "Atlanta"]))
         
-        FLIGHTS.delete([ComparisonTerm(Attribute("FROM"), EqualityComparator(), "JFK")])
+        FLIGHTS.delete(Attribute("FROM") *== "JFK")
         AssertEqual(FLIGHTS,
                     MakeRelation(
                         ["FROM",     "NUMBER", "TO"],
@@ -143,10 +143,10 @@ class SQLiteDatabaseTests: DBTestCase {
         r.add(["column": "42"])
         XCTAssertEqual(changeCount, 1)
         
-        r.update([.EQ(Attribute("column"), "42")], newValues: ["column": "43"])
+        r.update(Attribute("column") *== "42", newValues: ["column": "43"])
         XCTAssertEqual(changeCount, 2)
         
-        r.delete([.EQ(Attribute("column"), "43")])
+        r.delete(Attribute("column") *== "43")
         XCTAssertEqual(changeCount, 3)
         
         removal()
@@ -183,7 +183,7 @@ class SQLiteDatabaseTests: DBTestCase {
         let removal = joined.addChangeObserver({ _ in changed = true })
         
         changed = false
-        a.delete([.EQ(Attribute("2"), "Y")])
+        a.delete(Attribute("2") *== "Y")
         XCTAssertTrue(changed)
         AssertEqual(joined,
                     MakeRelation(
@@ -203,7 +203,7 @@ class SQLiteDatabaseTests: DBTestCase {
         
         removal()
         changed = false
-        a.delete([.EQ(Attribute("1"), "X")])
+        a.delete(Attribute("1") *== "X")
         XCTAssertFalse(changed)
     }
     
@@ -225,7 +225,7 @@ class SQLiteDatabaseTests: DBTestCase {
         binding.set("Roberta")
         XCTAssertEqual(currentName, "Roberta")
         
-        r.update([.EQ(Attribute("id"), RelationValue.Integer(2))], newValues: ["name": "Tina"])
+        r.update(Attribute("id") *== RelationValue.Integer(2), newValues: ["name": "Tina"])
         XCTAssertEqual(currentName, "Tina")
     }
     
@@ -249,8 +249,8 @@ class SQLiteDatabaseTests: DBTestCase {
         XCTAssertNil(houses.add(["id": 2, "address": "456 West St."]).err)
         
         var joined = people.equijoin(houses.renameAttributes(["id": "renamed_house_id"]), matching: ["houseID": "renamed_house_id"])
-        XCTAssertNil(joined.update([Attribute("id") *== RelationValue(1 as Int64)], newValues: ["name": "Stevens"]).err)
-        XCTAssertNil(joined.update([Attribute("id") *== RelationValue(2 as Int64)], newValues: ["address": "999 Something Ln."]).err)
+        XCTAssertNil(joined.update(Attribute("id") *== RelationValue(1 as Int64), newValues: ["name": "Stevens"]).err)
+        XCTAssertNil(joined.update(Attribute("id") *== RelationValue(2 as Int64), newValues: ["address": "999 Something Ln."]).err)
         
         AssertEqual(joined,
                     MakeRelation(
@@ -280,7 +280,7 @@ class SQLiteDatabaseTests: DBTestCase {
         XCTAssertNil(r.add(["first": "Allen", "last": "Jones", "pet": "dog"]).err)
         
         var projected = r.project(["last", "pet"])
-        projected.update([Attribute("pet") *== "cat"], newValues: ["last": "Smith"])
+        projected.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
         
         AssertEqual(r,
                     MakeRelation(
@@ -304,7 +304,7 @@ class SQLiteDatabaseTests: DBTestCase {
         XCTAssertNil(r2.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
         
         var difference = r1.difference(r2)
-        difference.update([Attribute("pet") *== "cat"], newValues: ["last": "Smith"])
+        difference.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
         
         AssertEqual(r1,
                     MakeRelation(
@@ -334,7 +334,7 @@ class SQLiteDatabaseTests: DBTestCase {
         XCTAssertNil(r2.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
         
         var intersection = r1.intersection(r2)
-        intersection.update([Attribute("pet") *== "cat"], newValues: ["last": "Smith"])
+        intersection.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
         
         AssertEqual(r1,
                     MakeRelation(
@@ -362,7 +362,7 @@ class SQLiteDatabaseTests: DBTestCase {
         XCTAssertNil(r2.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
         
         var union = r1.union(r2)
-        union.update([Attribute("pet") *== "cat"], newValues: ["last": "Smith"])
+        union.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
         
         AssertEqual(r1,
                     MakeRelation(

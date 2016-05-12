@@ -19,7 +19,7 @@ class ModelDatabaseTests: DBTestCase {
         }
         
         AssertEqual(db.fetchAll(FLIGHT.self), flights)
-        AssertEqual(db.fetchAll(FLIGHT.self).select([.EQ(FLIGHT.Attributes.departs, "JFK")]), flights.filter({ $0.departs == "JFK" }))
+        AssertEqual(db.fetchAll(FLIGHT.self).select(FLIGHT.Attributes.departs *== "JFK"), flights.filter({ $0.departs == "JFK" }))
     }
     
     func testModelToMany() {

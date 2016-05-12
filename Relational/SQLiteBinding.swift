@@ -36,8 +36,7 @@ public class SQLiteBinding {
     }
     
     public func set(value: RelationValue) -> Result<Void, RelationError> {
-        let searchTerms = key.values.map({ ComparisonTerm.EQ($0, $1) })
-        return database[tableName]!.update(searchTerms, newValues: [attribute: value])
+        return database[tableName]!.update(SelectExpressionFromRow(key), newValues: [attribute: value])
     }
     
     private func changed() {

@@ -32,7 +32,6 @@
 		C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */; };
 		C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		C22921C51CD12A8700518184 /* Comparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7491CBD7F4500234A89 /* Comparator.swift */; };
-		C22921C61CD12A8700518184 /* ComparisonTerm.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A31CCA86CE00518184 /* ComparisonTerm.swift */; };
 		C22921C71CD12A8700518184 /* ConcreteRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */; };
 		C22921C81CD12A8700518184 /* DictionaryConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */; };
 		C22921C91CD12A8700518184 /* DictionaryCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */; };
@@ -67,6 +66,8 @@
 		C277E8071CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8061CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift */; };
 		C277E80C1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E80B1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift */; };
 		C277E80E1CE25E8F00B7B8F6 /* ModelDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E80D1CE25E8F00B7B8F6 /* ModelDatabaseTests.swift */; };
+		C277E8101CE4EF5400B7B8F6 /* SelectExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */; };
+		C277E8121CE4FAD400B7B8F6 /* SelectExpressionOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */; };
 		C2BD29921CD251870081FD05 /* Flight.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
 		C2BD29931CD251870081FD05 /* Store.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
@@ -156,7 +157,6 @@
 		C22921991CCA5B1200518184 /* Model.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		C229219F1CCA5EF200518184 /* ModelDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelDatabase.swift; sourceTree = "<group>"; };
 		C22921A11CCA84D100518184 /* ModelRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelRelation.swift; sourceTree = "<group>"; };
-		C22921A31CCA86CE00518184 /* ComparisonTerm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComparisonTerm.swift; sourceTree = "<group>"; };
 		C22921A71CCE587900518184 /* RelationValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValue.swift; sourceTree = "<group>"; };
 		C22921A91CCE605D00518184 /* ArrayHashing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ArrayHashing.swift; path = Relational/ArrayHashing.swift; sourceTree = "<group>"; };
 		C22921AB1CCE6C5B00518184 /* ModelError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelError.swift; sourceTree = "<group>"; };
@@ -188,6 +188,8 @@
 		C277E8061CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingDatabase.swift; sourceTree = "<group>"; };
 		C277E80B1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteDatabaseTests.swift; sourceTree = "<group>"; };
 		C277E80D1CE25E8F00B7B8F6 /* ModelDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelDatabaseTests.swift; sourceTree = "<group>"; };
+		C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpression.swift; sourceTree = "<group>"; };
+		C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpressionOperators.swift; sourceTree = "<group>"; };
 		C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConcreteRelation.swift; sourceTree = "<group>"; };
 		C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OperationRelations.swift; sourceTree = "<group>"; };
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
@@ -425,7 +427,6 @@
 			isa = PBXGroup;
 			children = (
 				C257C7491CBD7F4500234A89 /* Comparator.swift */,
-				C22921A31CCA86CE00518184 /* ComparisonTerm.swift */,
 				C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */,
 				C257C74F1CBEB18A00234A89 /* FunctionalDependency.swift */,
 				C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */,
@@ -434,6 +435,8 @@
 				C22921E71CD12CF100518184 /* RelationTests.swift */,
 				C257C74B1CBD835600234A89 /* RelationParts.swift */,
 				C22921A71CCE587900518184 /* RelationValue.swift */,
+				C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */,
+				C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */,
 				C257C7531CC017EB00234A89 /* SimpleDatabase.swift */,
 			);
 			path = Relational;
@@ -735,10 +738,10 @@
 				C22921C51CD12A8700518184 /* Comparator.swift in Sources */,
 				C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */,
 				C277E8031CDB9D3400B7B8F6 /* GeneratorConcat.swift in Sources */,
-				C22921C61CD12A8700518184 /* ComparisonTerm.swift in Sources */,
 				C22921C71CD12A8700518184 /* ConcreteRelation.swift in Sources */,
 				C22921C81CD12A8700518184 /* DictionaryConvenience.swift in Sources */,
 				C22921C91CD12A8700518184 /* DictionaryCreation.swift in Sources */,
+				C277E8121CE4FAD400B7B8F6 /* SelectExpressionOperators.swift in Sources */,
 				C22921CA1CD12A8700518184 /* FunctionalDependency.swift in Sources */,
 				C22921CB1CD12A8700518184 /* ObserverSet.swift in Sources */,
 				C22921CC1CD12A8700518184 /* OperationRelations.swift in Sources */,
@@ -762,6 +765,7 @@
 				C22921DB1CD12AA200518184 /* ModelRelation.swift in Sources */,
 				C22921DC1CD12AA200518184 /* WeakReference.swift in Sources */,
 				C22921DD1CD12AA200518184 /* WeakValueDictionary.swift in Sources */,
+				C277E8101CE4EF5400B7B8F6 /* SelectExpression.swift in Sources */,
 				C22921DE1CD12AA600518184 /* SQLiteDatabase.swift in Sources */,
 				C22921DF1CD12AA600518184 /* SQLiteRelation.swift in Sources */,
 			);

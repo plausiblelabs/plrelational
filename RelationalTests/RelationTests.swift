@@ -391,7 +391,7 @@ class RelationTests: DBTestCase {
         )
         
         let times = FLIGHTS.project(["NUMBER", "DEPARTS", "ARRIVES"])
-        AssertEqual(times.select([ComparisonTerm(Attribute("ARRIVES"), LTComparator(), RelationValue.Integer(1300))]),
+        AssertEqual(times.select(SelectExpressionBinaryOperator(lhs: Attribute("ARRIVES"), op: LTComparator(), rhs: RelationValue.Integer(1300))),
                     MakeRelation(
                         ["NUMBER", "DEPARTS", "ARRIVES"],
                         ["109", 2150, 0252],
@@ -403,7 +403,7 @@ class RelationTests: DBTestCase {
             return ((rhsN + 2400) - lhsN) % 2400 >= 200
         })
         
-        AssertEqual(times.select([ComparisonTerm(Attribute("DEPARTS"), twoHoursLT, Attribute("ARRIVES"))]),
+        AssertEqual(times.select(SelectExpressionBinaryOperator(lhs: Attribute("DEPARTS"), op: twoHoursLT, rhs: Attribute("ARRIVES"))),
                     MakeRelation(
                         ["NUMBER", "DEPARTS", "ARRIVES"],
                         ["109", 2150, 252],
@@ -428,7 +428,7 @@ class RelationTests: DBTestCase {
             ["158", "1910", "2035"]
         )
         
-        let connectac = timesab.thetajoin(timesbc.renamePrime(), terms: [ComparisonTerm(Attribute("ARRIVES"), LTComparator(), Attribute("DEPARTS'"))])
+        let connectac = timesab.thetajoin(timesbc.renamePrime(), query: SelectExpressionBinaryOperator(lhs: Attribute("ARRIVES"), op: LTComparator(), rhs: Attribute("DEPARTS'")))
         AssertEqual(connectac,
                     MakeRelation(
                         ["ARRIVES", "ARRIVES'", "DEPARTS", "DEPARTS'", "NUMBER", "NUMBER'"],
@@ -450,7 +450,7 @@ class RelationTests: DBTestCase {
             ["214",    "Boston", "O'Hare",      "1420",    "1512"]
         )
         
-        let split = FLIGHTS.split([ComparisonTerm(Attribute("FROM"), EqualityComparator(), "JFK")])
+        let split = FLIGHTS.split(Attribute("FROM") *== "JFK")
         AssertEqual(split.0,
                     MakeRelation(
                         ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],

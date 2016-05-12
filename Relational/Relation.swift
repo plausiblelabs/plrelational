@@ -4,8 +4,8 @@ public typealias RelationError = ErrorType
 
 public enum RelationChange {
     case Add(Row)
-    case Delete([ComparisonTerm])
-    case Update([ComparisonTerm], Row)
+    case Delete(SelectExpression)
+    case Update(SelectExpression, Row)
 }
 
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
@@ -16,7 +16,7 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     
     func forEach(@noescape f: (Row, Void -> Void) -> Void) -> Result<Void, RelationError>
     
-    mutating func update(terms: [ComparisonTerm], newValues: Row) -> Result<Void, RelationError>
+    mutating func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError>
     
     /// Add an observer function which is called when the content of the Relation
     /// changes. The return value is a function which removes the observation when
@@ -30,12 +30,12 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     
     func join(other: Relation) -> Relation
     func equijoin(other: Relation, matching: [Attribute: Attribute]) -> Relation
-    func thetajoin(other: Relation, terms: [ComparisonTerm]) -> Relation
-    func split(terms: [ComparisonTerm]) -> (Relation, Relation)
+    func thetajoin(other: Relation, query: SelectExpression) -> Relation
+    func split(query: SelectExpression) -> (Relation, Relation)
     func divide(other: Relation) -> Relation
     
     func select(rowToFind: Row) -> Relation
-    func select(terms: [ComparisonTerm]) -> Relation
+    func select(query: SelectExpression) -> Relation
     
     func renameAttributes(renames: [Attribute: Attribute]) -> Relation
 }
@@ -85,12 +85,12 @@ extension Relation {
         return EquijoinRelation(a: self, b: other, matching: matching)
     }
     
-    public func thetajoin(other: Relation, terms: [ComparisonTerm]) -> Relation {
-        return self.join(other).select(terms)
+    public func thetajoin(other: Relation, query: SelectExpression) -> Relation {
+        return self.join(other).select(query)
     }
     
-    public func split(terms: [ComparisonTerm]) -> (Relation, Relation) {
-        let matching = select(terms)
+    public func split(query: SelectExpression) -> (Relation, Relation) {
+        let matching = select(query)
         let notmatching = difference(matching)
         return (matching, notmatching)
     }
@@ -110,11 +110,11 @@ extension Relation {
     public func select(rowToFind: Row) -> Relation {
         let rowScheme = Set(rowToFind.values.map({ $0.0 }))
         precondition(rowScheme.isSubsetOf(scheme.attributes))
-        return select(ComparisonTerm.termsFromRow(rowToFind))
+        return select(SelectExpressionFromRow(rowToFind))
     }
     
-    public func select(terms: [ComparisonTerm]) -> Relation {
-        return SelectRelation(relation: self, terms: terms)
+    public func select(query: SelectExpression) -> Relation {
+        return SelectRelation(relation: self, query: query)
     }
 }
 
