@@ -29,10 +29,10 @@ extension Int: SelectExpression {
 
 public struct SelectExpressionBinaryOperator: SelectExpression {
     public var lhs: SelectExpression
-    public var op: Comparator
+    public var op: BinaryOperator
     public var rhs: SelectExpression
     
-    public init(lhs: SelectExpression, op: Comparator, rhs: SelectExpression) {
+    public init(lhs: SelectExpression, op: BinaryOperator, rhs: SelectExpression) {
         self.lhs = lhs
         self.op = op
         self.rhs = rhs
@@ -41,8 +41,7 @@ public struct SelectExpressionBinaryOperator: SelectExpression {
     public func valueWithRow(row: Row) -> RelationValue {
         let lvalue = lhs.valueWithRow(row)
         let rvalue = rhs.valueWithRow(row)
-        let result = op.matches(lvalue, rvalue)
-        return .Integer(result ? 1 : 0)
+        return op.evaluate(lvalue, rvalue)
     }
 }
 
@@ -56,7 +55,7 @@ public struct SelectExpressionUnaryOperator: SelectExpression {
     }
     
     public func valueWithRow(row: Row) -> RelationValue {
-        return op.transform(expr.valueWithRow(row))
+        return op.evaluate(expr.valueWithRow(row))
     }
 }
 

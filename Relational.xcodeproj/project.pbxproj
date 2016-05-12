@@ -34,7 +34,7 @@
 		37F8FBD51CE4FC36001C7C5F /* OrderedTreeBindingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F8FBD31CE4FC30001C7C5F /* OrderedTreeBindingTests.swift */; };
 		C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */; };
 		C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
-		C22921C51CD12A8700518184 /* Comparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7491CBD7F4500234A89 /* Comparator.swift */; };
+		C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7491CBD7F4500234A89 /* BinaryOperator.swift */; };
 		C22921C71CD12A8700518184 /* ConcreteRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */; };
 		C22921C81CD12A8700518184 /* DictionaryConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */; };
 		C22921C91CD12A8700518184 /* DictionaryCreation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */; };
@@ -180,7 +180,7 @@
 		C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlaygroundMonospace.swift; path = Relational/PlaygroundMonospace.swift; sourceTree = "<group>"; };
 		C22BF1391CBC349400D3FE59 /* Relation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Relation.swift; sourceTree = "<group>"; };
 		C22BF13A1CBC349400D3FE59 /* StringPad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StringPad.swift; path = Relational/StringPad.swift; sourceTree = "<group>"; };
-		C257C7491CBD7F4500234A89 /* Comparator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comparator.swift; sourceTree = "<group>"; };
+		C257C7491CBD7F4500234A89 /* BinaryOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinaryOperator.swift; sourceTree = "<group>"; };
 		C257C74B1CBD835600234A89 /* RelationParts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationParts.swift; sourceTree = "<group>"; };
 		C257C74D1CBD8A9400234A89 /* StringConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StringConvenience.swift; path = Relational/StringConvenience.swift; sourceTree = "<group>"; };
 		C257C74F1CBEB18A00234A89 /* FunctionalDependency.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FunctionalDependency.swift; sourceTree = "<group>"; };
@@ -436,7 +436,7 @@
 		C22BF12E1CBC348500D3FE59 /* Relational */ = {
 			isa = PBXGroup;
 			children = (
-				C257C7491CBD7F4500234A89 /* Comparator.swift */,
+				C257C7491CBD7F4500234A89 /* BinaryOperator.swift */,
 				C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */,
 				C257C74F1CBEB18A00234A89 /* FunctionalDependency.swift */,
 				C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */,
@@ -749,7 +749,7 @@
 			files = (
 				C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */,
 				C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */,
-				C22921C51CD12A8700518184 /* Comparator.swift in Sources */,
+				C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */,
 				C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */,
 				C277E8031CDB9D3400B7B8F6 /* GeneratorConcat.swift in Sources */,
 				C22921C71CD12A8700518184 /* ConcreteRelation.swift in Sources */,

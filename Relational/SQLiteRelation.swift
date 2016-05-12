@@ -64,7 +64,7 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
 }
 
 extension SQLiteRelation {
-    private func comparatorToSQL(op: Comparator) -> String? {
+    private func operatorToSQL(op: BinaryOperator) -> String? {
         switch op {
         case is EqualityComparator:
             return "="
@@ -99,7 +99,7 @@ extension SQLiteRelation {
         case let value as SelectExpressionBinaryOperator:
             if let
                 lhs = queryToSQL(value.lhs),
-                opSQL = comparatorToSQL(value.op),
+                opSQL = operatorToSQL(value.op),
                 rhs = queryToSQL(value.rhs) {
                 return ("(\(lhs.0)) \(opSQL) (\(rhs.0))", lhs.1 + rhs.1)
             }

@@ -162,4 +162,8 @@ extension RelationValue {
     var boolValue: Bool {
         return self != .Integer(0)
     }
+    
+    static func boolValue(value: Bool) -> RelationValue {
+        return .Integer(value ? 1 : 0)
+    }
 }
