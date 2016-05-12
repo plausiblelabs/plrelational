@@ -160,25 +160,7 @@ public class OrderedTreeBinding {
     private func onInsert(row: Row) {
 
         func insertNode(node: Node, parent: Node) -> Int {
-            let orderVal: Double = row[orderAttr].get()!
-            
-            // XXX: This is an inefficient way to do an order-preserving insert
-            var index = 0
-            for n in parent.children {
-                let o: Double = n.data[orderAttr].get()!
-                if o > orderVal {
-                    break
-                }
-                index += 1
-            }
-            
-            if index < parent.children.count {
-                parent.children.insert(node, atIndex: index)
-            } else {
-                parent.children.append(node)
-            }
-            
-            return index
+            return parent.children.insertSorted(node, { (n) -> Double in n.data[self.orderAttr].get()! })
         }
 
         let node = Node(row)
@@ -276,7 +258,7 @@ public class OrderedTreeBinding {
 
     private func onUpdate(terms: [ComparisonTerm], row: Row) {
         // XXX: We have to dig out the identifier of the item to be moved here
-        let id = terms.first!.rhs as! RelationValue
+        //let id = terms.first!.rhs as! RelationValue
 
         // TODO: Get tree path for item at `id`
         // TODO: Determine destination tree path using updated row values
