@@ -199,7 +199,7 @@ public class OrderedTreeBinding {
                 parent = nil
                 index = deleteNode(node, &root.children)
             }
-            relation.delete([.EQ(idAttr, id)])
+            relation.delete(idAttr *== id)
             
             let path = TreePath(parent: parent, index: index)
             observers.forEach{$0.onDelete(path)}

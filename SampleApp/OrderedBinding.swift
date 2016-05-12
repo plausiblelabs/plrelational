@@ -82,7 +82,7 @@ public class OrderedBinding {
     
     public func delete(id: RelationValue) {
         if let index = indexForID(id) {
-            relation.delete([.EQ(idAttr, id)])
+            relation.delete(idAttr *== id)
             rows.removeAtIndex(index)
             observers.forEach{$0.onDelete(index)}
         }

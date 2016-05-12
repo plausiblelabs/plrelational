@@ -116,14 +116,14 @@ class DocModel {
 
     private func selectCollection(id: RelationValue, update: Bool) {
         if update {
-            selectedCollection.update([Attribute("id") *== RelationValue(Int64(1))], newValues: ["coll_id": id])
+            selectedCollection.update(Attribute("id") *== RelationValue(Int64(1)), newValues: ["coll_id": id])
         } else {
             selectedCollection.add(["id": RelationValue(Int64(1)), "coll_id": id])
         }
     }
     
     private func deselectCollection() {
-        selectedCollection.delete([Attribute("id") *== RelationValue(Int64(1))])
+        selectedCollection.delete(Attribute("id") *== RelationValue(Int64(1)))
     }
 
     lazy var docOutlineTreeViewModel: TreeViewModel = { [unowned self] in
@@ -196,7 +196,7 @@ class DocModel {
             // continue to work even after the row has been deleted from the underlying
             // relation.)
             let rowID = row["id"]
-            let rowRelation = self.collections.select([Attribute("id") *== rowID])
+            let rowRelation = self.collections.select(Attribute("id") *== rowID)
             let binding = self.collectionNameBinding(rowRelation, id: { rowID })
             return TreeViewModel.Cell(text: binding)
         }
@@ -259,10 +259,10 @@ class DocModel {
         
         func update(newValue: String) {
             let idValue = id()
-            let terms = [Attribute("id") *== idValue]
+            let query = Attribute("id") *== idValue
             let values: Row = ["name": RelationValue(newValue)]
             Swift.print("UPDATE: \(newValue)")
-            assert(self.collections.update(terms, newValues: values).ok != nil)
+            assert(self.collections.update(query, newValues: values).ok != nil)
         }
         
         return StringBidiBinding(relation: relation, attribute: "name", change: BidiChange<String>{ (newValue, oldValue, commit) in
