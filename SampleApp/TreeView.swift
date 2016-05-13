@@ -98,9 +98,8 @@ extension TreeView: NSOutlineViewDataSource {
     
     func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
         let node = item as! OrderedTreeBinding.Node
-        let row = node.data
         // TODO: Don't assume Int64
-        let rowID: Int64 = row[model.data.binding.idAttr].get()!
+        let rowID: Int64 = node.id.get()!
         let pboardItem = NSPasteboardItem()
         pboardItem.setString(String(rowID), forType: PasteboardType)
         return pboardItem
@@ -205,8 +204,7 @@ extension TreeView: ExtOutlineViewDelegate {
         selfInitiatedSelectionChange = true
         if outlineView.selectedRow >= 0 {
             let node = outlineView.itemAtRow(outlineView.selectedRow)! as! OrderedTreeBinding.Node
-            let row = node.data
-            itemID = row[model.data.binding.idAttr]
+            itemID = node.id
         } else {
             itemID = nil
         }

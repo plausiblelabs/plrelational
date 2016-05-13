@@ -60,8 +60,7 @@ public class OrderedTreeBinding {
     
     private let relation: ChangeLoggingRelation<SQLiteTableRelation>
     private let tableName: String
-    // TODO: Make this private
-    let idAttr: Attribute
+    private let idAttr: Attribute
     private let parentAttr: Attribute
     private let orderAttr: Attribute
     
@@ -248,11 +247,13 @@ public class OrderedTreeBinding {
     }
     
     public func delete(transaction: ChangeLoggingDatabase.Transaction, id: RelationValue) {
+        // Delete from the relation
         // TODO: Should we delete from the bottom up?  The way things are ordered now,
         // observers will only be notified in onDelete() for the ancestor node; would it
         // make more sense to notify observers about all children?
         transaction[tableName].delete(idAttr *== id)
         
+        // Recursively delete descendant nodes
         // TODO: There are probably more efficient ways to handle this, but for now we'll
         // use our tree structure to determine which children need to be deleted
         if let node = nodeForID(id) {
