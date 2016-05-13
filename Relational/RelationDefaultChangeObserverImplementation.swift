@@ -13,12 +13,12 @@ public protocol RelationDefaultChangeObserverImplementation: class, Relation {
 
 public struct RelationDefaultChangeObserverImplementationData {
     private var didAddFirstObserver = false
-    private var observers: [UInt64: [RelationChange] -> Void] = [:]
+    private var observers: [UInt64: RelationChange -> Void] = [:]
     private var nextID: UInt64 = 0
 }
 
 extension RelationDefaultChangeObserverImplementation {
-    public func addChangeObserver(f: [RelationChange] -> Void) -> (Void -> Void) {
+    public func addChangeObserver(f: RelationChange -> Void) -> (Void -> Void) {
         let id = changeObserverData.nextID
         changeObserverData.nextID += 1
         
@@ -34,7 +34,7 @@ extension RelationDefaultChangeObserverImplementation {
     
     public func onAddFirstObserver() {}
     
-    func notifyChangeObservers(changes: [RelationChange]) {
+    func notifyChangeObservers(changes: RelationChange) {
         for (_, f) in changeObserverData.observers {
             f(changes)
         }

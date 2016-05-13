@@ -158,20 +158,22 @@ public class SQLiteTableRelation: SQLiteRelation {
             let array = Array(rows)
             precondition(array.isEmpty, "Unexpected results from INSERT INTO statement: \(array)")
             let rowid = sqlite3_last_insert_rowid(db.db)
-            self.notifyChangeObservers([.Add(row)])
+            self.notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil))
             return rowid
         })
     }
     
     public func delete(query: SelectExpression) -> Result<Void, RelationError> {
         if let (whereSQL, whereParameters) = queryToSQL(query) {
-            let sql = "DELETE FROM \(tableNameForQuery) WHERE \(whereSQL)"
-            let result = db.executeQuery(sql, whereParameters)
-            return result.map({
-                let array = Array($0)
-                precondition(array.isEmpty, "Unexpected results from DELETE FROM statement: \(array)")
-                self.notifyChangeObservers([.Delete(query)])
-                return ()
+            let willDelete = ConcreteRelation.copyRelation(self.select(query))
+            return willDelete.then({ willDelete in
+                let sql = "DELETE FROM \(tableNameForQuery) WHERE \(whereSQL)"
+                let result = db.executeQuery(sql, whereParameters)
+                return result.map({ rows in
+                    let array = Array(rows)
+                    precondition(array.isEmpty, "Unexpected results from DELETE FROM statement: \(array)")
+                    self.notifyChangeObservers(RelationChange(added: nil, removed: willDelete))
+                })
             })
         } else {
             fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL deletes: \(query)")
@@ -180,18 +182,22 @@ public class SQLiteTableRelation: SQLiteRelation {
     
     override public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         if let (whereSQL, whereParameters) = queryToSQL(self.queryAndedWithOtherQuery(query)) {
-            let orderedAttributes = Array(newValues.values)
-            let setParts = orderedAttributes.map({ db.escapeIdentifier($0.0.name) + " = ?" })
-            let setSQL = setParts.joinWithSeparator(", ")
-            let setParameters = orderedAttributes.map({ $0.1 })
-            
-            let sql = "UPDATE \(tableNameForQuery) SET \(setSQL) WHERE \(whereSQL)"
-            let result = db.executeQuery(sql, setParameters + whereParameters)
-            return result.map({
-                let array = Array($0)
-                precondition(array.isEmpty, "Unexpected results from UPDATE statement: \(array)")
-                self.notifyChangeObservers([.Update(query, newValues)])
-                return ()
+            let willUpdate = ConcreteRelation.copyRelation(self.select(query))
+            return willUpdate.then({ willUpdate in
+                let orderedAttributes = Array(newValues.values)
+                let setParts = orderedAttributes.map({ db.escapeIdentifier($0.0.name) + " = ?" })
+                let setSQL = setParts.joinWithSeparator(", ")
+                let setParameters = orderedAttributes.map({ $0.1 })
+                
+                let sql = "UPDATE \(tableNameForQuery) SET \(setSQL) WHERE \(whereSQL)"
+                let result = db.executeQuery(sql, setParameters + whereParameters)
+                return result.map({ rows in
+                    let array = Array(rows)
+                    precondition(array.isEmpty, "Unexpected results from UPDATE statement: \(array)")
+                    
+                    let updated = willUpdate.withUpdate(newValues)
+                    self.notifyChangeObservers(RelationChange(added: updated, removed: willUpdate))
+                })
             })
         } else {
             fatalError("Don't know how to transform these search terms into SQL, and we haven't implemented non-SQL updates: \(query)")

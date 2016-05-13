@@ -71,16 +71,32 @@ public class OrderedTreeBinding {
         //let rows = relation.rows().map{$0.ok!}
         
         self.removal = relation.addChangeObserver({ changes in
-            for change in changes {
-                switch change {
-                case let .Add(row):
-                    self.onInsert(row)
-                case let .Delete(terms):
-                    self.onDelete(terms)
-                case let .Update(terms, row):
-                    self.onUpdate(terms, row: row)
+            if let added = changes.added {
+                for newRow in added.rows() {
+                    switch newRow {
+                    case .Ok(let row):
+                        self.onInsert(row)
+                    case .Err(let err):
+                        // TODO: error handling again
+                        fatalError("Error fetching added rows: \(err)")
+                    }
                 }
             }
+            
+            if let removed = changes.removed {
+                // TODO: rather than iterate here, maybe hand the whole relation over to onDelete
+                for removedRow in removed.rows() {
+                    switch removedRow {
+                    case .Ok(let row):
+                        self.onDelete(row)
+                    case .Err(let err):
+                        // TODO: error handling again
+                        fatalError("Error fetching removed rows: \(err)")
+                    }
+                }
+            }
+            
+            // TODO: handle (and compute) changes differently from add/delete?
         })
     }
     
@@ -197,7 +213,7 @@ public class OrderedTreeBinding {
         transaction[tableName].delete(idAttr *== id)
     }
     
-    private func onDelete(query: SelectExpression) {
+    private func onDelete(row: Row) {
         
         func deleteNode(node: Node, inout _ nodes: [Node]) -> Int {
             let index = nodes.indexOf({$0 === node})!
@@ -205,8 +221,7 @@ public class OrderedTreeBinding {
             return index
         }
         
-        // XXX: We have to dig out the identifier of the item to be deleted here
-        let id = (query as! SelectExpressionBinaryOperator).rhs as! RelationValue
+        let id = row[idAttr]
 
         // TODO: Delete all children too!
         

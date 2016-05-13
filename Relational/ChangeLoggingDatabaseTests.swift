@@ -58,6 +58,50 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             ))
     }
     
+    func testAddNotify() {
+        let underlying = MakeRelation(
+            ["number", "pilot", "equipment"],
+            ["123",    "Jones", "707"],
+            ["124",    "Steve", "727"],
+            ["125",    "Martha", "747"],
+            ["126",    "Alice", "767"],
+            ["127",    "Wendy", "707"]
+        )
+        
+        let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
+        
+        var lastChange: RelationChange?
+        _ = loggingRelation.addChangeObserver({ lastChange = $0 })
+        
+        loggingRelation.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
+        AssertEqual(lastChange!.added!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["42",     "Adams", "MD-11"]))
+        XCTAssertNil(lastChange!.removed)
+        
+        loggingRelation.add(["number": "43", "pilot": "Adams", "equipment": "MD-11"])
+        AssertEqual(lastChange!.added!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["43",     "Adams", "MD-11"]))
+        XCTAssertNil(lastChange!.removed)
+        
+        loggingRelation.add(["number": "44", "pilot": "Adams", "equipment": "MD-11"])
+        AssertEqual(lastChange!.added!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["44",     "Adams", "MD-11"]))
+        XCTAssertNil(lastChange!.removed)
+        
+        loggingRelation.add(["number": "45", "pilot": "Adams", "equipment": "MD-11"])
+        AssertEqual(lastChange!.added!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["45",     "Adams", "MD-11"]))
+        XCTAssertNil(lastChange!.removed)
+    }
+    
     func testDelete() {
         let underlying = MakeRelation(
             ["number", "pilot", "equipment"],
@@ -102,6 +146,39 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["126",    "Alice", "767"],
                         ["127",    "Wendy", "707"]
             ))
+    }
+    
+    func testDeleteNotify() {
+        let underlying = MakeRelation(
+            ["number", "pilot", "equipment"],
+            ["123",    "Jones", "707"],
+            ["124",    "Steve", "727"],
+            ["125",    "Martha", "747"],
+            ["126",    "Alice", "767"],
+            ["127",    "Wendy", "707"]
+        )
+        
+        let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
+        
+        var lastChange: RelationChange?
+        _ = loggingRelation.addChangeObserver({ lastChange = $0 })
+        
+        loggingRelation.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
+        
+        loggingRelation.delete(Attribute("number") *== "42")
+        AssertEqual(lastChange!.removed!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["42",     "Adams", "MD-11"]))
+        XCTAssertNil(lastChange!.added)
+
+        
+        loggingRelation.delete(Attribute("number") *== "123")
+        AssertEqual(lastChange!.removed!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["123",    "Jones", "707"]))
+        XCTAssertNil(lastChange!.added)
     }
     
     func testUpdate() {
@@ -152,6 +229,55 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["127",    "Wendy", "707"],
                         ["42",     "JFK",   "DC-10"]
             ))
+    }
+    
+    func testUpdateNotify() {
+        let underlying = MakeRelation(
+            ["number", "pilot", "equipment"],
+            ["123",    "Jones", "707"],
+            ["124",    "Steve", "727"],
+            ["125",    "Martha", "747"],
+            ["126",    "Alice", "767"],
+            ["127",    "Wendy", "707"]
+        )
+        
+        let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
+        
+        var lastChange: RelationChange?
+        _ = loggingRelation.addChangeObserver({ lastChange = $0 })
+
+        loggingRelation.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
+        loggingRelation.update(Attribute("number") *== "42", newValues: ["equipment": "DC-10"])
+        AssertEqual(lastChange!.removed!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["42",     "Adams", "MD-11"]))
+        AssertEqual(lastChange!.added!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["42",     "Adams", "DC-10"]))
+        
+        loggingRelation.update(Attribute("number") *== "123", newValues: ["equipment": "DC-10"])
+        AssertEqual(lastChange!.removed!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["123",    "Jones", "707"]))
+        AssertEqual(lastChange!.added!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["123",    "Jones", "DC-10"]))
+        
+        loggingRelation.update(Attribute("equipment") *== "DC-10", newValues: ["pilot": "JFK"])
+        AssertEqual(lastChange!.removed!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["42",     "Adams", "DC-10"],
+                        ["123",    "Jones", "DC-10"]))
+        AssertEqual(lastChange!.added!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        ["42",     "JFK", "DC-10"],
+                        ["123",    "JFK", "DC-10"]))
     }
     
     func testSave() {

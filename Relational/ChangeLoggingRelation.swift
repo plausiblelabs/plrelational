@@ -1,6 +1,9 @@
 
-/// Temporary typealias while we figure out the types. Should these be identical? Does the this code need more?
-typealias ChangeLoggingRelationChange = RelationChange
+public enum ChangeLoggingRelationChange {
+    case Add(Row)
+    case Delete(SelectExpression)
+    case Update(SelectExpression, Row)
+}
 
 public struct ChangeLoggingRelationSnapshot {
     var savedLog: [ChangeLoggingRelationChange]
@@ -19,17 +22,22 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
     
     public func add(row: Row) {
         log.append(.Add(row))
-        notifyChangeObservers([.Add(row)])
+        notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil))
     }
     
     public func delete(query: SelectExpression) {
+        let toDelete = computeFinalRelation().select(query)
         log.append(.Delete(query))
-        notifyChangeObservers([.Delete(query)])
+        notifyChangeObservers(RelationChange(added: nil, removed: toDelete))
     }
     
     public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        let currentState = computeFinalRelation()
+        let toUpdate = currentState.select(query)
+        let afterUpdate = toUpdate.withUpdate(newValues)
+        
         log.append(.Update(query, newValues))
-        notifyChangeObservers([.Update(query, newValues)])
+        notifyChangeObservers(RelationChange(added: afterUpdate, removed: toUpdate))
         return .Ok()
     }
 }
@@ -58,25 +66,7 @@ extension ChangeLoggingRelation: Relation, RelationDefaultChangeObserverImplemen
             case .Delete(let query):
                 currentRelation = currentRelation.select(*!query)
             case .Update(let query, let newValues):
-                // Figure out which attributes are being altered.
-                let newValuesScheme = Scheme(attributes: Set(newValues.values.keys))
-                
-                // And which attributes are not being altered.
-                let untouchedAttributesScheme = Scheme(attributes: self.scheme.attributes.subtract(newValuesScheme.attributes))
-                
-                // Pick out the rows which will be updated.
-                let toUpdate = currentRelation.select(query)
-                
-                // Compute the update. We project away the updated attributes, then join in the new values.
-                // The result is equivalent to updating the values.
-                let withoutNewValueAttributes = toUpdate.project(untouchedAttributesScheme)
-                let updatedValues = withoutNewValueAttributes.join(ConcreteRelation(newValues))
-                
-                // Pick out the rows not selected for the update.
-                let nonUpdated = currentRelation.select(*!query)
-                
-                // The result is the union of the updated values and the rows not selected.
-                currentRelation = nonUpdated.union(updatedValues)
+                currentRelation = currentRelation.withUpdate(query, newValues: newValues)
             }
         }
         
@@ -115,7 +105,7 @@ extension ChangeLoggingRelation {
         self.log = snapshot.savedLog
         if notifyObservers {
             // XXX TODO: we need to provide the actual changes here!
-            notifyChangeObservers([])
+            notifyChangeObservers(RelationChange(added: nil, removed: nil))
         }
     }
     
@@ -123,7 +113,7 @@ extension ChangeLoggingRelation {
         self.log = []
         if notifyObservers {
             // XXX TODO: we need to provide the actual changes here!
-            notifyChangeObservers([])
+            notifyChangeObservers(RelationChange(added: nil, removed: nil))
         }
     }
 }

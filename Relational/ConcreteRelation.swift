@@ -16,6 +16,10 @@ public struct ConcreteRelation: Relation {
         self.init(scheme: scheme, values: [row])
     }
     
+    public static func copyRelation(other: Relation) -> Result<ConcreteRelation, RelationError> {
+        return mapOk(other.rows(), { $0 }).map({ ConcreteRelation(scheme: other.scheme, values: Set($0)) })
+    }
+    
     private func rowMatchesScheme(row: Row) -> Bool {
         return Set(row.values.keys) == scheme.attributes
     }
@@ -116,7 +120,7 @@ public struct ConcreteRelation: Relation {
 //        return (one, two)
 //    }
     
-    public func addChangeObserver(f: [RelationChange] -> Void) -> (Void -> Void) {
+    public func addChangeObserver(f: RelationChange -> Void) -> (Void -> Void) {
         fatalError("Change observation isn't implemented for ConcreteRelation. Its implementation as a value type makes that weird. We might change that if we ever need it.")
     }
 }

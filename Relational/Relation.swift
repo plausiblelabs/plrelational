@@ -2,10 +2,9 @@
 /// Silly placeholder until we figure out what the error type should actually look like.
 public typealias RelationError = ErrorType
 
-public enum RelationChange {
-    case Add(Row)
-    case Delete(SelectExpression)
-    case Update(SelectExpression, Row)
+public struct RelationChange {
+    public var added: Relation?
+    public var removed: Relation?
 }
 
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
@@ -22,7 +21,7 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// changes. The return value is a function which removes the observation when
     /// invoked. The caller can use that function to cancel the observation when
     /// it no longer needs it.
-    func addChangeObserver(f: [RelationChange] -> Void) -> (Void -> Void)
+    func addChangeObserver(f: RelationChange -> Void) -> (Void -> Void)
     
     func union(other: Relation) -> Relation
     func intersection(other: Relation) -> Relation
@@ -36,6 +35,12 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     
     func select(rowToFind: Row) -> Relation
     func select(query: SelectExpression) -> Relation
+    
+    /// Return a new Relation that is this Relation with the given update applied to it.
+    func withUpdate(query: SelectExpression, newValues: Row) -> Relation
+    
+    /// The same as the two-parameter withUpdate, but it updates all rows.
+    func withUpdate(newValues: Row) -> Relation
     
     func renameAttributes(renames: [Attribute: Attribute]) -> Relation
 }
@@ -103,7 +108,6 @@ extension Relation {
         let result = self.project(resultingScheme).difference(projected)
         return result
     }
-    
 }
 
 extension Relation {
@@ -126,6 +130,34 @@ extension Relation {
     public func renamePrime() -> Relation {
         let renames = Dictionary(scheme.attributes.map({ ($0, Attribute($0.name + "'")) }))
         return renameAttributes(renames)
+    }
+}
+
+extension Relation {
+    public func withUpdate(query: SelectExpression, newValues: Row) -> Relation {
+        // Pick out the rows which will be updated, and update them.
+        let toUpdate = self.select(query)
+        let updatedValues = toUpdate.withUpdate(newValues)
+        
+        // Pick out the rows not selected for the update.
+        let nonUpdated = self.select(*!query)
+        
+        // The result is the union of the updated values and the rows not selected.
+        return nonUpdated.union(updatedValues)
+    }
+    
+    public func withUpdate(newValues: Row) -> Relation {
+        // Figure out which attributes are being altered.
+        let newValuesScheme = Scheme(attributes: Set(newValues.values.keys))
+        
+        // And which attributes are not being altered.
+        let untouchedAttributesScheme = Scheme(attributes: self.scheme.attributes.subtract(newValuesScheme.attributes))
+        
+        // Compute the update. We project away the updated attributes, then join in the new values.
+        // The result is equivalent to updating the values.
+        let withoutNewValueAttributes = self.project(untouchedAttributesScheme)
+        let updatedValues = withoutNewValueAttributes.join(ConcreteRelation(newValues))
+        return updatedValues
     }
 }
 
@@ -160,7 +192,7 @@ extension Relation {
 }
 
 extension Relation {
-    func addWeakChangeObserver<T: AnyObject>(target: T, method: T -> [RelationChange] -> Void) {
+    func addWeakChangeObserver<T: AnyObject>(target: T, method: T -> RelationChange -> Void) {
         var remove: (Void -> Void)? = nil
         
         remove = self.addChangeObserver({ [weak target] in

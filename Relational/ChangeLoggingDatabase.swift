@@ -72,7 +72,8 @@ extension ChangeLoggingDatabase {
             relation.underlyingRelation.log.appendContentsOf(relation.log)
         }
         for (_, relation) in transaction.changeLoggingRelations {
-            relation.underlyingRelation.notifyChangeObservers(relation.log)
+            // TODO: make this work again
+            //relation.underlyingRelation.notifyChangeObservers(relation.log)
         }
     }
 }
@@ -100,7 +101,7 @@ extension ChangeLoggingDatabase {
         
         for (_, relation) in changeLoggingRelations {
             // XXX TODO: we need to provide the actual changes here!
-            relation.notifyChangeObservers([])
+            relation.notifyChangeObservers(RelationChange(added: nil, removed: nil))
         }
     }
     
