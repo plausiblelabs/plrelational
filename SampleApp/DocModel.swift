@@ -204,7 +204,7 @@ class DocModel {
             // relation.)
             let rowID = row["id"]
             let nameRelation = self.collections.select(Attribute("id") *== rowID).project(["name"])
-            let binding = self.collectionNameBinding(nameRelation, id: { rowID })
+            let binding = self.collectionNameBinding(nameRelation)
             return TreeViewModel.Cell(text: binding)
         }
         
@@ -257,19 +257,16 @@ class DocModel {
     
     // TODO: This should resolve to the name associated with selectedDocItem
     lazy var selectedItemName: StringBidiBinding = { [unowned self] in
-        return self.collectionNameBinding(self.selectedCollectionItem.project(["name"]), id: {
-            return self.selectedCollectionItem.rows().next()!.ok!["coll_id"]
-        })
+        return self.collectionNameBinding(self.selectedCollectionItem.project(["name"]))
     }()
     
-    private func collectionNameBinding(relation: Relation, id: () -> RelationValue) -> StringBidiBinding {
+    private func collectionNameBinding(relation: Relation) -> StringBidiBinding {
         
         func update(newValue: String) {
-            let idValue = id()
-            let query = Attribute("id") *== idValue
             let values: Row = ["name": RelationValue(newValue)]
             Swift.print("UPDATE: \(newValue)")
-            assert(self.collections.update(query, newValues: values).ok != nil)
+            var mutableRelation = relation
+            assert(mutableRelation.update(true, newValues: values).ok != nil)
         }
         
         return StringBidiBinding(relation: relation, change: BidiChange<String>{ (newValue, oldValue, commit) in

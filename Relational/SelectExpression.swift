@@ -27,6 +27,12 @@ extension Int: SelectExpression {
     }
 }
 
+extension Bool: SelectExpression {
+    public func valueWithRow(row: Row) -> RelationValue {
+        return RelationValue.boolValue(true)
+    }
+}
+
 public struct SelectExpressionBinaryOperator: SelectExpression {
     public var lhs: SelectExpression
     public var op: BinaryOperator
