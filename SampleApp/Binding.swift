@@ -9,10 +9,11 @@
 import Foundation
 import libRelational
 
-public typealias ChangeObserver = Void -> Void
-public typealias ObserverRemoval = Void -> Void
-
 public class ValueBinding<T> {
+    
+    public typealias ChangeObserver = Void -> Void
+    public typealias ObserverRemoval = Void -> Void
+    
     private(set) public var value: T
     private var changeObservers: [UInt64: ChangeObserver] = [:]
     private var changeObserverNextID: UInt64 = 0

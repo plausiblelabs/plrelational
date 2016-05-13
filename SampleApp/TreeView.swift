@@ -45,6 +45,7 @@ class TreeView: NSObject {
     private let outlineView: NSOutlineView
     private let model: TreeViewModel
     
+    private var treeBindingObserverRemoval: (Void -> Void)?
     private var selectionObserverRemoval: (Void -> Void)?
     private var selfInitiatedSelectionChange = false
     
@@ -54,7 +55,7 @@ class TreeView: NSObject {
         
         super.init()
         
-        model.data.binding.addObserver(self)
+        treeBindingObserverRemoval = model.data.binding.addChangeObserver({ [weak self] changes in self?.treeBindingChanged(changes) })
         selectionObserverRemoval = model.selection.relation.addChangeObserver({ [weak self] _ in self?.selectionRelationChanged() })
         
         outlineView.setDelegate(self)
@@ -236,36 +237,35 @@ extension TreeView {
         }
         selfInitiatedSelectionChange = false
     }
-}
-
-extension TreeView: OrderedTreeBindingObserver {
-
-    func onInsert(path: TreePath) {
-        let rows = NSIndexSet(index: path.index)
-        outlineView.insertItemsAtIndexes(rows, inParent: path.parent, withAnimation: [.EffectFade])
-    }
     
-    func onDelete(path: TreePath) {
-        let rows = NSIndexSet(index: path.index)
-        outlineView.removeItemsAtIndexes(rows, inParent: path.parent, withAnimation: [.EffectFade])
-    }
-    
-    func onMove(srcPath srcPath: TreePath, dstPath: TreePath) {
+    func treeBindingChanged(changes: [OrderedTreeBinding.Change]) {
         outlineView.beginUpdates()
         
-        outlineView.moveItemAtIndex(srcPath.index, inParent: srcPath.parent, toIndex: dstPath.index, inParent: dstPath.parent)
+        for change in changes {
+            switch change {
+            case let .Insert(path):
+                let rows = NSIndexSet(index: path.index)
+                outlineView.insertItemsAtIndexes(rows, inParent: path.parent, withAnimation: [.EffectFade])
 
-        // XXX: NSOutlineView doesn't appear to hide/show the disclosure triangle in the case where
-        // the parent's emptiness is changing, so we have to do that manually
-        if let srcParent = srcPath.parent {
-            if srcParent.children.count == 0 {
-                outlineView.reloadItem(srcParent)
-            }
-        }
-        if let dstParent = dstPath.parent {
-            if dstParent.children.count == 1 {
-                outlineView.reloadItem(dstParent)
-                outlineView.expandItem(dstParent)
+            case let .Delete(path):
+                let rows = NSIndexSet(index: path.index)
+                outlineView.removeItemsAtIndexes(rows, inParent: path.parent, withAnimation: [.EffectFade])
+
+            case let .Move(srcPath, dstPath):
+                outlineView.moveItemAtIndex(srcPath.index, inParent: srcPath.parent, toIndex: dstPath.index, inParent: dstPath.parent)
+                // XXX: NSOutlineView doesn't appear to hide/show the disclosure triangle in the case where
+                // the parent's emptiness is changing, so we have to do that manually
+                if let srcParent = srcPath.parent {
+                    if srcParent.children.count == 0 {
+                        outlineView.reloadItem(srcParent)
+                    }
+                }
+                if let dstParent = dstPath.parent {
+                    if dstParent.children.count == 1 {
+                        outlineView.reloadItem(dstParent)
+                        outlineView.expandItem(dstParent)
+                    }
+                }
             }
         }
         

@@ -25,10 +25,14 @@ public func ==(a: TreePath, b: TreePath) -> Bool {
     return a.parent?.id == b.parent?.id && a.index == b.index
 }
 
-public protocol OrderedTreeBindingObserver: class {
-    func onInsert(path: TreePath)
-    func onDelete(path: TreePath)
-    func onMove(srcPath srcPath: TreePath, dstPath: TreePath)
+extension OrderedTreeBinding.Change: Equatable {}
+public func ==(a: OrderedTreeBinding.Change, b: OrderedTreeBinding.Change) -> Bool {
+    switch (a, b) {
+    case let (.Insert(a), .Insert(b)): return a == b
+    case let (.Delete(a), .Delete(b)): return a == b
+    case let (.Move(asrc, adst), .Move(bsrc, bdst)): return asrc == bsrc && adst == bdst
+    default: return false
+    }
 }
 
 public class OrderedTreeBinding {
@@ -44,6 +48,15 @@ public class OrderedTreeBinding {
             self.children = children
         }
     }
+
+    public enum Change { case
+        Insert(TreePath),
+        Delete(TreePath),
+        Move(src: TreePath, dst: TreePath)
+    }
+    
+    public typealias ObserverRemoval = () -> Void
+    public typealias ChangeObserver = ([Change]) -> Void
     
     private let relation: ChangeLoggingRelation<SQLiteTableRelation>
     private let tableName: String
@@ -55,7 +68,8 @@ public class OrderedTreeBinding {
     public let root: Node = Node(id: -1, data: Row())
     
     private var removal: ObserverRemoval!
-    private var observers: [OrderedTreeBindingObserver] = []
+    private var changeObservers: [UInt64: ChangeObserver] = [:]
+    private var changeObserverNextID: UInt64 = 0
     
     init(relation: ChangeLoggingRelation<SQLiteTableRelation>, tableName: String, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
         self.relation = relation
@@ -69,20 +83,21 @@ public class OrderedTreeBinding {
         // TODO: Error handling
         // TODO: For now, we'll load the whole tree structure eagerly
         //let rows = relation.rows().map{$0.ok!}
-        
-        self.removal = relation.addChangeObserver({ changes in
 
-            func handle(relation: Relation, _ f: (Row) -> Void) {
-                for rowResult in relation.rows() {
-                    switch rowResult {
-                    case .Ok(let row):
-                        f(row)
-                    case .Err(let err):
-                        // TODO: error handling again
-                        fatalError("Error fetching rows: \(err)")
-                    }
+        func handle(relation: Relation, inout _ treeChanges: [Change], _ f: (Row) -> [Change]) {
+            for rowResult in relation.rows() {
+                switch rowResult {
+                case .Ok(let row):
+                    treeChanges.appendContentsOf(f(row))
+                case .Err(let err):
+                    // TODO: error handling again
+                    fatalError("Error fetching rows: \(err)")
                 }
             }
+        }
+        
+        self.removal = relation.addChangeObserver({ changes in
+            var treeChanges: [Change] = []
             
             if let adds = changes.added {
                 let added: Relation
@@ -91,12 +106,12 @@ public class OrderedTreeBinding {
                 } else {
                     added = adds
                 }
-                handle(added, self.onInsert)
+                handle(added, &treeChanges, self.onInsert)
             }
             
             if let adds = changes.added, removes = changes.removed {
                 let updated = removes.project([self.idAttr]).join(adds)
-                handle(updated, self.onUpdate)
+                handle(updated, &treeChanges, self.onUpdate)
             }
 
             if let removes = changes.removed {
@@ -107,17 +122,28 @@ public class OrderedTreeBinding {
                     removed = removes
                 }
                 // TODO: rather than iterate here, maybe hand the whole relation over to onDelete
-                handle(removed, self.onDelete)
+                handle(removed, &treeChanges, self.onDelete)
+            }
+            
+            if treeChanges.count > 0 {
+                self.notifyChangeObservers(treeChanges)
             }
         })
     }
     
-    public func addObserver(observer: OrderedTreeBindingObserver) {
-        if observers.indexOf({$0 === observer}) == nil {
-            observers.append(observer)
+    public func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval {
+        let id = changeObserverNextID
+        changeObserverNextID += 1
+        changeObservers[id] = observer
+        return { self.changeObservers.removeValueForKey(id) }
+    }
+    
+    private func notifyChangeObservers(changes: [Change]) {
+        for (_, f) in changeObservers {
+            f(changes)
         }
     }
-
+    
     public func nodeForID(id: RelationValue) -> Node? {
         // TODO: Not efficient, but whatever
         func findNode(node: Node) -> Node? {
@@ -198,7 +224,7 @@ public class OrderedTreeBinding {
         transaction[tableName].add(mutableRow)
     }
     
-    private func onInsert(row: Row) {
+    private func onInsert(row: Row) -> [Change] {
 
         func insertNode(node: Node, parent: Node) -> Int {
             return parent.children.insertSorted(node, { self.orderForNode($0) })
@@ -218,7 +244,7 @@ public class OrderedTreeBinding {
         }
         
         let path = TreePath(parent: parent, index: index)
-        observers.forEach{$0.onInsert(path)}
+        return [.Insert(path)]
     }
     
     public func delete(transaction: ChangeLoggingDatabase.Transaction, id: RelationValue) {
@@ -236,7 +262,7 @@ public class OrderedTreeBinding {
         }
     }
     
-    private func onDelete(row: Row) {
+    private func onDelete(row: Row) -> [Change] {
         
         func deleteNode(node: Node, inout _ nodes: [Node]) -> Int {
             let index = nodes.indexOf({$0 === node})!
@@ -259,7 +285,9 @@ public class OrderedTreeBinding {
             }
             
             let path = TreePath(parent: parent, index: index)
-            observers.forEach{$0.onDelete(path)}
+            return [.Delete(path)]
+        } else {
+            return []
         }
     }
 
@@ -296,21 +324,21 @@ public class OrderedTreeBinding {
         ])
     }
 
-    private func onUpdate(row: Row) {
+    private func onUpdate(row: Row) -> [Change] {
         let newParentID = row[parentAttr]
         let newOrder = row[orderAttr]
         if newParentID == .NotFound || newOrder == .NotFound {
             // TODO: We should be able to perform the move if only one of parent/order were updated
-            return
+            return []
         }
 
         // XXX: We have to dig out the identifier of the item to be moved here
         let srcID = row[idAttr]
         let srcNode = nodeForID(srcID)!
-        onMove(srcNode, dstParentID: newParentID, dstOrder: newOrder)
+        return onMove(srcNode, dstParentID: newParentID, dstOrder: newOrder)
     }
     
-    private func onMove(node: Node, dstParentID: RelationValue, dstOrder: RelationValue) {
+    private func onMove(node: Node, dstParentID: RelationValue, dstOrder: RelationValue) -> [Change] {
         let optSrcParent = parentForNode(node)
         let optDstParent: Node?
         if dstParentID == .NULL {
@@ -333,10 +361,10 @@ public class OrderedTreeBinding {
         // Insert the node in its new parent
         let dstIndex = dstParent.children.insertSorted(node, { self.orderForNode($0) })
 
-        // Notify observers
+        // Prepare changes
         let newSrcPath = TreePath(parent: optSrcParent, index: srcIndex)
         let newDstPath = TreePath(parent: optDstParent, index: dstIndex)
-        observers.forEach{$0.onMove(srcPath: newSrcPath, dstPath: newDstPath)}
+        return [.Move(src: newSrcPath, dst: newDstPath)]
     }
 
     private func adjacentNodesForIndex(index: Int, inParent parent: Node, notMatching node: Node) -> (Node?, Node?) {

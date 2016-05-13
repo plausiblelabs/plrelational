@@ -27,22 +27,6 @@ func AssertEqual(a: Relation, _ b: Relation, file: StaticString = #file, line: U
     }
 }
 
-enum OrderedTreeBindingChange { case
-    Insert(TreePath),
-    Delete(TreePath),
-    Move(src: TreePath, dst: TreePath)
-}
-
-extension OrderedTreeBindingChange: Equatable {}
-func ==(a: OrderedTreeBindingChange, b: OrderedTreeBindingChange) -> Bool {
-    switch (a, b) {
-    case let (.Insert(a), .Insert(b)): return a == b
-    case let (.Delete(a), .Delete(b)): return a == b
-    case let (.Move(asrc, adst), .Move(bsrc, bdst)): return asrc == bsrc && adst == bdst
-    default: return false
-    }
-}
-
 class OrderedTreeBindingTests: XCTestCase {
 
     var dbPaths: [String] = []
@@ -142,25 +126,11 @@ class OrderedTreeBindingTests: XCTestCase {
         let relation = db["collection"]
         let treeBinding = OrderedTreeBinding(relation: relation, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
         XCTAssertEqual(treeBinding.root.children.count, 0)
-
-        class Observer: OrderedTreeBindingObserver {
-            var changes: [OrderedTreeBindingChange] = []
-            
-            func onInsert(path: TreePath) {
-                changes.append(.Insert(path))
-            }
-            
-            func onDelete(path: TreePath) {
-                changes.append(.Delete(path))
-            }
-            
-            func onMove(srcPath srcPath: TreePath, dstPath: TreePath) {
-                changes.append(.Move(src: srcPath, dst: dstPath))
-            }
-        }
         
-        let observer = Observer()
-        treeBinding.addObserver(observer)
+        var changes: [OrderedTreeBinding.Change] = []
+        let removal = treeBinding.addChangeObserver({ treeChanges in
+            changes.appendContentsOf(treeChanges)
+        })
         
         func addCollection(collectionID: Int64, name: String, parentID: Int64?, previousID: Int64?) {
             db.transaction({
@@ -192,9 +162,9 @@ class OrderedTreeBindingTests: XCTestCase {
             XCTAssertEqual(prettyRoot(treeBinding), s)
         }
         
-        func verifyChanges(expected: [OrderedTreeBindingChange]) {
-            XCTAssertEqual(observer.changes, expected)
-            observer.changes = []
+        func verifyChanges(expected: [OrderedTreeBinding.Change]) {
+            XCTAssertEqual(changes, expected)
+            changes = []
         }
         
         func verifySQLite(expected: Relation) {
