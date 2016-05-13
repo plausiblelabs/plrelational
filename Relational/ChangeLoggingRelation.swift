@@ -1,8 +1,7 @@
 
 public enum ChangeLoggingRelationChange {
-    case Add(Row)
-    case Delete(SelectExpression)
-    case Update(SelectExpression, Row)
+    case Union(Relation)
+    case Select(SelectExpression)
 }
 
 public struct ChangeLoggingRelationSnapshot {
@@ -21,13 +20,14 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
     }
     
     public func add(row: Row) {
-        log.append(.Add(row))
-        notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil))
+        let relation = ConcreteRelation(row)
+        log.append(.Union(relation))
+        notifyChangeObservers(RelationChange(added: relation, removed: nil))
     }
     
     public func delete(query: SelectExpression) {
         let toDelete = computeFinalRelation().select(query)
-        log.append(.Delete(query))
+        log.append(.Select(*!query))
         notifyChangeObservers(RelationChange(added: nil, removed: toDelete))
     }
     
@@ -36,7 +36,8 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
         let toUpdate = currentState.select(query)
         let afterUpdate = toUpdate.withUpdate(newValues)
         
-        log.append(.Update(query, newValues))
+        log.append(.Select(*!query))
+        log.append(.Union(afterUpdate))
         notifyChangeObservers(RelationChange(added: afterUpdate, removed: toUpdate))
         return .Ok()
     }
@@ -55,43 +56,71 @@ extension ChangeLoggingRelation: Relation, RelationDefaultChangeObserverImplemen
         return computeFinalRelation().contains(row)
     }
     
-    private func computeFinalRelation() -> Relation {
+    internal func computeFinalRelation() -> Relation {
         var currentRelation: Relation = underlyingRelation
         
         for change in log {
             switch change {
-            case .Add(let row):
-                let toAdd = ConcreteRelation(row)
-                currentRelation = currentRelation.union(toAdd)
-            case .Delete(let query):
-                currentRelation = currentRelation.select(*!query)
-            case .Update(let query, let newValues):
-                currentRelation = currentRelation.withUpdate(query, newValues: newValues)
+            case .Union(let relation):
+                currentRelation = currentRelation.union(relation)
+            case .Select(let query):
+                currentRelation = currentRelation.select(query)
             }
         }
         
         return currentRelation
+    }
+    
+    static func computeChangeFromLog<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log, underlyingRelation: Relation) -> RelationChange {
+        var currentAdd: Relation = ConcreteRelation(scheme: underlyingRelation.scheme)
+        var currentRemove: Relation = ConcreteRelation(scheme: underlyingRelation.scheme)
+        
+        for change in log {
+            switch change {
+            case .Union(let relation):
+                currentAdd = currentAdd.union(relation.difference(currentRemove))
+                currentRemove = currentRemove.difference(relation)
+            case .Select(let query):
+                currentAdd = currentAdd.select(query)
+                currentRemove = currentRemove.union(underlyingRelation.select(*!query))
+            }
+        }
+        
+        return RelationChange(added: currentAdd, removed: currentRemove)
     }
 }
 
 extension ChangeLoggingRelation where UnderlyingRelation: SQLiteTableRelation {
     public func save() -> Result<Void, RelationError> {
         // TODO: transactions!
-        for change in log {
-            let err: RelationError?
-            switch change {
-            case .Add(let row):
-                err = underlyingRelation.add(row).err
-            case .Delete(let terms):
-                err = underlyingRelation.delete(terms).err
-            case .Update(let terms, let newValues):
-                // Note: without the `as SQLiteTableRelation`, this generates an error due to ambiguity for some reason.
-                err = (underlyingRelation as SQLiteTableRelation).update(terms, newValues: newValues).err
-            }
-            if let err = err {
-                return .Err(err)
+        let change = ChangeLoggingRelation.computeChangeFromLog(self.log, underlyingRelation: self.underlyingRelation)
+        if let removed = change.removed {
+            for row in removed.rows() {
+                switch row {
+                case .Ok(let row):
+                    if let err = underlyingRelation.delete(SelectExpressionFromRow(row)).err {
+                        return .Err(err)
+                    }
+                case .Err(let err):
+                    return .Err(err)
+                }
             }
         }
+        
+        if let added = change.added {
+            for row in added.rows() {
+                switch row {
+                case .Ok(let row):
+                    if let err = underlyingRelation.add(row).err {
+                        return .Err(err)
+                    }
+                case .Err(let err):
+                    return .Err(err)
+                }
+                
+            }
+        }
+        
         return .Ok()
     }
 }

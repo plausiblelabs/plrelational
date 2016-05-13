@@ -45,18 +45,19 @@ extension ChangeLoggingDatabase {
 extension ChangeLoggingDatabase {
     public class Transaction {
         private let db: ChangeLoggingDatabase
-        private var changeLoggingRelations: [String: ChangeLoggingRelation<ChangeLoggingRelation<SQLiteTableRelation>>] = [:]
+        private var changeLoggingRelations: [String: ChangeLoggingRelation<SQLiteTableRelation>] = [:]
         
         private init(db: ChangeLoggingDatabase) {
             self.db = db
         }
         
-        public subscript(name: String) -> ChangeLoggingRelation<ChangeLoggingRelation<SQLiteTableRelation>> {
+        public subscript(name: String) -> ChangeLoggingRelation<SQLiteTableRelation> {
             if let relation = changeLoggingRelations[name] {
                 return relation
             } else {
                 let table = db.getLoggingRelation(name)
-                let relation = ChangeLoggingRelation(underlyingRelation: table)
+                let relation = ChangeLoggingRelation(underlyingRelation: table.underlyingRelation)
+                relation.log = table.log
                 changeLoggingRelations[name] = relation
                 return relation
             }
@@ -68,12 +69,22 @@ extension ChangeLoggingDatabase {
         
         transactionFunction(transaction)
         
-        for (_, relation) in transaction.changeLoggingRelations {
-            relation.underlyingRelation.log.appendContentsOf(relation.log)
+        var changes: [(ChangeLoggingRelation<SQLiteTableRelation>, RelationChange)] = []
+        for (name, relation) in transaction.changeLoggingRelations {
+            let target = self[name]
+            // In computing the change log, we're assuming that target hasn't been changed.
+            // Right now we don't support directly changing the database during a transaction.
+            // If we ever do, it would involve retrying the transaction so this should still hold.
+            
+            let newLog = relation.log[target.log.count ..< relation.log.count]
+            let change = target.dynamicType.computeChangeFromLog(newLog, underlyingRelation: target.computeFinalRelation())
+            changes.append((target, change))
+            
+            target.log = relation.log
         }
-        for (_, relation) in transaction.changeLoggingRelations {
-            // TODO: make this work again
-            //relation.underlyingRelation.notifyChangeObservers(relation.log)
+        
+        for (relation, change) in changes {
+            relation.notifyChangeObservers(change)
         }
     }
 }

@@ -580,6 +580,84 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["Horton", "Miami"]))
     }
     
+    func testTransactionNotifications() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let db = ChangeLoggingDatabase(sqliteDB)
+        let flightsScheme: Scheme = ["number", "pilot", "equipment"]
+        let pilotsScheme: Scheme = ["name", "home"]
+        
+        sqliteDB.createRelation("flights", scheme: flightsScheme)
+        sqliteDB.createRelation("pilots", scheme: pilotsScheme)
+        
+        var lastFlightsChange: RelationChange?
+        _ = db["flights"].addChangeObserver({ lastFlightsChange = $0 })
+        
+        var lastPilotsChange: RelationChange?
+        _ = db["pilots"].addChangeObserver({ lastPilotsChange = $0 })
+        
+        db.transaction({
+            let flights = $0["flights"]
+            let pilots = $0["pilots"]
+            
+            flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
+            flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
+            flights.add(["number": 3, "pilot": "Johnson", "equipment": "797"])
+            
+            pilots.add(["name": "Jones", "home": "New York"])
+            pilots.add(["name": "Smith", "home": "Chicago"])
+            pilots.add(["name": "Johnson", "home": "Seattle"])
+        })
+        
+        AssertEqual(lastFlightsChange!.added!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [1, "Jones", "777"],
+                        [2, "Smith", "787"],
+                        [3, "Johnson", "797"]))
+        XCTAssertTrue(lastFlightsChange!.removed!.isEmpty.ok!)
+        AssertEqual(lastPilotsChange!.added!,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "New York"],
+                        ["Smith", "Chicago"],
+                        ["Johnson", "Seattle"]))
+        XCTAssertTrue(lastPilotsChange!.removed!.isEmpty.ok!)
+        
+        db.transaction({
+            let flights = $0["flights"]
+            let pilots = $0["pilots"]
+            
+            flights.add(["number": 4, "pilot": "Jones", "equipment": "DC-10"])
+            flights.update(Attribute("number") *== RelationValue(1 as Int64), newValues: ["pilot": "Smith"])
+            flights.delete(Attribute("equipment") *== "797")
+            
+            pilots.add(["name": "Horton", "home": "Miami"])
+            pilots.update(Attribute("name") *== "Jones", newValues: ["home": "Boston"])
+            pilots.delete(Attribute("home") *== "Seattle")
+        })
+        
+        AssertEqual(lastFlightsChange!.added!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [4, "Jones", "DC-10"],
+                        [1, "Smith", "777"]))
+        AssertEqual(lastFlightsChange!.removed!,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [3, "Johnson", "797"],
+                        [1, "Jones", "777"]))
+        AssertEqual(lastPilotsChange!.added!,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Horton", "Miami"],
+                        ["Jones", "Boston"]))
+        AssertEqual(lastPilotsChange!.removed!,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "New York"],
+                        ["Johnson", "Seattle"]))
+    }
+    
     func testSnapshots() {
         let sqliteDB = makeDB().db.sqliteDatabase
         let db = ChangeLoggingDatabase(sqliteDB)
@@ -644,10 +722,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                 ["Smith", "Chicago"],
                 ["Horton", "Miami"])))
         
-        var i = 0
         for (snapshot, flights, pilots) in snapshots + snapshots.reverse() {
-            i += 1
-            print("iteration \(i)")
             db.restoreSnapshot(snapshot)
             AssertEqual(db["flights"], flights)
             AssertEqual(db["pilots"], pilots)

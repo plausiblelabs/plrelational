@@ -162,7 +162,7 @@ extension Relation {
 }
 
 extension Relation {
-    var isEmpty: Result<Bool, RelationError> {
+    public var isEmpty: Result<Bool, RelationError> {
         switch rows().next() {
         case .None: return .Ok(true)
         case .Some(.Ok): return .Ok(false)
