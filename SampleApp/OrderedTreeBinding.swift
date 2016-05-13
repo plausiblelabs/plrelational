@@ -71,32 +71,44 @@ public class OrderedTreeBinding {
         //let rows = relation.rows().map{$0.ok!}
         
         self.removal = relation.addChangeObserver({ changes in
-            if let added = changes.added {
-                for newRow in added.rows() {
-                    switch newRow {
+
+            func handle(relation: Relation, _ f: (Row) -> Void) {
+                for rowResult in relation.rows() {
+                    switch rowResult {
                     case .Ok(let row):
-                        self.onInsert(row)
+                        f(row)
                     case .Err(let err):
                         // TODO: error handling again
-                        fatalError("Error fetching added rows: \(err)")
+                        fatalError("Error fetching rows: \(err)")
                     }
                 }
             }
             
-            if let removed = changes.removed {
+            if let adds = changes.added {
+                let added: Relation
+                if let removes = changes.removed {
+                    added = adds.project([self.idAttr]).difference(removes.project([self.idAttr])).join(adds)
+                } else {
+                    added = adds
+                }
+                handle(added, self.onInsert)
+            }
+            
+            if let adds = changes.added, removes = changes.removed {
+                let updated = removes.project([self.idAttr]).join(adds)
+                handle(updated, self.onUpdate)
+            }
+
+            if let removes = changes.removed {
+                let removed: Relation
+                if let adds = changes.added {
+                    removed = removes.project([self.idAttr]).difference(adds.project([self.idAttr])).join(removes)
+                } else {
+                    removed = removes
+                }
                 // TODO: rather than iterate here, maybe hand the whole relation over to onDelete
-                for removedRow in removed.rows() {
-                    switch removedRow {
-                    case .Ok(let row):
-                        self.onDelete(row)
-                    case .Err(let err):
-                        // TODO: error handling again
-                        fatalError("Error fetching removed rows: \(err)")
-                    }
-                }
+                handle(removed, self.onDelete)
             }
-            
-            // TODO: handle (and compute) changes differently from add/delete?
         })
     }
     
@@ -277,7 +289,7 @@ public class OrderedTreeBinding {
         ])
     }
 
-    private func onUpdate(query: SelectExpression, row: Row) {
+    private func onUpdate(row: Row) {
         let newParentID = row[parentAttr]
         let newOrder = row[orderAttr]
         if newParentID == .NotFound || newOrder == .NotFound {
@@ -286,7 +298,7 @@ public class OrderedTreeBinding {
         }
 
         // XXX: We have to dig out the identifier of the item to be moved here
-        let srcID = (query as! SelectExpressionBinaryOperator).rhs as! RelationValue
+        let srcID = row[idAttr]
         let srcNode = nodeForID(srcID)!
         onMove(srcNode, dstParentID: newParentID, dstOrder: newOrder)
     }
