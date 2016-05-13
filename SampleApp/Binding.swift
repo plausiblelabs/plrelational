@@ -137,16 +137,18 @@ public class ConcreteValueBinding<T: Equatable>: ValueBinding<T?> {
     private var removal: ObserverRemoval!
     private var selfInitiatedChange = false
     
-    init(relation: Relation, attribute: Attribute, unwrap: (RelationValue) -> T?) {
+    init(relation: Relation, unwrap: (RelationValue) -> T?) {
+        precondition(relation.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
+        
         self.relation = relation
-        self.attribute = attribute
+        self.attribute = relation.scheme.attributes.first!
         super.init(initialValue: ConcreteValueBinding.getValue(relation, attribute).flatMap(unwrap))
         self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
             
             if weakSelf.selfInitiatedChange { return }
             
-            let newValue = ConcreteValueBinding.getValue(relation, attribute).flatMap(unwrap)
+            let newValue = ConcreteValueBinding.getValue(relation, weakSelf.attribute).flatMap(unwrap)
             if newValue != weakSelf.value {
                 weakSelf.value = newValue
                 weakSelf.notifyChangeObservers()
@@ -163,15 +165,21 @@ public class ConcreteValueBinding<T: Equatable>: ValueBinding<T?> {
     }
 }
 
+public class RelationValueBinding: ConcreteValueBinding<RelationValue> {
+    init(relation: Relation) {
+        super.init(relation: relation, unwrap: { $0 })
+    }
+}
+
 public class StringBinding: ConcreteValueBinding<String> {
-    init(relation: Relation, attribute: Attribute) {
-        super.init(relation: relation, attribute: attribute, unwrap: { $0.get() })
+    init(relation: Relation) {
+        super.init(relation: relation, unwrap: { $0.get() })
     }
 }
 
 public class Int64Binding: ConcreteValueBinding<Int64> {
-    init(relation: Relation, attribute: Attribute) {
-        super.init(relation: relation, attribute: attribute, unwrap: { $0.get() })
+    init(relation: Relation) {
+        super.init(relation: relation, unwrap: { $0.get() })
     }
 }
 
@@ -182,9 +190,9 @@ public struct BidiChange<T> {
 public class StringBidiBinding: StringBinding {
     private let change: BidiChange<String>
     
-    init(relation: Relation, attribute: Attribute, change: BidiChange<String>) {
+    init(relation: Relation, change: BidiChange<String>) {
         self.change = change
-        super.init(relation: relation, attribute: attribute)
+        super.init(relation: relation)
     }
 
     public func change(newValue newValue: String, oldValue: String) {
