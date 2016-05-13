@@ -290,6 +290,17 @@ class OrderedTreeBindingTests: XCTestCase {
         verifyChanges([
             .Move(src: path(1, 0), dst: path(8, 0))
         ])
+        verifySQLite(MakeRelation(
+            ["id", "name", "parent", "order"],
+            [1, "Group1",      .NULL, 5.0],
+            [2, "Collection1", 8,     5.0],
+            [3, "Page1",       1,     7.0],
+            [4, "Page2",       1,     8.0],
+            [5, "Child1",      2,     5.0],
+            [6, "Child2",      2,     7.0],
+            [7, "Child3",      2,     3.0],
+            [8, "Group2",      .NULL, 7.0]
+        ))
         
         // Move a collection to the top level
         moveCollection(srcPath: path(2, 1), dstPath: path(nil, 1))
@@ -306,6 +317,17 @@ class OrderedTreeBindingTests: XCTestCase {
         verifyChanges([
             .Move(src: path(2, 1), dst: path(nil, 1))
         ])
+        verifySQLite(MakeRelation(
+            ["id", "name", "parent", "order"],
+            [1, "Group1",      .NULL, 5.0],
+            [2, "Collection1", 8,     5.0],
+            [3, "Page1",       1,     7.0],
+            [4, "Page2",       1,     8.0],
+            [5, "Child1",      .NULL, 6.0],
+            [6, "Child2",      2,     7.0],
+            [7, "Child3",      2,     3.0],
+            [8, "Group2",      .NULL, 7.0]
+        ))
         
         // Delete a couple collections
         deleteCollection(4)
@@ -320,5 +342,12 @@ class OrderedTreeBindingTests: XCTestCase {
             .Delete(path(1, 1)),
             .Delete(path(8, 0))
         ])
+        verifySQLite(MakeRelation(
+            ["id", "name", "parent", "order"],
+            [1, "Group1",      .NULL, 5.0],
+            [3, "Page1",       1,     7.0],
+            [5, "Child1",      .NULL, 6.0],
+            [8, "Group2",      .NULL, 7.0]
+        ))
     }
 }

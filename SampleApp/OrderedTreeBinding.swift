@@ -222,7 +222,18 @@ public class OrderedTreeBinding {
     }
     
     public func delete(transaction: ChangeLoggingDatabase.Transaction, id: RelationValue) {
+        // TODO: Should we delete from the bottom up?  The way things are ordered now,
+        // observers will only be notified in onDelete() for the ancestor node; would it
+        // make more sense to notify observers about all children?
         transaction[tableName].delete(idAttr *== id)
+        
+        // TODO: There are probably more efficient ways to handle this, but for now we'll
+        // use our tree structure to determine which children need to be deleted
+        if let node = nodeForID(id) {
+            for child in node.children {
+                delete(transaction, id: child.id)
+            }
+        }
     }
     
     private func onDelete(row: Row) {
@@ -234,9 +245,6 @@ public class OrderedTreeBinding {
         }
         
         let id = row[idAttr]
-
-        // TODO: Delete all children too!
-        
         if let node = nodeForID(id) {
             let parent: Node?
             let index: Int
@@ -249,7 +257,6 @@ public class OrderedTreeBinding {
                 parent = nil
                 index = deleteNode(node, &root.children)
             }
-            relation.delete(idAttr *== id)
             
             let path = TreePath(parent: parent, index: index)
             observers.forEach{$0.onDelete(path)}
