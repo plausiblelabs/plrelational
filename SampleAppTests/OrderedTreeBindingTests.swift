@@ -10,6 +10,23 @@ import XCTest
 import libRelational
 @testable import SampleApp
 
+// TODO: Import this from RelationalTests
+func AssertEqual(a: Relation, _ b: Relation, file: StaticString = #file, line: UInt = #line) {
+    XCTAssertEqual(a.scheme, b.scheme, "Relation schemes are not equal", file: file, line: line)
+    let aRows = mapOk(a.rows(), { $0 })
+    let bRows = mapOk(b.rows(), { $0 })
+    
+    switch (aRows, bRows) {
+    case (.Ok(let aRows), .Ok(let bRows)):
+        let aSet = Set(aRows)
+        let bSet = Set(bRows)
+        XCTAssertEqual(aSet, bSet, "Relations are not equal but should be. First relation:\n\(a)\n\nSecond relation:\n\(b)", file: file, line: line)
+    default:
+        XCTAssertNil(aRows.err)
+        XCTAssertNil(bRows.err)
+    }
+}
+
 enum OrderedTreeBindingChange { case
     Insert(TreePath),
     Delete(TreePath),
@@ -180,6 +197,11 @@ class OrderedTreeBindingTests: XCTestCase {
             observer.changes = []
         }
         
+        func verifySQLite(expected: Relation) {
+            XCTAssertNil(db.save().err)
+            AssertEqual(sqliteDB["collection"]!, expected)
+        }
+        
         func path(parentID: Int64?, _ index: Int) -> TreePath {
             let parent = parentID.flatMap{ treeBinding.nodeForID(RelationValue($0)) }
             return TreePath(parent: parent, index: index)
@@ -214,8 +236,17 @@ class OrderedTreeBindingTests: XCTestCase {
             .Insert(path(2, 2)),
             .Insert(path(nil, 1)),
         ])
-        
-        // TODO: Call db.save() and verify SQLite table structure
+        verifySQLite(MakeRelation(
+            ["id", "name", "parent", "order"],
+            [1, "Group1",      .NULL, 5.0],
+            [2, "Collection1", 1,     5.0],
+            [3, "Page1",       1,     7.0],
+            [4, "Page2",       1,     8.0],
+            [5, "Child1",      2,     5.0],
+            [6, "Child2",      2,     7.0],
+            [7, "Child3",      2,     8.0],
+            [8, "Group2",      .NULL, 7.0]
+        ))
 
         // Re-order a collection within its parent
         moveCollection(srcPath: path(2, 2), dstPath: path(2, 0))
@@ -232,6 +263,17 @@ class OrderedTreeBindingTests: XCTestCase {
         verifyChanges([
             .Move(src: path(2, 2), dst: path(2, 0))
         ])
+        verifySQLite(MakeRelation(
+            ["id", "name", "parent", "order"],
+            [1, "Group1",      .NULL, 5.0],
+            [2, "Collection1", 1,     5.0],
+            [3, "Page1",       1,     7.0],
+            [4, "Page2",       1,     8.0],
+            [5, "Child1",      2,     5.0],
+            [6, "Child2",      2,     7.0],
+            [7, "Child3",      2,     3.0],
+            [8, "Group2",      .NULL, 7.0]
+        ))
         
         // Move a collection to a new parent
         moveCollection(srcPath: path(1, 0), dstPath: path(8, 0))

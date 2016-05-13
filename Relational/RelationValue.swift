@@ -123,6 +123,12 @@ extension RelationValue: IntegerLiteralConvertible {
     }
 }
 
+extension RelationValue: FloatLiteralConvertible {
+    public init(floatLiteral value: Double) {
+        self = .Real(value)
+    }
+}
+
 extension RelationValue {
     public func get() -> Int64? {
         switch self {
