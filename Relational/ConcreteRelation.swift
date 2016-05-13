@@ -11,6 +11,11 @@ public struct ConcreteRelation: Relation {
         self.defaultSort = defaultSort
     }
     
+    public init(_ row: Row) {
+        let scheme = Scheme(attributes: Set(row.values.keys))
+        self.init(scheme: scheme, values: [row])
+    }
+    
     private func rowMatchesScheme(row: Row) -> Bool {
         return Set(row.values.keys) == scheme.attributes
     }

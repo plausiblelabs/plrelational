@@ -40,49 +40,47 @@ extension ChangeLoggingRelation: Relation, RelationDefaultChangeObserverImplemen
     }
     
     public func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        var myRows = ConcreteRelation(scheme: scheme, values: [], defaultSort: nil)
-        for change in log {
-            switch change {
-            case .Add(let row):
-                myRows.add(row)
-            case .Delete(let terms):
-                myRows.delete(terms)
-            case .Update(let terms, let newValues):
-                myRows.update(terms, newValues: newValues)
-            }
-        }
-        
-        let underlyingRows = underlyingRelation.rows()
-        let alteredUnderlyingRows = underlyingRows.lazy.flatMap({ (row: Result<Row, RelationError>) -> Result<Row, RelationError>? in
-            if var row = row.ok {
-                for change in self.log {
-                    switch change {
-                    case .Add:
-                        break
-                    case .Delete(let query):
-                        if query.valueWithRow(row).boolValue {
-                            return nil
-                        }
-                    case .Update(let query, let newValues):
-                        if query.valueWithRow(row).boolValue {
-                            for (attribute, value) in newValues.values {
-                                row[attribute] = value
-                            }
-                        }
-                    }
-                }
-                return .Ok(row)
-            } else {
-                return row
-            }
-        })
-        
-        let allRows = myRows.rows().concat(alteredUnderlyingRows.generate())
-        return AnyGenerator(allRows)
+        return computeFinalRelation().rows()
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {
-        return underlyingRelation.contains(row)
+        return computeFinalRelation().contains(row)
+    }
+    
+    private func computeFinalRelation() -> Relation {
+        var currentRelation: Relation = underlyingRelation
+        
+        for change in log {
+            switch change {
+            case .Add(let row):
+                let toAdd = ConcreteRelation(row)
+                currentRelation = currentRelation.union(toAdd)
+            case .Delete(let query):
+                currentRelation = currentRelation.select(*!query)
+            case .Update(let query, let newValues):
+                // Figure out which attributes are being altered.
+                let newValuesScheme = Scheme(attributes: Set(newValues.values.keys))
+                
+                // And which attributes are not being altered.
+                let untouchedAttributesScheme = Scheme(attributes: self.scheme.attributes.subtract(newValuesScheme.attributes))
+                
+                // Pick out the rows which will be updated.
+                let toUpdate = currentRelation.select(query)
+                
+                // Compute the update. We project away the updated attributes, then join in the new values.
+                // The result is equivalent to updating the values.
+                let withoutNewValueAttributes = toUpdate.project(untouchedAttributesScheme)
+                let updatedValues = withoutNewValueAttributes.join(ConcreteRelation(newValues))
+                
+                // Pick out the rows not selected for the update.
+                let nonUpdated = currentRelation.select(*!query)
+                
+                // The result is the union of the updated values and the rows not selected.
+                currentRelation = nonUpdated.union(updatedValues)
+            }
+        }
+        
+        return currentRelation
     }
 }
 
