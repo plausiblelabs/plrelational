@@ -175,8 +175,13 @@ extension Relation {
     public var description: String {
         let columns = scheme.attributes.sort()
         let rows = self.rows().map({ row in
-            columns.map({ col in
-                String(row.map({ $0[col] }))
+            columns.map({ (col: Attribute) -> String in
+                switch row.map({ $0[col] }) {
+                case .Ok(let value):
+                    return String(value)
+                case .Err(let err):
+                    return "Err(\(err))"
+                }
             })
         })
         
