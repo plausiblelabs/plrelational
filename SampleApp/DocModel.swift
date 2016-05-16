@@ -43,12 +43,17 @@ class DocModel {
     
     private let undoManager: UndoManager
     private let db: ChangeLoggingDatabase
-    private let collections: ChangeLoggingRelation<SQLiteTableRelation>
-    private let orderedCollections: OrderedTreeBinding
-    private let selectedCollection: ChangeLoggingRelation<SQLiteTableRelation>
-    private let selectedInspectorItem: ChangeLoggingRelation<SQLiteTableRelation>
+    private let collections: Relation
+    private let objects: Relation
+    private let inspectorItems: Relation
+    private let selectedCollection: Relation
+    private let selectedInspectorItem: Relation
     private let selectedCollectionItem: Relation
+    private let docOutlineBinding: OrderedTreeBinding
+    private let inspectorItemsBinding: OrderedTreeBinding
     private var collectionID: Int64 = 1
+    
+    private var removal: (Void -> Void)!
     
     init(undoManager: UndoManager) {
         self.undoManager = undoManager
@@ -73,10 +78,33 @@ class DocModel {
             return db[name]
         }
         self.collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
-        self.orderedCollections = OrderedTreeBinding(relation: collections, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        self.objects = createRelation("object", ["id", "name", "coll_id", "order"])
         self.selectedCollection = createRelation("selected_collection", ["id", "coll_id"])
         self.selectedInspectorItem = createRelation("selected_inspector_item", ["id", "type", "fid"])
         self.selectedCollectionItem = collections.renameAttributes(["id" : "coll_id"]).join(selectedCollection)
+
+        // Prepare the tree bindings
+        self.docOutlineBinding = OrderedTreeBinding(relation: collections, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
+
+        // XXX
+        let inspectorCollectionItems = selectedCollection
+            .project(["coll_id"])
+            .renameAttributes(["coll_id": "id"])
+            .join(collections)
+            .renameAttributes(["id": "fid"])
+            .project(["fid", "name"])
+            .join(MakeRelation(["id", "parent", "order"], [1, .NULL, 5.0]))
+        
+        let inspectorObjectItems = selectedCollection
+            .project(["coll_id"])
+            .join(objects)
+            .renameAttributes(["id": "fid"])
+            .project(["fid", "name", "order"])
+            .join(MakeRelation(["id", "parent"], [2, 1]))
+        
+        self.inspectorItems = inspectorCollectionItems.union(inspectorObjectItems)
+        self.inspectorItemsBinding = OrderedTreeBinding(relation: inspectorItems, tableName: "", idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        
         self.db = db
 
         func addCollection(collectionID: Int64, name: String, type: CollectionType, parentID: Int64?, previousID: Int64?) {
@@ -84,7 +112,7 @@ class DocModel {
                 self.addCollection($0, collectionID: collectionID, name: name, type: type, parentID: parentID, previousID: previousID)
             })
         }
-        
+
         // Prepare the default document data
         addCollection(1, name: "Group1", type: .Group, parentID: nil, previousID: nil)
         addCollection(2, name: "Collection1", type: .Collection, parentID: 1, previousID: nil)
@@ -94,6 +122,28 @@ class DocModel {
         addCollection(6, name: "Child2", type: .Page, parentID: 2, previousID: 5)
         addCollection(7, name: "Group2", type: .Group, parentID: nil, previousID: 1)
         collectionID = 8
+        
+        func addObject(objectID: Int64, _ name: String, _ collectionID: Int64, _ order: Double) {
+            db.transaction({
+                let objects = $0["object"]
+                let row: Row = [
+                    "id": RelationValue(objectID),
+                    "name": RelationValue(name),
+                    "coll_id": RelationValue(collectionID),
+                    "order": RelationValue(order)
+                ]
+                objects.add(row)
+            })
+        }
+        
+        addObject(11, "Obj1", 2, 5.0)
+        addObject(12, "Obj2", 3, 5.0)
+        
+        self.removal = inspectorItems.addChangeObserver({ _ in
+            print("COLLS:\n\(inspectorCollectionItems)\n")
+            print("OBJS:\n\(inspectorObjectItems)\n")
+            print("ITEMS:\n\(self.inspectorItems)\n")
+        })
     }
     
     private func performUndoableAction(name: String, _ transactionFunc: Transaction -> Void) {
@@ -119,13 +169,13 @@ class DocModel {
         let parent = parentID.map{RelationValue($0)}
         let previous = previousID.map{RelationValue($0)}
         let pos = TreePos(parentID: parent, previousID: previous, nextID: nil)
-        orderedCollections.insert(transaction, row: row, pos: pos)
+        docOutlineBinding.insert(transaction, row: row, pos: pos)
     }
     
     func newCollection(name: String, type: CollectionType) {
         let id = collectionID
         collectionID += 1
-        let previousNodeID: Int64? = orderedCollections.root.children.last?.data["id"].get()
+        let previousNodeID: Int64? = docOutlineBinding.root.children.last?.data["id"].get()
         performUndoableAction("New \(type.name)", {
             self.addCollection($0, collectionID: id, name: name, type: type, parentID: nil, previousID: previousNodeID)
         })
@@ -133,7 +183,7 @@ class DocModel {
     
     func deleteCollection(id: RelationValue, type: CollectionType) {
         performUndoableAction("Delete \(type.name)", {
-            self.orderedCollections.delete($0, id: id)
+            self.docOutlineBinding.delete($0, id: id)
         })
     }
 
@@ -157,7 +207,7 @@ class DocModel {
 
     lazy var docOutlineTreeViewModel: TreeViewModel = { [unowned self] in
         let data = TreeViewModel.Data(
-            binding: self.orderedCollections,
+            binding: self.docOutlineBinding,
             allowsChildren: { row in
                 let rawType: Int64 = row["type"].get()!
                 return rawType != CollectionType.Page.rawValue
@@ -174,7 +224,7 @@ class DocModel {
             move: { (srcPath, dstPath) in
                 // TODO: s/Collection/type.name/
                 self.performUndoableAction("Move Collection", {
-                    self.orderedCollections.move($0, srcPath: srcPath, dstPath: dstPath)
+                    self.docOutlineBinding.move($0, srcPath: srcPath, dstPath: dstPath)
                 })
             }
         )
@@ -205,13 +255,48 @@ class DocModel {
             // relation.)
             let rowID = row["id"]
             let nameRelation = self.collections.select(Attribute("id") *== rowID).project(["name"])
-            let binding = self.collectionNameBinding(nameRelation)
+            // TODO: s/Collection/type.name/
+            let binding = self.bidiBinding(nameRelation, attr: "name", type: "Collection")
             return TreeViewModel.Cell(text: binding)
         }
         
         return TreeViewModel(data: data, selection: selection, cell: cell)
     }()
 
+    lazy var inspectorTreeViewModel: TreeViewModel = { [unowned self] in
+        let data = TreeViewModel.Data(
+            binding: self.inspectorItemsBinding,
+            allowsChildren: { row in
+                // XXX
+                let rowID: Int64 = row["id"].get()!
+                return rowID != 1
+            },
+            contextMenu: nil,
+            move: nil
+        )
+        
+        let selection = TreeViewModel.Selection(
+            // TODO
+            relation: self.selectedCollection,
+            set: { _ in
+                // TODO
+            },
+            get: {
+                return nil
+            }
+        )
+        
+        let cell = { (row: Row) -> TreeViewModel.Cell in
+            let rowID = row["id"]
+            let nameRelation = self.inspectorItems.select(Attribute("id") *== rowID).project(["name"])
+            // TODO: s/Object/type.name/
+            let binding = self.bidiBinding(nameRelation, attr: "name", type: "Object")
+            return TreeViewModel.Cell(text: binding)
+        }
+        
+        return TreeViewModel(data: data, selection: selection, cell: cell)
+    }()
+    
     lazy var itemSelected: ValueBinding<Bool> = { [unowned self] in
         return self.selectedDocItem.map{ $0 != nil }
     }()
@@ -258,13 +343,15 @@ class DocModel {
     
     // TODO: This should resolve to the name associated with selectedDocItem
     lazy var selectedItemName: StringBidiBinding = { [unowned self] in
-        return self.collectionNameBinding(self.selectedCollectionItem.project(["name"]))
+        let nameRelation = self.selectedCollectionItem.project(["name"])
+        // TODO: s/Collection/type.name/
+        return self.bidiBinding(nameRelation, attr: "name", type: "Collection")
     }()
     
-    private func collectionNameBinding(relation: Relation) -> StringBidiBinding {
+    private func bidiBinding(relation: Relation, attr: Attribute, type: String) -> StringBidiBinding {
         
         func update(newValue: String) {
-            let values: Row = ["name": RelationValue(newValue)]
+            let values: Row = [attr: RelationValue(newValue)]
             Swift.print("UPDATE: \(newValue)")
             var mutableRelation = relation
             let updateResult = mutableRelation.update(true, newValues: values)
@@ -274,9 +361,8 @@ class DocModel {
         return StringBidiBinding(relation: relation, change: BidiChange<String>{ (newValue, oldValue, commit) in
             Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
             if commit {
-                // TODO: s/Collection/type.name/
                 self.undoManager.registerChange(
-                    name: "Rename Collection",
+                    name: "Rename \(type)",
                     perform: true,
                     forward: { update(newValue) },
                     backward: { update(oldValue) }

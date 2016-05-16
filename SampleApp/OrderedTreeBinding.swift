@@ -58,7 +58,7 @@ public class OrderedTreeBinding {
     public typealias ObserverRemoval = () -> Void
     public typealias ChangeObserver = ([Change]) -> Void
     
-    private let relation: ChangeLoggingRelation<SQLiteTableRelation>
+    private let relation: Relation
     private let tableName: String
     private let idAttr: Attribute
     private let parentAttr: Attribute
@@ -70,7 +70,7 @@ public class OrderedTreeBinding {
     private var changeObservers: [UInt64: ChangeObserver] = [:]
     private var changeObserverNextID: UInt64 = 0
     
-    init(relation: ChangeLoggingRelation<SQLiteTableRelation>, tableName: String, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
+    init(relation: Relation, tableName: String, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
         self.relation = relation
         self.tableName = tableName
         self.idAttr = idAttr
@@ -225,6 +225,13 @@ public class OrderedTreeBinding {
     
     private func onInsert(row: Row) -> [Change] {
 
+        // XXX: Currently it's possible for underlying relations to provide change notifications
+        // that contain only a subset of the attributes we're interested in, so ignore those
+        // for the time being
+        if Set(row.values.keys) != relation.scheme.attributes {
+            return []
+        }
+        
         func insertNode(node: Node, parent: Node) -> Int {
             return parent.children.insertSorted(node, { self.orderForNode($0) })
         }

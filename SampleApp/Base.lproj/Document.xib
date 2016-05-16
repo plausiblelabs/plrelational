@@ -53,7 +53,7 @@
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
                                                         <outlineView appearanceType="vibrantLight" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" viewBased="YES" floatsGroupRows="NO" indentationPerLevel="16" outlineTableColumn="fiS-ax-lsW" id="DUb-hy-bRa" userLabel="Document Outline View" customClass="ExtOutlineView" customModule="SampleApp" customModuleProvider="target">
-                                                            <rect key="frame" x="0.0" y="0.0" width="200" height="0.0"/>
+                                                            <rect key="frame" x="0.0" y="0.0" width="199" height="0.0"/>
                                                             <autoresizingMask key="autoresizingMask"/>
                                                             <size key="intercellSpacing" width="2" height="3"/>
                                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -126,18 +126,18 @@
                                                     <autoresizingMask key="autoresizingMask"/>
                                                 </scroller>
                                             </scrollView>
-                                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="22" horizontalPageScroll="10" verticalLineScroll="22" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="aCJ-Vg-V4H" userLabel="Scroll View">
+                                            <scrollView borderType="none" autohidesScrollers="YES" horizontalLineScroll="27" horizontalPageScroll="10" verticalLineScroll="27" verticalPageScroll="10" usesPredominantAxisScrolling="NO" id="aCJ-Vg-V4H" userLabel="Scroll View">
                                                 <rect key="frame" x="0.0" y="388" width="200" height="386"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <clipView key="contentView" drawsBackground="NO" id="Q2H-3Y-xBg">
                                                     <rect key="frame" x="0.0" y="0.0" width="200" height="386"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
-                                                        <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="sourceList" multipleSelection="NO" autosaveColumns="NO" rowHeight="22" viewBased="YES" floatsGroupRows="NO" indentationPerLevel="14" outlineTableColumn="BXm-8J-vHo" id="puU-ni-rOg" userLabel="Inspector Outline View" customClass="ExtOutlineView" customModule="SampleApp" customModuleProvider="target">
+                                                        <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" viewBased="YES" floatsGroupRows="NO" indentationPerLevel="16" outlineTableColumn="BXm-8J-vHo" id="puU-ni-rOg" userLabel="Inspector Outline View" customClass="ExtOutlineView" customModule="SampleApp" customModuleProvider="target">
                                                             <rect key="frame" x="0.0" y="0.0" width="200" height="0.0"/>
                                                             <autoresizingMask key="autoresizingMask"/>
-                                                            <size key="intercellSpacing" width="3" height="0.0"/>
-                                                            <color key="backgroundColor" name="_sourceListBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                                            <size key="intercellSpacing" width="2" height="3"/>
+                                                            <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                             <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                                             <tableColumns>
                                                                 <tableColumn identifier="SidebarColumn" width="197" minWidth="16" maxWidth="1000" id="BXm-8J-vHo">
@@ -154,7 +154,7 @@
                                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                                     <prototypeCellViews>
                                                                         <tableCellView identifier="PageCell" id="30p-3U-pWL" userLabel="Page Cell View">
-                                                                            <rect key="frame" x="1" y="0.0" width="197" height="24"/>
+                                                                            <rect key="frame" x="1" y="1" width="197" height="24"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <subviews>
                                                                                 <imageView translatesAutoresizingMaskIntoConstraints="NO" id="R4a-R5-Jwl">
@@ -188,7 +188,7 @@
                                                                             </connections>
                                                                         </tableCellView>
                                                                         <tableCellView identifier="FieldCell" id="ka6-4m-oIT" userLabel="Field Cell View">
-                                                                            <rect key="frame" x="1" y="24" width="197" height="24"/>
+                                                                            <rect key="frame" x="1" y="28" width="197" height="24"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <subviews>
                                                                                 <imageView translatesAutoresizingMaskIntoConstraints="NO" id="8Cr-d3-9Rr">

@@ -25,6 +25,7 @@ class Document: NSDocument {
     @IBOutlet var noSelectionLabel: TextField!
 
     var docOutlineView: DocOutlineView!
+    var inspectorView: InspectorView!
     var propertiesView: PropertiesView!
     
     var docModel: DocModel!
@@ -72,6 +73,7 @@ class Document: NSDocument {
         
         // Create the "views"
         docOutlineView = DocOutlineView(outlineView: documentOutlineView, docModel: docModel)
+        inspectorView = InspectorView(outlineView: inspectorOutlineView, docModel: docModel)
         propertiesView = PropertiesView(itemTypeLabel: itemTypeLabel, nameLabel: nameLabel, nameField: nameTextField, noSelectionLabel: noSelectionLabel, docModel: docModel)
     }
     
