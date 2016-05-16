@@ -72,6 +72,7 @@
 		C277E80E1CE25E8F00B7B8F6 /* ModelDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E80D1CE25E8F00B7B8F6 /* ModelDatabaseTests.swift */; };
 		C277E8101CE4EF5400B7B8F6 /* SelectExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */; };
 		C277E8121CE4FAD400B7B8F6 /* SelectExpressionOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */; };
+		C2B339DE1CEA54E7008568E9 /* RelationDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B339DD1CEA54E7008568E9 /* RelationDump.swift */; };
 		C2BD29921CD251870081FD05 /* Flight.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
 		C2BD29931CD251870081FD05 /* Store.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
@@ -199,6 +200,7 @@
 		C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpressionOperators.swift; sourceTree = "<group>"; };
 		C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConcreteRelation.swift; sourceTree = "<group>"; };
 		C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OperationRelations.swift; sourceTree = "<group>"; };
+		C2B339DD1CEA54E7008568E9 /* RelationDump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDump.swift; sourceTree = "<group>"; };
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
 		C2BD29911CD251870081FD05 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 		C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteBinding.swift; sourceTree = "<group>"; };
@@ -442,6 +444,7 @@
 				C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */,
 				C22BF1391CBC349400D3FE59 /* Relation.swift */,
 				C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */,
+				C2B339DD1CEA54E7008568E9 /* RelationDump.swift */,
 				C22921E71CD12CF100518184 /* RelationTests.swift */,
 				C257C74B1CBD835600234A89 /* RelationParts.swift */,
 				C22921A71CCE587900518184 /* RelationValue.swift */,
@@ -776,6 +779,7 @@
 				C277E8071CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift in Sources */,
 				C22921D91CD12A9E00518184 /* ModelHelpers.swift in Sources */,
 				C22921DA1CD12AA200518184 /* ModelDatabase.swift in Sources */,
+				C2B339DE1CEA54E7008568E9 /* RelationDump.swift in Sources */,
 				C22921DB1CD12AA200518184 /* ModelRelation.swift in Sources */,
 				C22921DC1CD12AA200518184 /* WeakReference.swift in Sources */,
 				C22921DD1CD12AA200518184 /* WeakValueDictionary.swift in Sources */,
