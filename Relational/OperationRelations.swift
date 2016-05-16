@@ -283,25 +283,29 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
 
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        let aJustMatching = a.project(Scheme(attributes: Set(matching.keys)))
-        let bJustMatching = b.project(Scheme(attributes: Set(matching.values)))
-        let allCommon = aJustMatching.intersection(bJustMatching.renameAttributes(matching.reversed))
+        // TODO: try to figure out which of a and b is smaller, rather than just
+        // arbitrarily picking an order.
+        let first = a
+        let second = b
         
-        let seq = allCommon.rows().lazy.flatMap({ row -> AnySequence<Result<Row, RelationError>> in
-            switch row {
-            case .Ok(let row):
-                let renamedRow = row.renameAttributes(self.matching)
-                let aMatching = self.a.select(row)
-                let bMatching = self.b.select(renamedRow)
-                
-                return AnySequence(aMatching.rows().lazy.flatMap({ aRow -> AnySequence<Result<Row, RelationError>> in
-                    return AnySequence(bMatching.rows().lazy.map({ bRow -> Result<Row, RelationError> in
-                        return aRow.combine(bRow).map({ Row(values: $0.values + $1.values) })
-                    }))
-                }))
-            case .Err:
-                return AnySequence(CollectionOfOne(row))
+        // This maps join keys in `first` to entire rows in `first`.
+        var firstKeyed: [Row: [Row]] = [:]
+        for rowResult in first.rows() {
+            guard let row = rowResult.ok else { return AnyGenerator(GeneratorOfOne(rowResult)) }
+            let joinKey = row.rowWithAttributes(matching.values)
+            if firstKeyed[joinKey] != nil {
+                firstKeyed[joinKey]!.append(row)
+            } else {
+                firstKeyed[joinKey] = [row]
             }
+        }
+        
+        let seq = second.rows().lazy.flatMap({ rowResult -> [Result<Row, RelationError>] in
+            guard let row = rowResult.ok else { return [rowResult] }
+            
+            let joinKey = row.rowWithAttributes(self.matching.keys).renameAttributes(self.matching)
+            guard let bRows = firstKeyed[joinKey] else { return [] }
+            return bRows.map({ .Ok(Row(values: $0.values + row.values)) })
         })
         return AnyGenerator(seq.generate())
     }
