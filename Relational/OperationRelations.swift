@@ -285,14 +285,18 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
         // TODO: try to figure out which of a and b is smaller, rather than just
         // arbitrarily picking an order.
-        let first = a
-        let second = b
+        let first = b
+        let second = a
+        
+        let firstAttributes = matching.values
+        let secondAttributes = matching.keys
+        let secondToFirstRenaming = matching
         
         // This maps join keys in `first` to entire rows in `first`.
         var firstKeyed: [Row: [Row]] = [:]
         for rowResult in first.rows() {
             guard let row = rowResult.ok else { return AnyGenerator(GeneratorOfOne(rowResult)) }
-            let joinKey = row.rowWithAttributes(matching.values)
+            let joinKey = row.rowWithAttributes(firstAttributes)
             if firstKeyed[joinKey] != nil {
                 firstKeyed[joinKey]!.append(row)
             } else {
@@ -303,7 +307,7 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
         let seq = second.rows().lazy.flatMap({ rowResult -> [Result<Row, RelationError>] in
             guard let row = rowResult.ok else { return [rowResult] }
             
-            let joinKey = row.rowWithAttributes(self.matching.keys).renameAttributes(self.matching)
+            let joinKey = row.rowWithAttributes(secondAttributes).renameAttributes(secondToFirstRenaming)
             guard let bRows = firstKeyed[joinKey] else { return [] }
             return bRows.map({ .Ok(Row(values: $0.values + row.values)) })
         })
