@@ -408,3 +408,54 @@ class RenameRelation: Relation, RelationDefaultChangeObserverImplementation {
         relation.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
     }
 }
+
+class UpdateRelation: Relation, RelationDefaultChangeObserverImplementation {
+    var projected: Relation
+    let newValues: Row
+    
+    let scheme: Scheme
+    
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    
+    init(relation: Relation, newValues: Row) {
+        let untouchedAttributes = Set(relation.scheme.attributes.subtract(newValues.values.keys))
+        self.projected = relation.project(Scheme(attributes: untouchedAttributes))
+        self.newValues = newValues
+        self.scheme = relation.scheme
+    }
+    
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        return AnyGenerator(projected.rows().lazy.map({ (row: Result<Row, RelationError>) -> Result<Row, RelationError> in
+            return row.map({ (row: Row) -> Row in
+                return Row(values: row.values + self.newValues.values)
+            })
+        }).generate())
+    }
+    
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        let newValuesScheme = Set(newValues.values.keys)
+        let newValueParts = row.rowWithAttributes(newValuesScheme)
+        if newValueParts != newValues {
+            return .Ok(false)
+        }
+        
+        let remainingParts = row.rowWithAttributes(projected.scheme.attributes)
+        return projected.contains(remainingParts)
+    }
+    
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        // Rewrite the query to eliminate attributes that we update. To do this,
+        // map the expression to replace any attributes we update with the updated
+        // value. Any other attributes can then be passed through to the underlying
+        // relation for updates.
+        let queryWithNewValues = query.mapTree({ (expr: SelectExpression) -> SelectExpression in
+            switch expr {
+            case let attr as Attribute:
+                return self.newValues[attr] ?? attr
+            default:
+                return expr
+            }
+        })
+        return projected.update(queryWithNewValues, newValues: newValues)
+    }
+}

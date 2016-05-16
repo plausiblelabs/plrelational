@@ -147,17 +147,7 @@ extension Relation {
     }
     
     public func withUpdate(newValues: Row) -> Relation {
-        // Figure out which attributes are being altered.
-        let newValuesScheme = Scheme(attributes: Set(newValues.values.keys))
-        
-        // And which attributes are not being altered.
-        let untouchedAttributesScheme = Scheme(attributes: self.scheme.attributes.subtract(newValuesScheme.attributes))
-        
-        // Compute the update. We project away the updated attributes, then join in the new values.
-        // The result is equivalent to updating the values.
-        let withoutNewValueAttributes = self.project(untouchedAttributesScheme)
-        let updatedValues = withoutNewValueAttributes.join(ConcreteRelation(newValues))
-        return updatedValues
+        return UpdateRelation(relation: self, newValues: newValues)
     }
 }
 
