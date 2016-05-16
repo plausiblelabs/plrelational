@@ -68,7 +68,8 @@ class DocModel {
         let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
         func createRelation(name: String, _ scheme: Scheme) -> ChangeLoggingRelation<SQLiteTableRelation> {
-            assert(sqliteDB.createRelation(name, scheme: scheme).ok != nil)
+            let createResult = sqliteDB.createRelation(name, scheme: scheme)
+            precondition(createResult.ok != nil)
             return db[name]
         }
         self.collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
@@ -266,7 +267,8 @@ class DocModel {
             let values: Row = ["name": RelationValue(newValue)]
             Swift.print("UPDATE: \(newValue)")
             var mutableRelation = relation
-            assert(mutableRelation.update(true, newValues: values).ok != nil)
+            let updateResult = mutableRelation.update(true, newValues: values)
+            precondition(updateResult.ok != nil)
         }
         
         return StringBidiBinding(relation: relation, change: BidiChange<String>{ (newValue, oldValue, commit) in
