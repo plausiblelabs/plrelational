@@ -29,6 +29,22 @@ class UnionRelation: Relation, RelationDefaultChangeObserverImplementation {
         return aResult.and(bResult)
     }
     
+    // Special case union(UnionRelation(..., ConcreteRelation), ConcreteRelation) to avoid
+    // building up deep layers.
+    func union(other: Relation) -> Relation {
+        if let concreteOther = other as? ConcreteRelation {
+            if let concreteMine = a as? ConcreteRelation {
+                let concreteCombined = ConcreteRelation(scheme: scheme, values: concreteMine.values.union(concreteOther.values))
+                return UnionRelation(a: concreteCombined, b: b)
+            }
+            if let concreteMine = b as? ConcreteRelation {
+                let concreteCombined = ConcreteRelation(scheme: scheme, values: concreteMine.values.union(concreteOther.values))
+                return UnionRelation(a: a, b: concreteCombined)
+            }
+        }
+        return UnionRelation(a: self, b: other)
+    }
+    
     func onAddFirstObserver() {
         a.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
         b.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
