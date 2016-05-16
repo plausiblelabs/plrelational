@@ -24,7 +24,7 @@ public class ModelDatabase {
         return search.generate().next() != nil
     }
     
-    public func add(obj: Model) -> Result<Void, RelationError> {
+    public func add<T: Model>(obj: T) -> Result<Void, RelationError> {
         let relation = relationForModel(obj.dynamicType)
         return relation.then({
             $0.add(obj.toRow()).map({ _ in
@@ -42,7 +42,7 @@ public class ModelDatabase {
         let targetRelation = self.relationForModel(type)
         let joinRelation = self.joinRelation(from: Parent.self, to: type)
         
-        return targetRelation.combine(joinRelation).map({
+        return targetRelation.combine(joinRelation).map({// (targetRelation: Relation, joinRelation: Relation) -> ModelToManyRelation<T> in
             let joinRelationFiltered = $1.select(Attribute("from ID") *== RelationValue(ownedBy.objectID.value))
             
             let joined = joinRelationFiltered.equijoin($0, matching: ["to ID": "objectID"])
@@ -64,7 +64,7 @@ public class ModelDatabase {
 }
 
 extension ModelDatabase {
-    func relationForModel(type: Model.Type) -> Result<SQLiteTableRelation, RelationError> {
+    func relationForModel<T: Model>(type: T.Type) -> Result<SQLiteTableRelation, RelationError> {
         return sqliteDatabase.getOrCreateRelation(type.name, scheme: schemeForModel(type))
     }
     
@@ -76,7 +76,7 @@ extension ModelDatabase {
 }
 
 extension ModelDatabase {
-    private func schemeForModel(type: Model.Type) -> Scheme {
+    private func schemeForModel<T: Model>(type: T.Type) -> Scheme {
         return Scheme(attributes: Set(type.attributes))
     }
 }
@@ -87,14 +87,14 @@ extension ModelDatabase {
         return obj as! T?
     }
     
-    func addLiveModelObject(obj: Model) {
+    func addLiveModelObject<T: Model>(obj: T) {
         let key = ObjectIdentifier(obj.dynamicType)
         if liveModelObjects[key] == nil {
             liveModelObjects[key] = WeakValueDictionary()
         }
         liveModelObjects[key]![obj.objectID] = obj
         
-        obj.changeObservers.add(self.modelChanged)
+        obj.changeObservers.add({ self.modelChanged($0 as! T) })
     }
     
     func getOrMakeModelObject<T: Model>(type: T.Type, _ objectID: ModelObjectID, _ creatorFunction: Void -> Result<T, RelationError>) -> Result<T, RelationError> {
@@ -111,7 +111,7 @@ extension ModelDatabase {
 }
 
 extension ModelDatabase {
-    private func modelChanged(obj: Model) {
+    private func modelChanged<T: Model>(obj: T) {
         relationForModel(obj.dynamicType).map({ $0.update(Attribute("objectID") *== RelationValue(obj.objectID.value), newValues: obj.toRow()) })
     }
 }
