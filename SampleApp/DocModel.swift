@@ -107,13 +107,20 @@ class DocModel {
         
         self.db = db
 
+        self.removal = inspectorItems.addChangeObserver({ _ in
+            print("COLLS:\n\(inspectorCollectionItems)\n")
+            print("OBJS:\n\(inspectorObjectItems)\n")
+            print("ITEMS:\n\(self.inspectorItems)\n")
+        })
+    }
+    
+    func addDefaultData() {
         func addCollection(collectionID: Int64, name: String, type: CollectionType, parentID: Int64?, previousID: Int64?) {
             db.transaction({
                 self.addCollection($0, collectionID: collectionID, name: name, type: type, parentID: parentID, previousID: previousID)
             })
         }
-
-        // Prepare the default document data
+        
         addCollection(1, name: "Group1", type: .Group, parentID: nil, previousID: nil)
         addCollection(2, name: "Collection1", type: .Collection, parentID: 1, previousID: nil)
         addCollection(3, name: "Page1", type: .Page, parentID: 1, previousID: 2)
@@ -138,12 +145,6 @@ class DocModel {
         
         addObject(11, "Obj1", 2, 5.0)
         addObject(12, "Obj2", 3, 5.0)
-        
-        self.removal = inspectorItems.addChangeObserver({ _ in
-            print("COLLS:\n\(inspectorCollectionItems)\n")
-            print("OBJS:\n\(inspectorObjectItems)\n")
-            print("ITEMS:\n\(self.inspectorItems)\n")
-        })
     }
     
     private func performUndoableAction(name: String, _ transactionFunc: Transaction -> Void) {
@@ -172,12 +173,11 @@ class DocModel {
         docOutlineBinding.insert(transaction, row: row, pos: pos)
     }
     
-    func newCollection(name: String, type: CollectionType) {
+    func newCollection(name: String, type: CollectionType, parentID: Int64?) {
         let id = collectionID
         collectionID += 1
-        let previousNodeID: Int64? = docOutlineBinding.root.children.last?.data["id"].get()
         performUndoableAction("New \(type.name)", {
-            self.addCollection($0, collectionID: id, name: name, type: type, parentID: nil, previousID: previousNodeID)
+            self.addCollection($0, collectionID: id, name: name, type: type, parentID: parentID, previousID: nil)
         })
     }
     
@@ -216,7 +216,7 @@ class DocModel {
                 let collectionID = row["id"]
                 let collectionType = CollectionType(rawValue: row["type"].get()!)!
                 return ContextMenu(items: [
-                    .Titled(title: "New Page", action: { self.newCollection("Page", type: .Page) }),
+                    .Titled(title: "New Page", action: { self.newCollection("Page", type: .Page, parentID: nil) }),
                     .Separator,
                     .Titled(title: "Delete", action: { self.deleteCollection(collectionID, type: collectionType) })
                 ])
