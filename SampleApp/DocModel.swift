@@ -49,9 +49,12 @@ class DocModel {
     private let selectedCollection: Relation
     private let selectedInspectorItem: Relation
     private let selectedCollectionItem: Relation
+    
     private let docOutlineBinding: OrderedTreeBinding
     private let inspectorItemsBinding: OrderedTreeBinding
+    
     private var collectionID: Int64 = 1
+    private var objectID: Int64 = 1001
     
     private var removal: (Void -> Void)!
     
@@ -132,19 +135,13 @@ class DocModel {
         
         func addObject(objectID: Int64, _ name: String, _ collectionID: Int64, _ order: Double) {
             db.transaction({
-                let objects = $0["object"]
-                let row: Row = [
-                    "id": RelationValue(objectID),
-                    "name": RelationValue(name),
-                    "coll_id": RelationValue(collectionID),
-                    "order": RelationValue(order)
-                ]
-                objects.add(row)
+                self.addObject($0, objectID: objectID, name: name, collectionID: collectionID, order: order)
             })
         }
         
-        addObject(11, "Obj1", 2, 5.0)
-        addObject(12, "Obj2", 3, 5.0)
+        addObject(1001, "Obj1", 3, 5.0)
+        addObject(1002, "Obj2", 4, 5.0)
+        objectID = 1003
     }
     
     private func performUndoableAction(name: String, _ transactionFunc: Transaction -> Void) {
@@ -171,6 +168,25 @@ class DocModel {
         let previous = previousID.map{RelationValue($0)}
         let pos = TreePos(parentID: parent, previousID: previous, nextID: nil)
         docOutlineBinding.insert(transaction, row: row, pos: pos)
+    }
+    
+    private func addObject(transaction: Transaction, objectID: Int64, name: String, collectionID: Int64, order: Double) {
+        let objects = transaction["object"]
+        let row: Row = [
+            "id": RelationValue(objectID),
+            "name": RelationValue(name),
+            "coll_id": RelationValue(collectionID),
+            "order": RelationValue(order)
+        ]
+        objects.add(row)
+    }
+    
+    func newObject(name: String, collectionID: Int64, order: Double) {
+        let id = objectID
+        objectID += 1
+        performUndoableAction("New Object", {
+            self.addObject($0, objectID: id, name: name, collectionID: collectionID, order: order)
+        })
     }
     
     func newCollection(name: String, type: CollectionType, parentID: Int64?) {

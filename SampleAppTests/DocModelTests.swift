@@ -12,66 +12,59 @@ import libRelational
 
 class DocModelTests: XCTestCase {
     
-    var dbPaths: [String] = []
-    
-    override func tearDown() {
-        for path in dbPaths {
-            _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
-        }
-    }
-    
-    func makeDB() -> (path: String, db: SQLiteDatabase) {
-        let tmp = NSTemporaryDirectory() as NSString
-        let dbname = "testing-\(NSUUID()).db"
-        let path = tmp.stringByAppendingPathComponent(dbname)
-        _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
-        
-        let db = try! SQLiteDatabase(path)
-        
-        dbPaths.append(path)
-        
-        return (path, db)
-    }
-    
-    func pretty(node: OrderedTreeBinding.Node, _ accum: String, _ indent: Int) -> String {
-        var mutstr = accum
+    func pretty(node: OrderedTreeBinding.Node, inout _ accum: [String], _ indent: Int) {
         let pad = Array(count: indent, repeatedValue: "  ").joinWithSeparator("")
-        mutstr.appendContentsOf("\(pad)\(node.data["name"])\n")
+        accum.append("\(pad)\(node.data["name"])")
         for child in node.children {
-            mutstr = pretty(child, mutstr, indent + 1)
+            pretty(child, &accum, indent + 1)
         }
-        return mutstr
     }
     
-    func prettyRoot(binding: OrderedTreeBinding) -> String {
-        var s = ""
+    func prettyRoot(binding: OrderedTreeBinding) -> [String] {
+        var accum: [String] = []
         for node in binding.root.children {
-            s = pretty(node, s, 0)
+            pretty(node, &accum, 0)
         }
-        return s
+        return accum
     }
     
     func testModel() {
         let model = DocModel(undoManager: UndoManager())
         
-        func addCollection(name name: String, parentID: Int64?) {
-            model.newCollection(name, type: .Page, parentID: parentID)
+        func addCollection(name: String, _ type: SampleApp.CollectionType, _ parentID: Int64?) {
+            model.newCollection(name, type: type, parentID: parentID)
+        }
+        
+        func addObject(name: String, _ collectionID: Int64, _ order: Double) {
+            model.newObject(name, collectionID: collectionID, order: order)
         }
         
         func verifyTree(binding: OrderedTreeBinding, _ expected: [String]) {
-            let s = "\(expected.joinWithSeparator("\n"))\n"
-            XCTAssertEqual(prettyRoot(binding), s)
+            XCTAssertEqual(prettyRoot(binding), expected)
+        }
+        
+        func verifyBindings(itemSelected itemSelected: Bool, selectedItemType: String?, selectedItemName: String?) {
+            XCTAssertEqual(model.itemSelected.value, itemSelected)
+            XCTAssertEqual(model.itemNotSelected.value, !itemSelected)
+            XCTAssertEqual(model.selectedItemType.value, selectedItemType)
+            XCTAssertEqual(model.selectedItemName.value, selectedItemName)
         }
         
         // Insert some collections
-        addCollection(name: "Group1", parentID: nil)
-        addCollection(name: "Collection1", parentID: 1)
-        addCollection(name: "Page1", parentID: 1)
-        addCollection(name: "Page2", parentID: 1)
-        addCollection(name: "Child1", parentID: 2)
-        addCollection(name: "Child2", parentID: 2)
-        addCollection(name: "Child3", parentID: 2)
-        addCollection(name: "Group2", parentID: nil)
+        addCollection("Group1", .Group, nil)
+        addCollection("Collection1", .Collection, 1)
+        addCollection("Page1", .Page, 1)
+        addCollection("Page2", .Page, 1)
+        addCollection("Child1", .Page, 2)
+        addCollection("Child2", .Page, 2)
+        addCollection("Child3", .Page, 2)
+        addCollection("Group2", .Group, nil)
+        
+        // Insert some objects
+        addObject("Object1", 3, 5.0)
+        addObject("Object2", 3, 7.0)
+
+        // Verify the initial doc outline structure
         verifyTree(model.docOutlineTreeViewModel.data.binding, [
             "Group1",
             "  Collection1",
@@ -82,5 +75,24 @@ class DocModelTests: XCTestCase {
             "  Page2",
             "Group2"
         ])
+        
+        // Verify that the inspector is empty initially
+        verifyTree(model.inspectorTreeViewModel.data.binding, [])
+        
+        // Verify properties-related bindings
+        verifyBindings(itemSelected: false, selectedItemType: nil, selectedItemName: nil)
+        
+        // Select a page in the doc outline
+        model.docOutlineTreeViewModel.selection.set(id: 3)
+
+        // Verify that the inspector is updated to show the selected page and its objects
+//        verifyTree(model.inspectorTreeViewModel.data.binding, [
+//            "Page1",
+//            "  Object1",
+//            "  Object2"
+//        ])
+        
+        // Verify properties-related bindings
+        verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
     }
 }
