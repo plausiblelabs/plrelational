@@ -84,21 +84,37 @@ func SelectExpressionFromRow(row: Row) -> SelectExpression {
 }
 
 extension SelectExpression {
-    func withRenamedAttributes(renames: [Attribute: Attribute]) -> SelectExpression {
+    /// Walk the entire expression tree, calling a map function at each node.
+    /// Child nodes are mapped first, and then the map function is called on
+    /// the parent node after the new values are substituted in.
+    func mapTree(f: SelectExpression -> SelectExpression) -> SelectExpression{
         switch self {
-        case let attribute as Attribute:
-            return renames[attribute] ?? attribute
         case let binary as SelectExpressionBinaryOperator:
-            return SelectExpressionBinaryOperator(
-                lhs: binary.lhs.withRenamedAttributes(renames),
+            let substituted = SelectExpressionBinaryOperator(
+                lhs: binary.lhs.mapTree(f),
                 op: binary.op,
-                rhs: binary.rhs.withRenamedAttributes(renames))
+                rhs: binary.rhs.mapTree(f))
+            return f(substituted)
         case let unary as SelectExpressionUnaryOperator:
-            return SelectExpressionUnaryOperator(
+            let substituted = SelectExpressionUnaryOperator(
                 op: unary.op,
-                expr: unary.expr.withRenamedAttributes(renames))
+                expr: unary.expr.mapTree(f))
+            return f(substituted)
         default:
-            return self
+            return f(self)
         }
+    }
+}
+
+extension SelectExpression {
+    func withRenamedAttributes(renames: [Attribute: Attribute]) -> SelectExpression {
+        return self.mapTree({
+            switch $0 {
+            case let attribute as Attribute:
+                return renames[attribute] ?? attribute
+            default:
+                return $0
+            }
+        })
     }
 }
