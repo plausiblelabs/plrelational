@@ -18,13 +18,13 @@ struct TreeViewModel {
     struct Data {
         let binding: OrderedTreeBinding
         let allowsChildren: (Row) -> Bool
-        let contextMenu: (Row) -> ContextMenu?
+        let contextMenu: ((Row) -> ContextMenu?)?
         // Note: dstPath.index is relative to the state of the array *before* the item is removed.
-        let move: (srcPath: TreePath, dstPath: TreePath) -> Void
+        let move: ((srcPath: TreePath, dstPath: TreePath) -> Void)?
     }
     
     struct Selection {
-        let relation: ChangeLoggingRelation<SQLiteTableRelation>
+        let relation: Relation
         let set: (id: RelationValue?) -> Void
         let get: () -> RelationValue?
     }
@@ -97,6 +97,10 @@ extension TreeView: NSOutlineViewDataSource {
     }
     
     func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
+        if model.data.move == nil {
+            return nil
+        }
+        
         let node = item as! OrderedTreeBinding.Node
         // TODO: Don't assume Int64
         let rowID: Int64 = node.id.get()!
@@ -159,7 +163,7 @@ extension TreeView: NSOutlineViewDataSource {
 
             let srcPath = TreePath(parent: currentParent, index: srcIndex)
             let dstPath = TreePath(parent: proposedParent, index: dstIndex)
-            model.data.move(srcPath: srcPath, dstPath: dstPath)
+            model.data.move?(srcPath: srcPath, dstPath: dstPath)
             return true
         }
         
@@ -188,7 +192,7 @@ extension TreeView: ExtOutlineViewDelegate {
     
     func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
         let node = item as! OrderedTreeBinding.Node
-        return model.data.contextMenu(node.data).map{$0.nsmenu}
+        return model.data.contextMenu?(node.data).map{$0.nsmenu}
     }
     
     func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
