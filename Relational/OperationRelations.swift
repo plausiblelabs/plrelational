@@ -244,7 +244,11 @@ class SelectRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
-        return relation.contains(row).map({ $0 && self.query.valueWithRow(row).boolValue })
+        if !self.query.valueWithRow(row).boolValue {
+            return .Ok(false)
+        } else {
+            return relation.contains(row)
+        }
     }
     
     func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
