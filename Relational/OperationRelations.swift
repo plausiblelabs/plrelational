@@ -255,6 +255,11 @@ class SelectRelation: Relation, RelationDefaultChangeObserverImplementation {
         return relation.update(query *&& self.query, newValues: newValues)
     }
     
+    func select(query: SelectExpression) -> Relation {
+        let combinedQuery = self.query *&& query
+        return SelectRelation(relation: self.relation, query: combinedQuery)
+    }
+    
     func onAddFirstObserver() {
         relation.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
     }
