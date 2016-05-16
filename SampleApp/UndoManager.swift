@@ -12,6 +12,10 @@ class UndoManager {
     
     private let nsmanager: SPUndoManager
     
+    init() {
+        self.nsmanager = SPUndoManager()
+    }
+    
     init(nsmanager: SPUndoManager) {
         self.nsmanager = nsmanager
     }

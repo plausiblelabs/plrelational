@@ -70,6 +70,7 @@ class Document: NSDocument {
         
         // Create the document model
         docModel = DocModel(undoManager: undoManager)
+        docModel.addDefaultData()
         
         // Create the "views"
         docOutlineView = DocOutlineView(outlineView: documentOutlineView, docModel: docModel)
@@ -78,6 +79,6 @@ class Document: NSDocument {
     }
     
     @IBAction func newPageAction(sender: NSMenuItem) {
-        docModel.newCollection("Page", type: .Page)
+        docModel.newCollection("Page", type: .Page, parentID: nil)
     }
 }
