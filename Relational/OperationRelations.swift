@@ -196,8 +196,25 @@ class DifferenceRelation: Relation, RelationDefaultChangeObserverImplementation 
     }
     
     func onAddFirstObserver() {
-        a.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
-        b.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
+        a.addWeakChangeObserver(self, method: self.dynamicType.observeChangeA)
+        b.addWeakChangeObserver(self, method: self.dynamicType.observeChangeB)
+    }
+    
+    private func observeChangeA(change: RelationChange) {
+        // When a changes, our changes are the same, minus the entries in b.
+        let intersectionChange = RelationChange(
+            added: change.added.map({ $0.difference(b) }),
+            removed: change.removed.map({ $0.difference(b) }))
+        notifyChangeObservers(intersectionChange)
+    }
+    
+    private func observeChangeB(change: RelationChange) {
+        // When b changes, our changes are switched (adds are removes, removes are adds)
+        // and intersected with the entries in a.
+        let intersectionChange = RelationChange(
+            added: change.removed.map({ $0.intersection(a) }),
+            removed: change.added.map({ $0.intersection(a) }))
+        notifyChangeObservers(intersectionChange)
     }
 }
 
