@@ -2,6 +2,7 @@
 public enum ChangeLoggingRelationChange {
     case Union(Relation)
     case Select(SelectExpression)
+    case Update(SelectExpression, Row)
 }
 
 public struct ChangeLoggingRelationSnapshot {
@@ -25,21 +26,22 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
         notifyChangeObservers(RelationChange(added: relation, removed: nil))
     }
     
-    public func delete(query: SelectExpression) {
-        let toDelete = computeFinalRelation().select(query)
-        log.append(.Select(*!query))
-        notifyChangeObservers(RelationChange(added: nil, removed: toDelete))
+    public func delete(query: SelectExpression) -> Result<Void, RelationError> {
+        return computeFinalRelation().map({ finalRelation in
+            let toDelete = finalRelation.select(query)
+            log.append(.Select(*!query))
+            notifyChangeObservers(RelationChange(added: nil, removed: toDelete))
+        })
     }
     
     public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
-        let currentState = computeFinalRelation()
-        let toUpdate = currentState.select(query)
-        let afterUpdate = toUpdate.withUpdate(newValues)
-        
-        log.append(.Select(*!query))
-        log.append(.Union(afterUpdate))
-        notifyChangeObservers(RelationChange(added: afterUpdate, removed: toUpdate))
-        return .Ok()
+        return computeFinalRelation().map({ currentState in
+            let removed = currentState.select(query)
+            let added = removed.withUpdate(newValues)
+            
+            log.append(.Update(query, newValues))
+            notifyChangeObservers(RelationChange(added: added, removed: removed))
+        })
     }
 }
 
@@ -49,26 +51,59 @@ extension ChangeLoggingRelation: Relation, RelationDefaultChangeObserverImplemen
     }
     
     public func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        return computeFinalRelation().rows()
+        switch computeFinalRelation() {
+        case .Ok(let relation):
+            return relation.rows()
+        case .Err(let err):
+            return AnyGenerator(CollectionOfOne(Result.Err(err)).generate())
+        }
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {
-        return computeFinalRelation().contains(row)
+        return computeFinalRelation().then({ $0.contains(row) })
     }
     
-    internal func computeFinalRelation() -> Relation {
-        var currentRelation: Relation = underlyingRelation
+    internal func computeFinalRelation() -> Result<Relation, RelationError> {
+        var addedRows = ConcreteRelation(scheme: scheme, values: [], defaultSort: nil)
+        var removedRows = ConcreteRelation(scheme: scheme, values: [], defaultSort: nil)
         
         for change in log {
             switch change {
             case .Union(let relation):
-                currentRelation = currentRelation.union(relation)
+                for row in relation.rows() {
+                    switch row {
+                    case .Ok(let row):
+                        addedRows.add(row)
+                        removedRows.delete(row)
+                    case .Err(let err):
+                        return .Err(err)
+                    }
+                }
             case .Select(let query):
-                currentRelation = currentRelation.select(query)
+                addedRows.delete(*!query)
+                for row in underlyingRelation.select(*!query).rows() {
+                    switch row {
+                    case .Ok(let row):
+                        removedRows.add(row)
+                    case .Err(let err):
+                        return .Err(err)
+                    }
+                }
+            case .Update(let query, let newValues):
+                addedRows.update(query, newValues: newValues)
+                for toUpdate in underlyingRelation.select(query).difference(removedRows).rows() {
+                    switch toUpdate {
+                    case .Ok(let row):
+                        addedRows.add(Row(values: row.values + newValues.values))
+                        removedRows.add(row)
+                    case .Err(let err):
+                        return .Err(err)
+                    }
+                }
             }
         }
         
-        return currentRelation
+        return .Ok(underlyingRelation.difference(removedRows).union(addedRows))
     }
     
     static func computeChangeFromLog<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log, underlyingRelation: Relation) -> RelationChange {
@@ -83,6 +118,10 @@ extension ChangeLoggingRelation: Relation, RelationDefaultChangeObserverImplemen
             case .Select(let query):
                 currentAdd = currentAdd.select(query)
                 currentRemove = currentRemove.union(underlyingRelation.select(*!query))
+            case .Update(let query, let newValues):
+                currentAdd = currentAdd.withUpdate(query, newValues: newValues)
+                currentAdd = currentAdd.union(underlyingRelation.select(query).difference(currentRemove).withUpdate(newValues))
+                currentRemove = currentRemove.union(underlyingRelation.select(query))
             }
         }
         

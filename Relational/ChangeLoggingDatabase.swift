@@ -77,7 +77,7 @@ extension ChangeLoggingDatabase {
             // If we ever do, it would involve retrying the transaction so this should still hold.
             
             let newLog = relation.log[target.log.count ..< relation.log.count]
-            let change = target.dynamicType.computeChangeFromLog(newLog, underlyingRelation: target.computeFinalRelation())
+            let change = target.dynamicType.computeChangeFromLog(newLog, underlyingRelation: target.computeFinalRelation().ok! /* TODO: error handling */)
             changes.append((target, change))
             
             target.log = relation.log
