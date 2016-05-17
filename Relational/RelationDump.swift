@@ -21,6 +21,11 @@ extension Relation {
         
         let m = Mirror(reflecting: self)
         for (name, value) in m.children {
+            if let name = name where !(value is Relation) && name != "changeObserverData" && name != "log" {
+                print("\(name): \(value)")
+            }
+        }
+        for (name, value) in m.children {
             if let name = name, let subrelation = value as? Relation {
                 print("\(name):")
                 subrelation.fullDebugDump(showContents, indent + 1)
