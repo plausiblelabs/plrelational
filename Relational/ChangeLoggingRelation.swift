@@ -12,9 +12,15 @@ public struct ChangeLoggingRelationSnapshot {
 public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
     let underlyingRelation: UnderlyingRelation
     
-    var log: [ChangeLoggingRelationChange] = []
+    var log: [ChangeLoggingRelationChange] = [] {
+        didSet {
+            self.current = nil
+        }
+    }
     
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    
+    var current: (added: ConcreteRelation, removed: ConcreteRelation)?
     
     public init(underlyingRelation: UnderlyingRelation) {
         self.underlyingRelation = underlyingRelation
@@ -64,6 +70,10 @@ extension ChangeLoggingRelation: Relation, RelationDefaultChangeObserverImplemen
     }
     
     internal func computeFinalRelation() -> Result<Relation, RelationError> {
+        if let (added, removed) = self.current {
+            return .Ok(underlyingRelation.difference(removed).union(added))
+        }
+        
         var addedRows = ConcreteRelation(scheme: scheme, values: [], defaultSort: nil)
         var removedRows = ConcreteRelation(scheme: scheme, values: [], defaultSort: nil)
         
@@ -102,6 +112,8 @@ extension ChangeLoggingRelation: Relation, RelationDefaultChangeObserverImplemen
                 }
             }
         }
+        
+        current = (addedRows, removedRows)
         
         return .Ok(underlyingRelation.difference(removedRows).union(addedRows))
     }
