@@ -260,7 +260,21 @@ class ProjectRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func onAddFirstObserver() {
-        relation.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
+        relation.addWeakChangeObserver(self, method: self.dynamicType.observeChange)
+    }
+    
+    private func observeChange(change: RelationChange) {
+        // Adds to the underlying relation are adds to the projected relation
+        // if there were no matching rows in the relation before. To compute
+        // that, project the changes, then subtract the pre-change relation,
+        // which is self minus additions.
+        //
+        // Removes are the same, except they subtract the post-change relation,
+        // which is just self.
+        let projectChange = RelationChange(
+            added: change.added?.project(scheme).difference(relation.difference(change.added!).project(scheme)),
+            removed: change.removed?.project(scheme).difference(self))
+        notifyChangeObservers(projectChange)
     }
 }
 
