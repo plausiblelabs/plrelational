@@ -480,7 +480,15 @@ class RenameRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func onAddFirstObserver() {
-        relation.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
+        relation.addWeakChangeObserver(self, method: self.dynamicType.observeChange)
+    }
+    
+    private func observeChange(change: RelationChange) {
+        // Changes are the same, but renamed.
+        let renameChange = RelationChange(
+            added: change.added?.renameAttributes(renames),
+            removed: change.removed?.renameAttributes(renames))
+        notifyChangeObservers(renameChange)
     }
 }
 
