@@ -9,20 +9,6 @@
 import Foundation
 import libRelational
 
-enum DocItem { case
-    Page(RelationValue),
-    Object(RelationValue)
-    
-    var typeName: String {
-        switch self {
-        case .Page:
-            return "Page"
-        case .Object:
-            return "Object"
-        }
-    }
-}
-
 // TODO: Similar to what we did with `globalID`, we put all "type" constants that describe
 // collections and objects into the same space, even though it would be more appropriate
 // to have a `CollectionType` that is distinct from `ObjectType`.
@@ -42,6 +28,24 @@ enum ItemType: Int64 { case
         case .Image: return "Image"
         }
     }
+    
+    var isCollectionType: Bool {
+        switch self {
+        case .Group, .Collection, .Page:
+            return true
+        default:
+            return false
+        }
+    }
+    
+    var isObjectType: Bool {
+        return !isCollectionType
+    }
+}
+
+struct DocItem {
+    let id: RelationValue
+    let type: ItemType
 }
 
 class DocModel {
@@ -51,12 +55,14 @@ class DocModel {
     private let undoManager: UndoManager
     private let db: ChangeLoggingDatabase
 
-    let collections: Relation
+    private let collections: Relation
     private let objects: Relation
     private let inspectorItems: Relation
+    private let selectedCollectionID: Relation
+    private let selectedInspectorItemID: Relation
+    
     private let selectedCollection: Relation
     private let selectedInspectorItem: Relation
-    private let selectedCollectionItem: Relation
     
     private let docOutlineBinding: OrderedTreeBinding
     private let inspectorItemsBinding: OrderedTreeBinding
@@ -84,7 +90,7 @@ class DocModel {
             return (path, db)
         }
         
-        // Prepare the schemas
+        // Prepare the stored relations
         let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
         func createRelation(name: String, _ scheme: Scheme) -> ChangeLoggingRelation<SQLiteTableRelation> {
@@ -94,13 +100,12 @@ class DocModel {
         }
         self.collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
         self.objects = createRelation("object", ["id", "type", "name", "coll_id", "order"])
-        self.selectedCollection = createRelation("selected_collection", ["id", "coll_id"])
-        self.selectedInspectorItem = createRelation("selected_inspector_item", ["id", "type", "fid"])
-        self.selectedCollectionItem = collections.renameAttributes(["id" : "coll_id"]).join(selectedCollection)
+        self.selectedCollectionID = createRelation("selected_collection", ["id", "coll_id"])
+        self.selectedInspectorItemID = createRelation("selected_inspector_item", ["id", "item_id"])
 
-        // Prepare the tree bindings
-        self.docOutlineBinding = OrderedTreeBinding(relation: collections, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
-
+        // Prepare the higher level relations
+        self.selectedCollection = collections.renameAttributes(["id" : "coll_id"]).join(selectedCollectionID)
+        
         // TODO: This is probably more complex than it needs to be
         let inspectorCollectionItems = selectedCollection
             .project(["coll_id"])
@@ -108,16 +113,18 @@ class DocModel {
             .join(collections)
             .project(["id", "type", "name"])
             .join(MakeRelation(["parent", "order"], [.NULL, 5.0]))
-
         let inspectorObjectItems = selectedCollection
             .project(["coll_id"])
             .join(objects)
             .renameAttributes(["coll_id": "parent"])
             .project(["id", "type", "name", "parent", "order"])
-
         // XXX
         //self.inspectorItems = inspectorCollectionItems.union(inspectorObjectItems)
-        self.inspectorItems = MakeRelation(["id", "name", "parent", "order"])
+        self.inspectorItems = MakeRelation(["id", "type", "name", "parent", "order"])
+        self.selectedInspectorItem = inspectorItems.renameAttributes(["id" : "item_id"]).join(selectedInspectorItemID)
+        
+        // Prepare the tree bindings
+        self.docOutlineBinding = OrderedTreeBinding(relation: collections, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
         self.inspectorItemsBinding = OrderedTreeBinding(relation: inspectorItems, tableName: "", idAttr: "id", parentAttr: "parent", orderAttr: "order")
         
         self.db = db
@@ -216,6 +223,7 @@ class DocModel {
     }
 
     private func selectCollection(id: RelationValue, update: Bool) {
+        // TODO: s/Collection/type.name/
         self.performUndoableAction("Select Collection", {
             let selectedCollection = $0["selected_collection"]
             if update {
@@ -227,18 +235,39 @@ class DocModel {
     }
     
     private func deselectCollection() {
+        // TODO: s/Collection/type.name/
         self.performUndoableAction("Deselect Collection", {
             let selectedCollection = $0["selected_collection"]
             selectedCollection.delete(Attribute("id") *== RelationValue(Int64(1)))
         })
     }
 
+    private func selectInspectorItem(id: RelationValue, update: Bool) {
+        // TODO: s/Object/type.name/
+        self.performUndoableAction("Select Object", {
+            let selectedInspectorItem = $0["selected_inspector_item"]
+            if update {
+                selectedInspectorItem.update(Attribute("id") *== RelationValue(Int64(1)), newValues: ["item_id": id])
+            } else {
+                selectedInspectorItem.add(["id": RelationValue(Int64(1)), "item_id": id])
+            }
+        })
+    }
+    
+    private func deselectInspectorItem() {
+        // TODO: s/Object/type.name/
+        self.performUndoableAction("Deselect Object", {
+            let selectedInspectorItem = $0["selected_inspector_item"]
+            selectedInspectorItem.delete(Attribute("id") *== RelationValue(Int64(1)))
+        })
+    }
+    
     lazy var docOutlineTreeViewModel: TreeViewModel = { [unowned self] in
         let data = TreeViewModel.Data(
             binding: self.docOutlineBinding,
             allowsChildren: { row in
-                let rawType: Int64 = row["type"].get()!
-                return rawType == ItemType.Group.rawValue || rawType == ItemType.Collection.rawValue
+                let type = ItemType(rawValue: row["type"].get()!)!
+                return type == .Group || type == .Collection
             },
             contextMenu: { row in
                 let collectionID = row["id"]
@@ -257,11 +286,10 @@ class DocModel {
             }
         )
         
-        // TODO: s/Collection/type.name/
         let selection = TreeViewModel.Selection(
             relation: self.selectedCollection,
             set: { id in
-                let selectedID = self.selectedCollection.rows().next().map{$0.ok!["coll_id"]}
+                let selectedID = self.selectedCollectionID.rows().next().map{$0.ok!["coll_id"]}
                 if let id = id {
                     self.selectCollection(id, update: selectedID != nil)
                 } else {
@@ -269,7 +297,7 @@ class DocModel {
                 }
             },
             get: {
-                return self.selectedCollection.rows().next().map{$0.ok!["coll_id"]}
+                return self.selectedCollectionID.rows().next().map{$0.ok!["coll_id"]}
             }
         )
         
@@ -295,22 +323,25 @@ class DocModel {
         let data = TreeViewModel.Data(
             binding: self.inspectorItemsBinding,
             allowsChildren: { row in
-                // XXX
-                let rowID: Int64 = row["id"].get()!
-                return rowID != 1
+                let type = ItemType(rawValue: row["type"].get()!)!
+                return type.isCollectionType
             },
             contextMenu: nil,
             move: nil
         )
         
         let selection = TreeViewModel.Selection(
-            // TODO
-            relation: self.selectedCollection,
-            set: { _ in
-                // TODO
+            relation: self.selectedInspectorItem,
+            set: { id in
+                let selectedID = self.selectedInspectorItemID.rows().next().map{$0.ok!["item_id"]}
+                if let id = id {
+                    self.selectInspectorItem(id, update: selectedID != nil)
+                } else {
+                    self.deselectInspectorItem()
+                }
             },
             get: {
-                return nil
+                return self.selectedInspectorItemID.rows().next().map{$0.ok!["item_id"]}
             }
         )
         
@@ -325,18 +356,12 @@ class DocModel {
         return TreeViewModel(data: data, selection: selection, cell: cell)
     }()
     
-    lazy var itemSelected: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedDocItem.map{ $0 != nil }
-    }()
-    
-    lazy var itemNotSelected: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedDocItem.map{ $0 == nil }
-    }()
-
     private lazy var selectedCollectionDocItem: ValueBinding<DocItem?> = { [unowned self] in
-        return RelationValueBinding(relation: self.selectedCollectionItem.project(["coll_id"])).map{ value in
-            if let id = value {
-                return DocItem.Page(id)
+        return SingleRowBinding(relation: self.selectedCollection).map{ row in
+            if let row = row {
+                let id = row["coll_id"]
+                let type = ItemType(rawValue: row["type"].get()!)!
+                return DocItem(id: id, type: type)
             } else {
                 return nil
             }
@@ -346,13 +371,9 @@ class DocModel {
     private lazy var selectedInspectorDocItem: ValueBinding<DocItem?> = { [unowned self] in
         return SingleRowBinding(relation: self.selectedInspectorItem).map{ row in
             if let row = row {
-                let type: Int64 = row["type"].get()!
-                let fid: Int64 = row["fid"].get()!
-                if type == 0 {
-                    return DocItem.Page(RelationValue(fid))
-                } else {
-                    return DocItem.Object(RelationValue(fid))
-                }
+                let id = row["item_id"]
+                let type = ItemType(rawValue: row["type"].get()!)!
+                return DocItem(id: id, type: type)
             } else {
                 return nil
             }
@@ -365,13 +386,21 @@ class DocModel {
         }
     }()
     
+    lazy var itemSelected: ValueBinding<Bool> = { [unowned self] in
+        return self.selectedDocItem.map{ $0 != nil }
+    }()
+    
+    lazy var itemNotSelected: ValueBinding<Bool> = { [unowned self] in
+        return self.selectedDocItem.map{ $0 == nil }
+    }()
+
     lazy var selectedItemType: ValueBinding<String?> = { [unowned self] in
-        return self.selectedDocItem.map{ $0?.typeName }
+        return self.selectedDocItem.map{ $0?.type.name }
     }()
     
     // TODO: This should resolve to the name associated with selectedDocItem
     lazy var selectedItemName: StringBidiBinding = { [unowned self] in
-        let nameRelation = self.selectedCollectionItem.project(["name"])
+        let nameRelation = self.selectedCollection.project(["name"])
         // TODO: s/Collection/type.name/
         return self.bidiBinding(nameRelation, attr: "name", type: "Collection")
     }()
