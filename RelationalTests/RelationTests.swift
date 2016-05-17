@@ -524,20 +524,22 @@ class RelationTests: DBTestCase {
         var lastChange: RelationChange?
         _ = u.addChangeObserver({ lastChange = $0 })
         
+        lastChange = nil
         a.add(["first": "Sue", "last": "Johnson"])
         AssertEqual(lastChange?.added, ConcreteRelation(["first": "Sue", "last": "Johnson"]))
         AssertEqual(lastChange?.removed, nil)
         
+        lastChange = nil
         b.delete(Attribute("first") *== "Jane")
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, ConcreteRelation(["first": "Jane", "last": "Doe"]))
         
         lastChange = nil
-        
         b.add(["first": "Sue", "last": "Johnson"])
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, nil)
         
+        lastChange = nil
         a.delete(Attribute("first") *== "Sue")
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, nil)
@@ -554,24 +556,26 @@ class RelationTests: DBTestCase {
                 ["Jane", "Doe"],
                 ["Tim", "Smith"]))
         
-        let u = a.intersection(b)
+        let i = a.intersection(b)
         var lastChange: RelationChange?
-        _ = u.addChangeObserver({ lastChange = $0 })
+        _ = i.addChangeObserver({ lastChange = $0 })
         
+        lastChange = nil
         a.add(["first": "Sue", "last": "Johnson"])
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, nil)
         
+        lastChange = nil
         b.delete(Attribute("first") *== "Jane")
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, nil)
         
         lastChange = nil
-        
         b.add(["first": "Sue", "last": "Johnson"])
         AssertEqual(lastChange?.added, ConcreteRelation(["first": "Sue", "last": "Johnson"]))
         AssertEqual(lastChange?.removed, nil)
         
+        lastChange = nil
         a.delete(Attribute("first") *== "Sue")
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, ConcreteRelation(["first": "Sue", "last": "Johnson"]))
@@ -588,24 +592,26 @@ class RelationTests: DBTestCase {
                 ["Jane", "Doe"],
                 ["Tim", "Smith"]))
         
-        let u = a.difference(b)
+        let d = a.difference(b)
         var lastChange: RelationChange?
-        _ = u.addChangeObserver({ lastChange = $0 })
+        _ = d.addChangeObserver({ lastChange = $0 })
         
+        lastChange = nil
         a.add(["first": "Sue", "last": "Johnson"])
         AssertEqual(lastChange?.added, ConcreteRelation(["first": "Sue", "last": "Johnson"]))
         AssertEqual(lastChange?.removed, nil)
         
+        lastChange = nil
         b.delete(Attribute("first") *== "Jane")
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, nil)
         
         lastChange = nil
-        
         b.add(["first": "Sue", "last": "Johnson"])
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, ConcreteRelation(["first": "Sue", "last": "Johnson"]))
         
+        lastChange = nil
         a.delete(Attribute("first") *== "Sue")
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, nil)
