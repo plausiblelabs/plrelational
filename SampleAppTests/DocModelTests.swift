@@ -31,12 +31,12 @@ class DocModelTests: XCTestCase {
     func testModel() {
         let model = DocModel(undoManager: UndoManager())
         
-        func addCollection(name: String, _ type: SampleApp.CollectionType, _ parentID: Int64?) {
+        func addCollection(name: String, _ type: ItemType, _ parentID: Int64?) {
             model.newCollection(name, type: type, parentID: parentID)
         }
         
-        func addObject(name: String, _ collectionID: Int64, _ order: Double) {
-            model.newObject(name, collectionID: collectionID, order: order)
+        func addObject(name: String, _ type: ItemType, _ collectionID: Int64, _ order: Double) {
+            model.newObject(name, type: type, collectionID: collectionID, order: order)
         }
         
         func verifyTree(binding: OrderedTreeBinding, _ expected: [String]) {
@@ -61,8 +61,8 @@ class DocModelTests: XCTestCase {
         addCollection("Group2", .Group, nil)
         
         // Insert some objects
-        addObject("Object1", 3, 5.0)
-        addObject("Object2", 3, 7.0)
+        addObject("Object1", .Text, 3, 5.0)
+        addObject("Object2", .Image, 3, 7.0)
 
         // Verify the initial doc outline structure
         verifyTree(model.docOutlineTreeViewModel.data.binding, [
