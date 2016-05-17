@@ -508,4 +508,38 @@ class RelationTests: DBTestCase {
                         ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]))
         
     }
+    
+    func testUnionObservation() {
+        let a = ChangeLoggingRelation(underlyingRelation:
+            MakeRelation(
+                ["first", "last"],
+                ["John", "Doe"]))
+        let b = ChangeLoggingRelation(underlyingRelation:
+            MakeRelation(
+                ["first", "last"],
+                ["Jane", "Doe"],
+                ["Tim", "Smith"]))
+        
+        let u = a.union(b)
+        var lastChange: RelationChange?
+        _ = u.addChangeObserver({ lastChange = $0 })
+        
+        a.add(["first": "Sue", "last": "Johnson"])
+        AssertEqual(lastChange?.added, ConcreteRelation(["first": "Sue", "last": "Johnson"]))
+        AssertEqual(lastChange?.removed, nil)
+        
+        b.delete(Attribute("first") *== "Jane")
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, ConcreteRelation(["first": "Jane", "last": "Doe"]))
+        
+        lastChange = nil
+        
+        b.add(["first": "Sue", "last": "Johnson"])
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, nil)
+        
+        a.delete(Attribute("first") *== "Sue")
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, nil)
+    }
 }

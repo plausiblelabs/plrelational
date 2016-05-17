@@ -46,8 +46,18 @@ class UnionRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func onAddFirstObserver() {
-        a.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
-        b.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
+        a.addWeakChangeObserver(self, call: { $0.observeChange($1, otherRelation: $0.b) })
+        b.addWeakChangeObserver(self, call: { $0.observeChange($1, otherRelation: $0.a) })
+    }
+    
+    private func observeChange(change: RelationChange, otherRelation: Relation) {
+        // Adding a row to one side of a union adds that row to the union iff the
+        // row isn't already in the other side. Same for deleting a row. Thus, our
+        // change is the original change with the other relation subtracted.
+        let unionChange = RelationChange(
+            added: change.added.map({ $0.difference(otherRelation) }),
+            removed: change.removed.map({ $0.difference(otherRelation) }))
+        notifyChangeObservers(unionChange)
     }
 }
 

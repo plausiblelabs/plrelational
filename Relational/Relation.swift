@@ -199,4 +199,8 @@ extension Relation {
             }
         })
     }
+    
+    func addWeakChangeObserver<T: AnyObject>(target: T, call: (T, RelationChange) -> Void) {
+        addWeakChangeObserver(target, method: { obj in { change in call(obj, change) } })
+    }
 }

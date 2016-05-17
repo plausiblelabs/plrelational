@@ -2,7 +2,16 @@
 import XCTest
 import libRelational
 
-func AssertEqual(a: Relation, _ b: Relation, file: StaticString = #file, line: UInt = #line) {
+func AssertEqual(a: Relation?, _ b: Relation?, file: StaticString = #file, line: UInt = #line) {
+    guard let a = a else {
+        guard let b = b else { return }
+        XCTAssertTrue(b.isEmpty.ok == true, "First relation is nil, second relation is not nil and not empty:\n\(b)", file: file, line: line)
+        return
+    }
+    guard let b = b else {
+        XCTAssertTrue(a.isEmpty.ok == true, "Second relation is nil, first relation is not nil and not empty:\n\(a)", file: file, line: line)
+        return
+    }
     XCTAssertEqual(a.scheme, b.scheme, "Relation schemes are not equal", file: file, line: line)
     let aRows = mapOk(a.rows(), { $0 })
     let bRows = mapOk(b.rows(), { $0 })
