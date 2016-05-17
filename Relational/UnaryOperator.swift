@@ -10,3 +10,9 @@ public struct NotOperator: UnaryOperator {
         return .Integer(value.boolValue ? 0 : 1)
     }
 }
+
+extension NotOperator: CustomStringConvertible {
+    public var description: String {
+        return "!"
+    }
+}

@@ -118,3 +118,15 @@ extension SelectExpression {
         })
     }
 }
+
+extension SelectExpressionBinaryOperator: CustomStringConvertible {
+    public var description: String {
+        return "(\(lhs)) \(op) (\(rhs))"
+    }
+}
+
+extension SelectExpressionUnaryOperator: CustomStringConvertible {
+    public var description: String {
+        return "\(op)(\(expr))"
+    }
+}

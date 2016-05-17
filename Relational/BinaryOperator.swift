@@ -38,3 +38,21 @@ public struct AnyComparator: BinaryOperator {
         return .boolValue(compare(a, b))
     }
 }
+
+extension EqualityComparator: CustomStringConvertible {
+    public var description: String {
+        return "="
+    }
+}
+
+extension LTComparator: CustomStringConvertible {
+    public var description: String {
+        return "<"
+    }
+}
+
+extension AndComparator: CustomStringConvertible {
+    public var description: String {
+        return "AND"
+    }
+}
