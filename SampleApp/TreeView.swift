@@ -49,6 +49,12 @@ class TreeView: NSObject {
     private var selectionObserverRemoval: (Void -> Void)?
     private var selfInitiatedSelectionChange = false
     
+    /// Whether to animate insert/delete changes with a fade.
+    var animateChanges = false
+    
+    /// Whether to automatically expand a parent when a child is inserted.
+    var autoExpand = false
+    
     init(outlineView: NSOutlineView, model: TreeViewModel) {
         self.outlineView = outlineView
         self.model = model
@@ -241,17 +247,22 @@ extension TreeView {
     }
     
     func treeBindingChanged(changes: [OrderedTreeBinding.Change]) {
+        let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
+        
         outlineView.beginUpdates()
         
         for change in changes {
             switch change {
             case let .Insert(path):
                 let rows = NSIndexSet(index: path.index)
-                outlineView.insertItemsAtIndexes(rows, inParent: path.parent, withAnimation: [.EffectFade])
+                outlineView.insertItemsAtIndexes(rows, inParent: path.parent, withAnimation: animation)
+                if let parent = path.parent where autoExpand {
+                    outlineView.expandItem(parent)
+                }
 
             case let .Delete(path):
                 let rows = NSIndexSet(index: path.index)
-                outlineView.removeItemsAtIndexes(rows, inParent: path.parent, withAnimation: [.EffectFade])
+                outlineView.removeItemsAtIndexes(rows, inParent: path.parent, withAnimation: animation)
 
             case let .Move(srcPath, dstPath):
                 outlineView.moveItemAtIndex(srcPath.index, inParent: srcPath.parent, toIndex: dstPath.index, inParent: dstPath.parent)
