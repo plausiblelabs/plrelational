@@ -678,4 +678,55 @@ class RelationTests: DBTestCase {
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, nil)
     }
+    
+    func testJoinObservation() {
+        let a = ChangeLoggingRelation(underlyingRelation:
+            MakeRelation(
+                ["first", "last"],
+                ["John", "Doe"],
+                ["Jane", "Doe"],
+                ["Tom", "Smith"]))
+        let b = ChangeLoggingRelation(underlyingRelation:
+            MakeRelation(
+                ["last", "remark"],
+                ["Doe", "unknown"],
+                ["Smith", "common"]))
+        
+        let j = a.join(b)
+        var lastChange: RelationChange?
+        _ = j.addChangeObserver({ lastChange = $0 })
+        
+        lastChange = nil
+        a.add(["first": "Sue", "last": "Doe"])
+        AssertEqual(lastChange?.added, ConcreteRelation(["first": "Sue", "last": "Doe", "remark": "unknown"]))
+        AssertEqual(lastChange?.removed, nil)
+        
+        lastChange = nil
+        a.delete(Attribute("first") *== "Sue")
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, ConcreteRelation(["first": "Sue", "last": "Doe", "remark": "unknown"]))
+        
+        lastChange = nil
+        b.delete(Attribute("last") *== "Doe")
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed,
+                    MakeRelation(
+                        ["first", "last", "remark"],
+                        ["John", "Doe", "unknown"],
+                        ["Jane", "Doe", "unknown"]))
+        
+        lastChange = nil
+        b.add(["last": "Doe", "remark": "unknown"])
+        AssertEqual(lastChange?.added,
+                    MakeRelation(
+                        ["first", "last", "remark"],
+                        ["John", "Doe", "unknown"],
+                        ["Jane", "Doe", "unknown"]))
+        AssertEqual(lastChange?.removed, nil)
+        
+        lastChange = nil
+        b.add(["last": "DeLancey", "remark": "French"])
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, nil)
+    }
 }

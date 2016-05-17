@@ -420,8 +420,24 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func onAddFirstObserver() {
-        a.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
-        b.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
+        a.addWeakChangeObserver(self, method: self.dynamicType.observeChangeA)
+        b.addWeakChangeObserver(self, method: self.dynamicType.observeChangeB)
+    }
+    
+    private func observeChangeA(change: RelationChange) {
+        // Changes to the underlying relations are joined with the unchanged relation
+        // to produce the changes in the join relation.
+        let joinChange = RelationChange(
+            added: change.added?.equijoin(b, matching: matching),
+            removed: change.removed?.equijoin(b, matching: matching))
+        notifyChangeObservers(joinChange)
+    }
+    
+    private func observeChangeB(change: RelationChange) {
+        let joinChange = RelationChange(
+            added: change.added.map({ a.equijoin($0, matching: matching) }),
+            removed: change.removed.map({ a.equijoin($0, matching: matching) }))
+        notifyChangeObservers(joinChange)
     }
 }
 
