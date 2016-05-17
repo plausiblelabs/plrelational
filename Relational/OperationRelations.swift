@@ -541,4 +541,16 @@ class UpdateRelation: Relation, RelationDefaultChangeObserverImplementation {
         })
         return projected.update(queryWithNewValues, newValues: newValues)
     }
+    
+    func onAddFirstObserver() {
+        projected.addWeakChangeObserver(self, method: self.dynamicType.observeChange)
+    }
+    
+    private func observeChange(change: RelationChange) {
+        // Our updates are equal to the projected updates joined with our newValues.
+        let updateChange = RelationChange(
+            added: change.added?.join(ConcreteRelation(newValues)),
+            removed: change.removed?.join(ConcreteRelation(newValues)))
+        notifyChangeObservers(updateChange)
+    }
 }

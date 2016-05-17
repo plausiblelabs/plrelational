@@ -750,4 +750,25 @@ class RelationTests: DBTestCase {
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, ConcreteRelation(["first'": "John", "last'": "Doe"]))
     }
+    
+    func testUpdateObservation() {
+        let a = ChangeLoggingRelation(underlyingRelation:
+            MakeRelation(
+                ["first", "last"],
+                ["John", "Doe"]))
+        
+        let u = a.withUpdate(["last": "42"])
+        var lastChange: RelationChange?
+        _ = u.addChangeObserver({ lastChange = $0 })
+        
+        lastChange = nil
+        a.add(["first": "Sue", "last": "Smith"])
+        AssertEqual(lastChange?.added, ConcreteRelation(["first": "Sue", "last": "42"]))
+        AssertEqual(lastChange?.removed, nil)
+        
+        lastChange = nil
+        a.delete(Attribute("first") *== "John")
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, ConcreteRelation(["first": "John", "last": "42"]))
+    }
 }
