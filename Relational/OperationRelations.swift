@@ -55,8 +55,8 @@ class UnionRelation: Relation, RelationDefaultChangeObserverImplementation {
         // row isn't already in the other side. Same for deleting a row. Thus, our
         // change is the original change with the other relation subtracted.
         let unionChange = RelationChange(
-            added: change.added.map({ $0.difference(otherRelation) }),
-            removed: change.removed.map({ $0.difference(otherRelation) }))
+            added: change.added?.difference(otherRelation),
+            removed: change.removed?.difference(otherRelation))
         notifyChangeObservers(unionChange)
     }
 }
@@ -132,8 +132,8 @@ class IntersectionRelation: Relation, RelationDefaultChangeObserverImplementatio
         // row is already in the other side. Same for deleting a row. Thus, our
         // change is the original change intersected with the other relation.
         let intersectionChange = RelationChange(
-            added: change.added.map({ $0.intersection(otherRelation) }),
-            removed: change.removed.map({ $0.intersection(otherRelation) }))
+            added: change.added?.intersection(otherRelation),
+            removed: change.removed?.intersection(otherRelation))
         notifyChangeObservers(intersectionChange)
     }
 }
@@ -203,8 +203,8 @@ class DifferenceRelation: Relation, RelationDefaultChangeObserverImplementation 
     private func observeChangeA(change: RelationChange) {
         // When a changes, our changes are the same, minus the entries in b.
         let intersectionChange = RelationChange(
-            added: change.added.map({ $0.difference(b) }),
-            removed: change.removed.map({ $0.difference(b) }))
+            added: change.added?.difference(b),
+            removed: change.removed?.difference(b))
         notifyChangeObservers(intersectionChange)
     }
     
@@ -212,8 +212,8 @@ class DifferenceRelation: Relation, RelationDefaultChangeObserverImplementation 
         // When b changes, our changes are switched (adds are removes, removes are adds)
         // and intersected with the entries in a.
         let intersectionChange = RelationChange(
-            added: change.removed.map({ $0.intersection(a) }),
-            removed: change.added.map({ $0.intersection(a) }))
+            added: change.removed?.intersection(a),
+            removed: change.added?.intersection(a))
         notifyChangeObservers(intersectionChange)
     }
 }
