@@ -63,7 +63,8 @@ class DocModel {
     
     private let selectedCollection: Relation
     private let selectedInspectorItem: Relation
-    
+    private let selectedItems: Relation
+
     private let docOutlineBinding: OrderedTreeBinding
     private let inspectorItemsBinding: OrderedTreeBinding
     
@@ -122,16 +123,26 @@ class DocModel {
         self.inspectorItems = inspectorCollectionItems.union(inspectorObjectItems)
         self.selectedInspectorItem = inspectorItems.renameAttributes(["id" : "item_id"]).join(selectedInspectorItemID)
         
+        // The `selectedItems` relation is a roll-up view that includes the currently selected
+        // inspector item and/or the currently selected doc outline item.  The inspector item
+        // has a higher priority value associated with it, so that finding the currently selected
+        // item is just a matter of choosing the row with the highest priority value.
+        let selectedCollectionWithPriority = selectedCollection
+            .project(["id", "type", "name"])
+            .join(MakeRelation(["priority"], [1]))
+        let selectedInspectorItemWithPriority = selectedInspectorItem
+            .project(["id", "type", "name"])
+            .join(MakeRelation(["priority"], [2]))
+        self.selectedItems = selectedCollectionWithPriority.union(selectedInspectorItemWithPriority)
+
         // Prepare the tree bindings
         self.docOutlineBinding = OrderedTreeBinding(relation: collections, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
         self.inspectorItemsBinding = OrderedTreeBinding(relation: inspectorItems, tableName: "", idAttr: "id", parentAttr: "parent", orderAttr: "order")
         
         self.db = db
 
-        self.removal = inspectorItems.addChangeObserver({ _ in
-            print("COLLS:\n\(inspectorCollectionItems)\n")
-            print("OBJS:\n\(inspectorObjectItems)\n")
-            print("ITEMS:\n\(self.inspectorItems)\n")
+        self.removal = selectedItems.addChangeObserver({ _ in
+            print("ITEMS:\n\(self.selectedItems)\n")
         })
     }
     
@@ -355,33 +366,15 @@ class DocModel {
         return TreeViewModel(data: data, selection: selection, cell: cell)
     }()
     
-    private lazy var selectedCollectionDocItem: ValueBinding<DocItem?> = { [unowned self] in
-        return SingleRowBinding(relation: self.selectedCollection).map{ row in
-            if let row = row {
-                let id = row["coll_id"]
-                let type = ItemType(rawValue: row["type"].get()!)!
-                return DocItem(id: id, type: type)
-            } else {
-                return nil
-            }
-        }
-    }()
-
-    private lazy var selectedInspectorDocItem: ValueBinding<DocItem?> = { [unowned self] in
-        return SingleRowBinding(relation: self.selectedInspectorItem).map{ row in
-            if let row = row {
-                let id = row["item_id"]
-                let type = ItemType(rawValue: row["type"].get()!)!
-                return DocItem(id: id, type: type)
-            } else {
-                return nil
-            }
-        }
-    }()
-    
     private lazy var selectedDocItem: ValueBinding<DocItem?> = { [unowned self] in
-        return self.selectedCollectionDocItem.zip(self.selectedInspectorDocItem).map{ (docItem, inspectorItem) in
-            return inspectorItem ?? docItem
+        return SingleRowBinding(relation: self.selectedItems, extract: { row -> Int64 in return row["priority"].get()! }).map{ row in
+            if let row = row {
+                let id = row["id"]
+                let type = ItemType(rawValue: row["type"].get()!)!
+                return DocItem(id: id, type: type)
+            } else {
+                return nil
+            }
         }
     }()
     

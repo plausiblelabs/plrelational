@@ -120,12 +120,44 @@ public class SingleRowBinding: ValueBinding<Row?> {
     private let relation: Relation
     private var removal: ObserverRemoval!
     
-    init(relation: Relation) {
+    init<T: Comparable>(relation: Relation, extract: (Row -> T)? = nil) {
         self.relation = relation
-        super.init(initialValue: relation.rows().next()?.ok)
+        
+        func matchingRow() -> Row? {
+            if let f = extract {
+                // Select the row with the largest extracted value
+                // TODO: Make the comparison configurable
+                var matching: Row?
+                var largest: T?
+                for row in relation.rows() {
+                    if let row = row.ok {
+                        let v = f(row)
+                        // TODO: Simplify
+                        if let l = largest {
+                            if v > l {
+                                matching = row
+                                largest = v
+                            }
+                        } else {
+                            matching = row
+                            largest = v
+                        }
+                    } else {
+                        // TODO: Error handling
+                        return nil
+                    }
+                }
+                return matching
+            } else {
+                // Select any row
+                return relation.rows().next()?.ok
+            }
+        }
+        
+        super.init(initialValue: matchingRow())
         self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
-            let newValue = relation.rows().next()?.ok
+            let newValue = matchingRow()
             weakSelf.value = newValue
             weakSelf.notifyChangeObservers()
         })
