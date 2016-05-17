@@ -86,11 +86,11 @@ class DocModelTests: XCTestCase {
         model.docOutlineTreeViewModel.selection.set(id: 3)
 
         // Verify that the inspector is updated to show the selected page and its objects
-//        verifyTree(model.inspectorTreeViewModel.data.binding, [
-//            "Page1",
-//            "  Object1",
-//            "  Object2"
-//        ])
+        verifyTree(model.inspectorTreeViewModel.data.binding, [
+            "Page1",
+            "  Object1",
+            "  Object2"
+        ])
         
         // Verify properties-related bindings
         verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")

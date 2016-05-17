@@ -118,9 +118,7 @@ class DocModel {
             .join(objects)
             .renameAttributes(["coll_id": "parent"])
             .project(["id", "type", "name", "parent", "order"])
-        // XXX
-        //self.inspectorItems = inspectorCollectionItems.union(inspectorObjectItems)
-        self.inspectorItems = MakeRelation(["id", "type", "name", "parent", "order"])
+        self.inspectorItems = inspectorCollectionItems.union(inspectorObjectItems)
         self.selectedInspectorItem = inspectorItems.renameAttributes(["id" : "item_id"]).join(selectedInspectorItemID)
         
         // Prepare the tree bindings
