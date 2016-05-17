@@ -16,5 +16,6 @@ class InspectorView {
     
     init(outlineView: NSOutlineView, docModel: DocModel) {
         self.treeView = TreeView(outlineView: outlineView, model: docModel.inspectorTreeViewModel)
+        self.treeView.autoExpand = true
     }
 }

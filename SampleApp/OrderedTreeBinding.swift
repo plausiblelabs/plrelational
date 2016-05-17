@@ -146,8 +146,7 @@ public class OrderedTreeBinding {
     public func nodeForID(id: RelationValue) -> Node? {
         // TODO: Not efficient, but whatever
         func findNode(node: Node) -> Node? {
-            let nodeID = node.data[idAttr]
-            if nodeID == id {
+            if node.id == id {
                 return node
             }
             
@@ -305,11 +304,11 @@ public class OrderedTreeBinding {
         let dstParent = dstPath.parent ?? root
 
         let srcNode = srcParent.children[srcPath.index]
-        let srcID = srcNode.data[idAttr]
+        let srcID = srcNode.id
         
         let dstParentID: RelationValue
         if let dstParent = dstPath.parent {
-            dstParentID = dstParent.data[idAttr]
+            dstParentID = dstParent.id
         } else {
             dstParentID = .NULL
         }
