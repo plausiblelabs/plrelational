@@ -328,7 +328,15 @@ class SelectRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func onAddFirstObserver() {
-        relation.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
+        relation.addWeakChangeObserver(self, method: self.dynamicType.observeChange)
+    }
+    
+    private func observeChange(change: RelationChange) {
+        // Our changes are equal to the underlying changes with the same select applied.
+        let selectChange = RelationChange(
+            added: change.added?.select(query),
+            removed: change.removed?.select(query))
+        notifyChangeObservers(selectChange)
     }
 }
 
