@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		372707661CECD27700710C80 /* MultiValueTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707651CECD27700710C80 /* MultiValueTextField.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
@@ -128,6 +129,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		372707651CECD27700710C80 /* MultiValueTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultiValueTextField.swift; sourceTree = "<group>"; };
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = SampleAppTests/DocModelTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -290,6 +292,7 @@
 			children = (
 				37C611301CD7F7D7001DAF59 /* BackgroundView.swift */,
 				37C611321CD7F80F001DAF59 /* TextField.swift */,
+				372707651CECD27700710C80 /* MultiValueTextField.swift */,
 				37C611351CD7FB07001DAF59 /* ListView.swift */,
 				37C611501CE10770001DAF59 /* TreeView.swift */,
 				37C611371CD7FB9C001DAF59 /* ExtOutlineView.swift */,
@@ -727,6 +730,7 @@
 				37C6113F1CD93069001DAF59 /* Binding.swift in Sources */,
 				37C611441CDA7230001DAF59 /* Box.swift in Sources */,
 				37C6113A1CD80566001DAF59 /* DocModel.swift in Sources */,
+				372707661CECD27700710C80 /* MultiValueTextField.swift in Sources */,
 				37C6114B1CDBCB5C001DAF59 /* PropertiesView.swift in Sources */,
 				37C6114D1CDD603C001DAF59 /* OrderedBinding.swift in Sources */,
 				37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */,

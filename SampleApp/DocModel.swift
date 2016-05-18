@@ -303,9 +303,9 @@ class DocModel {
             // continue to work even after the row has been deleted from the underlying
             // relation.)
             let rowID = row["id"]
+            let type = ItemType(rawValue: row["type"].get()!)!
             let nameRelation = self.collections.select(Attribute("id") *== rowID).project(["name"])
-            // TODO: s/Collection/type.name/
-            let binding = self.bidiBinding(nameRelation, attr: "name", type: "Collection")
+            let binding = self.bidiBinding(nameRelation, type: type.name)
             return TreeViewModel.Cell(text: binding)
         }
         
@@ -335,9 +335,9 @@ class DocModel {
         
         let cell = { (row: Row) -> TreeViewModel.Cell in
             let rowID = row["id"]
+            let type = ItemType(rawValue: row["type"].get()!)!
             let nameRelation = self.inspectorItems.select(Attribute("id") *== rowID).project(["name"])
-            // TODO: s/Object/type.name/
-            let binding = self.bidiBinding(nameRelation, attr: "name", type: "Object")
+            let binding = self.bidiBinding(nameRelation, type: type.name)
             return TreeViewModel.Cell(text: binding)
         }
         
@@ -369,9 +369,9 @@ class DocModel {
             } else if items.count == 1 {
                 return items[0].type.name
             } else {
-                let names = Set(items.map{$0.type.name})
-                if names.count == 1 {
-                    return "Multiple \(names.first!)s"
+                let types = Set(items.map{$0.type})
+                if types.count == 1 {
+                    return "Multiple \(types.first!.name)s"
                 } else {
                     return "Multiple Items"
                 }
@@ -382,10 +382,11 @@ class DocModel {
     lazy var selectedItemName: StringBidiBinding = { [unowned self] in
         let nameRelation = self.selectedItems.project(["name"])
         // TODO: s/Collection/type.name/
-        return self.bidiBinding(nameRelation, attr: "name", type: "Collection")
+        return self.bidiBinding(nameRelation, type: "Collection")
     }()
     
-    private func bidiBinding(relation: Relation, attr: Attribute, type: String) -> StringBidiBinding {
+    private func bidiBinding(relation: Relation, type: String) -> StringBidiBinding {
+        let attr = relation.scheme.attributes.first!
         
         func update(newValue: String) {
             let values: Row = [attr: RelationValue(newValue)]
@@ -409,4 +410,40 @@ class DocModel {
             }
         })
     }
+    
+//    private func bidiBinding2(relation: Relation, type: String) -> StringBidiBinding {
+//        let attr = relation.scheme.attributes.first!
+//        
+//        func update(newValue: String) {
+//            let values: Row = [attr: RelationValue(newValue)]
+//            Swift.print("UPDATE: \(newValue)")
+//            var mutableRelation = relation
+//            let updateResult = mutableRelation.update(true, newValues: values)
+//            precondition(updateResult.ok != nil)
+//        }
+//
+//        return StringBidiBinding(
+//            relation: relation,
+//            snapshot: {
+//                return self.db.takeSnapshot()
+//            },
+//            change: { newValue in
+//                update(nil, newValue)
+//            },
+//            commit: { before, newValue in
+//                self.db.transaction({ update($0, newValue) })
+//                let after = self.db.takeSnapshot()
+//                self.undoManager.registerChange(
+//                    name: "Rename \(type)",
+//                    perform: false,
+//                    forward: {
+//                        self.db.restoreSnapshot(after)
+//                    },
+//                    backward: {
+//                        self.db.restoreSnapshot(before)
+//                    }
+//                )
+//            }
+//        )
+//    }
 }

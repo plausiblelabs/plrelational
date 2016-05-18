@@ -160,35 +160,35 @@ public class MultiRowBinding: ValueBinding<[Row]> {
 
 public class ConcreteValueBinding<T: Equatable>: ValueBinding<T?> {
     private let relation: Relation
-    private let attribute: Attribute
     private var removal: ObserverRemoval!
     private var selfInitiatedChange = false
     
     init(relation: Relation, unwrap: (RelationValue) -> T?) {
         precondition(relation.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
+        let attribute = relation.scheme.attributes.first!
+        
+        func getValue() -> RelationValue? {
+            if let row = relation.rows().next()?.ok {
+                return row[attribute]
+            } else {
+                return nil
+            }
+        }
         
         self.relation = relation
-        self.attribute = relation.scheme.attributes.first!
-        super.init(initialValue: ConcreteValueBinding.getValue(relation, attribute).flatMap(unwrap))
+        super.init(initialValue: getValue().flatMap(unwrap))
+        
         self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
             
             if weakSelf.selfInitiatedChange { return }
             
-            let newValue = ConcreteValueBinding.getValue(relation, weakSelf.attribute).flatMap(unwrap)
+            let newValue = getValue().flatMap(unwrap)
             if newValue != weakSelf.value {
                 weakSelf.value = newValue
                 weakSelf.notifyChangeObservers()
             }
         })
-    }
-
-    private static func getValue(relation: Relation, _ attribute: Attribute) -> RelationValue? {
-        if let row = relation.rows().next()?.ok {
-            return row[attribute]
-        } else {
-            return nil
-        }
     }
 }
 
@@ -205,6 +205,65 @@ public class StringBinding: ConcreteValueBinding<String> {
 }
 
 public class Int64Binding: ConcreteValueBinding<Int64> {
+    init(relation: Relation) {
+        super.init(relation: relation, unwrap: { $0.get() })
+    }
+}
+
+public class ConcreteMultiValueBinding<T: Equatable>: ValueBinding<[T]> {
+    private let relation: Relation
+    private var removal: ObserverRemoval!
+    private var selfInitiatedChange = false
+    
+    init(relation: Relation, unwrap: (RelationValue) -> T?) {
+        precondition(relation.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
+        let attribute = relation.scheme.attributes.first!
+        
+        func getValues() -> [RelationValue] {
+            // TODO: Error handling
+            var values: [RelationValue] = []
+            for row in relation.rows() {
+                switch row {
+                case .Ok(let row):
+                    values.append(row[attribute])
+                case .Err:
+                    // TODO: Error handling
+                    break
+                }
+            }
+            return values
+        }
+        
+        self.relation = relation
+        super.init(initialValue: getValues().flatMap(unwrap))
+        
+        self.removal = relation.addChangeObserver({ [weak self] _ in
+            guard let weakSelf = self else { return }
+            
+            if weakSelf.selfInitiatedChange { return }
+            
+            let newValues = getValues().flatMap(unwrap)
+            if newValues != weakSelf.value {
+                weakSelf.value = newValues
+                weakSelf.notifyChangeObservers()
+            }
+        })
+    }
+}
+
+public class MultiRelationValueBinding: ConcreteMultiValueBinding<RelationValue> {
+    init(relation: Relation) {
+        super.init(relation: relation, unwrap: { $0 })
+    }
+}
+
+public class MultiStringBinding: ConcreteMultiValueBinding<String> {
+    init(relation: Relation) {
+        super.init(relation: relation, unwrap: { $0.get() })
+    }
+}
+
+public class MultiInt64Binding: ConcreteMultiValueBinding<Int64> {
     init(relation: Relation) {
         super.init(relation: relation, unwrap: { $0.get() })
     }
