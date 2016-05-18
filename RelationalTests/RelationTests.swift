@@ -644,14 +644,19 @@ class RelationTests: DBTestCase {
         a.add(["first": "Sue", "last": "Johnson"])
         AssertEqual(lastChange?.added, ConcreteRelation(["first": "Sue"]))
         AssertEqual(lastChange?.removed, nil)
-        
+
+        lastChange = nil
+        a.update(Attribute("first") *== "Sue", newValues: ["last": "Jonsen"])
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, nil)
+
         lastChange = nil
         a.add(["first": "Sue", "last": "Thompson"])
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, nil)
         
         lastChange = nil
-        a.delete(Attribute("last") *== "Johnson")
+        a.delete(Attribute("last") *== "Jonsen")
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, nil)
         
