@@ -50,6 +50,15 @@ class DocModelTests: XCTestCase {
             XCTAssertEqual(model.selectedItemName.value, selectedItemName)
         }
         
+        func path(treeBinding: OrderedTreeBinding, parentID: Int64?, index: Int) -> TreePath {
+            let parent = parentID.flatMap{ treeBinding.nodeForID(RelationValue($0)) }
+            return TreePath(parent: parent, index: index)
+        }
+        
+        func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath {
+            return path(model.docOutlineTreeViewModel.data.binding, parentID: parentID, index: index)
+        }
+        
         // Insert some collections
         addCollection("Group1", .Group, nil)
         addCollection("Collection1", .Collection, 1)
@@ -86,6 +95,31 @@ class DocModelTests: XCTestCase {
         model.docOutlineTreeViewModel.selection.set(ids: [3])
 
         // Verify that the inspector is updated to show the selected page and its objects
+        verifyTree(model.inspectorTreeViewModel.data.binding, [
+            "Page1",
+            "  Object1",
+            "  Object2"
+        ])
+        
+        // Verify properties-related bindings
+        verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
+        
+        // Reorder a page in the doc outline
+        model.docOutlineTreeViewModel.data.move?(srcPath: docOutlinePath(1, 1), dstPath: docOutlinePath(1, 2))
+        
+        // Verify the new doc outline structure
+        verifyTree(model.docOutlineTreeViewModel.data.binding, [
+            "Group1",
+            "  Collection1",
+            "    Child1",
+            "    Child2",
+            "    Child3",
+            "  Page2",
+            "  Page1",
+            "Group2"
+        ])
+        
+        // Verify that the inspector contents remain unchanged
         verifyTree(model.inspectorTreeViewModel.data.binding, [
             "Page1",
             "  Object1",
