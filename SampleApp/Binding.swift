@@ -137,6 +137,27 @@ public class SingleRowBinding: ValueBinding<Row?> {
     }
 }
 
+public class MultiRowBinding: ValueBinding<[Row]> {
+    private let relation: Relation
+    private var removal: ObserverRemoval!
+    
+    init(relation: Relation) {
+        self.relation = relation
+        
+        func allRows() -> [Row] {
+            return relation.rows().flatMap{$0.ok}
+        }
+        
+        super.init(initialValue: allRows())
+        self.removal = relation.addChangeObserver({ [weak self] _ in
+            guard let weakSelf = self else { return }
+            let newValue = allRows()
+            weakSelf.value = newValue
+            weakSelf.notifyChangeObservers()
+        })
+    }
+}
+
 public class ConcreteValueBinding<T: Equatable>: ValueBinding<T?> {
     private let relation: Relation
     private let attribute: Attribute

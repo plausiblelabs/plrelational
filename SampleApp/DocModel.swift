@@ -344,28 +344,39 @@ class DocModel {
         return TreeViewModel(data: data, selection: selection, cell: cell)
     }()
     
-    private lazy var selectedDocItem: ValueBinding<DocItem?> = { [unowned self] in
-        return SingleRowBinding(relation: self.selectedItems).map{ row in
-            if let row = row {
+    private lazy var selectedDocItems: ValueBinding<[DocItem]> = { [unowned self] in
+        return MultiRowBinding(relation: self.selectedItems).map{ rows in
+            return rows.map { row in
                 let id = row["id"]
                 let type = ItemType(rawValue: row["type"].get()!)!
                 return DocItem(id: id, type: type)
-            } else {
-                return nil
             }
         }
     }()
     
     lazy var itemSelected: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedDocItem.map{ $0 != nil }
+        return self.selectedDocItems.map{ $0.count > 0 }
     }()
     
     lazy var itemNotSelected: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedDocItem.map{ $0 == nil }
+        return self.selectedDocItems.map{ $0.count == 0 }
     }()
 
     lazy var selectedItemType: ValueBinding<String?> = { [unowned self] in
-        return self.selectedDocItem.map{ $0?.type.name }
+        return self.selectedDocItems.map{ items -> String? in
+            if items.count == 0 {
+                return nil
+            } else if items.count == 1 {
+                return items[0].type.name
+            } else {
+                let names = Set(items.map{$0.type.name})
+                if names.count == 1 {
+                    return "Multiple \(names.first!)s"
+                } else {
+                    return "Multiple Items"
+                }
+            }
+        }
     }()
     
     lazy var selectedItemName: StringBidiBinding = { [unowned self] in
