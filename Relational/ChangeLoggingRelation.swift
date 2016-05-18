@@ -181,19 +181,25 @@ extension ChangeLoggingRelation {
         return ChangeLoggingRelationSnapshot(savedLog: self.log)
     }
     
-    public func restoreSnapshot(snapshot: ChangeLoggingRelationSnapshot, notifyObservers: Bool = true) {
-        self.log = snapshot.savedLog
-        if notifyObservers {
-            // XXX TODO: we need to provide the actual changes here!
-            notifyChangeObservers(RelationChange(added: nil, removed: nil))
-        }
+    public func restoreSnapshot(snapshot: ChangeLoggingRelationSnapshot) {
+        let change = rawRestoreSnapshot(snapshot)
+        notifyChangeObservers(change)
     }
     
-    public func restoreEmptySnapshot(notifyObservers notifyObservers: Bool = true) {
-        self.log = []
-        if notifyObservers {
-            // XXX TODO: we need to provide the actual changes here!
-            notifyChangeObservers(RelationChange(added: nil, removed: nil))
+    /// Restore a snapshot and compute the changes that this causes. Does not notify observers.
+    func rawRestoreSnapshot(snapshot: ChangeLoggingRelationSnapshot) -> RelationChange {
+        if snapshot.savedLog.count > self.log.count {
+            let log = snapshot.savedLog.suffixFrom(self.log.count)
+            // TODO: handle errors on all computeFinalRelation calls
+            let change = self.dynamicType.computeChangeFromLog(log, underlyingRelation: self.computeFinalRelation().ok!)
+            self.log = snapshot.savedLog
+            return change
+        } else {
+            let log = self.log.suffixFrom(snapshot.savedLog.count)
+            self.log = snapshot.savedLog
+            let change = self.dynamicType.computeChangeFromLog(log, underlyingRelation: self.computeFinalRelation().ok!)
+            let reversedChange = RelationChange(added: change.removed, removed: change.added)
+            return reversedChange
         }
     }
 }
