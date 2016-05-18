@@ -151,7 +151,7 @@ extension ConcreteRelation: CustomStringConvertible, PlaygroundMonospace {
         let all = ([columns.map({ $0.name })] + rows)
         let lengths = all.map({ $0.map({ $0.characters.count }) })
         let columnLengths = (0 ..< columns.count).map({ index in
-            return lengths.map({ $0[index] }).reduce(0, combine: max)
+            return lengths.map({ $0[index] }).reduce(0, combine: Swift.max)
         })
         let padded = all.map({ zip(columnLengths, $0).map({ $1.pad(to: $0, with: " ") }) })
         let joined = padded.map({ $0.joinWithSeparator("  ") })

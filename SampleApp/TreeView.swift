@@ -25,8 +25,8 @@ struct TreeViewModel {
     
     struct Selection {
         let relation: Relation
-        let set: (id: RelationValue?) -> Void
-        let get: () -> RelationValue?
+        let set: (ids: [RelationValue]) -> Void
+        let get: () -> [RelationValue]
     }
     
     struct Cell {
@@ -210,15 +210,16 @@ extension TreeView: ExtOutlineViewDelegate {
             return
         }
         
-        let itemID: RelationValue?
         selfInitiatedSelectionChange = true
-        if outlineView.selectedRow >= 0 {
-            let node = outlineView.itemAtRow(outlineView.selectedRow)! as! OrderedTreeBinding.Node
-            itemID = node.id
-        } else {
-            itemID = nil
+        
+        var itemIDs: [RelationValue] = []
+        outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
+            if let node = self.outlineView.itemAtRow(index) as? OrderedTreeBinding.Node {
+                itemIDs.append(node.id)
+            }
         }
-        model.selection.set(id: itemID)
+        model.selection.set(ids: itemIDs)
+        
         selfInitiatedSelectionChange = false
     }
 }
@@ -230,19 +231,19 @@ extension TreeView {
             return
         }
 
-        var index: Int?
-        if let selectedID = model.selection.get() {
-            if let selectedNode = model.data.binding.nodeForID(selectedID) {
+        let indexes = NSMutableIndexSet()
+        for id in model.selection.get() {
+            if let node = model.data.binding.nodeForID(id) {
                 // TODO: This is inefficient
-                index = outlineView.rowForItem(selectedNode)
+                let index = outlineView.rowForItem(node)
+                if index >= 0 {
+                    indexes.addIndex(index)
+                }
             }
         }
+        
         selfInitiatedSelectionChange = true
-        if let index = index {
-            outlineView.selectRowIndexes(NSIndexSet(index: index), byExtendingSelection: false)
-        } else {
-            outlineView.deselectAll(nil)
-        }
+        outlineView.selectRowIndexes(indexes, byExtendingSelection: false)
         selfInitiatedSelectionChange = false
     }
     

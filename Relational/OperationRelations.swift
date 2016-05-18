@@ -554,3 +554,52 @@ class UpdateRelation: Relation, RelationDefaultChangeObserverImplementation {
         notifyChangeObservers(updateChange)
     }
 }
+
+class MaxRelation: Relation, RelationDefaultChangeObserverImplementation {
+    var relation: Relation
+    let attribute: Attribute
+
+    var cachedMaxValue: RelationValue?
+    
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    
+    init(relation: Relation, attribute: Attribute) {
+        precondition(relation.scheme.attributes.contains(attribute))
+        self.relation = relation
+        self.attribute = attribute
+    }
+    
+    var scheme: Scheme {
+        return relation.scheme
+    }
+    
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        // TODO: Error handling
+        let maxValue = relation.rows().lazy.map{ $0.ok![self.attribute] }.maxElement{ $0 < $1 }
+        let maxRows = relation.rows().lazy.filter{ $0.ok![self.attribute] >= maxValue }
+        return AnyGenerator(maxRows.generate())
+    }
+    
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        // TODO
+        return .Ok(false)
+    }
+    
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        // TODO
+        return .Ok(())
+    }
+    
+    func onAddFirstObserver() {
+        relation.addWeakChangeObserver(self, method: self.dynamicType.observeChange)
+    }
+    
+    private func observeChange(change: RelationChange) {
+        if let maxValue = cachedMaxValue {
+            // TODO: See if added/deleted rows are >= maxValue
+        } else {
+            // TODO: Calculate max value and cache it
+            // TODO: 
+        }
+    }
+}

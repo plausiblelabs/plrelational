@@ -464,6 +464,19 @@ class RelationTests: DBTestCase {
                         ["214",    "Boston", "O'Hare",      "1420",    "1512"]))
     }
     
+    func testMax() {
+        let r = MakeRelation(
+            ["id", "name", "count"],
+            [1,    "cat",  1],
+            [2,    "dog",  3],
+            [3,    "fish", 2])
+        
+        AssertEqual(r.max("count"),
+                    MakeRelation(
+                        ["id", "name", "count"],
+                        [2,    "dog",  3]))
+    }
+    
     func testForeach() {
         let r1 = MakeRelation(
             ["first", "last", "pet"],

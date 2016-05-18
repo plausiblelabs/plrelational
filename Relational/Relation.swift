@@ -32,6 +32,7 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     func thetajoin(other: Relation, query: SelectExpression) -> Relation
     func split(query: SelectExpression) -> (Relation, Relation)
     func divide(other: Relation) -> Relation
+    func max(attribute: Attribute) -> Relation
     
     func select(rowToFind: Row) -> Relation
     func select(query: SelectExpression) -> Relation
@@ -108,6 +109,10 @@ extension Relation {
         let result = self.project(resultingScheme).difference(projected)
         return result
     }
+    
+    public func max(attribute: Attribute) -> Relation {
+        return MaxRelation(relation: self, attribute: attribute)
+    }
 }
 
 extension Relation {
@@ -178,7 +183,7 @@ extension Relation {
         let all = ([columns.map({ $0.name })] + rows)
         let lengths = all.map({ $0.map({ $0.characters.count }) })
         let columnLengths = (0 ..< columns.count).map({ index in
-            return lengths.map({ $0[index] }).reduce(0, combine: max)
+            return lengths.map({ $0[index] }).reduce(0, combine: Swift.max)
         })
         let padded = all.map({ zip(columnLengths, $0).map({ $1.pad(to: $0, with: " ") }) })
         let joined = padded.map({ $0.joinWithSeparator("  ") })

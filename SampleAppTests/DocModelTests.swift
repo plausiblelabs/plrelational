@@ -83,7 +83,7 @@ class DocModelTests: XCTestCase {
         verifyBindings(itemSelected: false, selectedItemType: nil, selectedItemName: nil)
         
         // Select a page in the doc outline
-        model.docOutlineTreeViewModel.selection.set(id: 3)
+        model.docOutlineTreeViewModel.selection.set(ids: [3])
 
         // Verify that the inspector is updated to show the selected page and its objects
         verifyTree(model.inspectorTreeViewModel.data.binding, [
