@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		372707661CECD27700710C80 /* MultiValueTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707651CECD27700710C80 /* MultiValueTextField.swift */; };
+		372707681CED2F8100710C80 /* AppTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707671CED2F8100710C80 /* AppTestCase.swift */; };
+		3727076B1CED32B000710C80 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
@@ -130,6 +132,7 @@
 
 /* Begin PBXFileReference section */
 		372707651CECD27700710C80 /* MultiValueTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultiValueTextField.swift; sourceTree = "<group>"; };
+		372707671CED2F8100710C80 /* AppTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppTestCase.swift; sourceTree = "<group>"; };
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = SampleAppTests/DocModelTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -274,6 +277,7 @@
 			isa = PBXGroup;
 			children = (
 				37C611161CD7EFAE001DAF59 /* Info.plist */,
+				372707671CED2F8100710C80 /* AppTestCase.swift */,
 			);
 			path = SampleAppTests;
 			sourceTree = "<group>";
@@ -744,7 +748,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3727076B1CED32B000710C80 /* DBTestCase.swift in Sources */,
 				37C6115D1CE4F756001DAF59 /* ArrayBinarySearchTests.swift in Sources */,
+				372707681CED2F8100710C80 /* AppTestCase.swift in Sources */,
 				3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */,
 				37F8FBD51CE4FC36001C7C5F /* OrderedTreeBindingTests.swift in Sources */,
 			);

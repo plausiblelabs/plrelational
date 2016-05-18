@@ -10,23 +10,7 @@ import XCTest
 import libRelational
 @testable import SampleApp
 
-class DocModelTests: XCTestCase {
-    
-    func pretty(node: OrderedTreeBinding.Node, inout _ accum: [String], _ indent: Int) {
-        let pad = Array(count: indent, repeatedValue: "  ").joinWithSeparator("")
-        accum.append("\(pad)\(node.data["name"])")
-        for child in node.children {
-            pretty(child, &accum, indent + 1)
-        }
-    }
-    
-    func prettyRoot(binding: OrderedTreeBinding) -> [String] {
-        var accum: [String] = []
-        for node in binding.root.children {
-            pretty(node, &accum, 0)
-        }
-        return accum
-    }
+class DocModelTests: AppTestCase {
     
     func testModel() {
         let model = DocModel(undoManager: UndoManager())
@@ -39,20 +23,11 @@ class DocModelTests: XCTestCase {
             model.newObject(name, type: type, collectionID: collectionID, order: order)
         }
         
-        func verifyTree(binding: OrderedTreeBinding, _ expected: [String]) {
-            XCTAssertEqual(prettyRoot(binding), expected)
-        }
-        
         func verifyBindings(itemSelected itemSelected: Bool, selectedItemType: String?, selectedItemName: String?) {
             XCTAssertEqual(model.itemSelected.value, itemSelected)
             XCTAssertEqual(model.itemNotSelected.value, !itemSelected)
             XCTAssertEqual(model.selectedItemType.value, selectedItemType)
             XCTAssertEqual(model.selectedItemName.value, selectedItemName)
-        }
-        
-        func path(treeBinding: OrderedTreeBinding, parentID: Int64?, index: Int) -> TreePath {
-            let parent = parentID.flatMap{ treeBinding.nodeForID(RelationValue($0)) }
-            return TreePath(parent: parent, index: index)
         }
         
         func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath {
@@ -104,29 +79,29 @@ class DocModelTests: XCTestCase {
         // Verify properties-related bindings
         verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
         
-        // Reorder a page in the doc outline
-        model.docOutlineTreeViewModel.data.move?(srcPath: docOutlinePath(1, 1), dstPath: docOutlinePath(1, 2))
-        
-        // Verify the new doc outline structure
-        verifyTree(model.docOutlineTreeViewModel.data.binding, [
-            "Group1",
-            "  Collection1",
-            "    Child1",
-            "    Child2",
-            "    Child3",
-            "  Page2",
-            "  Page1",
-            "Group2"
-        ])
-        
-        // Verify that the inspector contents remain unchanged
-        verifyTree(model.inspectorTreeViewModel.data.binding, [
-            "Page1",
-            "  Object1",
-            "  Object2"
-        ])
-        
-        // Verify properties-related bindings
-        verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
+//        // Reorder a page in the doc outline
+//        model.docOutlineTreeViewModel.data.move?(srcPath: docOutlinePath(1, 1), dstPath: docOutlinePath(1, 2))
+//        
+//        // Verify the new doc outline structure
+//        verifyTree(model.docOutlineTreeViewModel.data.binding, [
+//            "Group1",
+//            "  Collection1",
+//            "    Child1",
+//            "    Child2",
+//            "    Child3",
+//            "  Page2",
+//            "  Page1",
+//            "Group2"
+//        ])
+//        
+//        // Verify that the inspector contents remain unchanged
+//        verifyTree(model.inspectorTreeViewModel.data.binding, [
+//            "Page1",
+//            "  Object1",
+//            "  Object2"
+//        ])
+//        
+//        // Verify properties-related bindings
+//        verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
     }
 }
