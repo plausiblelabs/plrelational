@@ -135,7 +135,7 @@ class DocModel {
             .renameAttributes(["item_id": "id"])
             .project(["id", "type", "name"])
             .join(MakeRelation(["priority"], [2]))
-        self.selectedItems = selectedCollectionWithPriority.union(selectedInspectorItemsWithPriority).max("priority")
+        self.selectedItems = selectedCollectionWithPriority.union(selectedInspectorItemsWithPriority)//.max("priority")
 
         // Prepare the tree bindings
         self.docOutlineBinding = OrderedTreeBinding(relation: collections, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
@@ -257,14 +257,6 @@ class DocModel {
             for id in ids {
                 selectedInspectorItem.add(["item_id": id])
             }
-        })
-    }
-    
-    private func deselectInspectorItem() {
-        // TODO: s/Object/type.name/
-        self.performUndoableAction("Deselect Object", {
-            let selectedInspectorItem = $0["selected_inspector_item"]
-            selectedInspectorItem.delete(Attribute("id") *== RelationValue(Int64(1)))
         })
     }
     
