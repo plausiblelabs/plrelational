@@ -251,6 +251,10 @@ extension TreeView {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
         
         outlineView.beginUpdates()
+
+        // TODO: Use a Set instead
+        var parentsToReload: [OrderedTreeBinding.Node] = []
+        var parentsToExpand: [OrderedTreeBinding.Node] = []
         
         for change in changes {
             switch change {
@@ -258,7 +262,7 @@ extension TreeView {
                 let rows = NSIndexSet(index: path.index)
                 outlineView.insertItemsAtIndexes(rows, inParent: path.parent, withAnimation: animation)
                 if let parent = path.parent where autoExpand {
-                    outlineView.expandItem(parent)
+                    parentsToExpand.append(parent)
                 }
 
             case let .Delete(path):
@@ -271,17 +275,22 @@ extension TreeView {
                 // the parent's emptiness is changing, so we have to do that manually
                 if let srcParent = srcPath.parent {
                     if srcParent.children.count == 0 {
-                        outlineView.reloadItem(srcParent)
+                        parentsToReload.append(srcParent)
                     }
                 }
                 if let dstParent = dstPath.parent {
                     if dstParent.children.count == 1 {
-                        outlineView.reloadItem(dstParent)
-                        outlineView.expandItem(dstParent)
+                        parentsToReload.append(dstParent)
+                        parentsToExpand.append(dstParent)
                     }
                 }
             }
         }
+        
+        // Note: we need to wait until all insert/remove calls are processed above before
+        // reloadItem() and/or expandItem() are called, otherwise NSOutlineView will get confused
+        parentsToReload.forEach(outlineView.reloadItem)
+        parentsToExpand.forEach(outlineView.expandItem)
         
         outlineView.endUpdates()
     }
