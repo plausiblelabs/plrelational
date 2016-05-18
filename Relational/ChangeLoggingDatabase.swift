@@ -96,9 +96,23 @@ extension ChangeLoggingDatabase {
     }
     
     public func restoreSnapshot(snapshot: ChangeLoggingDatabaseSnapshot) {
+        var changes: [(ChangeLoggingRelation<SQLiteTableRelation>, RelationChange)] = []
+        
         // Restore all the snapshotted relations.
         for (relation, snapshot) in snapshot.relationSnapshots {
-            relation.restoreSnapshot(snapshot, notifyObservers: false)
+            if snapshot.savedLog.count > relation.log.count {
+                let log = snapshot.savedLog.suffixFrom(relation.log.count)
+                // TODO: handle errors on all computeFinalRelation calls
+                let change = relation.dynamicType.computeChangeFromLog(log, underlyingRelation: relation.computeFinalRelation().ok!)
+                changes.append((relation, change))
+                relation.restoreSnapshot(snapshot, notifyObservers: false)
+            } else {
+                let log = relation.log.suffixFrom(snapshot.savedLog.count)
+                relation.restoreSnapshot(snapshot)
+                let change = relation.dynamicType.computeChangeFromLog(log, underlyingRelation: relation.computeFinalRelation().ok!)
+                let reversedChange = RelationChange(added: change.removed, removed: change.added)
+                changes.append((relation, reversedChange))
+            }
         }
         
         // Any relations that were created after the snapshot was taken won't be captured.
@@ -106,13 +120,16 @@ extension ChangeLoggingDatabase {
         let snapshottedRelations = Set(snapshot.relationSnapshots.map({ ObjectIdentifier($0.0) }))
         for (_, relation) in changeLoggingRelations {
             if !snapshottedRelations.contains(ObjectIdentifier(relation)) {
+                let log = relation.log
                 relation.restoreEmptySnapshot(notifyObservers: false)
+                let change = relation.dynamicType.computeChangeFromLog(log, underlyingRelation: relation.computeFinalRelation().ok!)
+                let reversedChange = RelationChange(added: change.removed, removed: change.added)
+                changes.append((relation, reversedChange))
             }
         }
         
-        for (_, relation) in changeLoggingRelations {
-            // XXX TODO: we need to provide the actual changes here!
-            relation.notifyChangeObservers(RelationChange(added: nil, removed: nil))
+        for (relation, change) in changes {
+            relation.notifyChangeObservers(change)
         }
     }
     

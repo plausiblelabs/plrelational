@@ -171,7 +171,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "MD-11"]))
         XCTAssertNil(lastChange!.added)
-
+        
         
         loggingRelation.delete(Attribute("number") *== "123")
         AssertEqual(lastChange!.removed!,
@@ -245,7 +245,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         var lastChange: RelationChange?
         _ = loggingRelation.addChangeObserver({ lastChange = $0 })
-
+        
         loggingRelation.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
         loggingRelation.update(Attribute("number") *== "42", newValues: ["equipment": "DC-10"])
         AssertEqual(lastChange!.removed!,
@@ -787,5 +787,181 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["Jones", "New York"],
                         ["Smith", "Chicago"],
                         ["Johnson", "Seattle"]))
+    }
+    
+    func testSnapshotChangeNotification() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let db = ChangeLoggingDatabase(sqliteDB)
+        let flightsScheme: Scheme = ["number", "pilot", "equipment"]
+        let pilotsScheme: Scheme = ["name", "home"]
+        
+        sqliteDB.createRelation("flights", scheme: flightsScheme)
+        sqliteDB.createRelation("pilots", scheme: pilotsScheme)
+        
+        var lastFlightsChange: RelationChange?
+        _ = db["flights"].addChangeObserver({ lastFlightsChange = $0 })
+        
+        var lastPilotsChange: RelationChange?
+        _ = db["pilots"].addChangeObserver({ lastPilotsChange = $0 })
+        
+        let s1 = db.takeSnapshot()
+        
+        db.transaction({
+            let flights = $0["flights"]
+            let pilots = $0["pilots"]
+            
+            flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
+            flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
+            flights.add(["number": 3, "pilot": "Johnson", "equipment": "797"])
+            
+            pilots.add(["name": "Jones", "home": "New York"])
+            pilots.add(["name": "Smith", "home": "Chicago"])
+            pilots.add(["name": "Johnson", "home": "Seattle"])
+        })
+        
+        let s2 = db.takeSnapshot()
+        
+        db.transaction({
+            let flights = $0["flights"]
+            let pilots = $0["pilots"]
+            
+            flights.add(["number": 4, "pilot": "Jones", "equipment": "DC-10"])
+            flights.update(Attribute("number") *== RelationValue(1 as Int64), newValues: ["pilot": "Smith"])
+            flights.delete(Attribute("equipment") *== "797")
+            
+            pilots.add(["name": "Horton", "home": "Miami"])
+            pilots.update(Attribute("name") *== "Jones", newValues: ["home": "Boston"])
+            pilots.delete(Attribute("home") *== "Seattle")
+        })
+        
+        let s3 = db.takeSnapshot()
+        
+        lastFlightsChange = nil
+        lastPilotsChange = nil
+        db.restoreSnapshot(s2)
+        AssertEqual(lastFlightsChange?.added,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [1, "Jones", "777"],
+                        [3, "Johnson", "797"]))
+        AssertEqual(lastFlightsChange?.removed,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [1, "Smith", "777"],
+                        [4, "Jones", "DC-10"]))
+        AssertEqual(lastPilotsChange?.added,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "New York"],
+                        ["Johnson", "Seattle"]))
+        AssertEqual(lastPilotsChange?.removed,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "Boston"],
+                        ["Horton", "Miami"]))
+        
+        lastFlightsChange = nil
+        lastPilotsChange = nil
+        db.restoreSnapshot(s1)
+        AssertEqual(lastFlightsChange?.added, nil)
+        AssertEqual(lastFlightsChange?.removed,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [1, "Jones", "777"],
+                        [2, "Smith", "787"],
+                        [3, "Johnson", "797"]))
+        AssertEqual(lastPilotsChange?.added, nil)
+        AssertEqual(lastPilotsChange?.removed,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "New York"],
+                        ["Smith", "Chicago"],
+                        ["Johnson", "Seattle"]))
+        
+        lastFlightsChange = nil
+        lastPilotsChange = nil
+        db.restoreSnapshot(s2)
+        AssertEqual(lastFlightsChange?.added,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [1, "Jones", "777"],
+                        [2, "Smith", "787"],
+                        [3, "Johnson", "797"]))
+        AssertEqual(lastFlightsChange?.removed, nil)
+        AssertEqual(lastPilotsChange?.added,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "New York"],
+                        ["Smith", "Chicago"],
+                        ["Johnson", "Seattle"]))
+        AssertEqual(lastPilotsChange?.removed, nil)
+        
+        lastFlightsChange = nil
+        lastPilotsChange = nil
+        db.restoreSnapshot(s3)
+        AssertEqual(lastFlightsChange?.added,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [1, "Smith", "777"],
+                        [4, "Jones", "DC-10"]))
+        AssertEqual(lastFlightsChange?.removed,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [1, "Jones", "777"],
+                        [3, "Johnson", "797"]))
+        AssertEqual(lastPilotsChange?.added,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "Boston"],
+                        ["Horton", "Miami"]))
+        AssertEqual(lastPilotsChange?.removed,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "New York"],
+                        ["Johnson", "Seattle"]))
+        
+        lastFlightsChange = nil
+        lastPilotsChange = nil
+        db.restoreSnapshot(s1)
+        AssertEqual(lastFlightsChange?.added, nil)
+        AssertEqual(lastFlightsChange?.removed,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [1, "Smith", "777"],
+                        [2, "Smith", "787"],
+                        [4, "Jones", "DC-10"]))
+        AssertEqual(lastPilotsChange?.added, nil)
+        AssertEqual(lastPilotsChange?.removed,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "Boston"],
+                        ["Smith", "Chicago"],
+                        ["Horton", "Miami"]))
+        
+        lastFlightsChange = nil
+        lastPilotsChange = nil
+        db.restoreSnapshot(s3)
+        AssertEqual(lastFlightsChange?.added,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [1, "Smith", "777"],
+                        [2, "Smith", "787"],
+                        [4, "Jones", "DC-10"]))
+        AssertEqual(lastFlightsChange?.removed, nil)
+        AssertEqual(lastPilotsChange?.added,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "Boston"],
+                        ["Smith", "Chicago"],
+                        ["Horton", "Miami"]))
+        AssertEqual(lastPilotsChange?.removed, nil)
+        
+        lastFlightsChange = nil
+        lastPilotsChange = nil
+        db.restoreSnapshot(s3)
+        AssertEqual(lastFlightsChange?.added, nil)
+        AssertEqual(lastFlightsChange?.removed, nil)
+        AssertEqual(lastPilotsChange?.added, nil)
+        AssertEqual(lastPilotsChange?.removed, nil)
     }
 }
