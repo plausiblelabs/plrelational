@@ -269,29 +269,41 @@ public class MultiInt64Binding: ConcreteMultiValueBinding<Int64> {
     }
 }
 
-public struct BidiChange<T> {
-    let f: (newValue: T, oldValue: T, commit: Bool) -> Void
-}
-
 public class StringBidiBinding: StringBinding {
-    private let change: BidiChange<String>
     
-    init(relation: Relation, change: BidiChange<String>) {
+    typealias Snapshot = () -> ChangeLoggingDatabaseSnapshot
+    typealias Change = (newValue: String) -> Void
+    typealias Commit = (before: ChangeLoggingDatabaseSnapshot, newValue: String) -> Void
+    
+    private let snapshot: Snapshot
+    private let change: Change
+    private let commit: Commit
+    private var before: ChangeLoggingDatabaseSnapshot?
+
+    init(relation: Relation, snapshot: Snapshot, change: Change, commit: Commit) {
+        self.snapshot = snapshot
         self.change = change
+        self.commit = commit
         super.init(relation: relation)
     }
 
-    public func change(newValue newValue: String, oldValue: String) {
+    public func change(newValue: String) {
         selfInitiatedChange = true
+        if before == nil {
+            self.before = snapshot()
+        }
         self.value = newValue
-        change.f(newValue: newValue, oldValue: oldValue, commit: false)
+        self.change(newValue: newValue)
         selfInitiatedChange = false
     }
     
-    public func commit(newValue newValue: String, oldValue: String) {
+    public func commit(newValue: String) {
         selfInitiatedChange = true
         self.value = newValue
-        change.f(newValue: newValue, oldValue: oldValue, commit: true)
+        if let before = before {
+            self.commit(before: before, newValue: newValue)
+            self.before = nil
+        }
         selfInitiatedChange = false
     }
 }

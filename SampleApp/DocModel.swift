@@ -377,6 +377,7 @@ class DocModel {
         }
     }()
     
+    // TODO: This needs to be a MultiStringBidiBinding
     lazy var selectedItemName: StringBidiBinding = { [unowned self] in
         let nameRelation = self.selectedItems.project(["name"])
         // TODO: s/Collection/type.name/
@@ -393,55 +394,31 @@ class DocModel {
             let updateResult = mutableRelation.update(true, newValues: values)
             precondition(updateResult.ok != nil)
         }
-        
-        return StringBidiBinding(relation: relation, change: BidiChange<String>{ (newValue, oldValue, commit) in
-            Swift.print("\(commit ? "COMMIT" : "CHANGE") new=\(newValue) old=\(oldValue)")
-            if commit {
+
+        return StringBidiBinding(
+            relation: relation,
+            snapshot: {
+                return self.db.takeSnapshot()
+            },
+            change: { newValue in
+                // XXX: Shouldn't need to put this in a transaction, but without it we're not
+                // currently getting change notifications
+                self.db.transaction({ update(newValue) })
+            },
+            commit: { before, newValue in
+                self.db.transaction({ update(newValue) })
+                let after = self.db.takeSnapshot()
                 self.undoManager.registerChange(
                     name: "Rename \(type)",
-                    perform: true,
-                    forward: { update(newValue) },
-                    backward: { update(oldValue) }
+                    perform: false,
+                    forward: {
+                        self.db.restoreSnapshot(after)
+                    },
+                    backward: {
+                        self.db.restoreSnapshot(before)
+                    }
                 )
-            } else {
-                update(newValue)
             }
-        })
+        )
     }
-    
-//    private func bidiBinding2(relation: Relation, type: String) -> StringBidiBinding {
-//        let attr = relation.scheme.attributes.first!
-//        
-//        func update(newValue: String) {
-//            let values: Row = [attr: RelationValue(newValue)]
-//            Swift.print("UPDATE: \(newValue)")
-//            var mutableRelation = relation
-//            let updateResult = mutableRelation.update(true, newValues: values)
-//            precondition(updateResult.ok != nil)
-//        }
-//
-//        return StringBidiBinding(
-//            relation: relation,
-//            snapshot: {
-//                return self.db.takeSnapshot()
-//            },
-//            change: { newValue in
-//                update(nil, newValue)
-//            },
-//            commit: { before, newValue in
-//                self.db.transaction({ update($0, newValue) })
-//                let after = self.db.takeSnapshot()
-//                self.undoManager.registerChange(
-//                    name: "Rename \(type)",
-//                    perform: false,
-//                    forward: {
-//                        self.db.restoreSnapshot(after)
-//                    },
-//                    backward: {
-//                        self.db.restoreSnapshot(before)
-//                    }
-//                )
-//            }
-//        )
-//    }
 }
