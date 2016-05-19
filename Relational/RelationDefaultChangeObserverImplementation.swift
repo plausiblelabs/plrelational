@@ -35,6 +35,15 @@ extension RelationDefaultChangeObserverImplementation {
     public func onAddFirstObserver() {}
     
     func notifyChangeObservers(changes: RelationChange) {
+        func isEmpty(r: Relation?) -> Bool {
+            return r == nil || r?.isEmpty.ok == true
+        }
+        
+        // Don't bother notifying if there aren't actually any changes.
+        if isEmpty(changes.added) && isEmpty(changes.removed) {
+            return
+        }
+        
         for (_, f) in changeObserverData.observers {
             f(changes)
         }
