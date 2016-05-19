@@ -84,6 +84,8 @@
 		C2BD29951CD251A20081FD05 /* Store.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29991CD7ED900081FD05 /* SQLiteBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */; };
 		C2FE9B971CEE02BC0004E635 /* RelationChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FE9B961CEE02BC0004E635 /* RelationChange.swift */; };
+		C2FE9B991CEE15720004E635 /* TransactionalDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FE9B981CEE15720004E635 /* TransactionalDatabase.swift */; };
+		C2FE9B9B1CEE3A810004E635 /* TransactionalDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FE9B9A1CEE3A810004E635 /* TransactionalDatabaseTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -215,6 +217,8 @@
 		C2BD29911CD251870081FD05 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 		C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteBinding.swift; sourceTree = "<group>"; };
 		C2FE9B961CEE02BC0004E635 /* RelationChange.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationChange.swift; sourceTree = "<group>"; };
+		C2FE9B981CEE15720004E635 /* TransactionalDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionalDatabase.swift; sourceTree = "<group>"; };
+		C2FE9B9A1CEE3A810004E635 /* TransactionalDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionalDatabaseTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -489,6 +493,8 @@
 				C277E8061CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift */,
 				C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */,
 				C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */,
+				C2FE9B981CEE15720004E635 /* TransactionalDatabase.swift */,
+				C2FE9B9A1CEE3A810004E635 /* TransactionalDatabaseTests.swift */,
 			);
 			name = "Change Logging";
 			path = Relational;
@@ -779,6 +785,7 @@
 				C22921C71CD12A8700518184 /* ConcreteRelation.swift in Sources */,
 				C22921C81CD12A8700518184 /* DictionaryConvenience.swift in Sources */,
 				C22921C91CD12A8700518184 /* DictionaryCreation.swift in Sources */,
+				C2FE9B991CEE15720004E635 /* TransactionalDatabase.swift in Sources */,
 				C277E8121CE4FAD400B7B8F6 /* SelectExpressionOperators.swift in Sources */,
 				C22921CA1CD12A8700518184 /* FunctionalDependency.swift in Sources */,
 				C22921CB1CD12A8700518184 /* ObserverSet.swift in Sources */,
@@ -819,6 +826,7 @@
 				C277E80E1CE25E8F00B7B8F6 /* ModelDatabaseTests.swift in Sources */,
 				C2BD29951CD251A20081FD05 /* Store.model in Sources */,
 				C277E80C1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift in Sources */,
+				C2FE9B9B1CEE3A810004E635 /* TransactionalDatabaseTests.swift in Sources */,
 				C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */,
 				C277E8051CDBD2A000B7B8F6 /* DBTestCase.swift in Sources */,
 				C22921E81CD12CF100518184 /* RelationTests.swift in Sources */,
