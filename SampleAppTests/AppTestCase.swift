@@ -28,8 +28,8 @@ class AppTestCase: XCTestCase {
         return accum
     }
     
-    func verifyTree(binding: OrderedTreeBinding, _ expected: [String]) {
-        XCTAssertEqual(prettyRoot(binding), expected)
+    func verifyTree(binding: OrderedTreeBinding, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
+        XCTAssertEqual(prettyRoot(binding), expected, file: file, line: line)
     }
     
     func path(treeBinding: OrderedTreeBinding, parentID: Int64?, index: Int) -> TreePath {

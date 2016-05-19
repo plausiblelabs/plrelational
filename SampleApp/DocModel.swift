@@ -50,17 +50,15 @@ struct DocItem {
 
 class DocModel {
 
-    typealias Transaction = ChangeLoggingDatabase.Transaction
-    
     private let undoManager: UndoManager
-    private let db: ChangeLoggingDatabase
+    private let db: TransactionalDatabase
 
-    private let collections: Relation
-    private let objects: Relation
-    private let inspectorItems: Relation
-    private let selectedCollectionID: Relation
-    private let selectedInspectorItemIDs: Relation
+    private var collections: MutableRelation
+    private var objects: MutableRelation
+    private var selectedCollectionID: MutableRelation
+    private var selectedInspectorItemIDs: MutableRelation
     
+    private let inspectorItems: Relation
     private let selectedCollection: Relation
     private let selectedInspectorItems: Relation
     private let selectedItems: Relation
@@ -93,8 +91,8 @@ class DocModel {
         
         // Prepare the stored relations
         let sqliteDB = makeDB().db
-        let db = ChangeLoggingDatabase(sqliteDB)
-        func createRelation(name: String, _ scheme: Scheme) -> ChangeLoggingRelation<SQLiteTableRelation> {
+        let db = TransactionalDatabase(sqliteDB)
+        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
             return db[name]
@@ -139,8 +137,8 @@ class DocModel {
         self.selectedItems = allSelectedItems.max("priority").join(allSelectedItems)
 
         // Prepare the tree bindings
-        self.docOutlineBinding = OrderedTreeBinding(relation: collections, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
-        self.inspectorItemsBinding = OrderedTreeBinding(relation: inspectorItems, tableName: "", idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        self.docOutlineBinding = OrderedTreeBinding(relation: collections, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        self.inspectorItemsBinding = OrderedTreeBinding(relation: inspectorItems, idAttr: "id", parentAttr: "parent", orderAttr: "order")
         
         self.db = db
 
@@ -154,7 +152,7 @@ class DocModel {
     func addDefaultData() {
         func addCollection(collectionID: Int64, name: String, type: ItemType, parentID: Int64?, previousID: Int64?) {
             db.transaction({
-                self.addCollection($0, collectionID: collectionID, name: name, type: type, parentID: parentID, previousID: previousID)
+                self.addCollection(collectionID, name: name, type: type, parentID: parentID, previousID: previousID)
             })
         }
         
@@ -168,7 +166,7 @@ class DocModel {
         
         func addObject(objectID: Int64, name: String, type: ItemType, collectionID: Int64, order: Double) {
             db.transaction({
-                self.addObject($0, objectID: objectID, name: name, type: type, collectionID: collectionID, order: order)
+                self.addObject(objectID, name: name, type: type, collectionID: collectionID, order: order)
             })
         }
         
@@ -177,7 +175,7 @@ class DocModel {
         globalID = 10
     }
     
-    private func performUndoableAction(name: String, _ transactionFunc: Transaction -> Void) {
+    private func performUndoableAction(name: String, _ transactionFunc: Void -> Void) {
         let (before, after) = db.transactionWithSnapshots(transactionFunc)
         undoManager.registerChange(
             name: name,
@@ -191,7 +189,7 @@ class DocModel {
         )
     }
     
-    private func addCollection(transaction: Transaction, collectionID: Int64, name: String, type: ItemType, parentID: Int64?, previousID: Int64?) {
+    private func addCollection(collectionID: Int64, name: String, type: ItemType, parentID: Int64?, previousID: Int64?) {
         let row: Row = [
             "id": RelationValue(collectionID),
             "type": RelationValue(type.rawValue),
@@ -200,11 +198,10 @@ class DocModel {
         let parent = parentID.map{RelationValue($0)}
         let previous = previousID.map{RelationValue($0)}
         let pos = TreePos(parentID: parent, previousID: previous, nextID: nil)
-        docOutlineBinding.insert(transaction, row: row, pos: pos)
+        docOutlineBinding.insert(row, pos: pos)
     }
     
-    private func addObject(transaction: Transaction, objectID: Int64, name: String, type: ItemType, collectionID: Int64, order: Double) {
-        let objects = transaction["object"]
+    private func addObject(objectID: Int64, name: String, type: ItemType, collectionID: Int64, order: Double) {
         let row: Row = [
             "id": RelationValue(objectID),
             "name": RelationValue(name),
@@ -219,7 +216,7 @@ class DocModel {
         let id = globalID
         globalID += 1
         performUndoableAction("New \(type.name)", {
-            self.addCollection($0, collectionID: id, name: name, type: type, parentID: parentID, previousID: nil)
+            self.addCollection(id, name: name, type: type, parentID: parentID, previousID: nil)
         })
     }
     
@@ -227,13 +224,13 @@ class DocModel {
         let id = globalID
         globalID += 1
         performUndoableAction("New \(type.name)", {
-            self.addObject($0, objectID: id, name: name, type: type, collectionID: collectionID, order: order)
+            self.addObject(id, name: name, type: type, collectionID: collectionID, order: order)
         })
     }
     
     func deleteCollection(id: RelationValue, type: ItemType) {
         performUndoableAction("Delete \(type.name)", {
-            self.docOutlineBinding.delete($0, id: id)
+            self.docOutlineBinding.delete(id)
         })
     }
 
@@ -241,11 +238,10 @@ class DocModel {
         // TODO: s/Collection/type.name/
         // TODO: "Deselect"?
         self.performUndoableAction("Select Collection", {
-            let selectedCollection = $0["selected_collection"]
             // TODO: This could probably be made more efficient
-            selectedCollection.delete(true)
+            self.selectedCollectionID.delete(true)
             for id in ids {
-                selectedCollection.add(["coll_id": id])
+                self.selectedCollectionID.add(["coll_id": id])
             }
         })
     }
@@ -254,11 +250,10 @@ class DocModel {
         // TODO: s/Object/type.name/
         // TODO: "Deselect"?
         self.performUndoableAction("Select Object", {
-            let selectedInspectorItem = $0["selected_inspector_item"]
             // TODO: This could probably be made more efficient
-            selectedInspectorItem.delete(true)
+            self.selectedInspectorItemIDs.delete(true)
             for id in ids {
-                selectedInspectorItem.add(["item_id": id])
+                self.selectedInspectorItemIDs.add(["item_id": id])
             }
         })
     }
@@ -282,7 +277,7 @@ class DocModel {
             move: { (srcPath, dstPath) in
                 // TODO: s/Collection/type.name/
                 self.performUndoableAction("Move Collection", {
-                    self.docOutlineBinding.move($0, srcPath: srcPath, dstPath: dstPath)
+                    self.docOutlineBinding.move(srcPath: srcPath, dstPath: dstPath)
                 })
             }
         )

@@ -10,6 +10,7 @@
 		372707661CECD27700710C80 /* MultiValueTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707651CECD27700710C80 /* MultiValueTextField.swift */; };
 		372707681CED2F8100710C80 /* AppTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707671CED2F8100710C80 /* AppTestCase.swift */; };
 		3727076B1CED32B000710C80 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
+		3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076C1CEE60C900710C80 /* MutableRelation.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
@@ -136,6 +137,7 @@
 /* Begin PBXFileReference section */
 		372707651CECD27700710C80 /* MultiValueTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultiValueTextField.swift; sourceTree = "<group>"; };
 		372707671CED2F8100710C80 /* AppTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppTestCase.swift; sourceTree = "<group>"; };
+		3727076C1CEE60C900710C80 /* MutableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelation.swift; sourceTree = "<group>"; };
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = SampleAppTests/DocModelTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -460,6 +462,7 @@
 				C257C7491CBD7F4500234A89 /* BinaryOperator.swift */,
 				C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */,
 				C257C74F1CBEB18A00234A89 /* FunctionalDependency.swift */,
+				3727076C1CEE60C900710C80 /* MutableRelation.swift */,
 				C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */,
 				C22BF1391CBC349400D3FE59 /* Relation.swift */,
 				C2FE9B961CEE02BC0004E635 /* RelationChange.swift */,
@@ -791,6 +794,7 @@
 				C22921CB1CD12A8700518184 /* ObserverSet.swift in Sources */,
 				C22921CC1CD12A8700518184 /* OperationRelations.swift in Sources */,
 				C22921CD1CD12A8700518184 /* PlaygroundMonospace.swift in Sources */,
+				3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */,
 				C22921CE1CD12A8700518184 /* Relation.swift in Sources */,
 				C22921CF1CD12A8700518184 /* RelationParts.swift in Sources */,
 				C22921D01CD12A8700518184 /* RelationValue.swift in Sources */,

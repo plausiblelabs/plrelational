@@ -96,7 +96,7 @@ public class TransactionalDatabase {
 }
 
 extension TransactionalDatabase {
-    public class TransactionalRelation: Relation, RelationDefaultChangeObserverImplementation {
+    public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
         var underlyingRelation: ChangeLoggingRelation<SQLiteTableRelation>
         var transactionRelation: ChangeLoggingRelation<SQLiteTableRelation>?
         
@@ -119,8 +119,8 @@ extension TransactionalDatabase {
             return (transactionRelation ?? underlyingRelation).contains(row)
         }
         
-        public func add(row: Row) {
-            (transactionRelation ?? underlyingRelation).add(row)
+        public func add(row: Row) -> Result<Int64, RelationError> {
+            return (transactionRelation ?? underlyingRelation).add(row)
         }
         
         public func delete(query: SelectExpression) -> Result<Void, RelationError> {

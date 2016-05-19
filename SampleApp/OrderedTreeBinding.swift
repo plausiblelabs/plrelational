@@ -59,7 +59,6 @@ public class OrderedTreeBinding {
     public typealias ChangeObserver = ([Change]) -> Void
     
     private let relation: Relation
-    private let tableName: String
     private let idAttr: Attribute
     private let parentAttr: Attribute
     private let orderAttr: Attribute
@@ -70,9 +69,8 @@ public class OrderedTreeBinding {
     private var changeObservers: [UInt64: ChangeObserver] = [:]
     private var changeObserverNextID: UInt64 = 0
     
-    init(relation: Relation, tableName: String, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
+    init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
         self.relation = relation
-        self.tableName = tableName
         self.idAttr = idAttr
         self.parentAttr = parentAttr
         self.orderAttr = orderAttr
@@ -211,7 +209,12 @@ public class OrderedTreeBinding {
         return false
     }
     
-    public func insert(transaction: ChangeLoggingDatabase.Transaction, row: Row, pos: TreePos) {
+    public func insert(row: Row, pos: TreePos) {
+        // TODO: Provide insert/delete/move as extension defined where R: MutableRelation
+        guard var relation = relation as? MutableRelation else {
+            fatalError("insert() is only supported when the underlying relation is mutable")
+        }
+        
         let parentIDValue = pos.parentID ?? .NULL
         let order: RelationValue = orderForPos(pos)
         
@@ -219,18 +222,11 @@ public class OrderedTreeBinding {
         mutableRow[parentAttr] = parentIDValue
         mutableRow[orderAttr] = order
 
-        transaction[tableName].add(mutableRow)
+        relation.add(mutableRow)
     }
     
     private func onInsert(row: Row) -> [Change] {
 
-        // XXX: Currently it's possible for underlying relations to provide change notifications
-        // that contain only a subset of the attributes we're interested in, so ignore those
-        // for the time being
-        if Set(row.values.keys) != relation.scheme.attributes {
-            return []
-        }
-        
         func insertNode(node: Node, parent: Node) -> Int {
             return parent.children.insertSorted(node, { self.orderForNode($0) })
         }
@@ -252,25 +248,29 @@ public class OrderedTreeBinding {
         return [.Insert(path)]
     }
     
-    public func delete(transaction: ChangeLoggingDatabase.Transaction, id: RelationValue) {
+    public func delete(id: RelationValue) {
+        guard var relation = relation as? MutableRelation else {
+            fatalError("delete() is only supported when the underlying relation is mutable")
+        }
+
         // Delete from the relation
         // TODO: Should we delete from the bottom up?  The way things are ordered now,
         // observers will only be notified in onDelete() for the ancestor node; would it
         // make more sense to notify observers about all children?
-        transaction[tableName].delete(idAttr *== id)
+        relation.delete(idAttr *== id)
         
         // Recursively delete descendant nodes
         // TODO: There are probably more efficient ways to handle this, but for now we'll
         // use our tree structure to determine which children need to be deleted
         if let node = nodeForID(id) {
             for child in node.children {
-                delete(transaction, id: child.id)
+                delete(child.id)
             }
         }
     }
     
     private func onDelete(row: Row) -> [Change] {
-        
+
         func deleteNode(node: Node, inout _ nodes: [Node]) -> Int {
             let index = nodes.indexOf({$0 === node})!
             nodes.removeAtIndex(index)
@@ -299,7 +299,7 @@ public class OrderedTreeBinding {
     }
 
     /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
-    public func move(transaction: ChangeLoggingDatabase.Transaction, srcPath: TreePath, dstPath: TreePath) {
+    public func move(srcPath srcPath: TreePath, dstPath: TreePath) {
         let srcParent = srcPath.parent ?? root
         let dstParent = dstPath.parent ?? root
 
@@ -325,7 +325,8 @@ public class OrderedTreeBinding {
         let (previous, next) = adjacentNodesForIndex(dstIndex, inParent: dstParent, notMatching: srcNode)
         let newOrder = orderWithinParent(dstParent, previous: previous, next: next)
         
-        transaction[tableName].update(idAttr *== srcID, newValues: [
+        var mutableRelation = relation
+        mutableRelation.update(idAttr *== srcID, newValues: [
             parentAttr: dstParentID,
             orderAttr: newOrder
         ])

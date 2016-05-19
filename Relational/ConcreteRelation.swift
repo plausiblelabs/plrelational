@@ -1,5 +1,5 @@
 
-public struct ConcreteRelation: Relation {
+public struct ConcreteRelation: MutableRelation {
     public var scheme: Scheme
     public var values: Set<Row>
     
@@ -42,9 +42,10 @@ public struct ConcreteRelation: Relation {
         }
     }
     
-    public mutating func add(row: Row) {
+    public mutating func add(row: Row) -> Result<Int64, RelationError> {
         precondition(rowMatchesScheme(row))
         values.insert(row)
+        return .Ok(0)
     }
     
     public mutating func delete(rowToDelete: Row) {
@@ -55,12 +56,13 @@ public struct ConcreteRelation: Relation {
         }))
     }
     
-    public mutating func delete(query: SelectExpression) {
+    public mutating func delete(query: SelectExpression) -> Result<Void, RelationError> {
         let toDelete = select(query)
         values = Set(values.filter({
             // We know that the result of contains() can never fail here because it's ultimately our own implementation.
             toDelete.contains($0).ok! == false
         }))
+        return .Ok(())
     }
     
     public mutating func update(rowToFind: Row, newValues: Row) {

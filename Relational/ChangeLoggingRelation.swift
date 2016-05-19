@@ -26,20 +26,6 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
         self.underlyingRelation = underlyingRelation
     }
     
-    public func add(row: Row) {
-        let relation = ConcreteRelation(row)
-        log.append(.Union(relation))
-        notifyChangeObservers(RelationChange(added: relation, removed: nil))
-    }
-    
-    public func delete(query: SelectExpression) -> Result<Void, RelationError> {
-        return computeFinalRelation().map({ finalRelation in
-            let toDelete = finalRelation.select(query)
-            log.append(.Select(*!query))
-            notifyChangeObservers(RelationChange(added: nil, removed: toDelete))
-        })
-    }
-    
     public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         return computeFinalRelation().map({ currentState in
             let removed = currentState.select(query)
@@ -51,7 +37,7 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
     }
 }
 
-extension ChangeLoggingRelation: Relation, RelationDefaultChangeObserverImplementation {
+extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
     public var scheme: Scheme {
         return underlyingRelation.scheme
     }
@@ -67,6 +53,21 @@ extension ChangeLoggingRelation: Relation, RelationDefaultChangeObserverImplemen
     
     public func contains(row: Row) -> Result<Bool, RelationError> {
         return computeFinalRelation().then({ $0.contains(row) })
+    }
+    
+    public func add(row: Row) -> Result<Int64, RelationError> {
+        let relation = ConcreteRelation(row)
+        log.append(.Union(relation))
+        notifyChangeObservers(RelationChange(added: relation, removed: nil))
+        return .Ok(0)
+    }
+    
+    public func delete(query: SelectExpression) -> Result<Void, RelationError> {
+        return computeFinalRelation().map({ finalRelation in
+            let toDelete = finalRelation.select(query)
+            log.append(.Select(*!query))
+            notifyChangeObservers(RelationChange(added: nil, removed: toDelete))
+        })
     }
     
     internal func computeFinalRelation() -> Result<Relation, RelationError> {

@@ -291,7 +291,12 @@ extension TreeView {
         // reloadItem() and/or expandItem() are called, otherwise NSOutlineView will get confused
         parentsToReload.forEach(outlineView.reloadItem)
         parentsToExpand.forEach(outlineView.expandItem)
-        
+
+        // XXX: This prevents a call to selection.set(); we need to figure out a better way, so that
+        // if the selection changes as a result of e.g. deleting an item, we update our selection
+        // state, but do it in a way that doesn't go through the undo manager
+        selfInitiatedSelectionChange = true
         outlineView.endUpdates()
+        selfInitiatedSelectionChange = false
     }
 }

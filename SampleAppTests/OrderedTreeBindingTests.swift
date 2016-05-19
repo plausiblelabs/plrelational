@@ -61,9 +61,7 @@ class OrderedTreeBindingTests: AppTestCase {
         addCollection(6, name: "Child2", parentID: 2, order: 2.0)
         addCollection(7, name: "Group2", parentID: nil, order: 2.0)
         
-        let db = ChangeLoggingDatabase(sqliteDB)
-        let relation = db["collection"]
-        let treeBinding = OrderedTreeBinding(relation: relation, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        let treeBinding = OrderedTreeBinding(relation: sqliteRelation, idAttr: "id", parentAttr: "parent", orderAttr: "order")
         
         // TODO: Verify that in-memory tree structure was built correctly during initialization
 //        verifyTree(treeBinding, [
@@ -79,11 +77,11 @@ class OrderedTreeBindingTests: AppTestCase {
     
     func testInsertMoveDelete() {
         let sqliteDB = makeDB().db
-        let db = ChangeLoggingDatabase(sqliteDB)
-        
-        XCTAssertNil(sqliteDB.createRelation("collection", scheme: ["id", "name", "parent", "order"]).err)
-        let relation = db["collection"]
-        let treeBinding = OrderedTreeBinding(relation: relation, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        let loggingDB = ChangeLoggingDatabase(sqliteDB)
+        let db = TransactionalDatabase(loggingDB)
+
+        let relation = sqliteDB.createRelation("collection", scheme: ["id", "name", "parent", "order"]).ok!
+        let treeBinding = OrderedTreeBinding(relation: relation, idAttr: "id", parentAttr: "parent", orderAttr: "order")
         XCTAssertEqual(treeBinding.root.children.count, 0)
         
         var changes: [OrderedTreeBinding.Change] = []
@@ -100,30 +98,30 @@ class OrderedTreeBindingTests: AppTestCase {
                 let parent = parentID.map{RelationValue($0)}
                 let previous = previousID.map{RelationValue($0)}
                 let pos = TreePos(parentID: parent, previousID: previous, nextID: nil)
-                treeBinding.insert($0, row: row, pos: pos)
+                treeBinding.insert(row, pos: pos)
             })
         }
         
         func deleteCollection(collectionID: Int64) {
             db.transaction({
-                treeBinding.delete($0, id: RelationValue(collectionID))
+                treeBinding.delete(RelationValue(collectionID))
             })
         }
         
         func moveCollection(srcPath srcPath: TreePath, dstPath: TreePath) {
             db.transaction({
-                treeBinding.move($0, srcPath: srcPath, dstPath: dstPath)
+                treeBinding.move(srcPath: srcPath, dstPath: dstPath)
             })
         }
         
-        func verifyChanges(expected: [OrderedTreeBinding.Change]) {
-            XCTAssertEqual(changes, expected)
+        func verifyChanges(expected: [OrderedTreeBinding.Change], file: StaticString = #file, line: UInt = #line) {
+            XCTAssertEqual(changes, expected, file: file, line: line)
             changes = []
         }
         
-        func verifySQLite(expected: Relation) {
-            XCTAssertNil(db.save().err)
-            AssertEqual(sqliteDB["collection"]!, expected)
+        func verifySQLite(expected: Relation, file: StaticString = #file, line: UInt = #line) {
+            XCTAssertNil(loggingDB.save().err)
+            AssertEqual(sqliteDB["collection"]!, expected, file: file, line: line)
         }
         
         func path(parentID: Int64?, _ index: Int) -> TreePath {
