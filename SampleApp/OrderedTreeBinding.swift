@@ -249,10 +249,16 @@ public class OrderedTreeBinding {
     }
     
     public func delete(id: RelationValue) {
+        
         guard var relation = relation as? MutableRelation else {
             fatalError("delete() is only supported when the underlying relation is mutable")
         }
 
+        // Grab the node before we delete from the relation; otherwise if we are being called
+        // outside of a transaction, the node may be deleted by onDelete() just after we call
+        // relation.delete() below
+        let node = nodeForID(id)
+        
         // Delete from the relation
         // TODO: Should we delete from the bottom up?  The way things are ordered now,
         // observers will only be notified in onDelete() for the ancestor node; would it
@@ -262,7 +268,7 @@ public class OrderedTreeBinding {
         // Recursively delete descendant nodes
         // TODO: There are probably more efficient ways to handle this, but for now we'll
         // use our tree structure to determine which children need to be deleted
-        if let node = nodeForID(id) {
+        if let node = node {
             for child in node.children {
                 delete(child.id)
             }

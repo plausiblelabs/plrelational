@@ -80,7 +80,8 @@ class OrderedTreeBindingTests: AppTestCase {
         let loggingDB = ChangeLoggingDatabase(sqliteDB)
         let db = TransactionalDatabase(loggingDB)
 
-        let relation = sqliteDB.createRelation("collection", scheme: ["id", "name", "parent", "order"]).ok!
+        XCTAssertNil(sqliteDB.createRelation("collection", scheme: ["id", "name", "parent", "order"]).err)
+        let relation = db["collection"]
         let treeBinding = OrderedTreeBinding(relation: relation, idAttr: "id", parentAttr: "parent", orderAttr: "order")
         XCTAssertEqual(treeBinding.root.children.count, 0)
         
