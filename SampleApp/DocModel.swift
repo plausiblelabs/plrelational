@@ -135,7 +135,8 @@ class DocModel {
             .renameAttributes(["item_id": "id"])
             .project(["id", "type", "name"])
             .join(MakeRelation(["priority"], [2]))
-        self.selectedItems = selectedCollectionWithPriority.union(selectedInspectorItemsWithPriority)//.max("priority")
+        let allSelectedItems = selectedCollectionWithPriority.union(selectedInspectorItemsWithPriority)
+        self.selectedItems = allSelectedItems.max("priority").join(allSelectedItems)
 
         // Prepare the tree bindings
         self.docOutlineBinding = OrderedTreeBinding(relation: collections, tableName: "collection", idAttr: "id", parentAttr: "parent", orderAttr: "order")
@@ -143,9 +144,11 @@ class DocModel {
         
         self.db = db
 
-//        self.removal = selectedItems.addChangeObserver({ _ in
-//            print("ITEMS:\n\(self.selectedItems)\n")
-//        })
+        self.removal = selectedItems.addChangeObserver({ changes in
+//            print("ADDS:\n\(changes.added)")
+//            print("REMOVES:\n\(changes.removed)")
+            print("ITEMS:\n\(self.selectedItems)\n")
+        })
     }
     
     func addDefaultData() {

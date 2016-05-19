@@ -563,38 +563,45 @@ class UpdateRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
 }
 
-class MaxRelation: Relation, RelationDefaultChangeObserverImplementation {
-    var relation: Relation
+class AggregateRelation: Relation, RelationDefaultChangeObserverImplementation {
+    let relation: Relation
     let attribute: Attribute
+    let agg: (Relation) -> RelationValue?
 
-    var cachedMaxValue: RelationValue?
-    
     var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    init(relation: Relation, attribute: Attribute) {
+    init(relation: Relation, attribute: Attribute, agg: (Relation) -> RelationValue?) {
         precondition(relation.scheme.attributes.contains(attribute))
         self.relation = relation
         self.attribute = attribute
+        self.agg = agg
     }
     
     var scheme: Scheme {
-        return relation.scheme
+        return [attribute]
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        // TODO: Error handling
-        let maxValue = relation.rows().lazy.map{ $0.ok![self.attribute] }.maxElement{ $0 < $1 }
-        let maxRows = relation.rows().lazy.filter{ $0.ok![self.attribute] >= maxValue }
-        return AnyGenerator(maxRows.generate())
+        // TODO: Evaluate to single error row if any of the underlying rows are error?
+        let aggValue = agg(relation)
+        var done = false
+        return AnyGenerator(body: {
+            if !done {
+                done = true
+                let rowValue = aggValue ?? .NULL
+                return .Ok(Row(values: [self.attribute: rowValue]))
+            } else {
+                return nil
+            }
+        })
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
-        // TODO
-        return .Ok(false)
+        return .Ok(rows().contains({ $0.ok == row }))
     }
     
     func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
-        // TODO
+        // TODO: Error, no-op, or pass through to underlying relation?
         return .Ok(())
     }
     
@@ -603,11 +610,27 @@ class MaxRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     private func observeChange(change: RelationChange) {
-        if let maxValue = cachedMaxValue {
-            // TODO: See if added/deleted rows are >= maxValue
-        } else {
-            // TODO: Calculate max value and cache it
-            // TODO: 
+        // TODO: We're using the dumb and inefficient approach for now.  We should instead
+        // cache the computed aggregate value and inspect the added/removed rows to determine
+        // if the aggregate value has changed
+        
+        var preChangeRelation = relation
+        if let added = change.added {
+            preChangeRelation = preChangeRelation.difference(added)
         }
+        if let removed = change.removed {
+            preChangeRelation = preChangeRelation.union(removed)
+        }
+        let previousAgg = AggregateRelation(relation: preChangeRelation, attribute: self.attribute, agg: self.agg)
+
+        let aggChange: RelationChange
+        if self.intersection(previousAgg).isEmpty.ok == true {
+            // The aggregate value has changed
+            aggChange = RelationChange(added: self, removed: previousAgg)
+        } else {
+            // The aggregate value has not changed relative to the previous state
+            aggChange = RelationChange()
+        }
+        notifyChangeObservers(aggChange)
     }
 }
