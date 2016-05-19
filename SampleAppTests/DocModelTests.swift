@@ -79,29 +79,29 @@ class DocModelTests: AppTestCase {
         // Verify properties-related bindings
         verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
         
-//        // Reorder a page in the doc outline
-//        model.docOutlineTreeViewModel.data.move?(srcPath: docOutlinePath(1, 1), dstPath: docOutlinePath(1, 2))
-//        
-//        // Verify the new doc outline structure
-//        verifyTree(model.docOutlineTreeViewModel.data.binding, [
-//            "Group1",
-//            "  Collection1",
-//            "    Child1",
-//            "    Child2",
-//            "    Child3",
-//            "  Page2",
-//            "  Page1",
-//            "Group2"
-//        ])
-//        
-//        // Verify that the inspector contents remain unchanged
-//        verifyTree(model.inspectorTreeViewModel.data.binding, [
-//            "Page1",
-//            "  Object1",
-//            "  Object2"
-//        ])
-//        
-//        // Verify properties-related bindings
-//        verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
+        // Reorder a page in the doc outline
+        model.docOutlineTreeViewModel.data.move?(srcPath: docOutlinePath(1, 1), dstPath: docOutlinePath(1, 3))
+        
+        // Verify the new doc outline structure
+        verifyTree(model.docOutlineTreeViewModel.data.binding, [
+            "Group1",
+            "  Collection1",
+            "    Child1",
+            "    Child2",
+            "    Child3",
+            "  Page2",
+            "  Page1",
+            "Group2"
+        ])
+
+        // Verify that the inspector contents remain unchanged
+        verifyTree(model.inspectorTreeViewModel.data.binding, [
+            "Page1",
+            "  Object1",
+            "  Object2"
+        ])
+        
+        // Verify properties-related bindings
+        verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
     }
 }
