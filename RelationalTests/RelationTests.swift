@@ -463,18 +463,35 @@ class RelationTests: DBTestCase {
                         ["84",     "O'Hare", "JFK",         "1500",    "1755"],
                         ["214",    "Boston", "O'Hare",      "1420",    "1512"]))
     }
-    
-    func testMax() {
+
+    func testMinMax() {
+        let empty = MakeRelation(
+            ["id", "name", "count"])
+        
+        AssertEqual(empty.min("count"),
+                    MakeRelation(
+                        ["count"],
+                        [.NULL]))
+        AssertEqual(empty.max("count"),
+                    MakeRelation(
+                        ["count"],
+                        [.NULL]))
+        
         let r = MakeRelation(
             ["id", "name", "count"],
             [1,    "cat",  1],
             [2,    "dog",  3],
-            [3,    "fish", 2])
+            [3,    "fish", 2],
+            [4,    "ant",  3])
         
+        AssertEqual(r.min("count"),
+                    MakeRelation(
+                        ["count"],
+                        [1]))
         AssertEqual(r.max("count"),
                     MakeRelation(
-                        ["id", "name", "count"],
-                        [2,    "dog",  3]))
+                        ["count"],
+                        [3]))
     }
     
     func testForeach() {
@@ -788,5 +805,65 @@ class RelationTests: DBTestCase {
         a.delete(Attribute("first") *== "John")
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, ConcreteRelation(["first": "John", "last": "42"]))
+    }
+    
+    func testMinObservation() {
+        let a = ChangeLoggingRelation(underlyingRelation:
+            MakeRelation(
+                ["id", "name", "count"]))
+        
+        let m = a.min("count")
+        var lastChange: RelationChange?
+        _ = m.addChangeObserver({ lastChange = $0 })
+        
+        lastChange = nil
+        a.add(["id": 1, "name": "cat", "count": 2])
+        AssertEqual(lastChange?.added, ConcreteRelation(["count": 2]))
+        AssertEqual(lastChange?.removed, ConcreteRelation(["count": .NULL]))
+        
+        lastChange = nil
+        a.add(["id": 2, "name": "dog", "count": 3])
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, nil)
+        
+        lastChange = nil
+        a.update(Attribute("id") *== 2, newValues: ["count": 1])
+        AssertEqual(lastChange?.added, ConcreteRelation(["count": 1]))
+        AssertEqual(lastChange?.removed, ConcreteRelation(["count": 2]))
+        
+        lastChange = nil
+        a.delete(true)
+        AssertEqual(lastChange?.added, ConcreteRelation(["count": .NULL]))
+        AssertEqual(lastChange?.removed, ConcreteRelation(["count": 1]))
+    }
+    
+    func testMaxObservation() {
+        let a = ChangeLoggingRelation(underlyingRelation:
+            MakeRelation(
+                ["id", "name", "count"]))
+        
+        let m = a.max("count")
+        var lastChange: RelationChange?
+        _ = m.addChangeObserver({ lastChange = $0 })
+        
+        lastChange = nil
+        a.add(["id": 1, "name": "cat", "count": 2])
+        AssertEqual(lastChange?.added, ConcreteRelation(["count": 2]))
+        AssertEqual(lastChange?.removed, ConcreteRelation(["count": .NULL]))
+
+        lastChange = nil
+        a.add(["id": 2, "name": "dog", "count": 1])
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, nil)
+
+        lastChange = nil
+        a.update(Attribute("id") *== 2, newValues: ["count": 4])
+        AssertEqual(lastChange?.added, ConcreteRelation(["count": 4]))
+        AssertEqual(lastChange?.removed, ConcreteRelation(["count": 2]))
+        
+        lastChange = nil
+        a.delete(true)
+        AssertEqual(lastChange?.added, ConcreteRelation(["count": .NULL]))
+        AssertEqual(lastChange?.removed, ConcreteRelation(["count": 4]))
     }
 }

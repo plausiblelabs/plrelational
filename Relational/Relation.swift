@@ -27,6 +27,8 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     func thetajoin(other: Relation, query: SelectExpression) -> Relation
     func split(query: SelectExpression) -> (Relation, Relation)
     func divide(other: Relation) -> Relation
+    
+    func min(attribute: Attribute) -> Relation
     func max(attribute: Attribute) -> Relation
     
     func select(rowToFind: Row) -> Relation
@@ -104,9 +106,25 @@ extension Relation {
         let result = self.project(resultingScheme).difference(projected)
         return result
     }
+}
+
+extension Relation {
+    public func min(attribute: Attribute) -> Relation {
+        return AggregateRelation(relation: self, attribute: attribute, agg: {
+            $0.rows()
+                .lazy
+                .map{ $0.ok![attribute] }
+                .minElement{ $0 < $1 }
+        })
+    }
     
     public func max(attribute: Attribute) -> Relation {
-        return MaxRelation(relation: self, attribute: attribute)
+        return AggregateRelation(relation: self, attribute: attribute, agg: {
+            $0.rows()
+                .lazy
+                .map{ $0.ok![attribute] }
+                .maxElement{ $0 < $1 }
+        })
     }
 }
 
