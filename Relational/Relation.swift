@@ -2,11 +2,6 @@
 /// Silly placeholder until we figure out what the error type should actually look like.
 public typealias RelationError = ErrorType
 
-public struct RelationChange {
-    public var added: Relation?
-    public var removed: Relation?
-}
-
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     

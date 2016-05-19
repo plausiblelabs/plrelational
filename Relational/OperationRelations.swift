@@ -267,12 +267,20 @@ class ProjectRelation: Relation, RelationDefaultChangeObserverImplementation {
         // Adds to the underlying relation are adds to the projected relation
         // if there were no matching rows in the relation before. To compute
         // that, project the changes, then subtract the pre-change relation,
-        // which is self minus additions.
+        // which is the post-change relation minus additions and plus removals.
         //
         // Removes are the same, except they subtract the post-change relation,
         // which is just self.
+        var preChangeRelation = relation
+        if let added = change.added {
+            preChangeRelation = preChangeRelation.difference(added)
+        }
+        if let removed = change.removed {
+            preChangeRelation = preChangeRelation.union(removed)
+        }
+        
         let projectChange = RelationChange(
-            added: change.added?.project(scheme).difference(relation.difference(change.added!).project(scheme)),
+            added: change.added?.project(scheme).difference(preChangeRelation.project(scheme)),
             removed: change.removed?.project(scheme).difference(self))
         notifyChangeObservers(projectChange)
     }

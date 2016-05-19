@@ -83,6 +83,7 @@
 		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
 		C2BD29951CD251A20081FD05 /* Store.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29991CD7ED900081FD05 /* SQLiteBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */; };
+		C2FE9B971CEE02BC0004E635 /* RelationChange.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FE9B961CEE02BC0004E635 /* RelationChange.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -213,6 +214,7 @@
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
 		C2BD29911CD251870081FD05 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 		C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteBinding.swift; sourceTree = "<group>"; };
+		C2FE9B961CEE02BC0004E635 /* RelationChange.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationChange.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -456,6 +458,7 @@
 				C257C74F1CBEB18A00234A89 /* FunctionalDependency.swift */,
 				C2A7C41D1CBFE93F00248F92 /* OperationRelations.swift */,
 				C22BF1391CBC349400D3FE59 /* Relation.swift */,
+				C2FE9B961CEE02BC0004E635 /* RelationChange.swift */,
 				C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */,
 				C2B339DD1CEA54E7008568E9 /* RelationDump.swift */,
 				C22921E71CD12CF100518184 /* RelationTests.swift */,
@@ -802,6 +805,7 @@
 				C22921DC1CD12AA200518184 /* WeakReference.swift in Sources */,
 				C22921DD1CD12AA200518184 /* WeakValueDictionary.swift in Sources */,
 				C277E8101CE4EF5400B7B8F6 /* SelectExpression.swift in Sources */,
+				C2FE9B971CEE02BC0004E635 /* RelationChange.swift in Sources */,
 				C22921DE1CD12AA600518184 /* SQLiteDatabase.swift in Sources */,
 				C22921DF1CD12AA600518184 /* SQLiteRelation.swift in Sources */,
 			);
