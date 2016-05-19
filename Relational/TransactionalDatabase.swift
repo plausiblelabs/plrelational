@@ -80,6 +80,19 @@ public class TransactionalDatabase {
         precondition(!inTransaction, "Can't restore a snapshot while in a transaction")
         changeLoggingDatabase.restoreSnapshot(snapshot)
     }
+    
+    public func transaction(transactionFunction: Void -> Void) {
+        beginTransaction()
+        transactionFunction()
+        endTransaction()
+    }
+    
+    public func transactionWithSnapshots(transactionFunction: Void -> Void) -> (before: ChangeLoggingDatabaseSnapshot, after: ChangeLoggingDatabaseSnapshot) {
+        let before = takeSnapshot()
+        transaction(transactionFunction)
+        let after = takeSnapshot()
+        return (before, after)
+    }
 }
 
 extension TransactionalDatabase {
