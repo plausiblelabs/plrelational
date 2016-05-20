@@ -1010,4 +1010,32 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             for _ in flights.rows() {}
         })
     }
+    
+    func testLongLogSnapshotSpeed() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let db = ChangeLoggingDatabase(sqliteDB)
+        let flightsScheme: Scheme = ["number", "pilot", "equipment"]
+        
+        sqliteDB.createRelation("flights", scheme: flightsScheme)
+        
+        let flights = db["flights"]
+        
+        flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
+        
+        for i in 0..<1000 {
+            flights.update(Attribute("number") *== 1, newValues: ["pilot": .Text("Jones \(i)")])
+            if i % 2 == 0 {
+                flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
+            } else {
+                flights.delete(Attribute("number") *== 2)
+            }
+        }
+        
+        let snapshot = db.takeSnapshot()
+        flights.add(["number": 3, "pilot": "Thompson", "equipment": "727"])
+        
+        measureBlock({
+            db.restoreSnapshot(snapshot)
+        })
+    }
 }
