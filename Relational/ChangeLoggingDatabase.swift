@@ -35,7 +35,7 @@ extension ChangeLoggingDatabase {
             return relation
         } else {
             let table = sqliteDatabase[name]!
-            let relation = ChangeLoggingRelation(underlyingRelation: table)
+            let relation = ChangeLoggingRelation(baseRelation: table)
             changeLoggingRelations[name] = relation
             return relation
         }
@@ -55,9 +55,9 @@ extension ChangeLoggingDatabase {
             if let relation = changeLoggingRelations[name] {
                 return relation
             } else {
-                let table = db.getLoggingRelation(name)
-                let relation = ChangeLoggingRelation(underlyingRelation: table.underlyingRelation)
-                relation.log = table.log
+                let originalRelation = db.getLoggingRelation(name)
+                let relation = ChangeLoggingRelation(baseRelation: originalRelation.baseRelation)
+                relation.log = originalRelation.log
                 changeLoggingRelations[name] = relation
                 return relation
             }
@@ -77,7 +77,7 @@ extension ChangeLoggingDatabase {
             // If we ever do, it would involve retrying the transaction so this should still hold.
             
             let newLog = relation.log[target.log.count ..< relation.log.count]
-            let change = target.dynamicType.computeChangeFromLog(newLog, underlyingRelation: target.computeFinalRelation().ok! /* TODO: error handling */)
+            let change = target.dynamicType.computeChangeFromLog(newLog, baseRelation: target.computeFinalRelation().ok! /* TODO: error handling */)
             changes.append((target, change))
             
             target.log = relation.log

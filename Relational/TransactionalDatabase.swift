@@ -38,7 +38,7 @@ public class TransactionalDatabase {
     }
     
     func beginTransactionForRelation(r: TransactionalRelation) {
-        let transactionRelation = ChangeLoggingRelation(underlyingRelation: r.underlyingRelation.underlyingRelation)
+        let transactionRelation = ChangeLoggingRelation(baseRelation: r.underlyingRelation.baseRelation)
         transactionRelation.log = r.underlyingRelation.log
         r.transactionRelation = transactionRelation
     }
@@ -67,7 +67,7 @@ public class TransactionalDatabase {
         let transaction = r.transactionRelation!
         
         let newLog = transaction.log.suffixFrom(underlying.log.count)
-        let change = underlying.dynamicType.computeChangeFromLog(newLog, underlyingRelation: underlying.computeFinalRelation().ok! /* TODO: error handling */)
+        let change = underlying.dynamicType.computeChangeFromLog(newLog, baseRelation: underlying.computeFinalRelation().ok! /* TODO: error handling */)
         underlying.log = transaction.log
         r.transactionRelation = nil
         

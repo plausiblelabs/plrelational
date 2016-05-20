@@ -540,11 +540,11 @@ class RelationTests: DBTestCase {
     }
     
     func testUnionObservation() {
-        let a = ChangeLoggingRelation(underlyingRelation:
+        let a = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["first", "last"],
                 ["John", "Doe"]))
-        let b = ChangeLoggingRelation(underlyingRelation:
+        let b = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["first", "last"],
                 ["Jane", "Doe"],
@@ -576,11 +576,11 @@ class RelationTests: DBTestCase {
     }
     
     func testIntersectionObservation() {
-        let a = ChangeLoggingRelation(underlyingRelation:
+        let a = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["first", "last"],
                 ["John", "Doe"]))
-        let b = ChangeLoggingRelation(underlyingRelation:
+        let b = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["first", "last"],
                 ["Jane", "Doe"],
@@ -612,11 +612,11 @@ class RelationTests: DBTestCase {
     }
     
     func testDifferenceObservation() {
-        let a = ChangeLoggingRelation(underlyingRelation:
+        let a = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["first", "last"],
                 ["John", "Doe"]))
-        let b = ChangeLoggingRelation(underlyingRelation:
+        let b = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["first", "last"],
                 ["Jane", "Doe"],
@@ -648,7 +648,7 @@ class RelationTests: DBTestCase {
     }
     
     func testProjectObservation() {
-        let a = ChangeLoggingRelation(underlyingRelation:
+        let a = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["first", "last"],
                 ["John", "Doe"]))
@@ -684,7 +684,7 @@ class RelationTests: DBTestCase {
     }
     
     func testSelectObservation() {
-        let a = ChangeLoggingRelation(underlyingRelation:
+        let a = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["first", "last"],
                 ["John", "Doe"]))
@@ -715,13 +715,13 @@ class RelationTests: DBTestCase {
     }
     
     func testJoinObservation() {
-        let a = ChangeLoggingRelation(underlyingRelation:
+        let a = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["first", "last"],
                 ["John", "Doe"],
                 ["Jane", "Doe"],
                 ["Tom", "Smith"]))
-        let b = ChangeLoggingRelation(underlyingRelation:
+        let b = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["last", "remark"],
                 ["Doe", "unknown"],
@@ -766,7 +766,7 @@ class RelationTests: DBTestCase {
     }
     
     func testRenameObservation() {
-        let a = ChangeLoggingRelation(underlyingRelation:
+        let a = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["first", "last"],
                 ["John", "Doe"]))
@@ -787,7 +787,7 @@ class RelationTests: DBTestCase {
     }
     
     func testUpdateObservation() {
-        let a = ChangeLoggingRelation(underlyingRelation:
+        let a = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["first", "last"],
                 ["John", "Doe"]))
@@ -808,7 +808,7 @@ class RelationTests: DBTestCase {
     }
     
     func testMinObservation() {
-        let a = ChangeLoggingRelation(underlyingRelation:
+        let a = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["id", "name", "count"]))
         
@@ -838,7 +838,7 @@ class RelationTests: DBTestCase {
     }
     
     func testMaxObservation() {
-        let a = ChangeLoggingRelation(underlyingRelation:
+        let a = ChangeLoggingRelation(baseRelation:
             MakeRelation(
                 ["id", "name", "count"]))
         

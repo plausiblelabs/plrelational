@@ -12,7 +12,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             ["127",    "Wendy", "707"]
         )
         
-        let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
+        let loggingRelation = ChangeLoggingRelation(baseRelation: underlying)
         AssertEqual(underlying, loggingRelation)
     }
     
@@ -26,7 +26,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             ["127",    "Wendy", "707"]
         )
         
-        let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
+        let loggingRelation = ChangeLoggingRelation(baseRelation: underlying)
         
         loggingRelation.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(loggingRelation,
@@ -68,7 +68,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             ["127",    "Wendy", "707"]
         )
         
-        let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
+        let loggingRelation = ChangeLoggingRelation(baseRelation: underlying)
         
         var lastChange: RelationChange?
         _ = loggingRelation.addChangeObserver({ lastChange = $0 })
@@ -112,7 +112,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             ["127",    "Wendy", "707"]
         )
         
-        let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
+        let loggingRelation = ChangeLoggingRelation(baseRelation: underlying)
         
         loggingRelation.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(loggingRelation,
@@ -158,7 +158,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             ["127",    "Wendy", "707"]
         )
         
-        let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
+        let loggingRelation = ChangeLoggingRelation(baseRelation: underlying)
         
         var lastChange: RelationChange?
         _ = loggingRelation.addChangeObserver({ lastChange = $0 })
@@ -191,7 +191,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             ["127",    "Wendy", "707"]
         )
         
-        let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
+        let loggingRelation = ChangeLoggingRelation(baseRelation: underlying)
         
         loggingRelation.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
         loggingRelation.update(Attribute("number") *== "42", newValues: ["equipment": "DC-10"])
@@ -241,7 +241,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             ["127",    "Wendy", "707"]
         )
         
-        let loggingRelation = ChangeLoggingRelation(underlyingRelation: underlying)
+        let loggingRelation = ChangeLoggingRelation(baseRelation: underlying)
         
         var lastChange: RelationChange?
         _ = loggingRelation.addChangeObserver({ lastChange = $0 })
@@ -285,7 +285,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         let scheme: Scheme = ["number", "pilot", "equipment"]
         let table = db.getOrCreateRelation("flights", scheme: scheme).ok!
         
-        let loggingRelation = ChangeLoggingRelation(underlyingRelation: table)
+        let loggingRelation = ChangeLoggingRelation(baseRelation: table)
         var referenceRelation = ConcreteRelation(scheme: scheme)
         
         func add(row: Row) {
@@ -984,5 +984,30 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         AssertEqual(lastFlightsChange?.removed, nil)
         AssertEqual(lastPilotsChange?.added, nil)
         AssertEqual(lastPilotsChange?.removed, nil)
+    }
+    
+    func testLongLogSpeed() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let db = ChangeLoggingDatabase(sqliteDB)
+        let flightsScheme: Scheme = ["number", "pilot", "equipment"]
+        
+        sqliteDB.createRelation("flights", scheme: flightsScheme)
+        
+        let flights = db["flights"]
+        
+        flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
+        
+        for i in 0..<100 {
+            flights.update(Attribute("number") *== 1, newValues: ["pilot": .Text("Jones \(i)")])
+            if i % 2 == 0 {
+                flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
+            } else {
+                flights.delete(Attribute("number") *== 2)
+            }
+        }
+        
+        measureBlock({
+            for _ in flights.rows() {}
+        })
     }
 }

@@ -9,8 +9,8 @@ public struct ChangeLoggingRelationSnapshot {
     var savedLog: [ChangeLoggingRelationChange]
 }
 
-public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
-    let underlyingRelation: UnderlyingRelation
+public class ChangeLoggingRelation<BaseRelation: Relation> {
+    let baseRelation: BaseRelation
     
     var log: [ChangeLoggingRelationChange] = [] {
         didSet {
@@ -22,8 +22,8 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
     
     var current: (added: ConcreteRelation, removed: ConcreteRelation)?
     
-    public init(underlyingRelation: UnderlyingRelation) {
-        self.underlyingRelation = underlyingRelation
+    public init(baseRelation: BaseRelation) {
+        self.baseRelation = baseRelation
     }
     
     public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
@@ -39,7 +39,7 @@ public class ChangeLoggingRelation<UnderlyingRelation: Relation> {
 
 extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
     public var scheme: Scheme {
-        return underlyingRelation.scheme
+        return baseRelation.scheme
     }
     
     public func rows() -> AnyGenerator<Result<Row, RelationError>> {
@@ -70,9 +70,11 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
         })
     }
     
+//    internal func
+    
     internal func computeFinalRelation() -> Result<Relation, RelationError> {
         if let (added, removed) = self.current {
-            return .Ok(underlyingRelation.difference(removed).union(added))
+            return .Ok(baseRelation.difference(removed).union(added))
         }
         
         var addedRows = ConcreteRelation(scheme: scheme, values: [], defaultSort: nil)
@@ -92,7 +94,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                 }
             case .Select(let query):
                 addedRows.delete(*!query)
-                for row in underlyingRelation.select(*!query).rows() {
+                for row in baseRelation.select(*!query).rows() {
                     switch row {
                     case .Ok(let row):
                         removedRows.add(row)
@@ -102,7 +104,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                 }
             case .Update(let query, let newValues):
                 addedRows.update(query, newValues: newValues)
-                for toUpdate in underlyingRelation.select(query).difference(removedRows).rows() {
+                for toUpdate in baseRelation.select(query).difference(removedRows).rows() {
                     switch toUpdate {
                     case .Ok(let row):
                         addedRows.add(Row(values: row.values + newValues.values))
@@ -116,12 +118,12 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
         
         current = (addedRows, removedRows)
         
-        return .Ok(underlyingRelation.difference(removedRows).union(addedRows))
+        return .Ok(baseRelation.difference(removedRows).union(addedRows))
     }
     
-    static func computeChangeFromLog<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log, underlyingRelation: Relation) -> RelationChange {
-        var currentAdd: Relation = ConcreteRelation(scheme: underlyingRelation.scheme)
-        var currentRemove: Relation = ConcreteRelation(scheme: underlyingRelation.scheme)
+    static func computeChangeFromLog<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log, baseRelation: Relation) -> RelationChange {
+        var currentAdd: Relation = ConcreteRelation(scheme: baseRelation.scheme)
+        var currentRemove: Relation = ConcreteRelation(scheme: baseRelation.scheme)
         
         for change in log {
             switch change {
@@ -130,11 +132,11 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                 currentRemove = currentRemove.difference(relation)
             case .Select(let query):
                 currentAdd = currentAdd.select(query)
-                currentRemove = currentRemove.union(underlyingRelation.select(*!query))
+                currentRemove = currentRemove.union(baseRelation.select(*!query))
             case .Update(let query, let newValues):
                 currentAdd = currentAdd.withUpdate(query, newValues: newValues)
-                currentAdd = currentAdd.union(underlyingRelation.select(query).difference(currentRemove).withUpdate(newValues))
-                currentRemove = currentRemove.union(underlyingRelation.select(query))
+                currentAdd = currentAdd.union(baseRelation.select(query).difference(currentRemove).withUpdate(newValues))
+                currentRemove = currentRemove.union(baseRelation.select(query))
             }
         }
         
@@ -142,15 +144,15 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
     }
 }
 
-extension ChangeLoggingRelation where UnderlyingRelation: SQLiteTableRelation {
+extension ChangeLoggingRelation where BaseRelation: SQLiteTableRelation {
     public func save() -> Result<Void, RelationError> {
         // TODO: transactions!
-        let change = ChangeLoggingRelation.computeChangeFromLog(self.log, underlyingRelation: self.underlyingRelation)
+        let change = ChangeLoggingRelation.computeChangeFromLog(self.log, baseRelation: self.baseRelation)
         if let removed = change.removed {
             for row in removed.rows() {
                 switch row {
                 case .Ok(let row):
-                    if let err = underlyingRelation.delete(SelectExpressionFromRow(row)).err {
+                    if let err = baseRelation.delete(SelectExpressionFromRow(row)).err {
                         return .Err(err)
                     }
                 case .Err(let err):
@@ -163,7 +165,7 @@ extension ChangeLoggingRelation where UnderlyingRelation: SQLiteTableRelation {
             for row in added.rows() {
                 switch row {
                 case .Ok(let row):
-                    if let err = underlyingRelation.add(row).err {
+                    if let err = baseRelation.add(row).err {
                         return .Err(err)
                     }
                 case .Err(let err):
@@ -192,13 +194,13 @@ extension ChangeLoggingRelation {
         if snapshot.savedLog.count > self.log.count {
             let log = snapshot.savedLog.suffixFrom(self.log.count)
             // TODO: handle errors on all computeFinalRelation calls
-            let change = self.dynamicType.computeChangeFromLog(log, underlyingRelation: self.computeFinalRelation().ok!)
+            let change = self.dynamicType.computeChangeFromLog(log, baseRelation: self.computeFinalRelation().ok!)
             self.log = snapshot.savedLog
             return change
         } else {
             let log = self.log.suffixFrom(snapshot.savedLog.count)
             self.log = snapshot.savedLog
-            let change = self.dynamicType.computeChangeFromLog(log, underlyingRelation: self.computeFinalRelation().ok!)
+            let change = self.dynamicType.computeChangeFromLog(log, baseRelation: self.computeFinalRelation().ok!)
             let reversedChange = RelationChange(added: change.removed, removed: change.added)
             return reversedChange
         }
