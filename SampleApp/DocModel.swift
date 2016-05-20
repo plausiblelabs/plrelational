@@ -103,7 +103,9 @@ class DocModel {
         self.selectedInspectorItemIDs = createRelation("selected_inspector_item", ["item_id"])
 
         // Prepare the higher level relations
-        self.selectedCollection = collections.renameAttributes(["id" : "coll_id"]).join(selectedCollectionID)
+        self.selectedCollection = collections
+            .renameAttributes(["id" : "coll_id"])
+            .join(selectedCollectionID)
         
         // The `inspectorItems` relation is a view that presents the currently selected collection
         // (from the doc outline tree view) as the root node with its associated objects as the
@@ -365,7 +367,11 @@ class DocModel {
         return self.selectedDocItems.map{ $0.count == 0 }
     }()
 
-    lazy var selectedItemType: ValueBinding<String?> = { [unowned self] in
+    lazy var selectedItemTypes: ValueBinding<CommonValue<ItemType>> = { [unowned self] in
+        return self.selectedDocItems.map{ $0.map{ $0.type } }.common()
+    }()
+
+    lazy var selectedItemTypeString: ValueBinding<String?> = { [unowned self] in
         return self.selectedDocItems.map{ items -> String? in
             if items.count == 0 {
                 return nil
@@ -389,6 +395,14 @@ class DocModel {
         return self.bidiBinding(nameRelation, type: "Collection")
     }()
     
+    lazy var selectedItemsOnlyText: ValueBinding<Bool> = { [unowned self] in
+        return self.selectedItemTypes.map{ $0.all(.Text) }
+    }()
+
+    lazy var selectedItemsOnlyImage: ValueBinding<Bool> = { [unowned self] in
+        return self.selectedItemTypes.map{ $0.all(.Image) }
+    }()
+
     private func bidiBinding(relation: Relation, type: String) -> StringBidiBinding {
         let attr = relation.scheme.attributes.first!
         

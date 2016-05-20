@@ -26,7 +26,7 @@ class DocModelTests: AppTestCase {
         func verifyBindings(itemSelected itemSelected: Bool, selectedItemType: String?, selectedItemName: String?) {
             XCTAssertEqual(model.itemSelected.value, itemSelected)
             XCTAssertEqual(model.itemNotSelected.value, !itemSelected)
-            XCTAssertEqual(model.selectedItemType.value, selectedItemType)
+            XCTAssertEqual(model.selectedItemTypeString.value, selectedItemType)
             XCTAssertEqual(model.selectedItemName.value, selectedItemName)
         }
         

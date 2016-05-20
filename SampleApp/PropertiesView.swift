@@ -26,7 +26,7 @@ class PropertiesView {
         self.noSelectionLabel = noSelectionLabel
         self.docModel = docModel
         
-        itemTypeLabel.string = docModel.selectedItemType
+        itemTypeLabel.string = docModel.selectedItemTypeString
         itemTypeLabel.visible = docModel.itemSelected
 
         nameLabel.visible = docModel.itemSelected
