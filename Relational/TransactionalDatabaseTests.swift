@@ -82,6 +82,86 @@ class TransactionalDatabaseTests: DBTestCase {
                         ["Johnson", "Seattle"]))
     }
     
+    
+    func testSnapshots() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let db = TransactionalDatabase(sqliteDB)
+        let flightsScheme: Scheme = ["number", "pilot", "equipment"]
+        let pilotsScheme: Scheme = ["name", "home"]
+        
+        sqliteDB.createRelation("flights", scheme: flightsScheme)
+        sqliteDB.createRelation("pilots", scheme: pilotsScheme)
+        
+        let flights = db["flights"]
+        let pilots = db["pilots"]
+        
+        let (before, after) = db.transactionWithSnapshots({
+            flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
+            flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
+            flights.add(["number": 3, "pilot": "Johnson", "equipment": "797"])
+            
+            pilots.add(["name": "Jones", "home": "New York"])
+            pilots.add(["name": "Smith", "home": "Chicago"])
+            pilots.add(["name": "Johnson", "home": "Seattle"])
+        })
+        
+        AssertEqual(flights,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [1, "Jones", "777"],
+                        [2, "Smith", "787"],
+                        [3, "Johnson", "797"]))
+        AssertEqual(pilots,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "New York"],
+                        ["Smith", "Chicago"],
+                        ["Johnson", "Seattle"]))
+        
+        db.restoreSnapshot(before)
+        
+        AssertEqual(flights,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"]))
+        AssertEqual(pilots,
+                    MakeRelation(
+                        ["name", "home"]))
+        
+        db.restoreSnapshot(after)
+        
+        AssertEqual(flights,
+                    MakeRelation(
+                        ["number", "pilot", "equipment"],
+                        [1, "Jones", "777"],
+                        [2, "Smith", "787"],
+                        [3, "Johnson", "797"]))
+        AssertEqual(pilots,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "New York"],
+                        ["Smith", "Chicago"],
+                        ["Johnson", "Seattle"]))
+        
+        db.transaction({
+            pilots.delete(Attribute("name") *== "Jones")
+        })
+        
+        AssertEqual(pilots,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Smith", "Chicago"],
+                        ["Johnson", "Seattle"]))
+        
+        db.restoreSnapshot(after)
+        
+        AssertEqual(pilots,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "New York"],
+                        ["Smith", "Chicago"],
+                        ["Johnson", "Seattle"]))
+    }
+    
     func testAddNotify() {
         let sqliteDB = makeDB().db.sqliteDatabase
         let db = TransactionalDatabase(sqliteDB)

@@ -787,6 +787,27 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["Jones", "New York"],
                         ["Smith", "Chicago"],
                         ["Johnson", "Seattle"]))
+
+        let pilots = db["pilots"]
+        db.transaction({
+            let pilots = $0["pilots"]
+            pilots.delete(Attribute("name") *== "Jones")
+        })
+
+        AssertEqual(pilots,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Smith", "Chicago"],
+                        ["Johnson", "Seattle"]))
+
+        db.restoreSnapshot(after)
+        
+        AssertEqual(pilots,
+                    MakeRelation(
+                        ["name", "home"],
+                        ["Jones", "New York"],
+                        ["Smith", "Chicago"],
+                        ["Johnson", "Seattle"]))
     }
     
     func testSnapshotChangeNotification() {
