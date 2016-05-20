@@ -69,6 +69,8 @@ public class TransactionalDatabase {
         let newLog = transaction.log.suffixFrom(underlying.log.count)
         let change = underlying.dynamicType.computeChangeFromLog(newLog, underlyingRelation: underlying.computeFinalRelation().ok! /* TODO: error handling */)
         underlying.log = transaction.log
+        r.transactionRelation = nil
+        
         return change
     }
     
