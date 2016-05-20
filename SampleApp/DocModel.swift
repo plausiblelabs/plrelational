@@ -176,7 +176,14 @@ class DocModel {
     }
     
     private func performUndoableAction(name: String, _ transactionFunc: Void -> Void) {
-        let (before, after) = db.transactionWithSnapshots(transactionFunc)
+        performUndoableAction(name, before: nil, transactionFunc)
+    }
+    
+    private func performUndoableAction(name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: Void -> Void) {
+        let before = before ?? db.takeSnapshot()
+        db.transaction(transactionFunc)
+        let after = db.takeSnapshot()
+
         undoManager.registerChange(
             name: name,
             perform: false,
@@ -401,23 +408,12 @@ class DocModel {
                 return self.db.takeSnapshot()
             },
             change: { newValue in
-                // XXX: Shouldn't need to put this in a transaction, but without it we're not
-                // currently getting change notifications
-                self.db.transaction({ update(newValue) })
+                update(newValue)
             },
             commit: { before, newValue in
-                self.db.transaction({ update(newValue) })
-                let after = self.db.takeSnapshot()
-                self.undoManager.registerChange(
-                    name: "Rename \(type)",
-                    perform: false,
-                    forward: {
-                        self.db.restoreSnapshot(after)
-                    },
-                    backward: {
-                        self.db.restoreSnapshot(before)
-                    }
-                )
+                self.performUndoableAction("Rename \(type)", before: before, {
+                    update(newValue)
+                })
             }
         )
     }
