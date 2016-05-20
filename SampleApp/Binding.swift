@@ -9,6 +9,49 @@
 import Foundation
 import libRelational
 
+enum CommonValue<T> { case
+    /// The value is not defined for any item.
+    None,
+    
+    /// The value is the same for all items.
+    One(T),
+    
+    /// There is a mixed set of values across all items.
+    Multi
+    
+    /// Returns the single value if there is one, or the given default value in the .None or .Multi cases.
+    func orDefault(defaultValue: T) -> T {
+        switch self {
+        case .None, .Multi:
+            return defaultValue
+        case .One(let value):
+            return value
+        }
+    }
+    
+    /// Returns the single value if there is one, or nil in the .None or .Multi cases.
+    func orNil() -> T? {
+        switch self {
+        case .None, .Multi:
+            return nil
+        case .One(let value):
+            return value
+        }
+    }
+}
+
+extension CommonValue where T: Equatable {
+    /// Returns true if all items share the given value.
+    func all(value: T) -> Bool {
+        switch self {
+        case let .One(v):
+            return v == value
+        default:
+            return false
+        }
+    }
+}
+
 public class ValueBinding<T> {
     
     public typealias ChangeObserver = Void -> Void
@@ -43,6 +86,12 @@ extension ValueBinding {
     
     func zip<U>(other: ValueBinding<U>) -> ValueBinding<(T, U)> {
         return ZippedValueBinding(self, other)
+    }
+}
+
+extension ValueBinding where T: SequenceType, T.Generator.Element: Hashable {
+    func common() -> ValueBinding<CommonValue<T.Generator.Element>> {
+        return CommonValueBinding(binding: self)
     }
 }
 
@@ -112,6 +161,37 @@ public class NotExistsBinding: ValueBinding<Bool> {
                 weakSelf.value = newValue
                 weakSelf.notifyChangeObservers()
             }
+        })
+    }
+}
+
+public class CommonValueBinding<T: Hashable>: ValueBinding<CommonValue<T>> {
+    private var removal: ObserverRemoval!
+    
+    init<S: SequenceType where S.Generator.Element == T>(binding: ValueBinding<S>) {
+
+        func commonValue() -> CommonValue<T> {
+            let valuesSet = Set(binding.value)
+            switch valuesSet.count {
+            case 0:
+                return .None
+            case 1:
+                return .One(valuesSet.first!)
+            default:
+                return .Multi
+            }
+        }
+        
+        super.init(initialValue: commonValue())
+        
+        self.removal = binding.addChangeObserver({ [weak self] in
+            guard let weakSelf = self else { return }
+            let common = commonValue()
+            // TODO: Don't notify if value is not actually changing
+            //if common != weakSelf.value {
+                weakSelf.value = common
+                weakSelf.notifyChangeObservers()
+            //}
         })
     }
 }
