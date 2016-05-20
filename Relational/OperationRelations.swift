@@ -15,8 +15,23 @@ class UnionRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        let bUnique = b.rows().lazy.filter({ !($0.then({ self.a.contains($0) }).ok ?? true) })
-        return AnyGenerator(a.rows().concat(bUnique.generate()))
+        // In common usage, we tend to place relations where contains() is expensive
+        // (like SQLiteRelation) on the left side of the union. Because of that, we
+        // represent the union as (b + (a - b)) rather than (a + (b - a)).
+        let aUnique = a.rows().lazy.flatMap({ (row: Result<Row, RelationError>) -> Result<Row, RelationError>? in
+            switch row {
+            case .Ok(let row):
+                switch self.b.contains(row) {
+                case .Ok(let contains):
+                    return contains ? nil : .Ok(row)
+                case .Err(let err):
+                    return .Err(err)
+                }
+            case .Err:
+                return row
+            }
+        })
+        return AnyGenerator(aUnique.generate().concat(b.rows()))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
