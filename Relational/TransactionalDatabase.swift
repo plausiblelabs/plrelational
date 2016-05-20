@@ -38,18 +38,21 @@ public class TransactionalDatabase {
     }
     
     func beginTransactionForRelation(r: TransactionalRelation) {
-        let transactionRelation = ChangeLoggingRelation(baseRelation: r.underlyingRelation.baseRelation)
-        transactionRelation.log = r.underlyingRelation.log
-        r.transactionRelation = transactionRelation
+        r.transactionRelation = r.underlyingRelation.deriveChangeLoggingRelation()
     }
     
-    public func endTransaction() {
+    public func endTransaction() -> Result<Void, RelationError> {
         precondition(inTransaction, "Can't end transaction when we're not in one")
         
         var changes: [(TransactionalRelation, RelationChange)] = []
         for (_, r) in relations {
-            let change = endTransactionForRelation(r)
-            changes.append((r, change))
+            let result = endTransactionForRelation(r)
+            switch result {
+            case .Ok(let change):
+                changes.append((r, change))
+            case .Err(let err):
+                return .Err(err)
+            }
         }
         
         for (r, change) in changes {
@@ -57,21 +60,19 @@ public class TransactionalDatabase {
         }
         
         inTransaction = false
+        
+        return .Ok()
     }
     
-    func endTransactionForRelation(r: TransactionalRelation) -> RelationChange {
+    func endTransactionForRelation(r: TransactionalRelation) -> Result<RelationChange, RelationError> {
         // In computing the change log, we're assuming that target hasn't been changed.
         // Right now we don't support directly changing the database during a transaction.
         // If we ever do, it would involve retrying the transaction so this should still hold.
         let underlying = r.underlyingRelation
         let transaction = r.transactionRelation!
         
-        let newLog = transaction.log.suffixFrom(underlying.log.count)
-        let change = underlying.dynamicType.computeChangeFromLog(newLog, baseRelation: underlying.computeFinalRelation().ok! /* TODO: error handling */)
-        underlying.log = transaction.log
         r.transactionRelation = nil
-        
-        return change
+        return underlying.restoreFromChangeLoggingRelation(transaction)
     }
     
     public func takeSnapshot() -> ChangeLoggingDatabaseSnapshot {

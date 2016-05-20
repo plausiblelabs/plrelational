@@ -78,28 +78,28 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "MD-11"]))
-        XCTAssertNil(lastChange!.removed)
+        AssertEqual(lastChange!.removed, nil)
         
         loggingRelation.add(["number": "43", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(lastChange!.added!,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["43",     "Adams", "MD-11"]))
-        XCTAssertNil(lastChange!.removed)
+        AssertEqual(lastChange!.removed, nil)
         
         loggingRelation.add(["number": "44", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(lastChange!.added!,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["44",     "Adams", "MD-11"]))
-        XCTAssertNil(lastChange!.removed)
+        AssertEqual(lastChange!.removed, nil)
         
         loggingRelation.add(["number": "45", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(lastChange!.added!,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["45",     "Adams", "MD-11"]))
-        XCTAssertNil(lastChange!.removed)
+        AssertEqual(lastChange!.removed, nil)
     }
     
     func testDelete() {
@@ -170,7 +170,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "MD-11"]))
-        XCTAssertNil(lastChange!.added)
+        AssertEqual(lastChange!.added, nil)
         
         
         loggingRelation.delete(Attribute("number") *== "123")
@@ -178,7 +178,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["123",    "Jones", "707"]))
-        XCTAssertNil(lastChange!.added)
+        AssertEqual(lastChange!.added, nil)
     }
     
     func testUpdate() {
@@ -997,7 +997,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
         
-        for i in 0..<100 {
+        for i in 0..<10000 {
             flights.update(Attribute("number") *== 1, newValues: ["pilot": .Text("Jones \(i)")])
             if i % 2 == 0 {
                 flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])

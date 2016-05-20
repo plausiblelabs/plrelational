@@ -56,15 +56,14 @@ extension ChangeLoggingDatabase {
                 return relation
             } else {
                 let originalRelation = db.getLoggingRelation(name)
-                let relation = ChangeLoggingRelation(baseRelation: originalRelation.baseRelation)
-                relation.log = originalRelation.log
+                let relation = originalRelation.deriveChangeLoggingRelation()
                 changeLoggingRelations[name] = relation
                 return relation
             }
         }
     }
     
-    public func transaction(transactionFunction: Transaction -> Void) {
+    public func transaction(transactionFunction: Transaction -> Void) -> Result<Void, RelationError> {
         let transaction = Transaction(db: self)
         
         transactionFunction(transaction)
@@ -72,20 +71,23 @@ extension ChangeLoggingDatabase {
         var changes: [(ChangeLoggingRelation<SQLiteTableRelation>, RelationChange)] = []
         for (name, relation) in transaction.changeLoggingRelations {
             let target = self[name]
-            // In computing the change log, we're assuming that target hasn't been changed.
-            // Right now we don't support directly changing the database during a transaction.
-            // If we ever do, it would involve retrying the transaction so this should still hold.
-            
-            let newLog = relation.log[target.log.count ..< relation.log.count]
-            let change = target.dynamicType.computeChangeFromLog(newLog, baseRelation: target.computeFinalRelation().ok! /* TODO: error handling */)
-            changes.append((target, change))
-            
-            target.log = relation.log
+            // This snapshot thing is kind of elegant and ugly at the same time. It gets the job done
+            // of applying the new state and retrieving the changes, anyway.
+            let pretendSnapshot = relation.takeSnapshot()
+            let result = target.rawRestoreSnapshot(pretendSnapshot)
+            switch result {
+            case .Ok(let relationChanges):
+                changes.append((target, relationChanges))
+            case .Err(let err):
+                return .Err(err)
+            }
         }
         
         for (relation, change) in changes {
             relation.notifyChangeObservers(change)
         }
+        
+        return .Ok()
     }
 }
 
@@ -95,13 +97,18 @@ extension ChangeLoggingDatabase {
         return ChangeLoggingDatabaseSnapshot(relationSnapshots: Array(relationSnapshots))
     }
     
-    public func restoreSnapshot(snapshot: ChangeLoggingDatabaseSnapshot) {
+    public func restoreSnapshot(snapshot: ChangeLoggingDatabaseSnapshot) -> Result<Void, RelationError> {
         var changes: [(ChangeLoggingRelation<SQLiteTableRelation>, RelationChange)] = []
         
         // Restore all the snapshotted relations.
         for (relation, snapshot) in snapshot.relationSnapshots {
             let change = relation.rawRestoreSnapshot(snapshot)
-            changes.append((relation, change))
+            switch change {
+            case .Ok(let change):
+                changes.append((relation, change))
+            case .Err(let err):
+                return .Err(err)
+            }
         }
         
         // Any relations that were created after the snapshot was taken won't be captured.
@@ -110,13 +117,20 @@ extension ChangeLoggingDatabase {
         for (_, relation) in changeLoggingRelations {
             if !snapshottedRelations.contains(ObjectIdentifier(relation)) {
                 let change = relation.rawRestoreSnapshot(ChangeLoggingRelationSnapshot(savedLog: []))
-                changes.append((relation, change))
+                switch change {
+                case .Ok(let change):
+                    changes.append((relation, change))
+                case .Err(let err):
+                    return .Err(err)
+                }
             }
         }
         
         for (relation, change) in changes {
             relation.notifyChangeObservers(change)
         }
+        
+        return .Ok()
     }
     
     /// A wrapper function that performs a transaction and provides before and after snapshots to the caller.

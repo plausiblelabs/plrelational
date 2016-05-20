@@ -188,28 +188,28 @@ class TransactionalDatabaseTests: DBTestCase {
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "MD-11"]))
-        XCTAssertNil(lastChange!.removed)
+        AssertEqual(lastChange!.removed, nil)
         
         flights.add(["number": "43", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(lastChange!.added!,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["43",     "Adams", "MD-11"]))
-        XCTAssertNil(lastChange!.removed)
+        AssertEqual(lastChange!.removed, nil)
         
         flights.add(["number": "44", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(lastChange!.added!,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["44",     "Adams", "MD-11"]))
-        XCTAssertNil(lastChange!.removed)
+        AssertEqual(lastChange!.removed, nil)
         
         flights.add(["number": "45", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(lastChange!.added!,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["45",     "Adams", "MD-11"]))
-        XCTAssertNil(lastChange!.removed)
+        AssertEqual(lastChange!.removed, nil)
     }
     
     func testDeleteNotify() {
@@ -240,7 +240,7 @@ class TransactionalDatabaseTests: DBTestCase {
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "MD-11"]))
-        XCTAssertNil(lastChange!.added)
+        AssertEqual(lastChange!.added, nil)
         
         
         flights.delete(Attribute("number") *== "123")
@@ -248,7 +248,7 @@ class TransactionalDatabaseTests: DBTestCase {
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["123",    "Jones", "707"]))
-        XCTAssertNil(lastChange!.added)
+        AssertEqual(lastChange!.added, nil)
     }
     
     func testUpdateNotify() {
