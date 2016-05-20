@@ -141,6 +141,7 @@ public class OrderedTreeBinding {
         }
     }
     
+    /// Returns the node with the given identifier.
     public func nodeForID(id: RelationValue) -> Node? {
         // TODO: Not efficient, but whatever
         func findNode(node: Node) -> Node? {
@@ -158,6 +159,12 @@ public class OrderedTreeBinding {
         }
         
         return findNode(root)
+    }
+    
+    /// Returns the node at the given path.
+    public func nodeAtPath(path: TreePath) -> Node? {
+        let parent = path.parent ?? root
+        return parent.children[safe: path.index]
     }
     
     /// Returns the parent of the given node.
@@ -249,7 +256,6 @@ public class OrderedTreeBinding {
     }
     
     public func delete(id: RelationValue) {
-        
         guard var relation = relation as? MutableRelation else {
             fatalError("delete() is only supported when the underlying relation is mutable")
         }
@@ -346,7 +352,6 @@ public class OrderedTreeBinding {
             return []
         }
 
-        // XXX: We have to dig out the identifier of the item to be moved here
         let srcID = row[idAttr]
         let srcNode = nodeForID(srcID)!
         return onMove(srcNode, dstParentID: newParentID, dstOrder: newOrder)

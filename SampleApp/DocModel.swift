@@ -118,8 +118,11 @@ class DocModel {
             .join(objects)
             .renameAttributes(["coll_id": "parent"])
             .project(["id", "type", "name", "parent", "order"])
-        self.inspectorItems = inspectorCollectionItems.union(inspectorObjectItems)
-        self.selectedInspectorItems = inspectorItems.renameAttributes(["id" : "item_id"]).join(selectedInspectorItemIDs)
+        self.inspectorItems = inspectorCollectionItems
+            .union(inspectorObjectItems)
+        self.selectedInspectorItems = inspectorItems
+            .renameAttributes(["id" : "item_id"])
+            .join(selectedInspectorItemIDs)
         
         // The `selectedItems` relation is a roll-up view that includes the currently selected
         // inspector item(s) and/or the currently selected doc outline item.  The inspector item(s)
@@ -133,8 +136,11 @@ class DocModel {
             .renameAttributes(["item_id": "id"])
             .project(["id", "type", "name"])
             .join(MakeRelation(["priority"], [2]))
-        let allSelectedItems = selectedCollectionWithPriority.union(selectedInspectorItemsWithPriority)
-        self.selectedItems = allSelectedItems.max("priority").join(allSelectedItems)
+        let allSelectedItems = selectedCollectionWithPriority
+            .union(selectedInspectorItemsWithPriority)
+        self.selectedItems = allSelectedItems
+            .max("priority")
+            .join(allSelectedItems)
 
         // Prepare the tree bindings
         self.docOutlineBinding = OrderedTreeBinding(relation: collections, idAttr: "id", parentAttr: "parent", orderAttr: "order")
@@ -242,9 +248,7 @@ class DocModel {
     }
 
     private func selectDocOutlineItems(ids: [RelationValue]) {
-        // TODO: s/Collection/type.name/
-        // TODO: "Deselect"?
-        self.performUndoableAction("Select Collection", {
+        self.performUndoableAction("Change Selection", {
             // TODO: This could probably be made more efficient
             self.selectedCollectionID.delete(true)
             for id in ids {
@@ -254,9 +258,7 @@ class DocModel {
     }
 
     private func selectInspectorItems(ids: [RelationValue]) {
-        // TODO: s/Object/type.name/
-        // TODO: "Deselect"?
-        self.performUndoableAction("Select Object", {
+        self.performUndoableAction("Change Selection", {
             // TODO: This could probably be made more efficient
             self.selectedInspectorItemIDs.delete(true)
             for id in ids {
@@ -282,8 +284,9 @@ class DocModel {
                 ])
             },
             move: { (srcPath, dstPath) in
-                // TODO: s/Collection/type.name/
-                self.performUndoableAction("Move Collection", {
+                let srcNode = self.docOutlineBinding.nodeAtPath(srcPath)!
+                let collectionType = ItemType(rawValue: srcNode.data["type"].get()!)!
+                self.performUndoableAction("Move \(collectionType.name)", {
                     self.docOutlineBinding.move(srcPath: srcPath, dstPath: dstPath)
                 })
             }
@@ -300,13 +303,8 @@ class DocModel {
         )
         
         let cell = { (row: Row) -> TreeViewModel.Cell in
-            // TODO: Ideally we'd have a way to create a projection Relation directly from
-            // an existing Row.  In the meantime, we'll select/project from the original
-            // relation.  The downside of that latter approach is that the cell text will
-            // disappear before the cell fades out in the case where the item is deleted.
-            // (If the cell was bound to a projection of the row, presumably it would
-            // continue to work even after the row has been deleted from the underlying
-            // relation.)
+            // TODO: Could we have a convenience for creating a projection Relation directly
+            // from an existing Row?
             let rowID = row["id"]
             let type = ItemType(rawValue: row["type"].get()!)!
             let nameRelation = self.collections.select(Attribute("id") *== rowID).project(["name"])
