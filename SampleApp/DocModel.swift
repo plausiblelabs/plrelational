@@ -349,36 +349,37 @@ class DocModel {
         return TreeViewModel(data: data, selection: selection, cell: cell)
     }()
     
-    private lazy var selectedDocItems: ValueBinding<[DocItem]> = { [unowned self] in
-        return MultiRowBinding(relation: self.selectedItems).map{ rows in
-            return rows.map { row in
-                let id = row["id"]
-                let type = ItemType(rawValue: row["type"].get()!)!
-                return DocItem(id: id, type: type)
-            }
-        }
+    private lazy var selectedItemNamesRelation: Relation = { [unowned self] in
+        return self.selectedItems.project(["name"])
     }()
-    
+
+    private lazy var selectedItemTypesRelation: Relation = { [unowned self] in
+        return self.selectedItems.project(["type"])
+    }()
+
     lazy var itemSelected: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedDocItems.map{ $0.count > 0 }
+        return self.selectedItems.nonEmpty
     }()
     
     lazy var itemNotSelected: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedDocItems.map{ $0.count == 0 }
+        return self.selectedItems.empty
+    }()
+    
+    lazy var selectedItemTypes: ValueBinding<[ItemType]> = { [unowned self] in
+        return self.selectedItemTypesRelation.all{ ItemType(rawValue: $0.get()!)! }
+    }()
+    
+    private lazy var selectedItemCommonType: ValueBinding<CommonValue<ItemType>> = { [unowned self] in
+        return self.selectedItemTypes.common()
     }()
 
-    lazy var selectedItemTypes: ValueBinding<CommonValue<ItemType>> = { [unowned self] in
-        return self.selectedDocItems.map{ $0.map{ $0.type } }.common()
-    }()
-
-    lazy var selectedItemTypeString: ValueBinding<String?> = { [unowned self] in
-        return self.selectedDocItems.map{ items -> String? in
-            if items.count == 0 {
-                return nil
-            } else if items.count == 1 {
-                return items[0].type.name
+    lazy var selectedItemTypesString: ValueBinding<String> = { [unowned self] in
+        return self.selectedItemTypes.map{ types -> String in
+            if types.count == 0 {
+                return ""
+            } else if types.count == 1 {
+                return types[0].name
             } else {
-                let types = Set(items.map{$0.type})
                 if types.count == 1 {
                     return "Multiple \(types.first!.name)s"
                 } else {
@@ -388,45 +389,51 @@ class DocModel {
         }
     }()
     
-    // TODO: This needs to be a MultiStringBidiBinding
-    lazy var selectedItemName: StringBidiBinding = { [unowned self] in
-        let nameRelation = self.selectedItems.project(["name"])
+    lazy var selectedItemNames: ValueBinding<String> = { [unowned self] in
         // TODO: s/Collection/type.name/
-        return self.bidiBinding(nameRelation, type: "Collection")
+        return self.bidiBinding(self.selectedItemNamesRelation, type: "TODO")
     }()
-    
+
+    lazy var selectedItemNamesPlaceholder: ValueBinding<String> = { [unowned self] in
+        return self.selectedItemNamesRelation.stringWhenMulti("Multiple Values")
+    }()
+
     lazy var selectedItemsOnlyText: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedItemTypes.map{ $0.all(.Text) }
+        return self.selectedItemCommonType.map{ $0.all(.Text) }
     }()
 
     lazy var selectedItemsOnlyImage: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedItemTypes.map{ $0.all(.Image) }
+        return self.selectedItemCommonType.map{ $0.all(.Image) }
     }()
 
-    private func bidiBinding(relation: Relation, type: String) -> StringBidiBinding {
-        let attr = relation.scheme.attributes.first!
-        
-        func update(newValue: String) {
-            let values: Row = [attr: RelationValue(newValue)]
-            Swift.print("UPDATE: \(newValue)")
-            var mutableRelation = relation
-            let updateResult = mutableRelation.update(true, newValues: values)
-            precondition(updateResult.ok != nil)
-        }
-
-        return StringBidiBinding(
-            relation: relation,
-            snapshot: {
-                return self.db.takeSnapshot()
-            },
-            change: { newValue in
-                update(newValue)
-            },
-            commit: { before, newValue in
-                self.performUndoableAction("Rename \(type)", before: before, {
-                    update(newValue)
-                })
-            }
-        )
+    // TODO: Make this bidi again
+    private func bidiBinding(relation: Relation, type: String) -> ValueBinding<String> {
+        return relation.oneString
+    
+//        let attr = relation.scheme.attributes.first!
+//        
+//        func update(newValue: String?) {
+//            guard let newValue = newValue else { return }
+//            let values: Row = [attr: RelationValue(newValue)]
+//            Swift.print("UPDATE: \(newValue)")
+//            var mutableRelation = relation
+//            let updateResult = mutableRelation.update(true, newValues: values)
+//            precondition(updateResult.ok != nil)
+//        }
+//        
+//        return BidiBinding(
+//            binding: binding,
+//            snapshot: {
+//                return self.db.takeSnapshot()
+//            },
+//            change: { newValue in
+//                update(newValue)
+//            },
+//            commit: { before, newValue in
+//                self.performUndoableAction("Rename \(type)", before: before, {
+//                    update(newValue)
+//                })
+//            }
+//        )
     }
 }

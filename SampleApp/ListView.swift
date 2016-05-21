@@ -28,7 +28,7 @@ struct ListViewModel {
     }
     
     struct Cell {
-        let text: StringBidiBinding
+        let text: ValueBinding<String>
     }
     
     let data: Data

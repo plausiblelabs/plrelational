@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		372707661CECD27700710C80 /* MultiValueTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707651CECD27700710C80 /* MultiValueTextField.swift */; };
 		372707681CED2F8100710C80 /* AppTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707671CED2F8100710C80 /* AppTestCase.swift */; };
 		3727076B1CED32B000710C80 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076C1CEE60C900710C80 /* MutableRelation.swift */; };
 		3727076F1CEF84FC00710C80 /* ArraySafeIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
+		376136911CF11C0A00F572C5 /* RelationBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136901CF11C0A00F572C5 /* RelationBinding.swift */; };
+		376136931CF11C8D00F572C5 /* CommonValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136921CF11C8D00F572C5 /* CommonValue.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -136,12 +137,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		372707651CECD27700710C80 /* MultiValueTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MultiValueTextField.swift; sourceTree = "<group>"; };
 		372707671CED2F8100710C80 /* AppTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppTestCase.swift; sourceTree = "<group>"; };
 		3727076C1CEE60C900710C80 /* MutableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelation.swift; sourceTree = "<group>"; };
 		3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArraySafeIndex.swift; sourceTree = "<group>"; };
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = SampleAppTests/DocModelTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
+		376136901CF11C0A00F572C5 /* RelationBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationBinding.swift; sourceTree = "<group>"; };
+		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonValue.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -306,7 +308,6 @@
 			children = (
 				37C611301CD7F7D7001DAF59 /* BackgroundView.swift */,
 				37C611321CD7F80F001DAF59 /* TextField.swift */,
-				372707651CECD27700710C80 /* MultiValueTextField.swift */,
 				37C611351CD7FB07001DAF59 /* ListView.swift */,
 				37C611501CE10770001DAF59 /* TreeView.swift */,
 				37C611371CD7FB9C001DAF59 /* ExtOutlineView.swift */,
@@ -329,9 +330,11 @@
 			isa = PBXGroup;
 			children = (
 				37C6113E1CD93069001DAF59 /* Binding.swift */,
+				376136901CF11C0A00F572C5 /* RelationBinding.swift */,
 				37C6114C1CDD603C001DAF59 /* OrderedBinding.swift */,
 				37C6114E1CDD6084001DAF59 /* OrderedTreeBinding.swift */,
 				37F8FBD31CE4FC30001C7C5F /* OrderedTreeBindingTests.swift */,
+				376136921CF11C8D00F572C5 /* CommonValue.swift */,
 			);
 			name = "Relational Stuff";
 			sourceTree = "<group>";
@@ -740,8 +743,10 @@
 				37C611481CDBCB4C001DAF59 /* DocOutlineView.swift in Sources */,
 				3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */,
 				37C611531CE3A942001DAF59 /* ContextMenu.swift in Sources */,
+				376136931CF11C8D00F572C5 /* CommonValue.swift in Sources */,
 				37C611311CD7F7D7001DAF59 /* BackgroundView.swift in Sources */,
 				37C6115B1CE4F3BC001DAF59 /* ArrayBinarySearch.swift in Sources */,
+				376136911CF11C0A00F572C5 /* RelationBinding.swift in Sources */,
 				37C611021CD7EFAE001DAF59 /* Document.swift in Sources */,
 				37C611511CE10770001DAF59 /* TreeView.swift in Sources */,
 				37C611361CD7FB07001DAF59 /* ListView.swift in Sources */,
@@ -749,7 +754,6 @@
 				37C6113F1CD93069001DAF59 /* Binding.swift in Sources */,
 				37C611441CDA7230001DAF59 /* Box.swift in Sources */,
 				37C6113A1CD80566001DAF59 /* DocModel.swift in Sources */,
-				372707661CECD27700710C80 /* MultiValueTextField.swift in Sources */,
 				37C6114B1CDBCB5C001DAF59 /* PropertiesView.swift in Sources */,
 				37C6114D1CDD603C001DAF59 /* OrderedBinding.swift in Sources */,
 				37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */,

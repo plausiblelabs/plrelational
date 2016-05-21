@@ -23,11 +23,11 @@ class DocModelTests: AppTestCase {
             model.newObject(name, type: type, collectionID: collectionID, order: order)
         }
         
-        func verifyBindings(itemSelected itemSelected: Bool, selectedItemType: String?, selectedItemName: String?) {
+        func verifyBindings(itemSelected itemSelected: Bool, selectedItemType: String, selectedItemName: String) {
             XCTAssertEqual(model.itemSelected.value, itemSelected)
             XCTAssertEqual(model.itemNotSelected.value, !itemSelected)
-            XCTAssertEqual(model.selectedItemTypeString.value, selectedItemType)
-            XCTAssertEqual(model.selectedItemName.value, selectedItemName)
+            XCTAssertEqual(model.selectedItemTypesString.value, selectedItemType)
+            XCTAssertEqual(model.selectedItemNames.value, selectedItemName)
         }
         
         func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath {
@@ -64,7 +64,7 @@ class DocModelTests: AppTestCase {
         verifyTree(model.inspectorTreeViewModel.data.binding, [])
         
         // Verify properties-related bindings
-        verifyBindings(itemSelected: false, selectedItemType: nil, selectedItemName: nil)
+        verifyBindings(itemSelected: false, selectedItemType: "", selectedItemName: "")
         
         // Select a page in the doc outline
         model.docOutlineTreeViewModel.selection.set(ids: [3])

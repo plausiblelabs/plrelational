@@ -30,7 +30,7 @@ struct TreeViewModel {
     }
     
     struct Cell {
-        let text: StringBidiBinding
+        let text: ValueBinding<String>
     }
     
     let data: Data

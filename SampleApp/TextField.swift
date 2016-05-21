@@ -10,12 +10,12 @@ import Cocoa
 
 class TextField: NSTextField, NSTextFieldDelegate {
 
-    var string: ValueBinding<String?>? {
+    var string: ValueBinding<String>? {
         didSet {
             stringBindingRemoval?()
             stringBindingRemoval = nil
             if let string = string {
-                stringValue = string.value ?? ""
+                stringValue = string.value
                 stringBindingRemoval = string.addChangeObserver({ [weak self] in
                     guard let weakSelf = self else { return }
                     // TODO: If the value becomes nil, it means that the underlying row
@@ -25,16 +25,33 @@ class TextField: NSTextField, NSTextFieldDelegate {
                     // view item is removed (with a fade animation).  As a workaround,
                     // if the value is transitioning to nil, we will leave the previous
                     // text in place.
-                    if let value = string.value {
-                        weakSelf.stringValue = value
-                    }
+                    // XXX: The above no longer applies, since the string is no longer an optional type
+//                    if let value = string.value {
+                        weakSelf.stringValue = string.value
+//                    }
                 })
             } else {
                 stringValue = ""
             }
         }
     }
-    
+
+    var placeholder: ValueBinding<String>? {
+        didSet {
+            placeholderBindingRemoval?()
+            placeholderBindingRemoval = nil
+            if let placeholder = placeholder {
+                placeholderString = placeholder.value
+                placeholderBindingRemoval = placeholder.addChangeObserver({ [weak self] in
+                    guard let weakSelf = self else { return }
+                    weakSelf.placeholderString = placeholder.value
+                })
+            } else {
+                placeholderString = ""
+            }
+        }
+    }
+
     var visible: ValueBinding<Bool>? {
         didSet {
             visibleBindingRemoval?()
@@ -52,6 +69,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
     private var previousValue: String?
     
     private var stringBindingRemoval: (Void -> Void)?
+    private var placeholderBindingRemoval: (Void -> Void)?
     private var visibleBindingRemoval: (Void -> Void)?
     
     required init?(coder: NSCoder) {
@@ -68,9 +86,9 @@ class TextField: NSTextField, NSTextFieldDelegate {
     
     override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
-        if let bidiBinding = string as? StringBidiBinding {
-            bidiBinding.change(stringValue)
-        }
+//        if let bidiBinding = string as? BidiBinding {
+//            bidiBinding.change(stringValue)
+//        }
         previousValue = stringValue
     }
     
@@ -79,12 +97,12 @@ class TextField: NSTextField, NSTextFieldDelegate {
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value
         //Swift.print("CONTROL DID END EDITING!")
-        if let previousCommittedValue = previousCommittedValue, bidiBinding = string as? StringBidiBinding {
-            // TODO: Need to discard `before` snapshot if we're skipping the commit
-            if stringValue != previousCommittedValue {
-                bidiBinding.commit(stringValue)
-            }
-        }
+//        if let previousCommittedValue = previousCommittedValue, bidiBinding = string as? BidiBinding {
+//            // TODO: Need to discard `before` snapshot if we're skipping the commit
+//            if stringValue != previousCommittedValue {
+//                bidiBinding.commit(stringValue)
+//            }
+//        }
         previousCommittedValue = nil
         previousValue = nil
     }
