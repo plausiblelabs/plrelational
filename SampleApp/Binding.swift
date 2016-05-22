@@ -44,6 +44,12 @@ public class ValueBinding<T>: Binding {
             f()
         }
     }
+    
+    internal func setValue(value: T) {
+        // TODO: Don't notify if value is not actually changing
+        self.value = value
+        self.notifyChangeObservers()
+    }
 }
 
 extension ValueBinding {
@@ -68,10 +74,7 @@ private class MappedValueBinding<T>: ValueBinding<T> {
     init<U>(binding: ValueBinding<U>, transform: (U) -> T) {
         super.init(initialValue: transform(binding.value))
         self.removal = binding.addChangeObserver({ [weak self] in
-            guard let weakSelf = self else { return }
-            // TODO: Don't notify if value is not actually changing
-            weakSelf.value = transform(binding.value)
-            weakSelf.notifyChangeObservers()
+            self?.setValue(transform(binding.value))
         })
     }
 }
@@ -83,14 +86,10 @@ private class ZippedValueBinding<U, V>: ValueBinding<(U, V)> {
     init(_ binding1: ValueBinding<U>, _ binding2: ValueBinding<V>) {
         super.init(initialValue: (binding1.value, binding2.value))
         self.removal1 = binding1.addChangeObserver({ [weak self] in
-            guard let weakSelf = self else { return }
-            weakSelf.value = (binding1.value, binding2.value)
-            weakSelf.notifyChangeObservers()
+            self?.setValue((binding1.value, binding2.value))
         })
         self.removal2 = binding2.addChangeObserver({ [weak self] in
-            guard let weakSelf = self else { return }
-            weakSelf.value = (binding1.value, binding2.value)
-            weakSelf.notifyChangeObservers()
+            self?.setValue((binding1.value, binding2.value))
         })
     }
 }
@@ -115,105 +114,25 @@ private class CommonValueBinding<T: Hashable>: ValueBinding<CommonValue<T>> {
         super.init(initialValue: commonValue())
         
         self.removal = binding.addChangeObserver({ [weak self] in
-            guard let weakSelf = self else { return }
-            let common = commonValue()
-            // TODO: Don't notify if value is not actually changing
-            //if common != weakSelf.value {
-                weakSelf.value = common
-                weakSelf.notifyChangeObservers()
-            //}
+            self?.setValue(commonValue())
         })
     }
 }
 
-//public class StringBidiBinding: StringBinding {
-//    
-//    typealias Snapshot = () -> ChangeLoggingDatabaseSnapshot
-//    typealias Change = (newValue: String) -> Void
-//    typealias Commit = (before: ChangeLoggingDatabaseSnapshot, newValue: String) -> Void
-//    
-//    private let snapshot: Snapshot
-//    private let change: Change
-//    private let commit: Commit
-//    private var before: ChangeLoggingDatabaseSnapshot?
-//
-//    init(relation: Relation, snapshot: Snapshot, change: Change, commit: Commit) {
-//        self.snapshot = snapshot
-//        self.change = change
-//        self.commit = commit
-//        super.init(relation: relation)
-//    }
-//
-//    public func change(newValue: String) {
-//        selfInitiatedChange = true
-//        if before == nil {
-//            self.before = snapshot()
-//        }
-//        self.value = newValue
-//        self.change(newValue: newValue)
-//        selfInitiatedChange = false
-//    }
-//    
-//    public func commit(newValue: String) {
-//        selfInitiatedChange = true
-//        self.value = newValue
-//        if let before = before {
-//            self.commit(before: before, newValue: newValue)
-//            self.before = nil
-//        }
-//        selfInitiatedChange = false
-//    }
-//}
+public protocol BidiBinding: Binding {
+    func update(newValue: Value)
+    func commit(newValue: Value)
+}
 
-//public class BidiBinding<T>: ValueBinding<T> {
-//
-//    typealias Snapshot = () -> ChangeLoggingDatabaseSnapshot
-//    typealias Change = (newValue: T) -> Void
-//    typealias Commit = (before: ChangeLoggingDatabaseSnapshot, newValue: T) -> Void
-//    
-//    private let snapshot: Snapshot
-//    private let change: Change
-//    private let commit: Commit
-//    
-//    private var before: ChangeLoggingDatabaseSnapshot?
-//    private var removal: ObserverRemoval!
-//    private var selfInitiatedChange = false
-//
-//    init(binding: ValueBinding<T>, snapshot: Snapshot, change: Change, commit: Commit) {
-//        self.snapshot = snapshot
-//        self.change = change
-//        self.commit = commit
-//        
-//        super.init(initialValue: binding.value)
-//        
-//        self.removal = binding.addChangeObserver({ [weak self] in
-//            guard let weakSelf = self else { return }
-//
-//            if weakSelf.selfInitiatedChange { return }
-//
-//            // TODO: Don't notify if value is not actually changing
-//            weakSelf.value = binding.value
-//            weakSelf.notifyChangeObservers()
-//        })
-//    }
-//
-//    public func change(newValue: T) {
-//        selfInitiatedChange = true
-//        if before == nil {
-//            self.before = snapshot()
-//        }
-//        self.value = newValue
-//        self.change(newValue: newValue)
-//        selfInitiatedChange = false
-//    }
-//    
-//    public func commit(newValue: T) {
-//        selfInitiatedChange = true
-//        self.value = newValue
-//        if let before = before {
-//            self.commit(before: before, newValue: newValue)
-//            self.before = nil
-//        }
-//        selfInitiatedChange = false
-//    }
-//}
+// XXX: Hmm, this requires a subclass implementation; lousy design
+public class BidiValueBinding<T>: ValueBinding<T> {
+    override init(initialValue: T) {
+        super.init(initialValue: initialValue)
+    }
+    
+    public func update(newValue: T) {
+    }
+    
+    public func commit(newValue: T) {
+    }
+}

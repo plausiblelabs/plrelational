@@ -15,11 +15,55 @@ public class RelationBinding<T>: ValueBinding<T> {
         super.init(initialValue: transform(relation))
         
         self.removal = relation.addChangeObserver({ [weak self] _ in
-            guard let weakSelf = self else { return }
-            // TODO: Don't notify if value is not actually changing
-            weakSelf.value = transform(relation)
-            weakSelf.notifyChangeObservers()
+            self?.setValue(transform(relation))
         })
+    }
+}
+
+public struct BidiConfig<T> {
+    let snapshot: () -> ChangeLoggingDatabaseSnapshot
+    let update: (newValue: T) -> Void
+    let commit: (before: ChangeLoggingDatabaseSnapshot, newValue: T) -> Void
+}
+
+public class BidiRelationBinding<T>: BidiValueBinding<T> {
+    private let config: BidiConfig<T>
+    private var before: ChangeLoggingDatabaseSnapshot?
+    private var selfInitiatedChange = false
+    private var removal: (Void -> Void)!
+    
+    init(relation: Relation, config: BidiConfig<T>, transform: Relation -> T) {
+        self.config = config
+
+        super.init(initialValue: transform(relation))
+    
+        self.removal = relation.addChangeObserver({ [weak self] _ in
+            guard let weakSelf = self else { return }
+            
+            if weakSelf.selfInitiatedChange { return }
+            
+            weakSelf.setValue(transform(relation))
+        })
+    }
+    
+    public override func update(newValue: T) {
+        selfInitiatedChange = true
+        if before == nil {
+            before = config.snapshot()
+        }
+        value = newValue
+        config.update(newValue: newValue)
+        selfInitiatedChange = false
+    }
+    
+    public override func commit(newValue: T) {
+        selfInitiatedChange = true
+        value = newValue
+        if let before = before {
+            config.commit(before: before, newValue: newValue)
+            self.before = nil
+        }
+        selfInitiatedChange = false
     }
 }
 
@@ -70,6 +114,18 @@ extension Relation {
         return RelationBinding(relation: self, transform: { self.anyValue($0, unwrap) })
     }
 
+    /// Bidirectional version of `oneString` binding.
+    func bidiString(config: BidiConfig<String>) -> BidiValueBinding<String> {
+        return BidiRelationBinding(relation: self, config: config, transform: { relation -> String in
+            let values = self.allValues(relation, { value -> String? in value.get() })
+            if values.count == 1 {
+                return values.first!
+            } else {
+                return ""
+            }
+        })
+    }
+    
     /// Resolves to a sequence of all values for the single attribute, one value for each non-error row.
     private func allValues<V>(relation: Relation, _ unwrap: RelationValue -> V?) -> [V] {
         precondition(relation.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
