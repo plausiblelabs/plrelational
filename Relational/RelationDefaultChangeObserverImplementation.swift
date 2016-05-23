@@ -13,7 +13,7 @@ public protocol RelationDefaultChangeObserverImplementation: class, Relation {
 
 public struct RelationDefaultChangeObserverImplementationData {
     private var didAddFirstObserver = false
-    private var observers: [UInt64: RelationChange -> Void] = [:]
+    private var observers: [UInt64: RelationChange -> Void]?
     private var nextID: UInt64 = 0
 }
 
@@ -22,14 +22,18 @@ extension RelationDefaultChangeObserverImplementation {
         let id = changeObserverData.nextID
         changeObserverData.nextID += 1
         
-        changeObserverData.observers[id] = f
+        if changeObserverData.observers == nil {
+            changeObserverData.observers = [:]
+        }
+        
+        changeObserverData.observers![id] = f
         
         if !changeObserverData.didAddFirstObserver {
             changeObserverData.didAddFirstObserver = true
             self.onAddFirstObserver()
         }
         
-        return { self.changeObserverData.observers.removeValueForKey(id) }
+        return { self.changeObserverData.observers!.removeValueForKey(id) }
     }
     
     public func onAddFirstObserver() {}
@@ -39,13 +43,15 @@ extension RelationDefaultChangeObserverImplementation {
             return r == nil || r?.isEmpty.ok == true
         }
         
-        // Don't bother notifying if there aren't actually any changes.
-        if isEmpty(changes.added) && isEmpty(changes.removed) {
-            return
-        }
+        if let observers = changeObserverData.observers {
+            // Don't bother notifying if there aren't actually any changes.
+            if isEmpty(changes.added) && isEmpty(changes.removed) {
+                return
+            }
         
-        for (_, f) in changeObserverData.observers {
-            f(changes)
+            for (_, f) in observers {
+                f(changes)
+            }
         }
     }
 }
