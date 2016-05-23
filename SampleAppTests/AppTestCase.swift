@@ -32,7 +32,7 @@ class AppTestCase: XCTestCase {
         XCTAssertEqual(prettyRoot(binding), expected, file: file, line: line)
     }
     
-    func path(treeBinding: RelationTreeBinding, parentID: Int64?, index: Int) -> TreePath {
+    func path(treeBinding: RelationTreeBinding, parentID: Int64?, index: Int) -> RelationTreeBinding.Path {
         let parent = parentID.flatMap{ treeBinding.nodeForID(RelationValue($0)) }
         return TreePath(parent: parent, index: index)
     }

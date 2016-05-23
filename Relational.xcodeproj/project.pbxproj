@@ -12,6 +12,7 @@
 		3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076C1CEE60C900710C80 /* MutableRelation.swift */; };
 		3727076F1CEF84FC00710C80 /* ArraySafeIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */; };
 		372707711CF389DB00710C80 /* ValueBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707701CF389DB00710C80 /* ValueBinding.swift */; };
+		372707761CF391EC00710C80 /* TreeBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707751CF391EC00710C80 /* TreeBinding.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
 		376136911CF11C0A00F572C5 /* RelationValueBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136901CF11C0A00F572C5 /* RelationValueBinding.swift */; };
@@ -142,6 +143,7 @@
 		3727076C1CEE60C900710C80 /* MutableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelation.swift; sourceTree = "<group>"; };
 		3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArraySafeIndex.swift; sourceTree = "<group>"; };
 		372707701CF389DB00710C80 /* ValueBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueBinding.swift; sourceTree = "<group>"; };
+		372707751CF391EC00710C80 /* TreeBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeBinding.swift; sourceTree = "<group>"; };
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = SampleAppTests/DocModelTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		376136901CF11C0A00F572C5 /* RelationValueBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValueBinding.swift; sourceTree = "<group>"; };
@@ -284,6 +286,7 @@
 		372707731CF38FF600710C80 /* Tree Binding */ = {
 			isa = PBXGroup;
 			children = (
+				372707751CF391EC00710C80 /* TreeBinding.swift */,
 				37C6114E1CDD6084001DAF59 /* RelationTreeBinding.swift */,
 				37F8FBD31CE4FC30001C7C5F /* RelationTreeBindingTests.swift */,
 			);
@@ -769,6 +772,7 @@
 			files = (
 				37C611481CDBCB4C001DAF59 /* DocOutlineView.swift in Sources */,
 				3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */,
+				372707761CF391EC00710C80 /* TreeBinding.swift in Sources */,
 				37C611531CE3A942001DAF59 /* ContextMenu.swift in Sources */,
 				376136931CF11C8D00F572C5 /* CommonValue.swift in Sources */,
 				37C611311CD7F7D7001DAF59 /* BackgroundView.swift in Sources */,

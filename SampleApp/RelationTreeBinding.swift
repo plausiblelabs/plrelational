@@ -9,61 +9,26 @@
 import Foundation
 import libRelational
 
-public struct TreePos {
-    let parentID: RelationValue?
-    let previousID: RelationValue?
-    let nextID: RelationValue?
-}
-
-public struct TreePath {
-    let parent: RelationTreeBinding.Node?
-    let index: Int
-}
-
-extension TreePath: Equatable {}
-public func ==(a: TreePath, b: TreePath) -> Bool {
-    return a.parent?.id == b.parent?.id && a.index == b.index
-}
-
-extension RelationTreeBinding.Change: Equatable {}
-public func ==(a: RelationTreeBinding.Change, b: RelationTreeBinding.Change) -> Bool {
-    switch (a, b) {
-    case let (.Insert(a), .Insert(b)): return a == b
-    case let (.Delete(a), .Delete(b)): return a == b
-    case let (.Move(asrc, adst), .Move(bsrc, bdst)): return asrc == bsrc && adst == bdst
-    default: return false
-    }
-}
-
-public class RelationTreeBinding {
-
-    public class Node {
-        let id: RelationValue
-        var data: Row
-        var children: [Node]
-        
-        init(id: RelationValue, data: Row, children: [Node] = []) {
-            self.id = id
-            self.data = data
-            self.children = children
-        }
-    }
-
-    public enum Change { case
-        Insert(TreePath),
-        Delete(TreePath),
-        Move(src: TreePath, dst: TreePath)
-    }
+extension Row: TreeData {
+    public typealias ID = RelationValue
     
-    public typealias ObserverRemoval = () -> Void
-    public typealias ChangeObserver = ([Change]) -> Void
+    public var id: RelationValue {
+        // TODO: Need to use the attribute provided to RelationTreeBinding init
+        return self["id"]
+    }
+}
+
+public class RelationTreeBinding: TreeBinding<Row> {
+
+    public typealias Node = TreeNode<Row>
+    public typealias Path = TreePath<Row>
+    public typealias Pos = TreePos<Row>
+    public typealias Change = TreeChange<Row>
     
     private let relation: Relation
     private let idAttr: Attribute
     private let parentAttr: Attribute
     private let orderAttr: Attribute
-    
-    public let root: Node = Node(id: -1, data: Row())
     
     private var removal: ObserverRemoval!
     private var changeObservers: [UInt64: ChangeObserver] = [:]
@@ -74,6 +39,8 @@ public class RelationTreeBinding {
         self.idAttr = idAttr
         self.parentAttr = parentAttr
         self.orderAttr = orderAttr
+        
+        super.init(root: Node(id: -1, data: Row()))
         
         // TODO: Depth
         // TODO: Sorting
@@ -162,7 +129,7 @@ public class RelationTreeBinding {
     }
     
     /// Returns the node at the given path.
-    public func nodeAtPath(path: TreePath) -> Node? {
+    public func nodeAtPath(path: Path) -> Node? {
         let parent = path.parent ?? root
         return parent.children[safe: path.index]
     }
@@ -216,7 +183,7 @@ public class RelationTreeBinding {
         return false
     }
     
-    public func insert(row: Row, pos: TreePos) {
+    public func insert(row: Row, pos: Pos) {
         // TODO: Provide insert/delete/move as extension defined where R: MutableRelation
         guard var relation = relation as? MutableRelation else {
             fatalError("insert() is only supported when the underlying relation is mutable")
@@ -251,7 +218,7 @@ public class RelationTreeBinding {
             index = insertNode(node, parent: root)
         }
         
-        let path = TreePath(parent: parent, index: index)
+        let path = Path(parent: parent, index: index)
         return [.Insert(path)]
     }
     
@@ -311,7 +278,7 @@ public class RelationTreeBinding {
     }
 
     /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
-    public func move(srcPath srcPath: TreePath, dstPath: TreePath) {
+    public func move(srcPath srcPath: Path, dstPath: Path) {
         let srcParent = srcPath.parent ?? root
         let dstParent = dstPath.parent ?? root
 
@@ -430,7 +397,7 @@ public class RelationTreeBinding {
         return RelationValue(lo + ((hi - lo) / 2.0))
     }
     
-    private func orderForPos(pos: TreePos) -> RelationValue {
+    private func orderForPos(pos: Pos) -> RelationValue {
         let parent: Node
         if let parentID = pos.parentID {
             parent = nodeForID(parentID)!

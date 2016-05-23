@@ -98,7 +98,7 @@ class RelationTreeBindingTests: AppTestCase {
                 ]
                 let parent = parentID.map{RelationValue($0)}
                 let previous = previousID.map{RelationValue($0)}
-                let pos = TreePos(parentID: parent, previousID: previous, nextID: nil)
+                let pos = RelationTreeBinding.Pos(parentID: parent, previousID: previous, nextID: nil)
                 treeBinding.insert(row, pos: pos)
             })
         }
@@ -109,7 +109,7 @@ class RelationTreeBindingTests: AppTestCase {
             })
         }
         
-        func moveCollection(srcPath srcPath: TreePath, dstPath: TreePath) {
+        func moveCollection(srcPath srcPath: RelationTreeBinding.Path, dstPath: RelationTreeBinding.Path) {
             db.transaction({
                 treeBinding.move(srcPath: srcPath, dstPath: dstPath)
             })
@@ -125,7 +125,7 @@ class RelationTreeBindingTests: AppTestCase {
             AssertEqual(sqliteDB["collection"]!, expected, file: file, line: line)
         }
         
-        func path(parentID: Int64?, _ index: Int) -> TreePath {
+        func path(parentID: Int64?, _ index: Int) -> RelationTreeBinding.Path {
             let parent = parentID.flatMap{ treeBinding.nodeForID(RelationValue($0)) }
             return TreePath(parent: parent, index: index)
         }

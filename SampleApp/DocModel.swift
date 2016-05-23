@@ -215,7 +215,7 @@ class DocModel {
         ]
         let parent = parentID.map{RelationValue($0)}
         let previous = previousID.map{RelationValue($0)}
-        let pos = TreePos(parentID: parent, previousID: previous, nextID: nil)
+        let pos = RelationTreeBinding.Pos(parentID: parent, previousID: previous, nextID: nil)
         docOutlineBinding.insert(row, pos: pos)
     }
     

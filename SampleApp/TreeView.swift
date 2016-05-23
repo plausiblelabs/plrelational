@@ -20,7 +20,7 @@ struct TreeViewModel {
         let allowsChildren: (Row) -> Bool
         let contextMenu: ((Row) -> ContextMenu?)?
         // Note: dstPath.index is relative to the state of the array *before* the item is removed.
-        let move: ((srcPath: TreePath, dstPath: TreePath) -> Void)?
+        let move: ((srcPath: RelationTreeBinding.Path, dstPath: RelationTreeBinding.Path) -> Void)?
     }
     
     struct Selection {
