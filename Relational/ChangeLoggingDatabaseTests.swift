@@ -997,7 +997,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
         
-        for i in 0..<1000 {
+        for i in 0..<100 {
             flights.update(Attribute("number") *== 1, newValues: ["pilot": .Text("Jones \(i)")])
             if i % 2 == 0 {
                 flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
@@ -1022,7 +1022,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
         
-        for i in 0..<1000 {
+        for i in 0..<100 {
             flights.update(Attribute("number") *== 1, newValues: ["pilot": .Text("Jones \(i)")])
             if i % 2 == 0 {
                 flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
@@ -1033,9 +1033,11 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         let snapshot = db.takeSnapshot()
         flights.add(["number": 3, "pilot": "Thompson", "equipment": "727"])
+        let endSnapshot = db.takeSnapshot()
         
         measureBlock({
             db.restoreSnapshot(snapshot)
+            db.restoreSnapshot(endSnapshot)
         })
     }
 }
