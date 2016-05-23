@@ -31,8 +31,6 @@ public class RelationTreeBinding: TreeBinding<Row> {
     private let orderAttr: Attribute
     
     private var removal: ObserverRemoval!
-    private var changeObservers: [UInt64: ChangeObserver] = [:]
-    private var changeObserverNextID: UInt64 = 0
     
     init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
         self.relation = relation
@@ -93,19 +91,6 @@ public class RelationTreeBinding: TreeBinding<Row> {
                 self.notifyChangeObservers(treeChanges)
             }
         })
-    }
-    
-    public func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval {
-        let id = changeObserverNextID
-        changeObserverNextID += 1
-        changeObservers[id] = observer
-        return { self.changeObservers.removeValueForKey(id) }
-    }
-    
-    private func notifyChangeObservers(changes: [Change]) {
-        for (_, f) in changeObservers {
-            f(changes)
-        }
     }
     
     /// Returns the node with the given identifier.

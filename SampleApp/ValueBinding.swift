@@ -10,7 +10,7 @@ import Foundation
 
 public class ValueBinding<T>: Binding {
     public typealias Value = T
-    public typealias Change = Void
+    public typealias Changes = Void
     
     internal typealias ChangeObserver = Void -> Void
     internal typealias ObserverRemoval = Void -> Void

@@ -10,11 +10,11 @@ import Foundation
 
 public protocol Binding {
     associatedtype Value
-    associatedtype Change
+    associatedtype Changes
     
     var value: Value { get }
     
-    func addChangeObserver(observer: Change -> Void) -> (Void -> Void)
+    func addChangeObserver(observer: Changes -> Void) -> (Void -> Void)
 }
 
 public protocol BidiBinding: Binding {

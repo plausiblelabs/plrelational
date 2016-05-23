@@ -57,14 +57,36 @@ public func ==<D: TreeData>(a: TreeChange<D>, b: TreeChange<D>) -> Bool {
     }
 }
 
-public class TreeBinding<D: TreeData> {
-    
+public class TreeBinding<D: TreeData>: Binding {
+    public typealias Value = TreeNode<D>
+    public typealias Changes = [TreeChange<D>]
+
     public typealias ChangeObserver = ([TreeChange<D>]) -> Void
     public typealias ObserverRemoval = Void -> Void
     
     public let root: TreeNode<D>
     
+    public var value: TreeNode<D> {
+        return root
+    }
+    
     init(root: TreeNode<D>) {
         self.root = root
+    }
+    
+    private var changeObservers: [UInt64: ChangeObserver] = [:]
+    private var changeObserverNextID: UInt64 = 0
+    
+    public func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval {
+        let id = changeObserverNextID
+        changeObserverNextID += 1
+        changeObservers[id] = observer
+        return { self.changeObservers.removeValueForKey(id) }
+    }
+    
+    internal func notifyChangeObservers(changes: [TreeChange<D>]) {
+        for (_, f) in changeObservers {
+            f(changes)
+        }
     }
 }
