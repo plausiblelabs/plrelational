@@ -183,8 +183,10 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
 }
 
 extension ChangeLoggingRelation where BaseRelation: SQLiteTableRelation {
+    /// Save changes into the underlying database. Note that this does *not* use a transaction.
+    /// Since we're likely to be saving multiple tables at once, the transaction takes place
+    /// in that code to ensure everything is done together.
     public func save() -> Result<Void, RelationError> {
-        // TODO: transactions!
         let change = ChangeLoggingRelation.computeChangeFromLog(self.log.lazy.map({ $0.forward }), baseRelation: self.baseRelation)
         if let removed = change.removed {
             for row in removed.rows() {
