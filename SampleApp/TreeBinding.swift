@@ -9,7 +9,7 @@
 import Foundation
 
 public protocol TreeData {
-    associatedtype ID: Equatable
+    associatedtype ID: Equatable, Plistable
 }
 
 public class TreeNode<D: TreeData> {

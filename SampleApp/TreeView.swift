@@ -8,9 +8,6 @@
 
 import Cocoa
 
-// XXX: Remove this dependency
-import libRelational
-
 // TODO: This needs to be configurable, or at least made unique so that only internal drag-and-drop
 // is allowed by default
 private let PasteboardType = "coop.plausible.vp.pasteboard.TreeViewItem"
@@ -27,10 +24,10 @@ struct TreeViewModel<D: TreeData> {
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
-class TreeView: NSObject {
+class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
     
     private let outlineView: NSOutlineView
-    private let model: TreeViewModel<Row>
+    private let model: TreeViewModel<D>
     
     private var treeBindingObserverRemoval: (Void -> Void)?
     private var selectionBindingObserverRemoval: (Void -> Void)?
@@ -42,7 +39,7 @@ class TreeView: NSObject {
     /// Whether to automatically expand a parent when a child is inserted.
     var autoExpand = false
     
-    init(outlineView: NSOutlineView, model: TreeViewModel<Row>) {
+    init(outlineView: NSOutlineView, model: TreeViewModel<D>) {
         self.outlineView = outlineView
         self.model = model
         
@@ -58,60 +55,57 @@ class TreeView: NSObject {
         outlineView.registerForDraggedTypes([PasteboardType])
         outlineView.verticalMotionCanBeginDrag = true
     }
-}
-
-extension TreeView: NSOutlineViewDataSource {
     
-    func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
+    // MARK: NSOutlineViewDataSource
+
+    @objc func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
         switch item {
         case nil:
             return model.data.root.children.count
-        case let node as RelationTreeBinding.Node:
+        case let node as TreeNode<D>:
             return node.children.count
         default:
             fatalError("Unexpected item type")
         }
     }
     
-    func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
+    @objc func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
         switch item {
         case nil:
             return model.data.root.children[index]
-        case let node as RelationTreeBinding.Node:
+        case let node as TreeNode<D>:
             return node.children[index]
         default:
             fatalError("Unexpected item type")
         }
     }
     
-    func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
-        let node = item as! RelationTreeBinding.Node
+    @objc func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
+        let node = item as! TreeNode<D>
         return model.allowsChildren(node.data) && node.children.count > 0
     }
     
-    func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
+    @objc func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
         if model.move == nil {
             return nil
         }
         
-        let node = item as! RelationTreeBinding.Node
-        // TODO: Don't assume Int64
-        let rowID: Int64 = node.id.get()!
+        let node = item as! TreeNode<D>
         let pboardItem = NSPasteboardItem()
-        pboardItem.setString(String(rowID), forType: PasteboardType)
+        pboardItem.setPropertyList(node.id.toPlist(), forType: PasteboardType)
         return pboardItem
     }
     
-    func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
+    @objc func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
         
-        if let rowIDString = pboard.stringForType(PasteboardType) {
-            let rowID = RelationValue(Int64(rowIDString)!)
-            let currentParent = model.data.parentForID(rowID)
-            let proposedParent = proposedItem as? RelationTreeBinding.Node
+        if let idPlist = pboard.propertyListForType(PasteboardType) {
+            let nodeID = D.ID.fromPlist(idPlist)!
+            let currentParent = model.data.parentForID(nodeID)
+            let proposedParent = proposedItem as? TreeNode<D>
             if proposedParent === currentParent {
                 // We are reordering the node within its existing parent (or at the top level)
-                if let srcIndex = model.data.indexForID(rowID) {
+                if let srcIndex = model.data.indexForID(nodeID) {
                     if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
                         return .Move
                     }
@@ -121,7 +115,7 @@ extension TreeView: NSOutlineViewDataSource {
                     // We are reparenting the item.  Note that we only allow dragging onto an existing node (i.e.,
                     // when proposedIndex < 0) for the case where the node is empty, since Cocoa doesn't propose
                     // a specific insertion index for that case.
-                    if let currentNode = model.data.nodeForID(rowID) {
+                    if let currentNode = model.data.nodeForID(nodeID) {
                         if model.allowsChildren(proposedParent.data) &&
                             (proposedIndex >= 0 || proposedParent.children.isEmpty) &&
                             !model.data.isNodeDescendent(proposedParent, ofAncestor: currentNode)
@@ -141,17 +135,18 @@ extension TreeView: NSOutlineViewDataSource {
         return .None
     }
     
-    func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
+    @objc func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
-        if let rowIDString = pboard.stringForType(PasteboardType) {
-            let rowID = RelationValue(Int64(rowIDString)!)
+        
+        if let idPlist = pboard.propertyListForType(PasteboardType) {
+            let nodeID = D.ID.fromPlist(idPlist)!
             
-            let currentParent = model.data.parentForID(rowID)
-            let proposedParent = item as? RelationTreeBinding.Node
+            let currentParent = model.data.parentForID(nodeID)
+            let proposedParent = item as? TreeNode<D>
 
             // Note that `index` will be -1 in the case where it is being dragged onto
             // another node, but we will account for that in RelationTreeBinding.move()
-            let srcIndex = model.data.indexForID(rowID)!
+            let srcIndex = model.data.indexForID(nodeID)!
             let dstIndex = index
 
             let srcPath = TreePath(parent: currentParent, index: srcIndex)
@@ -162,18 +157,16 @@ extension TreeView: NSOutlineViewDataSource {
         
         return false
     }
-}
 
-extension TreeView: ExtOutlineViewDelegate {
+    // MARK: ExtOutlineViewDelegate
     
     func outlineView(outlineView: NSOutlineView, viewForTableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
         // TODO: Make this configurable
         let identifier = "PageCell"
-        let node = item as! RelationTreeBinding.Node
-        let row = node.data
+        let node = item as! TreeNode<D>
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            textField.string = model.cellText(row)
+            textField.string = model.cellText(node.data)
         }
         return view
     }
@@ -183,7 +176,7 @@ extension TreeView: ExtOutlineViewDelegate {
     }
     
     func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
-        let node = item as! RelationTreeBinding.Node
+        let node = item as! TreeNode<D>
         return model.contextMenu?(node.data).map{$0.nsmenu}
     }
     
@@ -200,9 +193,9 @@ extension TreeView: ExtOutlineViewDelegate {
         
         selfInitiatedSelectionChange = true
         
-        var itemIDs: [RelationValue] = []
+        var itemIDs: [D.ID] = []
         outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
-            if let node = self.outlineView.itemAtRow(index) as? RelationTreeBinding.Node {
+            if let node = self.outlineView.itemAtRow(index) as? TreeNode<D> {
                 itemIDs.append(node.id)
             }
         }
@@ -210,10 +203,9 @@ extension TreeView: ExtOutlineViewDelegate {
         
         selfInitiatedSelectionChange = false
     }
-}
 
-extension TreeView {
-    
+    // MARK: Binding observers
+
     func selectionBindingChanged() {
         if selfInitiatedSelectionChange {
             return
@@ -235,14 +227,14 @@ extension TreeView {
         selfInitiatedSelectionChange = false
     }
     
-    func treeBindingChanged(changes: [RelationTreeBinding.Change]) {
+    func treeBindingChanged(changes: [TreeChange<D>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
         
         outlineView.beginUpdates()
 
         // TODO: Use a Set instead
-        var parentsToReload: [RelationTreeBinding.Node] = []
-        var parentsToExpand: [RelationTreeBinding.Node] = []
+        var parentsToReload: [TreeNode<D>] = []
+        var parentsToExpand: [TreeNode<D>] = []
         
         for change in changes {
             switch change {
