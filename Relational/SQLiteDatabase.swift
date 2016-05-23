@@ -182,7 +182,11 @@ extension SQLiteDatabase {
         var localStmt: sqlite3_stmt = nil
         return errwrap(sqliteCall(&localStmt)).map({ _ in
             ValueWithDestructor(value: localStmt, destructor: {
-                // TODO: handle errors somehow?
+                // Note: sqlite3_finalize can return errors, but it only returns an error
+                // when the most recent evaluation of the statement produced an error, in
+                // which case _finalize just returns that same error again. So the only
+                // time _finalize will return an error is if we've already seen (and handled)
+                // that error elsewhere, and we can (and want to) ignore it here.
                 sqlite3_finalize($0)
             })
         })
