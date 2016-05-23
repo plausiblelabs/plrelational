@@ -11,25 +11,28 @@ import libRelational
 
 extension Row: TreeData {
     public typealias ID = RelationValue
-    
-    public var id: RelationValue {
-        // TODO: Need to use the attribute provided to RelationTreeBinding init
-        return self["id"]
-    }
-    
-    public var parentID: RelationValue? {
-        // TODO: Need to use the attribute provided to RelationTreeBinding init
-        let parent = self["parent"]
-        if parent != .NULL {
-            return parent
-        } else {
-            return nil
-        }
-    }
 }
 
 public class RelationTreeBinding: TreeBinding<Row> {
 
+    private class RowTreeNode: TreeNode<Row> {
+        let parentAttr: Attribute
+        
+        init(id: RelationValue, row: Row, parentAttr: Attribute) {
+            self.parentAttr = parentAttr
+            super.init(id: id, data: row)
+        }
+        
+        override var parentID: RelationValue? {
+            let parent = data[parentAttr]
+            if parent != .NULL {
+                return parent
+            } else {
+                return nil
+            }
+        }
+    }
+    
     private let relation: Relation
     private let idAttr: Attribute
     private let parentAttr: Attribute
@@ -43,7 +46,7 @@ public class RelationTreeBinding: TreeBinding<Row> {
         self.parentAttr = parentAttr
         self.orderAttr = orderAttr
         
-        super.init(root: Node(id: -1, data: Row()))
+        super.init(root: RowTreeNode(id: -1, row: Row(), parentAttr: parentAttr))
         
         // TODO: Depth
         // TODO: Sorting
@@ -120,7 +123,7 @@ public class RelationTreeBinding: TreeBinding<Row> {
             return parent.children.insertSorted(node, { self.orderForNode($0) })
         }
 
-        let node = Node(id: row[idAttr], data: row)
+        let node = RowTreeNode(id: row[idAttr], row: row, parentAttr: parentAttr)
         let parentID = row[parentAttr]
         let parent: Node?
         let index: Int

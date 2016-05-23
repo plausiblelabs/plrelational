@@ -10,8 +10,6 @@ import Foundation
 
 public protocol TreeData {
     associatedtype ID: Equatable
-    var id: ID { get }
-    var parentID: ID? { get }
 }
 
 public class TreeNode<D: TreeData> {
@@ -23,6 +21,10 @@ public class TreeNode<D: TreeData> {
         self.id = id
         self.data = data
         self.children = children
+    }
+    
+    public var parentID: D.ID? {
+        return nil
     }
 }
 
@@ -134,7 +136,7 @@ public class TreeBinding<D: TreeData>: Binding {
     
     /// Returns the parent of the given node.
     public func parentForNode(node: Node) -> Node? {
-        if let parentID = node.data.parentID {
+        if let parentID = node.parentID {
             return nodeForID(parentID)
         } else {
             return nil
