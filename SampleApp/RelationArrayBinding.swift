@@ -1,5 +1,5 @@
 //
-//  OrderedBinding.swift
+//  RelationArrayBinding.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/6/16.
@@ -14,13 +14,13 @@ public struct Pos {
     let nextID: RelationValue?
 }
 
-public protocol OrderedBindingObserver: class {
+public protocol RelationArrayBindingObserver: class {
     func onInsert(index: Int)
     func onDelete(index: Int)
     func onMove(srcIndex srcIndex: Int, dstIndex: Int)
 }
 
-public class OrderedBinding {
+public class RelationArrayBinding {
     
     private let relation: SQLiteTableRelation
     // TODO: Make this private
@@ -29,7 +29,7 @@ public class OrderedBinding {
     
     private(set) public var rows: [Box<Row>] = []
     
-    private var observers: [OrderedBindingObserver] = []
+    private var observers: [RelationArrayBindingObserver] = []
     
     init(relation: SQLiteTableRelation, idAttr: Attribute, orderAttr: Attribute) {
         self.relation = relation
@@ -46,7 +46,7 @@ public class OrderedBinding {
         self.rows = sortedRows.map{Box($0)}
     }
     
-    public func addObserver(observer: OrderedBindingObserver) {
+    public func addObserver(observer: RelationArrayBindingObserver) {
         if observers.indexOf({$0 === observer}) == nil {
             observers.append(observer)
         }

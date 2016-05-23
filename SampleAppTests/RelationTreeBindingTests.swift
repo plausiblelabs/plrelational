@@ -1,5 +1,5 @@
 //
-//  OrderedTreeBindingTests.swift
+//  RelationTreeBindingTests.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/11/16.
@@ -10,7 +10,7 @@ import XCTest
 import libRelational
 @testable import SampleApp
 
-class OrderedTreeBindingTests: AppTestCase {
+class RelationTreeBindingTests: AppTestCase {
 
     var dbPaths: [String] = []
     
@@ -61,7 +61,7 @@ class OrderedTreeBindingTests: AppTestCase {
         addCollection(6, name: "Child2", parentID: 2, order: 2.0)
         addCollection(7, name: "Group2", parentID: nil, order: 2.0)
         
-        let treeBinding = OrderedTreeBinding(relation: sqliteRelation, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        let treeBinding = RelationTreeBinding(relation: sqliteRelation, idAttr: "id", parentAttr: "parent", orderAttr: "order")
         
         // TODO: Verify that in-memory tree structure was built correctly during initialization
 //        verifyTree(treeBinding, [
@@ -82,10 +82,10 @@ class OrderedTreeBindingTests: AppTestCase {
 
         XCTAssertNil(sqliteDB.createRelation("collection", scheme: ["id", "name", "parent", "order"]).err)
         let relation = db["collection"]
-        let treeBinding = OrderedTreeBinding(relation: relation, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        let treeBinding = RelationTreeBinding(relation: relation, idAttr: "id", parentAttr: "parent", orderAttr: "order")
         XCTAssertEqual(treeBinding.root.children.count, 0)
         
-        var changes: [OrderedTreeBinding.Change] = []
+        var changes: [RelationTreeBinding.Change] = []
         let removal = treeBinding.addChangeObserver({ treeChanges in
             changes.appendContentsOf(treeChanges)
         })
@@ -98,7 +98,7 @@ class OrderedTreeBindingTests: AppTestCase {
                 ]
                 let parent = parentID.map{RelationValue($0)}
                 let previous = previousID.map{RelationValue($0)}
-                let pos = TreePos(parentID: parent, previousID: previous, nextID: nil)
+                let pos = RelationTreeBinding.Pos(parentID: parent, previousID: previous, nextID: nil)
                 treeBinding.insert(row, pos: pos)
             })
         }
@@ -109,13 +109,13 @@ class OrderedTreeBindingTests: AppTestCase {
             })
         }
         
-        func moveCollection(srcPath srcPath: TreePath, dstPath: TreePath) {
+        func moveCollection(srcPath srcPath: RelationTreeBinding.Path, dstPath: RelationTreeBinding.Path) {
             db.transaction({
                 treeBinding.move(srcPath: srcPath, dstPath: dstPath)
             })
         }
         
-        func verifyChanges(expected: [OrderedTreeBinding.Change], file: StaticString = #file, line: UInt = #line) {
+        func verifyChanges(expected: [RelationTreeBinding.Change], file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(changes, expected, file: file, line: line)
             changes = []
         }
@@ -125,7 +125,7 @@ class OrderedTreeBindingTests: AppTestCase {
             AssertEqual(sqliteDB["collection"]!, expected, file: file, line: line)
         }
         
-        func path(parentID: Int64?, _ index: Int) -> TreePath {
+        func path(parentID: Int64?, _ index: Int) -> RelationTreeBinding.Path {
             let parent = parentID.flatMap{ treeBinding.nodeForID(RelationValue($0)) }
             return TreePath(parent: parent, index: index)
         }

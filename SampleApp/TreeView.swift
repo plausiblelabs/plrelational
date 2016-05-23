@@ -16,11 +16,11 @@ private let PasteboardType = "coop.plausible.vp.pasteboard.TreeViewItem"
 struct TreeViewModel {
     
     struct Data {
-        let binding: OrderedTreeBinding
+        let binding: RelationTreeBinding
         let allowsChildren: (Row) -> Bool
         let contextMenu: ((Row) -> ContextMenu?)?
         // Note: dstPath.index is relative to the state of the array *before* the item is removed.
-        let move: ((srcPath: TreePath, dstPath: TreePath) -> Void)?
+        let move: ((srcPath: RelationTreeBinding.Path, dstPath: RelationTreeBinding.Path) -> Void)?
     }
     
     struct Selection {
@@ -79,7 +79,7 @@ extension TreeView: NSOutlineViewDataSource {
         switch item {
         case nil:
             return model.data.binding.root.children.count
-        case let node as OrderedTreeBinding.Node:
+        case let node as RelationTreeBinding.Node:
             return node.children.count
         default:
             fatalError("Unexpected item type")
@@ -90,7 +90,7 @@ extension TreeView: NSOutlineViewDataSource {
         switch item {
         case nil:
             return model.data.binding.root.children[index]
-        case let node as OrderedTreeBinding.Node:
+        case let node as RelationTreeBinding.Node:
             return node.children[index]
         default:
             fatalError("Unexpected item type")
@@ -98,7 +98,7 @@ extension TreeView: NSOutlineViewDataSource {
     }
     
     func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
-        let node = item as! OrderedTreeBinding.Node
+        let node = item as! RelationTreeBinding.Node
         return model.data.allowsChildren(node.data) && node.children.count > 0
     }
     
@@ -107,7 +107,7 @@ extension TreeView: NSOutlineViewDataSource {
             return nil
         }
         
-        let node = item as! OrderedTreeBinding.Node
+        let node = item as! RelationTreeBinding.Node
         // TODO: Don't assume Int64
         let rowID: Int64 = node.id.get()!
         let pboardItem = NSPasteboardItem()
@@ -121,7 +121,7 @@ extension TreeView: NSOutlineViewDataSource {
         if let rowIDString = pboard.stringForType(PasteboardType) {
             let rowID = RelationValue(Int64(rowIDString)!)
             let currentParent = model.data.binding.parentForID(rowID)
-            let proposedParent = proposedItem as? OrderedTreeBinding.Node
+            let proposedParent = proposedItem as? RelationTreeBinding.Node
             if proposedParent === currentParent {
                 // We are reordering the node within its existing parent (or at the top level)
                 if let srcIndex = model.data.binding.indexForID(rowID) {
@@ -160,10 +160,10 @@ extension TreeView: NSOutlineViewDataSource {
             let rowID = RelationValue(Int64(rowIDString)!)
             
             let currentParent = model.data.binding.parentForID(rowID)
-            let proposedParent = item as? OrderedTreeBinding.Node
+            let proposedParent = item as? RelationTreeBinding.Node
 
             // Note that `index` will be -1 in the case where it is being dragged onto
-            // another node, but we will account for that in OrderedTreeBinding.move()
+            // another node, but we will account for that in RelationTreeBinding.move()
             let srcIndex = model.data.binding.indexForID(rowID)!
             let dstIndex = index
 
@@ -182,7 +182,7 @@ extension TreeView: ExtOutlineViewDelegate {
     func outlineView(outlineView: NSOutlineView, viewForTableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
         // TODO: Make this configurable
         let identifier = "PageCell"
-        let node = item as! OrderedTreeBinding.Node
+        let node = item as! RelationTreeBinding.Node
         let row = node.data
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         let cellModel = model.cell(row)
@@ -197,7 +197,7 @@ extension TreeView: ExtOutlineViewDelegate {
     }
     
     func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
-        let node = item as! OrderedTreeBinding.Node
+        let node = item as! RelationTreeBinding.Node
         return model.data.contextMenu?(node.data).map{$0.nsmenu}
     }
     
@@ -214,7 +214,7 @@ extension TreeView: ExtOutlineViewDelegate {
         
         var itemIDs: [RelationValue] = []
         outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
-            if let node = self.outlineView.itemAtRow(index) as? OrderedTreeBinding.Node {
+            if let node = self.outlineView.itemAtRow(index) as? RelationTreeBinding.Node {
                 itemIDs.append(node.id)
             }
         }
@@ -247,14 +247,14 @@ extension TreeView {
         selfInitiatedSelectionChange = false
     }
     
-    func treeBindingChanged(changes: [OrderedTreeBinding.Change]) {
+    func treeBindingChanged(changes: [RelationTreeBinding.Change]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
         
         outlineView.beginUpdates()
 
         // TODO: Use a Set instead
-        var parentsToReload: [OrderedTreeBinding.Node] = []
-        var parentsToExpand: [OrderedTreeBinding.Node] = []
+        var parentsToReload: [RelationTreeBinding.Node] = []
+        var parentsToExpand: [RelationTreeBinding.Node] = []
         
         for change in changes {
             switch change {

@@ -30,7 +30,7 @@ class DocModelTests: AppTestCase {
             XCTAssertEqual(model.selectedItemNames.value, selectedItemName)
         }
         
-        func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath {
+        func docOutlinePath(parentID: Int64?, _ index: Int) -> RelationTreeBinding.Path {
             return path(model.docOutlineTreeViewModel.data.binding, parentID: parentID, index: index)
         }
         
