@@ -1,5 +1,5 @@
 //
-//  OrderedTreeBinding.swift
+//  RelationTreeBinding.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/6/16.
@@ -16,7 +16,7 @@ public struct TreePos {
 }
 
 public struct TreePath {
-    let parent: OrderedTreeBinding.Node?
+    let parent: RelationTreeBinding.Node?
     let index: Int
 }
 
@@ -25,8 +25,8 @@ public func ==(a: TreePath, b: TreePath) -> Bool {
     return a.parent?.id == b.parent?.id && a.index == b.index
 }
 
-extension OrderedTreeBinding.Change: Equatable {}
-public func ==(a: OrderedTreeBinding.Change, b: OrderedTreeBinding.Change) -> Bool {
+extension RelationTreeBinding.Change: Equatable {}
+public func ==(a: RelationTreeBinding.Change, b: RelationTreeBinding.Change) -> Bool {
     switch (a, b) {
     case let (.Insert(a), .Insert(b)): return a == b
     case let (.Delete(a), .Delete(b)): return a == b
@@ -35,7 +35,7 @@ public func ==(a: OrderedTreeBinding.Change, b: OrderedTreeBinding.Change) -> Bo
     }
 }
 
-public class OrderedTreeBinding {
+public class RelationTreeBinding {
 
     public class Node {
         let id: RelationValue

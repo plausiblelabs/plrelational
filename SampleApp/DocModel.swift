@@ -66,13 +66,13 @@ class DocModel {
     private let selectedInspectorItems: Relation
     private let selectedItems: Relation
 
-    private let docOutlineBinding: OrderedTreeBinding
-    private let inspectorItemsBinding: OrderedTreeBinding
+    private let docOutlineBinding: RelationTreeBinding
+    private let inspectorItemsBinding: RelationTreeBinding
     
     // TODO: To simplify implementation of the relation that controls the inspector tree view,
     // we put identifiers for both the `collection` and `object` relations into the same set.
     // A potentially better/safer alternative would be to introduce compound primary key
-    // support into OrderedTreeBinding so that we can more easily merge data from different
+    // support into RelationTreeBinding so that we can more easily merge data from different
     // source relations into a single relation.
     private var globalID: Int64 = 1
     
@@ -148,8 +148,8 @@ class DocModel {
             .join(allSelectedItems)
 
         // Prepare the tree bindings
-        self.docOutlineBinding = OrderedTreeBinding(relation: collections, idAttr: "id", parentAttr: "parent", orderAttr: "order")
-        self.inspectorItemsBinding = OrderedTreeBinding(relation: inspectorItems, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        self.docOutlineBinding = RelationTreeBinding(relation: collections, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        self.inspectorItemsBinding = RelationTreeBinding(relation: inspectorItems, idAttr: "id", parentAttr: "parent", orderAttr: "order")
         
         self.db = db
 

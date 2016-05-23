@@ -16,7 +16,7 @@ private let PasteboardType = "coop.plausible.vp.pasteboard.ListViewItem"
 struct ListViewModel {
 
     struct Data {
-        let binding: OrderedBinding
+        let binding: RelationArrayBinding
         // Note: dstIndex is relative to the state of the array *before* the item is removed.
         let move: (srcIndex: Int, dstIndex: Int) -> Void
     }
@@ -176,7 +176,7 @@ extension ListView {
     }
 }
 
-extension ListView: OrderedBindingObserver {
+extension ListView: RelationArrayBindingObserver {
 
     func onInsert(index: Int) {
         let rows = NSIndexSet(index: index)
