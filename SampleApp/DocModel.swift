@@ -421,7 +421,7 @@ class DocModel {
             precondition(updateResult.ok != nil)
         }
 
-        return relation.bidiString(BidiConfig(
+        return relation.bidiString(RelationBidiConfig(
             snapshot: {
                 return self.db.takeSnapshot()
             },

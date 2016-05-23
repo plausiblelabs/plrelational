@@ -8,7 +8,7 @@
 
 import libRelational
 
-public class RelationBinding<T>: ValueBinding<T> {
+private class RelationValueBinding<T>: ValueBinding<T> {
     private var removal: (Void -> Void)!
     
     init(relation: Relation, transform: Relation -> T) {
@@ -20,19 +20,19 @@ public class RelationBinding<T>: ValueBinding<T> {
     }
 }
 
-public struct BidiConfig<T> {
+public struct RelationBidiConfig<T> {
     let snapshot: () -> ChangeLoggingDatabaseSnapshot
     let update: (newValue: T) -> Void
     let commit: (before: ChangeLoggingDatabaseSnapshot, newValue: T) -> Void
 }
 
-public class BidiRelationBinding<T>: BidiValueBinding<T> {
-    private let config: BidiConfig<T>
+private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
+    private let config: RelationBidiConfig<T>
     private var before: ChangeLoggingDatabaseSnapshot?
     private var selfInitiatedChange = false
     private var removal: (Void -> Void)!
     
-    init(relation: Relation, config: BidiConfig<T>, transform: Relation -> T) {
+    init(relation: Relation, config: RelationBidiConfig<T>, transform: Relation -> T) {
         self.config = config
 
         super.init(initialValue: transform(relation))
@@ -46,7 +46,7 @@ public class BidiRelationBinding<T>: BidiValueBinding<T> {
         })
     }
     
-    public override func update(newValue: T) {
+    private override func update(newValue: T) {
         selfInitiatedChange = true
         if before == nil {
             before = config.snapshot()
@@ -56,7 +56,7 @@ public class BidiRelationBinding<T>: BidiValueBinding<T> {
         selfInitiatedChange = false
     }
     
-    public override func commit(newValue: T) {
+    private override func commit(newValue: T) {
         selfInitiatedChange = true
         value = newValue
         if let before = before {
@@ -70,18 +70,18 @@ public class BidiRelationBinding<T>: BidiValueBinding<T> {
 extension Relation {
     /// Resolves to `true` if there are zero rows in the relation.
     var empty: ValueBinding<Bool> {
-        return RelationBinding(relation: self, transform: { $0.isEmpty.ok == true })
+        return RelationValueBinding(relation: self, transform: { $0.isEmpty.ok == true })
     }
     
     /// Resolves to `true` if there are one or more rows in the relation.
     var nonEmpty: ValueBinding<Bool> {
-        return RelationBinding(relation: self, transform: { $0.isEmpty.ok == false })
+        return RelationValueBinding(relation: self, transform: { $0.isEmpty.ok == false })
     }
     
     /// Resolves to a single string value if there is exactly one row in the relation, otherwise resolves
     /// to an empty string.
     var oneString: ValueBinding<String> {
-        return RelationBinding(relation: self, transform: { relation -> String in
+        return RelationValueBinding(relation: self, transform: { relation -> String in
             let values = self.allValues(relation, { value -> String? in value.get() })
             if values.count == 1 {
                 return values.first!
@@ -94,7 +94,7 @@ extension Relation {
     /// Resolves to the given string value if there are multiple string values in the relation, otherwise
     /// resolves to an empty string.
     func stringWhenMulti(string: String) -> ValueBinding<String> {
-        return RelationBinding(relation: self, transform: { relation -> String in
+        return RelationValueBinding(relation: self, transform: { relation -> String in
             let values = self.allValues(relation, { value -> String? in value.get() })
             if values.count > 1 {
                 return string
@@ -106,17 +106,17 @@ extension Relation {
 
     /// Resolves to a sequence of all values for the single attribute, one value for each non-error row.
     func all<V>(unwrap: RelationValue -> V?) -> ValueBinding<[V]> {
-        return RelationBinding(relation: self, transform: { self.allValues($0, unwrap) })
+        return RelationValueBinding(relation: self, transform: { self.allValues($0, unwrap) })
     }
 
     /// Resolves to some value for the single attribute if there are one or more rows, or nil if there are no non-error rows.
     func any<V>(unwrap: RelationValue -> V?) -> ValueBinding<V?> {
-        return RelationBinding(relation: self, transform: { self.anyValue($0, unwrap) })
+        return RelationValueBinding(relation: self, transform: { self.anyValue($0, unwrap) })
     }
 
     /// Bidirectional version of `oneString` binding.
-    func bidiString(config: BidiConfig<String>) -> BidiValueBinding<String> {
-        return BidiRelationBinding(relation: self, config: config, transform: { relation -> String in
+    func bidiString(config: RelationBidiConfig<String>) -> BidiValueBinding<String> {
+        return RelationBidiValueBinding(relation: self, config: config, transform: { relation -> String in
             let values = self.allValues(relation, { value -> String? in value.get() })
             if values.count == 1 {
                 return values.first!
