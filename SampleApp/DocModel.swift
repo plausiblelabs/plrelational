@@ -252,9 +252,9 @@ class DocModel {
         })
     }
 
-    lazy var docOutlineTreeViewModel: TreeViewModel = { [unowned self] in
-        let data = TreeViewModel.Data(
-            binding: self.docOutlineBinding,
+    lazy var docOutlineTreeViewModel: TreeViewModel<Row> = { [unowned self] in
+        return TreeViewModel(
+            data: self.docOutlineBinding,
             allowsChildren: { row in
                 let type = ItemType(row)!
                 return type == .Group || type == .Collection
@@ -274,50 +274,36 @@ class DocModel {
                 self.performUndoableAction("Move \(collectionType.name)", {
                     self.docOutlineBinding.move(srcPath: srcPath, dstPath: dstPath)
                 })
+            },
+            selection: self.bidiSelectionBinding(self.selectedCollectionID),
+            cellText: { row in
+                // TODO: Could we have a convenience for creating a projection Relation directly
+                // from an existing Row?
+                let rowID = row["id"]
+                let type = ItemType(row)!
+                let nameRelation = self.collections.select(Attribute("id") *== rowID).project(["name"])
+                return self.bidiStringBinding(nameRelation, type: type.name)
             }
         )
-        
-        let selection = TreeViewModel.Selection(
-            binding: self.bidiSelectionBinding(self.selectedCollectionID)
-        )
-        
-        let cell = { (row: Row) -> TreeViewModel.Cell in
-            // TODO: Could we have a convenience for creating a projection Relation directly
-            // from an existing Row?
-            let rowID = row["id"]
-            let type = ItemType(row)!
-            let nameRelation = self.collections.select(Attribute("id") *== rowID).project(["name"])
-            let binding = self.bidiStringBinding(nameRelation, type: type.name)
-            return TreeViewModel.Cell(text: binding)
-        }
-        
-        return TreeViewModel(data: data, selection: selection, cell: cell)
     }()
 
-    lazy var inspectorTreeViewModel: TreeViewModel = { [unowned self] in
-        let data = TreeViewModel.Data(
-            binding: self.inspectorItemsBinding,
+    lazy var inspectorTreeViewModel: TreeViewModel<Row> = { [unowned self] in
+        return TreeViewModel(
+            data: self.inspectorItemsBinding,
             allowsChildren: { row in
                 let type = ItemType(row)!
                 return type.isCollectionType
             },
             contextMenu: nil,
-            move: nil
+            move: nil,
+            selection: self.bidiSelectionBinding(self.selectedInspectorItemIDs),
+            cellText: { row in
+                let rowID = row["id"]
+                let type = ItemType(row)!
+                let nameRelation = self.inspectorItems.select(Attribute("id") *== rowID).project(["name"])
+                return self.bidiStringBinding(nameRelation, type: type.name)
+            }
         )
-        
-        let selection = TreeViewModel.Selection(
-            binding: self.bidiSelectionBinding(self.selectedInspectorItemIDs)
-        )
-        
-        let cell = { (row: Row) -> TreeViewModel.Cell in
-            let rowID = row["id"]
-            let type = ItemType(row)!
-            let nameRelation = self.inspectorItems.select(Attribute("id") *== rowID).project(["name"])
-            let binding = self.bidiStringBinding(nameRelation, type: type.name)
-            return TreeViewModel.Cell(text: binding)
-        }
-        
-        return TreeViewModel(data: data, selection: selection, cell: cell)
     }()
     
     private lazy var selectedItemNamesRelation: Relation = { [unowned self] in

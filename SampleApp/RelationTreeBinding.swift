@@ -16,15 +16,20 @@ extension Row: TreeData {
         // TODO: Need to use the attribute provided to RelationTreeBinding init
         return self["id"]
     }
+    
+    public var parentID: RelationValue? {
+        // TODO: Need to use the attribute provided to RelationTreeBinding init
+        let parent = self["parent"]
+        if parent != .NULL {
+            return parent
+        } else {
+            return nil
+        }
+    }
 }
 
 public class RelationTreeBinding: TreeBinding<Row> {
 
-    public typealias Node = TreeNode<Row>
-    public typealias Path = TreePath<Row>
-    public typealias Pos = TreePos<Row>
-    public typealias Change = TreeChange<Row>
-    
     private let relation: Relation
     private let idAttr: Attribute
     private let parentAttr: Attribute
@@ -91,81 +96,6 @@ public class RelationTreeBinding: TreeBinding<Row> {
                 self.notifyChangeObservers(treeChanges)
             }
         })
-    }
-    
-    /// Returns the node with the given identifier.
-    public func nodeForID(id: RelationValue) -> Node? {
-        // TODO: Not efficient, but whatever
-        func findNode(node: Node) -> Node? {
-            if node.id == id {
-                return node
-            }
-            
-            for child in node.children {
-                if let found = findNode(child) {
-                    return found
-                }
-            }
-            
-            return nil
-        }
-        
-        return findNode(root)
-    }
-    
-    /// Returns the node at the given path.
-    public func nodeAtPath(path: Path) -> Node? {
-        let parent = path.parent ?? root
-        return parent.children[safe: path.index]
-    }
-    
-    /// Returns the parent of the given node.
-    public func parentForID(id: RelationValue) -> Node? {
-        if let node = nodeForID(id) {
-            return parentForNode(node)
-        } else {
-            return nil
-        }
-    }
-
-    /// Returns the parent of the given node.
-    public func parentForNode(node: Node) -> Node? {
-        let parentID = node.data[parentAttr]
-        return nodeForID(parentID)
-    }
-
-    /// Returns the index of the given node relative to its parent.
-    public func indexForID(id: RelationValue) -> Int? {
-        if let node = nodeForID(id) {
-            let parent = parentForNode(node) ?? root
-            return parent.children.indexOf({$0 === node})
-        } else {
-            return nil
-        }
-    }
-
-    /// Returns the index of the given node relative to its parent.
-    public func indexForNode(node: Node) -> Int? {
-        let parent = parentForNode(node) ?? root
-        return parent.children.indexOf({$0 === node})
-    }
-
-    /// Returns true if the first node is a descendent of (or the same as) the second node.
-    func isNodeDescendent(node: Node, ofAncestor ancestor: Node) -> Bool {
-        if node === ancestor {
-            return true
-        }
-
-        // XXX: Again, inefficient
-        var parent = parentForNode(node)
-        while let p = parent {
-            if p === ancestor {
-                return true
-            }
-            parent = parentForNode(p)
-        }
-        
-        return false
     }
     
     public func insert(row: Row, pos: Pos) {

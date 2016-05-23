@@ -12,7 +12,7 @@ import libRelational
 
 class AppTestCase: XCTestCase {
     
-    func pretty(node: RelationTreeBinding.Node, inout _ accum: [String], _ indent: Int) {
+    func pretty(node: TreeNode<Row>, inout _ accum: [String], _ indent: Int) {
         let pad = Array(count: indent, repeatedValue: "  ").joinWithSeparator("")
         accum.append("\(pad)\(node.data["name"])")
         for child in node.children {
@@ -20,7 +20,7 @@ class AppTestCase: XCTestCase {
         }
     }
     
-    func prettyRoot(binding: RelationTreeBinding) -> [String] {
+    func prettyRoot(binding: TreeBinding<Row>) -> [String] {
         var accum: [String] = []
         for node in binding.root.children {
             pretty(node, &accum, 0)
@@ -28,11 +28,11 @@ class AppTestCase: XCTestCase {
         return accum
     }
     
-    func verifyTree(binding: RelationTreeBinding, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
+    func verifyTree(binding: TreeBinding<Row>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
         XCTAssertEqual(prettyRoot(binding), expected, file: file, line: line)
     }
     
-    func path(treeBinding: RelationTreeBinding, parentID: Int64?, index: Int) -> RelationTreeBinding.Path {
+    func path(treeBinding: TreeBinding<Row>, parentID: Int64?, index: Int) -> TreePath<Row> {
         let parent = parentID.flatMap{ treeBinding.nodeForID(RelationValue($0)) }
         return TreePath(parent: parent, index: index)
     }

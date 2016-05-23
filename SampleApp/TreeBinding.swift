@@ -11,6 +11,7 @@ import Foundation
 public protocol TreeData {
     associatedtype ID: Equatable
     var id: ID { get }
+    var parentID: ID? { get }
 }
 
 public class TreeNode<D: TreeData> {
@@ -63,14 +64,20 @@ public class TreeBinding<D: TreeData>: Binding {
 
     public typealias ChangeObserver = ([TreeChange<D>]) -> Void
     public typealias ObserverRemoval = Void -> Void
+
+    public typealias NodeID = D.ID
+    public typealias Node = TreeNode<D>
+    public typealias Path = TreePath<D>
+    public typealias Pos = TreePos<D>
+    public typealias Change = TreeChange<D>
     
-    public let root: TreeNode<D>
+    public let root: Node
     
-    public var value: TreeNode<D> {
+    public var value: Node {
         return root
     }
     
-    init(root: TreeNode<D>) {
+    init(root: Node) {
         self.root = root
     }
     
@@ -88,5 +95,83 @@ public class TreeBinding<D: TreeData>: Binding {
         for (_, f) in changeObservers {
             f(changes)
         }
+    }
+    
+    /// Returns the node with the given identifier.
+    public func nodeForID(id: NodeID) -> Node? {
+        // TODO: Not efficient, but whatever
+        func findNode(node: Node) -> Node? {
+            if node.id == id {
+                return node
+            }
+            
+            for child in node.children {
+                if let found = findNode(child) {
+                    return found
+                }
+            }
+            
+            return nil
+        }
+        
+        return findNode(root)
+    }
+    
+    /// Returns the node at the given path.
+    public func nodeAtPath(path: Path) -> Node? {
+        let parent = path.parent ?? root
+        return parent.children[safe: path.index]
+    }
+    
+    /// Returns the parent of the given node.
+    public func parentForID(id: NodeID) -> Node? {
+        if let node = nodeForID(id) {
+            return parentForNode(node)
+        } else {
+            return nil
+        }
+    }
+    
+    /// Returns the parent of the given node.
+    public func parentForNode(node: Node) -> Node? {
+        if let parentID = node.data.parentID {
+            return nodeForID(parentID)
+        } else {
+            return nil
+        }
+    }
+    
+    /// Returns the index of the given node relative to its parent.
+    public func indexForID(id: NodeID) -> Int? {
+        if let node = nodeForID(id) {
+            let parent = parentForNode(node) ?? root
+            return parent.children.indexOf({$0 === node})
+        } else {
+            return nil
+        }
+    }
+    
+    /// Returns the index of the given node relative to its parent.
+    public func indexForNode(node: Node) -> Int? {
+        let parent = parentForNode(node) ?? root
+        return parent.children.indexOf({$0 === node})
+    }
+    
+    /// Returns true if the first node is a descendent of (or the same as) the second node.
+    public func isNodeDescendent(node: Node, ofAncestor ancestor: Node) -> Bool {
+        if node === ancestor {
+            return true
+        }
+        
+        // XXX: Again, inefficient
+        var parent = parentForNode(node)
+        while let p = parent {
+            if p === ancestor {
+                return true
+            }
+            parent = parentForNode(p)
+        }
+        
+        return false
     }
 }

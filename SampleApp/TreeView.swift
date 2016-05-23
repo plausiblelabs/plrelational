@@ -7,33 +7,22 @@
 //
 
 import Cocoa
+
+// XXX: Remove this dependency
 import libRelational
 
 // TODO: This needs to be configurable, or at least made unique so that only internal drag-and-drop
 // is allowed by default
 private let PasteboardType = "coop.plausible.vp.pasteboard.TreeViewItem"
 
-struct TreeViewModel {
-    
-    struct Data {
-        let binding: RelationTreeBinding
-        let allowsChildren: (Row) -> Bool
-        let contextMenu: ((Row) -> ContextMenu?)?
-        // Note: dstPath.index is relative to the state of the array *before* the item is removed.
-        let move: ((srcPath: RelationTreeBinding.Path, dstPath: RelationTreeBinding.Path) -> Void)?
-    }
-    
-    struct Selection {
-        let binding: BidiValueBinding<[RelationValue]>
-    }
-    
-    struct Cell {
-        let text: ValueBinding<String>
-    }
-    
-    let data: Data
-    let selection: Selection
-    let cell: (Row) -> Cell
+struct TreeViewModel<D: TreeData> {
+    let data: TreeBinding<D>
+    let allowsChildren: (D) -> Bool
+    let contextMenu: ((D) -> ContextMenu?)?
+    // Note: dstPath.index is relative to the state of the array *before* the item is removed.
+    let move: ((srcPath: TreePath<D>, dstPath: TreePath<D>) -> Void)?
+    let selection: BidiValueBinding<[D.ID]>
+    let cellText: (D) -> ValueBinding<String>
 }
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
@@ -41,7 +30,7 @@ struct TreeViewModel {
 class TreeView: NSObject {
     
     private let outlineView: NSOutlineView
-    private let model: TreeViewModel
+    private let model: TreeViewModel<Row>
     
     private var treeBindingObserverRemoval: (Void -> Void)?
     private var selectionBindingObserverRemoval: (Void -> Void)?
@@ -53,14 +42,14 @@ class TreeView: NSObject {
     /// Whether to automatically expand a parent when a child is inserted.
     var autoExpand = false
     
-    init(outlineView: NSOutlineView, model: TreeViewModel) {
+    init(outlineView: NSOutlineView, model: TreeViewModel<Row>) {
         self.outlineView = outlineView
         self.model = model
         
         super.init()
         
-        treeBindingObserverRemoval = model.data.binding.addChangeObserver({ [weak self] changes in self?.treeBindingChanged(changes) })
-        selectionBindingObserverRemoval = model.selection.binding.addChangeObserver({ [weak self] _ in self?.selectionBindingChanged() })
+        treeBindingObserverRemoval = model.data.addChangeObserver({ [weak self] changes in self?.treeBindingChanged(changes) })
+        selectionBindingObserverRemoval = model.selection.addChangeObserver({ [weak self] _ in self?.selectionBindingChanged() })
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
@@ -76,7 +65,7 @@ extension TreeView: NSOutlineViewDataSource {
     func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
         switch item {
         case nil:
-            return model.data.binding.root.children.count
+            return model.data.root.children.count
         case let node as RelationTreeBinding.Node:
             return node.children.count
         default:
@@ -87,7 +76,7 @@ extension TreeView: NSOutlineViewDataSource {
     func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
         switch item {
         case nil:
-            return model.data.binding.root.children[index]
+            return model.data.root.children[index]
         case let node as RelationTreeBinding.Node:
             return node.children[index]
         default:
@@ -97,11 +86,11 @@ extension TreeView: NSOutlineViewDataSource {
     
     func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
         let node = item as! RelationTreeBinding.Node
-        return model.data.allowsChildren(node.data) && node.children.count > 0
+        return model.allowsChildren(node.data) && node.children.count > 0
     }
     
     func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
-        if model.data.move == nil {
+        if model.move == nil {
             return nil
         }
         
@@ -118,11 +107,11 @@ extension TreeView: NSOutlineViewDataSource {
         
         if let rowIDString = pboard.stringForType(PasteboardType) {
             let rowID = RelationValue(Int64(rowIDString)!)
-            let currentParent = model.data.binding.parentForID(rowID)
+            let currentParent = model.data.parentForID(rowID)
             let proposedParent = proposedItem as? RelationTreeBinding.Node
             if proposedParent === currentParent {
                 // We are reordering the node within its existing parent (or at the top level)
-                if let srcIndex = model.data.binding.indexForID(rowID) {
+                if let srcIndex = model.data.indexForID(rowID) {
                     if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
                         return .Move
                     }
@@ -132,10 +121,10 @@ extension TreeView: NSOutlineViewDataSource {
                     // We are reparenting the item.  Note that we only allow dragging onto an existing node (i.e.,
                     // when proposedIndex < 0) for the case where the node is empty, since Cocoa doesn't propose
                     // a specific insertion index for that case.
-                    if let currentNode = model.data.binding.nodeForID(rowID) {
-                        if model.data.allowsChildren(proposedParent.data) &&
+                    if let currentNode = model.data.nodeForID(rowID) {
+                        if model.allowsChildren(proposedParent.data) &&
                             (proposedIndex >= 0 || proposedParent.children.isEmpty) &&
-                            !model.data.binding.isNodeDescendent(proposedParent, ofAncestor: currentNode)
+                            !model.data.isNodeDescendent(proposedParent, ofAncestor: currentNode)
                         {
                             return .Move
                         }
@@ -157,17 +146,17 @@ extension TreeView: NSOutlineViewDataSource {
         if let rowIDString = pboard.stringForType(PasteboardType) {
             let rowID = RelationValue(Int64(rowIDString)!)
             
-            let currentParent = model.data.binding.parentForID(rowID)
+            let currentParent = model.data.parentForID(rowID)
             let proposedParent = item as? RelationTreeBinding.Node
 
             // Note that `index` will be -1 in the case where it is being dragged onto
             // another node, but we will account for that in RelationTreeBinding.move()
-            let srcIndex = model.data.binding.indexForID(rowID)!
+            let srcIndex = model.data.indexForID(rowID)!
             let dstIndex = index
 
             let srcPath = TreePath(parent: currentParent, index: srcIndex)
             let dstPath = TreePath(parent: proposedParent, index: dstIndex)
-            model.data.move?(srcPath: srcPath, dstPath: dstPath)
+            model.move?(srcPath: srcPath, dstPath: dstPath)
             return true
         }
         
@@ -183,9 +172,8 @@ extension TreeView: ExtOutlineViewDelegate {
         let node = item as! RelationTreeBinding.Node
         let row = node.data
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
-        let cellModel = model.cell(row)
         if let textField = view.textField as? TextField {
-            textField.string = cellModel.text
+            textField.string = model.cellText(row)
         }
         return view
     }
@@ -196,7 +184,7 @@ extension TreeView: ExtOutlineViewDelegate {
     
     func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
         let node = item as! RelationTreeBinding.Node
-        return model.data.contextMenu?(node.data).map{$0.nsmenu}
+        return model.contextMenu?(node.data).map{$0.nsmenu}
     }
     
     func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
@@ -218,7 +206,7 @@ extension TreeView: ExtOutlineViewDelegate {
                 itemIDs.append(node.id)
             }
         }
-        model.selection.binding.commit(itemIDs)
+        model.selection.commit(itemIDs)
         
         selfInitiatedSelectionChange = false
     }
@@ -232,8 +220,8 @@ extension TreeView {
         }
 
         let indexes = NSMutableIndexSet()
-        for id in model.selection.binding.value {
-            if let node = model.data.binding.nodeForID(id) {
+        for id in model.selection.value {
+            if let node = model.data.nodeForID(id) {
                 // TODO: This is inefficient
                 let index = outlineView.rowForItem(node)
                 if index >= 0 {

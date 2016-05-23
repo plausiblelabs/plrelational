@@ -30,8 +30,8 @@ class DocModelTests: AppTestCase {
             XCTAssertEqual(model.selectedItemNames.value, selectedItemName)
         }
         
-        func docOutlinePath(parentID: Int64?, _ index: Int) -> RelationTreeBinding.Path {
-            return path(model.docOutlineTreeViewModel.data.binding, parentID: parentID, index: index)
+        func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath<Row> {
+            return path(model.docOutlineTreeViewModel.data, parentID: parentID, index: index)
         }
         
         // Insert some collections
@@ -49,7 +49,7 @@ class DocModelTests: AppTestCase {
         addObject("Object2", .Image, 3, 7.0)
 
         // Verify the initial doc outline structure
-        verifyTree(model.docOutlineTreeViewModel.data.binding, [
+        verifyTree(model.docOutlineTreeViewModel.data, [
             "Group1",
             "  Collection1",
             "    Child1",
@@ -61,16 +61,16 @@ class DocModelTests: AppTestCase {
         ])
         
         // Verify that the inspector is empty initially
-        verifyTree(model.inspectorTreeViewModel.data.binding, [])
+        verifyTree(model.inspectorTreeViewModel.data, [])
         
         // Verify properties-related bindings
         verifyBindings(itemSelected: false, selectedItemType: "", selectedItemName: "")
         
         // Select a page in the doc outline
-        model.docOutlineTreeViewModel.selection.binding.commit([3])
+        model.docOutlineTreeViewModel.selection.commit([3])
 
         // Verify that the inspector is updated to show the selected page and its objects
-        verifyTree(model.inspectorTreeViewModel.data.binding, [
+        verifyTree(model.inspectorTreeViewModel.data, [
             "Page1",
             "  Object1",
             "  Object2"
@@ -80,10 +80,10 @@ class DocModelTests: AppTestCase {
         verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
         
         // Reorder a page in the doc outline
-        model.docOutlineTreeViewModel.data.move?(srcPath: docOutlinePath(1, 1), dstPath: docOutlinePath(1, 3))
+        model.docOutlineTreeViewModel.move?(srcPath: docOutlinePath(1, 1), dstPath: docOutlinePath(1, 3))
         
         // Verify the new doc outline structure
-        verifyTree(model.docOutlineTreeViewModel.data.binding, [
+        verifyTree(model.docOutlineTreeViewModel.data, [
             "Group1",
             "  Collection1",
             "    Child1",
@@ -95,7 +95,7 @@ class DocModelTests: AppTestCase {
         ])
 
         // Verify that the inspector contents remain unchanged
-        verifyTree(model.inspectorTreeViewModel.data.binding, [
+        verifyTree(model.inspectorTreeViewModel.data, [
             "Page1",
             "  Object1",
             "  Object2"
