@@ -58,11 +58,12 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
     
     private override func commit(newValue: T) {
         selfInitiatedChange = true
-        value = newValue
-        if let before = before {
-            config.commit(before: before, newValue: newValue)
-            self.before = nil
+        if before == nil {
+            before = config.snapshot()
         }
+        value = newValue
+        config.commit(before: before!, newValue: newValue)
+        self.before = nil
         selfInitiatedChange = false
     }
 }
@@ -123,6 +124,13 @@ extension Relation {
             } else {
                 return ""
             }
+        })
+    }
+    
+    /// Bidirectional version of `all` binding with RelationValue elements.
+    func bidiValues(config: RelationBidiConfig<[RelationValue]>) -> BidiValueBinding<[RelationValue]> {
+        return RelationBidiValueBinding(relation: self, config: config, transform: { relation -> [RelationValue] in
+            return self.allValues(relation, { $0 })
         })
     }
     

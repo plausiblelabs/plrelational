@@ -252,26 +252,6 @@ class DocModel {
         })
     }
 
-    private func selectDocOutlineItems(ids: [RelationValue]) {
-        self.performUndoableAction("Change Selection", {
-            // TODO: This could probably be made more efficient
-            self.selectedCollectionID.delete(true)
-            for id in ids {
-                self.selectedCollectionID.add(["coll_id": id])
-            }
-        })
-    }
-
-    private func selectInspectorItems(ids: [RelationValue]) {
-        self.performUndoableAction("Change Selection", {
-            // TODO: This could probably be made more efficient
-            self.selectedInspectorItemIDs.delete(true)
-            for id in ids {
-                self.selectedInspectorItemIDs.add(["item_id": id])
-            }
-        })
-    }
-    
     lazy var docOutlineTreeViewModel: TreeViewModel = { [unowned self] in
         let data = TreeViewModel.Data(
             binding: self.docOutlineBinding,
@@ -298,13 +278,7 @@ class DocModel {
         )
         
         let selection = TreeViewModel.Selection(
-            relation: self.selectedCollectionID,
-            set: { ids in
-                self.selectDocOutlineItems(ids)
-            },
-            get: {
-                return self.selectedCollectionID.rows().map{$0.ok!["coll_id"]}
-            }
+            binding: self.bidiSelectionBinding(self.selectedCollectionID)
         )
         
         let cell = { (row: Row) -> TreeViewModel.Cell in
@@ -332,13 +306,7 @@ class DocModel {
         )
         
         let selection = TreeViewModel.Selection(
-            relation: self.selectedCollectionID,
-            set: { ids in
-                self.selectInspectorItems(ids)
-            },
-            get: {
-                return self.selectedInspectorItemIDs.rows().map{$0.ok!["item_id"]}
-            }
+            binding: self.bidiSelectionBinding(self.selectedInspectorItemIDs)
         )
         
         let cell = { (row: Row) -> TreeViewModel.Cell in
@@ -409,13 +377,10 @@ class DocModel {
         return self.selectedItemCommonType.map{ $0.all(.Image) }
     }()
 
-    private func bidiStringBinding(relation: Relation, type: String) -> ValueBinding<String> {
-        let attr = relation.scheme.attributes.first!
-
-        func update(newValue: String?) {
-            guard let newValue = newValue else { return }
+    private func bidiStringBinding(relation: Relation, type: String) -> BidiValueBinding<String> {
+        func update(newValue: String) {
+            let attr = relation.scheme.attributes.first!
             let values: Row = [attr: RelationValue(newValue)]
-            Swift.print("UPDATE: \(newValue)")
             var mutableRelation = relation
             let updateResult = mutableRelation.update(true, newValues: values)
             precondition(updateResult.ok != nil)
@@ -431,6 +396,35 @@ class DocModel {
             commit: { before, newValue in
                 self.performUndoableAction("Rename \(type)", before: before, {
                     update(newValue)
+                })
+            }
+        ))
+    }
+    
+    private func bidiSelectionBinding(relation: MutableRelation) -> BidiValueBinding<[RelationValue]> {
+        func update(newValues: [RelationValue]) {
+            let attr = relation.scheme.attributes.first!
+            var mutableRelation = relation
+            mutableRelation.delete(true)
+            for id in newValues {
+                mutableRelation.add([attr: id])
+            }
+        }
+        
+        return relation.bidiValues(RelationBidiConfig(
+            snapshot: {
+                return self.db.takeSnapshot()
+            },
+            update: { newValues in
+                // TODO: We wrap this in a transaction to keep it atomic, but we don't actually
+                // need to log the changes anywhere
+                self.db.transaction({
+                    update(newValues)
+                })
+            },
+            commit: { before, newValues in
+                self.performUndoableAction("Change Selection", before: before, {
+                    update(newValues)
                 })
             }
         ))

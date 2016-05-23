@@ -24,9 +24,7 @@ struct TreeViewModel {
     }
     
     struct Selection {
-        let relation: Relation
-        let set: (ids: [RelationValue]) -> Void
-        let get: () -> [RelationValue]
+        let binding: BidiValueBinding<[RelationValue]>
     }
     
     struct Cell {
@@ -46,7 +44,7 @@ class TreeView: NSObject {
     private let model: TreeViewModel
     
     private var treeBindingObserverRemoval: (Void -> Void)?
-    private var selectionObserverRemoval: (Void -> Void)?
+    private var selectionBindingObserverRemoval: (Void -> Void)?
     private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
@@ -62,7 +60,7 @@ class TreeView: NSObject {
         super.init()
         
         treeBindingObserverRemoval = model.data.binding.addChangeObserver({ [weak self] changes in self?.treeBindingChanged(changes) })
-        selectionObserverRemoval = model.selection.relation.addChangeObserver({ [weak self] _ in self?.selectionRelationChanged() })
+        selectionBindingObserverRemoval = model.selection.binding.addChangeObserver({ [weak self] _ in self?.selectionBindingChanged() })
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
@@ -206,6 +204,8 @@ extension TreeView: ExtOutlineViewDelegate {
     }
     
     func outlineViewSelectionDidChange(notification: NSNotification) {
+        // TODO: RelationBidiValueBinding has its own notion of selfInitiatedChange, so perhaps
+        // we don't need this any longer
         if selfInitiatedSelectionChange {
             return
         }
@@ -218,7 +218,7 @@ extension TreeView: ExtOutlineViewDelegate {
                 itemIDs.append(node.id)
             }
         }
-        model.selection.set(ids: itemIDs)
+        model.selection.binding.commit(itemIDs)
         
         selfInitiatedSelectionChange = false
     }
@@ -226,13 +226,13 @@ extension TreeView: ExtOutlineViewDelegate {
 
 extension TreeView {
     
-    func selectionRelationChanged() {
+    func selectionBindingChanged() {
         if selfInitiatedSelectionChange {
             return
         }
 
         let indexes = NSMutableIndexSet()
-        for id in model.selection.get() {
+        for id in model.selection.binding.value {
             if let node = model.data.binding.nodeForID(id) {
                 // TODO: This is inefficient
                 let index = outlineView.rowForItem(node)

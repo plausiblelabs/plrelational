@@ -67,7 +67,7 @@ class DocModelTests: AppTestCase {
         verifyBindings(itemSelected: false, selectedItemType: "", selectedItemName: "")
         
         // Select a page in the doc outline
-        model.docOutlineTreeViewModel.selection.set(ids: [3])
+        model.docOutlineTreeViewModel.selection.binding.commit([3])
 
         // Verify that the inspector is updated to show the selected page and its objects
         verifyTree(model.inspectorTreeViewModel.data.binding, [
