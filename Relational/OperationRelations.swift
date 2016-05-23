@@ -581,15 +581,42 @@ class UpdateRelation: Relation, RelationDefaultChangeObserverImplementation {
 class AggregateRelation: Relation, RelationDefaultChangeObserverImplementation {
     let relation: Relation
     let attribute: Attribute
-    let agg: (Relation) -> RelationValue?
+    let initialValue: RelationValue?
+    let agg: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>
 
     var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    init(relation: Relation, attribute: Attribute, agg: (Relation) -> RelationValue?) {
+    /// Initialize a new aggregate relation.
+    ///
+    /// - parameter relation: The underlying relation that this is based on.
+    /// - parameter attribute: The attribute of the relation which is used to obatin values.
+    /// - parameter initial: The initial value to use when computing the aggregate. The
+    ///                      aggregate of an empty relation is considered to have this value.
+    ///                      If nil, the aggregate of an empty relation is also empty.
+    /// - parameter agg: The aggregation function. It receives the current aggregate value as
+    ///                  the first parameter, and the value in the current row as the second
+    ///                  value. Its return value becomes the new aggregate value.
+    init(relation: Relation, attribute: Attribute, initial: RelationValue?, agg: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) {
         precondition(relation.scheme.attributes.contains(attribute))
         self.relation = relation
         self.attribute = attribute
+        self.initialValue = initial
         self.agg = agg
+    }
+    
+    /// A convenience initializer for aggregating functions which cannot fail and which always
+    /// compare two values. If the initial value is nil, then the aggregate of an empty relation
+    /// is empty, the aggregate of a relation containing a single row is the value stored in
+    /// that row. The aggregate function is only called if there are two or more rows, and the
+    /// first two call will pass in the values of the first two rows.
+    convenience init(relation: Relation, attribute: Attribute, initial: RelationValue?, agg: (RelationValue, RelationValue) -> RelationValue) {
+        self.init(relation: relation, attribute: attribute, initial: initial, agg: { (a, b) -> Result<RelationValue, RelationError> in
+            if let a = a {
+                return .Ok(agg(a, b))
+            } else {
+                return .Ok(b)
+            }
+        })
     }
     
     var scheme: Scheme {
@@ -597,17 +624,28 @@ class AggregateRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        // TODO: Evaluate to single error row if any of the underlying rows are error?
-        let aggValue = agg(relation)
         var done = false
         return AnyGenerator(body: {
-            if !done {
-                done = true
-                let rowValue = aggValue ?? .NULL
-                return .Ok(Row(values: [self.attribute: rowValue]))
-            } else {
-                return nil
+            guard !done else { return nil }
+            
+            var soFar: RelationValue? = self.initialValue
+            for row in self.relation.rows() {
+                switch row {
+                case .Ok(let row):
+                    let newValue = row[self.attribute]
+                    let aggregated = self.agg(soFar, newValue)
+                    switch aggregated {
+                    case .Ok(let value):
+                        soFar = value
+                    case .Err(let err):
+                        return .Err(err)
+                    }
+                case .Err(let err):
+                    return .Err(err)
+                }
             }
+            done = true
+            return soFar.map({ .Ok(Row(values: [self.attribute: $0])) })
         })
     }
     
@@ -636,7 +674,7 @@ class AggregateRelation: Relation, RelationDefaultChangeObserverImplementation {
         if let removed = change.removed {
             preChangeRelation = preChangeRelation.union(removed)
         }
-        let previousAgg = AggregateRelation(relation: preChangeRelation, attribute: self.attribute, agg: self.agg)
+        let previousAgg = AggregateRelation(relation: preChangeRelation, attribute: self.attribute, initial: self.initialValue, agg: self.agg)
 
         let aggChange: RelationChange
         if self.intersection(previousAgg).isEmpty.ok == true {

@@ -468,14 +468,8 @@ class RelationTests: DBTestCase {
         let empty = MakeRelation(
             ["id", "name", "count"])
         
-        AssertEqual(empty.min("count"),
-                    MakeRelation(
-                        ["count"],
-                        [.NULL]))
-        AssertEqual(empty.max("count"),
-                    MakeRelation(
-                        ["count"],
-                        [.NULL]))
+        AssertEqual(empty.min("count"), nil)
+        AssertEqual(empty.max("count"), nil)
         
         let r = MakeRelation(
             ["id", "name", "count"],
@@ -819,7 +813,7 @@ class RelationTests: DBTestCase {
         lastChange = nil
         a.add(["id": 1, "name": "cat", "count": 2])
         AssertEqual(lastChange?.added, ConcreteRelation(["count": 2]))
-        AssertEqual(lastChange?.removed, ConcreteRelation(["count": .NULL]))
+        AssertEqual(lastChange?.removed, nil)
         
         lastChange = nil
         a.add(["id": 2, "name": "dog", "count": 3])
@@ -833,7 +827,7 @@ class RelationTests: DBTestCase {
         
         lastChange = nil
         a.delete(true)
-        AssertEqual(lastChange?.added, ConcreteRelation(["count": .NULL]))
+        AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, ConcreteRelation(["count": 1]))
     }
     
@@ -849,7 +843,7 @@ class RelationTests: DBTestCase {
         lastChange = nil
         a.add(["id": 1, "name": "cat", "count": 2])
         AssertEqual(lastChange?.added, ConcreteRelation(["count": 2]))
-        AssertEqual(lastChange?.removed, ConcreteRelation(["count": .NULL]))
+        AssertEqual(lastChange?.removed, nil)
 
         lastChange = nil
         a.add(["id": 2, "name": "dog", "count": 1])
@@ -863,7 +857,7 @@ class RelationTests: DBTestCase {
         
         lastChange = nil
         a.delete(true)
-        AssertEqual(lastChange?.added, ConcreteRelation(["count": .NULL]))
+        AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, ConcreteRelation(["count": 4]))
     }
 }

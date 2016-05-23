@@ -110,21 +110,11 @@ extension Relation {
 
 extension Relation {
     public func min(attribute: Attribute) -> Relation {
-        return AggregateRelation(relation: self, attribute: attribute, agg: {
-            $0.rows()
-                .lazy
-                .map{ $0.ok![attribute] }
-                .minElement{ $0 < $1 }
-        })
+        return AggregateRelation(relation: self, attribute: attribute, initial: nil, agg: Swift.min)
     }
     
     public func max(attribute: Attribute) -> Relation {
-        return AggregateRelation(relation: self, attribute: attribute, agg: {
-            $0.rows()
-                .lazy
-                .map{ $0.ok![attribute] }
-                .maxElement{ $0 < $1 }
-        })
+        return AggregateRelation(relation: self, attribute: attribute, initial: nil, agg: Swift.max)
     }
 }
 
