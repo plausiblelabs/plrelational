@@ -18,6 +18,11 @@ private var indentLevel = 0
 
 @inline(__always) func LogRelationIterationBegin<T: Relation>(caller: T) -> RelationIterationLoggingData {
     #if LOG_RELATION_ITERATION
+        if indentLevel == 0 {
+            print("----------")
+            print("Starting top-level iteration of:")
+            caller.fullDebugDump(showContents: false)
+        }
         let description: String
         if let obj = caller as? AnyObject {
             description = String(format: "%@ %p", NSStringFromClass(obj.dynamicType), unsafeAddressOf(obj))
