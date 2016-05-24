@@ -21,6 +21,8 @@ private var indentLevel = 0
         if indentLevel == 0 {
             print("----------")
             print("Starting top-level iteration of:")
+            caller.simpleDump()
+            caller.uniquingDump()
             caller.fullDebugDump(showContents: false)
         }
         let description: String
