@@ -488,6 +488,28 @@ class RelationTests: DBTestCase {
                         [3]))
     }
     
+    func testCount() {
+        let empty = MakeRelation(
+            ["id", "name"])
+        
+        AssertEqual(empty.count(),
+                    MakeRelation(
+                        ["count"],
+                        [0]))
+        
+        let r = MakeRelation(
+            ["id", "name"],
+            [1,    "cat"],
+            [2,    "dog"],
+            [3,    "fish"],
+            [4,    "ant"])
+        
+        AssertEqual(r.count(),
+                    MakeRelation(
+                        ["count"],
+                        [4]))
+    }
+    
     func testForeach() {
         let r1 = MakeRelation(
             ["first", "last", "pet"],
@@ -859,5 +881,30 @@ class RelationTests: DBTestCase {
         a.delete(true)
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, ConcreteRelation(["count": 4]))
+    }
+    
+    func testCountObservation() {
+        let a = ChangeLoggingRelation(baseRelation:
+            MakeRelation(
+                ["id", "name"]))
+        
+        let c = a.count()
+        var lastChange: RelationChange?
+        _ = c.addChangeObserver({ lastChange = $0 })
+        
+        lastChange = nil
+        a.add(["id": 1, "name": "cat"])
+        AssertEqual(lastChange?.added, ConcreteRelation(["count": 1]))
+        AssertEqual(lastChange?.removed, ConcreteRelation(["count": 0]))
+        
+        lastChange = nil
+        a.add(["id": 2, "name": "dog"])
+        AssertEqual(lastChange?.added, ConcreteRelation(["count": 2]))
+        AssertEqual(lastChange?.removed, ConcreteRelation(["count": 1]))
+        
+        lastChange = nil
+        a.delete(true)
+        AssertEqual(lastChange?.added, ConcreteRelation(["count": 0]))
+        AssertEqual(lastChange?.removed, ConcreteRelation(["count": 2]))
     }
 }

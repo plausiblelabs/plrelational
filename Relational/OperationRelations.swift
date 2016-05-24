@@ -388,35 +388,92 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
         let data = LogRelationIterationBegin(self)
         
-        // TODO: try to figure out which of a and b is smaller, rather than just
-        // arbitrarily picking an order.
-        let first = b
-        let second = a
+        // For an optimal (least memory usage) join, we want to figure out which of the joined relations
+        // is smaller, use that one to populate the hash table, then scan the other one. Figuring out
+        // relation size is non-trivial, though. Instead, we'll scan both relations in parallel, saving
+        // what we find. When we hit the end of one, that's the smaller one. Load that one's rows (now
+        // in memory) into the hash table. Join with the rows of the other one, starting with the ones
+        // in memory and adding on the remaining rows we haven't yet read out of the second relation.
+        var aCachedRows: [Row] = []
+        var bCachedRows: [Row] = []
         
-        let firstAttributes = matching.values
-        let secondAttributes = matching.keys
-        let secondToFirstRenaming = matching
+        let aAttributes = Array(matching.keys)
+        let bAttributes = Array(matching.values)
         
-        // This maps join keys in `first` to entire rows in `first`.
-        var firstKeyed: [Row: [Row]] = [:]
-        for rowResult in first.rows() {
-            guard let row = rowResult.ok else { return AnyGenerator(GeneratorOfOne(rowResult)) }
-            let joinKey = row.rowWithAttributes(firstAttributes)
-            if firstKeyed[joinKey] != nil {
-                firstKeyed[joinKey]!.append(row)
+        let aGen = a.rows()
+        let bGen = b.rows()
+        
+        var smallerRows: [Row]!
+        var smallerAttributes: [Attribute]!
+        var largerCachedRows: [Row]!
+        var largerRemainderGenerator: AnyGenerator<Result<Row, RelationError>>!
+        var largerAttributes: [Attribute]!
+        var largerToSmallerRenaming: [Attribute: Attribute]!
+        
+        while true {
+            if let aRow = aGen.next() {
+                switch aRow {
+                case .Ok(let row):
+                    aCachedRows.append(row)
+                case .Err(let err):
+                    return AnyGenerator(GeneratorOfOne(Result<Row, RelationError>.Err(err)))
+                }
             } else {
-                firstKeyed[joinKey] = [row]
+                smallerRows = aCachedRows
+                smallerAttributes = aAttributes
+                largerCachedRows = bCachedRows
+                largerRemainderGenerator = bGen
+                largerAttributes = bAttributes
+                largerToSmallerRenaming = matching.reversed
+                break
+            }
+            if let bRow = bGen.next() {
+                switch bRow {
+                case .Ok(let row):
+                    bCachedRows.append(row)
+                case .Err(let err):
+                    return AnyGenerator(GeneratorOfOne(Result<Row, RelationError>.Err(err)))
+                }
+            } else {
+                smallerRows = bCachedRows
+                smallerAttributes = bAttributes
+                largerCachedRows = aCachedRows
+                largerRemainderGenerator = aGen
+                largerAttributes = aAttributes
+                largerToSmallerRenaming = matching
+                break
             }
         }
         
-        let seq = second.rows().lazy.flatMap({ rowResult -> [Result<Row, RelationError>] in
-            guard let row = rowResult.ok else { return [rowResult] }
-            
-            let joinKey = row.rowWithAttributes(secondAttributes).renameAttributes(secondToFirstRenaming)
-            guard let bRows = firstKeyed[joinKey] else { return [] }
-            return bRows.map({ .Ok(Row(values: $0.values + row.values)) })
+        // Potential TODO: if smallerRows is really small (like, one entry) then we might want to
+        // turn this into a select operation to save scanning the whole other relation.
+        
+        // This maps join keys in `smallerRows` to entire rows.
+        var keyed: [Row: [Row]] = [:]
+        for row in smallerRows {
+            let joinKey = row.rowWithAttributes(smallerAttributes)
+            if keyed[joinKey] != nil {
+                keyed[joinKey]!.append(row)
+            } else {
+                keyed[joinKey] = [row]
+            }
+        }
+        
+        let cachedJoined = largerCachedRows.lazy.flatMap({ row -> [Result<Row, RelationError>] in
+            let joinKey = row.rowWithAttributes(largerAttributes).renameAttributes(largerToSmallerRenaming)
+            guard let smallerRows = keyed[joinKey] else { return [] }
+            return smallerRows.map({ .Ok(Row(values: $0.values + row.values)) })
         })
-        return LogRelationIterationReturn(data, AnyGenerator(seq.generate()))
+        
+        let remainderJoined = largerRemainderGenerator.lazy.flatMap({ rowResult -> [Result<Row, RelationError>] in
+            guard let row = rowResult.ok else { return [rowResult] }
+            let joinKey = row.rowWithAttributes(largerAttributes).renameAttributes(largerToSmallerRenaming)
+            guard let smallerRows = keyed[joinKey] else { return [] }
+            return smallerRows.map({ .Ok(Row(values: $0.values + row.values)) })
+        })
+        
+        let concatenated = cachedJoined.generate().concat(remainderJoined.generate())
+        return LogRelationIterationReturn(data, AnyGenerator(concatenated))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
@@ -695,5 +752,70 @@ class AggregateRelation: Relation, RelationDefaultChangeObserverImplementation {
             aggChange = RelationChange()
         }
         notifyChangeObservers(aggChange)
+    }
+}
+
+class CountRelation: Relation, RelationDefaultChangeObserverImplementation {
+    let relation: Relation
+    
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    
+    init(relation: Relation) {
+        self.relation = relation
+    }
+    
+    var scheme: Scheme {
+        return ["count"]
+    }
+    
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
+        var done = false
+        return LogRelationIterationReturn(data, AnyGenerator(body: {
+            guard !done else { return nil }
+            done = true
+            // TODO: Only include non-error rows?
+            var count: Int64 = 0
+            self.relation.rows().forEach({ _ in count += 1 })
+            return .Ok(Row(values: ["count": RelationValue(count)]))
+        }))
+    }
+    
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        return .Ok(rows().contains({ $0.ok == row }))
+    }
+    
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        // TODO: Error, no-op, or pass through to underlying relation?
+        return .Ok(())
+    }
+    
+    func onAddFirstObserver() {
+        relation.addWeakChangeObserver(self, method: self.dynamicType.observeChange)
+    }
+    
+    private func observeChange(change: RelationChange) {
+        // TODO: We're using the dumb and inefficient approach for now.  We should instead
+        // cache the computed count and inspect the added/removed rows to determine
+        // if the count has changed
+        
+        var preChangeRelation = relation
+        if let added = change.added {
+            preChangeRelation = preChangeRelation.difference(added)
+        }
+        if let removed = change.removed {
+            preChangeRelation = preChangeRelation.union(removed)
+        }
+        let previousCount = CountRelation(relation: preChangeRelation)
+        
+        let countChange: RelationChange
+        if self.intersection(previousCount).isEmpty.ok == true {
+            // The count has changed
+            countChange = RelationChange(added: self, removed: previousCount)
+        } else {
+            // The aggregate value has not changed relative to the previous state
+            countChange = RelationChange()
+        }
+        notifyChangeObservers(countChange)
     }
 }

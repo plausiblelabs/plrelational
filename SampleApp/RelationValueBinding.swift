@@ -91,7 +91,20 @@ extension Relation {
             }
         })
     }
-    
+
+    /// Resolves to a single integer value if there is exactly one row in the relation, otherwise resolves
+    /// to zero.
+    var oneInteger: ValueBinding<Int64> {
+        return RelationValueBinding(relation: self, transform: { relation -> Int64 in
+            let values = self.allValues(relation, { value -> Int64? in value.get() })
+            if values.count == 1 {
+                return values.first!
+            } else {
+                return 0
+            }
+        })
+    }
+
     /// Resolves to the given string value if there are multiple string values in the relation, otherwise
     /// resolves to an empty string.
     func stringWhenMulti(string: String) -> ValueBinding<String> {
@@ -103,6 +116,11 @@ extension Relation {
                 return ""
             }
         })
+    }
+    
+    /// Resolves to a sequence of mapped values, one value for each non-error row.
+    func map<V>(transform: Row -> V) -> ValueBinding<[V]> {
+        return RelationValueBinding(relation: self, transform: { self.mapRows($0, transform) })
     }
 
     /// Resolves to a sequence of all values for the single attribute, one value for each non-error row.
@@ -134,14 +152,21 @@ extension Relation {
         })
     }
     
-    /// Resolves to a sequence of all values for the single attribute, one value for each non-error row.
+    /// Resolves the relation to a sequence of mapped values, one value for each non-error row.
+    private func mapRows<V>(relation: Relation, _ transform: Row -> V) -> [V] {
+        return relation.rows().flatMap{$0.ok}.map(transform)
+    }
+    
+    /// Resolves the relation to a sequence of all values for the single attribute, one value for
+    /// each non-error row.
     private func allValues<V>(relation: Relation, _ unwrap: RelationValue -> V?) -> [V] {
         precondition(relation.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = relation.scheme.attributes.first!
         return relation.rows().flatMap{$0.ok}.flatMap{unwrap($0[attr])}
     }
     
-    /// Resolves to some value for the single attribute if there are one or more rows, or nil if there are no non-error rows.
+    /// Resolves the relation to some value for the single attribute if there are one or more rows,
+    /// or nil if there are no non-error rows.
     private func anyValue<V>(relation: Relation, _ unwrap: RelationValue -> V?) -> V? {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!
