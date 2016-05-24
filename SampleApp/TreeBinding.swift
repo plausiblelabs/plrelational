@@ -73,6 +73,9 @@ public class TreeBinding<D: TreeData>: Binding {
     public typealias Pos = TreePos<D>
     public typealias Change = TreeChange<D>
     
+    private var changeObservers: [UInt64: ChangeObserver] = [:]
+    private var changeObserverNextID: UInt64 = 0
+    
     public let root: Node
     
     public var value: Node {
@@ -82,9 +85,6 @@ public class TreeBinding<D: TreeData>: Binding {
     init(root: Node) {
         self.root = root
     }
-    
-    private var changeObservers: [UInt64: ChangeObserver] = [:]
-    private var changeObserverNextID: UInt64 = 0
     
     public func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval {
         let id = changeObserverNextID

@@ -18,6 +18,8 @@
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
 		376136911CF11C0A00F572C5 /* RelationValueBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136901CF11C0A00F572C5 /* RelationValueBinding.swift */; };
 		376136931CF11C8D00F572C5 /* CommonValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136921CF11C8D00F572C5 /* CommonValue.swift */; };
+		376136951CF40A9600F572C5 /* ArrayBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136941CF40A9600F572C5 /* ArrayBinding.swift */; };
+		376136971CF40AB300F572C5 /* RelationArrayBindingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136961CF40AB300F572C5 /* RelationArrayBindingTests.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -150,6 +152,8 @@
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		376136901CF11C0A00F572C5 /* RelationValueBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValueBinding.swift; sourceTree = "<group>"; };
 		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonValue.swift; sourceTree = "<group>"; };
+		376136941CF40A9600F572C5 /* ArrayBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayBinding.swift; sourceTree = "<group>"; };
+		376136961CF40AB300F572C5 /* RelationArrayBindingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationArrayBindingTests.swift; path = SampleAppTests/RelationArrayBindingTests.swift; sourceTree = SOURCE_ROOT; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -298,7 +302,9 @@
 		372707741CF3904D00710C80 /* Array Binding */ = {
 			isa = PBXGroup;
 			children = (
+				376136941CF40A9600F572C5 /* ArrayBinding.swift */,
 				37C6114C1CDD603C001DAF59 /* RelationArrayBinding.swift */,
+				376136961CF40AB300F572C5 /* RelationArrayBindingTests.swift */,
 			);
 			name = "Array Binding";
 			sourceTree = "<group>";
@@ -782,6 +788,7 @@
 				37C6115B1CE4F3BC001DAF59 /* ArrayBinarySearch.swift in Sources */,
 				376136911CF11C0A00F572C5 /* RelationValueBinding.swift in Sources */,
 				37C611021CD7EFAE001DAF59 /* Document.swift in Sources */,
+				376136951CF40A9600F572C5 /* ArrayBinding.swift in Sources */,
 				37C611511CE10770001DAF59 /* TreeView.swift in Sources */,
 				372707781CF3C31200710C80 /* RelationValuePlistable.swift in Sources */,
 				37C611361CD7FB07001DAF59 /* ListView.swift in Sources */,
@@ -805,6 +812,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3727076B1CED32B000710C80 /* DBTestCase.swift in Sources */,
+				376136971CF40AB300F572C5 /* RelationArrayBindingTests.swift in Sources */,
 				37C6115D1CE4F756001DAF59 /* ArrayBinarySearchTests.swift in Sources */,
 				372707681CED2F8100710C80 /* AppTestCase.swift in Sources */,
 				3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */,

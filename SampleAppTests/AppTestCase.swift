@@ -11,7 +11,19 @@ import libRelational
 @testable import SampleApp
 
 class AppTestCase: XCTestCase {
-    
+
+    func prettyArray(binding: ArrayBinding<Row>) -> [String] {
+        var accum: [String] = []
+        for element in binding.elements {
+            accum.append("\(element.data["name"])")
+        }
+        return accum
+    }
+
+    func verifyArray(binding: ArrayBinding<Row>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
+        XCTAssertEqual(prettyArray(binding), expected, file: file, line: line)
+    }
+
     func pretty(node: TreeNode<Row>, inout _ accum: [String], _ indent: Int) {
         let pad = Array(count: indent, repeatedValue: "  ").joinWithSeparator("")
         accum.append("\(pad)\(node.data["name"])")
@@ -27,7 +39,7 @@ class AppTestCase: XCTestCase {
         }
         return accum
     }
-    
+
     func verifyTree(binding: TreeBinding<Row>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
         XCTAssertEqual(prettyRoot(binding), expected, file: file, line: line)
     }
