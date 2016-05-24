@@ -47,6 +47,7 @@ class DocModelTests: AppTestCase {
         // Insert some objects
         addObject("Object1", .Text, 3, 5.0)
         addObject("Object2", .Image, 3, 7.0)
+        addObject("Object3", .Image, 3, 8.0)
 
         // Verify the initial doc outline structure
         verifyTree(model.docOutlineTreeViewModel.data, [
@@ -73,7 +74,8 @@ class DocModelTests: AppTestCase {
         verifyTree(model.inspectorTreeViewModel.data, [
             "Page1",
             "  Object1",
-            "  Object2"
+            "  Object2",
+            "  Object3"
         ])
         
         // Verify properties-related bindings
@@ -98,10 +100,29 @@ class DocModelTests: AppTestCase {
         verifyTree(model.inspectorTreeViewModel.data, [
             "Page1",
             "  Object1",
-            "  Object2"
+            "  Object2",
+            "  Object3"
         ])
         
         // Verify properties-related bindings
         verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
+        
+        // Select a single object in the inspector
+        model.inspectorTreeViewModel.selection.commit([9])
+        
+        // Verify properties-related bindings
+        verifyBindings(itemSelected: true, selectedItemType: "Text", selectedItemName: "Object1")
+
+        // Select two objects (of the same type) in the inspector
+        model.inspectorTreeViewModel.selection.commit([10, 11])
+
+        // Verify properties-related bindings
+        verifyBindings(itemSelected: true, selectedItemType: "Multiple Images", selectedItemName: "")
+        
+        // Select two objects (of differing type) in the inspector
+        model.inspectorTreeViewModel.selection.commit([9, 10])
+        
+        // Verify properties-related bindings
+        verifyBindings(itemSelected: true, selectedItemType: "Multiple Items", selectedItemName: "")
     }
 }

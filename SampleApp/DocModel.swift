@@ -326,16 +326,18 @@ class DocModel {
         return self.selectedItemTypesRelation.all{ ItemType($0)! }
     }()
     
-    private lazy var selectedItemCommonType: ValueBinding<CommonValue<ItemType>> = { [unowned self] in
-        return self.selectedItemTypes.common()
-    }()
+//    private lazy var selectedItemCommonType: ValueBinding<CommonValue<ItemType>> = { [unowned self] in
+//        return self.selectedItemTypes.common()
+//    }()
 
     lazy var selectedItemTypesString: ValueBinding<String> = { [unowned self] in
-        return self.selectedItemTypes.map{ types -> String in
+        // TODO: Is there a more efficient way to do this?
+        let selectedItemCountBinding = self.selectedItems.count().oneInteger
+        return selectedItemCountBinding.zip(self.selectedItemTypes).map { (count, types) in
             if types.count == 0 {
                 return ""
-            } else if types.count == 1 {
-                return types[0].name
+            } else if count == 1 {
+                return types.first!.name
             } else {
                 if types.count == 1 {
                     return "Multiple \(types.first!.name)s"
@@ -355,13 +357,13 @@ class DocModel {
         return self.selectedItemNamesRelation.stringWhenMulti("Multiple Values")
     }()
 
-    lazy var selectedItemsOnlyText: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedItemCommonType.map{ $0.all(.Text) }
-    }()
-
-    lazy var selectedItemsOnlyImage: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedItemCommonType.map{ $0.all(.Image) }
-    }()
+//    lazy var selectedItemsOnlyText: ValueBinding<Bool> = { [unowned self] in
+//        return self.selectedItemCommonType.map{ $0.all(.Text) }
+//    }()
+//
+//    lazy var selectedItemsOnlyImage: ValueBinding<Bool> = { [unowned self] in
+//        return self.selectedItemCommonType.map{ $0.all(.Image) }
+//    }()
 
     private func bidiStringBinding(relation: Relation, type: String) -> BidiValueBinding<String> {
         func update(newValue: String) {
