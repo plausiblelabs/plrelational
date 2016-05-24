@@ -104,6 +104,19 @@ extension Relation {
             }
         })
     }
+    
+    /// Resolves to a single boolean value if there is exactly one row in the relation, otherwise resolves
+    /// to nil.
+    var oneBoolOrNil: ValueBinding<Bool?> {
+        return RelationValueBinding(relation: self, transform: { relation -> Bool? in
+            let values = self.allValues(relation, { value -> Int64? in value.get() })
+            if values.count == 1 {
+                return values.first! != 0
+            } else {
+                return nil
+            }
+        })
+    }
 
     /// Resolves to the given string value if there are multiple string values in the relation, otherwise
     /// resolves to an empty string.
