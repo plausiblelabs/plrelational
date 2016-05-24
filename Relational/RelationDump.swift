@@ -14,7 +14,11 @@ extension Relation {
             }
         }
         
-        print("\(self.dynamicType)")
+        if let obj = self as? AnyObject {
+            print("\(self.dynamicType) \(String(format: "%p", ObjectIdentifier(obj).uintValue))")
+        } else {
+            print("\(self.dynamicType)")
+        }
         if showContents {
             print("\(self.description)")
         }
