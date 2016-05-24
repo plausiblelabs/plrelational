@@ -112,7 +112,8 @@ extension Relation {
         for id in multiples {
             let r = relationIDs[id]!
             let name = names[id]!
-            print("\(name): \(rawDump(r))")
+            let count = counts[id]!
+            print("\(name): \(rawDump(r)) (referenced \(count) times)")
         }
         
         print(rawDump(self))
