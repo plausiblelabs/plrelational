@@ -116,6 +116,10 @@ extension Relation {
     public func max(attribute: Attribute) -> Relation {
         return AggregateRelation(relation: self, attribute: attribute, initial: nil, agg: Swift.max)
     }
+    
+    public func count() -> Relation {
+        return CountRelation(relation: self)
+    }
 }
 
 extension Relation {

@@ -754,3 +754,68 @@ class AggregateRelation: Relation, RelationDefaultChangeObserverImplementation {
         notifyChangeObservers(aggChange)
     }
 }
+
+class CountRelation: Relation, RelationDefaultChangeObserverImplementation {
+    let relation: Relation
+    
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    
+    init(relation: Relation) {
+        self.relation = relation
+    }
+    
+    var scheme: Scheme {
+        return ["count"]
+    }
+    
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
+        var done = false
+        return LogRelationIterationReturn(data, AnyGenerator(body: {
+            guard !done else { return nil }
+            done = true
+            // TODO: Only include non-error rows?
+            var count: Int64 = 0
+            self.relation.rows().forEach({ _ in count += 1 })
+            return .Ok(Row(values: ["count": RelationValue(count)]))
+        }))
+    }
+    
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        return .Ok(rows().contains({ $0.ok == row }))
+    }
+    
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        // TODO: Error, no-op, or pass through to underlying relation?
+        return .Ok(())
+    }
+    
+    func onAddFirstObserver() {
+        relation.addWeakChangeObserver(self, method: self.dynamicType.observeChange)
+    }
+    
+    private func observeChange(change: RelationChange) {
+        // TODO: We're using the dumb and inefficient approach for now.  We should instead
+        // cache the computed count and inspect the added/removed rows to determine
+        // if the count has changed
+        
+        var preChangeRelation = relation
+        if let added = change.added {
+            preChangeRelation = preChangeRelation.difference(added)
+        }
+        if let removed = change.removed {
+            preChangeRelation = preChangeRelation.union(removed)
+        }
+        let previousCount = CountRelation(relation: preChangeRelation)
+        
+        let countChange: RelationChange
+        if self.intersection(previousCount).isEmpty.ok == true {
+            // The count has changed
+            countChange = RelationChange(added: self, removed: previousCount)
+        } else {
+            // The aggregate value has not changed relative to the previous state
+            countChange = RelationChange()
+        }
+        notifyChangeObservers(countChange)
+    }
+}
