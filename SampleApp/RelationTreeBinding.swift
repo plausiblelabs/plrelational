@@ -41,19 +41,65 @@ public class RelationTreeBinding: TreeBinding<Row> {
     private var removal: ObserverRemoval!
     
     init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
+        
+        // TODO: Are the below items still TODO??
+        //
+        // TODO: Depth
+        // TODO: Sorting
+        // TODO: Error handling
+        // TODO: For now, we'll load the whole tree structure eagerly
+        
+        // Retrieve flat Tree representation from underlying Relation.
+        let rows = relation.rows().map{$0.ok!}
+        
+        // Map Rows to Nodes; children not set at this point.
+        let nodes = rows.map{ (row: Row) -> RowTreeNode in
+            (id: row[idAttr], data: row)
+            return RowTreeNode(id: row[idAttr], row: row, parentAttr: parentAttr)
+        }
+        
+        // Convenience Dictionary for looking up Nodes by their ID.
+        var nodeDict = [RelationValue: Node]()
+        for node in nodes {
+            nodeDict[node.id] = node
+        }
+        
+        // Create empty dummy Node to sit at the top of the tree.
+        var rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: parentAttr)
+        
+        // Extract only the parentIDs.
+        let parentIDs: Set<RelationValue> = {
+            var ids = Set<RelationValue>()
+            let parentRows: [Row] = rows.filter{ $0[parentAttr] != RelationValue.NULL }
+            for row in parentRows {
+                ids.insert(row[parentAttr])
+            }
+            return ids
+        }()
+        
+        // Add child nodes to parent elements.
+        for parentID in parentIDs {
+            let children: [Node] = nodes.filter{ $0.parentID == parentID }
+            for child in children {
+                // XXX forced unwrapping
+                nodeDict[parentID]!.children.insertSorted(child, {$0.data[orderAttr]})
+            }
+        }
+        
+        // Add top ordered (parentless) Nodes as descendants of the root Node.
+        for node in nodes {
+            if node.data[parentAttr] == RelationValue.NULL {
+                rootNode.children.insertSorted(node, {$0.data[orderAttr]})
+            }
+        }
+        
         self.relation = relation
         self.idAttr = idAttr
         self.parentAttr = parentAttr
         self.orderAttr = orderAttr
         
-        super.init(root: RowTreeNode(id: -1, row: Row(), parentAttr: parentAttr))
+        super.init(root: rootNode)
         
-        // TODO: Depth
-        // TODO: Sorting
-        // TODO: Error handling
-        // TODO: For now, we'll load the whole tree structure eagerly
-        //let rows = relation.rows().map{$0.ok!}
-
         func handle(relation: Relation, inout _ treeChanges: [Change], _ f: (Row) -> [Change]) {
             for rowResult in relation.rows() {
                 switch rowResult {

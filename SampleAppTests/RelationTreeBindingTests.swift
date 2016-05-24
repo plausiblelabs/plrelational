@@ -63,16 +63,15 @@ class RelationTreeBindingTests: AppTestCase {
         
         let treeBinding = RelationTreeBinding(relation: sqliteRelation, idAttr: "id", parentAttr: "parent", orderAttr: "order")
         
-        // TODO: Verify that in-memory tree structure was built correctly during initialization
-//        verifyTree(treeBinding, [
-//            "Group1",
-//            "  Collection1",
-//            "    Child1",
-//            "    Child2",
-//            "  Page1",
-//            "  Page2",
-//            "Group2"
-//        ])
+        verifyTree(treeBinding, [
+            "Group1",
+            "  Collection1",
+            "    Child1",
+            "    Child2",
+            "  Page1",
+            "  Page2",
+            "Group2"
+        ])
     }
     
     func testInsertMoveDelete() {
