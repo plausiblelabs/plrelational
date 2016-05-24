@@ -8,30 +8,28 @@ extension GeneratorType {
 /// A GeneratorType which concatenates two other generators. It will produce all elements from
 /// the first generator, then all elements from the second.
 public struct ConcatGenerator<G1: GeneratorType, G2: GeneratorType where G1.Element == G2.Element>: GeneratorType {
-    var g1: G1
-    var g2: G2
-    var current: Int
+    var g1: G1?
+    var g2: G2?
     
     public init(_ g1: G1, _ g2: G2) {
         self.g1 = g1
         self.g2 = g2
-        self.current = 0
     }
     
     public mutating func next() -> G1.Element? {
-        if current == 0 {
-            if let element = g1.next() {
+        if g1 != nil {
+            if let element = g1?.next() {
                 return element
             } else {
-                current = 1
+                g1 = nil
             }
         }
-        // NOTE: not else if, because we want to fall through when current == 0 assigns current = 1 above.
-        if current == 1 {
-            if let element = g2.next() {
+        // NOTE: not else if, because we want to fall through after the g1 = nil above.
+        if g2 != nil {
+            if let element = g2?.next() {
                 return element
             } else {
-                current = 2
+                g2 = nil
             }
         }
         
