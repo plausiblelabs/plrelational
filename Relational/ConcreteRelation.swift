@@ -93,7 +93,8 @@ public struct ConcreteRelation: MutableRelation {
     }
     
     public func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        return AnyGenerator(values.lazy.map(Result.Ok).generate())
+        let data = LogRelationIterationBegin(self)
+        return LogRelationIterationReturn(data, AnyGenerator(values.lazy.map(Result.Ok).generate()))
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {

@@ -27,8 +27,9 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
     }
     
     public func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
         var queryGenerator: AnyGenerator<Result<Row, RelationError>>? = nil
-        return AnyGenerator(body: {
+        return LogRelationIterationReturn(data, AnyGenerator(body: {
             if let queryGenerator = queryGenerator {
                 return queryGenerator.next()
             } else {
@@ -42,7 +43,7 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
                     return .Err(error)
                 }
             }
-        })
+        }))
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {

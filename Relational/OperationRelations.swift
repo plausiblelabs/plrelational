@@ -15,6 +15,7 @@ class UnionRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
         // In common usage, we tend to place relations where contains() is expensive
         // (like SQLiteRelation) on the left side of the union. Because of that, we
         // represent the union as (b + (a - b)) rather than (a + (b - a)).
@@ -31,7 +32,7 @@ class UnionRelation: Relation, RelationDefaultChangeObserverImplementation {
                 return row
             }
         })
-        return AnyGenerator(aUnique.generate().concat(b.rows()))
+        return LogRelationIterationReturn(data, AnyGenerator(aUnique.generate().concat(b.rows())))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
@@ -93,8 +94,9 @@ class IntersectionRelation: Relation, RelationDefaultChangeObserverImplementatio
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
         let aGen = a.rows()
-        return AnyGenerator(body: {
+        return LogRelationIterationReturn(data, AnyGenerator(body: {
             while let row = aGen.next() {
                 switch row {
                 case .Ok(let row):
@@ -112,7 +114,7 @@ class IntersectionRelation: Relation, RelationDefaultChangeObserverImplementatio
                 }
             }
             return nil
-        })
+        }))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
@@ -170,8 +172,9 @@ class DifferenceRelation: Relation, RelationDefaultChangeObserverImplementation 
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
         let aGen = a.rows()
-        return AnyGenerator(body: {
+        return LogRelationIterationReturn(data, AnyGenerator(body: {
             while let row = aGen.next() {
                 switch row {
                 case .Ok(let row):
@@ -189,7 +192,7 @@ class DifferenceRelation: Relation, RelationDefaultChangeObserverImplementation 
                 }
             }
             return nil
-        })
+        }))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
@@ -246,9 +249,10 @@ class ProjectRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
         let gen = relation.rows()
         var seen: Set<Row> = []
-        return AnyGenerator(body: {
+        return LogRelationIterationReturn(data, AnyGenerator(body: {
             while let row = gen.next() {
                 switch row {
                 case .Ok(let row):
@@ -263,7 +267,7 @@ class ProjectRelation: Relation, RelationDefaultChangeObserverImplementation {
                 }
             }
             return nil
-        })
+        }))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
@@ -317,8 +321,9 @@ class SelectRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
         let gen = relation.rows()
-        return AnyGenerator(body: {
+        return LogRelationIterationReturn(data, AnyGenerator(body: {
             while let row = gen.next() {
                 switch row {
                 case .Ok(let row):
@@ -330,7 +335,7 @@ class SelectRelation: Relation, RelationDefaultChangeObserverImplementation {
                 }
             }
             return nil
-        })
+        }))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
@@ -381,6 +386,8 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
 
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
+        
         // TODO: try to figure out which of a and b is smaller, rather than just
         // arbitrarily picking an order.
         let first = b
@@ -409,7 +416,7 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
             guard let bRows = firstKeyed[joinKey] else { return [] }
             return bRows.map({ .Ok(Row(values: $0.values + row.values)) })
         })
-        return AnyGenerator(seq.generate())
+        return LogRelationIterationReturn(data, AnyGenerator(seq.generate()))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
@@ -483,12 +490,13 @@ class RenameRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        return AnyGenerator(
+        let data = LogRelationIterationBegin(self)
+        return LogRelationIterationReturn(data, AnyGenerator(
             relation
                 .rows()
                 .lazy
                 .map({ $0.map({ $0.renameAttributes(self.renames) }) })
-                .generate())
+                .generate()))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
@@ -531,11 +539,12 @@ class UpdateRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        return AnyGenerator(projected.rows().lazy.map({ (row: Result<Row, RelationError>) -> Result<Row, RelationError> in
+        let data = LogRelationIterationBegin(self)
+        return LogRelationIterationReturn(data, AnyGenerator(projected.rows().lazy.map({ (row: Result<Row, RelationError>) -> Result<Row, RelationError> in
             return row.map({ (row: Row) -> Row in
                 return Row(values: row.values + self.newValues.values)
             })
-        }).generate())
+        }).generate()))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
@@ -624,8 +633,9 @@ class AggregateRelation: Relation, RelationDefaultChangeObserverImplementation {
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
         var done = false
-        return AnyGenerator(body: {
+        return LogRelationIterationReturn(data, AnyGenerator(body: {
             guard !done else { return nil }
             
             var soFar: RelationValue? = self.initialValue
@@ -646,7 +656,7 @@ class AggregateRelation: Relation, RelationDefaultChangeObserverImplementation {
             }
             done = true
             return soFar.map({ .Ok(Row(values: [self.attribute: $0])) })
-        })
+        }))
     }
     
     func contains(row: Row) -> Result<Bool, RelationError> {
