@@ -15,6 +15,7 @@ struct RelationIterationLoggingData {
 }
 
 private var indentLevel = 0
+private var completionScheduled = false
 
 @inline(__always) func LogRelationIterationBegin<T: Relation>(caller: T) -> RelationIterationLoggingData {
     #if LOG_RELATION_ITERATION
@@ -24,6 +25,16 @@ private var indentLevel = 0
             caller.simpleDump()
             caller.uniquingDump()
             caller.fullDebugDump(showContents: false)
+            
+            if !completionScheduled {
+                dispatch_async(dispatch_get_main_queue(), {
+                    print("==========")
+                    print("RETURNED TO EVENT LOOP")
+                    print("==========")
+                    completionScheduled = false
+                })
+                completionScheduled = true
+            }
         }
         let description: String
         if let obj = caller as? AnyObject {
