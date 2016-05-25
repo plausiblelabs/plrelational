@@ -490,11 +490,6 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
             }
         }
         
-        print("Joining into:")
-        keyed.forEach({ print("key: \($0)"); $1.forEach({ print("    \($0)") }) })
-        print("Larger is:")
-        largerCachedRows.forEach({ print("    \($0)") })
-        
         let cachedJoined = largerCachedRows.lazy.flatMap({ row -> [Result<Row, RelationError>] in
             let joinKey = row.rowWithAttributes(largerAttributes).renameAttributes(largerToSmallerRenaming)
             guard let smallerRows = keyed[joinKey] else { return [] }
