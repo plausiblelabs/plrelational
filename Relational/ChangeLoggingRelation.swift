@@ -153,11 +153,13 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
     }
     
     private func applyLogToCurrentRelationAndGetChanges<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log) -> Result<RelationChange, RelationError> {
-        let before = currentRelation()
+        let before = currentChange
         let result = applyLogToCurrentRelation(log)
         return result.map({
-            let after = self.currentRelation()
-            return RelationChange(added: after.difference(before), removed: before.difference(after))
+            let after = currentChange
+            let added = after.added.difference(before.added).union(before.removed.difference(after.removed))
+            let removed = before.added.difference(after.added).union(after.removed.difference(before.removed))
+            return RelationChange(added: added, removed: removed)
         })
     }
     
