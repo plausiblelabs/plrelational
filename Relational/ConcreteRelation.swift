@@ -9,6 +9,7 @@ public struct ConcreteRelation: MutableRelation {
         self.scheme = scheme
         self.values = values
         self.defaultSort = defaultSort
+        LogRelationCreation(self)
     }
     
     public init(_ row: Row) {

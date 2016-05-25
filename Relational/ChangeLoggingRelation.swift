@@ -26,6 +26,7 @@ public class ChangeLoggingRelation<BaseRelation: Relation> {
     public init(baseRelation: BaseRelation) {
         self.baseRelation = baseRelation
         currentChange = (ConcreteRelation(scheme: baseRelation.scheme), ConcreteRelation(scheme: baseRelation.scheme))
+        LogRelationCreation(self)
     }
     
     public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {

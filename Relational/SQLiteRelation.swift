@@ -23,6 +23,7 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
         self.scheme = scheme
         self.query = query
         
+        LogRelationCreation(self)
         precondition(queryToSQL(query) != nil, "Query terms must be SQL compatible!")
     }
     

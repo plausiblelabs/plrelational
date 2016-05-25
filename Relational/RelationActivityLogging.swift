@@ -1,12 +1,12 @@
 
 import Foundation
 
-/// Iteration logging support. Disabled at compile time by default, which should result in zero overhead with the
+/// Relation logging support. Disabled at compile time by default, which should result in zero overhead with the
 /// always-inlined functions. To enable, add this to Other Swift Flags:
-///     -DLOG_RELATION_ITERATION
+///     -DLOG_RELATION_ACTIVITY
 
 struct RelationIterationLoggingData {
-    #if LOG_RELATION_ITERATION
+    #if LOG_RELATION_ACTIVITY
     var callerDescription: String
     var startTime: NSTimeInterval
     var indentLevel: Int
@@ -17,8 +17,19 @@ struct RelationIterationLoggingData {
 private var indentLevel = 0
 private var completionScheduled = false
 
+@inline(__always) func LogRelationCreation<T: Relation>(caller: T) {
+    #if LOG_RELATION_ACTIVITY
+        if let obj = caller as? AnyObject {
+            print("Created \(caller.dynamicType) \(String(format: "%p", ObjectIdentifier(obj).uintValue))")
+            for line in NSThread.callStackSymbols() {
+                print(line)
+            }
+        }
+    #endif
+}
+
 @inline(__always) func LogRelationIterationBegin<T: Relation>(caller: T) -> RelationIterationLoggingData {
-    #if LOG_RELATION_ITERATION
+    #if LOG_RELATION_ACTIVITY
         if indentLevel == 0 {
             print("----------")
             print("Starting top-level iteration of:")
@@ -62,7 +73,7 @@ private var completionScheduled = false
 }
 
 @inline(__always) func LogRelationIterationReturn(data: RelationIterationLoggingData, _ generator: AnyGenerator<Result<Row, RelationError>>) -> AnyGenerator<Result<Row, RelationError>> {
-    #if LOG_RELATION_ITERATION
+    #if LOG_RELATION_ACTIVITY
         var rowCount = 0
         let indentString = "".stringByPaddingToLength(data.indentLevel * 4, withString: " ", startingAtIndex: 0)
         return AnyGenerator(body: {

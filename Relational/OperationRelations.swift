@@ -8,6 +8,7 @@ class UnionRelation: Relation, RelationDefaultChangeObserverImplementation {
         precondition(a.scheme == b.scheme)
         self.a = a
         self.b = b
+        LogRelationCreation(self)
     }
     
     var scheme: Scheme {
@@ -87,6 +88,7 @@ class IntersectionRelation: Relation, RelationDefaultChangeObserverImplementatio
         precondition(a.scheme == b.scheme)
         self.a = a
         self.b = b
+        LogRelationCreation(self)
     }
     
     var scheme: Scheme {
@@ -165,6 +167,7 @@ class DifferenceRelation: Relation, RelationDefaultChangeObserverImplementation 
         precondition(a.scheme == b.scheme)
         self.a = a
         self.b = b
+        LogRelationCreation(self)
     }
     
     var scheme: Scheme {
@@ -246,6 +249,7 @@ class ProjectRelation: Relation, RelationDefaultChangeObserverImplementation {
         precondition(scheme.attributes.isSubsetOf(relation.scheme.attributes))
         self.relation = relation
         self.scheme = scheme
+        LogRelationCreation(self)
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
@@ -314,6 +318,7 @@ class SelectRelation: Relation, RelationDefaultChangeObserverImplementation {
     init(relation: Relation, query: SelectExpression) {
         self.relation = relation
         self.query = query
+        LogRelationCreation(self)
     }
     
     var scheme: Scheme {
@@ -379,6 +384,7 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
         self.a = a
         self.b = b
         self.matching = matching
+        LogRelationCreation(self)
     }
     
     var scheme: Scheme {
@@ -484,6 +490,11 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
             }
         }
         
+        print("Joining into:")
+        keyed.forEach({ print("key: \($0)"); $1.forEach({ print("    \($0)") }) })
+        print("Larger is:")
+        largerCachedRows.forEach({ print("    \($0)") })
+        
         let cachedJoined = largerCachedRows.lazy.flatMap({ row -> [Result<Row, RelationError>] in
             let joinKey = row.rowWithAttributes(largerAttributes).renameAttributes(largerToSmallerRenaming)
             guard let smallerRows = keyed[joinKey] else { return [] }
@@ -562,6 +573,7 @@ class RenameRelation: Relation, RelationDefaultChangeObserverImplementation {
     init(relation: Relation, renames: [Attribute: Attribute]) {
         self.relation = relation
         self.renames = renames
+        LogRelationCreation(self)
     }
     
     var scheme: Scheme {
@@ -618,6 +630,7 @@ class UpdateRelation: Relation, RelationDefaultChangeObserverImplementation {
         self.projected = relation.project(Scheme(attributes: untouchedAttributes))
         self.newValues = newValues
         self.scheme = relation.scheme
+        LogRelationCreation(self)
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
@@ -693,6 +706,7 @@ class AggregateRelation: Relation, RelationDefaultChangeObserverImplementation {
         self.attribute = attribute
         self.initialValue = initial
         self.agg = agg
+        LogRelationCreation(self)
     }
     
     /// A convenience initializer for aggregating functions which cannot fail and which always
@@ -787,6 +801,7 @@ class CountRelation: Relation, RelationDefaultChangeObserverImplementation {
     
     init(relation: Relation) {
         self.relation = relation
+        LogRelationCreation(self)
     }
     
     var scheme: Scheme {
@@ -857,6 +872,7 @@ class UniqueRelation: Relation, RelationDefaultChangeObserverImplementation {
         self.relation = relation
         self.attribute = attribute
         self.matching = matching
+        LogRelationCreation(self)
     }
     
     var scheme: Scheme {
