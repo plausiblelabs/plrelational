@@ -53,6 +53,12 @@ extension ValueBinding {
     }
 }
 
+extension ValueBinding where T: SequenceType, T.Generator.Element: Equatable {
+    public func isOne(value: T.Generator.Element) -> ValueBinding<Bool> {
+        return IsOneValueBinding(binding: self, value: value)
+    }
+}
+
 extension ValueBinding where T: SequenceType, T.Generator.Element: Hashable {
     public func common() -> ValueBinding<CommonValue<T.Generator.Element>> {
         return CommonValueBinding(binding: self)
@@ -81,6 +87,24 @@ private class ZippedValueBinding<U, V>: ValueBinding<(U, V)> {
         })
         self.removal2 = binding2.addChangeObserver({ [weak self] in
             self?.setValue((binding1.value, binding2.value))
+        })
+    }
+}
+
+private class IsOneValueBinding<T: Equatable>: ValueBinding<Bool> {
+    private var removal: ObserverRemoval!
+    
+    init<S: SequenceType where S.Generator.Element == T>(binding: ValueBinding<S>, value: T) {
+        
+        func isOne() -> Bool {
+            let values = Array(binding.value)
+            return values.count == 1 && values.first! == value
+        }
+        
+        super.init(initialValue: isOne())
+        
+        self.removal = binding.addChangeObserver({ [weak self] in
+            self?.setValue(isOne())
         })
     }
 }

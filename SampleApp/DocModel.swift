@@ -58,6 +58,7 @@ class DocModel {
 
     private var collections: MutableRelation
     private var objects: MutableRelation
+    private var textObjects: MutableRelation
     private var selectedCollectionID: MutableRelation
     private var selectedInspectorItemIDs: MutableRelation
     
@@ -102,6 +103,7 @@ class DocModel {
         }
         self.collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
         self.objects = createRelation("object", ["id", "type", "name", "coll_id", "order"])
+        self.textObjects = createRelation("text_object", ["id", "editable", "hint"])
         self.selectedCollectionID = createRelation("selected_collection", ["coll_id"])
         self.selectedInspectorItemIDs = createRelation("selected_inspector_item", ["item_id"])
 
@@ -220,14 +222,21 @@ class DocModel {
     }
     
     private func addObject(objectID: Int64, name: String, type: ItemType, collectionID: Int64, order: Double) {
-        let row: Row = [
+        objects.add([
             "id": RelationValue(objectID),
             "name": RelationValue(name),
             "type": RelationValue(type.rawValue),
             "coll_id": RelationValue(collectionID),
             "order": RelationValue(order)
-        ]
-        objects.add(row)
+        ])
+        
+        if type == .Text {
+            textObjects.add([
+                "id": RelationValue(objectID),
+                "editable": 0,
+                "hint": ""
+            ])
+        }
     }
 
     func newCollection(name: String, type: ItemType, parentID: Int64?) {
@@ -305,7 +314,7 @@ class DocModel {
             }
         )
     }()
-    
+
     private lazy var selectedItemNamesRelation: Relation = { [unowned self] in
         return self.selectedItems.project(["name"])
     }()
@@ -326,10 +335,6 @@ class DocModel {
         return self.selectedItemTypesRelation.all{ ItemType($0)! }
     }()
     
-//    private lazy var selectedItemCommonType: ValueBinding<CommonValue<ItemType>> = { [unowned self] in
-//        return self.selectedItemTypes.common()
-//    }()
-
     lazy var selectedItemTypesString: ValueBinding<String> = { [unowned self] in
         // TODO: Is there a more efficient way to do this?
         let selectedItemCountBinding = self.selectedItems.count().oneInteger
@@ -348,7 +353,7 @@ class DocModel {
         }
     }()
     
-    lazy var selectedItemNames: ValueBinding<String> = { [unowned self] in
+    lazy var selectedItemNames: BidiValueBinding<String> = { [unowned self] in
         // TODO: s/Item/type.name/
         return self.bidiStringBinding(self.selectedItemNamesRelation, type: "Item")
     }()
@@ -357,13 +362,37 @@ class DocModel {
         return self.selectedItemNamesRelation.stringWhenMulti("Multiple Values")
     }()
 
-//    lazy var selectedItemsOnlyText: ValueBinding<Bool> = { [unowned self] in
-//        return self.selectedItemCommonType.map{ $0.all(.Text) }
+    lazy var selectedItemsOnlyText: ValueBinding<Bool> = { [unowned self] in
+        return self.selectedItemTypes.isOne(.Text)
+    }()
+    
+//    private lazy var selectedTextObjects: Relation = { [unowned self] in
+//        return Relation.when(self.selectedItemsOnlyText, then: {
+//            self.selectedItems
+//                .project(["id"])
+//                .join(self.textObjects)
+//        })
 //    }()
-//
-//    lazy var selectedItemsOnlyImage: ValueBinding<Bool> = { [unowned self] in
-//        return self.selectedItemCommonType.map{ $0.all(.Image) }
+    
+//    // TODO: Bidi
+//    lazy var selectedTextObjectsEditable: ValueBinding<Bool?> = { [unowned self] in
+//        return self.selectedTextObjects
+//            .project(["editable"])
+//            .oneBoolOrNil
+//            .onlyWhen(self.selectedItemsOnlyText)
 //    }()
+
+//    // TODO: Bidi
+//    lazy var selectedTextObjectsHint: ValueBinding<String> = { [unowned self] in
+//        return self.selectedTextObjects
+//            .project(["hint"])
+//            .oneBoolOrNil
+//            .onlyWhen(self.selectedItemsOnlyText)
+//    }()
+
+    lazy var selectedItemsOnlyImage: ValueBinding<Bool> = { [unowned self] in
+        return self.selectedItemTypes.isOne(.Image)
+    }()
 
     private func bidiStringBinding(relation: Relation, type: String) -> BidiValueBinding<String> {
         func update(newValue: String) {
