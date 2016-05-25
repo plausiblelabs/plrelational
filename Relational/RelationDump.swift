@@ -1,6 +1,10 @@
 
 import Foundation
 
+private struct FieldNameExclusions {
+    static let strings: Set = ["changeObserverData", "log", "cachedCurrentRelation"]
+}
+
 extension Relation {
     public func fullDebugDump(showContents showContents: Bool = true) {
         fullDebugDump(showContents, 0)
@@ -35,7 +39,7 @@ extension Relation {
     private func getFieldsForDump() -> [(String, Any)] {
         var result: [(String, Any)] = []
         for (name, value) in Mirror(reflecting: self).childrenIncludingSupertypes {
-            if let name = name where !(value is Relation) && name != "changeObserverData" && name != "log" {
+            if let name = name where !(value is Relation) && !FieldNameExclusions.strings.contains(name) {
                 result.append((name, value))
             }
         }

@@ -23,6 +23,8 @@ public class ChangeLoggingRelation<BaseRelation: Relation> {
     
     var currentChange: (added: ConcreteRelation, removed: ConcreteRelation)
     
+    var cachedCurrentRelation: Relation?
+    
     public init(baseRelation: BaseRelation) {
         self.baseRelation = baseRelation
         currentChange = (ConcreteRelation(scheme: baseRelation.scheme), ConcreteRelation(scheme: baseRelation.scheme))
@@ -110,10 +112,17 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
     /// This is what rows() returns data from, but it won't reflect any future
     /// changes to the ChangeLoggingRelation.
     internal func currentRelation() -> Relation {
-        return baseRelation.difference(currentChange.removed).union(currentChange.added)
+        if let cached = cachedCurrentRelation {
+            return cached
+        } else {
+            let relation = baseRelation.difference(currentChange.removed).union(currentChange.added)
+            cachedCurrentRelation = relation
+            return relation
+        }
     }
     
     private func applyLogToCurrentRelation<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log) -> Result<Void, RelationError> {
+        cachedCurrentRelation = nil
         for change in log {
             switch change {
             case .Union(let relation):
