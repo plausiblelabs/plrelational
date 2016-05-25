@@ -23,11 +23,8 @@ extension Relation {
             print("\(self.description)")
         }
         
-        let m = Mirror(reflecting: self)
-        for (name, value) in m.children {
-            if let name = name where !(value is Relation) && name != "changeObserverData" && name != "log" {
-                print("\(name): \(value)")
-            }
+        for (name, value) in getFieldsForDump() {
+            print("\(name): \(value)")
         }
         for (name, subrelation) in getChildRelationsForDump() {
             print("\(name):")
@@ -35,9 +32,20 @@ extension Relation {
         }
     }
     
+    private func getFieldsForDump() -> [(String, Any)] {
+        var result: [(String, Any)] = []
+        for (name, value) in Mirror(reflecting: self).childrenIncludingSupertypes {
+            if let name = name where !(value is Relation) && name != "changeObserverData" && name != "log" {
+                result.append((name, value))
+            }
+        }
+        return result
+
+    }
+    
     private func getChildRelationsForDump() -> [(String, Relation)] {
         var result: [(String, Relation)] = []
-        for (name, value) in Mirror(reflecting: self).children {
+        for (name, value) in Mirror(reflecting: self).childrenIncludingSupertypes {
             if let name = name, let subrelation = value as? Relation {
                 result.append((name, subrelation))
             }
@@ -117,5 +125,44 @@ extension Relation {
         }
         
         print(rawDump(self))
+    }
+    
+    public func graphivizDump() {
+        var seenIDs: Set<ObjectIdentifier> = []
+        
+        print("digraph relation_graph {")
+        
+        func visit(r: Relation, nonobjectID: String) -> String {
+            let supplemental = r.getFieldsForDump().map({ "\($0): \($1)" })
+            if let obj = r as? AnyObject {
+                let id = ObjectIdentifier(obj)
+                let idString = String(format: "_%lx", id.uintValue)
+                if !seenIDs.contains(id) {
+                    let name = "\(r.dynamicType) \(idString)"
+                    let label = ([name] + supplemental).joinWithSeparator("\n")
+                    print("\(idString) [label=\"\(label)\"]")
+                    for (name, child) in r.getChildRelationsForDump() {
+                        let graphID = visit(child, nonobjectID: "\(idString)xxx\(name)")
+                        print("\(idString) -> \(graphID) [label=\"\(name)\"]")
+                    }
+                    seenIDs.insert(id)
+                }
+                return idString
+            } else {
+                let name = "\(r.dynamicType)"
+                let label: String
+                switch r {
+                case let r as ConcreteRelation:
+                    label = "ConcreteRelation\n\(r.description)"
+                default:
+                    label = ([name] + supplemental).joinWithSeparator("\n")
+                }
+                print("\(nonobjectID) [label=\"\(label)\"]")
+                return nonobjectID
+            }
+        }
+        visit(self, nonobjectID: "root")
+        
+        print("}")
     }
 }
