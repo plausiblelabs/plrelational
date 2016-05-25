@@ -53,12 +53,7 @@ public class RelationTreeBinding: TreeBinding<Row> {
         
         // Use order Attribute from underlying Relation to nest child Nodes under parent elements.
         for node in nodeDict.values {
-            let parentNode: Node
-            if (nodeDict[node.data[parentAttr]] != nil) {
-                parentNode = nodeDict[node.data[parentAttr]]!
-            } else {
-                parentNode = rootNode
-            }
+            let parentNode = nodeDict[node.data[parentAttr]] ?? rootNode
             parentNode.children.insertSorted(node, {$0.data[orderAttr]})
         }
         
