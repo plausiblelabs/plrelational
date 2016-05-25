@@ -819,3 +819,76 @@ class CountRelation: Relation, RelationDefaultChangeObserverImplementation {
         notifyChangeObservers(countChange)
     }
 }
+
+class UniqueRelation: Relation, RelationDefaultChangeObserverImplementation {
+    let relation: Relation
+    let attribute: Attribute
+    let matching: RelationValue
+    
+    var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    
+    init(relation: Relation, attribute: Attribute, matching: RelationValue) {
+        precondition(relation.scheme.attributes.contains(attribute))
+        self.relation = relation
+        self.attribute = attribute
+        self.matching = matching
+    }
+    
+    var scheme: Scheme {
+        return relation.scheme
+    }
+    
+    func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
+        var done = false
+        var unique: Bool?
+        let gen = relation.rows()
+        return LogRelationIterationReturn(data, AnyGenerator(body: {
+            guard !done else { return nil }
+            if unique == nil {
+                let projected = self.relation.project([self.attribute])
+                let projectedRows = projected.rows()
+                if let row = projectedRows.next() {
+                    if projectedRows.next() != nil {
+                        // There are two or more values
+                        unique = false
+                    } else {
+                        // There is one unique value; see if it matches the expected value
+                        unique = row.ok![self.attribute] == self.matching
+                    }
+                } else {
+                    // There are no values
+                    unique = false
+                }
+            }
+            if unique == true {
+                if let row = gen.next() {
+                    return row
+                } else {
+                    done = true
+                    return nil
+                }
+            } else {
+                done = true
+                return nil
+            }
+        }))
+    }
+    
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        return .Ok(rows().contains({ $0.ok == row }))
+    }
+    
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        // TODO: Error, no-op, or pass through to underlying relation?
+        return .Ok(())
+    }
+    
+    func onAddFirstObserver() {
+        relation.addWeakChangeObserver(self, method: self.dynamicType.observeChange)
+    }
+    
+    private func observeChange(change: RelationChange) {
+        // TODO
+    }
+}

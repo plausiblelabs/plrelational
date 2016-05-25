@@ -362,36 +362,24 @@ class DocModel {
         return self.selectedItemNamesRelation.stringWhenMulti("Multiple Values")
     }()
 
-    lazy var selectedItemsOnlyText: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedItemTypes.isOne(.Text)
+    private lazy var selectedTextObjects: Relation = { [unowned self] in
+        return self.selectedItems
+            .unique("type", matching: RelationValue(ItemType.Text.rawValue))
+            .equijoin(self.textObjects, matching: ["id": "id"])
     }()
-    
-//    private lazy var selectedTextObjects: Relation = { [unowned self] in
-//        return Relation.when(self.selectedItemsOnlyText, then: {
-//            self.selectedItems
-//                .project(["id"])
-//                .join(self.textObjects)
-//        })
-//    }()
-    
-//    // TODO: Bidi
-//    lazy var selectedTextObjectsEditable: ValueBinding<Bool?> = { [unowned self] in
-//        return self.selectedTextObjects
-//            .project(["editable"])
-//            .oneBoolOrNil
-//            .onlyWhen(self.selectedItemsOnlyText)
-//    }()
 
-//    // TODO: Bidi
-//    lazy var selectedTextObjectsHint: ValueBinding<String> = { [unowned self] in
-//        return self.selectedTextObjects
-//            .project(["hint"])
-//            .oneBoolOrNil
-//            .onlyWhen(self.selectedItemsOnlyText)
-//    }()
+    lazy var selectedItemsOnlyText: ValueBinding<Bool> = { [unowned self] in
+        return self.selectedTextObjects.nonEmpty
+    }()
 
-    lazy var selectedItemsOnlyImage: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedItemTypes.isOne(.Image)
+    // TODO: Bidi
+    lazy var selectedTextObjectsEditable: ValueBinding<Bool?> = { [unowned self] in
+        return self.selectedTextObjects.project(["editable"]).oneBoolOrNil
+    }()
+
+    // TODO: Bidi
+    lazy var selectedTextObjectsHint: ValueBinding<String> = { [unowned self] in
+        return self.selectedTextObjects.project(["hint"]).oneString
     }()
 
     private func bidiStringBinding(relation: Relation, type: String) -> BidiValueBinding<String> {

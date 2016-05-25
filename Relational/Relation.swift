@@ -30,6 +30,12 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     
     func min(attribute: Attribute) -> Relation
     func max(attribute: Attribute) -> Relation
+    func count() -> Relation
+    
+    /// Return a new Relation that resolves to this Relation when there is a unique value
+    /// for the given attribute that is the same as `matching`, otherwise resolves to an
+    /// empty relation.
+    func unique(attribute: Attribute, matching: RelationValue) -> Relation
     
     func select(rowToFind: Row) -> Relation
     func select(query: SelectExpression) -> Relation
@@ -119,6 +125,12 @@ extension Relation {
     
     public func count() -> Relation {
         return CountRelation(relation: self)
+    }
+}
+
+extension Relation {
+    public func unique(attribute: Attribute, matching: RelationValue) -> Relation {
+        return UniqueRelation(relation: self, attribute: attribute, matching: matching)
     }
 }
 

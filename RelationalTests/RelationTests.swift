@@ -510,6 +510,31 @@ class RelationTests: DBTestCase {
                         [4]))
     }
     
+    func testUnique() {
+        let r1 = MakeRelation(
+            ["id", "name", "type"],
+            [1,    "cat",  "animal"],
+            [2,    "dog",  "animal"],
+            [3,    "corn", "plant"])
+        
+        AssertEqual(r1.unique("type", matching: "animal"),
+                    MakeRelation(
+                        ["id", "name", "type"]))
+        
+        let r2 = MakeRelation(
+            ["id", "name", "type"],
+            [1,    "cat",  "animal"],
+            [2,    "dog",  "animal"],
+            [3,    "pig",  "animal"])
+        
+        AssertEqual(r2.unique("type", matching: "animal"),
+            MakeRelation(
+                ["id", "name", "type"],
+                [1,    "cat",  "animal"],
+                [2,    "dog",  "animal"],
+                [3,    "pig",  "animal"]))
+    }
+    
     func testForeach() {
         let r1 = MakeRelation(
             ["first", "last", "pet"],
