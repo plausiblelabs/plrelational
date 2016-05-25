@@ -405,10 +405,12 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
         
         var smallerRows: [Row]!
         var smallerAttributes: [Attribute]!
+        var smallerToLargerRenaming: [Attribute: Attribute]!
         var largerCachedRows: [Row]!
         var largerRemainderGenerator: AnyGenerator<Result<Row, RelationError>>!
         var largerAttributes: [Attribute]!
         var largerToSmallerRenaming: [Attribute: Attribute]!
+        var largerRelation: Relation!
         
         while true {
             if let aRow = aGen.next() {
@@ -421,10 +423,12 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
             } else {
                 smallerRows = aCachedRows
                 smallerAttributes = aAttributes
+                smallerToLargerRenaming = matching
                 largerCachedRows = bCachedRows
                 largerRemainderGenerator = bGen
                 largerAttributes = bAttributes
                 largerToSmallerRenaming = matching.reversed
+                largerRelation = b
                 break
             }
             if let bRow = bGen.next() {
@@ -437,10 +441,12 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
             } else {
                 smallerRows = bCachedRows
                 smallerAttributes = bAttributes
+                smallerToLargerRenaming = matching.reversed
                 largerCachedRows = aCachedRows
                 largerRemainderGenerator = aGen
                 largerAttributes = aAttributes
                 largerToSmallerRenaming = matching
+                largerRelation = a
                 break
             }
         }
@@ -450,8 +456,22 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
             return AnyGenerator(EmptyGenerator())
         }
         
-        // Potential TODO: if smallerRows is really small (like, one entry) then we might want to
-        // turn this into a select operation to save scanning the whole other relation.
+        // Joining with a single row is equivalent to a select and then combining the output
+        // with that single row, but the select operation is potentially faster.
+        if smallerRows.count == 1 {
+            let smallerRow = smallerRows[0]
+            let smallerKey = smallerRow.rowWithAttributes(smallerAttributes)
+            let largerKey = smallerKey.renameAttributes(smallerToLargerRenaming)
+            let largerFiltered = largerRelation.select(largerKey)
+            return LogRelationIterationReturn(data, AnyGenerator(largerFiltered.rows().lazy.map({ (row: Result<Row, RelationError>) -> Result<Row, RelationError> in
+                return row.map({ (row: Row) -> Row in
+                    Row(values: row.values + smallerRow.values)
+                })
+            }).generate()))
+        }
+        // Potential TODO: if smallerRows is small but has more than one element,
+        // it may still be better to turn that into a select as in the == 1 case,
+        // rather than scanning the entire other relation.
         
         // This maps join keys in `smallerRows` to entire rows.
         var keyed: [Row: [Row]] = [:]
