@@ -453,7 +453,7 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
         
         // Joining with an empty relation produces an empty relation. Short circuit that.
         if smallerRows.isEmpty {
-            return AnyGenerator(EmptyGenerator())
+            return LogRelationIterationReturn(data, AnyGenerator(EmptyGenerator()))
         }
         
         // Joining with a single row is equivalent to a select and then combining the output
