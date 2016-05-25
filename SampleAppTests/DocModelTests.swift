@@ -13,6 +13,14 @@ import libRelational
 class DocModelTests: AppTestCase {
     
     func testModel() {
+        
+        struct BindingVals {
+            let itemSelected: Bool
+            let selectedItemType: String
+            let selectedItemName: String
+            let selectedItemsOnlyText: Bool
+        }
+        
         let model = DocModel(undoManager: UndoManager())
         
         func addCollection(name: String, _ type: ItemType, _ parentID: Int64?) {
@@ -23,11 +31,12 @@ class DocModelTests: AppTestCase {
             model.newObject(name, type: type, collectionID: collectionID, order: order)
         }
         
-        func verifyBindings(itemSelected itemSelected: Bool, selectedItemType: String, selectedItemName: String) {
-            XCTAssertEqual(model.itemSelected.value, itemSelected)
-            XCTAssertEqual(model.itemNotSelected.value, !itemSelected)
-            XCTAssertEqual(model.selectedItemTypesString.value, selectedItemType)
-            XCTAssertEqual(model.selectedItemNames.value, selectedItemName)
+        func verifyBindings(expected: BindingVals, file: StaticString = #file, line: UInt = #line) {
+            XCTAssertEqual(model.itemSelected.value, expected.itemSelected, file: file, line: line)
+            XCTAssertEqual(model.itemNotSelected.value, !expected.itemSelected, file: file, line: line)
+            XCTAssertEqual(model.selectedItemTypesString.value, expected.selectedItemType, file: file, line: line)
+            XCTAssertEqual(model.selectedItemNames.value, expected.selectedItemName, file: file, line: line)
+            XCTAssertEqual(model.selectedItemsOnlyText.value, expected.selectedItemsOnlyText, file: file, line: line)
         }
         
         func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath<Row> {
@@ -65,7 +74,11 @@ class DocModelTests: AppTestCase {
         verifyTree(model.inspectorTreeViewModel.data, [])
         
         // Verify properties-related bindings
-        verifyBindings(itemSelected: false, selectedItemType: "", selectedItemName: "")
+        verifyBindings(BindingVals(
+            itemSelected: false,
+            selectedItemType: "",
+            selectedItemName: "",
+            selectedItemsOnlyText: false))
         
         // Select a page in the doc outline
         model.docOutlineTreeViewModel.selection.commit([3])
@@ -79,7 +92,11 @@ class DocModelTests: AppTestCase {
         ])
         
         // Verify properties-related bindings
-        verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
+        verifyBindings(BindingVals(
+            itemSelected: true,
+            selectedItemType: "Page",
+            selectedItemName: "Page1",
+            selectedItemsOnlyText: false))
         
         // Reorder a page in the doc outline
         model.docOutlineTreeViewModel.move?(srcPath: docOutlinePath(1, 1), dstPath: docOutlinePath(1, 3))
@@ -105,24 +122,40 @@ class DocModelTests: AppTestCase {
         ])
         
         // Verify properties-related bindings
-        verifyBindings(itemSelected: true, selectedItemType: "Page", selectedItemName: "Page1")
+        verifyBindings(BindingVals(
+            itemSelected: true,
+            selectedItemType: "Page",
+            selectedItemName: "Page1",
+            selectedItemsOnlyText: false))
         
         // Select a single object in the inspector
         model.inspectorTreeViewModel.selection.commit([9])
         
         // Verify properties-related bindings
-        verifyBindings(itemSelected: true, selectedItemType: "Text", selectedItemName: "Object1")
+        verifyBindings(BindingVals(
+            itemSelected: true,
+            selectedItemType: "Text",
+            selectedItemName: "Object1",
+            selectedItemsOnlyText: true))
 
         // Select two objects (of the same type) in the inspector
         model.inspectorTreeViewModel.selection.commit([10, 11])
 
         // Verify properties-related bindings
-        verifyBindings(itemSelected: true, selectedItemType: "Multiple Images", selectedItemName: "")
+        verifyBindings(BindingVals(
+            itemSelected: true,
+            selectedItemType: "Multiple Images",
+            selectedItemName: "",
+            selectedItemsOnlyText: false))
         
         // Select two objects (of differing type) in the inspector
         model.inspectorTreeViewModel.selection.commit([9, 10])
         
         // Verify properties-related bindings
-        verifyBindings(itemSelected: true, selectedItemType: "Multiple Items", selectedItemName: "")
+        verifyBindings(BindingVals(
+            itemSelected: true,
+            selectedItemType: "Multiple Items",
+            selectedItemName: "",
+            selectedItemsOnlyText: false))
     }
 }

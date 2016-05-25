@@ -130,7 +130,15 @@ extension Relation {
 
 extension Relation {
     public func unique(attribute: Attribute, matching: RelationValue) -> Relation {
-        return UniqueRelation(relation: self, attribute: attribute, matching: matching)
+        // TODO: There is probably a more efficient way to do this
+        return self
+            .project([attribute])
+            .count()
+            .join(self)
+            .select(
+                (Attribute("count") *== 1) *&&
+                (attribute *== matching))
+            .project(self.scheme)
     }
 }
 

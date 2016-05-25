@@ -357,7 +357,7 @@ class DocModel {
         return self.selectedItemNamesRelation.stringWhenMulti("Multiple Values")
     }()
 
-    private lazy var selectedTextObjects: Relation = { [unowned self] in
+    lazy var selectedTextObjects: Relation = { [unowned self] in
         return self.selectedItems
             .unique("type", matching: RelationValue(ItemType.Text.rawValue))
             .equijoin(self.textObjects, matching: ["id": "id"])
