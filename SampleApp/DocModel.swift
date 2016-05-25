@@ -108,39 +108,34 @@ class DocModel {
         self.selectedInspectorItemIDs = createRelation("selected_inspector_item", ["item_id"])
 
         // Prepare the higher level relations
-        self.selectedCollection = collections
-            .renameAttributes(["id" : "coll_id"])
-            .join(selectedCollectionID)
+        self.selectedCollection = selectedCollectionID
+            .equijoin(collections, matching: ["coll_id": "id"])
         
         // The `inspectorItems` relation is a view that presents the currently selected collection
         // (from the doc outline tree view) as the root node with its associated objects as the
         // root node's children
         // TODO: This is probably more complex than it needs to be
         let inspectorCollectionItems = selectedCollection
-            .project(["coll_id", "type", "name"])
-            .renameAttributes(["coll_id": "id"])
+            .project(["id", "type", "name"])
             .join(MakeRelation(["parent", "order"], [.NULL, 5.0]))
         let inspectorObjectItems = selectedCollectionID
-            .project(["coll_id"])
             .join(objects)
             .renameAttributes(["coll_id": "parent"])
-            .project(["id", "type", "name", "parent", "order"])
+            // TODO: Maybe optimize project() so that it's a no-op when the given attributes equal the current scheme
+            //.project(["id", "type", "name", "parent", "order"])
         self.inspectorItems = inspectorCollectionItems
             .union(inspectorObjectItems)
-        self.selectedInspectorItems = inspectorItems
-            .renameAttributes(["id" : "item_id"])
-            .join(selectedInspectorItemIDs)
+        self.selectedInspectorItems = selectedInspectorItemIDs
+            .equijoin(inspectorItems, matching: ["item_id": "id"])
         
         // The `selectedItems` relation is a roll-up view that includes the currently selected
         // inspector item(s) and/or the currently selected doc outline item.  The inspector item(s)
         // have a higher priority value associated with them, so that finding the currently selected
         // items is just a matter of choosing the rows with the highest priority value.
         let selectedCollectionWithPriority = selectedCollection
-            .renameAttributes(["coll_id": "id"])
             .project(["id", "type", "name"])
             .join(MakeRelation(["priority"], [1]))
         let selectedInspectorItemsWithPriority = selectedInspectorItems
-            .renameAttributes(["item_id": "id"])
             .project(["id", "type", "name"])
             .join(MakeRelation(["priority"], [2]))
         let allSelectedItems = selectedCollectionWithPriority
