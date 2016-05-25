@@ -445,6 +445,11 @@ class EquijoinRelation: Relation, RelationDefaultChangeObserverImplementation {
             }
         }
         
+        // Joining with an empty relation produces an empty relation. Short circuit that.
+        if smallerRows.isEmpty {
+            return AnyGenerator(EmptyGenerator())
+        }
+        
         // Potential TODO: if smallerRows is really small (like, one entry) then we might want to
         // turn this into a select operation to save scanning the whole other relation.
         
