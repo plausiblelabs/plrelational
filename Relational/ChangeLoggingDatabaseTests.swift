@@ -166,7 +166,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         loggingRelation.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
         
         loggingRelation.delete(Attribute("number") *== "42")
-        AssertEqual(lastChange!.removed!,
+        AssertEqual(lastChange!.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "MD-11"]))
@@ -174,7 +174,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         
         loggingRelation.delete(Attribute("number") *== "123")
-        AssertEqual(lastChange!.removed!,
+        AssertEqual(lastChange!.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["123",    "Jones", "707"]))
@@ -248,32 +248,32 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         loggingRelation.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
         loggingRelation.update(Attribute("number") *== "42", newValues: ["equipment": "DC-10"])
-        AssertEqual(lastChange!.removed!,
+        AssertEqual(lastChange!.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "MD-11"]))
-        AssertEqual(lastChange!.added!,
+        AssertEqual(lastChange!.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "DC-10"]))
         
         loggingRelation.update(Attribute("number") *== "123", newValues: ["equipment": "DC-10"])
-        AssertEqual(lastChange!.removed!,
+        AssertEqual(lastChange!.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["123",    "Jones", "707"]))
-        AssertEqual(lastChange!.added!,
+        AssertEqual(lastChange!.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["123",    "Jones", "DC-10"]))
         
         loggingRelation.update(Attribute("equipment") *== "DC-10", newValues: ["pilot": "JFK"])
-        AssertEqual(lastChange!.removed!,
+        AssertEqual(lastChange!.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "DC-10"],
                         ["123",    "Jones", "DC-10"]))
-        AssertEqual(lastChange!.added!,
+        AssertEqual(lastChange!.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "JFK", "DC-10"],
@@ -608,20 +608,20 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             pilots.add(["name": "Johnson", "home": "Seattle"])
         })
         
-        AssertEqual(lastFlightsChange!.added!,
+        AssertEqual(lastFlightsChange!.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         [1, "Jones", "777"],
                         [2, "Smith", "787"],
                         [3, "Johnson", "797"]))
-        XCTAssertTrue(lastFlightsChange!.removed!.isEmpty.ok!)
-        AssertEqual(lastPilotsChange!.added!,
+        AssertEqual(lastFlightsChange!.removed, nil)
+        AssertEqual(lastPilotsChange!.added,
                     MakeRelation(
                         ["name", "home"],
                         ["Jones", "New York"],
                         ["Smith", "Chicago"],
                         ["Johnson", "Seattle"]))
-        XCTAssertTrue(lastPilotsChange!.removed!.isEmpty.ok!)
+        AssertEqual(lastPilotsChange!.removed, nil)
         
         db.transaction({
             let flights = $0["flights"]
@@ -636,22 +636,22 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             pilots.delete(Attribute("home") *== "Seattle")
         })
         
-        AssertEqual(lastFlightsChange!.added!,
+        AssertEqual(lastFlightsChange!.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         [4, "Jones", "DC-10"],
                         [1, "Smith", "777"]))
-        AssertEqual(lastFlightsChange!.removed!,
+        AssertEqual(lastFlightsChange!.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         [3, "Johnson", "797"],
                         [1, "Jones", "777"]))
-        AssertEqual(lastPilotsChange!.added!,
+        AssertEqual(lastPilotsChange!.added,
                     MakeRelation(
                         ["name", "home"],
                         ["Horton", "Miami"],
                         ["Jones", "Boston"]))
-        AssertEqual(lastPilotsChange!.removed!,
+        AssertEqual(lastPilotsChange!.removed,
                     MakeRelation(
                         ["name", "home"],
                         ["Jones", "New York"],
