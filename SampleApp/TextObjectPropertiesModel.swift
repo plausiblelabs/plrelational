@@ -11,9 +11,11 @@ import libRelational
 
 class TextObjectPropertiesModel {
     
+    let db: UndoableDatabase
     let selectedTextObjects: Relation
     
-    init(selectedTextObjects: Relation) {
+    init(db: UndoableDatabase, selectedTextObjects: Relation) {
+        self.db = db
         self.selectedTextObjects = selectedTextObjects
     }
 
@@ -25,14 +27,33 @@ class TextObjectPropertiesModel {
         return self.selectedTextObjects.project(["hint"])
     }()
 
-    // TODO: Bidi
-    lazy var editable: ValueBinding<Checkbox.CheckState> = { [unowned self] in
-        return self.editableRelation.oneBoolOrNil.map{ Checkbox.CheckState($0) }
+    lazy var editable: BidiValueBinding<Checkbox.CheckState> = { [unowned self] in
+        return self.db.bidiBinding(
+            self.editableRelation,
+            action: "Change Editable",
+            get: { Checkbox.CheckState($0.oneBoolOrNil) },
+            set: { newValue in
+                let intValue: Int64
+                switch newValue {
+                case .On:
+                    intValue = 1
+                case .Off:
+                    intValue = 0
+                case .Mixed:
+                    preconditionFailure("Cannot set mixed state")
+                }
+                self.editableRelation.updateInteger(intValue)
+            }
+        )
     }()
     
-    // TODO: Bidi
-    lazy var hint: ValueBinding<String> = { [unowned self] in
-        return self.hintRelation.oneString
+    lazy var hint: BidiValueBinding<String> = { [unowned self] in
+        return self.db.bidiBinding(
+            self.hintRelation,
+            action: "Change Hint",
+            get: { $0.oneString },
+            set: { self.hintRelation.updateString($0) }
+        )
     }()
     
     lazy var hintPlaceholder: ValueBinding<String> = { [unowned self] in

@@ -55,6 +55,7 @@ class DocModel {
 
     private let undoManager: UndoManager
     private let db: TransactionalDatabase
+    private let undoableDB: UndoableDatabase
 
     private var collections: MutableRelation
     private var objects: MutableRelation
@@ -138,6 +139,7 @@ class DocModel {
         self.inspectorItemsBinding = RelationTreeBinding(relation: inspectorItems, idAttr: "id", parentAttr: "parent", orderAttr: "order")
         
         self.db = db
+        self.undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
 
         self.removal = selectedItems.addChangeObserver({ changes in
 //            print("ADDS:\n\(changes.added)")
@@ -178,20 +180,7 @@ class DocModel {
     }
     
     private func performUndoableAction(name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: Void -> Void) {
-        let before = before ?? db.takeSnapshot()
-        db.transaction(transactionFunc)
-        let after = db.takeSnapshot()
-
-        undoManager.registerChange(
-            name: name,
-            perform: false,
-            forward: {
-                self.db.restoreSnapshot(after)
-            },
-            backward: {
-                self.db.restoreSnapshot(before)
-            }
-        )
+        undoableDB.performUndoableAction(name, before: before, transactionFunc)
     }
     
     private func addCollection(collectionID: Int64, name: String, type: ItemType, parentID: Int64?, previousID: Int64?) {
@@ -354,59 +343,26 @@ class DocModel {
     }()
     
     lazy var textObjectProperties: ValueBinding<TextObjectPropertiesModel?> = { [unowned self] in
-        return self.selectedTextObjects.whenNonEmpty{ TextObjectPropertiesModel(selectedTextObjects: $0) }
+        return self.selectedTextObjects.whenNonEmpty{
+            TextObjectPropertiesModel(db: self.undoableDB, selectedTextObjects: $0)
+        }
     }()
 
     private func bidiStringBinding(relation: Relation, type: String) -> BidiValueBinding<String> {
-        func update(newValue: String) {
-            let attr = relation.scheme.attributes.first!
-            let values: Row = [attr: RelationValue(newValue)]
-            var mutableRelation = relation
-            let updateResult = mutableRelation.update(true, newValues: values)
-            precondition(updateResult.ok != nil)
-        }
-
-        return relation.bidiString(RelationBidiConfig(
-            snapshot: {
-                return self.db.takeSnapshot()
-            },
-            update: { newValue in
-                update(newValue)
-            },
-            commit: { before, newValue in
-                self.performUndoableAction("Rename \(type)", before: before, {
-                    update(newValue)
-                })
-            }
-        ))
+        return undoableDB.bidiBinding(
+            relation,
+            action: "Rename \(type)",
+            get: { $0.oneString },
+            set: { relation.updateString($0) }
+        )
     }
-    
+
     private func bidiSelectionBinding(relation: MutableRelation) -> BidiValueBinding<[RelationValue]> {
-        func update(newValues: [RelationValue]) {
-            let attr = relation.scheme.attributes.first!
-            var mutableRelation = relation
-            mutableRelation.delete(true)
-            for id in newValues {
-                mutableRelation.add([attr: id])
-            }
-        }
-        
-        return relation.bidiValues(RelationBidiConfig(
-            snapshot: {
-                return self.db.takeSnapshot()
-            },
-            update: { newValues in
-                // TODO: We wrap this in a transaction to keep it atomic, but we don't actually
-                // need to log the changes anywhere
-                self.db.transaction({
-                    update(newValues)
-                })
-            },
-            commit: { before, newValues in
-                self.performUndoableAction("Change Selection", before: before, {
-                    update(newValues)
-                })
-            }
-        ))
+        return undoableDB.bidiBinding(
+            relation,
+            action: "Change Selection",
+            get: { $0.allValues },
+            set: { relation.replaceValues($0) }
+        )
     }
 }
