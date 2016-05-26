@@ -140,25 +140,25 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                     }
                 }
             case .Select(let query):
+                didRemove = true
                 currentChange.added.delete(*!query)
                 for row in baseRelation.select(*!query).rows() {
                     switch row {
                     case .Ok(let row):
                         currentChange.removed.add(row)
-                        didRemove = true
                     case .Err(let err):
                         return .Err(err)
                     }
                 }
             case .Update(let query, let newValues):
+                didAdd = true
+                didRemove = true
                 currentChange.added.update(query, newValues: newValues)
                 for toUpdate in baseRelation.select(query).difference(currentChange.removed).rows() {
                     switch toUpdate {
                     case .Ok(let row):
                         currentChange.added.add(Row(values: row.values + newValues.values))
                         currentChange.removed.add(row)
-                        didAdd = true
-                        didRemove = true
                     case .Err(let err):
                         return .Err(err)
                     }
