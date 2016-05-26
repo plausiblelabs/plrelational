@@ -179,8 +179,9 @@ class DocModel {
         }
         
         addObject(8, name: "Text1", type: .Text, collectionID: 3, order: 5.0)
-        addObject(9, name: "Image1", type: .Image, collectionID: 3, order: 7.0)
-        globalID = 10
+        addObject(9, name: "Text2", type: .Text, collectionID: 3, order: 7.0)
+        addObject(10, name: "Image1", type: .Image, collectionID: 3, order: 8.0)
+        globalID = 11
     }
     
     private func performUndoableAction(name: String, _ transactionFunc: Void -> Void) {
@@ -229,7 +230,7 @@ class DocModel {
             textObjects.add([
                 "id": RelationValue(objectID),
                 "editable": 0,
-                "hint": ""
+                "hint": RelationValue("Hint for \(name)")
             ])
         }
     }
@@ -357,24 +358,14 @@ class DocModel {
         return self.selectedItemNamesRelation.stringWhenMulti("Multiple Values")
     }()
 
-    lazy var selectedTextObjects: Relation = { [unowned self] in
+    private lazy var selectedTextObjects: Relation = { [unowned self] in
         return self.selectedItems
             .unique("type", matching: RelationValue(ItemType.Text.rawValue))
             .equijoin(self.textObjects, matching: ["id": "id"])
     }()
-
-    lazy var selectedItemsOnlyText: ValueBinding<Bool> = { [unowned self] in
-        return self.selectedTextObjects.nonEmpty
-    }()
-
-    // TODO: Bidi
-    lazy var selectedTextObjectsEditable: ValueBinding<Bool?> = { [unowned self] in
-        return self.selectedTextObjects.project(["editable"]).oneBoolOrNil
-    }()
-
-    // TODO: Bidi
-    lazy var selectedTextObjectsHint: ValueBinding<String> = { [unowned self] in
-        return self.selectedTextObjects.project(["hint"]).oneString
+    
+    lazy var textObjectProperties: ValueBinding<TextObjectPropertiesModel?> = { [unowned self] in
+        return self.selectedTextObjects.whenNonEmpty{ TextObjectPropertiesModel(selectedTextObjects: $0) }
     }()
 
     private func bidiStringBinding(relation: Relation, type: String) -> BidiValueBinding<String> {

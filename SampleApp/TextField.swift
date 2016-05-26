@@ -72,6 +72,12 @@ class TextField: NSTextField, NSTextFieldDelegate {
     private var placeholderBindingRemoval: (Void -> Void)?
     private var visibleBindingRemoval: (Void -> Void)?
     
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        
+        self.delegate = self
+    }
+    
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         

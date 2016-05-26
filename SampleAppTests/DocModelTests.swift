@@ -36,7 +36,7 @@ class DocModelTests: AppTestCase {
             XCTAssertEqual(model.itemNotSelected.value, !expected.itemSelected, file: file, line: line)
             XCTAssertEqual(model.selectedItemTypesString.value, expected.selectedItemType, file: file, line: line)
             XCTAssertEqual(model.selectedItemNames.value, expected.selectedItemName, file: file, line: line)
-            XCTAssertEqual(model.selectedItemsOnlyText.value, expected.selectedItemsOnlyText, file: file, line: line)
+            XCTAssertEqual(model.textObjectProperties.value != nil, expected.selectedItemsOnlyText, file: file, line: line)
         }
         
         func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath<Row> {

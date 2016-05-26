@@ -20,6 +20,38 @@ private class RelationValueBinding<T>: ValueBinding<T> {
     }
 }
 
+private class WhenNonEmptyBinding<T>: ValueBinding<T?> {
+    private var removal: (Void -> Void)!
+    
+    init(relation: Relation, transform: Relation -> T) {
+
+        func evaluate() -> T? {
+            if relation.isEmpty.ok == false {
+                return transform(relation)
+            } else {
+                return nil
+            }
+        }
+        
+        super.init(initialValue: evaluate())
+        
+        self.removal = relation.addChangeObserver({ [weak self] _ in
+            guard let weakSelf = self else { return }
+            
+            // Only re-evaluate if the relation is going from empty to non-empty or vice versa
+            if weakSelf.value == nil {
+                if let newValue = evaluate() {
+                    weakSelf.setValue(newValue)
+                }
+            } else {
+                if relation.isEmpty.ok != false {
+                    weakSelf.setValue(nil)
+                }
+            }
+        })
+    }
+}
+
 public struct RelationBidiConfig<T> {
     let snapshot: () -> ChangeLoggingDatabaseSnapshot
     let update: (newValue: T) -> Void
@@ -129,6 +161,12 @@ extension Relation {
                 return ""
             }
         })
+    }
+    
+    /// Resolves to an optional value, which is nil when this relation is empty and is reconstructed when this
+    /// relation becomes non-empty.
+    func whenNonEmpty<V>(transform: Relation -> V) -> ValueBinding<V?> {
+        return WhenNonEmptyBinding(relation: self, transform: transform)
     }
     
     /// Resolves to a sequence of mapped values, one value for each non-error row.
