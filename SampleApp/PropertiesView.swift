@@ -23,7 +23,7 @@ class PropertiesView {
     private let noSelectionLabel: TextField
 
     private var textSection: TextSection?
-    private var textObjectPropsObserverRemoval: (Void -> Void)?
+    private var textObjectPropsObserverRemoval: ObserverRemoval?
     
     private let docModel: DocModel
     

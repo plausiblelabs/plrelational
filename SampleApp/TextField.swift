@@ -68,9 +68,9 @@ class TextField: NSTextField, NSTextFieldDelegate {
     private var previousCommittedValue: String?
     private var previousValue: String?
     
-    private var stringBindingRemoval: (Void -> Void)?
-    private var placeholderBindingRemoval: (Void -> Void)?
-    private var visibleBindingRemoval: (Void -> Void)?
+    private var stringBindingRemoval: ObserverRemoval?
+    private var placeholderBindingRemoval: ObserverRemoval?
+    private var visibleBindingRemoval: ObserverRemoval?
     
     override init(frame: NSRect) {
         super.init(frame: frame)

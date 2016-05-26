@@ -29,8 +29,8 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     private let outlineView: NSOutlineView
     private let model: TreeViewModel<D>
     
-    private var treeBindingObserverRemoval: (Void -> Void)?
-    private var selectionBindingObserverRemoval: (Void -> Void)?
+    private var treeBindingObserverRemoval: ObserverRemoval?
+    private var selectionBindingObserverRemoval: ObserverRemoval?
     private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.

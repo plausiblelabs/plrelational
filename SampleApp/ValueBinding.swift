@@ -13,7 +13,6 @@ public class ValueBinding<T>: Binding {
     public typealias Changes = Void
     
     internal typealias ChangeObserver = Void -> Void
-    internal typealias ObserverRemoval = Void -> Void
     
     internal(set) public var value: T
     private var changeObservers: [UInt64: (Void -> Void)] = [:]
@@ -23,7 +22,7 @@ public class ValueBinding<T>: Binding {
         self.value = initialValue
     }
     
-    public func addChangeObserver(observer: Void -> Void) -> (Void -> Void) {
+    public func addChangeObserver(observer: Void -> Void) -> ObserverRemoval {
         let id = changeObserverNextID
         changeObserverNextID += 1
         changeObservers[id] = observer

@@ -48,7 +48,6 @@ public class ArrayBinding<D: ArrayData>: Binding {
     public typealias Changes = [ArrayChange<D>]
     
     public typealias ChangeObserver = ([ArrayChange<D>]) -> Void
-    public typealias ObserverRemoval = Void -> Void
     
     public typealias ElementID = D.EID
     public typealias Element = ArrayElement<D>

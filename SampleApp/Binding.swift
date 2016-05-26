@@ -8,13 +8,15 @@
 
 import Foundation
 
+public typealias ObserverRemoval = Void -> Void
+
 public protocol Binding {
     associatedtype Value
     associatedtype Changes
     
     var value: Value { get }
     
-    func addChangeObserver(observer: Changes -> Void) -> (Void -> Void)
+    func addChangeObserver(observer: Changes -> Void) -> ObserverRemoval
 }
 
 public protocol BidiBinding: Binding {

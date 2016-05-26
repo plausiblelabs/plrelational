@@ -9,7 +9,7 @@
 import libRelational
 
 private class RelationValueBinding<T>: ValueBinding<T> {
-    private var removal: (Void -> Void)!
+    private var removal: ObserverRemoval!
     
     init(relation: Relation, transform: Relation -> T) {
         super.init(initialValue: transform(relation))
@@ -21,7 +21,7 @@ private class RelationValueBinding<T>: ValueBinding<T> {
 }
 
 private class WhenNonEmptyBinding<T>: ValueBinding<T?> {
-    private var removal: (Void -> Void)!
+    private var removal: ObserverRemoval!
     
     init(relation: Relation, transform: Relation -> T) {
 
@@ -62,7 +62,7 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
     private let config: RelationBidiConfig<T>
     private var before: ChangeLoggingDatabaseSnapshot?
     private var selfInitiatedChange = false
-    private var removal: (Void -> Void)!
+    private var removal: ObserverRemoval!
     
     init(relation: Relation, config: RelationBidiConfig<T>, transform: Relation -> T) {
         self.config = config

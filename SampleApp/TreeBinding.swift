@@ -65,7 +65,6 @@ public class TreeBinding<D: TreeData>: Binding {
     public typealias Changes = [TreeChange<D>]
 
     public typealias ChangeObserver = ([TreeChange<D>]) -> Void
-    public typealias ObserverRemoval = Void -> Void
 
     public typealias NodeID = D.ID
     public typealias Node = TreeNode<D>

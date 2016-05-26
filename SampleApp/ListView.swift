@@ -42,7 +42,7 @@ private let PasteboardType = "coop.plausible.vp.pasteboard.ListViewItem"
 //    private let outlineView: NSOutlineView
 //    private let model: ListViewModel
 //
-//    private var selectionObserverRemoval: (Void -> Void)?
+//    private var selectionObserverRemoval: ObserverRemoval?
 //    private var selfInitiatedSelectionChange = false
 //    
 //    init(outlineView: NSOutlineView, model: ListViewModel) {

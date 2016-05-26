@@ -77,7 +77,7 @@ class DocModel {
     // source relations into a single relation.
     private var globalID: Int64 = 1
     
-    private var removal: (Void -> Void)!
+    private var removal: ObserverRemoval!
     
     init(undoManager: UndoManager) {
         self.undoManager = undoManager
