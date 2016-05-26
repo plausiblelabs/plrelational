@@ -78,6 +78,7 @@
 		C22921EA1CD12CF100518184 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
 		C23AAF401CF49AFE009E28E0 /* RelationActivityLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF3F1CF49AFE009E28E0 /* RelationActivityLogging.swift */; };
 		C23AAF421CF61890009E28E0 /* MirrorChildren.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF411CF61890009E28E0 /* MirrorChildren.swift */; };
+		C23AAF441CF758D1009E28E0 /* liblibRelational.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C263BBF21CE51B51006B7662 /* UnaryOperator.swift */; };
 		C277E7FD1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */; };
 		C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */; };
@@ -143,6 +144,20 @@
 			remoteInfo = libRelational;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C23AAF431CF758C0009E28E0 /* Copy Embedded Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C23AAF441CF758D1009E28E0 /* liblibRelational.dylib in Copy Embedded Libraries */,
+			);
+			name = "Copy Embedded Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		372707671CED2F8100710C80 /* AppTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppTestCase.swift; sourceTree = "<group>"; };
@@ -595,6 +610,7 @@
 				37C610F91CD7EFAE001DAF59 /* Sources */,
 				37C610FA1CD7EFAE001DAF59 /* Frameworks */,
 				37C610FB1CD7EFAE001DAF59 /* Resources */,
+				C23AAF431CF758C0009E28E0 /* Copy Embedded Libraries */,
 			);
 			buildRules = (
 			);
@@ -1025,6 +1041,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXECUTABLE_PREFIX = lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1035,6 +1052,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXECUTABLE_PREFIX = lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
