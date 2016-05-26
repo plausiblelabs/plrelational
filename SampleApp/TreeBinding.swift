@@ -63,8 +63,7 @@ public func ==<D: TreeData>(a: TreeChange<D>, b: TreeChange<D>) -> Bool {
 public class TreeBinding<D: TreeData>: Binding {
     public typealias Value = TreeNode<D>
     public typealias Changes = [TreeChange<D>]
-
-    public typealias ChangeObserver = ([TreeChange<D>]) -> Void
+    public typealias ChangeObserver = Changes -> Void
 
     public typealias NodeID = D.ID
     public typealias Node = TreeNode<D>

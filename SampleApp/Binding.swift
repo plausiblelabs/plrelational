@@ -13,10 +13,11 @@ public typealias ObserverRemoval = Void -> Void
 public protocol Binding {
     associatedtype Value
     associatedtype Changes
+    associatedtype ChangeObserver = Changes -> Void
     
     var value: Value { get }
     
-    func addChangeObserver(observer: Changes -> Void) -> ObserverRemoval
+    func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval
 }
 
 public protocol BidiBinding: Binding {

@@ -11,18 +11,17 @@ import Foundation
 public class ValueBinding<T>: Binding {
     public typealias Value = T
     public typealias Changes = Void
-    
-    internal typealias ChangeObserver = Void -> Void
+    public typealias ChangeObserver = Changes -> Void
     
     internal(set) public var value: T
-    private var changeObservers: [UInt64: (Void -> Void)] = [:]
+    private var changeObservers: [UInt64: ChangeObserver] = [:]
     private var changeObserverNextID: UInt64 = 0
     
     init(initialValue: T) {
         self.value = initialValue
     }
     
-    public func addChangeObserver(observer: Void -> Void) -> ObserverRemoval {
+    public func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval {
         let id = changeObserverNextID
         changeObserverNextID += 1
         changeObservers[id] = observer

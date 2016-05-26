@@ -46,8 +46,7 @@ public func ==<D: ArrayData>(a: ArrayChange<D>, b: ArrayChange<D>) -> Bool {
 public class ArrayBinding<D: ArrayData>: Binding {
     public typealias Value = [ArrayElement<D>]
     public typealias Changes = [ArrayChange<D>]
-    
-    public typealias ChangeObserver = ([ArrayChange<D>]) -> Void
+    public typealias ChangeObserver = Changes -> Void
     
     public typealias ElementID = D.EID
     public typealias Element = ArrayElement<D>
