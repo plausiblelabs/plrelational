@@ -26,8 +26,8 @@ class TextObjectPropertiesModel {
     }()
 
     // TODO: Bidi
-    lazy var editable: ValueBinding<Bool?> = { [unowned self] in
-        return self.editableRelation.oneBoolOrNil
+    lazy var editable: ValueBinding<Checkbox.CheckState> = { [unowned self] in
+        return self.editableRelation.oneBoolOrNil.map{ Checkbox.CheckState($0) }
     }()
     
     // TODO: Bidi

@@ -14,6 +14,17 @@ class Checkbox: NSButton {
         case On
         case Off
         case Mixed
+        
+        init(_ boolValue: Bool?) {
+            switch boolValue {
+            case nil:
+                self = .Mixed
+            case .Some(false):
+                self = .Off
+            case .Some(true):
+                self = .On
+            }
+        }
     }
     
     var checked: ValueBinding<CheckState> {
