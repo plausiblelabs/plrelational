@@ -29,8 +29,8 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     private let outlineView: NSOutlineView
     private let model: TreeViewModel<D>
     
-    private var treeBindingObserverRemoval: ObserverRemoval?
-    private var selectionBindingObserverRemoval: ObserverRemoval?
+    private var treeBindingRemoval: ObserverRemoval?
+    private var selectionBindingRemoval: ObserverRemoval?
     private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
@@ -45,8 +45,8 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         
         super.init()
         
-        treeBindingObserverRemoval = model.data.addChangeObserver({ [weak self] changes in self?.treeBindingChanged(changes) })
-        selectionBindingObserverRemoval = model.selection.addChangeObserver({ [weak self] _ in self?.selectionBindingChanged() })
+        treeBindingRemoval = model.data.addChangeObserver({ [weak self] changes in self?.treeBindingChanged(changes) })
+        selectionBindingRemoval = model.selection.addChangeObserver({ [weak self] _ in self?.selectionBindingChanged() })
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
@@ -56,6 +56,11 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         outlineView.verticalMotionCanBeginDrag = true
     }
     
+    deinit {
+        treeBindingRemoval?()
+        selectionBindingRemoval?()
+    }
+
     // MARK: NSOutlineViewDataSource
 
     @objc func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {

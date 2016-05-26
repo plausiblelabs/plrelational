@@ -14,6 +14,7 @@ class PropertiesView {
     
     struct TextSection {
         let view: NSView
+        let editableCheckbox: Checkbox
         let hintField: TextField
     }
     
@@ -62,15 +63,18 @@ class PropertiesView {
         let bgView = BackgroundView(frame: NSMakeRect(10, 100, 220, 120))
         bgView.backgroundColor = NSColor.blueColor()
         
+        let editableCheckbox = Checkbox(frame: NSMakeRect(10, 10, 120, 24), checkState: .Off)
+        //editableCheckbox.checked = model.editable
+        bgView.addSubview(editableCheckbox)
+        
         let hintField = TextField()
-        hintField.frame = NSMakeRect(10, 10, 120, 24)
+        hintField.frame = NSMakeRect(10, 46, 120, 24)
         hintField.string = model.hint
         hintField.placeholder = model.hintPlaceholder
-        
         bgView.addSubview(hintField)
-        parentView.addSubview(bgView)
         
-        textSection = TextSection(view: bgView, hintField: hintField)
+        parentView.addSubview(bgView)
+        textSection = TextSection(view: bgView, editableCheckbox: editableCheckbox, hintField: hintField)
     }
     
     private func updateTextSection() {

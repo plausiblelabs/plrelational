@@ -84,6 +84,12 @@ class TextField: NSTextField, NSTextFieldDelegate {
         self.delegate = self
     }
     
+    deinit {
+        stringBindingRemoval?()
+        placeholderBindingRemoval?()
+        visibleBindingRemoval?()
+    }
+    
     override func controlTextDidBeginEditing(obj: NSNotification) {
         //Swift.print("CONTROL DID BEGIN EDITING!")
         previousCommittedValue = stringValue
