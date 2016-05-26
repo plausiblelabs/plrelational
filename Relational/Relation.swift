@@ -32,9 +32,13 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     func max(attribute: Attribute) -> Relation
     func count() -> Relation
     
+    /// Return a new Relation that resolves to this Relation when it is non-empty, otherwise
+    /// resolves to the other Relation.
+    func otherwise(other: Relation) -> Relation
+    
     /// Return a new Relation that resolves to this Relation when there is a unique value
     /// for the given attribute that is the same as `matching`, otherwise resolves to an
-    /// empty relation.
+    /// empty Relation.
     func unique(attribute: Attribute, matching: RelationValue) -> Relation
     
     func select(rowToFind: Row) -> Relation
@@ -129,6 +133,21 @@ extension Relation {
 }
 
 extension Relation {
+    public func otherwise(other: Relation) -> Relation {
+        precondition(self.scheme.attributes == other.scheme.attributes)
+
+        // TODO: There must certainly be a more efficient way to do this
+        let r1 = other
+            .join(MakeRelation(["priority"], [1]))
+        let r2 = self
+            .join(MakeRelation(["priority"], [2]))
+        let union = r1.union(r2)
+        return union
+            .max("priority")
+            .join(union)
+            .project(self.scheme)
+    }
+    
     public func unique(attribute: Attribute, matching: RelationValue) -> Relation {
         // TODO: There is probably a more efficient way to do this
         return self

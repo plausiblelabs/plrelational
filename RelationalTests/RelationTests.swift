@@ -510,6 +510,26 @@ class RelationTests: DBTestCase {
                         [4]))
     }
     
+    func testOtherwise() {
+        let empty = MakeRelation(
+            ["id", "name"])
+        let r1 = MakeRelation(
+            ["id", "name"],
+            [1,    "cat"],
+            [2,    "dog"],
+            [3,    "fish"],
+            [4,    "ant"])
+        let r2 = MakeRelation(
+            ["id", "name"],
+            [5,    "duck"],
+            [6,    "loon"])
+        
+        AssertEqual(r1.otherwise(r2), r1)
+        AssertEqual(r2.otherwise(r1), r2)
+        AssertEqual(empty.otherwise(r1), r1)
+        AssertEqual(r1.otherwise(empty), r1)
+    }
+    
     func testUnique() {
         let r1 = MakeRelation(
             ["id", "name", "type"],
