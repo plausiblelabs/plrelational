@@ -121,8 +121,11 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
         }
     }
     
-    private func applyLogToCurrentRelation<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log) -> Result<Void, RelationError> {
+    private func applyLogToCurrentRelation<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log) -> Result<(didAdd: Bool, didRemove: Bool), RelationError> {
         cachedCurrentRelation = nil
+        
+        var didAdd = false
+        var didRemove = false
         for change in log {
             switch change {
             case .Union(let relation):
@@ -131,6 +134,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                     case .Ok(let row):
                         currentChange.added.add(row)
                         currentChange.removed.delete(row)
+                        didAdd = true
                     case .Err(let err):
                         return .Err(err)
                     }
@@ -141,6 +145,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                     switch row {
                     case .Ok(let row):
                         currentChange.removed.add(row)
+                        didRemove = true
                     case .Err(let err):
                         return .Err(err)
                     }
@@ -152,22 +157,26 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                     case .Ok(let row):
                         currentChange.added.add(Row(values: row.values + newValues.values))
                         currentChange.removed.add(row)
+                        didAdd = true
+                        didRemove = true
                     case .Err(let err):
                         return .Err(err)
                     }
                 }
             }
         }
-        return .Ok()
+        let ret = (didAdd: didAdd, didRemove: didRemove)
+        return .Ok(ret)
     }
     
     private func applyLogToCurrentRelationAndGetChanges<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log) -> Result<RelationChange, RelationError> {
         let before = currentChange
         let result = applyLogToCurrentRelation(log)
-        return result.map({
+        return result.map({ didAdd, didRemove in
             let after = currentChange
-            let added = after.added.difference(before.added).union(before.removed.difference(after.removed))
-            let removed = before.added.difference(after.added).union(after.removed.difference(before.removed))
+            let added: Relation? = didAdd ? after.added.difference(before.added).union(before.removed.difference(after.removed)) : nil
+            let removed: Relation? = didRemove ? before.added.difference(after.added).union(after.removed.difference(before.removed)) : nil
+            
             return RelationChange(added: added, removed: removed)
         })
     }
