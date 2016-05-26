@@ -25,27 +25,44 @@ class Checkbox: NSButton {
                 self = .On
             }
         }
-    }
-    
-    var checked: ValueBinding<CheckState> {
-        didSet {
-            switch checked.value {
+        
+        func get() -> Int {
+            switch self {
             case .On:
-                self.state = NSOnState
+                return NSOnState
             case .Off:
-                self.state = NSOffState
+                return NSOffState
             case .Mixed:
-                self.state = NSMixedState
+                return NSMixedState
             }
         }
     }
+
+    private var checkStateBindingRemoval: ObserverRemoval?
     
-    init(frame frameRect: NSRect, checkState: CheckState) {
-        self.checked = ValueBinding<CheckState>(initialValue: checkState)
+    var checked: ValueBinding<CheckState> {
+        didSet {
+            checkStateBindingRemoval?()
+            checkStateBindingRemoval = nil
+            checkStateBindingRemoval = checked.addChangeObserver({ [weak self] in
+                guard let weakSelf = self else { return }
+                weakSelf.state = self!.checked.value.get()
+            })
+        }
+    }
+    
+    init(frame frameRect: NSRect, checkState: Bool?) {
+        self.checked = ValueBinding<CheckState>(initialValue: CheckState(checkState))
         
         super.init(frame: frameRect)
         
         self.setButtonType(.SwitchButton)
+//        self.allowsMixedState = true
+        
+        // TODO: handle mixed state. if self.allowsMixedState is set to 'true', the button toggles through a three-state
+        //       cycle on user interaction.
+        
+        self.state = self.checked.value.get()
     }
     
     // ???
