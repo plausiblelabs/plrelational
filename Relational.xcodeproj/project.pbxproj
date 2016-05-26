@@ -46,6 +46,7 @@
 		37C6115B1CE4F3BC001DAF59 /* ArrayBinarySearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6115A1CE4F3BC001DAF59 /* ArrayBinarySearch.swift */; };
 		37C6115D1CE4F756001DAF59 /* ArrayBinarySearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6115C1CE4F756001DAF59 /* ArrayBinarySearchTests.swift */; };
 		37F8FBD51CE4FC36001C7C5F /* RelationTreeBindingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F8FBD31CE4FC30001C7C5F /* RelationTreeBindingTests.swift */; };
+		47701CA11CF764CD00E3549D /* Checkbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47701CA01CF764CD00E3549D /* Checkbox.swift */; };
 		C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */; };
 		C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7491CBD7F4500234A89 /* BinaryOperator.swift */; };
@@ -202,6 +203,7 @@
 		37C6115A1CE4F3BC001DAF59 /* ArrayBinarySearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayBinarySearch.swift; sourceTree = "<group>"; };
 		37C6115C1CE4F756001DAF59 /* ArrayBinarySearchTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ArrayBinarySearchTests.swift; path = SampleAppTests/ArrayBinarySearchTests.swift; sourceTree = SOURCE_ROOT; };
 		37F8FBD31CE4FC30001C7C5F /* RelationTreeBindingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationTreeBindingTests.swift; path = SampleAppTests/RelationTreeBindingTests.swift; sourceTree = SOURCE_ROOT; };
+		47701CA01CF764CD00E3549D /* Checkbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
 		C21971A91CC030B900E84F7E /* ModelHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelHelpers.swift; sourceTree = "<group>"; };
 		C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDefaultChangeObserverImplementation.swift; sourceTree = "<group>"; };
 		C22921911CC6CDCC00518184 /* makemodule.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = makemodule.sh; path = ../modules/makemodule.sh; sourceTree = "<group>"; };
@@ -373,6 +375,7 @@
 				37C611501CE10770001DAF59 /* TreeView.swift */,
 				37C611371CD7FB9C001DAF59 /* ExtOutlineView.swift */,
 				37C611521CE3A942001DAF59 /* ContextMenu.swift */,
+				47701CA01CF764CD00E3549D /* Checkbox.swift */,
 			);
 			name = "Custom Views";
 			sourceTree = "<group>";
@@ -815,6 +818,7 @@
 				37C611021CD7EFAE001DAF59 /* Document.swift in Sources */,
 				376136951CF40A9600F572C5 /* ArrayBinding.swift in Sources */,
 				37C611511CE10770001DAF59 /* TreeView.swift in Sources */,
+				47701CA11CF764CD00E3549D /* Checkbox.swift in Sources */,
 				372707781CF3C31200710C80 /* RelationValuePlistable.swift in Sources */,
 				37C611361CD7FB07001DAF59 /* ListView.swift in Sources */,
 				37C6114F1CDD6084001DAF59 /* RelationTreeBinding.swift in Sources */,
