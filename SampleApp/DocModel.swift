@@ -110,13 +110,13 @@ class DocModel {
         // Prepare the higher level relations
         self.selectedCollection = selectedCollectionID
             .equijoin(collections, matching: ["coll_id": "id"])
+            .project(["id", "type", "name"])
         
         // The `inspectorItems` relation is a view that presents the currently selected collection
         // (from the doc outline tree view) as the root node with its associated objects as the
         // root node's children
         // TODO: This is probably more complex than it needs to be
         let inspectorCollectionItems = selectedCollection
-            .project(["id", "type", "name"])
             .join(MakeRelation(["parent", "order"], [.NULL, 5.0]))
         let inspectorObjectItems = selectedCollectionID
             .join(objects)
@@ -127,22 +127,11 @@ class DocModel {
             .union(inspectorObjectItems)
         self.selectedInspectorItems = selectedInspectorItemIDs
             .equijoin(inspectorItems, matching: ["item_id": "id"])
+            .project(["id", "type", "name"])
         
         // The `selectedItems` relation is a roll-up view that includes the currently selected
-        // inspector item(s) and/or the currently selected doc outline item.  The inspector item(s)
-        // have a higher priority value associated with them, so that finding the currently selected
-        // items is just a matter of choosing the rows with the highest priority value.
-        let selectedCollectionWithPriority = selectedCollection
-            .project(["id", "type", "name"])
-            .join(MakeRelation(["priority"], [1]))
-        let selectedInspectorItemsWithPriority = selectedInspectorItems
-            .project(["id", "type", "name"])
-            .join(MakeRelation(["priority"], [2]))
-        let allSelectedItems = selectedCollectionWithPriority
-            .union(selectedInspectorItemsWithPriority)
-        self.selectedItems = allSelectedItems
-            .max("priority")
-            .join(allSelectedItems)
+        // inspector item(s) (if non-empty) OR the currently selected doc outline item
+        self.selectedItems = selectedInspectorItems.otherwise(selectedCollection)
 
         // Prepare the tree bindings
         self.docOutlineBinding = RelationTreeBinding(relation: collections, idAttr: "id", parentAttr: "parent", orderAttr: "order")
