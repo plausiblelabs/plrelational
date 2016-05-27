@@ -3,7 +3,7 @@
 /// This implements operations such as union, intersection, difference, join, etc.
 class IntermediateRelation: Relation, RelationDefaultChangeObserverImplementation {
     let op: Operator
-    let operands: [Relation]
+    var operands: [Relation]
     
     var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
@@ -103,7 +103,7 @@ extension IntermediateRelation {
             // iff the row is already in another part of the intersection.
             let others = otherOperands(operandIndex)
             myAdded = change.added?.intersection(IntermediateRelation.intersection(others))
-            myAdded = change.removed?.intersection(IntermediateRelation.intersection(others))
+            myRemoved = change.removed?.intersection(IntermediateRelation.intersection(others))
         case .Difference:
             // When the first one changes, our changes are the same, minus the second.
             // When the second one changes, then changes are reversed and intersected
@@ -172,6 +172,9 @@ extension IntermediateRelation {
             if self.intersection(previousAgg).isEmpty.ok == true {
                 myAdded = self
                 myRemoved = previousAgg
+            } else {
+                myAdded = nil
+                myRemoved = nil
             }
         }
         
@@ -263,10 +266,10 @@ extension IntermediateRelation {
     private func intersectionRows() -> AnyGenerator<Result<Row, RelationError>> {
         let first = operands[0]
         let rest = operands.suffixFrom(1)
-        return first.rows().lazy.flatMap({ row in
+        return AnyGenerator(first.rows().lazy.flatMap({ row in
             switch row {
             case .Ok(let row):
-                for r in remainder {
+                for r in rest {
                     switch r.contains(row) {
                     case .Ok(let contains):
                         if !contains {
@@ -280,16 +283,16 @@ extension IntermediateRelation {
             case .Err:
                 return row
             }
-        })
+        }).generate())
     }
     
     private func differenceRows() -> AnyGenerator<Result<Row, RelationError>> {
         let first = operands[0]
         let rest = operands.suffixFrom(1)
-        return first.rows().lazy.flatMap({ row in
+        return AnyGenerator(first.rows().lazy.flatMap({ row in
             switch row {
             case .Ok(let row):
-                for r in remainder {
+                for r in rest {
                     switch r.contains(row) {
                     case .Ok(let contains):
                         if contains {
@@ -303,7 +306,7 @@ extension IntermediateRelation {
             case .Err:
                 return row
             }
-        })
+        }).generate())
     }
     
     private func projectRows(scheme: Scheme) -> AnyGenerator<Result<Row, RelationError>> {
@@ -594,37 +597,132 @@ extension IntermediateRelation {
     }
 }
 
-
-/*
- switch op {
- case .Union:
- case .Intersection:
- case .Difference:
- 
- case .Project(let scheme):
- case .Select(let expression):
- case .Equijoin(let matching):
- case .Rename(let renames):
- case .Update(let newValues):
- case .Aggregate(let attribute, let initialValue, let aggregateFunction):
- 
- }
- /// Convert a change in an underlying relation into a change in this relation.
- ///
- /// - parameter change: The added or removed values.
- /// - parameter isAdded: If true, `change` represents additions. If false,
- private func convertChange(change: Relation, isAdded: Bool, operandIndex: Int) -> Relation {
- switch op {
- case Union:
- case Intersection:
- case Difference:
- 
- case Project(let scheme):
- case Select(let expression):
- case Equijoin(let matching):
- case Rename(let renames):
- case Update(lewt newValues):
- case Aggregate(let initialValue, let aggregateFunction):
- 
- }
-*/
+extension IntermediateRelation {
+    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        switch op {
+        case .Union:
+            return updateOperandsDirectly(query, newValues: newValues)
+        case .Intersection:
+            return intersectionUpdate(query, newValues: newValues)
+        case .Difference:
+            return differenceUpdate(query, newValues: newValues)
+        case .Project:
+            return updateOperandsDirectly(query, newValues: newValues)
+        case .Select(let expression):
+            return selectUpdate(query, newValues: newValues, expression: expression)
+        case .Equijoin:
+            return equijoinUpdate(query, newValues: newValues)
+        case .Rename(let renames):
+            return renameUpdate(query, newValues: newValues, renames: renames)
+        case .Update(let myNewValues):
+            return updateUpdate(query, newValues: newValues, myNewValues: myNewValues)
+        case .Aggregate:
+            return aggregateUpdate(query, newValues: newValues)
+        }
+    }
+    
+    func updateOperandsDirectly(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        for i in operands.indices {
+            let result = operands[i].update(query, newValues: newValues)
+            if result.err != nil {
+                return result
+            }
+        }
+        return .Ok()
+    }
+    
+    func intersectionUpdate(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        for row in rows() {
+            switch row {
+            case .Ok(let row):
+                if query.valueWithRow(row).boolValue {
+                    let rowQuery = SelectExpressionFromRow(row)
+                    for i in operands.indices {
+                        let result = operands[i].update(rowQuery, newValues: newValues)
+                        if result.err != nil {
+                            return result
+                        }
+                    }
+                }
+            case .Err(let err):
+                return .Err(err)
+            }
+        }
+        return .Ok()
+    }
+    
+    func differenceUpdate(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        for row in rows() {
+            switch row {
+            case .Ok(let row):
+                if query.valueWithRow(row).boolValue {
+                    let rowQuery = SelectExpressionFromRow(row)
+                    let result = operands[0].update(rowQuery, newValues: newValues)
+                    if result.err != nil {
+                        return result
+                    }
+                }
+            case .Err(let err):
+                return .Err(err)
+            }
+        }
+        return .Ok()
+    }
+    
+    func selectUpdate(query: SelectExpression, newValues: Row, expression: SelectExpression) -> Result<Void, RelationError> {
+        return operands[0].update(query *&& expression, newValues: newValues)
+    }
+    
+    func equijoinUpdate(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        for row in rows() {
+            switch row {
+            case .Ok(let row):
+                if query.valueWithRow(row).boolValue {
+                    for i in operands.indices {
+                        let operandAttributes = operands[i].scheme.attributes
+                        let operandRow = row.rowWithAttributes(operandAttributes)
+                        let operandNewValues = newValues.rowWithAttributes(operandAttributes)
+                        if !operandNewValues.values.isEmpty {
+                            let rowQuery = SelectExpressionFromRow(operandRow)
+                            let result = operands[i].update(rowQuery, newValues: operandNewValues)
+                            if result.err != nil {
+                                return result
+                            }
+                        }
+                    }
+                }
+            case .Err(let err):
+                return .Err(err)
+            }
+        }
+        return .Ok()
+    }
+    
+    func renameUpdate(query: SelectExpression, newValues: Row, renames: [Attribute: Attribute]) -> Result<Void, RelationError> {
+        let reverseRenames = renames.reversed
+        let renamedQuery = query.withRenamedAttributes(reverseRenames)
+        let renamedNewValues = newValues.renameAttributes(reverseRenames)
+        return operands[0].update(renamedQuery, newValues: renamedNewValues)
+    }
+    
+    func updateUpdate(query: SelectExpression, newValues: Row, myNewValues: Row) -> Result<Void, RelationError> {
+        // Rewrite the query to eliminate attributes that we update. To do this,
+        // map the expression to replace any attributes we update with the updated
+        // value. Any other attributes can then be passed through to the underlying
+        // relation for updates.
+        let queryWithNewValues = query.mapTree({ (expr: SelectExpression) -> SelectExpression in
+            switch expr {
+            case let attr as Attribute:
+                return myNewValues[attr] ?? attr
+            default:
+                return expr
+            }
+        })
+        return operands[0].update(queryWithNewValues, newValues: newValues)
+    }
+    
+    func aggregateUpdate(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        // TODO: Error, no-op, or pass through to underlying relation?
+        return .Ok(())
+    }
+}
