@@ -73,19 +73,19 @@ extension Relation {
     }
     
     public func union(other: Relation) -> Relation {
-        return UnionRelation(a: self, b: other)
+        return IntermediateRelation.union([self, other])
     }
     
     public func intersection(other: Relation) -> Relation {
-        return IntersectionRelation(a: self, b: other)
+        return IntermediateRelation.intersection([self, other])
     }
     
     public func difference(other: Relation) -> Relation {
-        return DifferenceRelation(a: self, b: other)
+        return IntermediateRelation(op: .Difference, operands: [self, other])
     }
     
     public func project(scheme: Scheme) -> Relation {
-        return ProjectRelation(relation: self, scheme: scheme)
+        return IntermediateRelation(op: .Project(scheme), operands: [self])
     }
     
     public func join(other: Relation) -> Relation {
@@ -95,7 +95,7 @@ extension Relation {
     }
     
     public func equijoin(other: Relation, matching: [Attribute: Attribute]) -> Relation {
-        return EquijoinRelation(a: self, b: other, matching: matching)
+        return IntermediateRelation(op: .Equijoin(matching), operands: [self, other])
     }
     
     public func thetajoin(other: Relation, query: SelectExpression) -> Relation {
@@ -120,15 +120,19 @@ extension Relation {
 
 extension Relation {
     public func min(attribute: Attribute) -> Relation {
-        return AggregateRelation(relation: self, attribute: attribute, initial: nil, agg: Swift.min)
+        return IntermediateRelation.aggregate(self, attribute: attribute, initial: nil, agg: Swift.min)
     }
     
     public func max(attribute: Attribute) -> Relation {
-        return AggregateRelation(relation: self, attribute: attribute, initial: nil, agg: Swift.max)
+        return IntermediateRelation.aggregate(self, attribute: attribute, initial: nil, agg: Swift.max)
     }
     
     public func count() -> Relation {
-        return CountRelation(relation: self)
+        func count(count: RelationValue?, currentValueIgnore: RelationValue) -> Result<RelationValue, RelationError> {
+            let countInt: Int64 = count!.get()!
+            return .Ok(RelationValue.Integer(countInt + 1))
+        }
+        return IntermediateRelation(op: .Aggregate("count", 0, count), operands: [self])
     }
 }
 
@@ -169,13 +173,13 @@ extension Relation {
     }
     
     public func select(query: SelectExpression) -> Relation {
-        return SelectRelation(relation: self, query: query)
+        return IntermediateRelation(op: .Select(query), operands: [self])
     }
 }
 
 extension Relation {
     public func renameAttributes(renames: [Attribute: Attribute]) -> Relation {
-        return RenameRelation(relation: self, renames: renames)
+        return IntermediateRelation(op: .Rename(renames), operands: [self])
     }
     
     public func renamePrime() -> Relation {
@@ -198,7 +202,7 @@ extension Relation {
     }
     
     public func withUpdate(newValues: Row) -> Relation {
-        return UpdateRelation(relation: self, newValues: newValues)
+        return IntermediateRelation(op: .Update(newValues), operands: [self])
     }
 }
 
