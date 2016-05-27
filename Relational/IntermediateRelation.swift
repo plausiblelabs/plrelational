@@ -498,6 +498,102 @@ extension IntermediateRelation {
     }
 }
 
+extension IntermediateRelation {
+    func contains(row: Row) -> Result<Bool, RelationError> {
+        switch op {
+        case .Union:
+            return unionContains(row)
+        case .Intersection:
+            return intersectionContains(row)
+        case .Difference:
+            return differenceContains(row)
+        case .Project:
+            return projectContains(row)
+        case .Select(let expression):
+            return selectContains(row, expression: expression)
+        case .Equijoin:
+            return equijoinContains(row)
+        case .Rename(let renames):
+            return renameContains(row, renames: renames)
+        case .Update(let newValues):
+            return updateContains(row, newValues: newValues)
+        case .Aggregate:
+            return aggregateContains(row)
+        }
+    }
+    
+    func unionContains(row: Row) -> Result<Bool, RelationError> {
+        for r in operands {
+            switch r.contains(row) {
+            case .Ok(let contains):
+                if contains {
+                    return .Ok(true)
+                }
+            case .Err(let err):
+                return .Err(err)
+            }
+        }
+        return .Ok(false)
+    }
+    
+    func intersectionContains(row: Row) -> Result<Bool, RelationError> {
+        for r in operands {
+            switch r.contains(row) {
+            case .Ok(let contains):
+                if !contains {
+                    return .Ok(false)
+                }
+            case .Err(let err):
+                return .Err(err)
+            }
+        }
+        return .Ok(operands.count > 0)
+    }
+    
+    func differenceContains(row: Row) -> Result<Bool, RelationError> {
+        return operands[0].contains(row).combine(operands[1].contains(row)).map({ $0 && !$1 })
+    }
+    
+    func projectContains(row: Row) -> Result<Bool, RelationError> {
+        return operands[0].select(row).isEmpty.map(!)
+    }
+    
+    func selectContains(row: Row, expression: SelectExpression) -> Result<Bool, RelationError> {
+        if !expression.valueWithRow(row).boolValue {
+            return .Ok(false)
+        } else {
+            return operands[0].contains(row)
+        }
+    }
+    
+    func equijoinContains(row: Row) -> Result<Bool, RelationError> {
+        return select(row).isEmpty.map(!)
+    }
+    
+    func renameContains(row: Row, renames: [Attribute: Attribute]) -> Result<Bool, RelationError> {
+        let renamedRow = row.renameAttributes(renames.reversed)
+        return operands[0].contains(renamedRow)
+    }
+    
+    func updateContains(row: Row, newValues: Row) -> Result<Bool, RelationError> {
+        let newValuesScheme = Set(newValues.values.keys)
+        let newValueParts = row.rowWithAttributes(newValuesScheme)
+        if newValueParts != newValues {
+            return .Ok(false)
+        }
+        
+        let untouchedAttributes = Set(operands[0].scheme.attributes.subtract(newValues.values.keys))
+        let projected = operands[0].project(Scheme(attributes: untouchedAttributes))
+        
+        let remainingParts = row.rowWithAttributes(projected.scheme.attributes)
+        return projected.contains(remainingParts)
+    }
+    
+    func aggregateContains(row: Row) -> Result<Bool, RelationError> {
+        return containsOk(rows(), { $0 == row })
+    }
+}
+
 
 /*
  switch op {

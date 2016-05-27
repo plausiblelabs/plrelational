@@ -74,6 +74,16 @@ public func mapOk<Seq, InnerT, NewT, E where Seq: SequenceType, Seq.Generator.El
     return .Ok(results)
 }
 
+public func containsOk<Seq, T, E where Seq: SequenceType, Seq.Generator.Element == Result<T, E>>(seq: Seq, _ predicate: T -> Bool) -> Result<Bool, E> {
+    for elt in seq {
+        switch elt {
+        case .Ok(let t): if predicate(t) { return .Ok(true) }
+        case .Err(let e): return .Err(e)
+        }
+    }
+    return .Ok(false)
+}
+
 extension Result {
     public func combine<U>(other: Result<U, E>) -> Result<(T, U), E> {
         switch (self, other) {
