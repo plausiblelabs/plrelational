@@ -63,8 +63,23 @@ extension IntermediateRelation {
         if operands.count == 1 {
             return operands[0]
         } else {
-            return IntermediateRelation(op: .Union, operands: operands)
+            return IntermediateRelation(op: .Intersection, operands: operands)
         }
+    }
+    
+    /// A convenience initializer for aggregating functions which cannot fail and which always
+    /// compare two values. If the initial value is nil, then the aggregate of an empty relation
+    /// is empty, the aggregate of a relation containing a single row is the value stored in
+    /// that row. The aggregate function is only called if there are two or more rows, and the
+    /// first two call will pass in the values of the first two rows.
+    static func aggregate(relation: Relation, attribute: Attribute, initial: RelationValue?, agg: (RelationValue, RelationValue) -> RelationValue) -> Relation {
+        return IntermediateRelation(op: .Aggregate(attribute, initial, { (a, b) -> Result<RelationValue, RelationError> in
+            if let a = a {
+                return .Ok(agg(a, b))
+            } else {
+                return .Ok(b)
+            }
+        }), operands: [relation])
     }
 }
 
@@ -80,12 +95,6 @@ extension IntermediateRelation {
         result.removeAtIndex(excludingIndex)
         return result
     }
-    
-//    private func substituteOperand(index: Int, newOperand: Relation) -> [Relation] {
-//        var result = operands
-//        result[index] = newOperand
-//        return result
-//    }
     
     private func observeChange(change: RelationChange, operandIndex: Int) {
         let myAdded: Relation?
@@ -116,23 +125,7 @@ extension IntermediateRelation {
                 myRemoved = change.added?.intersection(operands[0])
             }
         case .Project(let scheme):
-            // Adds to the underlying relation are adds to the projected relation
-            // if there were no matching rows in the relation before. To compute
-            // that, project the changes, then subtract the pre-change relation,
-            // which is the post-change relation minus additions and plus removals.
-            //
-            // Removes are the same, except they subtract the post-change relation,
-            // which is just self.
-            var preChangeRelation = operands[0]
-            if let added = change.added {
-                preChangeRelation = preChangeRelation.difference(added)
-            }
-            if let removed = change.removed {
-                preChangeRelation = preChangeRelation.union(removed)
-            }
-            
-            myAdded = change.added?.project(scheme).difference(preChangeRelation.project(scheme))
-            myRemoved = change.removed?.project(scheme).difference(self)
+            (myAdded, myRemoved) = changesForProjection(change, scheme: scheme)
         case .Select(let expression):
             // Our changes are equal to the underlying changes with the same select applied.
             myAdded = change.added?.select(expression)
@@ -152,9 +145,10 @@ extension IntermediateRelation {
             myRemoved = change.removed?.renameAttributes(renames)
         case .Update(let newValues):
             // Our updates are equal to the projected updates joined with our newValues.
-            myAdded = change.added?.join(ConcreteRelation(newValues))
-            myRemoved = change.removed?.join(ConcreteRelation(newValues))
-
+            let untouchedScheme = Scheme(attributes: Set(operands[0].scheme.attributes.subtract(newValues.values.keys)))
+            let (projectedAdded, projectedRemoved) = changesForProjection(change, scheme: untouchedScheme)
+            myAdded = projectedAdded?.join(ConcreteRelation(newValues))
+            myRemoved = projectedRemoved?.project(untouchedScheme).join(ConcreteRelation(newValues))
         case .Aggregate(let attribute, let initialValue, let aggregateFunction):
             // TODO: We're using the dumb and inefficient approach for now.  We should instead
             // cache the computed aggregate value and inspect the added/removed rows to determine
@@ -167,7 +161,7 @@ extension IntermediateRelation {
             if let removed = change.removed {
                 preChangeRelation = preChangeRelation.union(removed)
             }
-            let previousAgg = AggregateRelation(relation: preChangeRelation, attribute: attribute, initial: initialValue, agg: aggregateFunction)
+            let previousAgg = IntermediateRelation(op: .Aggregate(attribute, initialValue, aggregateFunction), operands: [preChangeRelation])
             
             if self.intersection(previousAgg).isEmpty.ok == true {
                 myAdded = self
@@ -179,6 +173,27 @@ extension IntermediateRelation {
         }
         
         notifyChangeObservers(RelationChange(added: myAdded, removed: myRemoved))
+    }
+    
+    private func changesForProjection(change: RelationChange, scheme: Scheme) -> (Relation?, Relation?) {
+        // Adds to the underlying relation are adds to the projected relation
+        // if there were no matching rows in the relation before. To compute
+        // that, project the changes, then subtract the pre-change relation,
+        // which is the post-change relation minus additions and plus removals.
+        //
+        // Removes are the same, except they subtract the post-change relation,
+        // which is just self.
+        var preChangeRelation = operands[0]
+        if let added = change.added {
+            preChangeRelation = preChangeRelation.difference(added)
+        }
+        if let removed = change.removed {
+            preChangeRelation = preChangeRelation.union(removed)
+        }
+        
+        let myAdded = change.added?.project(scheme).difference(preChangeRelation.project(scheme))
+        let myRemoved = change.removed?.project(scheme).difference(self)
+        return (myAdded, myRemoved)
     }
 }
 

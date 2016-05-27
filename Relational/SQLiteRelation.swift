@@ -134,7 +134,7 @@ extension SQLiteRelation {
         } else if queryToSQL(query) != nil {
             return SQLiteRelation(db: db, tableName: self.tableName, scheme: scheme, query: self.queryAndedWithOtherQuery(query))
         } else {
-            return SelectRelation(relation: self, query: query)
+            return IntermediateRelation(op: .Select(query), operands: [self])
         }
     }
 }
