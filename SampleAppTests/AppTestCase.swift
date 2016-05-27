@@ -12,6 +12,27 @@ import libRelational
 
 class AppTestCase: XCTestCase {
 
+    var dbPaths: [String] = []
+    
+    override func tearDown() {
+        for path in dbPaths {
+            _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
+        }
+    }
+    
+    func makeDB() -> (path: String, db: SQLiteDatabase) {
+        let tmp = NSTemporaryDirectory() as NSString
+        let dbname = "testing-\(NSUUID()).db"
+        let path = tmp.stringByAppendingPathComponent(dbname)
+        _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
+        
+        let db = try! SQLiteDatabase(path)
+        
+        dbPaths.append(path)
+        
+        return (path, db)
+    }
+
     func prettyArray(binding: ArrayBinding<Row>) -> [String] {
         var accum: [String] = []
         for element in binding.elements {

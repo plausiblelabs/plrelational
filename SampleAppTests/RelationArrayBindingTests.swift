@@ -12,27 +12,6 @@ import libRelational
 
 class RelationArrayBindingTests: AppTestCase {
     
-    var dbPaths: [String] = []
-    
-    override func tearDown() {
-        for path in dbPaths {
-            _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
-        }
-    }
-    
-    func makeDB() -> (path: String, db: SQLiteDatabase) {
-        let tmp = NSTemporaryDirectory() as NSString
-        let dbname = "testing-\(NSUUID()).db"
-        let path = tmp.stringByAppendingPathComponent(dbname)
-        _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
-        
-        let db = try! SQLiteDatabase(path)
-        
-        dbPaths.append(path)
-        
-        return (path, db)
-    }
-    
     func testInit() {
         let sqliteDB = makeDB().db
         let sqliteRelation = sqliteDB.createRelation("page", scheme: ["id", "name", "order"]).ok!
