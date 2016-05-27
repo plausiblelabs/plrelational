@@ -36,6 +36,17 @@ class Checkbox: NSButton {
                 return NSMixedState
             }
         }
+        
+        var boolValue: Bool {
+            switch self {
+            case .On:
+                return true
+            case .Off:
+                return false
+            case .Mixed:
+                preconditionFailure("Cannot represent mixed state as a boolean")
+            }
+        }
     }
 
     private var checkStateBindingRemoval: ObserverRemoval?

@@ -306,12 +306,12 @@ class DocModel {
     }()
     
     lazy var selectedItemTypes: ValueBinding<[ItemType]> = { [unowned self] in
-        return self.selectedItemTypesRelation.all{ ItemType($0)! }
+        return self.selectedItemTypesRelation.bindAllValues{ ItemType($0)! }
     }()
     
     lazy var selectedItemTypesString: ValueBinding<String> = { [unowned self] in
         // TODO: Is there a more efficient way to do this?
-        let selectedItemCountBinding = self.selectedItems.count().oneInteger
+        let selectedItemCountBinding = self.selectedItems.count().bind{ $0.oneInteger }
         return selectedItemCountBinding.zip(self.selectedItemTypes).map { (count, types) in
             if types.count == 0 {
                 return ""

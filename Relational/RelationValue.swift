@@ -165,7 +165,7 @@ extension RelationValue {
     /// to a number (if it isn't already) and then considers 0 to be false.
     /// That means that, for example, the string "0" is false. For now,
     /// we'll skip that and just say that Integer(0) is the only false.
-    var boolValue: Bool {
+    public var boolValue: Bool {
         return self != .Integer(0)
     }
     

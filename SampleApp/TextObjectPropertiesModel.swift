@@ -31,19 +31,8 @@ class TextObjectPropertiesModel {
         return self.db.bidiBinding(
             self.editableRelation,
             action: "Change Editable",
-            get: { Checkbox.CheckState($0.oneBoolOrNil) },
-            set: { newValue in
-                let intValue: Int64
-                switch newValue {
-                case .On:
-                    intValue = 1
-                case .Off:
-                    intValue = 0
-                case .Mixed:
-                    preconditionFailure("Cannot set mixed state")
-                }
-                self.editableRelation.updateInteger(intValue)
-            }
+            get: { Checkbox.CheckState($0.oneBool) },
+            set: { self.editableRelation.updateBoolean($0.boolValue) }
         )
     }()
     

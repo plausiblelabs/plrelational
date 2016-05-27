@@ -55,6 +55,6 @@ class UndoableDatabase {
                 })
             }
         )
-        return relation.bidiBinding(config, relationToValue: get)
+        return relation.bindBidi(config, relationToValue: get)
     }
 }
