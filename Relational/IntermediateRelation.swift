@@ -239,7 +239,6 @@ extension IntermediateRelation {
             generator = updateRows(newValues)
         case .Aggregate(let attribute, let initialValue, let aggregateFunction):
             generator = aggregateRows(attribute, initialValue: initialValue, agg: aggregateFunction)
-            
         }
         return LogRelationIterationReturn(data, generator)
     }

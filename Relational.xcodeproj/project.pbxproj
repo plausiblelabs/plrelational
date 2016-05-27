@@ -79,6 +79,10 @@
 		C23AAF421CF61890009E28E0 /* MirrorChildren.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF411CF61890009E28E0 /* MirrorChildren.swift */; };
 		C23AAF441CF758D1009E28E0 /* liblibRelational.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C23AAF461CF76CFA009E28E0 /* IntermediateRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF451CF76CFA009E28E0 /* IntermediateRelation.swift */; };
+		C23AAF481CF8CD89009E28E0 /* QueryPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF471CF8CD89009E28E0 /* QueryPlanner.swift */; };
+		C23AAF4A1CF8D651009E28E0 /* ObjectSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF491CF8D651009E28E0 /* ObjectSet.swift */; };
+		C23AAF4C1CF8DAED009E28E0 /* QueryRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF4B1CF8DAED009E28E0 /* QueryRunner.swift */; };
+		C23AAF4E1CF8E3F8009E28E0 /* SequenceFind.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF4D1CF8E3F8009E28E0 /* SequenceFind.swift */; };
 		C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C263BBF21CE51B51006B7662 /* UnaryOperator.swift */; };
 		C277E7FD1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */; };
 		C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */; };
@@ -231,6 +235,10 @@
 		C23AAF3F1CF49AFE009E28E0 /* RelationActivityLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationActivityLogging.swift; sourceTree = "<group>"; };
 		C23AAF411CF61890009E28E0 /* MirrorChildren.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MirrorChildren.swift; path = Relational/MirrorChildren.swift; sourceTree = "<group>"; };
 		C23AAF451CF76CFA009E28E0 /* IntermediateRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntermediateRelation.swift; sourceTree = "<group>"; };
+		C23AAF471CF8CD89009E28E0 /* QueryPlanner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryPlanner.swift; sourceTree = "<group>"; };
+		C23AAF491CF8D651009E28E0 /* ObjectSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectSet.swift; path = Relational/ObjectSet.swift; sourceTree = "<group>"; };
+		C23AAF4B1CF8DAED009E28E0 /* QueryRunner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryRunner.swift; sourceTree = "<group>"; };
+		C23AAF4D1CF8E3F8009E28E0 /* SequenceFind.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SequenceFind.swift; path = Relational/SequenceFind.swift; sourceTree = "<group>"; };
 		C257C7491CBD7F4500234A89 /* BinaryOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinaryOperator.swift; sourceTree = "<group>"; };
 		C257C74B1CBD835600234A89 /* RelationParts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationParts.swift; sourceTree = "<group>"; };
 		C257C74D1CBD8A9400234A89 /* StringConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StringConvenience.swift; path = Relational/StringConvenience.swift; sourceTree = "<group>"; };
@@ -531,6 +539,8 @@
 				C257C74F1CBEB18A00234A89 /* FunctionalDependency.swift */,
 				C23AAF451CF76CFA009E28E0 /* IntermediateRelation.swift */,
 				3727076C1CEE60C900710C80 /* MutableRelation.swift */,
+				C23AAF471CF8CD89009E28E0 /* QueryPlanner.swift */,
+				C23AAF4B1CF8DAED009E28E0 /* QueryRunner.swift */,
 				C22BF1391CBC349400D3FE59 /* Relation.swift */,
 				C23AAF3F1CF49AFE009E28E0 /* RelationActivityLogging.swift */,
 				C2FE9B961CEE02BC0004E635 /* RelationChange.swift */,
@@ -579,10 +589,12 @@
 				C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */,
 				C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */,
 				C23AAF411CF61890009E28E0 /* MirrorChildren.swift */,
+				C23AAF491CF8D651009E28E0 /* ObjectSet.swift */,
 				C22921B51CD10BA800518184 /* ObserverSet.swift */,
 				C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */,
 				C22921AD1CCFABA300518184 /* Result.swift */,
 				C257C7511CBEBF6300234A89 /* SetPowerSet.swift */,
+				C23AAF4D1CF8E3F8009E28E0 /* SequenceFind.swift */,
 				C257C74D1CBD8A9400234A89 /* StringConvenience.swift */,
 				C22BF13A1CBC349400D3FE59 /* StringPad.swift */,
 				C22921AF1CCFEB6D00518184 /* ValueWithDestructor.swift */,
@@ -861,8 +873,10 @@
 				C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */,
 				C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */,
 				C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */,
+				C23AAF4E1CF8E3F8009E28E0 /* SequenceFind.swift in Sources */,
 				C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */,
 				C277E8031CDB9D3400B7B8F6 /* GeneratorConcat.swift in Sources */,
+				C23AAF4A1CF8D651009E28E0 /* ObjectSet.swift in Sources */,
 				C23AAF421CF61890009E28E0 /* MirrorChildren.swift in Sources */,
 				C23AAF401CF49AFE009E28E0 /* RelationActivityLogging.swift in Sources */,
 				C22921C71CD12A8700518184 /* ConcreteRelation.swift in Sources */,
@@ -871,6 +885,7 @@
 				C2FE9B991CEE15720004E635 /* TransactionalDatabase.swift in Sources */,
 				C277E8121CE4FAD400B7B8F6 /* SelectExpressionOperators.swift in Sources */,
 				C22921CA1CD12A8700518184 /* FunctionalDependency.swift in Sources */,
+				C23AAF481CF8CD89009E28E0 /* QueryPlanner.swift in Sources */,
 				C22921CB1CD12A8700518184 /* ObserverSet.swift in Sources */,
 				C22921CD1CD12A8700518184 /* PlaygroundMonospace.swift in Sources */,
 				3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */,
@@ -896,6 +911,7 @@
 				C22921DC1CD12AA200518184 /* WeakReference.swift in Sources */,
 				C22921DD1CD12AA200518184 /* WeakValueDictionary.swift in Sources */,
 				C277E8101CE4EF5400B7B8F6 /* SelectExpression.swift in Sources */,
+				C23AAF4C1CF8DAED009E28E0 /* QueryRunner.swift in Sources */,
 				C2FE9B971CEE02BC0004E635 /* RelationChange.swift in Sources */,
 				C22921DE1CD12AA600518184 /* SQLiteDatabase.swift in Sources */,
 				C22921DF1CD12AA600518184 /* SQLiteRelation.swift in Sources */,
