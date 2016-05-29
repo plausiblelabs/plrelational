@@ -78,6 +78,8 @@ class PopUpButton: NSPopUpButton {
         super.init(frame: frame, pullsDown: flag)
         
         autoenablesItems = false
+        target = self
+        action = #selector(selectionChanged(_:))
         
         // Create the default menu item, which is shown when there is no selection
         defaultMenuItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
@@ -106,7 +108,7 @@ class PopUpButton: NSPopUpButton {
         selfInitiatedSelectionChange = false
     }
     
-    private func selectionChanged(sender: NSPopUpButton) {
+    @objc func selectionChanged(sender: NSPopUpButton) {
         if selfInitiatedSelectionChange { return }
         
         guard let newTitle = sender.titleOfSelectedItem else { return }
