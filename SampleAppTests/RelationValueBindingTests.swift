@@ -88,10 +88,97 @@ class RelationValueBindingTests: AppTestCase {
         XCTAssertEqual(multi.project(["age"]).oneInteger, 0)
     }
     
-    func testBindAllValues() {
-//        let db = makeDB().db
-//        let r = db.createRelation("animal", scheme: ["id", "name"]).ok!
-        // TODO
+    func testBind() {
+        let db = makeDB().db
+        let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
+        let r = ChangeLoggingRelation(baseRelation: sqlr)
+
+        let binding = r.select(Attribute("id") *== 1).project(["name"]).bind{ $0.oneString }
+        var changed = false
+        _ = binding.addChangeObserver({ _ in changed = true })
+        
+        XCTAssertEqual(binding.value, "")
+        XCTAssertFalse(changed)
+        changed = false
+        
+        r.add(["id": 1, "name": "cat"])
+        
+        XCTAssertEqual(binding.value, "cat")
+        XCTAssertTrue(changed)
+        changed = false
+        
+        r.add(["id": 2, "name": "dog"])
+
+        XCTAssertNotNil(binding.value)
+        XCTAssertEqual(binding.value, "cat")
+        XCTAssertFalse(changed)
+        changed = false
+        
+        r.delete(true)
+        
+        XCTAssertEqual(binding.value, "")
+        XCTAssertTrue(changed)
+        changed = false
+    }
+    
+    func testBindBidi() {
+        let sqliteDB = makeDB().db
+        let loggingDB = ChangeLoggingDatabase(sqliteDB)
+        let db = TransactionalDatabase(loggingDB)
+        
+        XCTAssertNil(sqliteDB.createRelation("animal", scheme: ["id", "name"]).err)
+        let r = db["animal"]
+
+        func updateName(newValue: String) {
+            db.transaction{
+                r.update(Attribute("id") *== 1, newValues: ["name": RelationValue(newValue)])
+            }
+        }
+        
+        let config: RelationBidiConfig<String> = RelationBidiConfig(
+            snapshot: {
+                return db.takeSnapshot()
+            },
+            update: { newValue in
+                updateName(newValue)
+            },
+            commit: { _, newValue in
+                updateName(newValue)
+            }
+        )
+        
+        let binding = r.select(Attribute("id") *== 1).project(["name"]).bindBidi(config, relationToValue: { $0.oneString })
+        var changed = false
+        _ = binding.addChangeObserver({ _ in changed = true })
+        
+        XCTAssertEqual(binding.value, "")
+        XCTAssertFalse(changed)
+        changed = false
+        
+        r.add(["id": 1, "name": "cat"])
+        
+        XCTAssertEqual(binding.value, "cat")
+        XCTAssertTrue(changed)
+        changed = false
+
+        // TODO: Verify that snapshot is taken?
+        binding.update("dog")
+        
+        XCTAssertEqual(binding.value, "dog")
+        XCTAssertFalse(changed)
+        changed = false
+        
+        binding.commit("ant")
+        
+        XCTAssertEqual(binding.value, "ant")
+        XCTAssertFalse(changed)
+        changed = false
+        
+        r.delete(true)
+        
+        XCTAssertEqual(binding.value, "")
+        XCTAssertTrue(changed)
+        changed = false
     }
     
     func testEmpty() {
