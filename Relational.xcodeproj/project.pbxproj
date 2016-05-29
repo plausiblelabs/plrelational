@@ -24,6 +24,7 @@
 		376136971CF40AB300F572C5 /* RelationArrayBindingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136961CF40AB300F572C5 /* RelationArrayBindingTests.swift */; };
 		376136991CF65F0A00F572C5 /* TextObjectPropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */; };
 		3761369B1CF9523A00F572C5 /* PopUpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761369A1CF9523A00F572C5 /* PopUpButton.swift */; };
+		3761369D1CFBA42100F572C5 /* StepperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761369C1CFBA42100F572C5 /* StepperView.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -184,6 +185,7 @@
 		376136961CF40AB300F572C5 /* RelationArrayBindingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationArrayBindingTests.swift; path = SampleAppTests/RelationArrayBindingTests.swift; sourceTree = SOURCE_ROOT; };
 		376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObjectPropertiesModel.swift; sourceTree = "<group>"; };
 		3761369A1CF9523A00F572C5 /* PopUpButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopUpButton.swift; sourceTree = "<group>"; };
+		3761369C1CFBA42100F572C5 /* StepperView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StepperView.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -392,6 +394,7 @@
 				37C611521CE3A942001DAF59 /* ContextMenu.swift */,
 				47701CA01CF764CD00E3549D /* Checkbox.swift */,
 				3761369A1CF9523A00F572C5 /* PopUpButton.swift */,
+				3761369C1CFBA42100F572C5 /* StepperView.swift */,
 			);
 			name = "Custom Views";
 			sourceTree = "<group>";
@@ -844,6 +847,7 @@
 				37C611361CD7FB07001DAF59 /* ListView.swift in Sources */,
 				37C6114F1CDD6084001DAF59 /* RelationTreeBinding.swift in Sources */,
 				37C6113F1CD93069001DAF59 /* Binding.swift in Sources */,
+				3761369D1CFBA42100F572C5 /* StepperView.swift in Sources */,
 				3727077A1CF7B2CB00710C80 /* UndoableDatabase.swift in Sources */,
 				37C611441CDA7230001DAF59 /* Box.swift in Sources */,
 				37C6113A1CD80566001DAF59 /* DocModel.swift in Sources */,

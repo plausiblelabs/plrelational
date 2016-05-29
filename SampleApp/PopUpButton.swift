@@ -94,6 +94,7 @@ class PopUpButton: NSPopUpButton {
     deinit {
         titlesBindingRemoval?()
         selectedTitleBindingRemoval?()
+        placeholderTitleBindingRemoval?()
     }
     
     private func setSelectedTitle(title: String?) {
