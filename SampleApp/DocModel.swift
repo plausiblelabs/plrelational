@@ -104,7 +104,7 @@ class DocModel {
         }
         self.collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
         self.objects = createRelation("object", ["id", "type", "name", "coll_id", "order"])
-        self.textObjects = createRelation("text_object", ["id", "editable", "hint"])
+        self.textObjects = createRelation("text_object", ["id", "editable", "hint", "font"])
         self.selectedCollectionID = createRelation("selected_collection", ["coll_id"])
         self.selectedInspectorItemIDs = createRelation("selected_inspector_item", ["item_id"])
 
@@ -208,7 +208,8 @@ class DocModel {
             textObjects.add([
                 "id": RelationValue(objectID),
                 "editable": 0,
-                "hint": RelationValue("Hint for \(name)")
+                "hint": RelationValue("Hint for \(name)"),
+                "font": .NULL
             ])
         }
     }

@@ -27,6 +27,10 @@ class TextObjectPropertiesModel {
         return self.selectedTextObjects.project(["hint"])
     }()
 
+    private lazy var fontRelation: Relation = { [unowned self] in
+        return self.selectedTextObjects.project(["font"])
+    }()
+
     lazy var editable: BidiValueBinding<Checkbox.CheckState> = { [unowned self] in
         return self.db.bidiBinding(
             self.editableRelation,
@@ -47,5 +51,24 @@ class TextObjectPropertiesModel {
     
     lazy var hintPlaceholder: ValueBinding<String> = { [unowned self] in
         return self.hintRelation.stringWhenMulti("Multiple Values")
+    }()
+    
+    lazy var availableFonts: ValueBinding<[String]> = { [unowned self] in
+        // XXX
+        let fonts = ["Futura", "Helvetica", "Monaco"]
+        return ValueBinding.constant(fonts)
+    }()
+    
+    lazy var font: BidiValueBinding<String?> = { [unowned self] in
+        return self.db.bidiBinding(
+            self.fontRelation,
+            action: "Change Font",
+            get: { $0.oneString },
+            set: { self.fontRelation.updateNullableString($0) }
+        )
+    }()
+    
+    lazy var fontPlaceholder: ValueBinding<String> = { [unowned self] in
+        return self.fontRelation.stringWhenMulti("Multiple Values", otherwise: "Default")
     }()
 }

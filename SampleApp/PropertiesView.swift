@@ -16,6 +16,7 @@ class PropertiesView {
         let view: NSView
         let editableCheckbox: Checkbox
         let hintField: TextField
+        let fontPopupButton: PopUpButton
     }
     
     private let itemTypeLabel: TextField
@@ -72,9 +73,20 @@ class PropertiesView {
         hintField.string = model.hint
         hintField.placeholder = model.hintPlaceholder
         bgView.addSubview(hintField)
+
+        let fontPopupButton = PopUpButton(frame: NSMakeRect(10, 80, 120, 24), pullsDown: false)
+        fontPopupButton.titles = model.availableFonts
+        fontPopupButton.placeholderTitle = model.fontPlaceholder
+        fontPopupButton.selectedTitle = model.font
+        bgView.addSubview(fontPopupButton)
         
         parentView.addSubview(bgView)
-        textSection = TextSection(view: bgView, editableCheckbox: editableCheckbox, hintField: hintField)
+        textSection = TextSection(
+            view: bgView,
+            editableCheckbox: editableCheckbox,
+            hintField: hintField,
+            fontPopupButton: fontPopupButton
+        )
     }
     
     private func updateTextSection() {

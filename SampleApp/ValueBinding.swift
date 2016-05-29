@@ -42,6 +42,10 @@ public class ValueBinding<T>: Binding {
 }
 
 extension ValueBinding {
+    public static func constant(value: T) -> ValueBinding<T> {
+        return ConstantValueBinding(value: value)
+    }
+    
     public func map<U>(transform: (T) -> U) -> ValueBinding<U> {
         return MappedValueBinding(binding: self, transform: transform)
     }
@@ -60,6 +64,16 @@ extension ValueBinding where T: SequenceType, T.Generator.Element: Equatable {
 extension ValueBinding where T: SequenceType, T.Generator.Element: Hashable {
     public func common() -> ValueBinding<CommonValue<T.Generator.Element>> {
         return CommonValueBinding(binding: self)
+    }
+}
+
+private class ConstantValueBinding<T>: ValueBinding<T> {
+    init(value: T) {
+        super.init(initialValue: value)
+    }
+    
+    private override func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval {
+        return {}
     }
 }
 

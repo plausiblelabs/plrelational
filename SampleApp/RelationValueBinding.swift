@@ -224,15 +224,15 @@ extension Relation {
     }
     
     /// Returns a read-only binding that resolves to the given string value if there are multiple string
-    /// values in the relation, otherwise resolves to an empty string.
-    func stringWhenMulti(string: String) -> ValueBinding<String> {
+    /// values in the relation, otherwise resolves to the alternate string.
+    func stringWhenMulti(string: String, otherwise: String = "") -> ValueBinding<String> {
         // TODO: Reimplement in terms of other bindings
         return RelationValueBinding(relation: self, relationToValue: { relation -> String in
             let values = self.allValues{ value -> String? in value.get() }
             if values.count > 1 {
                 return string
             } else {
-                return ""
+                return otherwise
             }
         })
     }
@@ -247,12 +247,23 @@ extension Relation {
         var mutableRelation = self
         mutableRelation.update(true, newValues: row)
     }
-    
+
     /// Performs an update using a single string value.
     func updateString(value: String) {
         updateValue(RelationValue(value))
     }
-    
+
+    /// Performs an update using a single optional string value.
+    func updateNullableString(value: String?) {
+        let rv: RelationValue
+        if let value = value {
+            rv = RelationValue(value)
+        } else {
+            rv = .NULL
+        }
+        updateValue(rv)
+    }
+
     /// Performs an update using a single integer value.
     func updateInteger(value: Int64) {
         updateValue(RelationValue(value))
