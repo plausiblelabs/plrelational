@@ -8,15 +8,46 @@
 
 import libRelational
 
-private class RelationValueBinding<T>: ValueBinding<T> {
+private class BaseRelationValueBinding<T>: ValueBinding<T> {
     private var removal: ObserverRemoval!
     
     init(relation: Relation, relationToValue: Relation -> T) {
         super.init(initialValue: relationToValue(relation))
         
         self.removal = relation.addChangeObserver({ [weak self] _ in
-            self?.setValue(relationToValue(relation))
+            guard let weakSelf = self else { return }
+            let newValue = relationToValue(relation)
+            if weakSelf.valueChanging(newValue) {
+                weakSelf.setValue(newValue)
+            }
         })
+    }
+    
+    /// Overridden by subclasses.
+    private func valueChanging(newValue: T) -> Bool {
+        return true
+    }
+}
+
+private class RelationValueBinding<T: Equatable>: BaseRelationValueBinding<T> {
+    override init(relation: Relation, relationToValue: Relation -> T) {
+        super.init(relation: relation, relationToValue: relationToValue)
+    }
+
+    private override func valueChanging(newValue: T) -> Bool {
+        return newValue != self.value
+    }
+}
+
+// XXX: This is necessary because Optionals do not automatically conform to the Equatable protocol,
+// even though they do have a generic implementation of `==`.
+private class RelationOptValueBinding<T: Equatable>: BaseRelationValueBinding<T?> {
+    override init(relation: Relation, relationToValue: Relation -> T?) {
+        super.init(relation: relation, relationToValue: relationToValue)
+    }
+    
+    private override func valueChanging(newValue: T?) -> Bool {
+        return newValue != self.value
     }
 }
 
@@ -58,7 +89,7 @@ public struct RelationBidiConfig<T> {
     let commit: (before: ChangeLoggingDatabaseSnapshot, newValue: T) -> Void
 }
 
-private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
+private class BaseRelationBidiValueBinding<T>: BidiValueBinding<T> {
     private let config: RelationBidiConfig<T>
     private var before: ChangeLoggingDatabaseSnapshot?
     private var selfInitiatedChange = false
@@ -74,8 +105,16 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
             
             if weakSelf.selfInitiatedChange { return }
             
-            weakSelf.setValue(relationToValue(relation))
+            let newValue = relationToValue(relation)
+            if weakSelf.valueChanging(newValue) {
+                weakSelf.setValue(newValue)
+            }
         })
+    }
+    
+    /// Overridden by subclasses.
+    private func valueChanging(newValue: T) -> Bool {
+        return true
     }
     
     private override func update(newValue: T) {
@@ -100,18 +139,40 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
     }
 }
 
-extension Relation {
-    /// Resolves to a sequence of all values for the single attribute, one transformed value for each non-error row.
-    func allValues<V>(transform: RelationValue -> V?) -> [V] {
-        precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
-        let attr = self.scheme.attributes.first!
-        return self.rows()
-            .flatMap{$0.ok}
-            .flatMap{transform($0[attr])}
+private class RelationBidiValueBinding<T: Equatable>: BaseRelationBidiValueBinding<T> {
+    override init(relation: Relation, config: RelationBidiConfig<T>, relationToValue: Relation -> T) {
+        super.init(relation: relation, config: config, relationToValue: relationToValue)
     }
     
-    /// Resolves to a sequence of all RelationValues for the single attribute, one value for each non-error row.
-    var allValues: [RelationValue] {
+    private override func valueChanging(newValue: T) -> Bool {
+        return newValue != self.value
+    }
+}
+
+// XXX: This is necessary because Optionals do not automatically conform to the Equatable protocol,
+// even though they do have a generic implementation of `==`.
+private class RelationBidiOptValueBinding<T: Equatable>: BaseRelationBidiValueBinding<T?> {
+    override init(relation: Relation, config: RelationBidiConfig<T?>, relationToValue: Relation -> T?) {
+        super.init(relation: relation, config: config, relationToValue: relationToValue)
+    }
+    
+    private override func valueChanging(newValue: T?) -> Bool {
+        return newValue != self.value
+    }
+}
+
+extension Relation {
+    /// Resolves to a set of all values for the single attribute, built from one transformed value for each non-error row.
+    func allValues<V: Hashable>(transform: RelationValue -> V?) -> Set<V> {
+        precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
+        let attr = self.scheme.attributes.first!
+        return Set(self.rows()
+            .flatMap{$0.ok}
+            .flatMap{transform($0[attr])})
+    }
+    
+    /// Resolves to a set of all RelationValues for the single attribute.
+    var allValues: Set<RelationValue> {
         return allValues{ $0 }
     }
     
@@ -177,32 +238,42 @@ extension Relation {
 
 extension Relation {
     /// Returns a read-only binding that gets its value from this relation.
-    func bind<V>(relationToValue: Relation -> V) -> ValueBinding<V> {
+    func bind<V: Equatable>(relationToValue: Relation -> V) -> ValueBinding<V> {
         return RelationValueBinding(relation: self, relationToValue: relationToValue)
     }
-    
-    /// Returns a read-only binding that resolves to a sequence of all values for the single attribute, one
-    /// value for each non-error row.
-    func bindAllValues<V>(transform: RelationValue -> V?) -> ValueBinding<[V]> {
-        return bind{ $0.allValues(transform) }
+
+    /// Returns a read-only binding that gets its (optional) value from this relation.
+    func bindOpt<V: Equatable>(relationToValue: Relation -> V?) -> ValueBinding<V?> {
+        return RelationOptValueBinding(relation: self, relationToValue: relationToValue)
     }
-    
+
+    /// Returns a read-only binding that resolves to a set of all values for the single attribute.
+    func bindAllValues<V: Hashable>(transform: RelationValue -> V?) -> ValueBinding<Set<V>> {
+        return RelationValueBinding(relation: self, relationToValue: { $0.allValues(transform) })
+    }
+
     /// Returns a read-only binding that resolves to some value for the single attribute, or nil if there are
     /// no non-error rows.
-    func bindAnyValue<V>(transform: RelationValue -> V?) -> ValueBinding<V?> {
-        return bind{ $0.anyValue(transform) }
+    func bindAnyValue<V: Equatable>(transform: RelationValue -> V?) -> ValueBinding<V?> {
+        return RelationOptValueBinding(relation: self, relationToValue: { $0.anyValue(transform) })
     }
 
     /// Returns a read-only binding that resolves to a single value if there is exactly one row in the relation,
     /// otherwise resolves to nil.
-    func bindOneValue<V>(transform: RelationValue -> V?) -> ValueBinding<V?> {
-        return bind{ $0.oneValue(transform) }
+    func bindOneValue<V: Equatable>(transform: RelationValue -> V?) -> ValueBinding<V?> {
+        return RelationOptValueBinding(relation: self, relationToValue: { $0.oneValue(transform) })
     }
 
     /// Returns a bidirectional binding that gets its value from this relation and writes values back
     /// according to the provided bidi configuration.
-    func bindBidi<V>(config: RelationBidiConfig<V>, relationToValue: Relation -> V) -> BidiValueBinding<V> {
+    func bindBidi<V: Equatable>(config: RelationBidiConfig<V>, relationToValue: Relation -> V) -> BidiValueBinding<V> {
         return RelationBidiValueBinding(relation: self, config: config, relationToValue: relationToValue)
+    }
+    
+    /// Returns a bidirectional binding that gets its (optional) value from this relation and writes values back
+    /// according to the provided bidi configuration.
+    func bindOptBidi<V: Equatable>(config: RelationBidiConfig<V?>, relationToValue: Relation -> V?) -> BidiValueBinding<V?> {
+        return RelationBidiOptValueBinding(relation: self, config: config, relationToValue: relationToValue)
     }
 }
 

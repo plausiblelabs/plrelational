@@ -24,18 +24,18 @@ class RelationValueBindingTests: AppTestCase {
         
         let rvset = Set([RelationValue("cat"), RelationValue("dog"), RelationValue("fish")])
 
-        XCTAssertEqual(Set(empty.project(["name"]).allValues), Set())
-        XCTAssertEqual(Set(r.project(["name"]).allValues), rvset)
+        XCTAssertEqual(empty.project(["name"]).allValues, Set())
+        XCTAssertEqual(r.project(["name"]).allValues, rvset)
 
         XCTAssertEqual(
-            Set(r.project(["name"]).allValues{
+            r.project(["name"]).allValues{
                 let s: String = $0.get()!
                 if s.characters.count <= 3 {
                     return "\(s)s"
                 } else {
                     return nil
                 }
-            }),
+            },
             Set(["cats", "dogs"]))
     }
     
@@ -202,9 +202,9 @@ class RelationValueBindingTests: AppTestCase {
 
         r.add(["id": 2, "name": "dog"])
         
+        // Verify that observers are not notified when binding value has not actually changed
         XCTAssertFalse(binding.value)
-        // TODO: ValueBinding should not notify if value is not changing
-        //XCTAssertFalse(changed)
+        XCTAssertFalse(changed)
         changed = false
 
         r.delete(true)
@@ -235,9 +235,9 @@ class RelationValueBindingTests: AppTestCase {
         
         r.add(["id": 2, "name": "dog"])
         
+        // Verify that observers are not notified when binding value has not actually changed
         XCTAssertTrue(binding.value)
-        // TODO: ValueBinding should not notify if value is not changing
-        //XCTAssertFalse(changed)
+        XCTAssertFalse(changed)
         changed = false
         
         r.delete(true)
@@ -308,9 +308,9 @@ class RelationValueBindingTests: AppTestCase {
         
         r.add(["id": 1, "name": "cat"])
         
+        // Verify that observers are not notified when binding value has not actually changed
         XCTAssertEqual(binding.value, "")
-        // TODO: ValueBinding should not notify if value is not changing
-        //XCTAssertFalse(changed)
+        XCTAssertFalse(changed)
         changed = false
         
         r.add(["id": 2, "name": "dog"])

@@ -37,8 +37,17 @@ class UndoableDatabase {
     }
     
     /// Note: `set` will be called in the context of a database transaction.
-    func bidiBinding<T>(relation: Relation, action: String, get: Relation -> T, set: T -> Void) -> BidiValueBinding<T> {
-        let config = RelationBidiConfig(
+    func bidiBinding<T: Equatable>(relation: Relation, action: String, get: Relation -> T, set: T -> Void) -> BidiValueBinding<T> {
+        return relation.bindBidi(bidiConfig(action, set), relationToValue: get)
+    }
+    
+    /// Note: `set` will be called in the context of a database transaction.
+    func bidiOptBinding<T: Equatable>(relation: Relation, action: String, get: Relation -> T?, set: T? -> Void) -> BidiValueBinding<T?> {
+        return relation.bindOptBidi(bidiConfig(action, set), relationToValue: get)
+    }
+    
+    private func bidiConfig<T>(action: String, _ set: T -> Void) -> RelationBidiConfig<T> {
+        return RelationBidiConfig(
             snapshot: {
                 return self.db.takeSnapshot()
             },
@@ -55,6 +64,5 @@ class UndoableDatabase {
                 })
             }
         )
-        return relation.bindBidi(config, relationToValue: get)
     }
 }

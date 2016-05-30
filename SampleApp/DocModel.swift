@@ -306,7 +306,7 @@ class DocModel {
         return self.selectedItems.empty
     }()
     
-    lazy var selectedItemTypes: ValueBinding<[ItemType]> = { [unowned self] in
+    lazy var selectedItemTypes: ValueBinding<Set<ItemType>> = { [unowned self] in
         return self.selectedItemTypesRelation.bindAllValues{ ItemType($0)! }
     }()
     
@@ -358,12 +358,12 @@ class DocModel {
         )
     }
 
-    private func bidiSelectionBinding(relation: MutableRelation) -> BidiValueBinding<[RelationValue]> {
+    private func bidiSelectionBinding(relation: MutableRelation) -> BidiValueBinding<Set<RelationValue>> {
         return undoableDB.bidiBinding(
             relation,
             action: "Change Selection",
             get: { $0.allValues },
-            set: { relation.replaceValues($0) }
+            set: { relation.replaceValues(Array($0)) }
         )
     }
 }

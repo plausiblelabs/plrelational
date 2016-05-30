@@ -18,7 +18,7 @@ struct TreeViewModel<D: TreeData> {
     let contextMenu: ((D) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
     let move: ((srcPath: TreePath<D>, dstPath: TreePath<D>) -> Void)?
-    let selection: BidiValueBinding<[D.ID]>
+    let selection: BidiValueBinding<Set<D.ID>>
     let cellText: (D) -> ValueBinding<String>
 }
 
@@ -204,7 +204,7 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
                 itemIDs.append(node.id)
             }
         }
-        model.selection.commit(itemIDs)
+        model.selection.commit(Set(itemIDs))
         
         selfInitiatedSelectionChange = false
     }
