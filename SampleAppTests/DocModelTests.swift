@@ -12,15 +12,7 @@ import libRelational
 
 class DocModelTests: AppTestCase {
     
-    func testModel() {
-        
-        struct BindingVals {
-            let itemSelected: Bool
-            let selectedItemType: String
-            let selectedItemName: String
-            let selectedItemsOnlyText: Bool
-        }
-        
+    func defaultModel() -> DocModel {
         let model = DocModel(undoManager: UndoManager())
         
         func addCollection(name: String, _ type: ItemType, _ parentID: Int64?) {
@@ -29,18 +21,6 @@ class DocModelTests: AppTestCase {
         
         func addObject(name: String, _ type: ItemType, _ collectionID: Int64, _ order: Double) {
             model.newObject(name, type: type, collectionID: collectionID, order: order)
-        }
-        
-        func verifyBindings(expected: BindingVals, file: StaticString = #file, line: UInt = #line) {
-            XCTAssertEqual(model.itemSelected.value, expected.itemSelected, file: file, line: line)
-            XCTAssertEqual(model.itemNotSelected.value, !expected.itemSelected, file: file, line: line)
-            XCTAssertEqual(model.selectedItemTypesString.value, expected.selectedItemType, file: file, line: line)
-            XCTAssertEqual(model.selectedItemNames.value, expected.selectedItemName, file: file, line: line)
-            XCTAssertEqual(model.textObjectProperties.value != nil, expected.selectedItemsOnlyText, file: file, line: line)
-        }
-        
-        func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath<Row> {
-            return path(model.docOutlineTreeViewModel.data, parentID: parentID, index: index)
         }
         
         // Insert some collections
@@ -57,7 +37,33 @@ class DocModelTests: AppTestCase {
         addObject("Object1", .Text, 3, 5.0)
         addObject("Object2", .Image, 3, 7.0)
         addObject("Object3", .Image, 3, 8.0)
-
+        
+        return model
+    }
+    
+    func testModel() {
+        
+        struct BindingVals {
+            let itemSelected: Bool
+            let selectedItemType: String
+            let selectedItemName: String
+            let selectedItemsOnlyText: Bool
+        }
+        
+        let model = defaultModel()
+        
+        func verifyBindings(expected: BindingVals, file: StaticString = #file, line: UInt = #line) {
+            XCTAssertEqual(model.itemSelected.value, expected.itemSelected, file: file, line: line)
+            XCTAssertEqual(model.itemNotSelected.value, !expected.itemSelected, file: file, line: line)
+            XCTAssertEqual(model.selectedItemTypesString.value, expected.selectedItemType, file: file, line: line)
+            XCTAssertEqual(model.selectedItemNames.value, expected.selectedItemName, file: file, line: line)
+            XCTAssertEqual(model.textObjectProperties.value != nil, expected.selectedItemsOnlyText, file: file, line: line)
+        }
+        
+        func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath<Row> {
+            return path(model.docOutlineTreeViewModel.data, parentID: parentID, index: index)
+        }
+        
         // Verify the initial doc outline structure
         verifyTree(model.docOutlineTreeViewModel.data, [
             "Group1",
@@ -157,5 +163,92 @@ class DocModelTests: AppTestCase {
             selectedItemType: "Multiple Items",
             selectedItemName: "",
             selectedItemsOnlyText: false))
+    }
+    
+    func testDocOutlineSelectionSpeedUnbound() {
+        let model = defaultModel()
+
+        // Toggle back and forth between two pages
+        let page1: Set<RelationValue> = [3]
+        let page2: Set<RelationValue> = [4]
+        var first = true
+        measureBlock({
+            model.docOutlineTreeViewModel.selection.commit(first ? page1 : page2)
+            first = !first
+        })
+    }
+    
+    func testDocOutlineSelectionSpeedOneBound() {
+        let model = defaultModel()
+
+        // Observe the selected item names binding
+        var changeCount = 0
+        _ = model.selectedItemNames.addChangeObserver({ _ in changeCount += 1 })
+
+        // Toggle back and forth between two pages
+        let page1: Set<RelationValue> = [3]
+        let page2: Set<RelationValue> = [4]
+        var first = true
+        measureBlock({
+            model.docOutlineTreeViewModel.selection.commit(first ? page1 : page2)
+            first = !first
+        })
+    }
+
+    func testDocOutlineSelectionSpeedAllBound() {
+        let model = defaultModel()
+        
+        // Observe a number of related bindings
+        var changeCount = 0
+        _ = model.itemSelected.addChangeObserver({ _ in changeCount += 1 })
+        _ = model.itemNotSelected.addChangeObserver({ _ in changeCount += 1 })
+        _ = model.selectedItemTypesString.addChangeObserver({ _ in changeCount += 1 })
+        _ = model.selectedItemNames.addChangeObserver({ _ in changeCount += 1 })
+        _ = model.selectedItemNamesPlaceholder.addChangeObserver({ _ in changeCount += 1 })
+        
+        // Toggle back and forth between two pages
+        let page1: Set<RelationValue> = [3]
+        let page2: Set<RelationValue> = [4]
+        var first = true
+        measureBlock({
+            model.docOutlineTreeViewModel.selection.commit(first ? page1 : page2)
+            first = !first
+        })
+    }
+
+    func testInspectorSelectionSpeedUnbound() {
+        let model = defaultModel()
+
+        // Select the first page
+        model.docOutlineTreeViewModel.selection.commit([3])
+        
+        // Toggle back and forth between two objects (of differing type)
+        let obj1: Set<RelationValue> = [9]
+        let obj2: Set<RelationValue> = [10]
+        var first = true
+        measureBlock({
+            model.inspectorTreeViewModel.selection.commit(first ? obj1 : obj2)
+            first = !first
+        })
+    }
+
+    func testInspectorSelectionSpeedBound() {
+        let model = defaultModel()
+        
+        // Select the first page
+        model.docOutlineTreeViewModel.selection.commit([3])
+        
+        // Observe the text object properties binding
+        var changeCount = 0
+        _ = model.textObjectProperties.addChangeObserver({ _ in changeCount += 1 })
+
+        // Toggle back and forth between two objects (of differing type)
+        let obj1: Set<RelationValue> = [9]
+        let obj2: Set<RelationValue> = [10]
+        var first = true
+        measureBlock({
+            model.inspectorTreeViewModel.selection.commit(first ? obj1 : obj2)
+            first = !first
+        })
     }
 }

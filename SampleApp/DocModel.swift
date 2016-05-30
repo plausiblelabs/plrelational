@@ -306,7 +306,7 @@ class DocModel {
         return self.selectedItems.empty
     }()
     
-    lazy var selectedItemTypes: ValueBinding<Set<ItemType>> = { [unowned self] in
+    private lazy var selectedItemTypes: ValueBinding<Set<ItemType>> = { [unowned self] in
         return self.selectedItemTypesRelation.bindAllValues{ ItemType($0)! }
     }()
     
