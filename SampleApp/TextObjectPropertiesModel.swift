@@ -14,6 +14,9 @@ class TextObjectPropertiesModel {
     let db: UndoableDatabase
     let selectedTextObjects: Relation
     
+    /// - Parameters:
+    ///     - db: The database.
+    ///     - selectedTextObjects: Relation with scheme [id, editable, hint, font].
     init(db: UndoableDatabase, selectedTextObjects: Relation) {
         self.db = db
         self.selectedTextObjects = selectedTextObjects

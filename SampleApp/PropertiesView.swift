@@ -18,6 +18,8 @@ class PropertiesView {
         let hintField: TextField
         let fontPopupButton: PopUpButton
     }
+
+    private let model: PropertiesModel
     
     private let itemTypeLabel: TextField
     private let nameLabel: TextField
@@ -27,28 +29,26 @@ class PropertiesView {
     private var textSection: TextSection?
     private var textObjectPropsObserverRemoval: ObserverRemoval?
     
-    private let docModel: DocModel
-    
-    init(itemTypeLabel: TextField, nameLabel: TextField, nameField: TextField, noSelectionLabel: TextField, docModel: DocModel) {
+    init(model: PropertiesModel, itemTypeLabel: TextField, nameLabel: TextField, nameField: TextField, noSelectionLabel: TextField) {
+        self.model = model
         self.itemTypeLabel = itemTypeLabel
         self.nameLabel = nameLabel
         self.nameField = nameField
         self.noSelectionLabel = noSelectionLabel
-        self.docModel = docModel
         
-        itemTypeLabel.string = docModel.selectedItemTypesString
-        itemTypeLabel.visible = docModel.itemSelected
+        itemTypeLabel.string = model.selectedItemTypesString
+        itemTypeLabel.visible = model.itemSelected
 
-        nameLabel.visible = docModel.itemSelected
+        nameLabel.visible = model.itemSelected
 
-        nameField.string = docModel.selectedItemNames
-        nameField.placeholder = docModel.selectedItemNamesPlaceholder
-        nameField.visible = docModel.itemSelected
+        nameField.string = model.selectedItemNames
+        nameField.placeholder = model.selectedItemNamesPlaceholder
+        nameField.visible = model.itemSelected
 
-        noSelectionLabel.visible = docModel.itemNotSelected
+        noSelectionLabel.visible = model.itemNotSelected
 
         updateTextSection()
-        textObjectPropsObserverRemoval = docModel.textObjectProperties.addChangeObserver({ [weak self] _ in self?.updateTextSection() })
+        textObjectPropsObserverRemoval = model.textObjectProperties.addChangeObserver({ [weak self] _ in self?.updateTextSection() })
     }
     
     private func removeTextSection() {
@@ -91,7 +91,7 @@ class PropertiesView {
     
     private func updateTextSection() {
         removeTextSection()
-        if let model = docModel.textObjectProperties.value {
+        if let model = model.textObjectProperties.value {
             addTextSection(model)
         }
     }

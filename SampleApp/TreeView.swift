@@ -26,8 +26,8 @@ struct TreeViewModel<D: TreeData> {
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
 class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
     
-    private let outlineView: NSOutlineView
     private let model: TreeViewModel<D>
+    private let outlineView: NSOutlineView
     
     private var treeBindingRemoval: ObserverRemoval?
     private var selectionBindingRemoval: ObserverRemoval?
@@ -39,9 +39,9 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     /// Whether to automatically expand a parent when a child is inserted.
     var autoExpand = false
     
-    init(outlineView: NSOutlineView, model: TreeViewModel<D>) {
-        self.outlineView = outlineView
+    init(model: TreeViewModel<D>, outlineView: NSOutlineView) {
         self.model = model
+        self.outlineView = outlineView
         
         super.init()
         
