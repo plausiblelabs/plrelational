@@ -17,7 +17,7 @@ public class ValueBinding<T>: Binding {
     private var changeObservers: [UInt64: ChangeObserver] = [:]
     private var changeObserverNextID: UInt64 = 0
     
-    init(initialValue: T) {
+    public init(initialValue: T) {
         self.value = initialValue
     }
     

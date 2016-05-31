@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import Binding
 
 // TODO: This needs to be configurable, or at least made unique so that only internal drag-and-drop
 // is allowed by default

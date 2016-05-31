@@ -8,9 +8,9 @@
 
 import XCTest
 import libRelational
-@testable import SampleApp
+@testable import Binding
 
-class RelationTreeBindingTests: AppTestCase {
+class RelationTreeBindingTests: BindingTestCase {
 
     func testInit() {
         let sqliteDB = makeDB().db

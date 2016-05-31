@@ -8,9 +8,9 @@
 
 import XCTest
 import libRelational
-@testable import SampleApp
+@testable import Binding
 
-class RelationValueBindingTests: AppTestCase {
+class RelationValueBindingTests: BindingTestCase {
     
     func testAllValues() {
         let empty = MakeRelation(
