@@ -37,6 +37,22 @@ func AssertEqual<M1: Model, M2: Model, Seq: SequenceType where Seq.Generator.Ele
     })
 }
 
+func AssertEqual(a: AnyGenerator<Result<Row, RelationError>>, _ b: Relation?, file: StaticString = #file, line: UInt = #line) {
+    let result = mapOk(a, { $0 })
+    guard let rows = result.ok else {
+        XCTFail("Got error iterating rows: \(result.err)", file: file, line: line)
+        return
+    }
+    
+    if let first = rows.first {
+        let scheme = Scheme(attributes: Set(first.values.keys))
+        let relation = ConcreteRelation(scheme: scheme, values: Set(rows))
+        AssertEqual(relation, b, file: file, line: line)
+    } else {
+        AssertEqual(nil, b, file: file, line: line)
+    }
+}
+
 class DBTestCase: XCTestCase {
     var dbPaths: [String] = []
     

@@ -16,6 +16,10 @@ struct ObjectSet<T: AnyObject>: SequenceType {
         set.insert(ObjectSetWrapper(object: obj))
     }
     
+    mutating func remove(obj: T) {
+        set.remove(ObjectSetWrapper(object: obj))
+    }
+    
     func contains(obj: T) -> Bool {
         return set.contains(ObjectSetWrapper(object: obj))
     }
@@ -25,15 +29,15 @@ struct ObjectSet<T: AnyObject>: SequenceType {
     }
 }
 
-private struct ObjectSetWrapper<T: AnyObject>: Hashable {
+struct ObjectSetWrapper<T: AnyObject>: Hashable {
     var object: T
     
-    private var hashValue: Int {
+    var hashValue: Int {
         return ObjectIdentifier(object).hashValue
     }
 }
 
-private func ==<T: AnyObject>(a: ObjectSetWrapper<T>, b: ObjectSetWrapper<T>) -> Bool {
+func ==<T: AnyObject>(a: ObjectSetWrapper<T>, b: ObjectSetWrapper<T>) -> Bool {
     return a.object === b.object
 }
 
