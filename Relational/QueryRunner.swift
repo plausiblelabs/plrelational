@@ -111,6 +111,8 @@ class QueryRunner {
             processDifference(node, state, inputIndex)
         case .Project(let scheme):
             processProject(node, state, inputIndex, scheme)
+        case .Select(let expression):
+            processSelect(node, state, inputIndex, expression)
         default:
             fatalError("Don't know how to process operation \(node.op)")
         }
@@ -153,6 +155,12 @@ class QueryRunner {
             return Row(values: Dictionary(subvalues))
         }))
         writeOutput(state.uniq(projected), fromNode: node)
+    }
+    
+    func processSelect(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int, _ expression: SelectExpression) {
+        let rows = state.inputBuffers[inputIndex].popAll()
+        let filtered = Set(rows.filter({ expression.valueWithRow($0).boolValue }))
+        writeOutput(filtered, fromNode: node)
     }
 }
 
