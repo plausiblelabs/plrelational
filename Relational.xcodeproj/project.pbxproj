@@ -46,6 +46,9 @@
 		3727080D1CFE2EA200710C80 /* BackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611301CD7F7D7001DAF59 /* BackgroundView.swift */; };
 		3727080E1CFE2FB600710C80 /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
 		3727080F1CFE300200710C80 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
+		372708101CFE3A4E00710C80 /* ExtOutlineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611371CD7FB9C001DAF59 /* ExtOutlineView.swift */; };
+		372708111CFE3AB900710C80 /* TreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611501CE10770001DAF59 /* TreeView.swift */; };
+		372708121CFE3D4F00710C80 /* ContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611521CE3A942001DAF59 /* ContextMenu.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
 		376136991CF65F0A00F572C5 /* TextObjectPropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */; };
@@ -1141,9 +1144,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				372708111CFE3AB900710C80 /* TreeView.swift in Sources */,
 				3727080D1CFE2EA200710C80 /* BackgroundView.swift in Sources */,
 				372708051CFE2CA400710C80 /* PopUpButton.swift in Sources */,
+				372708101CFE3A4E00710C80 /* ExtOutlineView.swift in Sources */,
 				3727080E1CFE2FB600710C80 /* UndoableDatabase.swift in Sources */,
+				372708121CFE3D4F00710C80 /* ContextMenu.swift in Sources */,
 				372708061CFE2CA400710C80 /* StepperView.swift in Sources */,
 				372707EB1CFE2C7E00710C80 /* AppDelegate.swift in Sources */,
 				3727080F1CFE300200710C80 /* UndoManager.swift in Sources */,
@@ -1654,6 +1660,7 @@
 				372707B01CFE238700710C80 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		372707D31CFE25B000710C80 /* Build configuration list for PBXNativeTarget "BindingTests" */ = {
 			isa = XCConfigurationList;
@@ -1662,6 +1669,7 @@
 				372707D51CFE25B000710C80 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		372707FD1CFE2C7E00710C80 /* Build configuration list for PBXNativeTarget "BindableControlsApp" */ = {
 			isa = XCConfigurationList;
@@ -1670,6 +1678,7 @@
 				372707FF1CFE2C7E00710C80 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		372708001CFE2C7E00710C80 /* Build configuration list for PBXNativeTarget "BindableControlsAppUITests" */ = {
 			isa = XCConfigurationList;
@@ -1678,6 +1687,7 @@
 				372708021CFE2C7E00710C80 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37C611281CD7EFAE001DAF59 /* Build configuration list for PBXNativeTarget "SampleApp" */ = {
 			isa = XCConfigurationList;

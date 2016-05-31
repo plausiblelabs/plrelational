@@ -15,8 +15,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBOutlet weak var window: NSWindow!
     @IBOutlet var rootView: BackgroundView!
+    @IBOutlet var outlineView: ExtOutlineView!
     @IBOutlet var textField: TextField!
     var checkbox: Checkbox!
+
+    var treeView: TreeView<Row>!
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
 
@@ -39,10 +42,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             precondition(createResult.ok != nil)
             return db[name]
         }
-        var objects = createRelation("object", ["id", "name", "editable"])
-        let firstObject = objects.select(Attribute("id") *== 1)
-        let firstObjectName = firstObject.project(["name"])
-        let firstObjectEditable = firstObject.project(["editable"])
+        var objects = createRelation("object", ["id", "name", "editable", "parent", "order"])
+        var selectedObjectID = createRelation("selected_object", ["id"])
+        let selectedObjects = selectedObjectID.join(objects)
+        let selectedObjectsName = selectedObjects.project(["name"])
+        let selectedObjectsEditable = selectedObjects.project(["editable"])
         
         // Prepare the undo manager
         let nsmanager = SPUndoManager()
@@ -50,27 +54,75 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let undoManager = UndoManager(nsmanager: nsmanager)
         let undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
 
-        // Add a test object
-        objects.add(["id": 1, "name": "Fred", "editable": 0])
+        // Add some test objects
+        var id: Int64 = 1
+        var order: Double = 1.0
+        func addObject(name: String, editable: Bool) {
+            let row: Row = [
+                "id": RelationValue(id),
+                "name": RelationValue(name),
+                "editable": RelationValue(Int64(editable ? 1 : 0)),
+                "parent": .NULL,
+                "order": RelationValue(order)
+            ]
+            objects.add(row)
+            id += 1
+            order += 1.0
+        }
+        addObject("Fred", editable: false)
+        addObject("Wilma", editable: true)
+
+        func nameBinding(relation: Relation) -> BidiValueBinding<String> {
+            return undoableDB.bidiBinding(
+                relation,
+                action: "Rename Object",
+                get: { $0.oneString },
+                set: { relation.updateString($0) }
+            )
+        }
+        
+        func selectionBinding(relation: MutableRelation) -> BidiValueBinding<Set<RelationValue>> {
+            return undoableDB.bidiBinding(
+                relation,
+                action: "Change Selection",
+                get: { $0.allValues },
+                set: { relation.replaceValues(Array($0)) }
+            )
+        }
+        
+        // Set up the tree view
+        let objectsTreeBinding = RelationTreeBinding(relation: objects, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        let treeViewModel = TreeViewModel(
+            data: objectsTreeBinding,
+            allowsChildren: { _ in
+                return false
+            },
+            contextMenu: nil,
+            move: nil,
+            selection: selectionBinding(selectedObjectID),
+            cellText: { row in
+                let rowID = row["id"]
+                let nameRelation = objects.select(Attribute("id") *== rowID).project(["name"])
+                return nameBinding(nameRelation)
+            }
+        )
+        treeView = TreeView(model: treeViewModel, outlineView: outlineView)
+        treeView.animateChanges = true
 
         // Add some other controls (could also do this in the xib)
-        checkbox = Checkbox(frame: NSMakeRect(30, 100, 120, 24))
-        checkbox.title = "Checkbox"
+        checkbox = Checkbox(frame: NSMakeRect(200, 80, 120, 24))
+        checkbox.title = "Editable"
         rootView.addSubview(checkbox)
 
         // Wire up the controls and bindings
-        textField.string = undoableDB.bidiBinding(
-            firstObjectName,
-            action: "Rename Object",
-            get: { $0.oneString },
-            set: { firstObjectName.updateString($0) }
-        )
+        textField.string = nameBinding(selectedObjectsName)
+        textField.placeholder = selectedObjectsName.stringWhenMulti("Multiple Values")
 
         checkbox.checked = undoableDB.bidiBinding(
-            firstObjectEditable,
+            selectedObjectsEditable,
             action: "Change Editable",
             get: { Checkbox.CheckState($0.oneBool) },
-            set: { firstObjectEditable.updateBoolean($0.boolValue) }
+            set: { selectedObjectsEditable.updateBoolean($0.boolValue) }
         )
     }
 }
