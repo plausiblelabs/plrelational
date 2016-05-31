@@ -27,7 +27,7 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
         precondition(queryToSQL(query) != nil, "Query terms must be SQL compatible!")
     }
     
-    public func rows() -> AnyGenerator<Result<Row, RelationError>> {
+    public func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {
         let data = LogRelationIterationBegin(self)
         var queryGenerator: AnyGenerator<Result<Row, RelationError>>? = nil
         return LogRelationIterationReturn(data, AnyGenerator(body: {

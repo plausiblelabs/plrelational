@@ -69,7 +69,7 @@ class QueryRunner {
     private func getInitiatorRow(initiator: QueryPlanner.Node) -> Result<Row, RelationError>? {
         switch initiator.op {
         case .TableScan(let relation):
-            let generator = initiatorGenerators.getOrCreate(initiator, defaultValue: relation.rows())
+            let generator = initiatorGenerators.getOrCreate(initiator, defaultValue: relation.rawGenerateRows())
             let row = generator.next()
             return row
         default:
