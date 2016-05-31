@@ -118,4 +118,21 @@ class QueryRunnerTests: XCTestCase {
             ["A", "B", "C"],
             ["X", "1", "T"]))
     }
+    
+    func testRename() {
+        let r = MakeRelation(
+            ["A", "B"],
+            ["1", "2"],
+            ["1", "3"],
+            ["2", "4"])
+        let renamed = r.renameAttributes(["A": "ayy"])
+        let planner = QueryPlanner(root: renamed)
+        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        AssertEqual(runner.rows(), MakeRelation(
+            ["ayy", "B"],
+            ["1", "2"],
+            ["1", "3"],
+            ["2", "4"]))
+    }
+    
 }
