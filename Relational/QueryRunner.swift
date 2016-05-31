@@ -141,7 +141,7 @@ class QueryRunner {
     func processDifference(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int) {
         // We compute buffer[0] - buffer[1]. buffer[1] must be complete before we can compute anything.
         // Once it is complete, we can stream buffer[0] through.
-        guard inputIndex == 0 && state.inputBuffers[1].eof else { return }
+        guard state.inputBuffers[1].eof else { return }
         
         let rows = state.inputBuffers[0].popAll()
         let subtracted = rows.subtract(state.inputBuffers[1].rows)
