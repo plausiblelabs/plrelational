@@ -113,6 +113,8 @@ class QueryRunner {
             processProject(node, state, inputIndex, scheme)
         case .Select(let expression):
             processSelect(node, state, inputIndex, expression)
+        case .Equijoin(let matching):
+            processEquijoin(node, state, inputIndex, matching)
         default:
             fatalError("Don't know how to process operation \(node.op)")
         }
@@ -162,6 +164,60 @@ class QueryRunner {
         let filtered = Set(rows.filter({ expression.valueWithRow($0).boolValue }))
         writeOutput(filtered, fromNode: node)
     }
+    
+    func processEquijoin(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int, _ matching: [Attribute: Attribute]) {
+        // Accumulate data until at least one input is complete.
+        guard state.activeBuffers <= 1 else { return }
+        
+        // Track the keyed join target and the larger input index across calls.
+        struct ExtraState {
+            var keyed: [Row: [Row]]
+            var largerIndex: Int
+            var largerAttributes: [Attribute]
+            var largerToSmallerRenaming: [Attribute: Attribute]
+        }
+        
+        let extraState = state.getExtraState({ Void -> ExtraState in
+            // Figure out which input is smaller. If only one is complete, assume that one is smaller.
+            let smallerInput: Int
+            if state.inputBuffers[0].eof {
+                if state.inputBuffers[1].eof {
+                    smallerInput = state.inputBuffers[0].rows.count < state.inputBuffers[1].rows.count ? 0 : 1
+                } else {
+                    smallerInput = 0
+                }
+            } else {
+                smallerInput = 1
+            }
+            
+            let smallerAttributes = smallerInput == 0 ? matching.keys : matching.values
+            let largerAttributes = smallerInput == 0 ? matching.values : matching.keys
+            let largerToSmallerRenaming = smallerInput == 0 ? matching.reversed : matching
+            
+            var keyed: [Row: [Row]] = [:]
+            for row in state.inputBuffers[smallerInput].popAll() {
+                let joinKey = row.rowWithAttributes(smallerAttributes)
+                if keyed[joinKey] != nil {
+                    keyed[joinKey]!.append(row)
+                } else {
+                    keyed[joinKey] = [row]
+                }
+            }
+            
+            return ExtraState(
+                keyed: keyed,
+                largerIndex: 1 - smallerInput,
+                largerAttributes: Array(largerAttributes),
+                largerToSmallerRenaming: largerToSmallerRenaming)
+        })
+        
+        let joined = state.inputBuffers[extraState.largerIndex].popAll().flatMap({ row -> [Row] in
+            let joinKey = row.rowWithAttributes(extraState.largerAttributes).renameAttributes(extraState.largerToSmallerRenaming)
+            guard let smallerRows = extraState.keyed[joinKey] else { return [] }
+            return smallerRows.map({ Row(values: $0.values + row.values) })
+        })
+        writeOutput(Set(joined), fromNode: node)
+    }
 }
 
 extension QueryRunner {
@@ -172,6 +228,8 @@ extension QueryRunner {
         var inputBuffers: [Buffer] = []
         
         var activeBuffers: Int
+        
+        var extraState: Any?
         
         init(node: QueryPlanner.Node) {
             self.node = node
@@ -191,6 +249,16 @@ extension QueryRunner {
             let unique = rows.subtract(outputForUniquing)
             outputForUniquing.unionInPlace(unique)
             return unique
+        }
+        
+        func getExtraState<T>(calculate: Void -> T) -> T {
+            if let state = extraState {
+                return state as! T
+            } else {
+                let state = calculate()
+                extraState = state
+                return state
+            }
         }
     }
 }
