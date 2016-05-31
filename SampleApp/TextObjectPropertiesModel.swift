@@ -63,7 +63,7 @@ class TextObjectPropertiesModel {
     }()
     
     lazy var font: BidiValueBinding<String?> = { [unowned self] in
-        return self.db.bidiOptBinding(
+        return self.db.bidiBinding(
             self.fontRelation,
             action: "Change Font",
             get: { $0.oneString },
