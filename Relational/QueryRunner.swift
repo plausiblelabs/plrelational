@@ -7,6 +7,8 @@ class QueryRunner {
     
     var initiatorGenerators: ObjectDictionary<QueryPlanner.Node, AnyGenerator<Result<Row, RelationError>>> = [:]
     
+    var nodeStates: ObjectDictionary<QueryPlanner.Node, NodeState> = [:]
+    
     var collectedOutput: Set<Row> = []
     
     var done = false
@@ -78,7 +80,24 @@ class QueryRunner {
         if fromNode === root {
             collectedOutput.unionInPlace(rows)
         } else {
-            fatalError("Implement me")
+            for (parent, index) in fromNode.parents {
+                let state = nodeStates.getOrCreate(parent, defaultValue: NodeState(node: parent))
+                state.inputBuffers[index].add(rows)
+                process(parent, inputIndex: index)
+            }
+        }
+    }
+    
+    private func process(node: QueryPlanner.Node, inputIndex: Int) {
+        let state = nodeStates[node]!
+        switch node.op {
+        case .Union:
+            let rows = state.inputBuffers[inputIndex].popAll()
+            let unique = rows.subtract(state.outputForUniquing)
+            state.outputForUniquing.unionInPlace(unique)
+            writeOutput(unique, fromNode: node)
+        default:
+            fatalError("Don't know how to process operation \(node.op)")
         }
     }
 }
@@ -87,10 +106,14 @@ extension QueryRunner {
     class NodeState {
         let node: QueryPlanner.Node
         
+        var outputForUniquing: Set<Row> = []
         var inputBuffers: [Buffer] = []
         
         init(node: QueryPlanner.Node) {
             self.node = node
+            while inputBuffers.count < node.childCount {
+                inputBuffers.append(Buffer())
+            }
         }
     }
 }
@@ -101,6 +124,12 @@ extension QueryRunner {
         
         func pop() -> Row? {
             return rows.popFirst()
+        }
+        
+        func popAll() -> Set<Row> {
+            let ret = rows
+            rows = []
+            return ret
         }
         
         func add<S: SequenceType where S.Generator.Element == Row>(seq: S) {

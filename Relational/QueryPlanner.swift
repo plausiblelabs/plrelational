@@ -1,7 +1,7 @@
 
 class QueryPlanner {
     let root: Relation
-    var relationNodeMap: [ObjectIdentifier: Node] = [:]
+    var relationNodeMap: ObjectDictionary<AnyObject, Node> = [:]
     
     init(root: Relation) {
         self.root = root
@@ -14,21 +14,28 @@ class QueryPlanner {
     
     private func relationTreeToNodeTree(r: Relation) -> ObjectSet<Node> {
         var nodes: ObjectSet<Node> = []
-        visitRelationTree(r, {
-            let node = getOrCreateNode($0)
-            nodes.insert(node)
-            for (index, childRelation) in relationChildren($0).enumerate() {
-                let childNode = getOrCreateNode(childRelation)
-                childNode.parents.append((node, index))
-                nodes.insert(childNode)
+        visitRelationTree(r, { relation, isRoot in
+            let children = relationChildren(relation)
+            // Skip this whole thing for relations with no children. They'll have nodes created for them by their parents.
+            // Except if the root node has no children, we still need to hit that one if anything is to happen at all.
+            if children.count > 0 || isRoot {
+                let node = getOrCreateNode(relation)
+                nodes.insert(node)
+                for (index, childRelation) in children.enumerate() {
+                    let childNode = getOrCreateNode(childRelation)
+                    childNode.parents.append((node, index))
+                    nodes.insert(childNode)
+                }
+                node.childCount = children.count
             }
         })
         return nodes
     }
     
-    private func visitRelationTree(root: Relation, @noescape _ f: Relation -> Void) {
+    private func visitRelationTree(root: Relation, @noescape _ f: (Relation, isRoot: Bool) -> Void) {
         var visited: Set<ObjectIdentifier> = []
         var toVisit: [Relation] = [root]
+        var isRoot = true
         while let r = toVisit.popLast() {
             if let obj = r as? AnyObject {
                 let id = ObjectIdentifier(obj)
@@ -38,23 +45,18 @@ class QueryPlanner {
                     visited.insert(id)
                 }
             }
-            f(r)
+            f(r, isRoot: isRoot)
+            isRoot = false
             toVisit.appendContentsOf(relationChildren(r))
         }
     }
     
     private func getOrCreateNode(r: Relation) -> Node {
         if let obj = r as? AnyObject {
-            let id = ObjectIdentifier(obj)
-            if let node = relationNodeMap[id] {
-                return node
-            } else {
-                let node = relationToNode(r)
-                relationNodeMap[id] = node
-                return node
-            }
+            return relationNodeMap.getOrCreate(obj, defaultValue: relationToNode(r))
+        } else {
+            return relationToNode(r)
         }
-        return relationToNode(r)
     }
     
     private func relationToNode(r: Relation) -> Node {
@@ -102,6 +104,7 @@ class QueryPlanner {
 extension QueryPlanner {
     class Node {
         let op: Operation
+        var childCount = 0
         var parents: [(node: Node, childIndex: Int)]
         
         init(op: Operation, parents: [(node: Node, childIndex: Int)] = []) {

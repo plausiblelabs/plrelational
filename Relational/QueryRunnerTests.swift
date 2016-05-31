@@ -18,4 +18,20 @@ class QueryRunnerTests: XCTestCase {
         let runner = QueryRunner(nodeTree: planner.makeNodeTree())
         AssertEqual(runner.rows(), r)
     }
+    
+    func testUnion() {
+        let r = MakeRelation(
+            ["A"],
+            ["one"])
+        let s = MakeRelation(
+            ["A"],
+            ["two"])
+        let union = r.union(s)
+        let planner = QueryPlanner(root: union)
+        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        AssertEqual(runner.rows(), MakeRelation(
+            ["A"],
+            ["one"],
+            ["two"]))
+    }
 }
