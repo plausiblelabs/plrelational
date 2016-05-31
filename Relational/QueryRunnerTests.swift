@@ -34,4 +34,21 @@ class QueryRunnerTests: XCTestCase {
             ["one"],
             ["two"]))
     }
+    
+    func testIntersection() {
+        let r = MakeRelation(
+            ["A"],
+            ["one"],
+            ["three"])
+        let s = MakeRelation(
+            ["A"],
+            ["two"],
+            ["three"])
+        let intersection = r.intersection(s)
+        let planner = QueryPlanner(root: intersection)
+        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        AssertEqual(runner.rows(), MakeRelation(
+            ["A"],
+            ["three"]))
+    }
 }

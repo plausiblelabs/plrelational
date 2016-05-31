@@ -52,17 +52,18 @@ class QueryRunner {
         let row = getInitiatorRow(node)
         
         switch row {
-        case .None:
-            activeInitiators.remove(node)
-            return []
         case .Some(.Err(let err)):
             return [.Err(err)]
         case .Some(.Ok(let row)):
             writeOutput([row], fromNode: node)
-            let output = collectedOutput
-            collectedOutput = []
-            return output.map({ .Ok($0) })
+        case .None:
+            activeInitiators.remove(node)
+            markDone(node)
         }
+        
+        let output = collectedOutput
+        collectedOutput = []
+        return output.map({ .Ok($0) })
     }
     
     private func getInitiatorRow(initiator: QueryPlanner.Node) -> Result<Row, RelationError>? {
@@ -88,17 +89,49 @@ class QueryRunner {
         }
     }
     
+    private func markDone(node: QueryPlanner.Node) {
+        for (parent, index) in node.parents {
+            let state = nodeStates.getOrCreate(parent, defaultValue: NodeState(node: parent))
+            state.setInputBufferEOF(index)
+            process(parent, inputIndex: index)
+            if state.activeBuffers == 0 {
+                markDone(parent)
+            }
+        }
+    }
+    
     private func process(node: QueryPlanner.Node, inputIndex: Int) {
         let state = nodeStates[node]!
         switch node.op {
         case .Union:
-            let rows = state.inputBuffers[inputIndex].popAll()
-            let unique = rows.subtract(state.outputForUniquing)
-            state.outputForUniquing.unionInPlace(unique)
-            writeOutput(unique, fromNode: node)
+            processUnion(node, state, inputIndex)
+        case .Intersection:
+            processIntersection(node, state, inputIndex)
         default:
             fatalError("Don't know how to process operation \(node.op)")
         }
+    }
+    
+    func processUnion(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int) {
+        let rows = state.inputBuffers[inputIndex].popAll()
+        let unique = rows.subtract(state.outputForUniquing)
+        state.outputForUniquing.unionInPlace(unique)
+        writeOutput(unique, fromNode: node)
+    }
+    
+    func processIntersection(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int) {
+        // Wait until all buffers are complete before we process anything. We could optimize this a bit
+        // by streaming data if all *but one* buffer is complete. Maybe later.
+        if state.activeBuffers > 0 {
+            return
+        }
+        
+        var accumulated = state.inputBuffers.first?.popAll() ?? []
+        for buffer in state.inputBuffers.dropFirst() {
+            let bufferRows = buffer.popAll()
+            accumulated.intersectInPlace(bufferRows)
+        }
+        writeOutput(accumulated, fromNode: node)
     }
 }
 
@@ -109,11 +142,20 @@ extension QueryRunner {
         var outputForUniquing: Set<Row> = []
         var inputBuffers: [Buffer] = []
         
+        var activeBuffers: Int
+        
         init(node: QueryPlanner.Node) {
             self.node = node
             while inputBuffers.count < node.childCount {
                 inputBuffers.append(Buffer())
             }
+            activeBuffers = inputBuffers.count
+        }
+        
+        func setInputBufferEOF(index: Int) {
+            precondition(inputBuffers[index].eof == false)
+            inputBuffers[index].eof = true
+            activeBuffers -= 1
         }
     }
 }
@@ -121,6 +163,7 @@ extension QueryRunner {
 extension QueryRunner {
     class Buffer {
         var rows: Set<Row> = []
+        var eof = false
         
         func pop() -> Row? {
             return rows.popFirst()
