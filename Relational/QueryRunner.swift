@@ -107,6 +107,8 @@ class QueryRunner {
             processUnion(node, state, inputIndex)
         case .Intersection:
             processIntersection(node, state, inputIndex)
+        case .Difference:
+            processDifference(node, state, inputIndex)
         default:
             fatalError("Don't know how to process operation \(node.op)")
         }
@@ -132,6 +134,16 @@ class QueryRunner {
             accumulated.intersectInPlace(bufferRows)
         }
         writeOutput(accumulated, fromNode: node)
+    }
+    
+    func processDifference(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int) {
+        // We compute buffer[0] - buffer[1]. buffer[1] must be complete before we can compute anything.
+        // Once it is complete, we can stream buffer[0] through.
+        guard inputIndex == 0 && state.inputBuffers[1].eof else { return }
+        
+        let rows = state.inputBuffers[0].popAll()
+        let subtracted = rows.subtract(state.inputBuffers[1].rows)
+        writeOutput(subtracted, fromNode: node)
     }
 }
 

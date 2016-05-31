@@ -51,4 +51,21 @@ class QueryRunnerTests: XCTestCase {
             ["A"],
             ["three"]))
     }
+    
+    func testDifference() {
+        let r = MakeRelation(
+            ["A"],
+            ["one"],
+            ["three"])
+        let s = MakeRelation(
+            ["A"],
+            ["two"],
+            ["three"])
+        let difference = r.difference(s)
+        let planner = QueryPlanner(root: difference)
+        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        AssertEqual(runner.rows(), MakeRelation(
+            ["A"],
+            ["one"]))
+    }
 }
