@@ -135,4 +135,18 @@ class QueryRunnerTests: XCTestCase {
             ["2", "4"]))
     }
     
+    func testUpdate() {
+        let r = MakeRelation(
+            ["A", "B"],
+            ["1", "2"],
+            ["1", "3"],
+            ["2", "4"])
+        let updated = r.withUpdate(["B": "5"])
+        let planner = QueryPlanner(root: updated)
+        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        AssertEqual(runner.rows(), MakeRelation(
+            ["A", "B"],
+            ["1", "5"],
+            ["2", "5"]))
+    }
 }

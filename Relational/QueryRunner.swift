@@ -117,6 +117,8 @@ class QueryRunner {
             processEquijoin(node, state, inputIndex, matching)
         case .Rename(let renames):
             processRename(node, state, inputIndex, renames)
+        case .Update(let newValues):
+            processUpdate(node, state, inputIndex, newValues)
         default:
             fatalError("Don't know how to process operation \(node.op)")
         }
@@ -225,6 +227,12 @@ class QueryRunner {
         let rows = state.inputBuffers[inputIndex].popAll()
         let renamed = rows.map({ $0.renameAttributes(renames) })
         writeOutput(Set(renamed), fromNode: node)
+    }
+    
+    func processUpdate(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int, _ newValues: Row) {
+        let rows = state.inputBuffers[inputIndex].popAll()
+        let updated = rows.map({ Row(values: $0.values + newValues.values) })
+        writeOutput(state.uniq(Set(updated)), fromNode: node)
     }
 }
 
