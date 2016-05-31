@@ -119,6 +119,8 @@ class QueryRunner {
             processRename(node, state, inputIndex, renames)
         case .Update(let newValues):
             processUpdate(node, state, inputIndex, newValues)
+        case .Aggregate(let attribute, let initialValue, let agg):
+            processAggregate(node, state, inputIndex, attribute, initialValue, agg)
         default:
             fatalError("Don't know how to process operation \(node.op)")
         }
@@ -234,6 +236,27 @@ class QueryRunner {
         let updated = rows.map({ Row(values: $0.values + newValues.values) })
         writeOutput(state.uniq(Set(updated)), fromNode: node)
     }
+    
+    func processAggregate(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int, _ attribute: Attribute, _ initialValue: RelationValue?, _ agg: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) {
+        var soFar = state.getExtraState({ initialValue })
+        for row in state.inputBuffers[inputIndex].popAll() {
+            let newValue = row[attribute]
+            let aggregated = agg(soFar, newValue)
+            switch aggregated {
+            case .Ok(let value):
+                soFar = value
+            case .Err(let err):
+                fatalError("Don't know how to handle errors here yet. \(err)")
+            }
+        }
+        state.setExtraState(soFar)
+        
+        if state.activeBuffers == 0 {
+            if let soFar = soFar {
+                writeOutput([Row(values: [attribute: soFar])], fromNode: node)
+            }
+        }
+    }
 }
 
 extension QueryRunner {
@@ -275,6 +298,10 @@ extension QueryRunner {
                 extraState = state
                 return state
             }
+        }
+        
+        func setExtraState<T>(value: T) {
+            extraState = value
         }
     }
 }
