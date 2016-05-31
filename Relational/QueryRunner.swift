@@ -109,6 +109,8 @@ class QueryRunner {
             processIntersection(node, state, inputIndex)
         case .Difference:
             processDifference(node, state, inputIndex)
+        case .Project(let scheme):
+            processProject(node, state, inputIndex, scheme)
         default:
             fatalError("Don't know how to process operation \(node.op)")
         }
@@ -116,9 +118,7 @@ class QueryRunner {
     
     func processUnion(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int) {
         let rows = state.inputBuffers[inputIndex].popAll()
-        let unique = rows.subtract(state.outputForUniquing)
-        state.outputForUniquing.unionInPlace(unique)
-        writeOutput(unique, fromNode: node)
+        writeOutput(state.uniq(rows), fromNode: node)
     }
     
     func processIntersection(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int) {
@@ -145,6 +145,15 @@ class QueryRunner {
         let subtracted = rows.subtract(state.inputBuffers[1].rows)
         writeOutput(subtracted, fromNode: node)
     }
+    
+    func processProject(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int, _ scheme: Scheme) {
+        let rows = state.inputBuffers[inputIndex].popAll()
+        let projected = Set(rows.map({ row -> Row in
+            let subvalues = scheme.attributes.map({ ($0, row[$0]) })
+            return Row(values: Dictionary(subvalues))
+        }))
+        writeOutput(state.uniq(projected), fromNode: node)
+    }
 }
 
 extension QueryRunner {
@@ -168,6 +177,12 @@ extension QueryRunner {
             precondition(inputBuffers[index].eof == false)
             inputBuffers[index].eof = true
             activeBuffers -= 1
+        }
+        
+        func uniq(rows: Set<Row>) -> Set<Row> {
+            let unique = rows.subtract(outputForUniquing)
+            outputForUniquing.unionInPlace(unique)
+            return unique
         }
     }
 }
