@@ -11,7 +11,7 @@ import libRelational
 import Binding
 
 @NSApplicationMain
-class AppDelegate: NSObject, NSApplicationDelegate {
+class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @IBOutlet weak var window: NSWindow!
     @IBOutlet var rootView: BackgroundView!
@@ -19,9 +19,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBOutlet var textField: TextField!
     var checkbox: Checkbox!
 
+    var nsUndoManager: SPUndoManager!
     var treeView: TreeView<Row>!
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
+        window.delegate = self
 
         func makeDB() -> (path: String, db: SQLiteDatabase) {
             let tmp = NSTemporaryDirectory() as NSString
@@ -49,9 +51,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let selectedObjectsEditable = selectedObjects.project(["editable"])
         
         // Prepare the undo manager
-        let nsmanager = SPUndoManager()
-        //self.undoManager = nsmanager
-        let undoManager = UndoManager(nsmanager: nsmanager)
+        nsUndoManager = SPUndoManager()
+        let undoManager = UndoManager(nsmanager: nsUndoManager)
         let undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
 
         // Add some test objects
@@ -124,5 +125,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             get: { Checkbox.CheckState($0.oneBool) },
             set: { selectedObjectsEditable.updateBoolean($0.boolValue) }
         )
+    }
+    
+    func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {
+        return nsUndoManager
     }
 }
