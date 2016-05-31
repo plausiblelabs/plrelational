@@ -27,7 +27,8 @@ class Checkbox: NSButton {
             }
         }
         
-        func get() -> Int {
+        // Int value is used to set NSButton.state
+        func getInt() -> Int {
             switch self {
             case .On:
                 return NSOnState
@@ -52,18 +53,16 @@ class Checkbox: NSButton {
 
     private var checkStateBindingRemoval: ObserverRemoval?
     
-    var checked: ValueBinding<CheckState>? {
+    var checked: BidiValueBinding<CheckState>? {
         didSet {
             checkStateBindingRemoval?()
             checkStateBindingRemoval = nil
             if let checked = checked {
-                checkStateBindingRemoval = checked.addChangeObserver({ [weak self] in
-                    guard let weakSelf = self else { return }
-                    weakSelf.state = checked.value.get()
-                })
+                self.state = checked.value.getInt()
+                checkStateBindingRemoval = checked.addChangeObserver({ [weak self] in self?.state = checked.value.getInt() })
             } else {
+                // TODO: should this be mixed or off?
                 state = NSMixedState
-                Swift.print("hit the else clause")
             }
         }
     }
@@ -72,12 +71,15 @@ class Checkbox: NSButton {
         super.init(frame: frameRect)
         
         self.setButtonType(.SwitchButton)
-//        self.allowsMixedState = true
+        
+        target = self
+        action = #selector(checkboxToggled(_:))
         
         // TODO: handle mixed state. if self.allowsMixedState is set to 'true', the button toggles through a three-state
         //       cycle on user interaction.
+        //        self.allowsMixedState = true
         
-//        self.state = self.checked!.value.get()
+        self.state = self.checked?.value.getInt() ?? NSOffState
     }
     
     // ???
@@ -85,13 +87,17 @@ class Checkbox: NSButton {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // XXX
-    override func mouseDown(theEvent: NSEvent) {
-//        switch self.state {
-//        case NSOnState:
-//            self.checked?.setValue(.Off)
-//        default:
-//            self.checked?.setValue(.On)
-//        }
+    @objc func checkboxToggled(sender: Checkbox) {
+        Swift.print(checked?.value.getInt())
+        switch self.checked?.value {
+        case .Some(.On):
+            self.checked!.commit(.Off)
+        case .Some(.Off):
+            self.checked!.commit(.On)
+        case .Some(.Mixed):
+            self.checked!.commit(.On)
+        default:
+            self.checked!.commit(.Mixed)
+        }
     }
 }
