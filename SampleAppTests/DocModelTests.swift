@@ -8,6 +8,7 @@
 
 import XCTest
 import libRelational
+import Binding
 @testable import SampleApp
 
 class DocModelTests: AppTestCase {
@@ -53,11 +54,12 @@ class DocModelTests: AppTestCase {
         let model = defaultModel()
         
         func verifyBindings(expected: BindingVals, file: StaticString = #file, line: UInt = #line) {
-            XCTAssertEqual(model.itemSelected.value, expected.itemSelected, file: file, line: line)
-            XCTAssertEqual(model.itemNotSelected.value, !expected.itemSelected, file: file, line: line)
-            XCTAssertEqual(model.selectedItemTypesString.value, expected.selectedItemType, file: file, line: line)
-            XCTAssertEqual(model.selectedItemNames.value, expected.selectedItemName, file: file, line: line)
-            XCTAssertEqual(model.textObjectProperties.value != nil, expected.selectedItemsOnlyText, file: file, line: line)
+            let propsModel = model.propertiesModel
+            XCTAssertEqual(propsModel.itemSelected.value, expected.itemSelected, file: file, line: line)
+            XCTAssertEqual(propsModel.itemNotSelected.value, !expected.itemSelected, file: file, line: line)
+            XCTAssertEqual(propsModel.selectedItemTypesString.value, expected.selectedItemType, file: file, line: line)
+            XCTAssertEqual(propsModel.selectedItemNames.value, expected.selectedItemName, file: file, line: line)
+            XCTAssertEqual(propsModel.textObjectProperties.value != nil, expected.selectedItemsOnlyText, file: file, line: line)
         }
         
         func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath<Row> {
@@ -182,8 +184,9 @@ class DocModelTests: AppTestCase {
         let model = defaultModel()
 
         // Observe the selected item names binding
+        let propsModel = model.propertiesModel
         var changeCount = 0
-        _ = model.selectedItemNames.addChangeObserver({ _ in changeCount += 1 })
+        _ = propsModel.selectedItemNames.addChangeObserver({ _ in changeCount += 1 })
 
         // Toggle back and forth between two pages
         let page1: Set<RelationValue> = [3]
@@ -199,12 +202,13 @@ class DocModelTests: AppTestCase {
         let model = defaultModel()
         
         // Observe a number of related bindings
+        let propsModel = model.propertiesModel
         var changeCount = 0
-        _ = model.itemSelected.addChangeObserver({ _ in changeCount += 1 })
-        _ = model.itemNotSelected.addChangeObserver({ _ in changeCount += 1 })
-        _ = model.selectedItemTypesString.addChangeObserver({ _ in changeCount += 1 })
-        _ = model.selectedItemNames.addChangeObserver({ _ in changeCount += 1 })
-        _ = model.selectedItemNamesPlaceholder.addChangeObserver({ _ in changeCount += 1 })
+        _ = propsModel.itemSelected.addChangeObserver({ _ in changeCount += 1 })
+        _ = propsModel.itemNotSelected.addChangeObserver({ _ in changeCount += 1 })
+        _ = propsModel.selectedItemTypesString.addChangeObserver({ _ in changeCount += 1 })
+        _ = propsModel.selectedItemNames.addChangeObserver({ _ in changeCount += 1 })
+        _ = propsModel.selectedItemNamesPlaceholder.addChangeObserver({ _ in changeCount += 1 })
         
         // Toggle back and forth between two pages
         let page1: Set<RelationValue> = [3]
@@ -239,8 +243,9 @@ class DocModelTests: AppTestCase {
         model.docOutlineTreeViewModel.selection.commit([3])
         
         // Observe the text object properties binding
+        let propsModel = model.propertiesModel
         var changeCount = 0
-        _ = model.textObjectProperties.addChangeObserver({ _ in changeCount += 1 })
+        _ = propsModel.textObjectProperties.addChangeObserver({ _ in changeCount += 1 })
 
         // Toggle back and forth between two objects (of differing type)
         let obj1: Set<RelationValue> = [9]

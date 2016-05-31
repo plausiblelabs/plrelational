@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import Binding
 
 class Checkbox: NSButton {
     
@@ -86,11 +87,11 @@ class Checkbox: NSButton {
     
     // XXX
     override func mouseDown(theEvent: NSEvent) {
-        switch self.state {
-        case NSOnState:
-            self.checked?.setValue(.Off)
-        default:
-            self.checked?.setValue(.On)
-        }
+//        switch self.state {
+//        case NSOnState:
+//            self.checked?.setValue(.Off)
+//        default:
+//            self.checked?.setValue(.On)
+//        }
     }
 }

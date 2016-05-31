@@ -13,11 +13,11 @@ public protocol TreeData {
 }
 
 public class TreeNode<D: TreeData> {
-    let id: D.ID
-    var data: D
-    var children: [TreeNode<D>]
+    public let id: D.ID
+    public var data: D
+    public var children: [TreeNode<D>]
     
-    init(id: D.ID, data: D, children: [TreeNode<D>] = []) {
+    public init(id: D.ID, data: D, children: [TreeNode<D>] = []) {
         self.id = id
         self.data = data
         self.children = children
@@ -29,8 +29,13 @@ public class TreeNode<D: TreeData> {
 }
 
 public struct TreePath<D: TreeData> {
-    let parent: TreeNode<D>?
-    let index: Int
+    public let parent: TreeNode<D>?
+    public let index: Int
+    
+    public init(parent: TreeNode<D>?, index: Int) {
+        self.parent = parent
+        self.index = index
+    }
 }
 
 extension TreePath: Equatable {}
@@ -39,9 +44,15 @@ public func ==<D: TreeData>(a: TreePath<D>, b: TreePath<D>) -> Bool {
 }
 
 public struct TreePos<D: TreeData> {
-    let parentID: D.ID?
-    let previousID: D.ID?
-    let nextID: D.ID?
+    public let parentID: D.ID?
+    public let previousID: D.ID?
+    public let nextID: D.ID?
+    
+    public init(parentID: D.ID?, previousID: D.ID?, nextID: D.ID?) {
+        self.parentID = parentID
+        self.previousID = previousID
+        self.nextID = nextID
+    }
 }
 
 public enum TreeChange<D: TreeData> { case

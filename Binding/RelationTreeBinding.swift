@@ -40,7 +40,7 @@ public class RelationTreeBinding: TreeBinding<Row> {
     
     private var removal: ObserverRemoval!
     
-    init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
+    public init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
         
         // Map Rows from underlying Relation to Node values.
         var nodeDict = [RelationValue: Node]()

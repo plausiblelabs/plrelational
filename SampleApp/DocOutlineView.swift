@@ -15,8 +15,8 @@ class DocOutlineView {
     
     private let treeView: TreeView<Row>
     
-    init(outlineView: NSOutlineView, docModel: DocModel) {
-        self.treeView = TreeView(outlineView: outlineView, model: docModel.docOutlineTreeViewModel)
+    init(model: TreeViewModel<Row>, outlineView: NSOutlineView) {
+        self.treeView = TreeView(model: model, outlineView: outlineView)
         self.treeView.animateChanges = true
     }
 }

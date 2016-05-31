@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import Binding
 
 class PopUpButton: NSPopUpButton {
 
@@ -82,7 +83,7 @@ class PopUpButton: NSPopUpButton {
         action = #selector(selectionChanged(_:))
         
         // Create the default menu item, which is shown when there is no selection
-        defaultMenuItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        defaultMenuItem = NSMenuItem(title: "TODO", action: nil, keyEquivalent: "")
         defaultMenuItem.enabled = false
         defaultMenuItem.hidden = true
     }

@@ -73,9 +73,9 @@ class Document: NSDocument {
         docModel.addDefaultData()
         
         // Create the "views"
-        docOutlineView = DocOutlineView(outlineView: documentOutlineView, docModel: docModel)
-        inspectorView = InspectorView(outlineView: inspectorOutlineView, docModel: docModel)
-        propertiesView = PropertiesView(itemTypeLabel: itemTypeLabel, nameLabel: nameLabel, nameField: nameTextField, noSelectionLabel: noSelectionLabel, docModel: docModel)
+        docOutlineView = DocOutlineView(model: docModel.docOutlineTreeViewModel, outlineView: documentOutlineView)
+        inspectorView = InspectorView(model: docModel.inspectorTreeViewModel, outlineView: inspectorOutlineView)
+        propertiesView = PropertiesView(model: docModel.propertiesModel, itemTypeLabel: itemTypeLabel, nameLabel: nameLabel, nameField: nameTextField, noSelectionLabel: noSelectionLabel)
     }
     
     @IBAction func newPageAction(sender: NSMenuItem) {

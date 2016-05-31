@@ -1,18 +1,17 @@
 //
-//  AppTestCase.swift
+//  BindingTestCase.swift
 //  Relational
 //
-//  Created by Chris Campbell on 5/18/16.
+//  Created by Chris Campbell on 5/31/16.
 //  Copyright © 2016 mikeash. All rights reserved.
 //
 
 import XCTest
 import libRelational
-import Binding
-@testable import SampleApp
+@testable import Binding
 
-class AppTestCase: XCTestCase {
-
+class BindingTestCase: XCTestCase {
+    
     var dbPaths: [String] = []
     
     override func tearDown() {
@@ -33,7 +32,7 @@ class AppTestCase: XCTestCase {
         
         return (path, db)
     }
-
+    
     func prettyArray(binding: ArrayBinding<Row>) -> [String] {
         var accum: [String] = []
         for element in binding.elements {
@@ -41,11 +40,11 @@ class AppTestCase: XCTestCase {
         }
         return accum
     }
-
+    
     func verifyArray(binding: ArrayBinding<Row>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
         XCTAssertEqual(prettyArray(binding), expected, file: file, line: line)
     }
-
+    
     func pretty(node: TreeNode<Row>, inout _ accum: [String], _ indent: Int) {
         let pad = Array(count: indent, repeatedValue: "  ").joinWithSeparator("")
         accum.append("\(pad)\(node.data["name"])")
@@ -61,7 +60,7 @@ class AppTestCase: XCTestCase {
         }
         return accum
     }
-
+    
     func verifyTree(binding: TreeBinding<Row>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
         XCTAssertEqual(prettyRoot(binding), expected, file: file, line: line)
     }

@@ -8,12 +8,16 @@
 
 import Foundation
 import libRelational
+import Binding
 
 class TextObjectPropertiesModel {
     
     let db: UndoableDatabase
     let selectedTextObjects: Relation
     
+    /// - Parameters:
+    ///     - db: The database.
+    ///     - selectedTextObjects: Relation with scheme [id, editable, hint, font].
     init(db: UndoableDatabase, selectedTextObjects: Relation) {
         self.db = db
         self.selectedTextObjects = selectedTextObjects
@@ -60,7 +64,7 @@ class TextObjectPropertiesModel {
     }()
     
     lazy var font: BidiValueBinding<String?> = { [unowned self] in
-        return self.db.bidiOptBinding(
+        return self.db.bidiBinding(
             self.fontRelation,
             action: "Change Font",
             get: { $0.oneString },

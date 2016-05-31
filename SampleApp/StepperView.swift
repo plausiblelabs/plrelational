@@ -4,6 +4,7 @@
 //
 
 import Cocoa
+import Binding
 
 class StepperView: NSControl, NSTextFieldDelegate {
     

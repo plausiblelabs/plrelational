@@ -8,6 +8,7 @@
 
 import Foundation
 import libRelational
+import Binding
 
 class UndoableDatabase {
     
@@ -42,8 +43,8 @@ class UndoableDatabase {
     }
     
     /// Note: `set` will be called in the context of a database transaction.
-    func bidiOptBinding<T: Equatable>(relation: Relation, action: String, get: Relation -> T?, set: T? -> Void) -> BidiValueBinding<T?> {
-        return relation.bindOptBidi(bidiConfig(action, set), relationToValue: get)
+    func bidiBinding<T: Equatable>(relation: Relation, action: String, get: Relation -> T?, set: T? -> Void) -> BidiValueBinding<T?> {
+        return relation.bindBidi(bidiConfig(action, set), relationToValue: get)
     }
     
     private func bidiConfig<T>(action: String, _ set: T -> Void) -> RelationBidiConfig<T> {
