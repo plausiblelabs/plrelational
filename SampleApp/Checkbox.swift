@@ -51,20 +51,23 @@ class Checkbox: NSButton {
 
     private var checkStateBindingRemoval: ObserverRemoval?
     
-    var checked: ValueBinding<CheckState> {
+    var checked: ValueBinding<CheckState>? {
         didSet {
             checkStateBindingRemoval?()
             checkStateBindingRemoval = nil
-            checkStateBindingRemoval = checked.addChangeObserver({ [weak self] in
-                guard let weakSelf = self else { return }
-                weakSelf.state = self!.checked.value.get()
-            })
+            if let checked = checked {
+                checkStateBindingRemoval = checked.addChangeObserver({ [weak self] in
+                    guard let weakSelf = self else { return }
+                    weakSelf.state = checked.value.get()
+                })
+            } else {
+                state = NSMixedState
+                Swift.print("hit the else clause")
+            }
         }
     }
     
-    init(frame frameRect: NSRect, checkState: Bool?) {
-        self.checked = ValueBinding<CheckState>(initialValue: CheckState(checkState))
-        
+    override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         
         self.setButtonType(.SwitchButton)
@@ -73,11 +76,21 @@ class Checkbox: NSButton {
         // TODO: handle mixed state. if self.allowsMixedState is set to 'true', the button toggles through a three-state
         //       cycle on user interaction.
         
-        self.state = self.checked.value.get()
+//        self.state = self.checked!.value.get()
     }
     
     // ???
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    // XXX
+    override func mouseDown(theEvent: NSEvent) {
+        switch self.state {
+        case NSOnState:
+            self.checked?.setValue(.Off)
+        default:
+            self.checked?.setValue(.On)
+        }
     }
 }

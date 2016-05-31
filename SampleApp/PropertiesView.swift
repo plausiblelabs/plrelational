@@ -64,8 +64,9 @@ class PropertiesView {
         let bgView = BackgroundView(frame: NSMakeRect(10, 100, 220, 120))
         bgView.backgroundColor = NSColor.blueColor()
         
-        let editableCheckbox = Checkbox(frame: NSMakeRect(10, 10, 120, 24), checkState: false)
+        let editableCheckbox = Checkbox(frame: NSMakeRect(10, 10, 120, 24))
         editableCheckbox.checked = model.editable
+        editableCheckbox.title = "\(self.nameField.stringValue) is editable"
         bgView.addSubview(editableCheckbox)
         
         let hintField = TextField()
