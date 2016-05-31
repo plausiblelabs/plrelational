@@ -28,7 +28,7 @@ class Checkbox: NSButton {
         }
         
         // Int value is used to set NSButton.state
-        func getInt() -> Int {
+        var nsValue: Int {
             switch self {
             case .On:
                 return NSOnState
@@ -58,11 +58,10 @@ class Checkbox: NSButton {
             checkStateBindingRemoval?()
             checkStateBindingRemoval = nil
             if let checked = checked {
-                self.state = checked.value.getInt()
-                checkStateBindingRemoval = checked.addChangeObserver({ [weak self] in self?.state = checked.value.getInt() })
+                self.state = checked.value.nsValue
+                checkStateBindingRemoval = checked.addChangeObserver({ [weak self] in self?.state = checked.value.nsValue })
             } else {
-                // TODO: should this be mixed or off?
-                state = NSMixedState
+                state = NSOffState
             }
         }
     }
@@ -78,8 +77,6 @@ class Checkbox: NSButton {
         // TODO: handle mixed state. if self.allowsMixedState is set to 'true', the button toggles through a three-state
         //       cycle on user interaction.
         //        self.allowsMixedState = true
-        
-        self.state = self.checked?.value.getInt() ?? NSOffState
     }
     
     // ???
@@ -88,7 +85,6 @@ class Checkbox: NSButton {
     }
     
     @objc func checkboxToggled(sender: Checkbox) {
-        Swift.print(checked?.value.getInt())
         switch self.checked?.value {
         case .Some(.On):
             self.checked!.commit(.Off)
@@ -97,7 +93,7 @@ class Checkbox: NSButton {
         case .Some(.Mixed):
             self.checked!.commit(.On)
         default:
-            self.checked!.commit(.Mixed)
+            self.setNextState()
         }
     }
 }
