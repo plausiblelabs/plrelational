@@ -52,6 +52,10 @@ extension Relation {
         for (name, value) in Mirror(reflecting: self).childrenIncludingSupertypes {
             if let name = name, let subrelation = value as? Relation {
                 result.append((name, subrelation))
+            } else if let name = name, let subrelations = value as? [Relation] {
+                for (index, subrelation) in subrelations.enumerate() {
+                    result.append(("\(name)[\(index)]", subrelation))
+                }
             }
         }
         return result
