@@ -2,34 +2,30 @@
 class QueryPlanner {
     let root: Relation
     var relationNodeMap: ObjectDictionary<AnyObject, Node> = [:]
+    lazy var nodeTree: ObjectSet<Node> = self.relationTreeToNodeTree(self.root)
     
     init(root: Relation) {
         self.root = root
     }
     
-    func makeNodeTree() -> ObjectSet<Node> {
-        relationNodeMap = [:]
-        return relationTreeToNodeTree(root)
-    }
-    
     private func relationTreeToNodeTree(r: Relation) -> ObjectSet<Node> {
-        var nodes: ObjectSet<Node> = []
+        var localNodes: ObjectSet<Node> = []
         visitRelationTree(r, { relation, isRoot in
             let children = relationChildren(relation)
             // Skip this whole thing for relations with no children. They'll have nodes created for them by their parents.
             // Except if the root node has no children, we still need to hit that one if anything is to happen at all.
             if children.count > 0 || isRoot {
                 let node = getOrCreateNode(relation)
-                nodes.insert(node)
+                localNodes.insert(node)
                 for (index, childRelation) in children.enumerate() {
                     let childNode = getOrCreateNode(childRelation)
                     childNode.parents.append((node, index))
-                    nodes.insert(childNode)
+                    localNodes.insert(childNode)
                 }
                 node.childCount = children.count
             }
         })
-        return nodes
+        return localNodes
     }
     
     private func visitRelationTree(root: Relation, @noescape _ f: (Relation, isRoot: Bool) -> Void) {

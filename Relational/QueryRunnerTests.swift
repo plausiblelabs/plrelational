@@ -15,7 +15,7 @@ class QueryRunnerTests: XCTestCase {
             ["A"],
             ["one"])
         let planner = QueryPlanner(root: r)
-        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        let runner = QueryRunner(nodeTree: planner.nodeTree)
         AssertEqual(runner.rows(), r)
     }
     
@@ -28,7 +28,7 @@ class QueryRunnerTests: XCTestCase {
             ["two"])
         let union = r.union(s)
         let planner = QueryPlanner(root: union)
-        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        let runner = QueryRunner(nodeTree: planner.nodeTree)
         AssertEqual(runner.rows(), MakeRelation(
             ["A"],
             ["one"],
@@ -46,7 +46,7 @@ class QueryRunnerTests: XCTestCase {
             ["three"])
         let intersection = r.intersection(s)
         let planner = QueryPlanner(root: intersection)
-        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        let runner = QueryRunner(nodeTree: planner.nodeTree)
         AssertEqual(runner.rows(), MakeRelation(
             ["A"],
             ["three"]))
@@ -63,7 +63,7 @@ class QueryRunnerTests: XCTestCase {
             ["three"])
         let difference = r.difference(s)
         let planner = QueryPlanner(root: difference)
-        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        let runner = QueryRunner(nodeTree: planner.nodeTree)
         AssertEqual(runner.rows(), MakeRelation(
             ["A"],
             ["one"]))
@@ -77,7 +77,7 @@ class QueryRunnerTests: XCTestCase {
             ["2", "4"])
         let projected = r.project(["A"])
         let planner = QueryPlanner(root: projected)
-        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        let runner = QueryRunner(nodeTree: planner.nodeTree)
         AssertEqual(runner.rows(), MakeRelation(
             ["A"],
             ["1"],
@@ -92,7 +92,7 @@ class QueryRunnerTests: XCTestCase {
             ["2", "4"])
         let selected = r.select(Attribute("A") *== "1")
         let planner = QueryPlanner(root: selected)
-        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        let runner = QueryRunner(nodeTree: planner.nodeTree)
         AssertEqual(runner.rows(), MakeRelation(
             ["A", "B"],
             ["1", "2"],
@@ -113,7 +113,7 @@ class QueryRunnerTests: XCTestCase {
         
         let joined = a.join(b)
         let planner = QueryPlanner(root: joined)
-        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        let runner = QueryRunner(nodeTree: planner.nodeTree)
         AssertEqual(runner.rows(), MakeRelation(
             ["A", "B", "C"],
             ["X", "1", "T"]))
@@ -127,7 +127,7 @@ class QueryRunnerTests: XCTestCase {
             ["2", "4"])
         let renamed = r.renameAttributes(["A": "ayy"])
         let planner = QueryPlanner(root: renamed)
-        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        let runner = QueryRunner(nodeTree: planner.nodeTree)
         AssertEqual(runner.rows(), MakeRelation(
             ["ayy", "B"],
             ["1", "2"],
@@ -143,7 +143,7 @@ class QueryRunnerTests: XCTestCase {
             ["2", "4"])
         let updated = r.withUpdate(["B": "5"])
         let planner = QueryPlanner(root: updated)
-        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        let runner = QueryRunner(nodeTree: planner.nodeTree)
         AssertEqual(runner.rows(), MakeRelation(
             ["A", "B"],
             ["1", "5"],
@@ -158,7 +158,7 @@ class QueryRunnerTests: XCTestCase {
             ["2", "4"])
         let updated = r.count()
         let planner = QueryPlanner(root: updated)
-        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        let runner = QueryRunner(nodeTree: planner.nodeTree)
         AssertEqual(runner.rows(), MakeRelation(
             ["count"],
             [3]))
