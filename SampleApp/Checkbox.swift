@@ -57,43 +57,52 @@ class Checkbox: NSButton {
         didSet {
             checkStateBindingRemoval?()
             checkStateBindingRemoval = nil
+            
+            func setState(checkbox: Checkbox, state: CheckState) {
+                // Only allow mixed state if we are starting in a mixed state; otherwise we
+                // use simple two-state mode
+                checkbox.allowsMixedState = state == .Mixed
+                checkbox.state = state.nsValue
+            }
+            
             if let checked = checked {
-                self.allowsMixedState = true
-                self.state = checked.value.nsValue
+                setState(self, state: checked.value)
                 checkStateBindingRemoval = checked.addChangeObserver({ [weak self] in
                     guard let weakSelf = self else { return }
-                    weakSelf.allowsMixedState = true
-                    weakSelf.state = checked.value.nsValue
+                    setState(weakSelf, state: checked.value)
                 })
             } else {
-                state = NSOffState
+                setState(self, state: .Off)
             }
         }
     }
     
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
-        self.setButtonType(.SwitchButton)
+        setButtonType(.SwitchButton)
+        target = self
+        action = #selector(checkboxToggled(_:))
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func mouseDown(theEvent: NSEvent) {
-        self.allowsMixedState = false
+    @objc func checkboxToggled(sender: Checkbox) {
+        guard let checked = checked else { return }
         
-        switch self.checked?.value {
-        case .Some(.On):
-            self.checked!.commit(.Off)
-        case .Some(.Off):
-            self.checked!.commit(.On)
-        case .Some(.Mixed):
-            self.allowsMixedState = true
-            self.checked!.commit(.On)
-        default:
-            break
+        // Note that by the time this function is called, `state` already reflects the new value.
+        // Cocoa always wants to cycle through the states (including mixed), but we only want the user
+        // to be able to choose on/off; we shouldn't ever see a mixed state here (Cocoa goes from
+        // Mixed to On), but just in case, treat it as On and disable allowsMixedState.
+        let mixed = state == NSMixedState
+        allowsMixedState = false
+        let newState: CheckState
+        if mixed {
+            newState = .On
+        } else {
+            newState = state == NSOnState ? .On : .Off
         }
-        performClick(self)
+        checked.commit(newState)
     }
 }
