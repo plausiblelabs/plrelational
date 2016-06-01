@@ -49,6 +49,14 @@ class Checkbox: NSButton {
                 preconditionFailure("Cannot represent mixed state as a boolean")
             }
         }
+        
+        var description: String {
+            switch self {
+                case .On: return "On"
+                case .Off: return "Off"
+                case .Mixed: return "Mixed"
+            }
+        }
     }
 
     private var checkStateBindingRemoval: ObserverRemoval?
@@ -63,6 +71,9 @@ class Checkbox: NSButton {
                 // use simple two-state mode
                 checkbox.allowsMixedState = state == .Mixed
                 checkbox.state = state.nsValue
+                
+                // For UI testing
+                self.setAccessibilityValue(state.description)
             }
             
             if let checked = checked {
@@ -104,5 +115,8 @@ class Checkbox: NSButton {
             newState = state == NSOnState ? .On : .Off
         }
         checked.commit(newState)
+        
+        // For UI testing
+        self.setAccessibilityValue(newState.description)
     }
 }
