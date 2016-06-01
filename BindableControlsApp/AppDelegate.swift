@@ -128,6 +128,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         rootView.addSubview(checkbox)
 
         popupButton = PopUpButton(frame: NSMakeRect(200, 120, 120, 24), pullsDown: false)
+        popupButton.setAccessibilityIdentifier("Color")
         rootView.addSubview(popupButton)
 
         stepper = StepperView(frame: NSMakeRect(200, 160, 120, 24), min: 0, max: 999, defaultValue: 0)
