@@ -217,7 +217,7 @@ extension IntermediateRelation {
 }
 
 extension IntermediateRelation {
-    func rows() -> AnyGenerator<Result<Row, RelationError>> {
+    func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {
         let data = LogRelationIterationBegin(self)
         let generator: AnyGenerator<Result<Row, RelationError>>
         switch op {

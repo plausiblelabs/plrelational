@@ -114,9 +114,9 @@ extension TransactionalDatabase {
             return underlyingRelation.scheme
         }
         
-        public func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        public func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {
             let data = LogRelationIterationBegin(self)
-            return LogRelationIterationReturn(data, (transactionRelation ?? underlyingRelation).rows())
+            return LogRelationIterationReturn(data, (transactionRelation ?? underlyingRelation).rawGenerateRows())
         }
         
         public func contains(row: Row) -> Result<Bool, RelationError> {

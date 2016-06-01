@@ -24,7 +24,7 @@ extension Relation {
             print("\(self.dynamicType)")
         }
         if showContents {
-            print("\(self.description)")
+            print("\(self.descriptionWithRows(self.rows()))")
         }
         
         for (name, value) in getFieldsForDump() {
@@ -39,7 +39,7 @@ extension Relation {
     private func getFieldsForDump() -> [(String, Any)] {
         var result: [(String, Any)] = []
         for (name, value) in Mirror(reflecting: self).childrenIncludingSupertypes {
-            if let name = name where !(value is Relation) && !FieldNameExclusions.strings.contains(name) {
+            if let name = name where !(value is Relation) && !(value is [Relation]) && !FieldNameExclusions.strings.contains(name) {
                 result.append((name, value))
             }
         }
