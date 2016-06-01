@@ -27,10 +27,40 @@ class BindableControlsAppUITests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
+
+//    func testTextField() {
+//        // TODO
+//    }
+//
+//    func testCheckbox() {
+//        // TODO
+//    }
     
-    func testExample() {
-        // Use recording to get started writing UI tests.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func testPopUpButton() {
+        let window = XCUIApplication().windows["BindableControlsApp"]
+        
+        // Select "Fred" in outline view
+        window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(0).textFields["PageName"].click()
+        
+        // TODO: Verify that popup button is initially set to "Default"
+        
+        // Click on popup button and select "Green"
+        window.popUpButtons["Default"].click()
+        window.menuItems["Green"].click()
+        
+        // TODO: Verify that popup button is set to "Green"
+        
+        // Select "Wilma" in outline view
+        window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(1).textFields["PageName"].click()
+        
+        // TODO: Verify that popup button is set to "Blue"
+        
+        // TODO: Select both "Fred" and "Wilma" in outline view
+        
+        // TODO: Verify that popup button is set to "Multiple"
     }
     
+//    func testStepper() {
+//        // TODO
+//    }
 }
