@@ -11,10 +11,10 @@ import Binding
 
 class Checkbox: NSButton {
     
-    enum CheckState {
-        case On
-        case Off
-        case Mixed
+    enum CheckState: String { case
+        On = "On",
+        Off = "Off",
+        Mixed = "Mixed"
         
         init(_ boolValue: Bool?) {
             switch boolValue {
@@ -24,6 +24,19 @@ class Checkbox: NSButton {
                 self = .Off
             case .Some(true):
                 self = .On
+            }
+        }
+        
+        init(_ nsValue: Int) {
+            switch nsValue {
+            case NSMixedState:
+                self = .Mixed
+            case NSOffState:
+                self = .Off
+            case NSOnState:
+                self = .On
+            default:
+                preconditionFailure("Must be one of {NSMixedState, NSOnState, NSOffState}")
             }
         }
         
@@ -49,14 +62,6 @@ class Checkbox: NSButton {
                 preconditionFailure("Cannot represent mixed state as a boolean")
             }
         }
-        
-        var description: String {
-            switch self {
-                case .On: return "On"
-                case .Off: return "Off"
-                case .Mixed: return "Mixed"
-            }
-        }
     }
 
     private var checkStateBindingRemoval: ObserverRemoval?
@@ -71,9 +76,6 @@ class Checkbox: NSButton {
                 // use simple two-state mode
                 checkbox.allowsMixedState = state == .Mixed
                 checkbox.state = state.nsValue
-                
-                // For UI testing
-                self.setAccessibilityValue(state.description)
             }
             
             if let checked = checked {
@@ -115,8 +117,9 @@ class Checkbox: NSButton {
             newState = state == NSOnState ? .On : .Off
         }
         checked.commit(newState)
-        
-        // For UI testing
-        self.setAccessibilityValue(newState.description)
+    }
+    
+    override func accessibilityValue() -> AnyObject? {
+        return CheckState(state).rawValue
     }
 }
