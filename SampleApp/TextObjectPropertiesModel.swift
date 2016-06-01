@@ -39,7 +39,7 @@ class TextObjectPropertiesModel {
         return self.db.bidiBinding(
             self.editableRelation,
             action: "Change Editable",
-            get: { Checkbox.CheckState($0.oneBool) },
+            get: { Checkbox.CheckState($0.oneBoolOrNil) },
             set: { self.editableRelation.updateBoolean($0.boolValue) }
         )
     }()
@@ -67,7 +67,7 @@ class TextObjectPropertiesModel {
         return self.db.bidiBinding(
             self.fontRelation,
             action: "Change Font",
-            get: { $0.oneString },
+            get: { $0.oneStringOrNil },
             set: { self.fontRelation.updateNullableString($0) }
         )
     }()

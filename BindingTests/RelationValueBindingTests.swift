@@ -79,13 +79,25 @@ class RelationValueBindingTests: BindingTestCase {
         XCTAssertEqual(one.project(["name"]).oneString, "cat")
         XCTAssertEqual(multi.project(["name"]).oneString, "")
 
-        XCTAssertNil(empty.project(["friendly"]).oneBool)
+        XCTAssertNil(empty.project(["name"]).oneStringOrNil, "")
+        XCTAssertEqual(one.project(["name"]).oneStringOrNil, "cat")
+        XCTAssertNil(multi.project(["name"]).oneStringOrNil)
+
+        XCTAssertEqual(empty.project(["friendly"]).oneBool, false)
         XCTAssertEqual(one.project(["friendly"]).oneBool, true)
-        XCTAssertNil(multi.project(["friendly"]).oneBool)
+        XCTAssertEqual(multi.project(["friendly"]).oneBool, false)
+        
+        XCTAssertNil(empty.project(["friendly"]).oneBoolOrNil)
+        XCTAssertEqual(one.project(["friendly"]).oneBoolOrNil, true)
+        XCTAssertNil(multi.project(["friendly"]).oneBoolOrNil)
         
         XCTAssertEqual(empty.project(["age"]).oneInteger, 0)
         XCTAssertEqual(one.project(["age"]).oneInteger, 5)
         XCTAssertEqual(multi.project(["age"]).oneInteger, 0)
+        
+        XCTAssertNil(empty.project(["age"]).oneIntegerOrNil)
+        XCTAssertEqual(one.project(["age"]).oneIntegerOrNil, 5)
+        XCTAssertNil(multi.project(["age"]).oneIntegerOrNil)
     }
     
     func testBind() {

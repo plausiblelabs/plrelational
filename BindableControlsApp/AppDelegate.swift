@@ -19,6 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @IBOutlet var textField: TextField!
     var checkbox: Checkbox!
     var popupButton: PopUpButton!
+    var stepper: StepperView!
 
     var nsUndoManager: SPUndoManager!
     var treeView: TreeView<Row>!
@@ -45,12 +46,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             precondition(createResult.ok != nil)
             return db[name]
         }
-        var objects = createRelation("object", ["id", "name", "editable", "color", "parent", "order"])
+        var objects = createRelation("object", ["id", "name", "editable", "color", "rocks", "parent", "order"])
         var selectedObjectID = createRelation("selected_object", ["id"])
         let selectedObjects = selectedObjectID.join(objects)
         let selectedObjectsName = selectedObjects.project(["name"])
         let selectedObjectsEditable = selectedObjects.project(["editable"])
         let selectedObjectsColor = selectedObjects.project(["color"])
+        let selectedObjectsRocks = selectedObjects.project(["rocks"])
         
         // Prepare the undo manager
         nsUndoManager = SPUndoManager()
@@ -60,7 +62,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Add some test objects
         var id: Int64 = 1
         var order: Double = 1.0
-        func addObject(name: String, editable: Bool, color: String?) {
+        func addObject(name: String, editable: Bool, color: String?, rocks: Int64) {
             let colorValue: RelationValue
             if let color = color {
                 colorValue = RelationValue(color)
@@ -72,6 +74,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 "name": RelationValue(name),
                 "editable": RelationValue(Int64(editable ? 1 : 0)),
                 "color": colorValue,
+                "rocks": RelationValue(rocks),
                 "parent": .NULL,
                 "order": RelationValue(order)
             ]
@@ -79,8 +82,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             id += 1
             order += 1.0
         }
-        addObject("Fred", editable: false, color: nil)
-        addObject("Wilma", editable: true, color: "Blue")
+        addObject("Fred", editable: false, color: nil, rocks: 17)
+        addObject("Wilma", editable: true, color: "Blue", rocks: 42)
 
         func nameBinding(relation: Relation) -> BidiValueBinding<String> {
             return undoableDB.bidiBinding(
@@ -126,7 +129,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         popupButton = PopUpButton(frame: NSMakeRect(200, 120, 120, 24), pullsDown: false)
         rootView.addSubview(popupButton)
-        
+
+        stepper = StepperView(frame: NSMakeRect(200, 160, 120, 24), min: 0, max: 999, defaultValue: 0)
+        rootView.addSubview(stepper)
+
         // Wire up the controls and bindings
         textField.string = nameBinding(selectedObjectsName)
         textField.placeholder = selectedObjectsName.stringWhenMulti("Multiple Values")
@@ -134,7 +140,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         checkbox.checked = undoableDB.bidiBinding(
             selectedObjectsEditable,
             action: "Change Editable",
-            get: { Checkbox.CheckState($0.oneBool) },
+            get: { Checkbox.CheckState($0.oneBoolOrNil) },
             set: { selectedObjectsEditable.updateBoolean($0.boolValue) }
         )
         
@@ -143,9 +149,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         popupButton.selectedTitle = undoableDB.bidiBinding(
             selectedObjectsColor,
             action: "Change Color",
-            get: { $0.oneString },
+            get: { $0.oneStringOrNil },
             set: { selectedObjectsColor.updateNullableString($0) }
         )
+        
+        stepper.value = undoableDB.bidiBinding(
+            selectedObjectsRocks,
+            action: "Change Rocks",
+            get: { $0.oneIntegerOrNil.map{ Int($0) } },
+            set: { selectedObjectsRocks.updateInteger(Int64($0!)) }
+        )
+        stepper.placeholder = selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {
