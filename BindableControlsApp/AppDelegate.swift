@@ -18,6 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @IBOutlet var outlineView: ExtOutlineView!
     @IBOutlet var textField: TextField!
     var checkbox: Checkbox!
+    var popupButton: PopUpButton!
 
     var nsUndoManager: SPUndoManager!
     var treeView: TreeView<Row>!
@@ -44,11 +45,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             precondition(createResult.ok != nil)
             return db[name]
         }
-        var objects = createRelation("object", ["id", "name", "editable", "parent", "order"])
+        var objects = createRelation("object", ["id", "name", "editable", "color", "parent", "order"])
         var selectedObjectID = createRelation("selected_object", ["id"])
         let selectedObjects = selectedObjectID.join(objects)
         let selectedObjectsName = selectedObjects.project(["name"])
         let selectedObjectsEditable = selectedObjects.project(["editable"])
+        let selectedObjectsColor = selectedObjects.project(["color"])
         
         // Prepare the undo manager
         nsUndoManager = SPUndoManager()
@@ -58,11 +60,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Add some test objects
         var id: Int64 = 1
         var order: Double = 1.0
-        func addObject(name: String, editable: Bool) {
+        func addObject(name: String, editable: Bool, color: String?) {
+            let colorValue: RelationValue
+            if let color = color {
+                colorValue = RelationValue(color)
+            } else {
+                colorValue = .NULL
+            }
             let row: Row = [
                 "id": RelationValue(id),
                 "name": RelationValue(name),
                 "editable": RelationValue(Int64(editable ? 1 : 0)),
+                "color": colorValue,
                 "parent": .NULL,
                 "order": RelationValue(order)
             ]
@@ -70,8 +79,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             id += 1
             order += 1.0
         }
-        addObject("Fred", editable: false)
-        addObject("Wilma", editable: true)
+        addObject("Fred", editable: false, color: nil)
+        addObject("Wilma", editable: true, color: "Blue")
 
         func nameBinding(relation: Relation) -> BidiValueBinding<String> {
             return undoableDB.bidiBinding(
@@ -115,6 +124,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         checkbox.title = "Editable"
         rootView.addSubview(checkbox)
 
+        popupButton = PopUpButton(frame: NSMakeRect(200, 120, 120, 24), pullsDown: false)
+        rootView.addSubview(popupButton)
+        
         // Wire up the controls and bindings
         textField.string = nameBinding(selectedObjectsName)
         textField.placeholder = selectedObjectsName.stringWhenMulti("Multiple Values")
@@ -124,6 +136,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             action: "Change Editable",
             get: { Checkbox.CheckState($0.oneBool) },
             set: { selectedObjectsEditable.updateBoolean($0.boolValue) }
+        )
+        
+        popupButton.titles = ValueBinding.constant(["Red", "Orange", "Yellow", "Green", "Blue", "Violet"])
+        popupButton.placeholderTitle = selectedObjectsColor.stringWhenMulti("Multiple Values", otherwise: "Default")
+        popupButton.selectedTitle = undoableDB.bidiBinding(
+            selectedObjectsColor,
+            action: "Change Color",
+            get: { $0.oneString },
+            set: { selectedObjectsColor.updateNullableString($0) }
         )
     }
     
