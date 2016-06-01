@@ -17,7 +17,7 @@ class TextObjectPropertiesView: BackgroundView {
     init(frame: NSRect, model: TextObjectPropertiesModel) {
         super.init(frame: frame)
         
-        editableCheckbox = Checkbox(frame: NSMakeRect(10, 10, 120, 24), checkState: false)
+        editableCheckbox = Checkbox(frame: NSMakeRect(10, 10, 120, 24))
         editableCheckbox.checked = model.editable
         addSubview(editableCheckbox)
         

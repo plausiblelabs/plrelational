@@ -27,7 +27,8 @@ class Checkbox: NSButton {
             }
         }
         
-        func get() -> Int {
+        // Int value is used to set NSButton.state
+        var nsValue: Int {
             switch self {
             case .On:
                 return NSOnState
@@ -52,33 +53,56 @@ class Checkbox: NSButton {
 
     private var checkStateBindingRemoval: ObserverRemoval?
     
-    var checked: ValueBinding<CheckState> {
+    var checked: BidiValueBinding<CheckState>? {
         didSet {
             checkStateBindingRemoval?()
             checkStateBindingRemoval = nil
-            checkStateBindingRemoval = checked.addChangeObserver({ [weak self] in
-                guard let weakSelf = self else { return }
-                weakSelf.state = self!.checked.value.get()
-            })
+            
+            func setState(checkbox: Checkbox, state: CheckState) {
+                // Only allow mixed state if we are starting in a mixed state; otherwise we
+                // use simple two-state mode
+                checkbox.allowsMixedState = state == .Mixed
+                checkbox.state = state.nsValue
+            }
+            
+            if let checked = checked {
+                setState(self, state: checked.value)
+                checkStateBindingRemoval = checked.addChangeObserver({ [weak self] in
+                    guard let weakSelf = self else { return }
+                    setState(weakSelf, state: checked.value)
+                })
+            } else {
+                setState(self, state: .Off)
+            }
         }
     }
     
-    init(frame frameRect: NSRect, checkState: Bool?) {
-        self.checked = ValueBinding<CheckState>(initialValue: CheckState(checkState))
-        
+    override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
-        
-        self.setButtonType(.SwitchButton)
-//        self.allowsMixedState = true
-        
-        // TODO: handle mixed state. if self.allowsMixedState is set to 'true', the button toggles through a three-state
-        //       cycle on user interaction.
-        
-        self.state = self.checked.value.get()
+        setButtonType(.SwitchButton)
+        target = self
+        action = #selector(checkboxToggled(_:))
     }
-    
-    // ???
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    @objc func checkboxToggled(sender: Checkbox) {
+        guard let checked = checked else { return }
+        
+        // Note that by the time this function is called, `state` already reflects the new value.
+        // Cocoa always wants to cycle through the states (including mixed), but we only want the user
+        // to be able to choose on/off; we shouldn't ever see a mixed state here (Cocoa goes from
+        // Mixed to On), but just in case, treat it as On and disable allowsMixedState.
+        let mixed = state == NSMixedState
+        allowsMixedState = false
+        let newState: CheckState
+        if mixed {
+            newState = .On
+        } else {
+            newState = state == NSOnState ? .On : .Off
+        }
+        checked.commit(newState)
     }
 }

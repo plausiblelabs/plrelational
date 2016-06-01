@@ -69,7 +69,6 @@ class StepperView: NSControl, NSTextFieldDelegate {
         formatter.maximumFractionDigits = 0
         textField = NSTextField()
         textField.formatter = formatter
-        textField.translatesAutoresizingMaskIntoConstraints = false
         textField.target = self
         textField.action = #selector(controlChanged(_:))
         textField.delegate = self
@@ -78,13 +77,14 @@ class StepperView: NSControl, NSTextFieldDelegate {
         stepper = NSStepper()
         stepper.valueWraps = false
         stepper.cell!.controlSize = .SmallControlSize
-        stepper.translatesAutoresizingMaskIntoConstraints = false
         stepper.target = self
         stepper.action = #selector(controlChanged(_:))
         stepper.minValue = Double(min)
         stepper.maxValue = Double(max)
         stepper.integerValue = defaultValue
         addSubview(stepper)
+        
+        setFrameSize(frame.size)
     }
     
     required init?(coder: NSCoder) {
@@ -98,7 +98,8 @@ class StepperView: NSControl, NSTextFieldDelegate {
     override func setFrameSize(newSize: NSSize) {
         super.setFrameSize(newSize)
         
-        let stepperW = stepper.frame.width
+        // XXX: NSStepper's width is zero until some later time, so for now just hardcode a width
+        let stepperW: CGFloat = 12.0 // stepper.frame.width
         let stepperPad: CGFloat = 0.0
         
         var textFrame = textField.frame
@@ -111,6 +112,9 @@ class StepperView: NSControl, NSTextFieldDelegate {
         var stepperFrame = stepper.frame
         stepperFrame.origin.x = newSize.width - stepperW
         stepperFrame.origin.y = 0
+        stepperFrame.size.width = stepperW
+        // XXX
+        stepperFrame.size.height = newSize.height
         stepper.frame = stepperFrame
     }
     
@@ -118,10 +122,12 @@ class StepperView: NSControl, NSTextFieldDelegate {
         let newValue: Int
         if let textField = sender as? NSTextField {
             newValue = textField.integerValue
+            stepper.integerValue = newValue
         } else if let stepper = sender as? NSStepper {
             newValue = stepper.integerValue
+            textField.integerValue = newValue
         } else {
-            return
+            fatalError("Unexpected sender")
         }
         value?.commit(newValue)
     }

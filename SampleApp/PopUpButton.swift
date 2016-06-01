@@ -16,12 +16,11 @@ class PopUpButton: NSPopUpButton {
             titlesBindingRemoval?()
             titlesBindingRemoval = nil
             if let titles = titles {
-                func updateTitles(button: NSPopUpButton) {
-                    removeAllItems()
-                    addItemsWithTitles(titles.value)
-                    menu?.insertItem(defaultMenuItem, atIndex: 0)
-                    // TODO: If selectedTitle.value is set, select that item after setting up the new titles
-                    selectItem(defaultMenuItem)
+                func updateTitles(button: PopUpButton) {
+                    button.removeAllItems()
+                    button.addItemsWithTitles(titles.value)
+                    button.menu?.insertItem(button.defaultMenuItem, atIndex: 0)
+                    button.setSelectedTitle(button.selectedTitle?.value)
                 }
                 
                 updateTitles(self)
@@ -83,7 +82,7 @@ class PopUpButton: NSPopUpButton {
         action = #selector(selectionChanged(_:))
         
         // Create the default menu item, which is shown when there is no selection
-        defaultMenuItem = NSMenuItem(title: "TODO", action: nil, keyEquivalent: "")
+        defaultMenuItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
         defaultMenuItem.enabled = false
         defaultMenuItem.hidden = true
     }
@@ -101,11 +100,14 @@ class PopUpButton: NSPopUpButton {
     private func setSelectedTitle(title: String?) {
         selfInitiatedSelectionChange = true
         if let title = title {
-            // TODO: If the given value is not one of the known titles, we should select the default menu item explicitly
-            selectItemWithTitle(title)
+            let index = indexOfItemWithTitle(title)
+            if index >= 0 {
+                selectItemAtIndex(index)
+            } else {
+                selectItem(defaultMenuItem)
+            }
         } else {
-            // Select the hidden default menu item
-            selectItemAtIndex(0)
+            selectItem(defaultMenuItem)
         }
         selfInitiatedSelectionChange = false
     }

@@ -179,15 +179,33 @@ extension Relation {
         return oneValue{ $0.get() } ?? ""
     }
 
+    /// Resolves to a single string value if there is exactly one row in the relation, otherwise resolves
+    /// to nil.
+    public var oneStringOrNil: String? {
+        return oneValue{ $0.get() }
+    }
+
     /// Resolves to a single integer value if there is exactly one row in the relation, otherwise resolves
     /// to zero.
     public var oneInteger: Int64 {
         return oneValue{ $0.get() } ?? 0
     }
 
+    /// Resolves to a single integer value if there is exactly one row in the relation, otherwise resolves
+    /// to nil.
+    public var oneIntegerOrNil: Int64? {
+        return oneValue{ $0.get() }
+    }
+
+    /// Resolves to a single boolean value if there is exactly one row in the relation, otherwise resolves
+    /// to false.
+    public var oneBool: Bool {
+        return oneValue{ $0.boolValue } ?? false
+    }
+
     /// Resolves to a single boolean value if there is exactly one row in the relation, otherwise resolves
     /// to nil.
-    public var oneBool: Bool? {
+    public var oneBoolOrNil: Bool? {
         return oneValue{ $0.boolValue }
     }
 }
@@ -300,18 +318,11 @@ extension Relation {
         return WhenNonEmptyBinding(relation: self, relationToValue: relationToValue)
     }
     
-    /// Returns a read-only binding that resolves to the given string value if there are multiple string
+    /// Returns a read-only binding that resolves to the given string value if there are multiple
     /// values in the relation, otherwise resolves to the alternate string.
     public func stringWhenMulti(string: String, otherwise: String = "") -> ValueBinding<String> {
         // TODO: Reimplement in terms of other bindings
-        return bind{ relation -> String in
-            let values = self.allValues{ value -> String? in value.get() }
-            if values.count > 1 {
-                return string
-            } else {
-                return otherwise
-            }
-        }
+        return bind{ $0.allValues.count > 1 ? string : otherwise }
     }
 }
 
