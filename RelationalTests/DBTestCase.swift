@@ -20,6 +20,8 @@ func AssertEqual(a: Relation?, _ b: Relation?, file: StaticString = #file, line:
     case (.Ok(let aRows), .Ok(let bRows)):
         let aSet = Set(aRows)
         let bSet = Set(bRows)
+        XCTAssertEqual(aRows.count, aSet.count, "Row generator returned duplicate values, all provided rows should be unique", file: file, line: line)
+        XCTAssertEqual(bRows.count, bSet.count, "Row generator returned duplicate values, all provided rows should be unique")
         XCTAssertEqual(aSet, bSet, "Relations are not equal but should be. First relation:\n\(a)\n\nSecond relation:\n\(b)", file: file, line: line)
     default:
         XCTAssertNil(aRows.err)
@@ -46,7 +48,9 @@ func AssertEqual(a: AnyGenerator<Result<Row, RelationError>>, _ b: Relation?, fi
     
     if let first = rows.first {
         let scheme = Scheme(attributes: Set(first.values.keys))
-        let relation = ConcreteRelation(scheme: scheme, values: Set(rows))
+        let rowsSet = Set(rows)
+        XCTAssertEqual(rows.count, rowsSet.count, "Row generator returned duplicate values, all provided rows should be unique")
+        let relation = ConcreteRelation(scheme: scheme, values: rowsSet)
         AssertEqual(relation, b, file: file, line: line)
     } else {
         AssertEqual(nil, b, file: file, line: line)

@@ -27,7 +27,7 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
         precondition(queryToSQL(query) != nil, "Query terms must be SQL compatible!")
     }
     
-    public func rows() -> AnyGenerator<Result<Row, RelationError>> {
+    public func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {
         let data = LogRelationIterationBegin(self)
         var queryGenerator: AnyGenerator<Result<Row, RelationError>>? = nil
         return LogRelationIterationReturn(data, AnyGenerator(body: {
@@ -164,7 +164,7 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
             return rowid
         })
     }
-    
+
     public func delete(query: SelectExpression) -> Result<Void, RelationError> {
         if let (whereSQL, whereParameters) = queryToSQL(query) {
             let willDelete = ConcreteRelation.copyRelation(self.select(query))

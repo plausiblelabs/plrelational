@@ -5,7 +5,7 @@ public typealias RelationError = ErrorType
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     
-    func rows() -> AnyGenerator<Result<Row, RelationError>>
+    func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>>
     func contains(row: Row) -> Result<Bool, RelationError>
     
     func forEach(@noescape f: (Row, Void -> Void) -> Void) -> Result<Void, RelationError>
@@ -51,6 +51,14 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     func withUpdate(newValues: Row) -> Relation
     
     func renameAttributes(renames: [Attribute: Attribute]) -> Relation
+}
+
+extension Relation {
+    public func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let planner = QueryPlanner(root: self)
+        let runner = QueryRunner(nodeTree: planner.makeNodeTree())
+        return runner.rows()
+    }
 }
 
 extension Relation {
@@ -218,8 +226,12 @@ extension Relation {
 
 extension Relation {
     public var description: String {
+        return descriptionWithRows(self.rows())
+    }
+    
+    public func descriptionWithRows(rows: AnyGenerator<Result<Row, RelationError>>) -> String {
         let columns = scheme.attributes.sort()
-        let rows = self.rows().map({ row in
+        let rows = rows.map({ row in
             columns.map({ (col: Attribute) -> String in
                 switch row.map({ $0[col] }) {
                 case .Ok(let value):

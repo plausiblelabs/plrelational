@@ -101,8 +101,21 @@ public class RelationTreeBinding: TreeBinding<Row> {
                 } else {
                     removed = removes
                 }
-                // TODO: rather than iterate here, maybe hand the whole relation over to onDelete
-                handle(removed, &treeChanges, self.onDelete)
+                
+                // Observers should only be notified about the top-most nodes that were deleted.
+                // We handle this by looking at the identifiers of the rows/nodes to be deleted,
+                // and only deleting the unique (top-most) parents.
+                // TODO: We should probably do something similar for Inserts, for the case where a
+                // subtree is inserted within one transaction
+                let idsToDelete: [RelationValue] = removed.rows().flatMap{$0.ok?[self.idAttr]}
+                for id in idsToDelete {
+                    if let node = self.nodeForID(id) {
+                        let parentID = node.parentID
+                        if parentID == nil || !idsToDelete.contains(parentID!) {
+                            treeChanges.appendContentsOf(self.onDelete(id))
+                        }
+                    }
+                }
             }
             
             if treeChanges.count > 0 {
@@ -161,14 +174,12 @@ public class RelationTreeBinding: TreeBinding<Row> {
         let node = nodeForID(id)
         
         // Delete from the relation
-        // TODO: Should we delete from the bottom up?  The way things are ordered now,
-        // observers will only be notified in onDelete() for the ancestor node; would it
-        // make more sense to notify observers about all children?
         relation.delete(idAttr *== id)
         
         // Recursively delete descendant nodes
-        // TODO: There are probably more efficient ways to handle this, but for now we'll
-        // use our tree structure to determine which children need to be deleted
+        // TODO: There are probably more efficient ways to handle this (need some sort of
+        // cascading delete), but for now we'll use our tree structure to determine which
+        // children need to be deleted
         if let node = node {
             for child in node.children {
                 delete(child.id)
@@ -176,7 +187,7 @@ public class RelationTreeBinding: TreeBinding<Row> {
         }
     }
     
-    private func onDelete(row: Row) -> [Change] {
+    private func onDelete(id: RelationValue) -> [Change] {
 
         func deleteNode(node: Node, inout _ nodes: [Node]) -> Int {
             let index = nodes.indexOf({$0 === node})!
@@ -184,7 +195,6 @@ public class RelationTreeBinding: TreeBinding<Row> {
             return index
         }
         
-        let id = row[idAttr]
         if let node = nodeForID(id) {
             let parent: Node?
             let index: Int

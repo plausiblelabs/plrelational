@@ -33,16 +33,15 @@ class QueryPlanner {
     }
     
     private func visitRelationTree(root: Relation, @noescape _ f: (Relation, isRoot: Bool) -> Void) {
-        var visited: Set<ObjectIdentifier> = []
+        var visited: ObjectSet<AnyObject> = []
         var toVisit: [Relation] = [root]
         var isRoot = true
         while let r = toVisit.popLast() {
             if let obj = r as? AnyObject {
-                let id = ObjectIdentifier(obj)
-                if visited.contains(id) {
-                    return
+                if visited.contains(obj) {
+                    continue
                 } else {
-                    visited.insert(id)
+                    visited.insert(obj)
                 }
             }
             f(r, isRoot: isRoot)

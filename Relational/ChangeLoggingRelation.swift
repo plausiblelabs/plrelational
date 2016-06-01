@@ -63,9 +63,9 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
         return baseRelation.scheme
     }
     
-    public func rows() -> AnyGenerator<Result<Row, RelationError>> {
+    public func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {
         let data = LogRelationIterationBegin(self)
-        return LogRelationIterationReturn(data, currentRelation().rows())
+        return LogRelationIterationReturn(data, currentRelation().rawGenerateRows())
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {
