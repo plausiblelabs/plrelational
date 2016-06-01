@@ -318,7 +318,15 @@ class RelationValueBindingTests: BindingTestCase {
         XCTAssertEqual(binding.value, "multi")
         XCTAssertTrue(changed)
         changed = false
-        
+
+        // Verify that value is considered "multi" when there is a single non-NULL value and a
+        // single NULL value
+        r.update(Attribute("id") *== 2, newValues: ["name": .NULL])
+
+        XCTAssertEqual(binding.value, "multi")
+        XCTAssertFalse(changed)
+        changed = false
+
         r.delete(true)
         
         XCTAssertEqual(binding.value, "")

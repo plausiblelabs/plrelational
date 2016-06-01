@@ -73,6 +73,6 @@ class TextObjectPropertiesModel {
     }()
     
     lazy var fontPlaceholder: ValueBinding<String> = { [unowned self] in
-        return self.fontRelation.stringWhenMulti("Multiple Values", otherwise: "Default")
+        return self.fontRelation.stringWhenMulti("Multiple", otherwise: "Default")
     }()
 }

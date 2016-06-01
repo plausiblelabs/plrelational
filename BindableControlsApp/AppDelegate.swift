@@ -139,7 +139,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
         
         popupButton.titles = ValueBinding.constant(["Red", "Orange", "Yellow", "Green", "Blue", "Violet"])
-        popupButton.placeholderTitle = selectedObjectsColor.stringWhenMulti("Multiple Values", otherwise: "Default")
+        popupButton.placeholderTitle = selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default")
         popupButton.selectedTitle = undoableDB.bidiBinding(
             selectedObjectsColor,
             action: "Change Color",
