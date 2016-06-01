@@ -145,7 +145,7 @@ class DocModel {
         self.removal = selectedItems.addChangeObserver({ changes in
 //            print("ADDS:\n\(changes.added)")
 //            print("REMOVES:\n\(changes.removed)")
-            print("ITEMS:\n\(self.selectedItems)\n")
+            print("SELECTED ITEMS:\n\(self.selectedItems)\n")
         })
     }
     
@@ -260,7 +260,7 @@ class DocModel {
                     self.docOutlineBinding.move(srcPath: srcPath, dstPath: dstPath)
                 })
             },
-            selection: self.bidiSelectionBinding(self.selectedCollectionID),
+            selection: self.bidiSelectionBinding(self.selectedCollectionID, clearInspectorSelection: true),
             cellText: { row in
                 // TODO: Could we have a convenience for creating a projection Relation directly
                 // from an existing Row?
@@ -281,7 +281,7 @@ class DocModel {
             },
             contextMenu: nil,
             move: nil,
-            selection: self.bidiSelectionBinding(self.selectedInspectorItemIDs),
+            selection: self.bidiSelectionBinding(self.selectedInspectorItemIDs, clearInspectorSelection: false),
             cellText: { row in
                 let rowID = row["id"]
                 let type = ItemType(row)!
@@ -308,12 +308,17 @@ class DocModel {
         )
     }
 
-    private func bidiSelectionBinding(relation: MutableRelation) -> BidiValueBinding<Set<RelationValue>> {
+    private func bidiSelectionBinding(relation: MutableRelation, clearInspectorSelection: Bool) -> BidiValueBinding<Set<RelationValue>> {
         return undoableDB.bidiBinding(
             relation,
             action: "Change Selection",
             get: { $0.allValues },
-            set: { relation.replaceValues(Array($0)) }
+            set: {
+                if clearInspectorSelection {
+                    self.selectedInspectorItemIDs.delete(true)
+                }
+                relation.replaceValues(Array($0))
+            }
         )
     }
 }
