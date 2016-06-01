@@ -78,6 +78,8 @@ class QueryRunner {
     }
     
     private func writeOutput(rows: Set<Row>, fromNode: QueryPlanner.Node) {
+        guard !rows.isEmpty else { return }
+        
         if fromNode === root {
             collectedOutput.unionInPlace(rows)
         } else {
