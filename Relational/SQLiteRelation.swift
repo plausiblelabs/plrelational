@@ -149,19 +149,23 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
     }
     
     public func add(row: Row) -> Result<Int64, RelationError> {
-        let orderedAttributes = Array(row.values)
-        let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.0.name) }).joinWithSeparator(", ")
-        let parameters = orderedAttributes.map({ $0.1 })
-        let valuesSQL = Array(count: orderedAttributes.count, repeatedValue: "?").joinWithSeparator(", ")
-        let sql = "INSERT INTO \(tableNameForQuery) (\(attributesSQL)) VALUES (\(valuesSQL))"
-        
-        let result = db.executeQuery(sql, parameters)
-        return result.map({ rows in
-            let array = Array(rows)
-            precondition(array.isEmpty, "Unexpected results from INSERT INTO statement: \(array)")
-            let rowid = sqlite3_last_insert_rowid(db.db)
-            self.notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil))
-            return rowid
+        return contains(row).then({ contains in
+            if contains { return .Ok(0) }
+            
+            let orderedAttributes = Array(row.values)
+            let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.0.name) }).joinWithSeparator(", ")
+            let parameters = orderedAttributes.map({ $0.1 })
+            let valuesSQL = Array(count: orderedAttributes.count, repeatedValue: "?").joinWithSeparator(", ")
+            let sql = "INSERT INTO \(tableNameForQuery) (\(attributesSQL)) VALUES (\(valuesSQL))"
+            
+            let result = db.executeQuery(sql, parameters)
+            return result.map({ rows in
+                let array = Array(rows)
+                precondition(array.isEmpty, "Unexpected results from INSERT INTO statement: \(array)")
+                let rowid = sqlite3_last_insert_rowid(db.db)
+                self.notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil))
+                return rowid
+            })
         })
     }
     
