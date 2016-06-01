@@ -1,11 +1,31 @@
 
 class QueryPlanner {
-    let root: Relation
+    let rootRelation: Relation
     var relationNodeMap: ObjectDictionary<AnyObject, Node> = [:]
-    lazy var nodeTree: ObjectSet<Node> = self.relationTreeToNodeTree(self.root)
+    lazy var nodeTree: ObjectSet<Node> = self.relationTreeToNodeTree(self.rootRelation)
     
     init(root: Relation) {
-        self.root = root
+        self.rootRelation = root
+    }
+    
+    var root: QueryPlanner.Node {
+        // If the root is not an object then we'll only have one node. If it is, we can look it up.
+        if rootRelation is AnyObject {
+            return getOrCreateNode(rootRelation)
+        } else {
+            return nodeTree.any!
+        }
+    }
+    
+    var initiators: ObjectSet<QueryPlanner.Node> {
+        return ObjectSet(nodeTree.filter({
+            switch $0.op {
+            case .TableScan:
+                return true
+            default:
+                return false
+            }
+        }))
     }
     
     private func relationTreeToNodeTree(r: Relation) -> ObjectSet<Node> {

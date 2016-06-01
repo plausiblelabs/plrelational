@@ -13,20 +13,10 @@ class QueryRunner {
     
     var done = false
     
-    init(nodeTree: ObjectSet<QueryPlanner.Node>) {
-        self.nodeTree = nodeTree
-        self.root = nodeTree.find({ $0.parents.isEmpty })!
-        
-        let initiators = nodeTree.filter({
-            switch $0.op {
-            case .TableScan:
-                return true
-            default:
-                return false
-            }
-        })
-        
-        activeInitiators = ObjectSet(initiators)
+    init(planner: QueryPlanner) {
+        self.nodeTree = planner.nodeTree
+        self.root = planner.root
+        activeInitiators = planner.initiators
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
