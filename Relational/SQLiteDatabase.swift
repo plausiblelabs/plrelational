@@ -81,7 +81,7 @@ extension SQLiteDatabase {
         let allColumns: [String]  = scheme.attributes.map({ escapeIdentifier($0.name) })
         
         let columnsSQL = allColumns.joinWithSeparator(", ")
-        let sql = "CREATE TABLE IF NOT EXISTS \(escapeIdentifier(name)) (\(columnsSQL))"
+        let sql = "CREATE TABLE IF NOT EXISTS \(escapeIdentifier(name)) (\(columnsSQL), UNIQUE (\(columnsSQL)) ON CONFLICT REPLACE)"
         
         let result = executeQuery(sql)
         return result.map({ rows in
