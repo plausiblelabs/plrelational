@@ -165,6 +165,26 @@ class DocModelTests: AppTestCase {
             selectedItemType: "Multiple Items",
             selectedItemName: "",
             selectedItemsOnlyText: false))
+        
+        // Select a single text object in the inspector (again)
+        model.inspectorTreeViewModel.selection.commit([9])
+
+        // Verify properties-related bindings
+        verifyBindings(BindingVals(
+            itemSelected: true,
+            selectedItemType: "Text",
+            selectedItemName: "Object1",
+            selectedItemsOnlyText: true))
+        
+        // Select a different page in the doc outline
+        model.docOutlineTreeViewModel.selection.commit([4])
+        
+        // Verify properties-related bindings
+        verifyBindings(BindingVals(
+            itemSelected: true,
+            selectedItemType: "Page",
+            selectedItemName: "Page2",
+            selectedItemsOnlyText: false))
     }
     
     func testDocOutlineSelectionSpeedUnbound() {
