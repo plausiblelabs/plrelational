@@ -952,4 +952,60 @@ class RelationTests: DBTestCase {
         AssertEqual(lastChange?.added, ConcreteRelation(["count": 0]))
         AssertEqual(lastChange?.removed, ConcreteRelation(["count": 2]))
     }
+    
+    func testUniqueObservation() {
+        let a = ChangeLoggingRelation(baseRelation:
+            MakeRelation(
+                ["id", "name", "type"]))
+        
+        let u = a.unique("type", matching: "animal")
+        var lastChange: RelationChange?
+        _ = u.addChangeObserver({ lastChange = $0 })
+        
+        lastChange = nil
+        a.add(["id": 1, "name": "cat", "type": "animal"])
+        AssertEqual(lastChange?.added,
+                    MakeRelation(
+                        ["id", "name", "type"],
+                        [1,    "cat",  "animal"]))
+        AssertEqual(lastChange?.removed, nil)
+        
+        lastChange = nil
+        a.add(["id": 2, "name": "dog", "type": "animal"])
+        AssertEqual(lastChange?.added,
+                    MakeRelation(
+                        ["id", "name", "type"],
+                        [2,    "dog",  "animal"]))
+        AssertEqual(lastChange?.removed, nil)
+
+        lastChange = nil
+        a.add(["id": 3, "name": "corn", "type": "plant"])
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed,
+                    MakeRelation(
+                        ["id", "name", "type"],
+                        [1,    "cat",  "animal"],
+                        [2,    "dog",  "animal"]))
+
+        lastChange = nil
+        a.delete(true)
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, nil)
+
+        lastChange = nil
+        a.add(["id": 1, "name": "cat", "type": "animal"])
+        AssertEqual(lastChange?.added,
+                    MakeRelation(
+                        ["id", "name", "type"],
+                        [1,    "cat",  "animal"]))
+        AssertEqual(lastChange?.removed, nil)
+
+        lastChange = nil
+        a.delete(true)
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed,
+                    MakeRelation(
+                        ["id", "name", "type"],
+                        [1,    "cat",  "animal"]))
+    }
 }
