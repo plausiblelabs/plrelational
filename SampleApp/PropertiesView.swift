@@ -57,6 +57,7 @@ class PropertiesView {
     private func addTextSection(model: TextObjectPropertiesModel) {
         let view = TextObjectPropertiesView(frame: NSMakeRect(10, 100, 220, 120), model: model)
         view.backgroundColor = NSColor.blueColor()
+        textObjectPropertiesView = view
         
         let parentView = itemTypeLabel.superview!
         parentView.addSubview(view)
