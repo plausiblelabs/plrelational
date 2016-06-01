@@ -73,9 +73,7 @@ class Checkbox: NSButton {
     
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
-        
         self.setButtonType(.SwitchButton)
-        self.refusesFirstResponder = true
     }
 
     required init?(coder: NSCoder) {
