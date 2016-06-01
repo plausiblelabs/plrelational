@@ -13,10 +13,10 @@ public protocol ArrayData {
 }
 
 public class ArrayElement<D: ArrayData> {
-    let id: D.EID
-    var data: D
+    public let id: D.EID
+    public var data: D
     
-    init(id: D.EID, data: D) {
+    public init(id: D.EID, data: D) {
         self.id = id
         self.data = data
     }

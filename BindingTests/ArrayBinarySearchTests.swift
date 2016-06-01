@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import SampleApp
+@testable import Binding
 
 class ArrayBinarySearchTests: XCTestCase {
     

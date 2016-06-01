@@ -8,6 +8,7 @@
 
 import XCTest
 import libRelational
+import Binding
 @testable import SampleApp
 
 class DocModelTests: AppTestCase {
