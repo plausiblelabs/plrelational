@@ -6,6 +6,12 @@ typealias sqlite3_stmt = COpaquePointer
 
 let SQLITE_TRANSIENT = unsafeBitCast(-1, sqlite3_destructor_type.self)
 
+private struct BLOBHeaders {
+    static let length = 4
+    static let NULL = Array("NULL".utf8)
+    static let BLOB = Array("BLOB".utf8)
+}
+
 public class SQLiteDatabase {
     let db: sqlite3
     
@@ -149,7 +155,7 @@ extension SQLiteDatabase {
     private func columnToValue(stmt: sqlite3_stmt, _ index: Int32) -> RelationValue {
         let type = sqlite3_column_type(stmt, index)
         switch type {
-        case SQLITE_NULL: return .NULL
+        case SQLITE_NULL: return .NULL // TODO: We don't really support SQLITE_NULL. We write out our own NULLs using funky BLOBs. Is it wise to read them in?
         case SQLITE_INTEGER: return .Integer(sqlite3_column_int64(stmt, index))
         case SQLITE_FLOAT: return .Real(sqlite3_column_double(stmt, index))
         case SQLITE_TEXT: return .Text(String.fromCString(UnsafePointer(sqlite3_column_text(stmt, index)))!)
@@ -157,20 +163,32 @@ extension SQLiteDatabase {
             let ptr = UnsafePointer<UInt8>(sqlite3_column_blob(stmt, index))
             let length = sqlite3_column_bytes(stmt, index)
             let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: Int(length))
-            return .Blob(Array(buffer))
+            return blobToValue(buffer)
         default:
             fatalError("Got unknown column type \(type) from SQLite")
+        }
+    }
+    
+    private func blobToValue(buffer: UnsafeBufferPointer<UInt8>) -> RelationValue {
+        if buffer.count < BLOBHeaders.length { fatalError("Got a blob of length \(buffer.count) from SQLite, which isn't long enough to contain our header") }
+        if memcmp(buffer.baseAddress, BLOBHeaders.NULL, BLOBHeaders.length) == 0 {
+            return .NULL
+        } else if memcmp(buffer.baseAddress, BLOBHeaders.BLOB, BLOBHeaders.length) == 0 {
+            let remainder = buffer.suffixFrom(BLOBHeaders.length)
+            return .Blob(Array(remainder))
+        } else {
+            preconditionFailure("Got a blob with a header prefix \(buffer.prefix(4)) which we don't understand.")
         }
     }
     
     private func bindValue(stmt: sqlite3_stmt, _ index: Int32, _ value: RelationValue) -> Result<Void, RelationError> {
         let result: Result<Int32, RelationError>
         switch value {
-        case .NULL: result = self.errwrap(sqlite3_bind_null(stmt, index))
+        case .NULL: result = self.errwrap(sqlite3_bind_blob64(stmt, index, BLOBHeaders.NULL, UInt64(BLOBHeaders.length), SQLITE_TRANSIENT))
         case .Integer(let x): result = self.errwrap(sqlite3_bind_int64(stmt, index, x))
         case .Real(let x): result = self.errwrap(sqlite3_bind_double(stmt, index, x))
         case .Text(let x): result = self.errwrap(sqlite3_bind_text(stmt, index, x, -1, SQLITE_TRANSIENT))
-        case .Blob(let x): result = self.errwrap(sqlite3_bind_blob64(stmt, index, x, UInt64(x.count), SQLITE_TRANSIENT))
+        case .Blob(let x): result = self.errwrap(sqlite3_bind_blob64(stmt, index, BLOBHeaders.BLOB + x, UInt64(BLOBHeaders.length + x.count), SQLITE_TRANSIENT))
         case .NotFound: result = .Ok(0)
         }
         return result.map({ _ in })
