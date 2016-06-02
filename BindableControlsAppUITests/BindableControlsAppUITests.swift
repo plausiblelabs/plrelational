@@ -21,23 +21,95 @@ class BindableControlsAppUITests: XCTestCase {
         super.tearDown()
     }
 
-//    func testTextField() {
-//        // TODO
-//    }
-//
+    func testTextField() {
+        let window = XCUIApplication().windows["BindableControlsApp"]
+        let field = window.textFields["NameField"]
+        
+        let fred = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(0).textFields["PageName"]
+        let wilma = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(1).textFields["PageName"]
+
+        func verifyText(element: XCUIElement, _ expected: String, file: StaticString = #file, line: UInt = #line) {
+            XCTAssertEqual(element.value as? String, expected, file: file, line: line)
+        }
+        
+        func verifyPlaceholder(element: XCUIElement, _ expected: String, file: StaticString = #file, line: UInt = #line) {
+            XCTAssertEqual(element.placeholderValue, expected, file: file, line: line)
+        }
+        
+        func clickText(element: XCUIElement, _ dx: CGFloat, _ dy: CGFloat) {
+            let coordinate = element
+                .coordinateWithNormalizedOffset(CGVector(dx: 0, dy: 0))
+                .coordinateWithOffset(CGVector(dx: dx, dy: dy))
+            coordinate.click()
+        }
+        
+        // Click on Fred cell and verify that text field contains "Fred"
+        fred.click()
+        verifyText(field, "Fred")
+
+        // Click on text field to give it focus, append some text, and verify that the updated
+        // name is reflected in the outline cell
+        field.click()
+        field.typeText("d")
+        verifyText(field, "Fredd")
+        verifyText(fred, "Fredd")
+        verifyText(wilma, "Wilma")
+
+        // TODO: Editing the cell text here makes the test framework unable to locate the cell's
+        // text field in later steps, so we'll skip this part for now (and just add the 'o' in
+        // the text field rather than the cell)
+        field.typeText("o")
+//        // Click on Fredd cell (has to be within the text bounds) and wait for focus, update the
+//        // text, and verify that the updated name is reflected in the text field
+//        clickText(fred, 10, 10)
+//        clickText(fred, 10, 10)
+//        fred.typeKey("e", modifierFlags: .Control)
+//        fred.typeText("o")
+        verifyText(field, "Freddo")
+        verifyText(fred, "Freddo")
+        
+        // Click on Wilma cell and verify that text field contains "Wilma"
+        wilma.click()
+        verifyText(field, "Wilma")
+        
+        // Click on text field to give it focus, append some text, and verify that the updated
+        // name is reflected in the outline cell
+        field.click()
+        field.typeText("x")
+        verifyText(field, "Wilmax")
+        verifyText(fred, "Freddo")
+        verifyText(wilma, "Wilmax")
+        
+        // Shift-select both Fred and Wilma cells; verify the placeholder text
+        XCUIElement.performWithKeyModifiers(.Shift) {
+            fred.click()
+        }
+        verifyText(field, "")
+        verifyPlaceholder(field, "Multiple Values")
+        
+        // Click on text field to give it focus, type a new name, and verify that both cells
+        // are updated
+        field.click()
+        field.typeText("Barney")
+        verifyText(field, "Barney")
+        verifyText(fred, "Barney")
+        verifyText(wilma, "Barney")
+    }
+
     func testCheckbox() {
         let window = XCUIApplication().windows["BindableControlsApp"]
+        let checkbox = window.checkBoxes["Editable"]
         
         // Tree View
         let fred = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(0).textFields["PageName"]
         let wilma = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(1).textFields["PageName"]
         
         func verifyCheckbox(expected: String) {
-            XCTAssertEqual(window.checkBoxes["Editable"].value as? String, expected)
+            XCTAssertEqual(checkbox.value as? String, expected)
         }
         
         func clickCheckbox() {
-            window.checkBoxes["Editable"].click()
+            checkbox.click()
         }
         
         // Verify fred's initial state
