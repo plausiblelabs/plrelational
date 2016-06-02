@@ -86,8 +86,15 @@ extension RelationDifferentiator {
             )
         })
         
-        return RelationDerivative(added: union(pieces.map({ $0.added })),
-                                  removed: union(pieces.map({ $0.removed })))
+        // We must also account for changes which apply everywhere simultaneously.
+        // The intersection of all operand changes is our change too.
+        let allDerivatives = r.operands.map(derivativeOf)
+        let withAll = pieces + [(
+            added: intersection(allDerivatives.map({ $0.added })),
+            removed: intersection(allDerivatives.map({ $0.removed })))]
+        
+        return RelationDerivative(added: union(withAll.map({ $0.added })),
+                                  removed: union(withAll.map({ $0.removed })))
     }
     
     private func intersectionDerivative(r: IntermediateRelation) -> RelationDerivative {
@@ -200,6 +207,17 @@ extension RelationDifferentiator {
             return nonnil[0]
         } else {
             return IntermediateRelation.union(nonnil)
+        }
+    }
+    
+    private func intersection(relations: [Relation?]) -> Relation? {
+        let nonnil = relations.flatMap({ $0 })
+        if nonnil.isEmpty || nonnil.count != relations.count {
+            return nil
+        } else if nonnil.count == 1 {
+            return nonnil[0]
+        } else {
+            return IntermediateRelation.intersection(nonnil)
         }
     }
     
