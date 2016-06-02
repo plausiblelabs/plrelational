@@ -113,11 +113,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             contextMenu: nil,
             move: nil,
             selection: selectionBinding(selectedObjectID),
+            cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 let rowID = row["id"]
                 let nameRelation = objects.select(Attribute("id") *== rowID).project(["name"])
                 return nameBinding(nameRelation)
-            }
+            },
+            cellImage: nil
         )
         treeView = TreeView(model: treeViewModel, outlineView: outlineView)
         treeView.animateChanges = true

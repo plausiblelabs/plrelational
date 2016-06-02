@@ -17,6 +17,8 @@
 		371243B61D00B5D700E9BCFF /* page18.png in Resources */ = {isa = PBXBuildFile; fileRef = 371243AE1D00B5D700E9BCFF /* page18.png */; };
 		371243B71D00B5D700E9BCFF /* page18@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 371243AF1D00B5D700E9BCFF /* page18@2x.png */; };
 		371243B91D00B6C100E9BCFF /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371243B81D00B6C100E9BCFF /* Image.swift */; };
+		371243BC1D00DC6800E9BCFF /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371243B81D00B6C100E9BCFF /* Image.swift */; };
+		371243BD1D00DC7600E9BCFF /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371243A51D00B06300E9BCFF /* ImageView.swift */; };
 		372707681CED2F8100710C80 /* AppTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707671CED2F8100710C80 /* AppTestCase.swift */; };
 		3727076B1CED32B000710C80 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076C1CEE60C900710C80 /* MutableRelation.swift */; };
@@ -1231,8 +1233,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				372708111CFE3AB900710C80 /* TreeView.swift in Sources */,
+				371243BC1D00DC6800E9BCFF /* Image.swift in Sources */,
 				3727080D1CFE2EA200710C80 /* BackgroundView.swift in Sources */,
 				372708051CFE2CA400710C80 /* PopUpButton.swift in Sources */,
+				371243BD1D00DC7600E9BCFF /* ImageView.swift in Sources */,
 				372708101CFE3A4E00710C80 /* ExtOutlineView.swift in Sources */,
 				3727080E1CFE2FB600710C80 /* UndoableDatabase.swift in Sources */,
 				372708121CFE3D4F00710C80 /* ContextMenu.swift in Sources */,

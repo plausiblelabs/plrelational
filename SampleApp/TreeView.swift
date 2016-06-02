@@ -22,7 +22,7 @@ struct TreeViewModel<D: TreeData> {
     let selection: BidiValueBinding<Set<D.ID>>
     let cellIdentifier: (D) -> String
     let cellText: (D) -> ValueBinding<String>
-    let cellImage: (D) -> ValueBinding<Image>
+    let cellImage: ((D) -> ValueBinding<Image>)?
 }
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
@@ -176,7 +176,7 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
             textField.string = model.cellText(node.data)
         }
         if let imageView = view.imageView as? ImageView {
-            imageView.img = model.cellImage(node.data)
+            imageView.img = model.cellImage?(node.data)
         }
         return view
     }
