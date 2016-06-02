@@ -28,6 +28,15 @@ class QueryPlanner {
         }))
     }
     
+    func initiatorRelation(initiator: QueryPlanner.Node) -> Relation {
+        switch initiator.op {
+        case .TableScan(let relation):
+            return relation
+        default:
+            fatalError("Node operation \(initiator.op) is not a known initiator operation")
+        }
+    }
+    
     private func relationTreeToNodeTree(r: Relation) -> ObjectSet<Node> {
         var localNodes: ObjectSet<Node> = []
         visitRelationTree(r, { relation, isRoot in

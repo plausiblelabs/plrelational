@@ -90,7 +90,7 @@ extension IntermediateRelation {
         }
     }
     
-    private func otherOperands(excludingIndex: Int) -> [Relation] {
+    func otherOperands(excludingIndex: Int) -> [Relation] {
         var result = operands
         result.removeAtIndex(excludingIndex)
         return result
