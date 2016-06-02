@@ -3,7 +3,14 @@
 /// This implements operations such as union, intersection, difference, join, etc.
 class IntermediateRelation: Relation, RelationDefaultChangeObserverImplementation {
     let op: Operator
-    var operands: [Relation]
+    var operands: [Relation] {
+        didSet {
+            let objs = operands.flatMap({ $0 as? AnyObject })
+            if objs.contains({ $0 === self }) {
+                fatalError()
+            }
+        }
+    }
     
     var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
@@ -85,115 +92,39 @@ extension IntermediateRelation {
 
 extension IntermediateRelation {
     func onAddFirstObserver() {
-        for (index, relation) in operands.enumerate() {
-            relation.addWeakChangeObserver(self, call: { $0.observeChange($1, operandIndex: index) })
+        for (withRespectTo, addPlaceholder, removePlaceholder, derivative) in allDerivatives() {
+            withRespectTo.addWeakChangeObserver(self, call: { innerSelf, change in
+                addPlaceholder.operands = [change.added ?? ConcreteRelation(scheme: withRespectTo.scheme)]
+                removePlaceholder.operands = [change.removed ?? ConcreteRelation(scheme: withRespectTo.scheme)]
+                let myChange = RelationChange(added: derivative.added, removed: derivative.removed)
+                innerSelf.notifyChangeObservers(myChange)
+            })
         }
     }
     
+    private func allDerivatives() -> [(withRespectTo: Relation, addPlaceholder: IntermediateRelation, removePlaceholder: IntermediateRelation, derivative: RelationDerivative)] {
+        let planner = QueryPlanner(root: self)
+        return planner.initiators.flatMap({ initiator in
+            guard let relation = planner.initiatorRelation(initiator) as? protocol<Relation, AnyObject> else { return nil }
+            
+            let addPlaceholder = IntermediateRelation(op: .Union, operands: [ConcreteRelation(scheme: relation.scheme)])
+            let removePlaceholder = IntermediateRelation(op: .Union, operands: [ConcreteRelation(scheme: relation.scheme)])
+            
+            let differentiator = RelationDifferentiator(withRespectTo: relation,
+                addPlaceholder: addPlaceholder,
+                removePlaceholder: removePlaceholder)
+            let derivative = differentiator.derivativeOf(self)
+            
+            return (relation, addPlaceholder, removePlaceholder, derivative)
+        })
+    }
+}
+
+extension IntermediateRelation {
     func otherOperands(excludingIndex: Int) -> [Relation] {
         var result = operands
         result.removeAtIndex(excludingIndex)
         return result
-    }
-    
-    private func observeChange(change: RelationChange, operandIndex: Int) {
-        let myAdded: Relation?
-        let myRemoved: Relation?
-        
-        switch op {
-        case .Union:
-            // Adding a row to one part of a union adds that row to the union iff the row
-            // isn't already present in one of the other relations. Same for removals.
-            let others = otherOperands(operandIndex)
-            myAdded = change.added?.difference(IntermediateRelation.union(others))
-            myRemoved = change.removed?.difference(IntermediateRelation.union(others))
-        case .Intersection:
-            // Adding or removing a row from one part of an intersection alters the intersection
-            // iff the row is already in another part of the intersection.
-            let others = otherOperands(operandIndex)
-            myAdded = change.added?.intersection(IntermediateRelation.intersection(others))
-            myRemoved = change.removed?.intersection(IntermediateRelation.intersection(others))
-        case .Difference:
-            // When the first one changes, our changes are the same, minus the second.
-            // When the second one changes, then changes are reversed and intersected
-            // with the first.
-            if operandIndex == 0 {
-                myAdded = change.added?.difference(operands[1])
-                myRemoved = change.removed?.difference(operands[1])
-            } else {
-                myAdded = change.removed?.intersection(operands[0])
-                myRemoved = change.added?.intersection(operands[0])
-            }
-        case .Project(let scheme):
-            (myAdded, myRemoved) = changesForProjection(change, scheme: scheme)
-        case .Select(let expression):
-            // Our changes are equal to the underlying changes with the same select applied.
-            myAdded = change.added?.select(expression)
-            myRemoved = change.removed?.select(expression)
-        case .Equijoin(let matching):
-            // Changes in a relation are joined with the other one to produce the final result.
-            if operandIndex == 0 {
-                myAdded = change.added?.equijoin(operands[1], matching: matching)
-                myRemoved = change.removed?.equijoin(operands[1], matching: matching)
-            } else {
-                myAdded = change.added.map({ operands[0].equijoin($0, matching: matching) })
-                myRemoved = change.removed.map({ operands[0].equijoin($0, matching: matching) })
-            }
-        case .Rename(let renames):
-            // Changes are the same, but renamed.
-            myAdded = change.added?.renameAttributes(renames)
-            myRemoved = change.removed?.renameAttributes(renames)
-        case .Update(let newValues):
-            // Our updates are equal to the projected updates joined with our newValues.
-            let untouchedScheme = Scheme(attributes: Set(operands[0].scheme.attributes.subtract(newValues.values.keys)))
-            let (projectedAdded, projectedRemoved) = changesForProjection(change, scheme: untouchedScheme)
-            myAdded = projectedAdded?.join(ConcreteRelation(newValues))
-            myRemoved = projectedRemoved?.project(untouchedScheme).join(ConcreteRelation(newValues))
-        case .Aggregate(let attribute, let initialValue, let aggregateFunction):
-            // TODO: We're using the dumb and inefficient approach for now.  We should instead
-            // cache the computed aggregate value and inspect the added/removed rows to determine
-            // if the aggregate value has changed
-            
-            var preChangeRelation = operands[0]
-            if let added = change.added {
-                preChangeRelation = preChangeRelation.difference(added)
-            }
-            if let removed = change.removed {
-                preChangeRelation = preChangeRelation.union(removed)
-            }
-            let previousAgg = IntermediateRelation(op: .Aggregate(attribute, initialValue, aggregateFunction), operands: [preChangeRelation])
-            
-            if self.intersection(previousAgg).isEmpty.ok == true {
-                myAdded = self
-                myRemoved = previousAgg
-            } else {
-                myAdded = nil
-                myRemoved = nil
-            }
-        }
-        
-        notifyChangeObservers(RelationChange(added: myAdded, removed: myRemoved))
-    }
-    
-    private func changesForProjection(change: RelationChange, scheme: Scheme) -> (Relation?, Relation?) {
-        // Adds to the underlying relation are adds to the projected relation
-        // if there were no matching rows in the relation before. To compute
-        // that, project the changes, then subtract the pre-change relation,
-        // which is the post-change relation minus additions and plus removals.
-        //
-        // Removes are the same, except they subtract the post-change relation,
-        // which is just self.
-        var preChangeRelation = operands[0]
-        if let added = change.added {
-            preChangeRelation = preChangeRelation.difference(added)
-        }
-        if let removed = change.removed {
-            preChangeRelation = preChangeRelation.union(removed)
-        }
-        
-        let myAdded = change.added?.project(scheme).difference(preChangeRelation.project(scheme))
-        let myRemoved = change.removed?.project(scheme).difference(self)
-        return (myAdded, myRemoved)
     }
 }
 
