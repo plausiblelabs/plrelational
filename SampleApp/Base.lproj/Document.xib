@@ -76,7 +76,7 @@
                                                                             <rect key="frame" x="1" y="1" width="197" height="24"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <subviews>
-                                                                                <imageView translatesAutoresizingMaskIntoConstraints="NO" id="dGr-bL-Z49">
+                                                                                <imageView translatesAutoresizingMaskIntoConstraints="NO" id="dGr-bL-Z49" customClass="ImageView" customModule="SampleApp" customModuleProvider="target">
                                                                                     <rect key="frame" x="3" y="3" width="18" height="18"/>
                                                                                     <constraints>
                                                                                         <constraint firstAttribute="height" constant="18" id="MRl-Nw-m15"/>
@@ -157,7 +157,7 @@
                                                                             <rect key="frame" x="1" y="1" width="197" height="24"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <subviews>
-                                                                                <imageView translatesAutoresizingMaskIntoConstraints="NO" id="R4a-R5-Jwl">
+                                                                                <imageView translatesAutoresizingMaskIntoConstraints="NO" id="R4a-R5-Jwl" customClass="ImageView" customModule="SampleApp" customModuleProvider="target">
                                                                                     <rect key="frame" x="7" y="3" width="18" height="18"/>
                                                                                     <constraints>
                                                                                         <constraint firstAttribute="height" constant="18" id="Ody-oZ-wqQ"/>
@@ -185,40 +185,6 @@
                                                                             <connections>
                                                                                 <outlet property="imageView" destination="R4a-R5-Jwl" id="ajD-fu-AS8"/>
                                                                                 <outlet property="textField" destination="k59-aA-kGM" id="yYR-fk-LTm"/>
-                                                                            </connections>
-                                                                        </tableCellView>
-                                                                        <tableCellView identifier="FieldCell" id="ka6-4m-oIT" userLabel="Field Cell View">
-                                                                            <rect key="frame" x="1" y="28" width="197" height="24"/>
-                                                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                                            <subviews>
-                                                                                <imageView translatesAutoresizingMaskIntoConstraints="NO" id="8Cr-d3-9Rr">
-                                                                                    <rect key="frame" x="7" y="3" width="18" height="18"/>
-                                                                                    <constraints>
-                                                                                        <constraint firstAttribute="width" constant="18" id="CkQ-8o-tGY"/>
-                                                                                        <constraint firstAttribute="height" constant="18" id="PuB-XK-gH8"/>
-                                                                                    </constraints>
-                                                                                    <imageCell key="cell" refusesFirstResponder="YES" imageScaling="proportionallyDown" image="NSUser" id="TjH-sp-Bp9"/>
-                                                                                </imageView>
-                                                                                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="LwH-o0-Z4g" customClass="TextField" customModule="SampleApp" customModuleProvider="target">
-                                                                                    <rect key="frame" x="30" y="3" width="166" height="18"/>
-                                                                                    <textFieldCell key="cell" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" title="Field Name" placeholderString="Untitled Field" usesSingleLineMode="YES" id="4Wm-gi-0Wq">
-                                                                                        <font key="font" metaFont="system"/>
-                                                                                        <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                                                                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                                                                    </textFieldCell>
-                                                                                </textField>
-                                                                            </subviews>
-                                                                            <constraints>
-                                                                                <constraint firstItem="LwH-o0-Z4g" firstAttribute="leading" secondItem="8Cr-d3-9Rr" secondAttribute="trailing" constant="7" id="5mL-1w-PaH"/>
-                                                                                <constraint firstItem="8Cr-d3-9Rr" firstAttribute="leading" secondItem="ka6-4m-oIT" secondAttribute="leading" constant="7" id="HGg-L1-U4T"/>
-                                                                                <constraint firstItem="LwH-o0-Z4g" firstAttribute="bottom" secondItem="8Cr-d3-9Rr" secondAttribute="bottom" id="PWV-Z1-poE"/>
-                                                                                <constraint firstAttribute="trailing" secondItem="LwH-o0-Z4g" secondAttribute="trailing" constant="3" id="QpJ-7S-TqJ"/>
-                                                                                <constraint firstItem="8Cr-d3-9Rr" firstAttribute="centerY" secondItem="ka6-4m-oIT" secondAttribute="centerY" id="R5E-lV-uTz"/>
-                                                                                <constraint firstItem="8Cr-d3-9Rr" firstAttribute="top" secondItem="LwH-o0-Z4g" secondAttribute="top" id="p0z-kV-tr3"/>
-                                                                            </constraints>
-                                                                            <connections>
-                                                                                <outlet property="imageView" destination="8Cr-d3-9Rr" id="UsU-af-Bgk"/>
-                                                                                <outlet property="textField" destination="LwH-o0-Z4g" id="wa1-mb-6Qk"/>
                                                                             </connections>
                                                                         </tableCellView>
                                                                     </prototypeCellViews>
@@ -361,6 +327,5 @@
         <image name="NSActionTemplate" width="14" height="14"/>
         <image name="NSAddTemplate" width="11" height="11"/>
         <image name="NSFolder" width="32" height="32"/>
-        <image name="NSUser" width="32" height="32"/>
     </resources>
 </document>

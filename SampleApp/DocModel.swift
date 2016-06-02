@@ -38,6 +38,18 @@ enum ItemType: Int64 { case
         }
     }
     
+    var cellImageName: String {
+        switch self {
+        case .Group: return "group18"
+        case .Collection: return "collection18"
+        case .Page: return "page18"
+        case .Text: return "label18"
+        // TODO: Use a different icon for image, or better yet, make a thumbnail of
+        // the associated image
+        case .Image: return "label18"
+        }
+    }
+    
     var isCollectionType: Bool {
         switch self {
         case .Group, .Collection, .Page:
@@ -261,6 +273,7 @@ class DocModel {
                 })
             },
             selection: self.bidiSelectionBinding(self.selectedCollectionID, clearInspectorSelection: true),
+            cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 // TODO: Could we have a convenience for creating a projection Relation directly
                 // from an existing Row?
@@ -268,6 +281,10 @@ class DocModel {
                 let type = ItemType(row)!
                 let nameRelation = self.collections.select(Attribute("id") *== rowID).project(["name"])
                 return self.bidiStringBinding(nameRelation, type: type.name)
+            },
+            cellImage: { row in
+                let type = ItemType(row)!
+                return ValueBinding.constant(Image(named: type.cellImageName))
             }
         )
     }()
@@ -282,11 +299,16 @@ class DocModel {
             contextMenu: nil,
             move: nil,
             selection: self.bidiSelectionBinding(self.selectedInspectorItemIDs, clearInspectorSelection: false),
+            cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 let rowID = row["id"]
                 let type = ItemType(row)!
                 let nameRelation = self.inspectorItems.select(Attribute("id") *== rowID).project(["name"])
                 return self.bidiStringBinding(nameRelation, type: type.name)
+            },
+            cellImage: { row in
+                let type = ItemType(row)!
+                return ValueBinding.constant(Image(named: type.cellImageName))
             }
         )
     }()
