@@ -135,7 +135,7 @@ extension Relation {
         print(rawDump(self))
     }
     
-    public func graphivizDump(showContents showContents: Bool = false) {
+    public func graphvizDump(showContents showContents: Bool = false) {
         var seenIDs: Set<ObjectIdentifier> = []
         
         print("digraph relation_graph {")
