@@ -79,9 +79,10 @@ extension RelationDifferentiator {
         // (A union B)' = (A' - B) union (B' - A)
         let pieces = r.operands.enumerate().map({ (index, operand) -> (added: Relation?, removed: Relation?) in
             let derivative = derivativeOf(operand)
+            let otherUnion = IntermediateRelation.union(preChangeRelations(r.otherOperands(index)))
             return (
-                derivative.added?.difference(IntermediateRelation.union(r.otherOperands(index))),
-                derivative.removed?.difference(IntermediateRelation.union(r.otherOperands(index)))
+                derivative.added?.difference(otherUnion),
+                derivative.removed?.difference(otherUnion)
             )
         })
         
@@ -133,13 +134,7 @@ extension RelationDifferentiator {
         // Removes are the same, except they subtract the post-change relation,
         // which is just the relation.
         let underlyingDerivative = derivativeOf(r.operands[0])
-        var preChangeRelation = r.operands[0]
-        if let added = underlyingDerivative.added {
-            preChangeRelation = preChangeRelation.difference(added)
-        }
-        if let removed = underlyingDerivative.removed {
-            preChangeRelation = preChangeRelation.union(removed)
-        }
+        let preChangeRelation = self.preChangeRelation(r.operands[0])
         
         return RelationDerivative(added: underlyingDerivative.added?.project(scheme).difference(preChangeRelation.project(scheme)),
                                   removed: underlyingDerivative.removed?.project(scheme).difference(r))
@@ -159,10 +154,10 @@ extension RelationDifferentiator {
         let derivatives = r.operands.map({
             derivativeOf($0)
         })
-        let added0 = derivatives[0].added?.equijoin(r.operands[1], matching: matching)
-        let removed0 = derivatives[0].removed?.equijoin(r.operands[1], matching: matching)
-        let added1 = derivatives[1].added.map({ r.operands[0].equijoin($0, matching: matching) })
-        let removed1 = derivatives[1].removed.map({ r.operands[0].equijoin($0, matching: matching) })
+        let added0 = derivatives[0].added?.equijoin(preChangeRelation(r.operands[1]), matching: matching)
+        let removed0 = derivatives[0].removed?.equijoin(preChangeRelation(r.operands[1]), matching: matching)
+        let added1 = derivatives[1].added.map({ preChangeRelation(r.operands[0]).equijoin($0, matching: matching) })
+        let removed1 = derivatives[1].removed.map({ preChangeRelation(r.operands[0]).equijoin($0, matching: matching) })
         
         return RelationDerivative(added: union([added0, added1]),
                                   removed: union([removed0, removed1]))
@@ -189,14 +184,7 @@ extension RelationDifferentiator {
         // Do a brute before/after difference.
         // A' = (new A) - (old A)
         // We called this approach "dumb and inefficient"; is there a better way here?
-        let underlyingDerivative = derivativeOf(r.operands[0])
-        var preChangeRelation = r.operands[0]
-        if let added = underlyingDerivative.added {
-            preChangeRelation = preChangeRelation.difference(added)
-        }
-        if let removed = underlyingDerivative.removed {
-            preChangeRelation = preChangeRelation.union(removed)
-        }
+        let preChangeRelation = self.preChangeRelation(r.operands[0])
         let previousAgg = IntermediateRelation(op: .Aggregate(attribute, initialValue, aggregateFunction), operands: [preChangeRelation])
         return RelationDerivative(added: r.difference(previousAgg),
                                   removed: previousAgg.difference(r))
@@ -213,5 +201,21 @@ extension RelationDifferentiator {
         } else {
             return IntermediateRelation.union(nonnil)
         }
+    }
+    
+    private func preChangeRelation(r: Relation) -> Relation {
+        let d = derivativeOf(r)
+        var preChangeRelation = r
+        if let added = d.added {
+            preChangeRelation = preChangeRelation.difference(added)
+        }
+        if let removed = d.removed {
+            preChangeRelation = preChangeRelation.union(removed)
+        }
+        return preChangeRelation
+    }
+    
+    private func preChangeRelations(relations: [Relation]) -> [Relation] {
+        return relations.map(self.preChangeRelation)
     }
 }
