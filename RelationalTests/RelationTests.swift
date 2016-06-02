@@ -1033,4 +1033,29 @@ class RelationTests: DBTestCase {
                         ["id", "name", "type"],
                         [1,    "cat",  "animal"]))
     }
+    
+    func testRedundantIntersection() {
+        let a = ChangeLoggingRelation(baseRelation:
+            MakeRelation(
+                ["id", "name", "type"]))
+        let i = a.intersection(a)
+        var lastChange: RelationChange?
+        _ = i.addChangeObserver({ lastChange = $0 })
+        
+        lastChange = nil
+        a.add(["id": 1, "name": "cat", "type": "animal"])
+        AssertEqual(lastChange?.added,
+                    MakeRelation(
+                        ["id", "name", "type"],
+                        [1,    "cat",  "animal"]))
+        AssertEqual(lastChange?.removed, nil)
+        
+        lastChange = nil
+        a.delete(true)
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed,
+                    MakeRelation(
+                        ["id", "name", "type"],
+                        [1,    "cat",  "animal"]))
+    }
 }
