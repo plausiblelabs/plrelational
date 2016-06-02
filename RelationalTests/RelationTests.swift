@@ -1058,4 +1058,23 @@ class RelationTests: DBTestCase {
                         ["id", "name", "type"],
                         [1,    "cat",  "animal"]))
     }
+    
+    func testRedundantDifference() {
+        let a = ChangeLoggingRelation(baseRelation:
+            MakeRelation(
+                ["id", "name", "type"]))
+        let i = a.difference(a)
+        var lastChange: RelationChange?
+        _ = i.addChangeObserver({ lastChange = $0 })
+        
+        lastChange = nil
+        a.add(["id": 1, "name": "cat", "type": "animal"])
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, nil)
+        
+        lastChange = nil
+        a.delete(true)
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, nil)
+    }
 }

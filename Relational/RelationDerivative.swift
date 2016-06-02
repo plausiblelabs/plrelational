@@ -130,13 +130,17 @@ extension RelationDifferentiator {
         let derivatives = r.operands.map({
             derivativeOf($0)
         })
-        let added0 = derivatives[0].added?.difference(r.operands[1])
-        let removed0 = derivatives[0].removed?.difference(r.operands[1])
-        let added1 = derivatives[1].removed?.intersection(r.operands[0])
-        let removed1 = derivatives[1].added?.intersection(r.operands[0])
+        let oldOperands = preChangeRelations(r.operands)
+        let added0 = derivatives[0].added?.difference(oldOperands[1])
+        let removed0 = derivatives[0].removed?.difference(oldOperands[1])
+        let added1 = derivatives[1].removed?.intersection(oldOperands[0])
+        let removed1 = derivatives[1].added?.intersection(oldOperands[0])
         
-        return RelationDerivative(added: union([added0, added1]),
-                                  removed: union([removed0, removed1]))
+        // Changes which occur on both sides simultaneously don't occur at all in the difference,
+        // so subtract the other derivative from each.
+        
+        return RelationDerivative(added: union([difference(added0, derivatives[1].added), difference(added1, derivatives[0].removed)]),
+                                  removed: union([difference(removed0, derivatives[1].removed), difference(removed1, derivatives[0].added)]))
     }
     
     private func projectionDerivative(r: IntermediateRelation, scheme: Scheme) -> RelationDerivative {
@@ -225,6 +229,16 @@ extension RelationDifferentiator {
             return nonnil[0]
         } else {
             return IntermediateRelation.intersection(nonnil)
+        }
+    }
+    
+    private func difference(a: Relation?, _ b: Relation?) -> Relation? {
+        if let a = a, b = b {
+            return a.difference(b)
+        } else if let a = a {
+            return a
+        } else {
+            return nil
         }
     }
     
