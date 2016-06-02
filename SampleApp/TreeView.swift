@@ -20,7 +20,9 @@ struct TreeViewModel<D: TreeData> {
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
     let move: ((srcPath: TreePath<D>, dstPath: TreePath<D>) -> Void)?
     let selection: BidiValueBinding<Set<D.ID>>
+    let cellIdentifier: (D) -> String
     let cellText: (D) -> ValueBinding<String>
+    let cellImage: (D) -> ValueBinding<Image>
 }
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
@@ -167,12 +169,14 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     // MARK: ExtOutlineViewDelegate
     
     func outlineView(outlineView: NSOutlineView, viewForTableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
-        // TODO: Make this configurable
-        let identifier = "PageCell"
         let node = item as! TreeNode<D>
+        let identifier = model.cellIdentifier(node.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
             textField.string = model.cellText(node.data)
+        }
+        if let imageView = view.imageView as? ImageView {
+            imageView.img = model.cellImage(node.data)
         }
         return view
     }

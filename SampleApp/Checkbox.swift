@@ -11,10 +11,10 @@ import Binding
 
 class Checkbox: NSButton {
     
-    enum CheckState {
-        case On
-        case Off
-        case Mixed
+    enum CheckState: String { case
+        On = "On",
+        Off = "Off",
+        Mixed = "Mixed"
         
         init(_ boolValue: Bool?) {
             switch boolValue {
@@ -24,6 +24,19 @@ class Checkbox: NSButton {
                 self = .Off
             case .Some(true):
                 self = .On
+            }
+        }
+        
+        init(_ nsValue: Int) {
+            switch nsValue {
+            case NSMixedState:
+                self = .Mixed
+            case NSOffState:
+                self = .Off
+            case NSOnState:
+                self = .On
+            default:
+                preconditionFailure("Must be one of {NSMixedState, NSOnState, NSOffState}")
             }
         }
         
@@ -104,5 +117,9 @@ class Checkbox: NSButton {
             newState = state == NSOnState ? .On : .Off
         }
         checked.commit(newState)
+    }
+    
+    override func accessibilityValue() -> AnyObject? {
+        return CheckState(state).rawValue
     }
 }
