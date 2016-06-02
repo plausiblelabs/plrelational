@@ -54,7 +54,7 @@ extension Relation {
                 result.append((name, subrelation))
             } else if let name = name, let subrelations = value as? [Relation] {
                 for (index, subrelation) in subrelations.enumerate() {
-                    result.append(("\(name)[\(index)]", subrelation))
+                    result.append(("\(name)_\(index)", subrelation))
                 }
             }
         }
@@ -135,7 +135,7 @@ extension Relation {
         print(rawDump(self))
     }
     
-    public func graphivizDump() {
+    public func graphivizDump(showContents showContents: Bool = false) {
         var seenIDs: Set<ObjectIdentifier> = []
         
         print("digraph relation_graph {")
@@ -147,7 +147,7 @@ extension Relation {
                 let idString = String(format: "_%lx", id.uintValue)
                 if !seenIDs.contains(id) {
                     let name = "\(r.dynamicType) \(idString)"
-                    let label = ([name] + supplemental).joinWithSeparator("\n")
+                    let label = ([name] + supplemental).joinWithSeparator("\n") + (showContents ? "\n" + r.description : "")
                     print("\(idString) [label=\"\(label)\"]")
                     for (name, child) in r.getChildRelationsForDump() {
                         let graphID = visit(child, nonobjectID: "\(idString)xxx\(name)")
