@@ -118,7 +118,7 @@ extension RelationDifferentiator {
         let added0 = derivatives[0].added?.difference(r.operands[1])
         let removed0 = derivatives[0].removed?.difference(r.operands[1])
         let added1 = derivatives[1].removed?.intersection(r.operands[0])
-        let removed1 = derivatives[1].removed?.intersection(r.operands[0])
+        let removed1 = derivatives[1].added?.intersection(r.operands[0])
         
         return RelationDerivative(added: union([added0, added1]),
                                   removed: union([removed0, removed1]))
