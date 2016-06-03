@@ -156,15 +156,9 @@ extension RelationDifferentiator {
         
         // + = ((A+ - (B - B+)) - B-) u ((B+ - (A - A+)) - A-)
         // - = (A- - (B - B-)) u (B- - (A - A-))
-        let added = union([
-            difference(difference(dA.added, difference(B, dB.added)), dB.removed),
-            difference(difference(dB.added, difference(A, dA.added)), dA.removed)
-            ])
-        
-        let removed = union([
-            difference(dA.removed, difference(B, dB.removed)),
-            difference(dB.removed, difference(A, dA.removed))
-            ])
+        let added = ((dA.added - (B - dB.added)) - dB.removed) + ((dB.added - (A - dA.added)) - dA.removed)
+        let removed = (dA.removed - (B - dB.removed)) + (dB.removed - (A - dA.removed))
+            
         return RelationDerivative(added: added, removed: removed)
     }
     
@@ -327,5 +321,28 @@ extension RelationDifferentiator {
     
     private func preChangeRelations(relations: [Relation]) -> [Relation] {
         return relations.map(self.preChangeRelation)
+    }
+}
+
+private func +(lhs: Relation?, rhs: Relation?) -> Relation? {
+    switch (lhs, rhs) {
+    case let (.Some(lhs), .Some(rhs)):
+        return lhs.union(rhs)
+    case let (.Some(lhs), .None):
+        return lhs
+    case let (.None, .Some(rhs)):
+        return rhs
+    case (.None, .None):
+        return nil
+    }
+}
+
+private func -(lhs: Relation?, rhs: Relation?) -> Relation? {
+    if let lhs = lhs, rhs = rhs {
+        return lhs.difference(rhs)
+    } else if let lhs = lhs {
+        return lhs
+    } else {
+        return nil
     }
 }
