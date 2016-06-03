@@ -20,7 +20,6 @@ class IntermediateRelation: Relation, RelationDefaultChangeObserverImplementatio
         
         switch op {
         case .Difference:
-            // TODO: handle more than two operands? [A, B, C] could turn into A - B - C somewhat sensibly.
             precondition(operands.count == 2)
         case .Project:
             precondition(operands.count == 1)
@@ -36,7 +35,7 @@ class IntermediateRelation: Relation, RelationDefaultChangeObserverImplementatio
         case .Aggregate:
             precondition(operands.count == 1)
         default:
-            precondition(operands.count > 0)
+            precondition(operands.count > 0 && operands.count <= 2)
         }
         LogRelationCreation(self)
     }
