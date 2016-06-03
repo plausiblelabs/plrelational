@@ -348,36 +348,3 @@ extension RelationDifferentiator {
         return relations.map(self.preChangeRelation)
     }
 }
-
-infix operator ∩ {}
-
-private func +(lhs: Relation?, rhs: Relation?) -> Relation? {
-    switch (lhs, rhs) {
-    case let (.Some(lhs), .Some(rhs)):
-        return lhs.union(rhs)
-    case let (.Some(lhs), .None):
-        return lhs
-    case let (.None, .Some(rhs)):
-        return rhs
-    case (.None, .None):
-        return nil
-    }
-}
-
-private func -(lhs: Relation?, rhs: Relation?) -> Relation? {
-    if let lhs = lhs, rhs = rhs {
-        return lhs.difference(rhs)
-    } else if let lhs = lhs {
-        return lhs
-    } else {
-        return nil
-    }
-}
-
-private func ∩(lhs: Relation?, rhs: Relation?) -> Relation? {
-    if let lhs = lhs, rhs = rhs {
-        return lhs.intersection(rhs)
-    } else {
-        return nil
-    }
-}

@@ -154,6 +154,7 @@
 		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
 		C2BD29951CD251A20081FD05 /* Store.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29991CD7ED900081FD05 /* SQLiteBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */; };
+		C2C2586A1D0203CC0066EB82 /* RelationOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C258691D0203CC0066EB82 /* RelationOperators.swift */; };
 		C2DF2B9E1CFDD81100ED8695 /* ObjectDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */; };
 		C2DF2BA01CFDE2B100ED8695 /* QueryRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */; };
 		C2DF2BA21D006E1C00ED8695 /* RelationDifferentiator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */; };
@@ -450,6 +451,7 @@
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
 		C2BD29911CD251870081FD05 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 		C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteBinding.swift; sourceTree = "<group>"; };
+		C2C258691D0203CC0066EB82 /* RelationOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationOperators.swift; sourceTree = "<group>"; };
 		C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectDictionary.swift; path = Relational/ObjectDictionary.swift; sourceTree = "<group>"; };
 		C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryRunnerTests.swift; sourceTree = "<group>"; };
 		C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiator.swift; sourceTree = "<group>"; };
@@ -909,6 +911,7 @@
 				C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */,
 				C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */,
 				C2B339DD1CEA54E7008568E9 /* RelationDump.swift */,
+				C2C258691D0203CC0066EB82 /* RelationOperators.swift */,
 				C22921E71CD12CF100518184 /* RelationTests.swift */,
 				C257C74B1CBD835600234A89 /* RelationParts.swift */,
 				C22921A71CCE587900518184 /* RelationValue.swift */,
@@ -1582,6 +1585,7 @@
 				C2FE9B971CEE02BC0004E635 /* RelationChange.swift in Sources */,
 				C22921DE1CD12AA600518184 /* SQLiteDatabase.swift in Sources */,
 				C22921DF1CD12AA600518184 /* SQLiteRelation.swift in Sources */,
+				C2C2586A1D0203CC0066EB82 /* RelationOperators.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
