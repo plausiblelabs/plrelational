@@ -243,16 +243,16 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         outlineView.beginUpdates()
 
         // TODO: Use a Set instead
-        var parentsToReload: [TreeNode<D>] = []
-        var parentsToExpand: [TreeNode<D>] = []
+        var itemsToReload: [TreeNode<D>] = []
+        var itemsToExpand: [TreeNode<D>] = []
         
         for change in changes {
             switch change {
             case let .Insert(path):
                 let rows = NSIndexSet(index: path.index)
                 outlineView.insertItemsAtIndexes(rows, inParent: path.parent, withAnimation: animation)
-                if let parent = path.parent where autoExpand {
-                    parentsToExpand.append(parent)
+                if let node = model.data.nodeAtPath(path) where autoExpand {
+                    itemsToExpand.append(node)
                 }
 
             case let .Delete(path):
@@ -265,13 +265,13 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
                 // the parent's emptiness is changing, so we have to do that manually
                 if let srcParent = srcPath.parent {
                     if srcParent.children.count == 0 {
-                        parentsToReload.append(srcParent)
+                        itemsToReload.append(srcParent)
                     }
                 }
                 if let dstParent = dstPath.parent {
                     if dstParent.children.count == 1 {
-                        parentsToReload.append(dstParent)
-                        parentsToExpand.append(dstParent)
+                        itemsToReload.append(dstParent)
+                        itemsToExpand.append(dstParent)
                     }
                 }
             }
@@ -279,8 +279,8 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         
         // Note: we need to wait until all insert/remove calls are processed above before
         // reloadItem() and/or expandItem() are called, otherwise NSOutlineView will get confused
-        parentsToReload.forEach(outlineView.reloadItem)
-        parentsToExpand.forEach(outlineView.expandItem)
+        itemsToReload.forEach(outlineView.reloadItem)
+        itemsToExpand.forEach(outlineView.expandItem)
 
         // XXX: This prevents a call to selection.set(); we need to figure out a better way, so that
         // if the selection changes as a result of e.g. deleting an item, we update our selection
