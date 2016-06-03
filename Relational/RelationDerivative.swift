@@ -273,18 +273,12 @@ extension RelationDifferentiator {
     }
     
     private func equijoinDerivative(r: IntermediateRelation, matching: [Attribute: Attribute]) -> RelationDerivative {
-        // Changes in a relation are joined with the other one to produce the final result.
-        // (A join B)' = (A' join B) union (A join B')
-        let derivatives = r.operands.map({
-            derivativeOf($0)
-        })
-        let added0 = derivatives[0].added?.equijoin(preChangeRelation(r.operands[1]), matching: matching)
-        let removed0 = derivatives[0].removed?.equijoin(preChangeRelation(r.operands[1]), matching: matching)
-        let added1 = derivatives[1].added.map({ preChangeRelation(r.operands[0]).equijoin($0, matching: matching) })
-        let removed1 = derivatives[1].removed.map({ preChangeRelation(r.operands[0]).equijoin($0, matching: matching) })
-        
-        return RelationDerivative(added: union([added0, added1]),
-                                  removed: union([removed0, removed1]))
+        // TODO: if we apply some brainpower we may be able to figure out how to compute this derivative without running
+        // the entire join multiple times just to compute the before/after differences.
+        let prejoin = preChangeRelation(r.operands[0]).equijoin(preChangeRelation(r.operands[1]), matching: matching)
+        let added = r - prejoin
+        let removed = prejoin - r
+        return RelationDerivative(added: added, removed: removed)
     }
     
     private func renameDerivative(r: IntermediateRelation, renames: [Attribute: Attribute]) -> RelationDerivative {
