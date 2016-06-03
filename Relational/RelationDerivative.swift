@@ -90,6 +90,28 @@
  + = ((A+ ∩ B) - B-) u ((B+ ∩ A) - A-)
  - = ((A- ∩ (B u B-)) - B+) u (((B- ∩ (A u A-)) - A+)
  
+ 
+ Difference table:
+ 
+  # |  A  |  B  | A - B |
+ ---+-----+-----+-------+
+  1 | in  | in+ |  in-  |
+  2 | in  | in- |  in+  |
+  3 | !in | in+ |       |
+  4 | !in | in- |       |
+  5 | in+ | in  |       |
+  6 | in+ | !in |  in+  |
+  7 | in+ | in+ |       |
+  8 | in+ | in- |  in+  |
+  9 | in- | in  |       |
+ 10 | in- | !in |  in-  |
+ 11 | in- | in+ |  in-  |
+ 12 | in- | in- |       |
+ ---+-----+-----+-------+
+ 
+ + = (A ∩ B-) + (A+ - B)
+ - = ((A - A+) ∩ B+) + ((A- - B-) - (B - B+))
+
  */
 
 class RelationDerivative {
@@ -207,24 +229,24 @@ extension RelationDifferentiator {
     }
     
     private func differenceDerivative(r: IntermediateRelation) -> RelationDerivative {
-        // When the first one changes, our changes are the same, minus the second.
-        // When the second one changes, then changes are reversed and intersected
-        // with the first.
-        // (A - B)' = (A' - B) union (A intersect reverse(B'))
-        let derivatives = r.operands.map({
-            derivativeOf($0)
-        })
-        let oldOperands = preChangeRelations(r.operands)
-        let added0 = derivatives[0].added?.difference(oldOperands[1])
-        let removed0 = derivatives[0].removed?.difference(oldOperands[1])
-        let added1 = derivatives[1].removed?.intersection(oldOperands[0])
-        let removed1 = derivatives[1].added?.intersection(oldOperands[0])
+        if r.operands.isEmpty {
+            return RelationDerivative(added: nil, removed: nil)
+        } else if r.operands.count == 1 {
+            return derivativeOf(r.operands[0])
+        }
         
-        // Changes which occur on both sides simultaneously don't occur at all in the difference,
-        // so subtract the other derivative from each.
+        // We only support two operands. (For now?)
+        let A = r.operands[0]
+        let B = r.operands[1]
+        let dA = derivativeOf(A)
+        let dB = derivativeOf(B)
         
-        return RelationDerivative(added: union([difference(added0, derivatives[1].added), difference(added1, derivatives[0].removed)]),
-                                  removed: union([difference(removed0, derivatives[1].removed), difference(removed1, derivatives[0].added)]))
+        // + = (A ∩ B-) + (A+ - B)
+        // - = ((A - A+) ∩ B+) + ((A- - B-) - (B - B+))
+        let added = (A ∩ dB.removed) + (dA.added - B)
+        let removed = ((A - dA.added) ∩ dB.added) + ((dA.removed - dB.removed) - (B - dB.added))
+        
+        return RelationDerivative(added: added, removed: removed)
     }
     
     private func projectionDerivative(r: IntermediateRelation, scheme: Scheme) -> RelationDerivative {

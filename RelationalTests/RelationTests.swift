@@ -1204,4 +1204,11 @@ class RelationTests: DBTestCase {
         AssertEqual(change?.added,   MakeRelation(["n"], [ 1], [ 5], [ 7]))
         AssertEqual(change?.removed, MakeRelation(["n"], [ 2], [ 9], [12]))
     }
+    
+    func testDifferenceObservationThoroughly() {
+        let change = thoroughObservationForOperator({ $0.difference($1) })
+        
+        AssertEqual(change?.added,   MakeRelation(["n"], [ 2], [ 6], [ 8]))
+        AssertEqual(change?.removed, MakeRelation(["n"], [ 1], [10], [11]))
+    }
 }
