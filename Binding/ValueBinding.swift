@@ -146,15 +146,23 @@ private class CommonValueBinding<T: Hashable>: ValueBinding<CommonValue<T>> {
     }
 }
 
-// XXX: Hmm, this requires a subclass implementation; lousy design
 public class BidiValueBinding<T>: ValueBinding<T> {
-    override init(initialValue: T) {
+    public override init(initialValue: T) {
         super.init(initialValue: initialValue)
     }
     
     public func update(newValue: T) {
+        setValue(newValue)
     }
     
     public func commit(newValue: T) {
+        setValue(newValue)
+    }
+}
+
+extension BidiValueBinding where T: BooleanType {
+    public func toggle() {
+        let newValue = !value
+        commit(newValue as! T)
     }
 }

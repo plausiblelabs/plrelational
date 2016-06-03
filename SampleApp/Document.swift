@@ -68,14 +68,19 @@ class Document: NSDocument {
         docModel = DocModel(undoManager: undoManager)
         docModel.addDefaultData()
         
-        // Create the "views"
+        // Create the views
         docOutlineView = DocOutlineView(model: docModel.docOutlineTreeViewModel, outlineView: documentOutlineView)
         inspectorView = InspectorView(model: docModel.inspectorTreeViewModel, outlineView: inspectorOutlineView)
         propertiesView = PropertiesView(frame: rightSidebarView.bounds, model: docModel.propertiesModel)
         rightSidebarView.addSubview(propertiesView)
+        rightSidebarView.visible = docModel.propertiesSidebarVisible
     }
     
     @IBAction func newPageAction(sender: NSMenuItem) {
         docModel.newCollection("Page", type: .Page, parentID: nil)
+    }
+    
+    @IBAction func togglePropertiesSidebar(sender: NSMenuItem) {
+        docModel.propertiesSidebarVisible.toggle()
     }
 }

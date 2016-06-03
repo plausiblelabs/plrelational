@@ -28,6 +28,7 @@
 		371243E71D0104F700E9BCFF /* RichTextUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371243E61D0104F700E9BCFF /* RichTextUITests.swift */; };
 		371243F61D01051700E9BCFF /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
 		371243F71D01051700E9BCFF /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
+		371243F91D024A9200E9BCFF /* ValueBindingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371243F81D024A9200E9BCFF /* ValueBindingTests.swift */; };
 		372707681CED2F8100710C80 /* AppTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707671CED2F8100710C80 /* AppTestCase.swift */; };
 		3727076B1CED32B000710C80 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076C1CEE60C900710C80 /* MutableRelation.swift */; };
@@ -336,6 +337,7 @@
 		371243E21D0104F700E9BCFF /* RichTextUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RichTextUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		371243E61D0104F700E9BCFF /* RichTextUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichTextUITests.swift; sourceTree = "<group>"; };
 		371243E81D0104F700E9BCFF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		371243F81D024A9200E9BCFF /* ValueBindingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ValueBindingTests.swift; path = BindingTests/ValueBindingTests.swift; sourceTree = SOURCE_ROOT; };
 		372707671CED2F8100710C80 /* AppTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppTestCase.swift; sourceTree = "<group>"; };
 		3727076C1CEE60C900710C80 /* MutableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelation.swift; sourceTree = "<group>"; };
 		3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArraySafeIndex.swift; sourceTree = "<group>"; };
@@ -612,6 +614,7 @@
 			isa = PBXGroup;
 			children = (
 				372707E11CFE2B6000710C80 /* ValueBinding.swift */,
+				371243F81D024A9200E9BCFF /* ValueBindingTests.swift */,
 				376136901CF11C0A00F572C5 /* RelationValueBinding.swift */,
 				3727077B1CF8F3C100710C80 /* RelationValueBindingTests.swift */,
 				376136921CF11C8D00F572C5 /* CommonValue.swift */,
@@ -1450,6 +1453,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				371243F91D024A9200E9BCFF /* ValueBindingTests.swift in Sources */,
 				372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */,
 				372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */,
 				372707D61CFE25D400710C80 /* RelationValueBindingTests.swift in Sources */,
@@ -2107,6 +2111,7 @@
 				371243EA1D0104F700E9BCFF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		371243F01D0104F700E9BCFF /* Build configuration list for PBXNativeTarget "RichTextTests" */ = {
 			isa = XCConfigurationList;
@@ -2115,6 +2120,7 @@
 				371243EC1D0104F700E9BCFF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		371243F11D0104F700E9BCFF /* Build configuration list for PBXNativeTarget "RichTextUITests" */ = {
 			isa = XCConfigurationList;
@@ -2123,6 +2129,7 @@
 				371243EE1D0104F700E9BCFF /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		372707B11CFE238700710C80 /* Build configuration list for PBXNativeTarget "Binding" */ = {
 			isa = XCConfigurationList;
