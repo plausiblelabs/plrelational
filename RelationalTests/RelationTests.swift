@@ -953,6 +953,67 @@ class RelationTests: DBTestCase {
         AssertEqual(lastChange?.removed, ConcreteRelation(["count": 2]))
     }
     
+    func testOtherwiseObservation() {
+        let a = ChangeLoggingRelation(baseRelation:
+            MakeRelation(
+                ["id", "name"]))
+        let b = ChangeLoggingRelation(baseRelation:
+            MakeRelation(
+                ["id", "name"]))
+        
+        let o = a.otherwise(b)
+        var lastChange: RelationChange?
+        _ = o.addChangeObserver({ lastChange = $0 })
+        
+        lastChange = nil
+        b.add(["id": 1, "name": "cat"])
+        AssertEqual(lastChange?.added,
+                    MakeRelation(
+                        ["id", "name"],
+                        [1,    "cat"]))
+        AssertEqual(lastChange?.removed, nil)
+        
+        lastChange = nil
+        a.add(["id": 2, "name": "dog"])
+        AssertEqual(lastChange?.added,
+                    MakeRelation(
+                        ["id", "name"],
+                        [2,    "dog"]))
+        AssertEqual(lastChange?.removed,
+                    MakeRelation(
+                        ["id", "name"],
+                        [1,    "cat"]))
+
+        lastChange = nil
+        b.delete(true)
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, nil)
+
+        lastChange = nil
+        b.add(["id": 1, "name": "cat"])
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed, nil)
+
+        lastChange = nil
+        a.delete(true)
+        AssertEqual(lastChange?.added,
+                    MakeRelation(
+                        ["id", "name"],
+                        [1,    "cat"]))
+        AssertEqual(lastChange?.removed,
+                    MakeRelation(
+                        ["id", "name"],
+                        [2,    "dog"]))
+        
+        lastChange = nil
+        b.delete(true)
+        AssertEqual(lastChange?.added, nil)
+        AssertEqual(lastChange?.removed,
+                    MakeRelation(
+                        ["id", "name"],
+                        [1,    "cat"]))
+    }
+
     func testUniqueObservation() {
         let a = ChangeLoggingRelation(baseRelation:
             MakeRelation(

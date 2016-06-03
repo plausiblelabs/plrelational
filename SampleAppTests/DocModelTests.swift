@@ -87,8 +87,23 @@ class DocModelTests: AppTestCase {
             selectedItemType: "",
             selectedItemName: "",
             selectedItemsOnlyText: false))
-        
+
         // Select a page in the doc outline
+        model.docOutlineTreeViewModel.selection.commit([4])
+        
+        // Verify that the inspector is updated to show the selected page
+        verifyTree(model.inspectorTreeViewModel.data, [
+            "Page2"
+        ])
+
+        // Verify properties-related bindings
+        verifyBindings(BindingVals(
+            itemSelected: true,
+            selectedItemType: "Page",
+            selectedItemName: "Page2",
+            selectedItemsOnlyText: false))
+
+        // Select a page in the doc outline that contains objects
         model.docOutlineTreeViewModel.selection.commit([3])
 
         // Verify that the inspector is updated to show the selected page and its objects
