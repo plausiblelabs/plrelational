@@ -35,7 +35,7 @@ private var completionScheduled = false
             print("Starting top-level iteration of:")
             caller.simpleDump()
             caller.uniquingDump()
-            caller.graphivizDump()
+            caller.graphvizDump()
             caller.fullDebugDump(showContents: false)
             
             if !completionScheduled {
