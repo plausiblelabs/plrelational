@@ -11,14 +11,10 @@
                 <outlet property="documentOutlineView" destination="DUb-hy-bRa" id="3oy-Iq-sOS"/>
                 <outlet property="inspectorOutlineView" destination="puU-ni-rOg" id="EQo-fm-dxF"/>
                 <outlet property="inspectorScrollView" destination="aCJ-Vg-V4H" id="8Wh-a9-SdO"/>
-                <outlet property="itemTypeLabel" destination="2pJ-FT-z5s" id="HkU-XK-jZs"/>
                 <outlet property="leftSidebarSplitView" destination="8FH-d9-e28" id="OQf-6b-Hzr"/>
                 <outlet property="leftSidebarView" destination="yub-2Y-fYN" id="bcf-Jh-icx"/>
                 <outlet property="mainSplitView" destination="IvO-8k-h2R" id="rbH-ZS-3MS"/>
-                <outlet property="nameLabel" destination="3GU-I4-dCu" id="Yc5-eC-RJd"/>
-                <outlet property="nameTextField" destination="zjO-DO-Dci" id="bjN-lC-PVO"/>
                 <outlet property="newItemButton" destination="ihR-db-9mo" id="xYg-td-lim"/>
-                <outlet property="noSelectionLabel" destination="xAE-E4-WGq" id="AMd-Pf-agy"/>
                 <outlet property="rightSidebarView" destination="26w-XZ-NoD" id="VvC-oF-KX1"/>
                 <outlet property="window" destination="OvC-Hn-tzl" id="e8J-i0-z39"/>
             </connections>
@@ -267,40 +263,6 @@
                             <customView id="26w-XZ-NoD" userLabel="Right Sidebar View" customClass="BackgroundView" customModule="SampleApp" customModuleProvider="target">
                                 <rect key="frame" x="740" y="0.0" width="260" height="800"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <subviews>
-                                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zjO-DO-Dci" customClass="TextField" customModule="SampleApp" customModuleProvider="target">
-                                        <rect key="frame" x="71" y="743" width="169" height="22"/>
-                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="fBB-1O-RvN">
-                                            <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3GU-I4-dCu" customClass="TextField" customModule="SampleApp" customModuleProvider="target">
-                                        <rect key="frame" x="18" y="746" width="40" height="17"/>
-                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Name" id="XMg-1z-M85">
-                                            <font key="font" metaFont="system"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2pJ-FT-z5s" customClass="TextField" customModule="SampleApp" customModuleProvider="target">
-                                        <rect key="frame" x="18" y="773" width="224" height="17"/>
-                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="Thing" id="obO-Wg-Q5x">
-                                            <font key="font" metaFont="systemBold"/>
-                                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                    <textField hidden="YES" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xAE-E4-WGq" customClass="TextField" customModule="SampleApp" customModuleProvider="target">
-                                        <rect key="frame" x="18" y="391" width="224" height="19"/>
-                                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="center" title="No Selection" id="i1B-jp-ymm">
-                                            <font key="font" metaFont="systemBold" size="16"/>
-                                            <color key="textColor" name="disabledControlTextColor" catalog="System" colorSpace="catalog"/>
-                                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
-                                        </textFieldCell>
-                                    </textField>
-                                </subviews>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="260" id="BWz-mj-roo"/>
                                 </constraints>

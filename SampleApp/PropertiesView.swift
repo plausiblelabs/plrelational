@@ -9,39 +9,67 @@
 import Cocoa
 import Binding
 
-// Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
-// a single Document.xib, so this class simply manages a subset of views defined in that xib.
-class PropertiesView {
+class PropertiesView: BackgroundView {
     private let model: PropertiesModel
     
-    private let itemTypeLabel: TextField
-    private let nameLabel: TextField
-    private let nameField: TextField
-    private let noSelectionLabel: TextField
+    private var itemTypeLabel: TextField!
+    private var nameLabel: TextField!
+    private var nameField: TextField!
+    private var noSelectionLabel: TextField!
 
     private var textObjectPropertiesView: TextObjectPropertiesView?
     private var textObjectPropertiesObserverRemoval: ObserverRemoval?
     
-    init(model: PropertiesModel, itemTypeLabel: TextField, nameLabel: TextField, nameField: TextField, noSelectionLabel: TextField) {
+    init(frame: NSRect, model: PropertiesModel) {
         self.model = model
-        self.itemTypeLabel = itemTypeLabel
-        self.nameLabel = nameLabel
-        self.nameField = nameField
-        self.noSelectionLabel = noSelectionLabel
+
+        super.init(frame: frame)
+
+        let pad: CGFloat = 12.0
+
+        func label(frame: NSRect) -> TextField {
+            let field = TextField(frame: frame)
+            field.editable = false
+            field.bezeled = false
+            field.backgroundColor = NSColor.clearColor()
+            field.font = NSFont.boldSystemFontOfSize(13)
+            return field
+        }
         
+        func field(frame: NSRect) -> TextField {
+            return TextField(frame: frame)
+        }
+        
+        itemTypeLabel = label(NSMakeRect(pad, 12, frame.width - (pad * 2), 24))
+        itemTypeLabel.alignment = .Center
         itemTypeLabel.string = model.selectedItemTypesString
         itemTypeLabel.visible = model.itemSelected
-
+        addSubview(itemTypeLabel)
+        
+        nameLabel = label(NSMakeRect(pad, 52, 50, 24))
+        nameLabel.stringValue = "Name"
+        nameLabel.alignment = .Right
         nameLabel.visible = model.itemSelected
+        addSubview(nameLabel)
 
+        nameField = field(NSMakeRect(nameLabel.frame.maxX + pad, 50, frame.width - nameLabel.frame.maxX - (pad * 2), 24))
         nameField.string = model.selectedItemNames
         nameField.placeholder = model.selectedItemNamesPlaceholder
         nameField.visible = model.itemSelected
-
+        addSubview(nameField)
+        
+        noSelectionLabel = label(NSMakeRect(pad, 400, frame.width - (pad * 2), 24))
+        noSelectionLabel.stringValue = "No Selection"
+        noSelectionLabel.alignment = .Center
         noSelectionLabel.visible = model.itemNotSelected
+        addSubview(noSelectionLabel)
 
         updateTextSection()
         textObjectPropertiesObserverRemoval = model.textObjectProperties.addChangeObserver({ [weak self] _ in self?.updateTextSection() })
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     deinit {

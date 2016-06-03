@@ -19,10 +19,6 @@ class Document: NSDocument {
     @IBOutlet var contentView: BackgroundView!
     @IBOutlet var newItemButton: NSPopUpButton!
     @IBOutlet var rightSidebarView: BackgroundView!
-    @IBOutlet var itemTypeLabel: TextField!
-    @IBOutlet var nameTextField: TextField!
-    @IBOutlet var nameLabel: TextField!
-    @IBOutlet var noSelectionLabel: TextField!
 
     var docOutlineView: DocOutlineView!
     var inspectorView: InspectorView!
@@ -75,7 +71,8 @@ class Document: NSDocument {
         // Create the "views"
         docOutlineView = DocOutlineView(model: docModel.docOutlineTreeViewModel, outlineView: documentOutlineView)
         inspectorView = InspectorView(model: docModel.inspectorTreeViewModel, outlineView: inspectorOutlineView)
-        propertiesView = PropertiesView(model: docModel.propertiesModel, itemTypeLabel: itemTypeLabel, nameLabel: nameLabel, nameField: nameTextField, noSelectionLabel: noSelectionLabel)
+        propertiesView = PropertiesView(frame: rightSidebarView.bounds, model: docModel.propertiesModel)
+        rightSidebarView.addSubview(propertiesView)
     }
     
     @IBAction func newPageAction(sender: NSMenuItem) {
