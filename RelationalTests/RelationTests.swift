@@ -1139,7 +1139,7 @@ class RelationTests: DBTestCase {
         AssertEqual(lastChange?.removed, nil)
     }
     
-    func testUnionObservationThoroughly() {
+    func thoroughObservationForOperator(opF: (Relation, Relation) -> Relation) -> RelationChange? {
         let sqliteDB = makeDB().db.sqliteDatabase
         let initial = MakeRelation(
             ["n", "A", "B"],
@@ -1168,10 +1168,10 @@ class RelationTests: DBTestCase {
         
         let a = base.select(Attribute("A") *== 1).project(["n"])
         let b = base.select(Attribute("B") *== 1).project(["n"])
-        let u = a.union(b)
+        let combined = opF(a, b)
         
         var lastChange: RelationChange?
-        _ = u.addChangeObserver({ lastChange = $0 })
+        _ = combined.addChangeObserver({ lastChange = $0 })
         
         db.transaction({
             base.update(Attribute("n") *==  1, newValues: ["A": 1, "B": 1])
@@ -1188,9 +1188,20 @@ class RelationTests: DBTestCase {
             base.update(Attribute("n") *== 12, newValues: ["A": 0, "B": 0])
         })
         
-        lastChange?.added?.graphvizDump(showContents: true)
+        return lastChange
+    }
+    
+    func testUnionObservationThoroughly() {
+        let change = thoroughObservationForOperator({ $0.union($1) })
         
-        AssertEqual(lastChange?.added,   MakeRelation(["n"], [ 3], [ 6], [ 7]))
-        AssertEqual(lastChange?.removed, MakeRelation(["n"], [ 4], [10], [12]))
+        AssertEqual(change?.added,   MakeRelation(["n"], [ 3], [ 6], [ 7]))
+        AssertEqual(change?.removed, MakeRelation(["n"], [ 4], [10], [12]))
+    }
+    
+    func testIntersectionObservationThoroughly() {
+        let change = thoroughObservationForOperator({ $0.intersection($1) })
+        
+        AssertEqual(change?.added,   MakeRelation(["n"], [ 1], [ 5], [ 7]))
+        AssertEqual(change?.removed, MakeRelation(["n"], [ 2], [ 9], [12]))
     }
 }

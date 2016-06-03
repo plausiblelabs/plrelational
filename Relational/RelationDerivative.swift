@@ -49,7 +49,7 @@
  
  Union table:
  
- #  |  A  |  B  | A u B |
+  # |  A  |  B  | A u B |
  ---+-----+-----+-------+
   1 | in  | in+ |       |
   2 | in  | in- |       |
@@ -68,7 +68,30 @@
  + = ((A+ - (B - B+)) - B-) u ((B+ - (A - A+)) - A-)
  - = (A- - (B - B-)) u (B- - (A - A-))
  
+ 
+ Intersection table:
+ 
+  # |  A  |  B  | A ∩ B |
+ ---+-----+-----+-------+
+  1 | in  | in+ |  in+  |
+  2 | in  | in- |  in-  |
+  3 | !in | in+ |       |
+  4 | !in | in- |       |
+  5 | in+ | in  |  in+  |
+  6 | in+ | !in |       |
+  7 | in+ | in+ |  in+  |
+  8 | in+ | in- |       |
+  9 | in- | in  |  in-  |
+ 10 | in- | !in |       |
+ 11 | in- | in+ |       |
+ 12 | in- | in- |  in-  |
+ ---+-----+-----+-------+
+ 
+ + = ((A+ ∩ B) - B-) u ((B+ ∩ A) - A-)
+ - = ((A- ∩ (B u B-)) - B+) u (((B- ∩ (A u A-)) - A+)
+ 
  */
+
 class RelationDerivative {
     let added: Relation?
     let removed: Relation?
@@ -163,28 +186,24 @@ extension RelationDifferentiator {
     }
     
     private func intersectionDerivative(r: IntermediateRelation) -> RelationDerivative {
-        // Adding or removing a row from one part of an intersection alters the intersection
-        // iff the row is already in another part of the intersection.
-        // The derivative of an intersection is equal to the derivative of each part, with
-        // other parts intersected, all unioned together.
-        // (A intersect B)' = (A' intersect B) union (B' intersect A)
-        let pieces = r.operands.enumerate().map({ (index, operand) -> (added: Relation?, removed: Relation?) in
-            let derivative = derivativeOf(operand)
-            return (
-                derivative.added?.intersection(IntermediateRelation.union(r.otherOperands(index))),
-                derivative.removed?.intersection(IntermediateRelation.union(r.otherOperands(index)))
-            )
-        })
+        if r.operands.isEmpty {
+            return RelationDerivative(added: nil, removed: nil)
+        } else if r.operands.count == 1 {
+            return derivativeOf(r.operands[0])
+        }
         
-        // We must also account for changes which apply everywhere simultaneously.
-        // The intersection of all operand changes is our change too.
-        let allDerivatives = r.operands.map(derivativeOf)
-        let withAll = pieces + [(
-            added: intersection(allDerivatives.map({ $0.added })),
-            removed: intersection(allDerivatives.map({ $0.removed })))]
+        // We only support two operands. (For now?)
+        let A = r.operands[0]
+        let B = r.operands[1]
+        let dA = derivativeOf(A)
+        let dB = derivativeOf(B)
         
-        return RelationDerivative(added: union(withAll.map({ $0.added })),
-                                  removed: union(withAll.map({ $0.removed })))
+        // + = ((A+ ∩ B) - B-) u ((B+ ∩ A) - A-)
+        // - = ((A- ∩ (B u B-)) - B+) u (((B- ∩ (A u A-)) - A+)
+        let added = ((dA.added ∩ B) - dB.removed) + ((dB.added ∩ A) - dA.removed)
+        let removed = ((dA.removed ∩ (B + dB.removed)) - dB.added) + ((dB.removed ∩ (A + dA.removed)) - dA.added)
+        
+        return RelationDerivative(added: added, removed: removed)
     }
     
     private func differenceDerivative(r: IntermediateRelation) -> RelationDerivative {
@@ -324,6 +343,8 @@ extension RelationDifferentiator {
     }
 }
 
+infix operator ∩ {}
+
 private func +(lhs: Relation?, rhs: Relation?) -> Relation? {
     switch (lhs, rhs) {
     case let (.Some(lhs), .Some(rhs)):
@@ -342,6 +363,14 @@ private func -(lhs: Relation?, rhs: Relation?) -> Relation? {
         return lhs.difference(rhs)
     } else if let lhs = lhs {
         return lhs
+    } else {
+        return nil
+    }
+}
+
+private func ∩(lhs: Relation?, rhs: Relation?) -> Relation? {
+    if let lhs = lhs, rhs = rhs {
+        return lhs.intersection(rhs)
     } else {
         return nil
     }
