@@ -1138,4 +1138,59 @@ class RelationTests: DBTestCase {
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed, nil)
     }
+    
+    func testUnionObservationThoroughly() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let initial = MakeRelation(
+            ["n", "A", "B"],
+            [ 1,   1,   0 ],
+            [ 2,   1,   1 ],
+            [ 3,   0,   0 ],
+            [ 4,   0,   1 ],
+            [ 5,   0,   1 ],
+            [ 6,   0,   0 ],
+            [ 7,   0,   0 ],
+            [ 8,   0,   1 ],
+            [ 9,   1,   1 ],
+            [10,   1,   0 ],
+            [11,   1,   0 ],
+            [12,   1,   1 ]
+        )
+        
+        let sqliteBase = sqliteDB.createRelation("base", scheme: initial.scheme).ok!
+        for row in initial.rows() {
+            let result = sqliteBase.add(row.ok!)
+            XCTAssertNil(result.err)
+        }
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let base = db["base"]
+        
+        let a = base.select(Attribute("A") *== 1).project(["n"])
+        let b = base.select(Attribute("B") *== 1).project(["n"])
+        let u = a.union(b)
+        
+        var lastChange: RelationChange?
+        _ = u.addChangeObserver({ lastChange = $0 })
+        
+        db.transaction({
+            base.update(Attribute("n") *==  1, newValues: ["A": 1, "B": 1])
+            base.update(Attribute("n") *==  2, newValues: ["A": 1, "B": 0])
+            base.update(Attribute("n") *==  3, newValues: ["A": 0, "B": 1])
+            base.update(Attribute("n") *==  4, newValues: ["A": 0, "B": 0])
+            base.update(Attribute("n") *==  5, newValues: ["A": 1, "B": 1])
+            base.update(Attribute("n") *==  6, newValues: ["A": 1, "B": 0])
+            base.update(Attribute("n") *==  7, newValues: ["A": 1, "B": 1])
+            base.update(Attribute("n") *==  8, newValues: ["A": 1, "B": 0])
+            base.update(Attribute("n") *==  9, newValues: ["A": 0, "B": 1])
+            base.update(Attribute("n") *== 10, newValues: ["A": 0, "B": 0])
+            base.update(Attribute("n") *== 11, newValues: ["A": 0, "B": 1])
+            base.update(Attribute("n") *== 12, newValues: ["A": 0, "B": 0])
+        })
+        
+        lastChange?.added?.graphvizDump(showContents: true)
+        
+        AssertEqual(lastChange?.added,   MakeRelation(["n"], [ 3], [ 6], [ 7]))
+        AssertEqual(lastChange?.removed, MakeRelation(["n"], [ 4], [10], [12]))
+    }
 }

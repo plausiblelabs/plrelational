@@ -1,4 +1,74 @@
 
+/*
+ 
+ For pure binary operations, where the scheme is the same on both sides, any given row
+ can be in or not in either side before or after.
+ 
+ Notation for the status of a row in a relation:
+ 
+ in - Present both before and after a change.
+ !in - Not present before nor after.
+ in+ - Added to the relation, in the "added" set.
+ in- - Removed from the relation, in the "removed" set.
+ 
+ 
+ Binary operation table for one row R in A op B:
+ 
+   A  in   !in  in+  in-
+ B
+  in  X     X    ?    ?
+ !in  X     X    ?    ?
+ in+  ?     ?    ?    ?
+ in-  ?     ?    ?    ?
+ 
+ There are sixteen before-and-after possibilities for a row. Four of them involve no change
+ and can be ignored, leaving us with twelve potential changes:
+ 
+ Linear table:
+ 
+ #  |  A  |  B  |
+ ---+-----+-----+
+  1 | in  | in+ |
+  2 | in  | in- |
+  3 | !in | in+ |
+  4 | !in | in- |
+  5 | in+ | in  |
+  6 | in+ | !in |
+  7 | in+ | in+ |
+  8 | in+ | in- |
+  9 | in- | in  |
+ 10 | in- | !in |
+ 11 | in- | in+ |
+ 12 | in- | in- |
+ ---+-----+-----+
+ 
+ For each operation, this table can be evaluated for the status of each row, then a relation
+ created that generates the proper result for each row. This will produce the correct derivative.
+ Since we only care about changes, the output doesn't need `in` or `!in`, only `in+` and `in-`.
+ 
+ 
+ Union table:
+ 
+ #  |  A  |  B  | A u B |
+ ---+-----+-----+-------+
+  1 | in  | in+ |       |
+  2 | in  | in- |       |
+  3 | !in | in+ |  in+  |
+  4 | !in | in- |  in-  |
+  5 | in+ | in  |       |
+  6 | in+ | !in |  in+  |
+  7 | in+ | in+ |  in+  |
+  8 | in+ | in- |       |
+  9 | in- | in  |       |
+ 10 | in- | !in |  in-  |
+ 11 | in- | in+ |       |
+ 12 | in- | in- |  in-  |
+ ---+-----+-----+-------+
+ 
+ + = ((A+ - (B - B+)) - B-) u ((B+ - (A - A+)) - A-)
+ - = (A- - (B - B-)) u (B- - (A - A-))
+ 
+ */
 class RelationDerivative {
     let added: Relation?
     let removed: Relation?
@@ -72,29 +142,30 @@ extension RelationDifferentiator {
     }
     
     private func unionDerivative(r: IntermediateRelation) -> RelationDerivative {
-        // Adding a row to one part of a union adds that row to the union iff the row
-        // isn't already present in one of the other relations. Same for removals.
-        // The derivative of a union is equal to the derivative of each part, with
-        // other parts subtracted, all unioned together.
-        // (A union B)' = (A' - B) union (B' - A)
-        let pieces = r.operands.enumerate().map({ (index, operand) -> (added: Relation?, removed: Relation?) in
-            let derivative = derivativeOf(operand)
-            let otherUnion = IntermediateRelation.union(preChangeRelations(r.otherOperands(index)))
-            return (
-                derivative.added?.difference(otherUnion),
-                derivative.removed?.difference(otherUnion)
-            )
-        })
+        if r.operands.isEmpty {
+            return RelationDerivative(added: nil, removed: nil)
+        } else if r.operands.count == 1 {
+            return derivativeOf(r.operands[0])
+        }
         
-        // We must also account for changes which apply everywhere simultaneously.
-        // The intersection of all operand changes is our change too.
-        let allDerivatives = r.operands.map(derivativeOf)
-        let withAll = pieces + [(
-            added: intersection(allDerivatives.map({ $0.added })),
-            removed: intersection(allDerivatives.map({ $0.removed })))]
+        // We only support two operands. (For now?)
+        let A = r.operands[0]
+        let B = r.operands[1]
+        let dA = derivativeOf(A)
+        let dB = derivativeOf(B)
         
-        return RelationDerivative(added: union(withAll.map({ $0.added })),
-                                  removed: union(withAll.map({ $0.removed })))
+        // + = ((A+ - (B - B+)) - B-) u ((B+ - (A - A+)) - A-)
+        // - = (A- - (B - B-)) u (B- - (A - A-))
+        let added = union([
+            difference(difference(dA.added, difference(B, dB.added)), dB.removed),
+            difference(difference(dB.added, difference(A, dA.added)), dA.removed)
+            ])
+        
+        let removed = union([
+            difference(dA.removed, difference(B, dB.removed)),
+            difference(dB.removed, difference(A, dA.removed))
+            ])
+        return RelationDerivative(added: added, removed: removed)
     }
     
     private func intersectionDerivative(r: IntermediateRelation) -> RelationDerivative {
