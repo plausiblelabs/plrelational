@@ -101,7 +101,7 @@ extension IntermediateRelation {
         }
     }
     
-    private func allDerivatives() -> [(withRespectTo: Relation, addPlaceholder: IntermediateRelation, removePlaceholder: IntermediateRelation, derivative: RelationDerivative)] {
+    private func allDerivatives() -> [(withRespectTo: Relation, addPlaceholder: IntermediateRelation, removePlaceholder: IntermediateRelation, derivative: RelationChange)] {
         let planner = QueryPlanner(root: self)
         return planner.initiators.flatMap({ initiator in
             guard let relation = planner.initiatorRelation(initiator) as? protocol<Relation, AnyObject> else { return nil }
