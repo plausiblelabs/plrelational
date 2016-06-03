@@ -64,18 +64,6 @@ public class RelationTreeBinding: TreeBinding<Row> {
         
         super.init(root: rootNode)
         
-        func handle(relation: Relation, inout _ treeChanges: [Change], _ f: (Row) -> [Change]) {
-            for rowResult in relation.rows() {
-                switch rowResult {
-                case .Ok(let row):
-                    treeChanges.appendContentsOf(f(row))
-                case .Err(let err):
-                    // TODO: error handling again
-                    fatalError("Error fetching rows: \(err)")
-                }
-            }
-        }
-        
         self.removal = relation.addChangeObserver({ changes in
             var treeChanges: [Change] = []
             
@@ -86,12 +74,17 @@ public class RelationTreeBinding: TreeBinding<Row> {
                 } else {
                     added = adds
                 }
-                handle(added, &treeChanges, self.onInsert)
+                // TODO: Error handling
+                let addedRows = added.rows().flatMap{$0.ok}
+                treeChanges.appendContentsOf(self.onInsert(addedRows))
             }
             
             if let adds = changes.added, removes = changes.removed {
                 let updated = removes.project([self.idAttr]).join(adds)
-                handle(updated, &treeChanges, self.onUpdate)
+                let updatedRows = updated.rows().flatMap{$0.ok}
+                for row in updatedRows {
+                    treeChanges.appendContentsOf(self.onUpdate(row))
+                }
             }
 
             if let removes = changes.removed {
@@ -105,8 +98,6 @@ public class RelationTreeBinding: TreeBinding<Row> {
                 // Observers should only be notified about the top-most nodes that were deleted.
                 // We handle this by looking at the identifiers of the rows/nodes to be deleted,
                 // and only deleting the unique (top-most) parents.
-                // TODO: We should probably do something similar for Inserts, for the case where a
-                // subtree is inserted within one transaction
                 let idsToDelete: [RelationValue] = removed.rows().flatMap{$0.ok?[self.idAttr]}
                 for id in idsToDelete {
                     if let node = self.nodeForID(id) {
@@ -140,27 +131,55 @@ public class RelationTreeBinding: TreeBinding<Row> {
         relation.add(mutableRow)
     }
     
-    private func onInsert(row: Row) -> [Change] {
-
+    private func onInsert(rows: [Row]) -> [Change] {
+        
         func insertNode(node: Node, parent: Node) -> Int {
-            return parent.children.insertSorted(node, { self.orderForNode($0) })
+            return parent.children.insertSorted(node, { $0.data[self.orderAttr] })
         }
 
-        let node = RowTreeNode(id: row[idAttr], row: row, parentAttr: parentAttr)
-        let parentID = row[parentAttr]
-        let parent: Node?
-        let index: Int
-        if parentID != .NULL {
-            let parentNode = nodeForID(parentID)!
-            parent = parentNode
-            index = insertNode(node, parent: parentNode)
-        } else {
-            parent = nil
-            index = insertNode(node, parent: root)
+        // Observers should only be notified about the top-most nodes that were inserted.
+        // Additionally, we need to take care to handle the case where a child node
+        // insertion change is reported before its parent is inserted into the in-memory
+        // tree structure.  We handle this by keeping a dictionary of nodes to be inserted,
+        // and then attach them to the in-memory tree structure in a second pass.
+        var nodeDict: [RelationValue: Node] = [:]
+        for row in rows {
+            let rowID = row[idAttr]
+            nodeDict[rowID] = RowTreeNode(id: rowID, row: row, parentAttr: parentAttr)
         }
         
-        let path = Path(parent: parent, index: index)
-        return [.Insert(path)]
+        // Wire up nodes to parents that only exist in the node dictionary
+        var nodesToDrop: [RelationValue] = []
+        for node in nodeDict.values {
+            if let parentID = node.parentID {
+                if let parent = nodeDict[parentID] {
+                    insertNode(node, parent: parent)
+                    nodesToDrop.append(node.id)
+                }
+            }
+        }
+        nodesToDrop.forEach{ nodeDict.removeValueForKey($0) }
+        
+        // Now attach the remaining nodes to the in-memory tree structure
+        var changes: [Change] = []
+        for node in nodeDict.values {
+            if let parentID = node.parentID {
+                if let parent = nodeForID(parentID) {
+                    // Attach the node to the existing parent node
+                    let index = insertNode(node, parent: parent)
+                    changes.append(.Insert(Path(parent: parent, index: index)))
+                } else {
+                    // The parent does not exist; doom
+                    fatalError("Parent does not already exist in tree structure")
+                }
+            } else {
+                // The node will be attached to the root node
+                let index = insertNode(node, parent: root)
+                changes.append(.Insert(Path(parent: nil, index: index)))
+            }
+        }
+        
+        return changes
     }
     
     public func delete(id: RelationValue) {
