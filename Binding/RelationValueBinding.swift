@@ -12,14 +12,12 @@ private class RelationValueBinding<T>: ValueBinding<T> {
     private var removal: ObserverRemoval!
     
     init(relation: Relation, relationToValue: Relation -> T, valueChanging: (T, T) -> Bool) {
-        super.init(initialValue: relationToValue(relation))
+        super.init(initialValue: relationToValue(relation), valueChanging: valueChanging)
         
         self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
             let newValue = relationToValue(relation)
-            if valueChanging(weakSelf.value, newValue) {
-                weakSelf.setValue(newValue)
-            }
+            weakSelf.setValue(newValue)
         })
     }
 }
@@ -81,7 +79,7 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
     init(relation: Relation, config: RelationBidiConfig<T>, relationToValue: Relation -> T, valueChanging: (T, T) -> Bool) {
         self.config = config
 
-        super.init(initialValue: relationToValue(relation))
+        super.init(initialValue: relationToValue(relation), valueChanging: valueChanging)
     
         self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
@@ -89,9 +87,7 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
             if weakSelf.selfInitiatedChange { return }
             
             let newValue = relationToValue(relation)
-            if valueChanging(weakSelf.value, newValue) {
-                weakSelf.setValue(newValue)
-            }
+            weakSelf.setValue(newValue)
         })
     }
     
@@ -282,22 +278,6 @@ extension Relation {
     /// according to the provided bidi configuration.
     public func bindBidi<V: Equatable>(config: RelationBidiConfig<V?>, relationToValue: Relation -> V?) -> BidiValueBinding<V?> {
         return RelationBidiValueBinding(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
-    }
-
-    private func valueChanging<T>(v0: T, v1: T) -> Bool {
-        return true
-    }
-    
-    private func valueChanging<T: Equatable>(v0: T, v1: T) -> Bool {
-        return v0 != v1
-    }
-    
-    private func valueChanging<T>(v0: T?, v1: T?) -> Bool {
-        return true
-    }
-    
-    private func valueChanging<T: Equatable>(v0: T?, v1: T?) -> Bool {
-        return v0 != v1
     }
 }
 

@@ -14,11 +14,13 @@ public class ValueBinding<T>: Binding {
     public typealias ChangeObserver = Changes -> Void
     
     internal(set) public var value: T
+    private let changing: (T, T) -> Bool
     private var changeObservers: [UInt64: ChangeObserver] = [:]
     private var changeObserverNextID: UInt64 = 0
     
-    public init(initialValue: T) {
+    public init(initialValue: T, valueChanging: (T, T) -> Bool = valueChanging) {
         self.value = initialValue
+        self.changing = valueChanging
     }
     
     public func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval {
@@ -35,9 +37,10 @@ public class ValueBinding<T>: Binding {
     }
     
     internal func setValue(value: T) {
-        // TODO: Don't notify if value is not actually changing
-        self.value = value
-        self.notifyChangeObservers()
+        if changing(self.value, value) {
+            self.value = value
+            self.notifyChangeObservers()
+        }
     }
 }
 
@@ -147,8 +150,8 @@ private class CommonValueBinding<T: Hashable>: ValueBinding<CommonValue<T>> {
 }
 
 public class BidiValueBinding<T>: ValueBinding<T> {
-    public override init(initialValue: T) {
-        super.init(initialValue: initialValue)
+    public override init(initialValue: T, valueChanging: (T, T) -> Bool) {
+        super.init(initialValue: initialValue, valueChanging: valueChanging)
     }
     
     public func update(newValue: T) {
@@ -160,9 +163,31 @@ public class BidiValueBinding<T>: ValueBinding<T> {
     }
 }
 
+extension BidiValueBinding where T: Equatable {
+    public convenience init(_ initialValue: T) {
+        self.init(initialValue: initialValue, valueChanging: valueChanging)
+    }
+}
+
 extension BidiValueBinding where T: BooleanType {
     public func toggle() {
         let newValue = !value
         commit(newValue as! T)
     }
+}
+
+internal func valueChanging<T>(v0: T, v1: T) -> Bool {
+    return true
+}
+
+internal func valueChanging<T: Equatable>(v0: T, v1: T) -> Bool {
+    return v0 != v1
+}
+
+internal func valueChanging<T>(v0: T?, v1: T?) -> Bool {
+    return true
+}
+
+internal func valueChanging<T: Equatable>(v0: T?, v1: T?) -> Bool {
+    return v0 != v1
 }

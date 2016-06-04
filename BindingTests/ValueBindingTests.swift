@@ -12,7 +12,7 @@ import XCTest
 class ValueBindingTests: BindingTestCase {
     
     func testBidiBoolBinding() {
-        let binding = BidiValueBinding(initialValue: false)
+        let binding = BidiValueBinding(false)
         var changed = false
         _ = binding.addChangeObserver({ _ in changed = true })
         
@@ -37,8 +37,7 @@ class ValueBindingTests: BindingTestCase {
 
         binding.commit(true)
         XCTAssertEqual(binding.value, true)
-        // TODO: Verify that change observers aren't notified when value isn't changing
-        //XCTAssertEqual(changed, false)
+        XCTAssertEqual(changed, false)
         changed = false
     }
 }

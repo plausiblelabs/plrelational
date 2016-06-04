@@ -314,7 +314,7 @@ class DocModel {
     }()
     
     lazy var propertiesSidebarVisible: BidiValueBinding<Bool> = { [unowned self] in
-        return BidiValueBinding(initialValue: true)
+        return BidiValueBinding(true)
     }()
     
     lazy var propertiesModel: PropertiesModel = { [unowned self] in
