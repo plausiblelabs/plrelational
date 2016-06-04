@@ -50,9 +50,13 @@ extension ValueBinding {
     }
     
     public func map<U>(transform: (T) -> U) -> ValueBinding<U> {
-        return MappedValueBinding(binding: self, transform: transform)
+        return MappedValueBinding(binding: self, transform: transform, valueChanging: valueChanging)
     }
-    
+
+    public func map<U: Equatable>(transform: (T) -> U) -> ValueBinding<U> {
+        return MappedValueBinding(binding: self, transform: transform, valueChanging: valueChanging)
+    }
+
     public func zip<U>(other: ValueBinding<U>) -> ValueBinding<(T, U)> {
         return ZippedValueBinding(self, other)
     }
@@ -83,8 +87,8 @@ private class ConstantValueBinding<T>: ValueBinding<T> {
 private class MappedValueBinding<T>: ValueBinding<T> {
     private var removal: ObserverRemoval!
     
-    init<U>(binding: ValueBinding<U>, transform: (U) -> T) {
-        super.init(initialValue: transform(binding.value))
+    init<U>(binding: ValueBinding<U>, transform: (U) -> T, valueChanging: (T, T) -> Bool) {
+        super.init(initialValue: transform(binding.value), valueChanging: valueChanging)
         self.removal = binding.addChangeObserver({ [weak self] in
             self?.setValue(transform(binding.value))
         })
