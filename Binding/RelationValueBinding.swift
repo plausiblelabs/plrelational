@@ -20,6 +20,10 @@ private class RelationValueBinding<T>: ValueBinding<T> {
             weakSelf.setValue(newValue)
         })
     }
+    
+    deinit {
+        removal()
+    }
 }
 
 private class WhenNonEmptyBinding<T>: ValueBinding<T?> {
@@ -51,6 +55,10 @@ private class WhenNonEmptyBinding<T>: ValueBinding<T?> {
                 }
             }
         })
+    }
+    
+    deinit {
+        removal()
     }
 }
 
@@ -89,6 +97,10 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
             let newValue = relationToValue(relation)
             weakSelf.setValue(newValue)
         })
+    }
+    
+    deinit {
+        removal()
     }
     
     private override func update(newValue: T) {

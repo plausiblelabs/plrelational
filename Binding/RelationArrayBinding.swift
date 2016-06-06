@@ -34,6 +34,10 @@ public class RelationArrayBinding: ArrayBinding<Row> {
         super.init(elements: sortedRows.map{ArrayElement(id: $0[idAttr], data: $0)})
     }
     
+    deinit {
+        //removal()
+    }
+    
     public func insert(row: Row, pos: Pos) {
         // TODO
     }

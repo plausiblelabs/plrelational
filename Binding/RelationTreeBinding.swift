@@ -49,7 +49,7 @@ public class RelationTreeBinding: TreeBinding<Row> {
         }
         
         // Create empty dummy Node to sit at the top of the tree.
-        var rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: parentAttr)
+        let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: parentAttr)
         
         // Use order Attribute from underlying Relation to nest child Nodes under parent elements.
         for node in nodeDict.values {
@@ -113,6 +113,10 @@ public class RelationTreeBinding: TreeBinding<Row> {
                 self.notifyChangeObservers(treeChanges)
             }
         })
+    }
+    
+    deinit {
+        removal()
     }
     
     public func insert(row: Row, pos: Pos) {
