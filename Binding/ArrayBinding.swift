@@ -78,4 +78,14 @@ public class ArrayBinding<D: ArrayData>: Binding {
             f(changes)
         }
     }
+    
+    /// Returns the index of the element with the given ID, relative to the sorted elements array.
+    public func indexForID(id: D.EID) -> Int? {
+        return elements.indexOf({ $0.id == id })
+    }
+    
+    /// Returns the element with the given ID.
+    public func elementForID(id: D.EID) -> Element? {
+        return indexForID(id).map{ elements[$0] }
+    }
 }

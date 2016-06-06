@@ -88,17 +88,17 @@ public class RelationTreeBinding: TreeBinding<Row> {
             }
 
             if let removes = changes.removed {
-                let removed: Relation
+                let removedIDs: Relation
                 if let adds = changes.added {
-                    removed = removes.project([self.idAttr]).difference(adds.project([self.idAttr])).join(removes)
+                    removedIDs = removes.project([self.idAttr]).difference(adds.project([self.idAttr]))
                 } else {
-                    removed = removes
+                    removedIDs = removes.project([self.idAttr])
                 }
                 
                 // Observers should only be notified about the top-most nodes that were deleted.
                 // We handle this by looking at the identifiers of the rows/nodes to be deleted,
                 // and only deleting the unique (top-most) parents.
-                let idsToDelete: [RelationValue] = removed.rows().flatMap{$0.ok?[self.idAttr]}
+                let idsToDelete: [RelationValue] = removedIDs.rows().flatMap{$0.ok?[self.idAttr]}
                 for id in idsToDelete {
                     if let node = self.nodeForID(id) {
                         let parentID = node.parentID
@@ -306,7 +306,7 @@ public class RelationTreeBinding: TreeBinding<Row> {
         node.data[orderAttr] = dstOrder
 
         // Insert the node in its new parent
-        let dstIndex = dstParent.children.insertSorted(node, { self.orderForNode($0) })
+        let dstIndex = dstParent.children.insertSorted(node, { $0.data[self.orderAttr] })
 
         // Prepare changes
         let newSrcPath = TreePath(parent: optSrcParent, index: srcIndex)
@@ -319,20 +319,12 @@ public class RelationTreeBinding: TreeBinding<Row> {
         // still contain that node, but `index` represents the new position assuming it was already removed,
         // so we use the `notMatching` node to avoid choosing that same node again.
         
-        func safeGet(i: Int) -> Node? {
-            if i >= 0 && i < parent.children.count {
-                return parent.children[i]
-            } else {
-                return nil
-            }
-        }
-        
         func nodeAtIndex(i: Int, alt: Int) -> Node? {
-            if let n = safeGet(i) {
+            if let n = parent.children[safe: i] {
                 if n !== node {
                     return n
                 } else {
-                    return safeGet(alt)
+                    return parent.children[safe: alt]
                 }
             } else {
                 return nil
@@ -353,6 +345,12 @@ public class RelationTreeBinding: TreeBinding<Row> {
             // Insert after previous child
             prev = previous
         }
+        
+        // TODO: Use a more appropriate data type for storing order
+        func orderForNode(node: Node) -> Double {
+            return node.data[orderAttr].get()!
+        }
+
         let lo: Double = prev.map(orderForNode) ?? 1.0
         let hi: Double = next.map(orderForNode) ?? 9.0
         return RelationValue(lo + ((hi - lo) / 2.0))
@@ -370,9 +368,5 @@ public class RelationTreeBinding: TreeBinding<Row> {
         let next = pos.nextID.flatMap(nodeForID)
         
         return orderWithinParent(parent, previous: previous, next: next)
-    }
-    
-    private func orderForNode(node: Node) -> Double {
-        return node.data[orderAttr].get()!
     }
 }
