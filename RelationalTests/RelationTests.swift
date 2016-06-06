@@ -1377,4 +1377,43 @@ class RelationTests: DBTestCase {
         AssertEqual(change?.added,   MakeRelation(["n"], [ 2], [ 6], [ 8]))
         AssertEqual(change?.removed, MakeRelation(["n"], [ 1], [10], [11]))
     }
+    
+    func DISABLED_testHugeRelationGraphPerformance() {
+        let base = MakeRelation(["A"])
+        
+        func unionAllPairs(relations: [Relation]) -> [Relation] {
+            var result: [Relation] = []
+            for (indexA, a) in relations.enumerate() {
+                for b in relations[indexA ..< relations.endIndex] {
+                    result.append(a.union(b))
+                }
+            }
+            return result
+        }
+        
+        func unionAdjacentPairs(relations: [Relation]) -> [Relation] {
+            var result: [Relation] = []
+            for i in 0.stride(to: relations.endIndex - 1, by: 2) {
+                result.append(relations[i].union(relations[i + 1]))
+            }
+            if relations.count % 2 != 0 {
+                result.append(relations.first!.union(relations.last!))
+            }
+            return result
+        }
+        
+        let level2 = unionAllPairs([base, base, base])
+        let level3 = unionAllPairs(level2)
+        let level4 = unionAllPairs(level3)
+        let level5 = unionAllPairs(level4)
+        var bringTogether = level5
+        while bringTogether.count > 1 {
+            bringTogether = unionAdjacentPairs(bringTogether)
+        }
+        let final = bringTogether[0]
+        
+        measureBlock({
+            AssertEqual(nil, final)
+        })
+    }
 }
