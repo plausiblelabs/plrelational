@@ -21,7 +21,9 @@ public class RelationArrayBinding: ArrayBinding<Row> {
     
     private var removal: ObserverRemoval!
 
-    init(relation: Relation, idAttr: Attribute, orderAttr: Attribute) {
+    public init(relation: Relation, idAttr: Attribute, orderAttr: Attribute) {
+        precondition(relation.scheme.attributes.isSupersetOf([idAttr, orderAttr]))
+        
         self.relation = relation
         self.idAttr = idAttr
         self.orderAttr = orderAttr

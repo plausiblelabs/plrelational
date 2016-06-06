@@ -41,7 +41,8 @@ public class RelationTreeBinding: TreeBinding<Row> {
     private var removal: ObserverRemoval!
     
     public init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
-        
+        precondition(relation.scheme.attributes.isSupersetOf([idAttr, parentAttr, orderAttr]))
+
         // Map Rows from underlying Relation to Node values.
         var nodeDict = [RelationValue: Node]()
         for row in relation.rows().map({$0.ok!}) {

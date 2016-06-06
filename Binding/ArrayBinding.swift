@@ -9,7 +9,7 @@
 import Foundation
 
 public protocol ArrayData {
-    associatedtype EID: Equatable, Plistable
+    associatedtype EID: Hashable, Plistable
 }
 
 public class ArrayElement<D: ArrayData> {
