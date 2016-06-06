@@ -62,19 +62,19 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
 
     // MARK: NSOutlineViewDataSource
 
-    @objc func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
+    func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
         return model.data.elements.count
     }
     
-    @objc func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
+    func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
         return model.data.elements[index]
     }
     
-    @objc func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
+    func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
         return false
     }
     
-    @objc func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
+    func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
         if model.move == nil {
             return nil
         }
@@ -85,7 +85,7 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
         return pboardItem
     }
     
-    @objc func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
+    func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
         
         if let idPlist = pboard.propertyListForType(PasteboardType) {
@@ -100,7 +100,7 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
         return NSDragOperation.None
     }
 
-    @objc func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
+    func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
         
         if let idPlist = pboard.propertyListForType(PasteboardType), move = model.move {
