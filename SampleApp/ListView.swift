@@ -74,41 +74,45 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
         return false
     }
     
-//    @objc func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
-//        let row = (item as! Box<Row>).value
-//        // TODO: Don't assume Int64
-//        let rowID: Int64 = row[model.data.binding.idAttr].get()!
-//        let pboardItem = NSPasteboardItem()
-//        pboardItem.setString(String(rowID), forType: PasteboardType)
-//        return pboardItem
-//    }
-//    
-//    @objc func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
-//        let pboard = info.draggingPasteboard()
-//        if let rowIDString = pboard.stringForType(PasteboardType) {
-//            let rowID = RelationValue(Int64(rowIDString)!)
-//            if let srcIndex = model.data.binding.indexForID(rowID) {
-//                if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
-//                    return NSDragOperation.Move
-//                }
-//            }
-//        }
-//        
-//        return NSDragOperation.None
-//    }
-//    
-//    @objc func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
-//        let pboard = info.draggingPasteboard()
-//        if let rowIDString = pboard.stringForType(PasteboardType) {
-//            let rowID = RelationValue(Int64(rowIDString)!)
-//            if let srcIndex = model.data.binding.indexForID(rowID) {
-//                model.data.move(srcIndex: srcIndex, dstIndex: index)
-//                return true
-//            }
-//        }
-//        
-//        return false
-//    }
+    @objc func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
+        if model.move == nil {
+            return nil
+        }
+        
+        let element = item as! ArrayElement<D>
+        let pboardItem = NSPasteboardItem()
+        pboardItem.setPropertyList(element.id.toPlist(), forType: PasteboardType)
+        return pboardItem
+    }
+    
+    @objc func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
+        let pboard = info.draggingPasteboard()
+        
+        if let idPlist = pboard.propertyListForType(PasteboardType) {
+            let elementID = D.EID.fromPlist(idPlist)!
+            if let srcIndex = model.data.indexForID(elementID) {
+                if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
+                    return NSDragOperation.Move
+                }
+            }
+        }
+        
+        return NSDragOperation.None
+    }
+
+    @objc func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
+        let pboard = info.draggingPasteboard()
+        
+        if let idPlist = pboard.propertyListForType(PasteboardType), move = model.move {
+            let elementID = D.EID.fromPlist(idPlist)!
+            if let srcIndex = model.data.indexForID(elementID) {
+                move(srcIndex: srcIndex, dstIndex: index)
+                return true
+            }
+        }
+        
+        return false
+    }
 
     // MARK: ExtOutlineViewDelegate
 

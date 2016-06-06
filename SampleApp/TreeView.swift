@@ -146,7 +146,7 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     @objc func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyListForType(PasteboardType) {
+        if let idPlist = pboard.propertyListForType(PasteboardType), move = model.move {
             let nodeID = D.ID.fromPlist(idPlist)!
             
             let currentParent = model.data.parentForID(nodeID)
@@ -159,7 +159,7 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
 
             let srcPath = TreePath(parent: currentParent, index: srcIndex)
             let dstPath = TreePath(parent: proposedParent, index: dstIndex)
-            model.move?(srcPath: srcPath, dstPath: dstPath)
+            move(srcPath: srcPath, dstPath: dstPath)
             return true
         }
         
