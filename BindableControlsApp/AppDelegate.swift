@@ -22,7 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var stepper: StepperView!
 
     var nsUndoManager: SPUndoManager!
-    var listView: ListView<Row>!
+    var listView: ListView<RowArrayElement>!
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         window.delegate = self

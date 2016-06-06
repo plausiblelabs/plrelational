@@ -33,7 +33,7 @@ class BindingTestCase: XCTestCase {
         return (path, db)
     }
     
-    func prettyArray(binding: ArrayBinding<Row>) -> [String] {
+    func prettyArray(binding: RelationArrayBinding) -> [String] {
         var accum: [String] = []
         for element in binding.elements {
             accum.append("\(element.data["name"])")
@@ -41,7 +41,7 @@ class BindingTestCase: XCTestCase {
         return accum
     }
     
-    func verifyArray(binding: ArrayBinding<Row>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
+    func verifyArray(binding: RelationArrayBinding, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
         XCTAssertEqual(prettyArray(binding), expected, file: file, line: line)
     }
     

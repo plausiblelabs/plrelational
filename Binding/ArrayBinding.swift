@@ -8,33 +8,27 @@
 
 import Foundation
 
-public protocol ArrayData {
-    associatedtype EID: Hashable, Plistable
-}
-
-public class ArrayElement<D: ArrayData> {
-    public let id: D.EID
-    public var data: D
+public protocol ArrayElement: class {
+    associatedtype ID: Hashable, Plistable
+    associatedtype Data
     
-    public init(id: D.EID, data: D) {
-        self.id = id
-        self.data = data
-    }
+    var id: ID { get }
+    var data: Data { get set }
 }
 
-public struct ArrayPos<D: ArrayData> {
-    let previousID: D.EID?
-    let nextID: D.EID?
+public struct ArrayPos<E: ArrayElement> {
+    let previousID: E.ID?
+    let nextID: E.ID?
 }
 
-public enum ArrayChange<D: ArrayData> { case
+public enum ArrayChange { case
     Insert(Int),
     Delete(Int),
     Move(srcIndex: Int, dstIndex: Int)
 }
 
 extension ArrayChange: Equatable {}
-public func ==<D: ArrayData>(a: ArrayChange<D>, b: ArrayChange<D>) -> Bool {
+public func ==(a: ArrayChange, b: ArrayChange) -> Bool {
     switch (a, b) {
     case let (.Insert(a), .Insert(b)): return a == b
     case let (.Delete(a), .Delete(b)): return a == b
@@ -43,15 +37,15 @@ public func ==<D: ArrayData>(a: ArrayChange<D>, b: ArrayChange<D>) -> Bool {
     }
 }
 
-public class ArrayBinding<D: ArrayData>: Binding {
-    public typealias Value = [ArrayElement<D>]
-    public typealias Changes = [ArrayChange<D>]
+public class ArrayBinding<E: ArrayElement>: Binding {
+    public typealias Value = [E]
+    public typealias Changes = [ArrayChange]
     public typealias ChangeObserver = Changes -> Void
     
-    public typealias ElementID = D.EID
-    public typealias Element = ArrayElement<D>
-    public typealias Pos = ArrayPos<D>
-    public typealias Change = ArrayChange<D>
+    public typealias ElementID = E.ID
+    public typealias Element = E
+    public typealias Pos = ArrayPos<E>
+    public typealias Change = ArrayChange
 
     internal(set) public var elements: [Element] = []
     
@@ -73,19 +67,19 @@ public class ArrayBinding<D: ArrayData>: Binding {
         return { self.changeObservers.removeValueForKey(id) }
     }
     
-    internal func notifyChangeObservers(changes: [ArrayChange<D>]) {
+    internal func notifyChangeObservers(changes: Changes) {
         for (_, f) in changeObservers {
             f(changes)
         }
     }
     
     /// Returns the index of the element with the given ID, relative to the sorted elements array.
-    public func indexForID(id: D.EID) -> Int? {
+    public func indexForID(id: E.ID) -> Int? {
         return elements.indexOf({ $0.id == id })
     }
     
     /// Returns the element with the given ID.
-    public func elementForID(id: D.EID) -> Element? {
+    public func elementForID(id: E.ID) -> Element? {
         return indexForID(id).map{ elements[$0] }
     }
 }

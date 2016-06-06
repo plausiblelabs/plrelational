@@ -13,22 +13,22 @@ import Binding
 // is allowed by default
 private let PasteboardType = "coop.plausible.vp.pasteboard.ListViewItem"
 
-struct ListViewModel<D: ArrayData> {
-    let data: ArrayBinding<D>
-    let contextMenu: ((D) -> ContextMenu?)?
+struct ListViewModel<E: ArrayElement> {
+    let data: ArrayBinding<E>
+    let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
-    let selection: BidiValueBinding<Set<D.EID>>
-    let cellIdentifier: (D) -> String
-    let cellText: (D) -> ValueBinding<String>
-    let cellImage: ((D) -> ValueBinding<Image>)?
+    let selection: BidiValueBinding<Set<E.ID>>
+    let cellIdentifier: (E.Data) -> String
+    let cellText: (E.Data) -> ValueBinding<String>
+    let cellImage: ((E.Data) -> ValueBinding<Image>)?
 }
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
-class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
+class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
 
-    private let model: ListViewModel<D>
+    private let model: ListViewModel<E>
     private let outlineView: NSOutlineView
 
     private var arrayBindingRemoval: ObserverRemoval?
@@ -38,7 +38,7 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
     /// Whether to animate insert/delete changes with a fade.
     var animateChanges = false
 
-    init(model: ListViewModel<D>, outlineView: NSOutlineView) {
+    init(model: ListViewModel<E>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
         
@@ -79,7 +79,7 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
             return nil
         }
         
-        let element = item as! ArrayElement<D>
+        let element = item as! E
         let pboardItem = NSPasteboardItem()
         pboardItem.setPropertyList(element.id.toPlist(), forType: PasteboardType)
         return pboardItem
@@ -89,7 +89,7 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
         let pboard = info.draggingPasteboard()
         
         if let idPlist = pboard.propertyListForType(PasteboardType) {
-            let elementID = D.EID.fromPlist(idPlist)!
+            let elementID = E.ID.fromPlist(idPlist)!
             if let srcIndex = model.data.indexForID(elementID) {
                 if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
                     return NSDragOperation.Move
@@ -104,7 +104,7 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
         let pboard = info.draggingPasteboard()
         
         if let idPlist = pboard.propertyListForType(PasteboardType), move = model.move {
-            let elementID = D.EID.fromPlist(idPlist)!
+            let elementID = E.ID.fromPlist(idPlist)!
             if let srcIndex = model.data.indexForID(elementID) {
                 move(srcIndex: srcIndex, dstIndex: index)
                 return true
@@ -117,7 +117,7 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
     // MARK: ExtOutlineViewDelegate
 
     func outlineView(outlineView: NSOutlineView, viewForTableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
-        let element = item as! ArrayElement<D>
+        let element = item as! E
         let identifier = model.cellIdentifier(element.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
@@ -134,7 +134,7 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
     }
     
     func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
-        let element = item as! ArrayElement<D>
+        let element = item as! E
         return model.contextMenu?(element.data).map{$0.nsmenu}
     }
     
@@ -151,9 +151,9 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
         
         selfInitiatedSelectionChange = true
         
-        var itemIDs: [D.EID] = []
+        var itemIDs: [E.ID] = []
         outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
-            if let element = self.outlineView.itemAtRow(index) as? ArrayElement<D> {
+            if let element = self.outlineView.itemAtRow(index) as? E {
                 itemIDs.append(element.id)
             }
         }
@@ -185,7 +185,7 @@ class ListView<D: ArrayData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewD
         selfInitiatedSelectionChange = false
     }
 
-    func arrayBindingChanged(changes: [ArrayChange<D>]) {
+    func arrayBindingChanged(changes: [ArrayChange]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
         
         outlineView.beginUpdates()

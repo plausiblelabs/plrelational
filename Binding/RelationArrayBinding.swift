@@ -9,11 +9,20 @@
 import Foundation
 import libRelational
 
-extension Row: ArrayData {
-    public typealias EID = RelationValue
+public class RowArrayElement: ArrayElement {
+    public typealias ID = RelationValue
+    public typealias Data = Row
+
+    public let id: RelationValue
+    public var data: Row
+    
+    init(id: RelationValue, data: Row) {
+        self.id = id
+        self.data = data
+    }
 }
 
-public class RelationArrayBinding: ArrayBinding<Row> {
+public class RelationArrayBinding: ArrayBinding<RowArrayElement> {
     
     private let relation: Relation
     private let idAttr: Attribute
@@ -31,7 +40,7 @@ public class RelationArrayBinding: ArrayBinding<Row> {
         // TODO: Error handling
         let unsortedRows = relation.rows().map{$0.ok!}
         let sortedRows = unsortedRows.sort({ $0[orderAttr] < $1[orderAttr] })
-        let elements = sortedRows.map{ArrayElement(id: $0[idAttr], data: $0)}
+        let elements = sortedRows.map{RowArrayElement(id: $0[idAttr], data: $0)}
         
         super.init(elements: elements)
         
@@ -97,7 +106,7 @@ public class RelationArrayBinding: ArrayBinding<Row> {
 
         func insertRow(row: Row) -> Int {
             let id = row[self.idAttr]
-            let element = ArrayElement(id: id, data: row)
+            let element = RowArrayElement(id: id, data: row)
             return insertElement(element)
         }
         
