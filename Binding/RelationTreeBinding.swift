@@ -9,30 +9,34 @@
 import Foundation
 import libRelational
 
-extension Row: TreeData {
+public final class RowTreeNode: TreeNode {
     public typealias ID = RelationValue
-}
-
-public class RelationTreeBinding: TreeBinding<Row> {
-
-    private class RowTreeNode: TreeNode<Row> {
-        let parentAttr: Attribute
-        
-        init(id: RelationValue, row: Row, parentAttr: Attribute) {
-            self.parentAttr = parentAttr
-            super.init(id: id, data: row)
-        }
-        
-        override var parentID: RelationValue? {
-            let parent = data[parentAttr]
-            if parent != .NULL {
-                return parent
-            } else {
-                return nil
-            }
-        }
+    public typealias Data = Row
+    
+    public let id: RelationValue
+    public var data: Row
+    public var children: [RowTreeNode]
+    private let parentAttr: Attribute
+    
+    init(id: RelationValue, row: Row, parentAttr: Attribute, children: [RowTreeNode] = []) {
+        self.id = id
+        self.data = row
+        self.children = children
+        self.parentAttr = parentAttr
     }
     
+    public var parentID: RelationValue? {
+        let parent = data[parentAttr]
+        if parent != .NULL {
+            return parent
+        } else {
+            return nil
+        }
+    }
+}
+
+public class RelationTreeBinding: TreeBinding<RowTreeNode> {
+
     private let relation: Relation
     private let idAttr: Attribute
     private let parentAttr: Attribute

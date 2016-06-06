@@ -62,7 +62,7 @@ class DocModelTests: AppTestCase {
             XCTAssertEqual(propsModel.textObjectProperties.value != nil, expected.selectedItemsOnlyText, file: file, line: line)
         }
         
-        func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath<Row> {
+        func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath<RowTreeNode> {
             return path(model.docOutlineTreeViewModel.data, parentID: parentID, index: index)
         }
         

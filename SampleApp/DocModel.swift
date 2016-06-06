@@ -249,7 +249,7 @@ class DocModel {
         })
     }
 
-    lazy var docOutlineTreeViewModel: TreeViewModel<Row> = { [unowned self] in
+    lazy var docOutlineTreeViewModel: TreeViewModel<RowTreeNode> = { [unowned self] in
         return TreeViewModel(
             data: self.docOutlineBinding,
             allowsChildren: { row in
@@ -289,7 +289,7 @@ class DocModel {
         )
     }()
 
-    lazy var inspectorTreeViewModel: TreeViewModel<Row> = { [unowned self] in
+    lazy var inspectorTreeViewModel: TreeViewModel<RowTreeNode> = { [unowned self] in
         return TreeViewModel(
             data: self.inspectorItemsBinding,
             allowsChildren: { row in

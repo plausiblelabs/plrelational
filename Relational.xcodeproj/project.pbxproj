@@ -30,6 +30,7 @@
 		371243F71D01051700E9BCFF /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
 		371243F91D024A9200E9BCFF /* ValueBindingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371243F81D024A9200E9BCFF /* ValueBindingTests.swift */; };
 		371243FA1D0613F200E9BCFF /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611351CD7FB07001DAF59 /* ListView.swift */; };
+		371243FB1D062ECC00E9BCFF /* BindingTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707DA1CFE262700710C80 /* BindingTestCase.swift */; };
 		372707681CED2F8100710C80 /* AppTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707671CED2F8100710C80 /* AppTestCase.swift */; };
 		3727076B1CED32B000710C80 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076C1CEE60C900710C80 /* MutableRelation.swift */; };
@@ -1529,6 +1530,7 @@
 				3727076B1CED32B000710C80 /* DBTestCase.swift in Sources */,
 				372707681CED2F8100710C80 /* AppTestCase.swift in Sources */,
 				3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */,
+				371243FB1D062ECC00E9BCFF /* BindingTestCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
