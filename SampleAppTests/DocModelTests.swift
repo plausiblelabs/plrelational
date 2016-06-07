@@ -302,4 +302,57 @@ class DocModelTests: AppTestCase {
             first = !first
         })
     }
+
+    struct SelectedItemNamePerfTestData {
+        let model: DocModel
+        var changeCount: Int = 0
+        
+        init(model: DocModel) {
+            self.model = model
+            
+            // Select the first page
+            model.docOutlineTreeViewModel.selection.commit([3])
+            
+            // Select the first text object
+            model.inspectorTreeViewModel.selection.commit([9])
+            
+            // Observe a number of bindings
+            let propsModel = model.propertiesModel
+            _ = model.docOutlineTreeViewModel.data.addChangeObserver({ _ in self.changeCount += 1 })
+            _ = model.inspectorTreeViewModel.data.addChangeObserver({ _ in self.changeCount += 1 })
+            _ = propsModel.itemSelected.addChangeObserver({ _ in self.changeCount += 1 })
+            _ = propsModel.itemNotSelected.addChangeObserver({ _ in self.changeCount += 1 })
+            _ = propsModel.selectedItemTypesString.addChangeObserver({ _ in self.changeCount += 1 })
+            _ = propsModel.selectedItemNames.addChangeObserver({ _ in self.changeCount += 1 })
+            _ = propsModel.selectedItemNamesPlaceholder.addChangeObserver({ _ in self.changeCount += 1 })
+        }
+    }
+    
+    func testSelectedItemNameUpdateSpeed() {
+        let data = SelectedItemNamePerfTestData(model: defaultModel())
+
+        // Toggle back and forth between two different names
+        let s1 = "Hello"
+        let s2 = "Hallo"
+        var first = true
+        let propsModel = data.model.propertiesModel
+        measureBlock({
+            propsModel.selectedItemNames.update(first ? s1 : s2)
+            first = !first
+        })
+    }
+    
+    func testSelectedItemNameCommitSpeed() {
+        let data = SelectedItemNamePerfTestData(model: defaultModel())
+        
+        // Toggle back and forth between two different names
+        let s1 = "Hello"
+        let s2 = "Hallo"
+        var first = true
+        let propsModel = data.model.propertiesModel
+        measureBlock({
+            propsModel.selectedItemNames.commit(first ? s1 : s2)
+            first = !first
+        })
+    }
 }
