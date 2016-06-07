@@ -29,6 +29,14 @@ class UndoManager {
             f()
         }
     }
+    
+    func undo() {
+        nsmanager.undo()
+    }
+    
+    func redo() {
+        nsmanager.redo()
+    }
 }
 
 // The following is pulled from:

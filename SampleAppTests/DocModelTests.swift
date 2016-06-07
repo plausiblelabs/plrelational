@@ -13,8 +13,8 @@ import Binding
 
 class DocModelTests: AppTestCase {
     
-    func defaultModel() -> DocModel {
-        let model = DocModel(undoManager: UndoManager())
+    func defaultModel(undoManager: UndoManager = UndoManager()) -> DocModel {
+        let model = DocModel(undoManager: undoManager)
         
         func addCollection(name: String, _ type: ItemType, _ parentID: Int64?) {
             model.newCollection(name, type: type, parentID: parentID)
@@ -352,6 +352,25 @@ class DocModelTests: AppTestCase {
         let propsModel = data.model.propertiesModel
         measureBlock({
             propsModel.selectedItemNames.commit(first ? s1 : s2)
+            first = !first
+        })
+    }
+    
+    func testSelectedItemNameUndoRedoSpeed() {
+        let undoManager = UndoManager()
+        let data = SelectedItemNamePerfTestData(model: defaultModel(undoManager))
+        
+        // Toggle back and forth between two different names (via undo/redo)
+        let propsModel = data.model.propertiesModel
+        propsModel.selectedItemNames.commit("Hello")
+        propsModel.selectedItemNames.commit("Hallo")
+        var first = true
+        measureBlock({
+            if first {
+                undoManager.undo()
+            } else {
+                undoManager.redo()
+            }
             first = !first
         })
     }
