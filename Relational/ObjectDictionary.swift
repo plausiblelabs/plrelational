@@ -34,4 +34,8 @@ struct ObjectDictionary<Key: AnyObject, Value>: SequenceType, DictionaryLiteralC
             return new
         }
     }
+    
+    var keys: [Key] {
+        return dict.keys.map({ $0.object })
+    }
 }

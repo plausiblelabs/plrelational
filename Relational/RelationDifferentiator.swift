@@ -115,21 +115,24 @@
  */
 
 class RelationDifferentiator {
-    let withRespectTo: protocol<Relation, AnyObject>
-    let addPlaceholder: Relation
-    let removePlaceholder: Relation
+    private let relation: Relation
+    private var derivativeMap: ObjectDictionary<AnyObject, RelationChange> = [:]
     
-    var derivativeMap: ObjectDictionary<AnyObject, RelationChange> = [:]
+    private let derivative = RelationDerivative()
     
-    init(withRespectTo: protocol<Relation, AnyObject>, addPlaceholder: Relation, removePlaceholder: Relation) {
-        self.withRespectTo = withRespectTo
-        self.addPlaceholder = addPlaceholder
-        self.removePlaceholder = removePlaceholder
+    init(relation: Relation) {
+        self.relation = relation
     }
 }
 
 extension RelationDifferentiator {
-    func derivativeOf(relation: Relation) -> RelationChange {
+    func computeDerivative() -> RelationDerivative {
+        // Fetching the derivative of the top relation will compute the whole thing.
+        derivative.setUnderlyingDerivative(derivativeOf(relation))
+        return derivative
+    }
+    
+    private func derivativeOf(relation: Relation) -> RelationChange {
         if let obj = relation as? AnyObject {
             return derivativeMap.getOrCreate(obj, defaultValue: rawDerivativeOf(relation))
         } else {
@@ -139,12 +142,13 @@ extension RelationDifferentiator {
     
     private func rawDerivativeOf(relation: Relation) -> RelationChange {
         switch relation {
-        case let obj as AnyObject where obj === withRespectTo:
-            // When we find the relation we're differentiating with respect to, then use the placeholders.
-            return RelationChange(added: addPlaceholder, removed: removePlaceholder)
         case let intermediate as IntermediateRelation:
             // Intermediate relations require more smarts. Do that elsewhere.
             return intermediateDerivative(intermediate)
+        case let obj as RelationDerivative.Variable:
+            // Variables use their placeholders as derivatives.
+            let placeholders = derivative.placeholdersForVariable(obj)
+            return RelationChange(added: placeholders.added, removed: placeholders.removed)
         default:
             // Other non-intermediate relations are constant in the face of changes, so we're just nil.
             return RelationChange(added: nil, removed: nil)

@@ -91,31 +91,17 @@ extension IntermediateRelation {
 
 extension IntermediateRelation {
     func onAddFirstObserver() {
-        for (withRespectTo, addPlaceholder, removePlaceholder, derivative) in allDerivatives() {
-            withRespectTo.addWeakChangeObserver(self, call: { innerSelf, change in
-                addPlaceholder.operands = [change.added ?? ConcreteRelation(scheme: withRespectTo.scheme)]
-                removePlaceholder.operands = [change.removed ?? ConcreteRelation(scheme: withRespectTo.scheme)]
-                let myChange = RelationChange(added: derivative.added, removed: derivative.removed)
+        let differentiator = RelationDifferentiator(relation: self)
+        let derivative = differentiator.computeDerivative()
+        
+        for variable in derivative.allVariables {
+            variable.addWeakChangeObserver(self, call: { innerSelf, change in
+                derivative.clearVariables()
+                derivative.setChange(change, forVariable: variable)
+                let myChange = derivative.change
                 innerSelf.notifyChangeObservers(myChange)
             })
         }
-    }
-    
-    private func allDerivatives() -> [(withRespectTo: Relation, addPlaceholder: IntermediateRelation, removePlaceholder: IntermediateRelation, derivative: RelationChange)] {
-        let planner = QueryPlanner(root: self)
-        return planner.initiators.flatMap({ initiator in
-            guard let relation = planner.initiatorRelation(initiator) as? protocol<Relation, AnyObject> else { return nil }
-            
-            let addPlaceholder = IntermediateRelation(op: .Union, operands: [ConcreteRelation(scheme: relation.scheme)])
-            let removePlaceholder = IntermediateRelation(op: .Union, operands: [ConcreteRelation(scheme: relation.scheme)])
-            
-            let differentiator = RelationDifferentiator(withRespectTo: relation,
-                addPlaceholder: addPlaceholder,
-                removePlaceholder: removePlaceholder)
-            let derivative = differentiator.derivativeOf(self)
-            
-            return (relation, addPlaceholder, removePlaceholder, derivative)
-        })
     }
 }
 
