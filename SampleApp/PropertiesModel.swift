@@ -15,15 +15,18 @@ class PropertiesModel {
     let db: UndoableDatabase
     let selectedItems: Relation
     let textObjects: Relation
+    let imageObjects: Relation
 
     /// - Parameters:
     ///     - db: The database.
     ///     - selectedItems: Relation with scheme [id, type, name].
     ///     - textObjects: Relation with scheme [id, editable, hint, font].
-    init(db: UndoableDatabase, selectedItems: Relation, textObjects: Relation) {
+    ///     - imageObjects: Relation with scheme [id, editable].
+    init(db: UndoableDatabase, selectedItems: Relation, textObjects: Relation, imageObjects: Relation) {
         self.db = db
         self.selectedItems = selectedItems
         self.textObjects = textObjects
+        self.imageObjects = imageObjects
     }
 
     private lazy var selectedItemNamesRelation: Relation = { [unowned self] in
@@ -79,15 +82,21 @@ class PropertiesModel {
         return self.selectedItemNamesRelation.stringWhenMulti("Multiple Values")
     }()
     
-    private lazy var selectedTextObjects: Relation = { [unowned self] in
+    private func selectedObjects(type: ItemType, _ relation: Relation) -> Relation {
         return self.selectedItems
-            .unique("type", matching: RelationValue(ItemType.Text.rawValue))
-            .equijoin(self.textObjects, matching: ["id": "id"])
-    }()
+            .unique("type", matching: RelationValue(type.rawValue))
+            .equijoin(relation, matching: ["id": "id"])
+    }
     
     lazy var textObjectProperties: ValueBinding<TextObjectPropertiesModel?> = { [unowned self] in
-        return self.selectedTextObjects.whenNonEmpty{
+        return self.selectedObjects(.Text, self.textObjects).whenNonEmpty{
             TextObjectPropertiesModel(db: self.db, selectedTextObjects: $0)
+        }
+    }()
+    
+    lazy var imageObjectProperties: ValueBinding<ImageObjectPropertiesModel?> = { [unowned self] in
+        return self.selectedObjects(.Image, self.imageObjects).whenNonEmpty{
+            ImageObjectPropertiesModel(db: self.db, selectedImageObjects: $0)
         }
     }()
 }

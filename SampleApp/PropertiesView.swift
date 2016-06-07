@@ -10,6 +10,32 @@ import Cocoa
 import Binding
 
 class PropertiesView: BackgroundView {
+    
+    class Section {
+        var view: NSView?
+        var observerRemoval: ObserverRemoval!
+        
+        init<T>(binding: ValueBinding<T?>, attachView: T -> NSView) {
+            
+            func validate(section: Section) {
+                if let view = section.view {
+                    view.removeFromSuperview()
+                    section.view = nil
+                }
+                if let model = binding.value {
+                    section.view = attachView(model)
+                }
+            }
+            
+            validate(self)
+            
+            self.observerRemoval = binding.addChangeObserver({ [weak self] _ in
+                guard let weakSelf = self else { return }
+                validate(weakSelf)
+            })
+        }
+    }
+    
     private let model: PropertiesModel
     
     private var itemTypeLabel: TextField!
@@ -17,8 +43,7 @@ class PropertiesView: BackgroundView {
     private var nameField: TextField!
     private var noSelectionLabel: TextField!
 
-    private var textObjectPropertiesView: TextObjectPropertiesView?
-    private var textObjectPropertiesObserverRemoval: ObserverRemoval?
+    private var sections: [Section] = []
     
     init(frame: NSRect, model: PropertiesModel) {
         self.model = model
@@ -64,8 +89,21 @@ class PropertiesView: BackgroundView {
         noSelectionLabel.visible = model.itemNotSelected
         addSubview(noSelectionLabel)
 
-        updateTextSection()
-        textObjectPropertiesObserverRemoval = model.textObjectProperties.addChangeObserver({ [weak self] _ in self?.updateTextSection() })
+        func addSection<T>(binding: ValueBinding<T?>, _ createView: T -> NSView) {
+            let section = Section(binding: binding, attachView: { [weak self] model in
+                let view = createView(model)
+                if let parentView = self?.itemTypeLabel.superview {
+                    parentView.addSubview(view)
+                }
+                return view
+            })
+            sections.append(section)
+        }
+        
+        // TODO: Use an NSStackView to manage these views
+        let sectionFrame = NSMakeRect(10, 100, 220, 120)
+        addSection(model.textObjectProperties, { TextObjectPropertiesView(frame: sectionFrame, model: $0) })
+        addSection(model.imageObjectProperties, { ImageObjectPropertiesView(frame: sectionFrame, model: $0) })
     }
     
     required init?(coder: NSCoder) {
@@ -73,28 +111,8 @@ class PropertiesView: BackgroundView {
     }
     
     deinit {
-        textObjectPropertiesObserverRemoval?()
-    }
-    
-    private func removeTextSection() {
-        guard let view = textObjectPropertiesView else { return }
-        view.removeFromSuperview()
-        textObjectPropertiesView = nil
-    }
-    
-    private func addTextSection(model: TextObjectPropertiesModel) {
-        let view = TextObjectPropertiesView(frame: NSMakeRect(10, 100, 220, 120), model: model)
-        view.backgroundColor = NSColor.blueColor()
-        textObjectPropertiesView = view
-        
-        let parentView = itemTypeLabel.superview!
-        parentView.addSubview(view)
-    }
-    
-    private func updateTextSection() {
-        removeTextSection()
-        if let model = model.textObjectProperties.value {
-            addTextSection(model)
+        for section in sections {
+            section.observerRemoval()
         }
     }
 }
