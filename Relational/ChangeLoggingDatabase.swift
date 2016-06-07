@@ -83,10 +83,18 @@ extension ChangeLoggingDatabase {
             }
         }
         
+        for (relation, _) in changes {
+            relation.notifyObserversTransactionBegan()
+        }
+        
         for (relation, change) in changes {
             relation.notifyChangeObservers(change)
         }
         
+        for (relation, _) in changes {
+            relation.notifyObserversTransactionEnded()
+        }
+
         return .Ok()
     }
 }

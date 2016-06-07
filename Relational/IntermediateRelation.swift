@@ -14,6 +14,9 @@ class IntermediateRelation: Relation, RelationDefaultChangeObserverImplementatio
     
     var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    var derivative: RelationDerivative?
+    var inTransaction = 0 // Like a refcount, incremented for begin, decremented for end, action at 0
+    
     init(op: Operator, operands: [Relation]) {
         self.op = op
         self.operands = operands
@@ -89,18 +92,39 @@ extension IntermediateRelation {
     }
 }
 
-extension IntermediateRelation {
+extension IntermediateRelation: RelationObserver {
     func onAddFirstObserver() {
         let differentiator = RelationDifferentiator(relation: self)
         let derivative = differentiator.computeDerivative()
+        self.derivative = derivative
         
         for variable in derivative.allVariables {
-            variable.addWeakChangeObserver(self, call: { innerSelf, change in
+            let proxy = WeakRelationObserverProxy(target: self)
+            proxy.registerOn(variable)
+        }
+    }
+    
+    func transactionBegan() {
+        inTransaction += 1
+        derivative?.clearVariables()
+    }
+    
+    func relationChanged(relation: Relation, change: RelationChange) {
+        if let derivative = derivative {
+            if inTransaction == 0 {
                 derivative.clearVariables()
-                derivative.setChange(change, forVariable: variable)
-                let myChange = derivative.change
-                innerSelf.notifyChangeObservers(myChange)
-            })
+                derivative.setChange(change, forVariable: relation as! protocol<AnyObject, Relation>)
+                notifyChangeObservers(derivative.change)
+            } else {
+                derivative.setChange(change, forVariable: relation as! protocol<AnyObject, Relation>)
+            }
+        }
+    }
+    
+    func transactionEnded() {
+        inTransaction -= 1
+        if let derivative = derivative where inTransaction == 0 {
+            notifyChangeObservers(derivative.change)
         }
     }
 }

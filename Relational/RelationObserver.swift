@@ -13,7 +13,7 @@ class WeakRelationObserverProxy: RelationObserver {
         self.target = target
     }
     
-    func register(observee: Relation) {
+    func registerOn(observee: Relation) {
         removal = observee.addChangeObserver(self)
     }
     

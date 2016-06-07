@@ -38,6 +38,14 @@ extension RelationDefaultChangeObserverImplementation {
     
     public func onAddFirstObserver() {}
     
+    func notifyObserversTransactionBegan() {
+        if let observers = changeObserverData.observers {
+            for (_, observer) in observers {
+                observer.transactionBegan()
+            }
+        }
+    }
+    
     func notifyChangeObservers(change: RelationChange) {
         func isEmpty(r: Relation?) -> Bool {
             return r == nil || r?.isEmpty.ok == true
@@ -51,6 +59,14 @@ extension RelationDefaultChangeObserverImplementation {
         
             for (_, observer) in observers {
                 observer.relationChanged(self, change: change)
+            }
+        }
+    }
+    
+    func notifyObserversTransactionEnded() {
+        if let observers = changeObserverData.observers {
+            for (_, observer) in observers {
+                observer.transactionEnded()
             }
         }
     }

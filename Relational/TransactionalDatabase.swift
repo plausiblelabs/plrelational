@@ -55,8 +55,16 @@ public class TransactionalDatabase {
             }
         }
         
+        for (r, _) in changes {
+            r.notifyObserversTransactionBegan()
+        }
+        
         for (r, change) in changes {
             r.notifyChangeObservers(change)
+        }
+        
+        for (r, _) in changes {
+            r.notifyObserversTransactionEnded()
         }
         
         inTransaction = false
