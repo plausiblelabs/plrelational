@@ -1080,29 +1080,13 @@ class RelationTests: DBTestCase {
         addObject("Obj1")
         addObject("Obj2")
         
-        func dump() {
-            print("DUMP")
-//            print("collections:\n\(collections)")
-//            print("objects:\n\(objects)")
-//            print("selectedCollectionID:\n\(selectedCollectionID)")
-//            print("selectedInspectorItemIDs:\n\(selectedInspectorItemIDs)")
-//            print("selectedCollection:\n\(selectedCollection)")
-//            print("selectedInspectorItems:\n\(selectedInspectorItems)")
-            print("selectedItems:\n\(selectedItems)")
-            print("selectedItemTypes:\n\(selectedItemTypes)")
-        }
-
         var lastChange: RelationChange?
         _ = selectedItemTypes.addChangeObserver({
-            print("CHANGE: \($0)")
             lastChange = $0
         })
-
-        dump()
         
         lastChange = nil
         selectedCollectionID.add(["coll_id": 1])
-        dump()
         AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["type"],
@@ -1111,7 +1095,6 @@ class RelationTests: DBTestCase {
         
         lastChange = nil
         selectedInspectorItemIDs.add(["item_id": 3])
-        dump()
         AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["type"],
@@ -1123,7 +1106,6 @@ class RelationTests: DBTestCase {
 
         lastChange = nil
         selectedInspectorItemIDs.delete(true)
-        dump()
         AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["type"],
@@ -1135,7 +1117,6 @@ class RelationTests: DBTestCase {
 
         lastChange = nil
         selectedCollectionID.delete(true)
-        dump()
         AssertEqual(lastChange?.added, nil)
         AssertEqual(lastChange?.removed,
                     MakeRelation(
@@ -1144,7 +1125,6 @@ class RelationTests: DBTestCase {
 
         lastChange = nil
         selectedCollectionID.add(["coll_id": 1])
-        dump()
         AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["type"],
@@ -1153,7 +1133,6 @@ class RelationTests: DBTestCase {
 
         lastChange = nil
         selectedInspectorItemIDs.add(["item_id": 3])
-        dump()
         AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["type"],
@@ -1169,7 +1148,6 @@ class RelationTests: DBTestCase {
             selectedCollectionID.delete(true)
             selectedCollectionID.add(["coll_id": 2])
         }
-        dump()
         AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["type"],
