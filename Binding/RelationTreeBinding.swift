@@ -9,30 +9,34 @@
 import Foundation
 import libRelational
 
-extension Row: TreeData {
+public final class RowTreeNode: TreeNode {
     public typealias ID = RelationValue
-}
-
-public class RelationTreeBinding: TreeBinding<Row> {
-
-    private class RowTreeNode: TreeNode<Row> {
-        let parentAttr: Attribute
-        
-        init(id: RelationValue, row: Row, parentAttr: Attribute) {
-            self.parentAttr = parentAttr
-            super.init(id: id, data: row)
-        }
-        
-        override var parentID: RelationValue? {
-            let parent = data[parentAttr]
-            if parent != .NULL {
-                return parent
-            } else {
-                return nil
-            }
-        }
+    public typealias Data = Row
+    
+    public let id: RelationValue
+    public var data: Row
+    public var children: [RowTreeNode]
+    private let parentAttr: Attribute
+    
+    init(id: RelationValue, row: Row, parentAttr: Attribute, children: [RowTreeNode] = []) {
+        self.id = id
+        self.data = row
+        self.children = children
+        self.parentAttr = parentAttr
     }
     
+    public var parentID: RelationValue? {
+        let parent = data[parentAttr]
+        if parent != .NULL {
+            return parent
+        } else {
+            return nil
+        }
+    }
+}
+
+public class RelationTreeBinding: TreeBinding<RowTreeNode> {
+
     private let relation: Relation
     private let idAttr: Attribute
     private let parentAttr: Attribute
@@ -41,7 +45,8 @@ public class RelationTreeBinding: TreeBinding<Row> {
     private var removal: ObserverRemoval!
     
     public init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
-        
+        precondition(relation.scheme.attributes.isSupersetOf([idAttr, parentAttr, orderAttr]))
+
         // Map Rows from underlying Relation to Node values.
         var nodeDict = [RelationValue: Node]()
         for row in relation.rows().map({$0.ok!}) {
@@ -49,7 +54,7 @@ public class RelationTreeBinding: TreeBinding<Row> {
         }
         
         // Create empty dummy Node to sit at the top of the tree.
-        var rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: parentAttr)
+        let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: parentAttr)
         
         // Use order Attribute from underlying Relation to nest child Nodes under parent elements.
         for node in nodeDict.values {
@@ -88,17 +93,17 @@ public class RelationTreeBinding: TreeBinding<Row> {
             }
 
             if let removes = changes.removed {
-                let removed: Relation
+                let removedIDs: Relation
                 if let adds = changes.added {
-                    removed = removes.project([self.idAttr]).difference(adds.project([self.idAttr])).join(removes)
+                    removedIDs = removes.project([self.idAttr]).difference(adds.project([self.idAttr]))
                 } else {
-                    removed = removes
+                    removedIDs = removes.project([self.idAttr])
                 }
                 
                 // Observers should only be notified about the top-most nodes that were deleted.
                 // We handle this by looking at the identifiers of the rows/nodes to be deleted,
                 // and only deleting the unique (top-most) parents.
-                let idsToDelete: [RelationValue] = removed.rows().flatMap{$0.ok?[self.idAttr]}
+                let idsToDelete: [RelationValue] = removedIDs.rows().flatMap{$0.ok?[self.idAttr]}
                 for id in idsToDelete {
                     if let node = self.nodeForID(id) {
                         let parentID = node.parentID
@@ -113,6 +118,10 @@ public class RelationTreeBinding: TreeBinding<Row> {
                 self.notifyChangeObservers(treeChanges)
             }
         })
+    }
+    
+    deinit {
+        removal()
     }
     
     public func insert(row: Row, pos: Pos) {
@@ -302,7 +311,7 @@ public class RelationTreeBinding: TreeBinding<Row> {
         node.data[orderAttr] = dstOrder
 
         // Insert the node in its new parent
-        let dstIndex = dstParent.children.insertSorted(node, { self.orderForNode($0) })
+        let dstIndex = dstParent.children.insertSorted(node, { $0.data[self.orderAttr] })
 
         // Prepare changes
         let newSrcPath = TreePath(parent: optSrcParent, index: srcIndex)
@@ -315,20 +324,12 @@ public class RelationTreeBinding: TreeBinding<Row> {
         // still contain that node, but `index` represents the new position assuming it was already removed,
         // so we use the `notMatching` node to avoid choosing that same node again.
         
-        func safeGet(i: Int) -> Node? {
-            if i >= 0 && i < parent.children.count {
-                return parent.children[i]
-            } else {
-                return nil
-            }
-        }
-        
         func nodeAtIndex(i: Int, alt: Int) -> Node? {
-            if let n = safeGet(i) {
+            if let n = parent.children[safe: i] {
                 if n !== node {
                     return n
                 } else {
-                    return safeGet(alt)
+                    return parent.children[safe: alt]
                 }
             } else {
                 return nil
@@ -349,6 +350,12 @@ public class RelationTreeBinding: TreeBinding<Row> {
             // Insert after previous child
             prev = previous
         }
+        
+        // TODO: Use a more appropriate data type for storing order
+        func orderForNode(node: Node) -> Double {
+            return node.data[orderAttr].get()!
+        }
+
         let lo: Double = prev.map(orderForNode) ?? 1.0
         let hi: Double = next.map(orderForNode) ?? 9.0
         return RelationValue(lo + ((hi - lo) / 2.0))
@@ -366,9 +373,5 @@ public class RelationTreeBinding: TreeBinding<Row> {
         let next = pos.nextID.flatMap(nodeForID)
         
         return orderWithinParent(parent, previous: previous, next: next)
-    }
-    
-    private func orderForNode(node: Node) -> Double {
-        return node.data[orderAttr].get()!
     }
 }

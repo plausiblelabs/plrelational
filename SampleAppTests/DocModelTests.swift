@@ -49,6 +49,7 @@ class DocModelTests: AppTestCase {
             let selectedItemType: String
             let selectedItemName: String
             let selectedItemsOnlyText: Bool
+            let selectedItemsOnlyImage: Bool
         }
         
         let model = defaultModel()
@@ -60,9 +61,10 @@ class DocModelTests: AppTestCase {
             XCTAssertEqual(propsModel.selectedItemTypesString.value, expected.selectedItemType, file: file, line: line)
             XCTAssertEqual(propsModel.selectedItemNames.value, expected.selectedItemName, file: file, line: line)
             XCTAssertEqual(propsModel.textObjectProperties.value != nil, expected.selectedItemsOnlyText, file: file, line: line)
+            XCTAssertEqual(propsModel.imageObjectProperties.value != nil, expected.selectedItemsOnlyImage, file: file, line: line)
         }
         
-        func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath<Row> {
+        func docOutlinePath(parentID: Int64?, _ index: Int) -> TreePath<RowTreeNode> {
             return path(model.docOutlineTreeViewModel.data, parentID: parentID, index: index)
         }
         
@@ -86,7 +88,8 @@ class DocModelTests: AppTestCase {
             itemSelected: false,
             selectedItemType: "",
             selectedItemName: "",
-            selectedItemsOnlyText: false))
+            selectedItemsOnlyText: false,
+            selectedItemsOnlyImage: false))
 
         // Select a page in the doc outline
         model.docOutlineTreeViewModel.selection.commit([4])
@@ -101,7 +104,8 @@ class DocModelTests: AppTestCase {
             itemSelected: true,
             selectedItemType: "Page",
             selectedItemName: "Page2",
-            selectedItemsOnlyText: false))
+            selectedItemsOnlyText: false,
+            selectedItemsOnlyImage: false))
 
         // Select a page in the doc outline that contains objects
         model.docOutlineTreeViewModel.selection.commit([3])
@@ -119,7 +123,8 @@ class DocModelTests: AppTestCase {
             itemSelected: true,
             selectedItemType: "Page",
             selectedItemName: "Page1",
-            selectedItemsOnlyText: false))
+            selectedItemsOnlyText: false,
+            selectedItemsOnlyImage: false))
         
         // Reorder a page in the doc outline
         model.docOutlineTreeViewModel.move?(srcPath: docOutlinePath(1, 1), dstPath: docOutlinePath(1, 3))
@@ -149,7 +154,8 @@ class DocModelTests: AppTestCase {
             itemSelected: true,
             selectedItemType: "Page",
             selectedItemName: "Page1",
-            selectedItemsOnlyText: false))
+            selectedItemsOnlyText: false,
+            selectedItemsOnlyImage: false))
         
         // Select a single object in the inspector
         model.inspectorTreeViewModel.selection.commit([9])
@@ -159,7 +165,8 @@ class DocModelTests: AppTestCase {
             itemSelected: true,
             selectedItemType: "Text",
             selectedItemName: "Object1",
-            selectedItemsOnlyText: true))
+            selectedItemsOnlyText: true,
+            selectedItemsOnlyImage: false))
 
         // Select two objects (of the same type) in the inspector
         model.inspectorTreeViewModel.selection.commit([10, 11])
@@ -169,7 +176,8 @@ class DocModelTests: AppTestCase {
             itemSelected: true,
             selectedItemType: "Multiple Images",
             selectedItemName: "",
-            selectedItemsOnlyText: false))
+            selectedItemsOnlyText: false,
+            selectedItemsOnlyImage: true))
         
         // Select two objects (of differing type) in the inspector
         model.inspectorTreeViewModel.selection.commit([9, 10])
@@ -179,7 +187,8 @@ class DocModelTests: AppTestCase {
             itemSelected: true,
             selectedItemType: "Multiple Items",
             selectedItemName: "",
-            selectedItemsOnlyText: false))
+            selectedItemsOnlyText: false,
+            selectedItemsOnlyImage: false))
         
         // Select a single text object in the inspector (again)
         model.inspectorTreeViewModel.selection.commit([9])
@@ -189,7 +198,8 @@ class DocModelTests: AppTestCase {
             itemSelected: true,
             selectedItemType: "Text",
             selectedItemName: "Object1",
-            selectedItemsOnlyText: true))
+            selectedItemsOnlyText: true,
+            selectedItemsOnlyImage: false))
         
         // Select a different page in the doc outline
         model.docOutlineTreeViewModel.selection.commit([4])
@@ -199,7 +209,8 @@ class DocModelTests: AppTestCase {
             itemSelected: true,
             selectedItemType: "Page",
             selectedItemName: "Page2",
-            selectedItemsOnlyText: false))
+            selectedItemsOnlyText: false,
+            selectedItemsOnlyImage: false))
     }
     
     func testDocOutlineSelectionSpeedUnbound() {

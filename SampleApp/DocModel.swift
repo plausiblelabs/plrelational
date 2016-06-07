@@ -73,6 +73,7 @@ class DocModel {
     private var collections: MutableRelation
     private var objects: MutableRelation
     private var textObjects: MutableRelation
+    private var imageObjects: MutableRelation
     private var selectedCollectionID: MutableRelation
     private var selectedInspectorItemIDs: MutableRelation
     
@@ -118,6 +119,7 @@ class DocModel {
         self.collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
         self.objects = createRelation("object", ["id", "type", "name", "coll_id", "order"])
         self.textObjects = createRelation("text_object", ["id", "editable", "hint", "font"])
+        self.imageObjects = createRelation("image_object", ["id", "editable"])
         self.selectedCollectionID = createRelation("selected_collection", ["coll_id"])
         self.selectedInspectorItemIDs = createRelation("selected_inspector_item", ["item_id"])
 
@@ -157,7 +159,7 @@ class DocModel {
         self.removal = selectedItems.addChangeObserver({ changes in
 //            print("ADDS:\n\(changes.added)")
 //            print("REMOVES:\n\(changes.removed)")
-            print("SELECTED ITEMS:\n\(self.selectedItems)\n")
+//            print("SELECTED ITEMS:\n\(self.selectedItems)\n")
         })
     }
     
@@ -217,13 +219,21 @@ class DocModel {
             "order": RelationValue(order)
         ])
         
-        if type == .Text {
+        switch type {
+        case .Text:
             textObjects.add([
                 "id": RelationValue(objectID),
                 "editable": 0,
                 "hint": RelationValue("Hint for \(name)"),
                 "font": .NULL
             ])
+        case .Image:
+            imageObjects.add([
+                "id": RelationValue(objectID),
+                "editable": 0
+            ])
+        default:
+            break
         }
     }
 
@@ -249,7 +259,7 @@ class DocModel {
         })
     }
 
-    lazy var docOutlineTreeViewModel: TreeViewModel<Row> = { [unowned self] in
+    lazy var docOutlineTreeViewModel: TreeViewModel<RowTreeNode> = { [unowned self] in
         return TreeViewModel(
             data: self.docOutlineBinding,
             allowsChildren: { row in
@@ -289,7 +299,7 @@ class DocModel {
         )
     }()
 
-    lazy var inspectorTreeViewModel: TreeViewModel<Row> = { [unowned self] in
+    lazy var inspectorTreeViewModel: TreeViewModel<RowTreeNode> = { [unowned self] in
         return TreeViewModel(
             data: self.inspectorItemsBinding,
             allowsChildren: { row in
@@ -313,11 +323,16 @@ class DocModel {
         )
     }()
     
+    lazy var propertiesSidebarVisible: BidiValueBinding<Bool> = { [unowned self] in
+        return BidiValueBinding(true)
+    }()
+    
     lazy var propertiesModel: PropertiesModel = { [unowned self] in
         return PropertiesModel(
             db: self.undoableDB,
             selectedItems: self.selectedItems,
-            textObjects: self.textObjects
+            textObjects: self.textObjects,
+            imageObjects: self.imageObjects
         )
     }()
 

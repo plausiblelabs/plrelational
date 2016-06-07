@@ -19,10 +19,6 @@ class Document: NSDocument {
     @IBOutlet var contentView: BackgroundView!
     @IBOutlet var newItemButton: NSPopUpButton!
     @IBOutlet var rightSidebarView: BackgroundView!
-    @IBOutlet var itemTypeLabel: TextField!
-    @IBOutlet var nameTextField: TextField!
-    @IBOutlet var nameLabel: TextField!
-    @IBOutlet var noSelectionLabel: TextField!
 
     var docOutlineView: DocOutlineView!
     var inspectorView: InspectorView!
@@ -72,13 +68,19 @@ class Document: NSDocument {
         docModel = DocModel(undoManager: undoManager)
         docModel.addDefaultData()
         
-        // Create the "views"
+        // Create the views
         docOutlineView = DocOutlineView(model: docModel.docOutlineTreeViewModel, outlineView: documentOutlineView)
         inspectorView = InspectorView(model: docModel.inspectorTreeViewModel, outlineView: inspectorOutlineView)
-        propertiesView = PropertiesView(model: docModel.propertiesModel, itemTypeLabel: itemTypeLabel, nameLabel: nameLabel, nameField: nameTextField, noSelectionLabel: noSelectionLabel)
+        propertiesView = PropertiesView(frame: rightSidebarView.bounds, model: docModel.propertiesModel)
+        rightSidebarView.addSubview(propertiesView)
+        rightSidebarView.visible = docModel.propertiesSidebarVisible
     }
     
     @IBAction func newPageAction(sender: NSMenuItem) {
         docModel.newCollection("Page", type: .Page, parentID: nil)
+    }
+    
+    @IBAction func togglePropertiesSidebar(sender: NSMenuItem) {
+        docModel.propertiesSidebarVisible.toggle()
     }
 }

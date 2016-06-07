@@ -22,7 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var stepper: StepperView!
 
     var nsUndoManager: SPUndoManager!
-    var treeView: TreeView<Row>!
+    var listView: ListView<RowArrayElement>!
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
         window.delegate = self
@@ -103,13 +103,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             )
         }
         
-        // Set up the tree view
-        let objectsTreeBinding = RelationTreeBinding(relation: objects, idAttr: "id", parentAttr: "parent", orderAttr: "order")
-        let treeViewModel = TreeViewModel(
-            data: objectsTreeBinding,
-            allowsChildren: { _ in
-                return false
-            },
+        // Set up the list view
+        let objectsArrayBinding = RelationArrayBinding(relation: objects, idAttr: "id", orderAttr: "order")
+        let listViewModel = ListViewModel(
+            data: objectsArrayBinding,
             contextMenu: nil,
             move: nil,
             selection: selectionBinding(selectedObjectID),
@@ -121,8 +118,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             },
             cellImage: nil
         )
-        treeView = TreeView(model: treeViewModel, outlineView: outlineView)
-        treeView.animateChanges = true
+        listView = ListView(model: listViewModel, outlineView: outlineView)
+        listView.animateChanges = true
 
         // Add some other controls (could also do this in the xib)
         checkbox = Checkbox(frame: NSMakeRect(200, 80, 120, 24))

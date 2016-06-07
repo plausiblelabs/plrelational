@@ -13,23 +13,23 @@ import Binding
 // is allowed by default
 private let PasteboardType = "coop.plausible.vp.pasteboard.TreeViewItem"
 
-struct TreeViewModel<D: TreeData> {
-    let data: TreeBinding<D>
-    let allowsChildren: (D) -> Bool
-    let contextMenu: ((D) -> ContextMenu?)?
+struct TreeViewModel<N: TreeNode> {
+    let data: TreeBinding<N>
+    let allowsChildren: (N.Data) -> Bool
+    let contextMenu: ((N.Data) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
-    let move: ((srcPath: TreePath<D>, dstPath: TreePath<D>) -> Void)?
-    let selection: BidiValueBinding<Set<D.ID>>
-    let cellIdentifier: (D) -> String
-    let cellText: (D) -> ValueBinding<String>
-    let cellImage: ((D) -> ValueBinding<Image>)?
+    let move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?
+    let selection: BidiValueBinding<Set<N.ID>>
+    let cellIdentifier: (N.Data) -> String
+    let cellText: (N.Data) -> ValueBinding<String>
+    let cellImage: ((N.Data) -> ValueBinding<Image>)?
 }
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
-class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
+class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
     
-    private let model: TreeViewModel<D>
+    private let model: TreeViewModel<N>
     private let outlineView: NSOutlineView
     
     private var treeBindingRemoval: ObserverRemoval?
@@ -42,7 +42,7 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     /// Whether to automatically expand a parent when a child is inserted.
     var autoExpand = false
     
-    init(model: TreeViewModel<D>, outlineView: NSOutlineView) {
+    init(model: TreeViewModel<N>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
         
@@ -66,51 +66,51 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
 
     // MARK: NSOutlineViewDataSource
 
-    @objc func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
+    func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
         switch item {
         case nil:
             return model.data.root.children.count
-        case let node as TreeNode<D>:
+        case let node as N:
             return node.children.count
         default:
             fatalError("Unexpected item type")
         }
     }
     
-    @objc func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
+    func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
         switch item {
         case nil:
             return model.data.root.children[index]
-        case let node as TreeNode<D>:
+        case let node as N:
             return node.children[index]
         default:
             fatalError("Unexpected item type")
         }
     }
     
-    @objc func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
-        let node = item as! TreeNode<D>
+    func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
+        let node = item as! N
         return model.allowsChildren(node.data) && node.children.count > 0
     }
     
-    @objc func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
+    func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
         if model.move == nil {
             return nil
         }
         
-        let node = item as! TreeNode<D>
+        let node = item as! N
         let pboardItem = NSPasteboardItem()
         pboardItem.setPropertyList(node.id.toPlist(), forType: PasteboardType)
         return pboardItem
     }
     
-    @objc func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
+    func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
         
         if let idPlist = pboard.propertyListForType(PasteboardType) {
-            let nodeID = D.ID.fromPlist(idPlist)!
+            let nodeID = N.ID.fromPlist(idPlist)!
             let currentParent = model.data.parentForID(nodeID)
-            let proposedParent = proposedItem as? TreeNode<D>
+            let proposedParent = proposedItem as? N
             if proposedParent === currentParent {
                 // We are reordering the node within its existing parent (or at the top level)
                 if let srcIndex = model.data.indexForID(nodeID) {
@@ -143,14 +143,14 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         return .None
     }
     
-    @objc func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
+    func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyListForType(PasteboardType) {
-            let nodeID = D.ID.fromPlist(idPlist)!
+        if let idPlist = pboard.propertyListForType(PasteboardType), move = model.move {
+            let nodeID = N.ID.fromPlist(idPlist)!
             
             let currentParent = model.data.parentForID(nodeID)
-            let proposedParent = item as? TreeNode<D>
+            let proposedParent = item as? N
 
             // Note that `index` will be -1 in the case where it is being dragged onto
             // another node, but we will account for that in RelationTreeBinding.move()
@@ -159,7 +159,7 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
 
             let srcPath = TreePath(parent: currentParent, index: srcIndex)
             let dstPath = TreePath(parent: proposedParent, index: dstIndex)
-            model.move?(srcPath: srcPath, dstPath: dstPath)
+            move(srcPath: srcPath, dstPath: dstPath)
             return true
         }
         
@@ -169,7 +169,7 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     // MARK: ExtOutlineViewDelegate
     
     func outlineView(outlineView: NSOutlineView, viewForTableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
-        let node = item as! TreeNode<D>
+        let node = item as! N
         let identifier = model.cellIdentifier(node.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
@@ -186,7 +186,7 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     }
     
     func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
-        let node = item as! TreeNode<D>
+        let node = item as! N
         return model.contextMenu?(node.data).map{$0.nsmenu}
     }
     
@@ -203,9 +203,9 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         
         selfInitiatedSelectionChange = true
         
-        var itemIDs: [D.ID] = []
+        var itemIDs: [N.ID] = []
         outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
-            if let node = self.outlineView.itemAtRow(index) as? TreeNode<D> {
+            if let node = self.outlineView.itemAtRow(index) as? N {
                 itemIDs.append(node.id)
             }
         }
@@ -237,14 +237,14 @@ class TreeView<D: TreeData>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         selfInitiatedSelectionChange = false
     }
     
-    func treeBindingChanged(changes: [TreeChange<D>]) {
+    func treeBindingChanged(changes: [TreeChange<N>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
         
         outlineView.beginUpdates()
 
         // TODO: Use a Set instead
-        var itemsToReload: [TreeNode<D>] = []
-        var itemsToExpand: [TreeNode<D>] = []
+        var itemsToReload: [N] = []
+        var itemsToExpand: [N] = []
         
         for change in changes {
             switch change {

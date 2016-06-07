@@ -8,61 +8,51 @@
 
 import Foundation
 
-public protocol TreeData {
+public protocol TreeNode: class {
     associatedtype ID: Hashable, Plistable
+    associatedtype Data
+
+    var id: ID { get }
+    var data: Data { get set }
+    var children: [Self] { get set }
+    var parentID: ID? { get }
 }
 
-public class TreeNode<D: TreeData> {
-    public let id: D.ID
-    public var data: D
-    public var children: [TreeNode<D>]
-    
-    public init(id: D.ID, data: D, children: [TreeNode<D>] = []) {
-        self.id = id
-        self.data = data
-        self.children = children
-    }
-    
-    public var parentID: D.ID? {
-        return nil
-    }
-}
-
-public struct TreePath<D: TreeData> {
-    public let parent: TreeNode<D>?
+public struct TreePath<N: TreeNode> {
+    public let parent: N?
     public let index: Int
     
-    public init(parent: TreeNode<D>?, index: Int) {
+    public init(parent: N?, index: Int) {
         self.parent = parent
         self.index = index
     }
 }
 
 extension TreePath: Equatable {}
-public func ==<D: TreeData>(a: TreePath<D>, b: TreePath<D>) -> Bool {
+public func ==<N: TreeNode>(a: TreePath<N>, b: TreePath<N>) -> Bool {
     return a.parent?.id == b.parent?.id && a.index == b.index
 }
 
-public struct TreePos<D: TreeData> {
-    public let parentID: D.ID?
-    public let previousID: D.ID?
-    public let nextID: D.ID?
+public struct TreePos<N: TreeNode> {
+    public let parentID: N.ID?
+    public let previousID: N.ID?
+    public let nextID: N.ID?
     
-    public init(parentID: D.ID?, previousID: D.ID?, nextID: D.ID?) {
+    public init(parentID: N.ID?, previousID: N.ID?, nextID: N.ID?) {
         self.parentID = parentID
         self.previousID = previousID
         self.nextID = nextID
     }
 }
 
-public enum TreeChange<D: TreeData> { case
-    Insert(TreePath<D>),
-    Delete(TreePath<D>),
-    Move(src: TreePath<D>, dst: TreePath<D>)
+public enum TreeChange<N: TreeNode> { case
+    Insert(TreePath<N>),
+    Delete(TreePath<N>),
+    Move(src: TreePath<N>, dst: TreePath<N>)
 }
 
 extension TreeChange: Equatable {}
-public func ==<D: TreeData>(a: TreeChange<D>, b: TreeChange<D>) -> Bool {
+public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     switch (a, b) {
     case let (.Insert(a), .Insert(b)): return a == b
     case let (.Delete(a), .Delete(b)): return a == b
@@ -71,16 +61,16 @@ public func ==<D: TreeData>(a: TreeChange<D>, b: TreeChange<D>) -> Bool {
     }
 }
 
-public class TreeBinding<D: TreeData>: Binding {
-    public typealias Value = TreeNode<D>
-    public typealias Changes = [TreeChange<D>]
+public class TreeBinding<N: TreeNode>: Binding {
+    public typealias Value = N
+    public typealias Changes = [TreeChange<N>]
     public typealias ChangeObserver = Changes -> Void
 
-    public typealias NodeID = D.ID
-    public typealias Node = TreeNode<D>
-    public typealias Path = TreePath<D>
-    public typealias Pos = TreePos<D>
-    public typealias Change = TreeChange<D>
+    public typealias NodeID = N.ID
+    public typealias Node = N
+    public typealias Path = TreePath<N>
+    public typealias Pos = TreePos<N>
+    public typealias Change = TreeChange<N>
     
     private var changeObservers: [UInt64: ChangeObserver] = [:]
     private var changeObserverNextID: UInt64 = 0
@@ -102,7 +92,7 @@ public class TreeBinding<D: TreeData>: Binding {
         return { self.changeObservers.removeValueForKey(id) }
     }
     
-    internal func notifyChangeObservers(changes: [TreeChange<D>]) {
+    internal func notifyChangeObservers(changes: Changes) {
         for (_, f) in changeObservers {
             f(changes)
         }

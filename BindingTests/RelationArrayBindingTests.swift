@@ -31,13 +31,13 @@ class RelationArrayBindingTests: BindingTestCase {
         
         let arrayBinding = RelationArrayBinding(relation: sqliteRelation, idAttr: "id", orderAttr: "order")
         
-        // TODO: Verify that in-memory array structure was built correctly during initialization
-//        verifyArray(arrayBinding, [
-//            "Page1",
-//            "Page2",
-//            "Page3",
-//            "Page4"
-//        ])
+        // Verify that in-memory array structure was built correctly during initialization
+        verifyArray(arrayBinding, [
+            "Page1",
+            "Page2",
+            "Page3",
+            "Page4"
+        ])
     }
     
     func testInsertMoveDelete() {
@@ -89,65 +89,65 @@ class RelationArrayBindingTests: BindingTestCase {
             AssertEqual(sqliteDB["page"]!, expected, file: file, line: line)
         }
         
-//        // Insert some pages
-//        addPage(1, name: "Page1", previousID: nil)
-//        addPage(2, name: "Page2", previousID: 1)
-//        addPage(3, name: "Page3", previousID: 2)
-//        addPage(4, name: "Page4", previousID: 3)
-//        verifyArray(arrayBinding, [
-//            "Page1",
-//            "Page2",
-//            "Page3",
-//            "Page4"
-//        ])
-//        verifyChanges([
-//            .Insert(0),
-//            .Insert(1),
-//            .Insert(2),
-//            .Insert(3),
-//        ])
-//        verifySQLite(MakeRelation(
-//            ["id", "name",  "order"],
-//            [1,    "Page1", 5.0],
-//            [2,    "Page2", 7.0],
-//            [3,    "Page3", 8.0],
-//            [4,    "Page4", 8.5]
-//        ))
-//        
-//        // Re-order a page
-//        movePage(srcIndex: 2, dstIndex: 0)
-//        verifyArray(arrayBinding, [
-//            "Page3",
-//            "Page1",
-//            "Page2",
-//            "Page4"
-//        ])
-//        verifyChanges([
-//            .Move(srcIndex: 2, dstIndex: 0)
-//        ])
-//        verifySQLite(MakeRelation(
-//            ["id", "name",  "order"],
-//            [1,    "Page1", 5.0],
-//            [2,    "Page2", 7.0],
-//            [3,    "Page3", 3.0],
-//            [4,    "Page4", 8.5]
-//        ))
-//        
-//        // Delete a page
-//        deletePage(1)
-//        verifyArray(arrayBinding, [
-//            "Page3",
-//            "Page2",
-//            "Page4"
-//        ])
-//        verifyChanges([
-//            .Delete(1)
-//        ])
-//        verifySQLite(MakeRelation(
-//            ["id", "name",  "order"],
-//            [1,    "Page1", 5.0],
-//            [2,    "Page2", 7.0],
-//            [4,    "Page4", 8.5]
-//        ))
+        // Insert some pages
+        addPage(1, name: "Page1", previousID: nil)
+        addPage(2, name: "Page2", previousID: 1)
+        addPage(3, name: "Page3", previousID: 2)
+        addPage(4, name: "Page4", previousID: 3)
+        verifyArray(arrayBinding, [
+            "Page1",
+            "Page2",
+            "Page3",
+            "Page4"
+        ])
+        verifyChanges([
+            .Insert(0),
+            .Insert(1),
+            .Insert(2),
+            .Insert(3),
+        ])
+        verifySQLite(MakeRelation(
+            ["id", "name",  "order"],
+            [1,    "Page1", 5.0],
+            [2,    "Page2", 7.0],
+            [3,    "Page3", 8.0],
+            [4,    "Page4", 8.5]
+        ))
+
+        // Re-order a page
+        movePage(srcIndex: 2, dstIndex: 0)
+        verifyArray(arrayBinding, [
+            "Page3",
+            "Page1",
+            "Page2",
+            "Page4"
+        ])
+        verifyChanges([
+            .Move(srcIndex: 2, dstIndex: 0)
+        ])
+        verifySQLite(MakeRelation(
+            ["id", "name",  "order"],
+            [1,    "Page1", 5.0],
+            [2,    "Page2", 7.0],
+            [3,    "Page3", 3.0],
+            [4,    "Page4", 8.5]
+        ))
+
+        // Delete a page
+        deletePage(1)
+        verifyArray(arrayBinding, [
+            "Page3",
+            "Page2",
+            "Page4"
+        ])
+        verifyChanges([
+            .Delete(1)
+        ])
+        verifySQLite(MakeRelation(
+            ["id", "name",  "order"],
+            [2,    "Page2", 7.0],
+            [3,    "Page3", 3.0],
+            [4,    "Page4", 8.5]
+        ))
     }
 }
