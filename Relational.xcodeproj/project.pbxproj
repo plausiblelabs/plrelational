@@ -102,6 +102,7 @@
 		37C611591CE3F7C0001DAF59 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
 		47701CA11CF764CD00E3549D /* Checkbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47701CA01CF764CD00E3549D /* Checkbox.swift */; };
 		C204A1501D071A9200DF297F /* RelationDerivative.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A14F1D071A9200DF297F /* RelationDerivative.swift */; };
+		C204A1521D073E6100DF297F /* RelationObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A1511D073E6100DF297F /* RelationObserver.swift */; };
 		C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */; };
 		C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7491CBD7F4500234A89 /* BinaryOperator.swift */; };
@@ -398,6 +399,7 @@
 		37F8FBD31CE4FC30001C7C5F /* RelationTreeBindingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationTreeBindingTests.swift; path = BindingTests/RelationTreeBindingTests.swift; sourceTree = SOURCE_ROOT; };
 		47701CA01CF764CD00E3549D /* Checkbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
 		C204A14F1D071A9200DF297F /* RelationDerivative.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDerivative.swift; sourceTree = "<group>"; };
+		C204A1511D073E6100DF297F /* RelationObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObserver.swift; sourceTree = "<group>"; };
 		C21971A91CC030B900E84F7E /* ModelHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelHelpers.swift; sourceTree = "<group>"; };
 		C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDefaultChangeObserverImplementation.swift; sourceTree = "<group>"; };
 		C22921911CC6CDCC00518184 /* makemodule.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = makemodule.sh; path = ../modules/makemodule.sh; sourceTree = "<group>"; };
@@ -914,6 +916,7 @@
 				C204A14F1D071A9200DF297F /* RelationDerivative.swift */,
 				C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */,
 				C2B339DD1CEA54E7008568E9 /* RelationDump.swift */,
+				C204A1511D073E6100DF297F /* RelationObserver.swift */,
 				C2C258691D0203CC0066EB82 /* RelationOperators.swift */,
 				C22921E71CD12CF100518184 /* RelationTests.swift */,
 				C257C74B1CBD835600234A89 /* RelationParts.swift */,
@@ -1560,6 +1563,7 @@
 				C22921CA1CD12A8700518184 /* FunctionalDependency.swift in Sources */,
 				C23AAF481CF8CD89009E28E0 /* QueryPlanner.swift in Sources */,
 				C22921CB1CD12A8700518184 /* ObserverSet.swift in Sources */,
+				C204A1521D073E6100DF297F /* RelationObserver.swift in Sources */,
 				C22921CD1CD12A8700518184 /* PlaygroundMonospace.swift in Sources */,
 				3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */,
 				C22921CE1CD12A8700518184 /* Relation.swift in Sources */,

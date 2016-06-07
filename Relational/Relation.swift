@@ -12,11 +12,11 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     
     mutating func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError>
     
-    /// Add an observer function which is called when the content of the Relation
+    /// Add an observer which is notified when the content of the Relation
     /// changes. The return value is a function which removes the observation when
     /// invoked. The caller can use that function to cancel the observation when
     /// it no longer needs it.
-    func addChangeObserver(f: RelationChange -> Void) -> (Void -> Void)
+    func addChangeObserver(observer: RelationObserver) -> (Void -> Void)
     
     func union(other: Relation) -> Relation
     func intersection(other: Relation) -> Relation
@@ -254,7 +254,11 @@ extension Relation {
 }
 
 extension Relation {
-    func addWeakChangeObserver<T: AnyObject>(target: T, method: T -> RelationChange -> Void) {
+    public func addChangeObserver(f: RelationChange -> Void) -> (Void -> Void) {
+        return addChangeObserver(SimpleRelationObserverProxy(f: f))
+    }
+    
+    public func addWeakChangeObserver<T: AnyObject>(target: T, method: T -> RelationChange -> Void) {
         var remove: (Void -> Void)? = nil
         
         remove = self.addChangeObserver({ [weak target] in
@@ -267,7 +271,7 @@ extension Relation {
         })
     }
     
-    func addWeakChangeObserver<T: AnyObject>(target: T, call: (T, RelationChange) -> Void) {
+    public func addWeakChangeObserver<T: AnyObject>(target: T, call: (T, RelationChange) -> Void) {
         addWeakChangeObserver(target, method: { obj in { change in call(obj, change) } })
     }
 }
