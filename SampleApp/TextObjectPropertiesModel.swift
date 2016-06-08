@@ -57,11 +57,7 @@ class TextObjectPropertiesModel {
         return self.hintRelation.stringWhenMulti("Multiple Values")
     }()
     
-    lazy var availableFonts: ValueBinding<[String]> = { [unowned self] in
-        // XXX
-        let fonts = ["Futura", "Helvetica", "Monaco"]
-        return ValueBinding.constant(fonts)
-    }()
+    var availableFonts: [String] = ["Futura", "Helvetica", "Monaco"]
     
     lazy var font: BidiValueBinding<String?> = { [unowned self] in
         return self.db.bidiBinding(

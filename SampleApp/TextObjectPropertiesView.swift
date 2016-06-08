@@ -7,12 +7,13 @@
 //
 
 import Cocoa
+import Binding
 
 class TextObjectPropertiesView: BackgroundView {
 
     var editableCheckbox: Checkbox!
     var hintField: TextField!
-    var fontPopupButton: PopUpButton!
+    var fontPopupButton: PopUpButton<String>!
 
     init(frame: NSRect, model: TextObjectPropertiesModel) {
         super.init(frame: frame)
@@ -29,9 +30,9 @@ class TextObjectPropertiesView: BackgroundView {
         addSubview(hintField)
         
         fontPopupButton = PopUpButton(frame: NSMakeRect(10, 80, 120, 24), pullsDown: false)
-        fontPopupButton.titles = model.availableFonts
-        fontPopupButton.placeholderTitle = model.fontPlaceholder
-        fontPopupButton.selectedTitle = model.font
+        fontPopupButton.items = ValueBinding.constant(model.availableFonts.map{ titledMenuItem($0) })
+        fontPopupButton.defaultItemContent = MenuItemContent(object: "Default", title: model.fontPlaceholder)
+        fontPopupButton.selectedObject = model.font
         addSubview(fontPopupButton)
     }
     

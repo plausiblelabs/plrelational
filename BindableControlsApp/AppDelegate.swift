@@ -18,7 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @IBOutlet var outlineView: ExtOutlineView!
     @IBOutlet var textField: TextField!
     var checkbox: Checkbox!
-    var popupButton: PopUpButton!
+    var popupButton: PopUpButton<String>!
     var stepper: StepperView!
 
     var nsUndoManager: SPUndoManager!
@@ -144,9 +144,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             set: { selectedObjectsEditable.updateBoolean($0.boolValue) }
         )
         
-        popupButton.titles = ValueBinding.constant(["Red", "Orange", "Yellow", "Green", "Blue", "Violet"])
-        popupButton.placeholderTitle = selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default")
-        popupButton.selectedTitle = undoableDB.bidiBinding(
+        let colors = ["Red", "Orange", "Yellow", "Green", "Blue", "Violet"]
+        let popupItems = colors.map{ titledMenuItem($0) }
+        popupButton.items = ValueBinding.constant(popupItems)
+        popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
+        popupButton.selectedObject = undoableDB.bidiBinding(
             selectedObjectsColor,
             action: "Change Color",
             get: { $0.oneStringOrNil },

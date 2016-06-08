@@ -9,39 +9,62 @@
 import Cocoa
 import Binding
 
-class PopUpButton: NSPopUpButton {
+class PopUpButton<T: Equatable>: NSPopUpButton {
 
     private let bindings = BindingSet()
     
-    var titles: ValueBinding<[String]>? {
+    var items: ValueBinding<[MenuItem<T>]>? {
         didSet {
-            bindings.register("titles", titles, { [weak self] value in
+            bindings.register("items", items, { [weak self] value in
                 guard let weakSelf = self else { return }
+
+                // Clear the menu
                 weakSelf.removeAllItems()
-                weakSelf.addItemsWithTitles(value)
-                weakSelf.menu?.insertItem(weakSelf.defaultMenuItem, atIndex: 0)
-                weakSelf.setSelectedTitle(weakSelf.selectedTitle?.value)
+
+                // Add the menu items
+                let nativeItems = value.map{ NativeMenuItem(model: $0) }
+                for item in nativeItems {
+                    weakSelf.menu?.addItem(item.nsitem)
+                }
+
+                // Insert the default menu item, if we have one
+                if let defaultMenuItem = weakSelf.defaultMenuItem {
+                    weakSelf.menu?.insertItem(defaultMenuItem.nsitem, atIndex: 0)
+                }
+                
+                // Set the selected item, if needed
+                weakSelf.setSelectedItem(weakSelf.selectedObject?.value)
             })
         }
     }
 
-    var selectedTitle: BidiValueBinding<String?>? {
+    var selectedObject: BidiValueBinding<T?>? {
         didSet {
-            bindings.register("selectedTitle", selectedTitle, { [weak self] value in
-                self?.setSelectedTitle(value)
+            bindings.register("selectedObject", selectedObject, { [weak self] value in
+                self?.setSelectedItem(value)
             })
         }
     }
 
-    var placeholderTitle: ValueBinding<String>? {
+    var defaultItemContent: MenuItemContent<T>? {
         didSet {
-            bindings.register("placeholderTitle", placeholderTitle, { [weak self] value in
-                self?.defaultMenuItem.title = value
-            })
+            if let existingItem = defaultMenuItem?.nsitem {
+                existingItem.menu?.removeItem(existingItem)
+            }
+            if let content = defaultItemContent {
+                let model = MenuItem.Normal(content)
+                let nativeItem = NativeMenuItem(model: model)
+                nativeItem.nsitem.hidden = true
+                nativeItem.nsitem.enabled = false
+                defaultMenuItem = nativeItem
+                menu?.insertItem(nativeItem.nsitem, atIndex: 0)
+            } else {
+                defaultMenuItem = nil
+            }
         }
     }
 
-    private var defaultMenuItem: NSMenuItem!
+    private var defaultMenuItem: NativeMenuItem<T>?
     
     private var selfInitiatedSelectionChange = false
 
@@ -51,28 +74,28 @@ class PopUpButton: NSPopUpButton {
         autoenablesItems = false
         target = self
         action = #selector(selectionChanged(_:))
-        
-        // Create the default menu item, which is shown when there is no selection
-        defaultMenuItem = NSMenuItem(title: "", action: nil, keyEquivalent: "")
-        defaultMenuItem.enabled = false
-        defaultMenuItem.hidden = true
     }
     
     required init?(coder: NSCoder) {
         fatalError("NSCoding not supported")
     }
     
-    private func setSelectedTitle(title: String?) {
+    private func setSelectedItem(object: T?) {
         selfInitiatedSelectionChange = true
-        if let title = title {
-            let index = indexOfItemWithTitle(title)
-            if index >= 0 {
+        if let object = object, menu = menu {
+            // Find menu item that matches given object
+            let index = menu.itemArray.indexOf({
+                let nativeItem = $0.representedObject! as! NativeMenuItem<T>
+                return nativeItem.object == object
+            })
+            if let index = index {
                 selectItemAtIndex(index)
             } else {
-                selectItem(defaultMenuItem)
+                selectItem(defaultMenuItem?.nsitem)
             }
         } else {
-            selectItem(defaultMenuItem)
+            // Select the default item if one exists, otherwise clear selection
+            selectItem(defaultMenuItem?.nsitem)
         }
         selfInitiatedSelectionChange = false
     }
@@ -80,10 +103,12 @@ class PopUpButton: NSPopUpButton {
     @objc func selectionChanged(sender: NSPopUpButton) {
         if selfInitiatedSelectionChange { return }
         
-        guard let newTitle = sender.titleOfSelectedItem else { return }
+        guard let selectedItem = sender.selectedItem else { return }
+        guard let nativeItem = selectedItem.representedObject as? NativeMenuItem<T> else { return }
+        guard let object = nativeItem.object else { return }
         
         selfInitiatedSelectionChange = true
-        selectedTitle?.commit(newTitle)
+        selectedObject?.commit(object)
         selfInitiatedSelectionChange = false
     }
 }
