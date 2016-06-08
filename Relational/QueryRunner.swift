@@ -79,8 +79,7 @@ class QueryRunner {
             collectedOutput.unionInPlace(rows)
         } else {
             for (parentIndex, index) in nodes[fromNode].parentIndexes {
-                let state = nodeStates[parentIndex]
-                state.inputBuffers[index].add(rows)
+                nodeStates[parentIndex].inputBuffers[index].add(rows)
                 process(parentIndex, inputIndex: index)
             }
         }
@@ -88,90 +87,93 @@ class QueryRunner {
     
     private func markDone(nodeIndex: Int) {
         for (parentIndex, index) in nodes[nodeIndex].parentIndexes {
-            let state = nodeStates[parentIndex]
-            state.setInputBufferEOF(index)
+            nodeStates[parentIndex].setInputBufferEOF(index)
             process(parentIndex, inputIndex: index)
-            if state.activeBuffers == 0 {
+            if nodeStates[parentIndex].activeBuffers == 0 {
                 markDone(parentIndex)
             }
         }
     }
     
     private func process(nodeIndex: Int, inputIndex: Int) {
-        let state = nodeStates[nodeIndex]
         let op = nodes[nodeIndex].op
         switch op {
         case .Union:
-            processUnion(nodeIndex, state, inputIndex)
+            processUnion(nodeIndex, inputIndex)
         case .Intersection:
-            processIntersection(nodeIndex, state, inputIndex)
+            processIntersection(nodeIndex, inputIndex)
         case .Difference:
-            processDifference(nodeIndex, state, inputIndex)
+            processDifference(nodeIndex, inputIndex)
         case .Project(let scheme):
-            processProject(nodeIndex, state, inputIndex, scheme)
+            processProject(nodeIndex, inputIndex, scheme)
         case .Select(let expression):
-            processSelect(nodeIndex, state, inputIndex, expression)
+            processSelect(nodeIndex, inputIndex, expression)
         case .Equijoin(let matching):
-            processEquijoin(nodeIndex, state, inputIndex, matching)
+            processEquijoin(nodeIndex, inputIndex, matching)
         case .Rename(let renames):
-            processRename(nodeIndex, state, inputIndex, renames)
+            processRename(nodeIndex, inputIndex, renames)
         case .Update(let newValues):
-            processUpdate(nodeIndex, state, inputIndex, newValues)
+            processUpdate(nodeIndex, inputIndex, newValues)
         case .Aggregate(let attribute, let initialValue, let agg):
-            processAggregate(nodeIndex, state, inputIndex, attribute, initialValue, agg)
+            processAggregate(nodeIndex, inputIndex, attribute, initialValue, agg)
         default:
             fatalError("Don't know how to process operation \(op)")
         }
     }
     
-    func processUnion(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int) {
-        let rows = state.inputBuffers[inputIndex].popAll()
-        writeOutput(state.uniq(rows), fromNode: nodeIndex)
+    func processUnion(nodeIndex: Int, _ inputIndex: Int) {
+        let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
+        writeOutput(nodeStates[nodeIndex].uniq(rows), fromNode: nodeIndex)
     }
     
-    func processIntersection(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int) {
+    func processIntersection(nodeIndex: Int, _ inputIndex: Int) {
         // Wait until all buffers are complete before we process anything. We could optimize this a bit
         // by streaming data if all *but one* buffer is complete. Maybe later.
-        if state.activeBuffers > 0 {
+        if nodeStates[nodeIndex].activeBuffers > 0 {
             return
         }
         
-        var accumulated = state.inputBuffers.first?.popAll() ?? []
-        for buffer in state.inputBuffers.dropFirst() {
-            let bufferRows = buffer.popAll()
+        var accumulated: Set<Row>
+        if nodeStates[nodeIndex].inputBuffers.isEmpty {
+            accumulated = []
+        } else {
+            accumulated = nodeStates[nodeIndex].inputBuffers[0].popAll()
+        }
+        for bufferIndex in nodeStates[nodeIndex].inputBuffers.indices.dropFirst() {
+            let bufferRows = nodeStates[nodeIndex].inputBuffers[bufferIndex].popAll()
             accumulated.intersectInPlace(bufferRows)
         }
         writeOutput(accumulated, fromNode: nodeIndex)
     }
     
-    func processDifference(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int) {
+    func processDifference(nodeIndex: Int, _ inputIndex: Int) {
         // We compute buffer[0] - buffer[1]. buffer[1] must be complete before we can compute anything.
         // Once it is complete, we can stream buffer[0] through.
-        guard state.inputBuffers[1].eof else { return }
+        guard nodeStates[nodeIndex].inputBuffers[1].eof else { return }
         
-        let rows = state.inputBuffers[0].popAll()
-        let subtracted = rows.subtract(state.inputBuffers[1].rows)
+        let rows = nodeStates[nodeIndex].inputBuffers[0].popAll()
+        let subtracted = rows.subtract(nodeStates[nodeIndex].inputBuffers[1].rows)
         writeOutput(subtracted, fromNode: nodeIndex)
     }
     
-    func processProject(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ scheme: Scheme) {
-        let rows = state.inputBuffers[inputIndex].popAll()
+    func processProject(nodeIndex: Int, _ inputIndex: Int, _ scheme: Scheme) {
+        let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
         let projected = Set(rows.map({ row -> Row in
             let subvalues = scheme.attributes.map({ ($0, row[$0]) })
             return Row(values: Dictionary(subvalues))
         }))
-        writeOutput(state.uniq(projected), fromNode: nodeIndex)
+        writeOutput(nodeStates[nodeIndex].uniq(projected), fromNode: nodeIndex)
     }
     
-    func processSelect(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ expression: SelectExpression) {
-        let rows = state.inputBuffers[inputIndex].popAll()
+    func processSelect(nodeIndex: Int, _ inputIndex: Int, _ expression: SelectExpression) {
+        let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
         let filtered = Set(rows.filter({ expression.valueWithRow($0).boolValue }))
         writeOutput(filtered, fromNode: nodeIndex)
     }
     
-    func processEquijoin(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ matching: [Attribute: Attribute]) {
+    func processEquijoin(nodeIndex: Int, _ inputIndex: Int, _ matching: [Attribute: Attribute]) {
         // Accumulate data until at least one input is complete.
-        guard state.activeBuffers <= 1 else { return }
+        guard nodeStates[nodeIndex].activeBuffers <= 1 else { return }
         
         // Track the keyed join target and the larger input index across calls.
         struct ExtraState {
@@ -181,12 +183,12 @@ class QueryRunner {
             var largerToSmallerRenaming: [Attribute: Attribute]
         }
         
-        let extraState = state.getExtraState({ Void -> ExtraState in
+        let extraState = nodeStates[nodeIndex].getExtraState({ Void -> ExtraState in
             // Figure out which input is smaller. If only one is complete, assume that one is smaller.
             let smallerInput: Int
-            if state.inputBuffers[0].eof {
-                if state.inputBuffers[1].eof {
-                    smallerInput = state.inputBuffers[0].rows.count < state.inputBuffers[1].rows.count ? 0 : 1
+            if nodeStates[nodeIndex].inputBuffers[0].eof {
+                if nodeStates[nodeIndex].inputBuffers[1].eof {
+                    smallerInput = nodeStates[nodeIndex].inputBuffers[0].rows.count < nodeStates[nodeIndex].inputBuffers[1].rows.count ? 0 : 1
                 } else {
                     smallerInput = 0
                 }
@@ -199,7 +201,7 @@ class QueryRunner {
             let largerToSmallerRenaming = smallerInput == 0 ? matching.reversed : matching
             
             var keyed: [Row: [Row]] = [:]
-            for row in state.inputBuffers[smallerInput].popAll() {
+            for row in nodeStates[nodeIndex].inputBuffers[smallerInput].popAll() {
                 let joinKey = row.rowWithAttributes(smallerAttributes)
                 if keyed[joinKey] != nil {
                     keyed[joinKey]!.append(row)
@@ -215,7 +217,7 @@ class QueryRunner {
                 largerToSmallerRenaming: largerToSmallerRenaming)
         })
         
-        let joined = state.inputBuffers[extraState.largerIndex].popAll().flatMap({ row -> [Row] in
+        let joined = nodeStates[nodeIndex].inputBuffers[extraState.largerIndex].popAll().flatMap({ row -> [Row] in
             let joinKey = row.rowWithAttributes(extraState.largerAttributes).renameAttributes(extraState.largerToSmallerRenaming)
             guard let smallerRows = extraState.keyed[joinKey] else { return [] }
             return smallerRows.map({ Row(values: $0.values + row.values) })
@@ -223,21 +225,21 @@ class QueryRunner {
         writeOutput(Set(joined), fromNode: nodeIndex)
     }
     
-    func processRename(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ renames: [Attribute: Attribute]) {
-        let rows = state.inputBuffers[inputIndex].popAll()
+    func processRename(nodeIndex: Int, _ inputIndex: Int, _ renames: [Attribute: Attribute]) {
+        let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
         let renamed = rows.map({ $0.renameAttributes(renames) })
         writeOutput(Set(renamed), fromNode: nodeIndex)
     }
     
-    func processUpdate(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ newValues: Row) {
-        let rows = state.inputBuffers[inputIndex].popAll()
+    func processUpdate(nodeIndex: Int, _ inputIndex: Int, _ newValues: Row) {
+        let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
         let updated = rows.map({ Row(values: $0.values + newValues.values) })
-        writeOutput(state.uniq(Set(updated)), fromNode: nodeIndex)
+        writeOutput(nodeStates[nodeIndex].uniq(Set(updated)), fromNode: nodeIndex)
     }
     
-    func processAggregate(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ attribute: Attribute, _ initialValue: RelationValue?, _ agg: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) {
-        var soFar = state.getExtraState({ initialValue })
-        for row in state.inputBuffers[inputIndex].popAll() {
+    func processAggregate(nodeIndex: Int, _ inputIndex: Int, _ attribute: Attribute, _ initialValue: RelationValue?, _ agg: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) {
+        var soFar = nodeStates[nodeIndex].getExtraState({ initialValue })
+        for row in nodeStates[nodeIndex].inputBuffers[inputIndex].popAll() {
             let newValue = row[attribute]
             let aggregated = agg(soFar, newValue)
             switch aggregated {
@@ -247,9 +249,9 @@ class QueryRunner {
                 fatalError("Don't know how to handle errors here yet. \(err)")
             }
         }
-        state.setExtraState(soFar)
+        nodeStates[nodeIndex].setExtraState(soFar)
         
-        if state.activeBuffers == 0 {
+        if nodeStates[nodeIndex].activeBuffers == 0 {
             if let soFar = soFar {
                 writeOutput([Row(values: [attribute: soFar])], fromNode: nodeIndex)
             }
@@ -258,7 +260,7 @@ class QueryRunner {
 }
 
 extension QueryRunner {
-    class NodeState {
+    struct NodeState {
         let nodeIndex: Int
         
         var outputForUniquing: Set<Row> = []
@@ -277,19 +279,19 @@ extension QueryRunner {
             activeBuffers = inputBuffers.count
         }
         
-        func setInputBufferEOF(index: Int) {
+        mutating func setInputBufferEOF(index: Int) {
             precondition(inputBuffers[index].eof == false)
             inputBuffers[index].eof = true
             activeBuffers -= 1
         }
         
-        func uniq(rows: Set<Row>) -> Set<Row> {
+        mutating func uniq(rows: Set<Row>) -> Set<Row> {
             let unique = rows.subtract(outputForUniquing)
             outputForUniquing.unionInPlace(unique)
             return unique
         }
         
-        func getExtraState<T>(calculate: Void -> T) -> T {
+        mutating func getExtraState<T>(@noescape calculate: Void -> T) -> T {
             if let state = extraState {
                 return state as! T
             } else {
@@ -299,28 +301,28 @@ extension QueryRunner {
             }
         }
         
-        func setExtraState<T>(value: T) {
+        mutating func setExtraState<T>(value: T) {
             extraState = value
         }
     }
 }
 
 extension QueryRunner {
-    class Buffer {
+    struct Buffer {
         var rows: Set<Row> = []
         var eof = false
         
-        func pop() -> Row? {
+        mutating func pop() -> Row? {
             return rows.popFirst()
         }
         
-        func popAll() -> Set<Row> {
+        mutating func popAll() -> Set<Row> {
             let ret = rows
             rows = []
             return ret
         }
         
-        func add<S: SequenceType where S.Generator.Element == Row>(seq: S) {
+        mutating func add<S: SequenceType where S.Generator.Element == Row>(seq: S) {
             rows.unionInPlace(seq)
         }
     }
