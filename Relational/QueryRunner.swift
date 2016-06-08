@@ -18,9 +18,11 @@ class QueryRunner {
         self.nodes = nodes
         rootIndex = planner.rootIndex
         activeInitiatorIndexes = planner.initiatorIndexes
-        nodeStates = nodes.indices.map({
-            NodeState(nodes: nodes, nodeIndex: $0)
-        })
+        nodeStates = Array()
+        nodeStates.reserveCapacity(nodes.count)
+        for index in nodes.indices {
+            nodeStates.append(NodeState(nodes: nodes, nodeIndex: index))
+        }
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
