@@ -91,6 +91,10 @@
 		37A1CE581D089CD70067870D /* BindingSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE571D089CD70067870D /* BindingSetTests.swift */; };
 		37A1CE5A1D08A2240067870D /* MenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE591D08A2240067870D /* MenuItem.swift */; };
 		37A1CE5B1D08A2240067870D /* MenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE591D08A2240067870D /* MenuItem.swift */; };
+		37A1CE5D1D08C3110067870D /* ColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE5C1D08C3110067870D /* ColorPickerView.swift */; };
+		37A1CE5E1D08C3110067870D /* ColorPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE5C1D08C3110067870D /* ColorPickerView.swift */; };
+		37A1CE601D08C70D0067870D /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE5F1D08C70D0067870D /* Color.swift */; };
+		37A1CE611D08C70D0067870D /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE5F1D08C70D0067870D /* Color.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -385,6 +389,8 @@
 		37A1CE541D0890970067870D /* BindingSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BindingSet.swift; sourceTree = "<group>"; };
 		37A1CE571D089CD70067870D /* BindingSetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BindingSetTests.swift; path = BindingTests/BindingSetTests.swift; sourceTree = SOURCE_ROOT; };
 		37A1CE591D08A2240067870D /* MenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuItem.swift; sourceTree = "<group>"; };
+		37A1CE5C1D08C3110067870D /* ColorPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
+		37A1CE5F1D08C70D0067870D /* Color.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -768,6 +774,8 @@
 				371243A51D00B06300E9BCFF /* ImageView.swift */,
 				371243B81D00B6C100E9BCFF /* Image.swift */,
 				37A1CE591D08A2240067870D /* MenuItem.swift */,
+				37A1CE5C1D08C3110067870D /* ColorPickerView.swift */,
+				37A1CE5F1D08C70D0067870D /* Color.swift */,
 			);
 			name = "Custom Views";
 			sourceTree = "<group>";
@@ -1500,10 +1508,12 @@
 				371243BC1D00DC6800E9BCFF /* Image.swift in Sources */,
 				3727080D1CFE2EA200710C80 /* BackgroundView.swift in Sources */,
 				372708051CFE2CA400710C80 /* PopUpButton.swift in Sources */,
+				37A1CE611D08C70D0067870D /* Color.swift in Sources */,
 				371243BD1D00DC7600E9BCFF /* ImageView.swift in Sources */,
 				372708101CFE3A4E00710C80 /* ExtOutlineView.swift in Sources */,
 				3727080E1CFE2FB600710C80 /* UndoableDatabase.swift in Sources */,
 				372708121CFE3D4F00710C80 /* ContextMenu.swift in Sources */,
+				37A1CE5E1D08C3110067870D /* ColorPickerView.swift in Sources */,
 				372708061CFE2CA400710C80 /* StepperView.swift in Sources */,
 				37A1CE5B1D08A2240067870D /* MenuItem.swift in Sources */,
 				372707EB1CFE2C7E00710C80 /* AppDelegate.swift in Sources */,
@@ -1543,6 +1553,7 @@
 				37A1CE5A1D08A2240067870D /* MenuItem.swift in Sources */,
 				37C6114B1CDBCB5C001DAF59 /* PropertiesView.swift in Sources */,
 				371243A61D00B06300E9BCFF /* ImageView.swift in Sources */,
+				37A1CE601D08C70D0067870D /* Color.swift in Sources */,
 				37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */,
 				37C611331CD7F80F001DAF59 /* TextField.swift in Sources */,
 				3761369B1CF9523A00F572C5 /* PopUpButton.swift in Sources */,
@@ -1550,6 +1561,7 @@
 				376136991CF65F0A00F572C5 /* TextObjectPropertiesModel.swift in Sources */,
 				37832EBC1CFCF17800256DB1 /* TextObjectPropertiesView.swift in Sources */,
 				37832EBA1CFCE63C00256DB1 /* PropertiesModel.swift in Sources */,
+				37A1CE5D1D08C3110067870D /* ColorPickerView.swift in Sources */,
 				37C611421CD94784001DAF59 /* UndoManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

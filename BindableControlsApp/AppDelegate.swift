@@ -20,6 +20,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var checkbox: Checkbox!
     var popupButton: PopUpButton<String>!
     var stepper: StepperView!
+    var colorPicker: ColorPickerView!
 
     var nsUndoManager: SPUndoManager!
     var listView: ListView<RowArrayElement>!
@@ -133,6 +134,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         stepper = StepperView(frame: NSMakeRect(200, 160, 120, 24), min: 0, max: 999, defaultValue: 0)
         rootView.addSubview(stepper)
 
+        colorPicker = ColorPickerView()
+        colorPicker.frame = NSMakeRect(200, 200, 120, 24)
+        rootView.addSubview(colorPicker)
+            
         // Wire up the controls and bindings
         textField.string = nameBinding(selectedObjectsName)
         textField.placeholder = selectedObjectsName.stringWhenMulti("Multiple Values")
@@ -162,6 +167,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             set: { selectedObjectsRocks.updateInteger(Int64($0!)) }
         )
         stepper.placeholder = selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
+        
+        let colorBinding: BidiValueBinding<CommonValue<Color>> = bidiValueBinding(.None)
+        colorPicker.color = colorBinding
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {

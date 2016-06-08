@@ -170,6 +170,14 @@ public class BidiValueBinding<T>: ValueBinding<T> {
     }
 }
 
+public func bidiValueBinding<T: Equatable>(initialValue: T) -> BidiValueBinding<T> {
+    return BidiValueBinding(initialValue: initialValue, valueChanging: valueChanging)
+}
+
+public func bidiValueBinding<T: Equatable>(initialValue: T?) -> BidiValueBinding<T?> {
+    return BidiValueBinding(initialValue: initialValue, valueChanging: valueChanging)
+}
+
 extension BidiValueBinding where T: Equatable {
     public convenience init(_ initialValue: T) {
         self.init(initialValue: initialValue, valueChanging: valueChanging)

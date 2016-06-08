@@ -8,7 +8,7 @@
 
 import Foundation
 
-public enum CommonValue<T> { case
+public enum CommonValue<T: Equatable>: Equatable { case
     /// The value is not defined for any item.
     None,
     
@@ -49,7 +49,20 @@ public enum CommonValue<T> { case
     }
 }
 
-extension CommonValue where T: Equatable {
+public func ==<T>(a: CommonValue<T>, b: CommonValue<T>) -> Bool {
+    switch (a, b) {
+    case (.None, .None):
+        return true
+    case let (.One(avalue), .One(bvalue)):
+        return avalue == bvalue
+    case (.Multi, .Multi):
+        return true
+    default:
+        return false
+    }
+}
+
+extension CommonValue { // where T: Equatable {
     /// Returns true if all items share the given value.
     public func all(value: T) -> Bool {
         switch self {

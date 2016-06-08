@@ -12,15 +12,13 @@ import Cocoa
 /// dependencies in the model, which should be platform-independent.  Currently it only
 /// supports loading a named image from the application's resource bundle.
 public class Image {
-    private let name: String
-    
-    public init(named name: String) {
-        self.name = name
-    }
-}
+    internal let nsimage: NSImage?
 
-extension Image {
-    var nsimage: NSImage? {
-        return NSImage(named: name)
+    public init(_ nsimage: NSImage) {
+        self.nsimage = nsimage
+    }
+
+    public init(named name: String) {
+        self.nsimage = NSImage(named: name)
     }
 }
