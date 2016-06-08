@@ -11,23 +11,15 @@ import Binding
 
 class ImageView: NSImageView {
 
+    private let bindings = BindingSet()
+    
     var img: ValueBinding<Image>? {
         didSet {
-            imgBindingRemoval?()
-            imgBindingRemoval = nil
-            if let img = img {
-                image = img.value.nsimage
-                imgBindingRemoval = img.addChangeObserver({ [weak self] in
-                    guard let weakSelf = self else { return }
-                    weakSelf.image = img.value.nsimage
-                })
-            } else {
-                image = nil
-            }
+            bindings.register("img", img, { [weak self] value in
+                self?.image = value.nsimage
+            })
         }
     }
-    
-    private var imgBindingRemoval: ObserverRemoval?
     
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -35,9 +27,5 @@ class ImageView: NSImageView {
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-    }
-    
-    deinit {
-        imgBindingRemoval?()
     }
 }

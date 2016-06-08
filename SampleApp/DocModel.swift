@@ -131,14 +131,11 @@ class DocModel {
         // The `inspectorItems` relation is a view that presents the currently selected collection
         // (from the doc outline tree view) as the root node with its associated objects as the
         // root node's children
-        // TODO: This is probably more complex than it needs to be
         let inspectorCollectionItems = selectedCollection
             .join(MakeRelation(["parent", "order"], [.NULL, 5.0]))
         let inspectorObjectItems = selectedCollectionID
             .join(objects)
             .renameAttributes(["coll_id": "parent"])
-            // TODO: Maybe optimize project() so that it's a no-op when the given attributes equal the current scheme
-            //.project(["id", "type", "name", "parent", "order"])
         self.inspectorItems = inspectorCollectionItems
             .union(inspectorObjectItems)
         self.selectedInspectorItems = selectedInspectorItemIDs

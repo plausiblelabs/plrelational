@@ -8,26 +8,17 @@ import Binding
 
 class BackgroundView: NSView {
     
+    private let bindings = BindingSet()
+    
     var visible: ValueBinding<Bool>? {
         didSet {
-            visibleBindingRemoval?()
-            visibleBindingRemoval = nil
-            if let visible = visible {
-                hidden = !visible.value
-                visibleBindingRemoval = visible.addChangeObserver({ [weak self] in self?.hidden = !visible.value })
-            } else {
-                hidden = false
-            }
+            bindings.register("visible", visible, { [weak self] value in
+                self?.hidden = !value
+            })
         }
     }
 
     var backgroundColor: NSColor?
-    
-    private var visibleBindingRemoval: ObserverRemoval?
-    
-    deinit {
-        visibleBindingRemoval?()
-    }
     
     override func drawRect(dirtyRect: NSRect) {
         super.drawRect(dirtyRect)
