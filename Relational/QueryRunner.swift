@@ -137,7 +137,7 @@ class QueryRunner {
         if nodeStates[nodeIndex].inputBuffers.isEmpty {
             accumulated = []
         } else {
-            accumulated = nodeStates[nodeIndex].inputBuffers[0].popAll()
+            accumulated = Set(nodeStates[nodeIndex].inputBuffers[0].popAll())
         }
         for bufferIndex in nodeStates[nodeIndex].inputBuffers.indices.dropFirst() {
             let bufferRows = nodeStates[nodeIndex].inputBuffers[bufferIndex].popAll()
@@ -151,7 +151,7 @@ class QueryRunner {
         // Once it is complete, we can stream buffer[0] through.
         guard nodeStates[nodeIndex].inputBuffers[1].eof else { return }
         
-        let rows = nodeStates[nodeIndex].inputBuffers[0].popAll()
+        let rows = Set(nodeStates[nodeIndex].inputBuffers[0].popAll())
         let subtracted = rows.subtract(nodeStates[nodeIndex].inputBuffers[1].rows)
         writeOutput(subtracted, fromNode: nodeIndex)
     }
@@ -285,10 +285,11 @@ extension QueryRunner {
             activeBuffers -= 1
         }
         
-        mutating func uniq(rows: Set<Row>) -> Set<Row> {
-            let unique = rows.subtract(outputForUniquing)
-            outputForUniquing.unionInPlace(unique)
-            return unique
+        mutating func uniq<Seq: SequenceType where Seq.Generator.Element == Row>(rows: Seq) -> Set<Row> {
+            var rowsSet = Set(rows)
+            rowsSet.subtractInPlace(outputForUniquing)
+            outputForUniquing.unionInPlace(rowsSet)
+            return rowsSet
         }
         
         mutating func getExtraState<T>(@noescape calculate: Void -> T) -> T {
@@ -309,21 +310,21 @@ extension QueryRunner {
 
 extension QueryRunner {
     struct Buffer {
-        var rows: Set<Row> = []
+        var rows: [Row] = []
         var eof = false
         
         mutating func pop() -> Row? {
-            return rows.popFirst()
+            return rows.popLast()
         }
         
-        mutating func popAll() -> Set<Row> {
+        mutating func popAll() -> [Row] {
             let ret = rows
             rows = []
             return ret
         }
         
         mutating func add<S: SequenceType where S.Generator.Element == Row>(seq: S) {
-            rows.unionInPlace(seq)
+            rows.appendContentsOf(seq)
         }
     }
 }
