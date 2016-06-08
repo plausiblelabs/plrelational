@@ -7,12 +7,14 @@
 //
 
 import Foundation
-import Binding
 
-class BindingSet {
+public class BindingSet {
     private var removals: [String: ObserverRemoval] = [:]
+
+    public init() {
+    }
     
-    func register<T>(key: String, _ binding: ValueBinding<T>?, _ onValue: (T) -> Void, onDetach: () -> Void = {}) {
+    public func register<T>(key: String, _ binding: ValueBinding<T>?, _ onValue: (T) -> Void, onDetach: () -> Void = {}) {
         if let removal = removals.removeValueForKey(key) {
             removal()
         }

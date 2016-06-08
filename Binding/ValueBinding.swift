@@ -42,6 +42,9 @@ public class ValueBinding<T>: Binding {
             self.notifyChangeObservers()
         }
     }
+    
+    // For testing purposes only.
+    internal var observerCount: Int { return changeObservers.count }
 }
 
 extension ValueBinding {
