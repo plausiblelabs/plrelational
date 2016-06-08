@@ -1,7 +1,7 @@
 
 class QueryPlanner {
     private let rootRelation: Relation
-    private var relationNodeIndexMap: ObjectDictionary<AnyObject, Int> = [:]
+    private var relationNodeIndexMap = ObjectMap<Int>()
     private var internalNodes: [Node] = []
     
     lazy var nodes: [Node] = {
@@ -59,15 +59,16 @@ class QueryPlanner {
     }
     
     private func visitRelationTree(root: Relation, @noescape _ f: (Relation, isRoot: Bool) -> Void) {
-        var visited: ObjectSet<AnyObject> = []
+        let visited = ObjectMap<Int>()
         var toVisit: [Relation] = [root]
         var isRoot = true
+        var iterationCount = 0
         while let r = toVisit.popLast() {
+            iterationCount += 1
             if let obj = r as? AnyObject {
-                if visited.contains(obj) {
+                let retrievedCount = visited.getOrCreate(obj, defaultValue: iterationCount)
+                if retrievedCount != iterationCount {
                     continue
-                } else {
-                    visited.insert(obj)
                 }
             }
             f(r, isRoot: isRoot)

@@ -108,6 +108,7 @@
 		47701CA11CF764CD00E3549D /* Checkbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47701CA01CF764CD00E3549D /* Checkbox.swift */; };
 		C204A1501D071A9200DF297F /* RelationDerivative.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A14F1D071A9200DF297F /* RelationDerivative.swift */; };
 		C204A1521D073E6100DF297F /* RelationObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A1511D073E6100DF297F /* RelationObserver.swift */; };
+		C204A1541D088B6300DF297F /* ObjectMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A1531D088B6300DF297F /* ObjectMap.swift */; };
 		C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */; };
 		C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7491CBD7F4500234A89 /* BinaryOperator.swift */; };
@@ -408,6 +409,7 @@
 		47701CA01CF764CD00E3549D /* Checkbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
 		C204A14F1D071A9200DF297F /* RelationDerivative.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDerivative.swift; sourceTree = "<group>"; };
 		C204A1511D073E6100DF297F /* RelationObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObserver.swift; sourceTree = "<group>"; };
+		C204A1531D088B6300DF297F /* ObjectMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectMap.swift; path = Relational/ObjectMap.swift; sourceTree = "<group>"; };
 		C21971A91CC030B900E84F7E /* ModelHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelHelpers.swift; sourceTree = "<group>"; };
 		C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDefaultChangeObserverImplementation.swift; sourceTree = "<group>"; };
 		C22921911CC6CDCC00518184 /* makemodule.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = makemodule.sh; path = ../modules/makemodule.sh; sourceTree = "<group>"; };
@@ -973,6 +975,7 @@
 				C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */,
 				C23AAF411CF61890009E28E0 /* MirrorChildren.swift */,
 				C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */,
+				C204A1531D088B6300DF297F /* ObjectMap.swift */,
 				C23AAF491CF8D651009E28E0 /* ObjectSet.swift */,
 				C22921B51CD10BA800518184 /* ObserverSet.swift */,
 				C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */,
@@ -1565,6 +1568,7 @@
 				C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */,
 				C23AAF4E1CF8E3F8009E28E0 /* SequenceFind.swift in Sources */,
 				C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */,
+				C204A1541D088B6300DF297F /* ObjectMap.swift in Sources */,
 				C277E8031CDB9D3400B7B8F6 /* GeneratorConcat.swift in Sources */,
 				C23AAF4A1CF8D651009E28E0 /* ObjectSet.swift in Sources */,
 				C23AAF421CF61890009E28E0 /* MirrorChildren.swift in Sources */,

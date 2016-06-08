@@ -1356,7 +1356,7 @@ class RelationTests: DBTestCase {
         AssertEqual(change?.removed, MakeRelation(["n"], [ 1], [10], [11]))
     }
     
-    func DISABLED_testHugeRelationGraphPerformance() {
+    func testHugeRelationGraphPerformance() {
         let base = MakeRelation(["A"])
         
         func unionAllPairs(relations: [Relation]) -> [Relation] {
