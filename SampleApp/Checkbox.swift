@@ -64,29 +64,17 @@ class Checkbox: NSButton {
         }
     }
 
-    private var checkStateBindingRemoval: ObserverRemoval?
+    private let bindings = BindingSet()
     
     var checked: BidiValueBinding<CheckState>? {
         didSet {
-            checkStateBindingRemoval?()
-            checkStateBindingRemoval = nil
-            
-            func setState(checkbox: Checkbox, state: CheckState) {
+            bindings.register("checked", checked, { [weak self] value in
+                guard let weakSelf = self else { return }
                 // Only allow mixed state if we are starting in a mixed state; otherwise we
                 // use simple two-state mode
-                checkbox.allowsMixedState = state == .Mixed
-                checkbox.state = state.nsValue
-            }
-            
-            if let checked = checked {
-                setState(self, state: checked.value)
-                checkStateBindingRemoval = checked.addChangeObserver({ [weak self] in
-                    guard let weakSelf = self else { return }
-                    setState(weakSelf, state: checked.value)
-                })
-            } else {
-                setState(self, state: .Off)
-            }
+                weakSelf.allowsMixedState = value == .Mixed
+                weakSelf.state = value.nsValue
+            })
         }
     }
     

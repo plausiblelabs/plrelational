@@ -11,68 +11,39 @@ import Binding
 
 class PopUpButton: NSPopUpButton {
 
+    private let bindings = BindingSet()
+    
     var titles: ValueBinding<[String]>? {
         didSet {
-            titlesBindingRemoval?()
-            titlesBindingRemoval = nil
-            if let titles = titles {
-                func updateTitles(button: PopUpButton) {
-                    button.removeAllItems()
-                    button.addItemsWithTitles(titles.value)
-                    button.menu?.insertItem(button.defaultMenuItem, atIndex: 0)
-                    button.setSelectedTitle(button.selectedTitle?.value)
-                }
-                
-                updateTitles(self)
-                
-                titlesBindingRemoval = titles.addChangeObserver({ [weak self] in
-                    guard let weakSelf = self else { return }
-                    updateTitles(weakSelf)
-                })
-            } else {
-                removeAllItems()
-            }
+            bindings.register("titles", titles, { [weak self] value in
+                guard let weakSelf = self else { return }
+                weakSelf.removeAllItems()
+                weakSelf.addItemsWithTitles(value)
+                weakSelf.menu?.insertItem(weakSelf.defaultMenuItem, atIndex: 0)
+                weakSelf.setSelectedTitle(weakSelf.selectedTitle?.value)
+            })
         }
     }
 
     var selectedTitle: BidiValueBinding<String?>? {
         didSet {
-            selectedTitleBindingRemoval?()
-            selectedTitleBindingRemoval = nil
-            if let selectedTitle = selectedTitle {
-                setSelectedTitle(selectedTitle.value)
-                selectedTitleBindingRemoval = selectedTitle.addChangeObserver({ [weak self] in
-                    self?.setSelectedTitle(selectedTitle.value)
-                })
-            } else {
-                setSelectedTitle(nil)
-            }
+            bindings.register("selectedTitle", selectedTitle, { [weak self] value in
+                self?.setSelectedTitle(value)
+            })
         }
     }
 
     var placeholderTitle: ValueBinding<String>? {
         didSet {
-            placeholderTitleBindingRemoval?()
-            placeholderTitleBindingRemoval = nil
-            if let placeholderTitle = placeholderTitle {
-                defaultMenuItem.title = placeholderTitle.value
-                placeholderTitleBindingRemoval = placeholderTitle.addChangeObserver({ [weak self] in
-                    guard let weakSelf = self else { return }
-                    weakSelf.defaultMenuItem.title = placeholderTitle.value
-                })
-            } else {
-                defaultMenuItem.title = ""
-            }
+            bindings.register("placeholderTitle", placeholderTitle, { [weak self] value in
+                self?.defaultMenuItem.title = value
+            })
         }
     }
 
     private var defaultMenuItem: NSMenuItem!
     
     private var selfInitiatedSelectionChange = false
-
-    private var titlesBindingRemoval: ObserverRemoval?
-    private var selectedTitleBindingRemoval: ObserverRemoval?
-    private var placeholderTitleBindingRemoval: ObserverRemoval?
 
     override init(frame: NSRect, pullsDown flag: Bool) {
         super.init(frame: frame, pullsDown: flag)
@@ -89,12 +60,6 @@ class PopUpButton: NSPopUpButton {
     
     required init?(coder: NSCoder) {
         fatalError("NSCoding not supported")
-    }
-    
-    deinit {
-        titlesBindingRemoval?()
-        selectedTitleBindingRemoval?()
-        placeholderTitleBindingRemoval?()
     }
     
     private func setSelectedTitle(title: String?) {

@@ -11,67 +11,34 @@ import Binding
 
 class TextField: NSTextField, NSTextFieldDelegate {
 
+    private let bindings = BindingSet()
+
     var string: ValueBinding<String>? {
         didSet {
-            stringBindingRemoval?()
-            stringBindingRemoval = nil
-            if let string = string {
-                stringValue = string.value
-                stringBindingRemoval = string.addChangeObserver({ [weak self] in
-                    guard let weakSelf = self else { return }
-                    // TODO: If the value becomes nil, it means that the underlying row
-                    // was deleted.  In practice, the TextField may be notified of the
-                    // change prior to other observers (such as the parent ListView),
-                    // which means that we may see the text disappear before the list
-                    // view item is removed (with a fade animation).  As a workaround,
-                    // if the value is transitioning to nil, we will leave the previous
-                    // text in place.
-                    // XXX: The above no longer applies, since the string is no longer an optional type
-//                    if let value = string.value {
-                        weakSelf.stringValue = string.value
-//                    }
-                })
-            } else {
-                stringValue = ""
-            }
+            bindings.register("string", string, { [weak self] value in
+                self?.stringValue = value
+            })
         }
     }
 
     var placeholder: ValueBinding<String>? {
         didSet {
-            placeholderBindingRemoval?()
-            placeholderBindingRemoval = nil
-            if let placeholder = placeholder {
-                placeholderString = placeholder.value
-                placeholderBindingRemoval = placeholder.addChangeObserver({ [weak self] in
-                    guard let weakSelf = self else { return }
-                    weakSelf.placeholderString = placeholder.value
-                })
-            } else {
-                placeholderString = ""
-            }
+            bindings.register("placeholder", placeholder, { [weak self] value in
+                self?.placeholderString = value
+            })
         }
     }
 
     var visible: ValueBinding<Bool>? {
         didSet {
-            visibleBindingRemoval?()
-            visibleBindingRemoval = nil
-            if let visible = visible {
-                hidden = !visible.value
-                visibleBindingRemoval = visible.addChangeObserver({ [weak self] in self?.hidden = !visible.value })
-            } else {
-                hidden = false
-            }
+            bindings.register("visible", visible, { [weak self] value in
+                self?.hidden = !value
+            })
         }
     }
     
     private var previousCommittedValue: String?
     private var previousValue: String?
-    
-    private var stringBindingRemoval: ObserverRemoval?
-    private var placeholderBindingRemoval: ObserverRemoval?
-    private var visibleBindingRemoval: ObserverRemoval?
     
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -83,12 +50,6 @@ class TextField: NSTextField, NSTextFieldDelegate {
         super.init(coder: coder)
         
         self.delegate = self
-    }
-    
-    deinit {
-        stringBindingRemoval?()
-        placeholderBindingRemoval?()
-        visibleBindingRemoval?()
     }
     
     override func controlTextDidBeginEditing(obj: NSNotification) {

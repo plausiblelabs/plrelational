@@ -8,54 +8,34 @@ import Binding
 
 class StepperView: NSControl, NSTextFieldDelegate {
     
+    private let bindings = BindingSet()
+    
     var value: BidiValueBinding<Int?>? {
         didSet {
-            valueBindingRemoval?()
-            valueBindingRemoval = nil
-            if let binding = value {
-                func updateControls(view: StepperView) {
-                    if let intValue = binding.value {
-                        view.stepper.integerValue = intValue
-                        view.textField.integerValue = intValue
-                    } else {
-                        view.stepper.integerValue = view.defaultValue
-                        view.textField.stringValue = ""
-                    }
+            bindings.register("value", value, { [weak self] value in
+                guard let weakSelf = self else { return }
+                if let intValue = value {
+                    weakSelf.stepper.integerValue = intValue
+                    weakSelf.textField.integerValue = intValue
+                } else {
+                    weakSelf.stepper.integerValue = weakSelf.defaultValue
+                    weakSelf.textField.stringValue = ""
                 }
-                updateControls(self)
-                valueBindingRemoval = binding.addChangeObserver({ [weak self] in
-                    guard let weakSelf = self else { return }
-                    updateControls(weakSelf)
-                })
-            } else {
-                stepper.integerValue = defaultValue
-                textField.stringValue = ""
-            }
+            })
         }
     }
 
     var placeholder: ValueBinding<String>? {
         didSet {
-            placeholderBindingRemoval?()
-            placeholderBindingRemoval = nil
-            if let placeholder = placeholder {
-                textField.placeholderString = placeholder.value
-                placeholderBindingRemoval = placeholder.addChangeObserver({ [weak self] in
-                    guard let weakSelf = self else { return }
-                    weakSelf.textField.placeholderString = placeholder.value
-                })
-            } else {
-                textField.placeholderString = ""
-            }
+            bindings.register("placeholder", placeholder, { [weak self] value in
+                self?.textField.placeholderString = value
+            })
         }
     }
 
     private let defaultValue: Int
     private var textField: NSTextField!
     private var stepper: NSStepper!
-
-    private var valueBindingRemoval: ObserverRemoval?
-    private var placeholderBindingRemoval: ObserverRemoval?
 
     init(frame: NSRect, min: Int, max: Int, defaultValue: Int) {
         self.defaultValue = defaultValue
