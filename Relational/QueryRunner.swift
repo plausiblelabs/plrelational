@@ -7,16 +7,20 @@ class QueryRunner {
     
     var initiatorGenerators: Dictionary<Int, AnyGenerator<Result<Row, RelationError>>> = [:]
     
-    var nodeStates: Dictionary<Int, NodeState> = [:]
+    var nodeStates: [NodeState]
     
     var collectedOutput: Set<Row> = []
     
     var done = false
     
     init(planner: QueryPlanner) {
-        nodes = planner.nodes
+        let nodes = planner.nodes
+        self.nodes = nodes
         rootIndex = planner.rootIndex
         activeInitiatorIndexes = planner.initiatorIndexes
+        nodeStates = nodes.indices.map({
+            NodeState(nodes: nodes, nodeIndex: $0)
+        })
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
@@ -75,7 +79,7 @@ class QueryRunner {
             collectedOutput.unionInPlace(rows)
         } else {
             for (parentIndex, index) in nodes[fromNode].parentIndexes {
-                let state = nodeStates.getOrCreate(parentIndex, defaultValue: NodeState(nodes: nodes, nodeIndex: parentIndex))
+                let state = nodeStates[parentIndex]
                 state.inputBuffers[index].add(rows)
                 process(parentIndex, inputIndex: index)
             }
@@ -84,7 +88,7 @@ class QueryRunner {
     
     private func markDone(nodeIndex: Int) {
         for (parentIndex, index) in nodes[nodeIndex].parentIndexes {
-            let state = nodeStates.getOrCreate(parentIndex, defaultValue: NodeState(nodes: nodes, nodeIndex: parentIndex))
+            let state = nodeStates[parentIndex]
             state.setInputBufferEOF(index)
             process(parentIndex, inputIndex: index)
             if state.activeBuffers == 0 {
@@ -94,7 +98,7 @@ class QueryRunner {
     }
     
     private func process(nodeIndex: Int, inputIndex: Int) {
-        let state = nodeStates[nodeIndex]!
+        let state = nodeStates[nodeIndex]
         let op = nodes[nodeIndex].op
         switch op {
         case .Union:
