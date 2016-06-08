@@ -1,22 +1,22 @@
 
 class QueryRunner {
-    let nodeTree: ObjectSet<QueryPlanner.Node>
-    let root: QueryPlanner.Node
+    let nodes: [QueryPlanner.Node]
+    let rootIndex: Int
     
-    var activeInitiators: ObjectSet<QueryPlanner.Node>
+    var activeInitiatorIndexes: [Int]
     
-    var initiatorGenerators: ObjectDictionary<QueryPlanner.Node, AnyGenerator<Result<Row, RelationError>>> = [:]
+    var initiatorGenerators: Dictionary<Int, AnyGenerator<Result<Row, RelationError>>> = [:]
     
-    var nodeStates: ObjectDictionary<QueryPlanner.Node, NodeState> = [:]
+    var nodeStates: Dictionary<Int, NodeState> = [:]
     
     var collectedOutput: Set<Row> = []
     
     var done = false
     
     init(planner: QueryPlanner) {
-        self.nodeTree = planner.nodeTree
-        self.root = planner.root
-        activeInitiators = planner.initiators
+        nodes = planner.nodes
+        rootIndex = planner.rootIndex
+        activeInitiatorIndexes = planner.initiatorIndexes
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
@@ -34,21 +34,21 @@ class QueryRunner {
     }
     
     private func pump() -> [Result<Row, RelationError>] {
-        guard let node = activeInitiators.any else {
+        guard let nodeIndex = activeInitiatorIndexes.last else {
             done = true
             return []
         }
         
-        let row = getInitiatorRow(node)
+        let row = getInitiatorRow(nodeIndex)
         
         switch row {
         case .Some(.Err(let err)):
             return [.Err(err)]
         case .Some(.Ok(let row)):
-            writeOutput([row], fromNode: node)
+            writeOutput([row], fromNode: nodeIndex)
         case .None:
-            activeInitiators.remove(node)
-            markDone(node)
+            activeInitiatorIndexes.removeLast()
+            markDone(nodeIndex)
         }
         
         let output = collectedOutput
@@ -56,74 +56,76 @@ class QueryRunner {
         return output.map({ .Ok($0) })
     }
     
-    private func getInitiatorRow(initiator: QueryPlanner.Node) -> Result<Row, RelationError>? {
-        switch initiator.op {
+    private func getInitiatorRow(initiatorIndex: Int) -> Result<Row, RelationError>? {
+        let op = nodes[initiatorIndex].op
+        switch op {
         case .TableScan(let relation):
-            let generator = initiatorGenerators.getOrCreate(initiator, defaultValue: relation.rawGenerateRows())
+            let generator = initiatorGenerators.getOrCreate(initiatorIndex, defaultValue: relation.rawGenerateRows())
             let row = generator.next()
             return row
         default:
-            fatalError("Unknown initiator operation \(initiator.op)")
+            fatalError("Unknown initiator operation \(op)")
         }
     }
     
-    private func writeOutput(rows: Set<Row>, fromNode: QueryPlanner.Node) {
+    private func writeOutput(rows: Set<Row>, fromNode: Int) {
         guard !rows.isEmpty else { return }
         
-        if fromNode === root {
+        if fromNode == rootIndex {
             collectedOutput.unionInPlace(rows)
         } else {
-            for (parent, index) in fromNode.parents {
-                let state = nodeStates.getOrCreate(parent, defaultValue: NodeState(node: parent))
+            for (parentIndex, index) in nodes[fromNode].parentIndexes {
+                let state = nodeStates.getOrCreate(parentIndex, defaultValue: NodeState(nodes: nodes, nodeIndex: parentIndex))
                 state.inputBuffers[index].add(rows)
-                process(parent, inputIndex: index)
+                process(parentIndex, inputIndex: index)
             }
         }
     }
     
-    private func markDone(node: QueryPlanner.Node) {
-        for (parent, index) in node.parents {
-            let state = nodeStates.getOrCreate(parent, defaultValue: NodeState(node: parent))
+    private func markDone(nodeIndex: Int) {
+        for (parentIndex, index) in nodes[nodeIndex].parentIndexes {
+            let state = nodeStates.getOrCreate(parentIndex, defaultValue: NodeState(nodes: nodes, nodeIndex: parentIndex))
             state.setInputBufferEOF(index)
-            process(parent, inputIndex: index)
+            process(parentIndex, inputIndex: index)
             if state.activeBuffers == 0 {
-                markDone(parent)
+                markDone(parentIndex)
             }
         }
     }
     
-    private func process(node: QueryPlanner.Node, inputIndex: Int) {
-        let state = nodeStates[node]!
-        switch node.op {
+    private func process(nodeIndex: Int, inputIndex: Int) {
+        let state = nodeStates[nodeIndex]!
+        let op = nodes[nodeIndex].op
+        switch op {
         case .Union:
-            processUnion(node, state, inputIndex)
+            processUnion(nodeIndex, state, inputIndex)
         case .Intersection:
-            processIntersection(node, state, inputIndex)
+            processIntersection(nodeIndex, state, inputIndex)
         case .Difference:
-            processDifference(node, state, inputIndex)
+            processDifference(nodeIndex, state, inputIndex)
         case .Project(let scheme):
-            processProject(node, state, inputIndex, scheme)
+            processProject(nodeIndex, state, inputIndex, scheme)
         case .Select(let expression):
-            processSelect(node, state, inputIndex, expression)
+            processSelect(nodeIndex, state, inputIndex, expression)
         case .Equijoin(let matching):
-            processEquijoin(node, state, inputIndex, matching)
+            processEquijoin(nodeIndex, state, inputIndex, matching)
         case .Rename(let renames):
-            processRename(node, state, inputIndex, renames)
+            processRename(nodeIndex, state, inputIndex, renames)
         case .Update(let newValues):
-            processUpdate(node, state, inputIndex, newValues)
+            processUpdate(nodeIndex, state, inputIndex, newValues)
         case .Aggregate(let attribute, let initialValue, let agg):
-            processAggregate(node, state, inputIndex, attribute, initialValue, agg)
+            processAggregate(nodeIndex, state, inputIndex, attribute, initialValue, agg)
         default:
-            fatalError("Don't know how to process operation \(node.op)")
+            fatalError("Don't know how to process operation \(op)")
         }
     }
     
-    func processUnion(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int) {
+    func processUnion(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int) {
         let rows = state.inputBuffers[inputIndex].popAll()
-        writeOutput(state.uniq(rows), fromNode: node)
+        writeOutput(state.uniq(rows), fromNode: nodeIndex)
     }
     
-    func processIntersection(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int) {
+    func processIntersection(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int) {
         // Wait until all buffers are complete before we process anything. We could optimize this a bit
         // by streaming data if all *but one* buffer is complete. Maybe later.
         if state.activeBuffers > 0 {
@@ -135,35 +137,35 @@ class QueryRunner {
             let bufferRows = buffer.popAll()
             accumulated.intersectInPlace(bufferRows)
         }
-        writeOutput(accumulated, fromNode: node)
+        writeOutput(accumulated, fromNode: nodeIndex)
     }
     
-    func processDifference(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int) {
+    func processDifference(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int) {
         // We compute buffer[0] - buffer[1]. buffer[1] must be complete before we can compute anything.
         // Once it is complete, we can stream buffer[0] through.
         guard state.inputBuffers[1].eof else { return }
         
         let rows = state.inputBuffers[0].popAll()
         let subtracted = rows.subtract(state.inputBuffers[1].rows)
-        writeOutput(subtracted, fromNode: node)
+        writeOutput(subtracted, fromNode: nodeIndex)
     }
     
-    func processProject(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int, _ scheme: Scheme) {
+    func processProject(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ scheme: Scheme) {
         let rows = state.inputBuffers[inputIndex].popAll()
         let projected = Set(rows.map({ row -> Row in
             let subvalues = scheme.attributes.map({ ($0, row[$0]) })
             return Row(values: Dictionary(subvalues))
         }))
-        writeOutput(state.uniq(projected), fromNode: node)
+        writeOutput(state.uniq(projected), fromNode: nodeIndex)
     }
     
-    func processSelect(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int, _ expression: SelectExpression) {
+    func processSelect(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ expression: SelectExpression) {
         let rows = state.inputBuffers[inputIndex].popAll()
         let filtered = Set(rows.filter({ expression.valueWithRow($0).boolValue }))
-        writeOutput(filtered, fromNode: node)
+        writeOutput(filtered, fromNode: nodeIndex)
     }
     
-    func processEquijoin(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int, _ matching: [Attribute: Attribute]) {
+    func processEquijoin(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ matching: [Attribute: Attribute]) {
         // Accumulate data until at least one input is complete.
         guard state.activeBuffers <= 1 else { return }
         
@@ -214,22 +216,22 @@ class QueryRunner {
             guard let smallerRows = extraState.keyed[joinKey] else { return [] }
             return smallerRows.map({ Row(values: $0.values + row.values) })
         })
-        writeOutput(Set(joined), fromNode: node)
+        writeOutput(Set(joined), fromNode: nodeIndex)
     }
     
-    func processRename(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int, _ renames: [Attribute: Attribute]) {
+    func processRename(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ renames: [Attribute: Attribute]) {
         let rows = state.inputBuffers[inputIndex].popAll()
         let renamed = rows.map({ $0.renameAttributes(renames) })
-        writeOutput(Set(renamed), fromNode: node)
+        writeOutput(Set(renamed), fromNode: nodeIndex)
     }
     
-    func processUpdate(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int, _ newValues: Row) {
+    func processUpdate(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ newValues: Row) {
         let rows = state.inputBuffers[inputIndex].popAll()
         let updated = rows.map({ Row(values: $0.values + newValues.values) })
-        writeOutput(state.uniq(Set(updated)), fromNode: node)
+        writeOutput(state.uniq(Set(updated)), fromNode: nodeIndex)
     }
     
-    func processAggregate(node: QueryPlanner.Node, _ state: NodeState, _ inputIndex: Int, _ attribute: Attribute, _ initialValue: RelationValue?, _ agg: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) {
+    func processAggregate(nodeIndex: Int, _ state: NodeState, _ inputIndex: Int, _ attribute: Attribute, _ initialValue: RelationValue?, _ agg: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) {
         var soFar = state.getExtraState({ initialValue })
         for row in state.inputBuffers[inputIndex].popAll() {
             let newValue = row[attribute]
@@ -245,7 +247,7 @@ class QueryRunner {
         
         if state.activeBuffers == 0 {
             if let soFar = soFar {
-                writeOutput([Row(values: [attribute: soFar])], fromNode: node)
+                writeOutput([Row(values: [attribute: soFar])], fromNode: nodeIndex)
             }
         }
     }
@@ -253,7 +255,7 @@ class QueryRunner {
 
 extension QueryRunner {
     class NodeState {
-        let node: QueryPlanner.Node
+        let nodeIndex: Int
         
         var outputForUniquing: Set<Row> = []
         var inputBuffers: [Buffer] = []
@@ -262,9 +264,10 @@ extension QueryRunner {
         
         var extraState: Any?
         
-        init(node: QueryPlanner.Node) {
-            self.node = node
-            while inputBuffers.count < node.childCount {
+        init(nodes: [QueryPlanner.Node], nodeIndex: Int) {
+            self.nodeIndex = nodeIndex
+            let childCount = nodes[nodeIndex].childCount
+            while inputBuffers.count < childCount {
                 inputBuffers.append(Buffer())
             }
             activeBuffers = inputBuffers.count

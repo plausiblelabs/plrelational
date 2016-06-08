@@ -1,31 +1,36 @@
 
 class QueryPlanner {
-    let rootRelation: Relation
-    var relationNodeMap: ObjectDictionary<AnyObject, Node> = [:]
-    lazy var nodeTree: ObjectSet<Node> = self.relationTreeToNodeTree(self.rootRelation)
+    private let rootRelation: Relation
+    private var relationNodeIndexMap: ObjectDictionary<AnyObject, Int> = [:]
+    private var internalNodes: [Node] = []
+    
+    lazy var nodes: [Node] = {
+        self.computeNodes()
+        return self.internalNodes
+    }()
     
     init(root: Relation) {
         self.rootRelation = root
     }
     
-    var root: QueryPlanner.Node {
+    var rootIndex: Int {
         // If the root is not an object then we'll only have one node. If it is, we can look it up.
         if rootRelation is AnyObject {
-            return getOrCreateNode(rootRelation)
+            return getOrCreateNodeIndex(rootRelation)
         } else {
-            return nodeTree.any!
+            return 0
         }
     }
     
-    var initiators: ObjectSet<QueryPlanner.Node> {
-        return ObjectSet(nodeTree.filter({
-            switch $0.op {
+    var initiatorIndexes: [Int] {
+        return (nodes.indices).filter({
+            switch nodes[$0].op {
             case .TableScan:
                 return true
             default:
                 return false
             }
-        }))
+        })
     }
     
     func initiatorRelation(initiator: QueryPlanner.Node) -> Relation {
@@ -37,24 +42,20 @@ class QueryPlanner {
         }
     }
     
-    private func relationTreeToNodeTree(r: Relation) -> ObjectSet<Node> {
-        var localNodes: ObjectSet<Node> = []
-        visitRelationTree(r, { relation, isRoot in
+    private func computeNodes() {
+        visitRelationTree(rootRelation, { relation, isRoot in
             let children = relationChildren(relation)
             // Skip this whole thing for relations with no children. They'll have nodes created for them by their parents.
             // Except if the root node has no children, we still need to hit that one if anything is to happen at all.
             if children.count > 0 || isRoot {
-                let node = getOrCreateNode(relation)
-                localNodes.insert(node)
+                let nodeIndex = getOrCreateNodeIndex(relation)
                 for (index, childRelation) in children.enumerate() {
-                    let childNode = getOrCreateNode(childRelation)
-                    childNode.parents.append((node, index))
-                    localNodes.insert(childNode)
+                    let childNodeIndex = getOrCreateNodeIndex(childRelation)
+                    internalNodes[childNodeIndex].parentIndexes.append((nodeIndex, index))
                 }
-                node.childCount = children.count
+                internalNodes[nodeIndex].childCount = children.count
             }
         })
-        return localNodes
     }
     
     private func visitRelationTree(root: Relation, @noescape _ f: (Relation, isRoot: Bool) -> Void) {
@@ -75,12 +76,19 @@ class QueryPlanner {
         }
     }
     
-    private func getOrCreateNode(r: Relation) -> Node {
+    private func getOrCreateNodeIndex(r: Relation) -> Int {
         if let obj = r as? AnyObject {
-            return relationNodeMap.getOrCreate(obj, defaultValue: relationToNode(r))
+            return relationNodeIndexMap.getOrCreate(obj, defaultValue: relationToNodeIndex(r))
         } else {
-            return relationToNode(r)
+            return relationToNodeIndex(r)
         }
+    }
+    
+    private func relationToNodeIndex(r: Relation) -> Int {
+        let node = relationToNode(r)
+        let index = internalNodes.count
+        internalNodes.append(node)
+        return index
     }
     
     private func relationToNode(r: Relation) -> Node {
@@ -88,7 +96,7 @@ class QueryPlanner {
         case let r as IntermediateRelation:
             return intermediateRelationToNode(r)
         default:
-            return Node(op: .TableScan(r), parents: [])
+            return Node(op: .TableScan(r), parentIndexes: [])
         }
     }
     
@@ -126,14 +134,14 @@ class QueryPlanner {
 }
 
 extension QueryPlanner {
-    class Node {
+    struct Node {
         let op: Operation
         var childCount = 0
-        var parents: [(node: Node, childIndex: Int)]
+        var parentIndexes: [(nodeIndex: Int, childIndex: Int)]
         
-        init(op: Operation, parents: [(node: Node, childIndex: Int)] = []) {
+        init(op: Operation, parentIndexes: [(nodeIndex: Int, childIndex: Int)] = []) {
             self.op = op
-            self.parents = parents
+            self.parentIndexes = parentIndexes
         }
     }
     

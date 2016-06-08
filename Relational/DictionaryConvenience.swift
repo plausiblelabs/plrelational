@@ -5,6 +5,18 @@ extension Dictionary where Value: Hashable {
     }
 }
 
+extension Dictionary {
+    mutating func getOrCreate(key: Key, @autoclosure defaultValue: Void -> Value) -> Value {
+        if let value = self[key] {
+            return value
+        } else {
+            let new = defaultValue()
+            self[key] = new
+            return new
+        }
+    }
+}
+
 func +<K: Hashable, V>(a: [K: V], b: [K: V]) -> [K: V] {
     var result = a
     for (k, v) in b {
