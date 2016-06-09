@@ -20,6 +20,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var checkbox: Checkbox!
     var popupButton: PopUpButton<String>!
     var stepper: StepperView!
+    var comboBox: ComboBox<String>!
     var colorPicker: ColorPickerView!
 
     var nsUndoManager: SPUndoManager!
@@ -134,8 +135,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         stepper = StepperView(frame: NSMakeRect(200, 160, 120, 24), min: 0, max: 999, defaultValue: 0)
         rootView.addSubview(stepper)
 
+        comboBox = ComboBox(frame: NSMakeRect(200, 200, 120, 24))
+        rootView.addSubview(comboBox)
+        
         colorPicker = ColorPickerView()
-        colorPicker.frame = NSMakeRect(200, 200, 120, 24)
+        colorPicker.frame = NSMakeRect(200, 240, 120, 24)
         rootView.addSubview(colorPicker)
             
         // Wire up the controls and bindings
@@ -167,6 +171,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             set: { selectedObjectsRocks.updateInteger(Int64($0!)) }
         )
         stepper.placeholder = selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
+        
+        let comboValueBinding = bidiValueBinding("Alice")
+        _ = comboValueBinding.addChangeObserver({ _ in
+            Swift.print("NEW COMBO VALUE: \(comboValueBinding.value)")
+        })
+        
+        comboBox.items = ValueBinding.constant(["Alice", "Bob", "Carlos"])
+        comboBox.value = comboValueBinding
         
         let colorBinding: BidiValueBinding<CommonValue<Color>> = bidiValueBinding(.None)
         colorPicker.color = colorBinding

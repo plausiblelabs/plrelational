@@ -79,6 +79,8 @@
 		376136991CF65F0A00F572C5 /* TextObjectPropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */; };
 		3761369B1CF9523A00F572C5 /* PopUpButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761369A1CF9523A00F572C5 /* PopUpButton.swift */; };
 		3761369D1CFBA42100F572C5 /* StepperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761369C1CFBA42100F572C5 /* StepperView.swift */; };
+		376A96381D09225900E696AE /* ComboBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376A96371D09225900E696AE /* ComboBox.swift */; };
+		376A96391D09225900E696AE /* ComboBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376A96371D09225900E696AE /* ComboBox.swift */; };
 		37832EBA1CFCE63C00256DB1 /* PropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37832EB91CFCE63C00256DB1 /* PropertiesModel.swift */; };
 		37832EBC1CFCF17800256DB1 /* TextObjectPropertiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37832EBB1CFCF17800256DB1 /* TextObjectPropertiesView.swift */; };
 		37832EBD1CFE9B6900256DB1 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
@@ -383,6 +385,7 @@
 		376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObjectPropertiesModel.swift; sourceTree = "<group>"; };
 		3761369A1CF9523A00F572C5 /* PopUpButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopUpButton.swift; sourceTree = "<group>"; };
 		3761369C1CFBA42100F572C5 /* StepperView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StepperView.swift; sourceTree = "<group>"; };
+		376A96371D09225900E696AE /* ComboBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComboBox.swift; sourceTree = "<group>"; };
 		37832EB91CFCE63C00256DB1 /* PropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertiesModel.swift; sourceTree = "<group>"; };
 		37832EBB1CFCF17800256DB1 /* TextObjectPropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObjectPropertiesView.swift; sourceTree = "<group>"; };
 		37A1CE501D07543F0067870D /* ImageObjectPropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageObjectPropertiesView.swift; sourceTree = "<group>"; };
@@ -776,6 +779,7 @@
 				37A1CE591D08A2240067870D /* MenuItem.swift */,
 				37A1CE5C1D08C3110067870D /* ColorPickerView.swift */,
 				37A1CE5F1D08C70D0067870D /* Color.swift */,
+				376A96371D09225900E696AE /* ComboBox.swift */,
 			);
 			name = "Custom Views";
 			sourceTree = "<group>";
@@ -1512,6 +1516,7 @@
 				371243BD1D00DC7600E9BCFF /* ImageView.swift in Sources */,
 				372708101CFE3A4E00710C80 /* ExtOutlineView.swift in Sources */,
 				3727080E1CFE2FB600710C80 /* UndoableDatabase.swift in Sources */,
+				376A96391D09225900E696AE /* ComboBox.swift in Sources */,
 				372708121CFE3D4F00710C80 /* ContextMenu.swift in Sources */,
 				37A1CE5E1D08C3110067870D /* ColorPickerView.swift in Sources */,
 				372708061CFE2CA400710C80 /* StepperView.swift in Sources */,
@@ -1562,6 +1567,7 @@
 				37832EBC1CFCF17800256DB1 /* TextObjectPropertiesView.swift in Sources */,
 				37832EBA1CFCE63C00256DB1 /* PropertiesModel.swift in Sources */,
 				37A1CE5D1D08C3110067870D /* ColorPickerView.swift in Sources */,
+				376A96381D09225900E696AE /* ComboBox.swift in Sources */,
 				37C611421CD94784001DAF59 /* UndoManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
