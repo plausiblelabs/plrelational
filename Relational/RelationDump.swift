@@ -1,5 +1,5 @@
 
-import Foundation
+import AppKit
 
 private struct FieldNameExclusions {
     static let strings: Set = ["changeObserverData", "log", "cachedCurrentRelation"]
@@ -135,7 +135,7 @@ extension Relation {
         print(rawDump(self))
     }
     
-    public func graphvizDump(showContents showContents: Bool = false) {
+    public func graphvizDump(showContents showContents: Bool = false, printer print: String -> Void = { print($0) }) {
         var seenIDs: Set<ObjectIdentifier> = []
         
         print("digraph relation_graph {")
@@ -172,5 +172,21 @@ extension Relation {
         visit(self, nonobjectID: "root")
         
         print("}")
+    }
+    
+    public func graphvizDumpAndOpen(showContents showContents: Bool = false) {
+        var output = ""
+        graphvizDump(showContents: showContents, printer: { output += $0; output += "\n" })
+        
+        let objDescription: String
+        if let obj = self as? AnyObject {
+             objDescription = "\(self.dynamicType) \(String(format: "%p", ObjectIdentifier(obj).uintValue))"
+        } else {
+            objDescription = "\(self.dynamicType)"
+        }
+        
+        let filename = "/tmp/\(objDescription).dot"
+        try! output.writeToFile(filename, atomically: true, encoding: NSUTF8StringEncoding)
+        NSWorkspace.sharedWorkspace().openFile(filename, withApplication: "Graphviz")
     }
 }
