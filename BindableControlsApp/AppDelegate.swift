@@ -48,12 +48,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             precondition(createResult.ok != nil)
             return db[name]
         }
-        var objects = createRelation("object", ["id", "name", "editable", "color", "rocks", "parent", "order"])
+        var objects = createRelation("object", ["id", "name", "editable", "fav_day", "fav_color", "rocks", "parent", "order"])
         var selectedObjectID = createRelation("selected_object", ["id"])
         let selectedObjects = selectedObjectID.join(objects)
         let selectedObjectsName = selectedObjects.project(["name"])
         let selectedObjectsEditable = selectedObjects.project(["editable"])
-        let selectedObjectsColor = selectedObjects.project(["color"])
+        let selectedObjectsDay = selectedObjects.project(["fav_day"])
+        let selectedObjectsColor = selectedObjects.project(["fav_color"])
         let selectedObjectsRocks = selectedObjects.project(["rocks"])
         
         // Prepare the undo manager
@@ -64,28 +65,38 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Add some test objects
         var id: Int64 = 1
         var order: Double = 1.0
-        func addObject(name: String, editable: Bool, color: String?, rocks: Int64) {
+        func addObject(name: String, editable: Bool, day: String?, color: Color?, rocks: Int64) {
+            let dayValue: RelationValue
+            if let day = day {
+                dayValue = RelationValue(day)
+            } else {
+                dayValue = .NULL
+            }
+            
             let colorValue: RelationValue
             if let color = color {
-                colorValue = RelationValue(color)
+                colorValue = RelationValue(color.stringValue)
             } else {
                 colorValue = .NULL
             }
+            
             let row: Row = [
                 "id": RelationValue(id),
                 "name": RelationValue(name),
                 "editable": RelationValue(Int64(editable ? 1 : 0)),
-                "color": colorValue,
+                "fav_day": dayValue,
+                "fav_color": colorValue,
                 "rocks": RelationValue(rocks),
                 "parent": .NULL,
                 "order": RelationValue(order)
             ]
             objects.add(row)
+            
             id += 1
             order += 1.0
         }
-        addObject("Fred", editable: false, color: nil, rocks: 17)
-        addObject("Wilma", editable: true, color: "Blue", rocks: 42)
+        addObject("Fred", editable: false, day: nil, color: nil, rocks: 17)
+        addObject("Wilma", editable: true, day: "Friday", color: Color.blue, rocks: 42)
 
         func nameBinding(relation: Relation) -> BidiValueBinding<String> {
             return undoableDB.bidiBinding(
@@ -153,15 +164,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             set: { selectedObjectsEditable.updateBoolean($0.boolValue) }
         )
         
-        let colors = ["Red", "Orange", "Yellow", "Green", "Blue", "Violet"]
-        let popupItems = colors.map{ titledMenuItem($0) }
+        let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+        let popupItems = days.map{ titledMenuItem($0) }
         popupButton.items = ValueBinding.constant(popupItems)
         popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
         popupButton.selectedObject = undoableDB.bidiBinding(
-            selectedObjectsColor,
-            action: "Change Color",
+            selectedObjectsDay,
+            action: "Change Day",
             get: { $0.oneStringOrNil },
-            set: { selectedObjectsColor.updateNullableString($0) }
+            set: { selectedObjectsDay.updateNullableString($0) }
         )
         
         stepper.value = undoableDB.bidiBinding(
@@ -172,7 +183,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
         stepper.placeholder = selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
         
-        let comboValueBinding = bidiValueBinding("Alice")
+        let comboValueBinding: BidiValueBinding<String?> = bidiValueBinding("Alice")
         _ = comboValueBinding.addChangeObserver({ _ in
             Swift.print("NEW COMBO VALUE: \(comboValueBinding.value)")
         })
@@ -180,8 +191,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         comboBox.items = ValueBinding.constant(["Alice", "Bob", "Carlos"])
         comboBox.value = comboValueBinding
         
-        let colorBinding: BidiValueBinding<CommonValue<Color>> = bidiValueBinding(.None)
-        colorPicker.color = colorBinding
+        colorPicker.color = undoableDB.bidiBinding(
+            selectedObjectsColor,
+            action: "Change Color",
+            get: {
+                $0.commonValue{ rv -> Color? in
+                    if let s: String = rv.get() {
+                        return Color(string: s)
+                    } else {
+                        return nil
+                    }
+                }
+            },
+            set: { (commonValue: CommonValue<Color>) in
+                guard let color = commonValue.orNil() else { preconditionFailure("Expected a single color value") }
+                selectedObjectsColor.updateString(color.stringValue)
+            }
+        )
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {

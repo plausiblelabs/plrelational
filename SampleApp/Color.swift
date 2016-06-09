@@ -42,8 +42,34 @@ struct Color: Hashable {
         self.components = Components(r: white, g: white, b: white, a: a)
     }
     
+    init?(string: String) {
+        let stringComps = string.componentsSeparatedByString(" ")
+        if stringComps.count != 4 {
+            return nil
+        }
+        let comps = stringComps.map{ s -> CGFloat in
+            if let f = NSNumberFormatter().numberFromString(s) {
+                let floatVal = CGFloat(f)
+                if floatVal < 0.0 {
+                    return 0.0
+                } else if floatVal > 1.0 {
+                    return 1.0
+                } else {
+                    return floatVal
+                }
+            } else {
+                return 1.0
+            }
+        }
+        self.init(r: comps[0], g: comps[1], b: comps[2], a: comps[3])
+    }
+    
     var hashValue: Int {
         return components.hashValue
+    }
+    
+    var stringValue: String {
+        return [components.r, components.g, components.b, components.a].map{ String($0) }.joinWithSeparator(" ")
     }
 }
 

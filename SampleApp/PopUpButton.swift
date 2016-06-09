@@ -85,8 +85,8 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
         if let object = object, menu = menu {
             // Find menu item that matches given object
             let index = menu.itemArray.indexOf({
-                let nativeItem = $0.representedObject! as! NativeMenuItem<T>
-                return nativeItem.object == object
+                let nativeItem = $0.representedObject as? NativeMenuItem<T>
+                return nativeItem?.object == object
             })
             if let index = index {
                 selectItemAtIndex(index)

@@ -10,8 +10,9 @@ import Cocoa
 import Binding
 
 enum ColorItem: Equatable { case
+    Default,
     Preset(Color),
-    Custom,
+    Custom(Color),
     Other
 }
 
@@ -19,8 +20,8 @@ func ==(a: ColorItem, b: ColorItem) -> Bool {
     switch (a, b) {
     case let (.Preset(acolor), .Preset(bcolor)):
         return acolor == bcolor
-    case (.Custom, .Custom):
-        return true
+    case let (.Custom(acolor), .Custom(bcolor)):
+        return acolor == bcolor
     case (.Other, .Other):
         return true
     default:
@@ -34,47 +35,53 @@ class ColorPickerView: NSView {
     
     var color: BidiValueBinding<CommonValue<Color>>? {
         didSet {
+            if let color = color {
+                self.setColorBinding(color)
+            }
             bindings.register("color", color, { [weak self] value in
                 guard let weakSelf = self else { return }
-                switch value {
-                case .None:
-                    // TODO: Clear opacity chooser
-                    weakSelf.colorPopup.defaultItemContent = MenuItemContent(
-                        object: ColorItem.Other,
-                        title: ValueBinding.constant("Default"),
-                        image: ValueBinding.constant(Image(unsetColorSwatchImage()))
-                    )
-                case .One(let color):
-                    // TODO: Update the popup selection
-                    // TODO: Update opacity chooser
-                    break
-                case .Multi:
-                    // TODO: Clear opacity chooser
-                    weakSelf.colorPopup.defaultItemContent = MenuItemContent(
-                        object: ColorItem.Other,
-                        title: ValueBinding.constant("Multiple"),
-                        image: ValueBinding.constant(Image(multipleColorSwatchImage()))
-                    )
+                
+                // Set the selected item in the color popup button
+                let newColorItem: ColorItem?
+                if let color = value.orNil() {
+                    if weakSelf.presetColors.contains(color) {
+                        newColorItem = ColorItem.Preset(color)
+                    } else {
+                        newColorItem = ColorItem.Custom(color)
+                    }
+                } else {
+                    newColorItem = ColorItem.Default
                 }
+                weakSelf.colorItem.commit(newColorItem)
+                
+                // Set the value in the opacity combo box
+                weakSelf.opacityValue.commit(value.orNil()?.components.a)
             })
         }
     }
     
+    private let presetColors: [Color]
+    
+    private let colorItem: BidiValueBinding<ColorItem?>
+    private let opacityValue: BidiValueBinding<CGFloat?>
+    
     private let colorPopup: PopUpButton<ColorItem>
-    private let opacityCombo: ComboBox<Double>
+    private let opacityCombo: ComboBox<CGFloat>
     
     init() {
         var popupItems: [MenuItem<ColorItem>] = []
+        var presets: [Color] = []
         
         func addPreset(name: String, _ color: Color) {
             let colorItem = ColorItem.Preset(color)
             let content = MenuItemContent(
                 object: colorItem,
                 title: ValueBinding.constant(name),
-                image: ValueBinding.constant(Image(colorSwatchImage(color, f: { _ in })))
+                image: ValueBinding.constant(colorSwatchImage(color, f: { _ in }))
             )
             let menuItem = MenuItem.Normal(content)
             popupItems.append(menuItem)
+            presets.append(color)
         }
         
         func addSeparator() {
@@ -97,19 +104,19 @@ class ColorPickerView: NSView {
         addPreset("Purple", Color.purple)
         addSeparator()
         addOther()
+        presetColors = presets
 
         colorPopup = PopUpButton(frame: NSZeroRect, pullsDown: false)
         colorPopup.items = ValueBinding.constant(popupItems)
+        colorItem = bidiValueBinding(nil)
+        colorPopup.selectedObject = colorItem
         
-        let opacityValues: [Double] = 0.stride(through: 100, by: 10).map{ $0 / 100.0 }
+        let opacityValues: [CGFloat] = 0.stride(through: 100, by: 10).map{ CGFloat($0) / 100.0 }
         opacityCombo = ComboBox(frame: NSZeroRect)
         opacityCombo.formatter = OpacityFormatter()
         opacityCombo.items = ValueBinding.constant(opacityValues)
-        let opacityValueBinding = bidiValueBinding(1.0)
-        opacityCombo.value = opacityValueBinding
-        _ = opacityValueBinding.addChangeObserver({ _ in
-            Swift.print("NEW OPACITY VALUE: \(opacityValueBinding.value)")
-        })
+        opacityValue = bidiValueBinding(nil)
+        opacityCombo.value = opacityValue
         
         super.init(frame: NSZeroRect)
         
@@ -137,10 +144,18 @@ class ColorPickerView: NSView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    private func setColorBinding(binding: BidiValueBinding<CommonValue<Color>>) {
+        colorPopup.defaultItemContent = MenuItemContent(
+            object: ColorItem.Default,
+            title: binding.map{ $0.whenMulti("Multiple", otherwise: "Default") },
+            image: binding.map{ $0.whenMulti(multipleColorSwatchImage(), otherwise: unsetColorSwatchImage()) }
+        )
+    }
 }
 
 /// Returns a swatch image for the default/unset color case.
-private func unsetColorSwatchImage() -> NSImage {
+private func unsetColorSwatchImage() -> Image {
     return colorSwatchImage(Color.white, f: { rect in
         let topRight = CGPoint(x: rect.maxX, y: rect.maxY)
         let bottomLeft = CGPoint(x: rect.minX, y: rect.minY)
@@ -154,7 +169,7 @@ private func unsetColorSwatchImage() -> NSImage {
 }
 
 /// Returns a swatch image for the multiple color case.
-private func multipleColorSwatchImage() -> NSImage {
+private func multipleColorSwatchImage() -> Image {
     return colorSwatchImage(Color.white, f: { rect in
         NSColor.redColor().setStroke()
         NSBezierPath.strokeLineFromPoint(NSMakePoint(rect.minX + 4, rect.midY), toPoint: NSMakePoint(rect.maxX - 4, rect.midY))
@@ -162,7 +177,7 @@ private func multipleColorSwatchImage() -> NSImage {
 }
 
 /// Returns a color swatch image.
-private func colorSwatchImage(color: Color, f: (NSRect) -> ()) -> NSImage {
+private func colorSwatchImage(color: Color, f: (NSRect) -> ()) -> Image {
     let size = NSMakeSize(20, 12)
     let rect = NSRect(origin: NSZeroPoint, size: size)
     let image = NSImage(size: size)
@@ -172,7 +187,7 @@ private func colorSwatchImage(color: Color, f: (NSRect) -> ()) -> NSImage {
     NSColor.blackColor().setStroke()
     NSBezierPath.strokeRect(rect.insetBy(dx: 0.5, dy: 0.5))
     image.unlockFocus()
-    return image
+    return Image(image)
 }
 
 /// Draws a color swatch into the current graphics context.

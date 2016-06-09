@@ -47,6 +47,16 @@ public enum CommonValue<T: Equatable>: Equatable { case
             return value
         }
     }
+    
+    /// Returns the given value in the .Multi case, otherwise returns the alternate value.
+    public func whenMulti<U>(value: U, otherwise: U) -> U {
+        switch self {
+        case .None, .One:
+            return otherwise
+        case .Multi:
+            return value
+        }
+    }
 }
 
 public func ==<T>(a: CommonValue<T>, b: CommonValue<T>) -> Bool {

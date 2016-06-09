@@ -224,6 +224,26 @@ extension Relation {
     public var oneBoolOrNil: Bool? {
         return oneValue{ $0.boolValue }
     }
+    
+    /// Resolves to a CommonValue that indicates whether there are zero, one, or multiple rows in the relation.
+    public func commonValue<V>(transform: RelationValue -> V?) -> CommonValue<V> {
+        precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
+        let attr = self.scheme.attributes.first!
+        let rows = self.rows()
+        if let row = rows.next()?.ok {
+            if rows.next() == nil {
+                if let value = transform(row[attr]) {
+                    return .One(value)
+                } else {
+                    return .None
+                }
+            } else {
+                return .Multi
+            }
+        } else {
+            return .None
+        }
+    }
 }
 
 extension Relation {

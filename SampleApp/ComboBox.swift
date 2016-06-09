@@ -22,7 +22,7 @@ class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
         }
     }
     
-    var value: BidiValueBinding<T>? {
+    var value: BidiValueBinding<T?>? {
         didSet {
             bindings.register("value", value, { [weak self] value in
                 self?.objectValue = value as? AnyObject
@@ -44,7 +44,7 @@ class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
     
     @objc func comboBoxSelectionDidChange(notification: NSNotification) {
         if let newValue = objectValueOfSelectedItem {
-            value?.commit(newValue as! T)
+            value?.commit(newValue as? T)
         }
     }
     

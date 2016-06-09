@@ -100,6 +100,37 @@ class RelationValueBindingTests: BindingTestCase {
         XCTAssertNil(multi.project(["age"]).oneIntegerOrNil)
     }
     
+    func testCommonValue() {
+        let empty = MakeRelation(
+            ["id", "name", "friendly", "count"])
+        
+        let one = MakeRelation(
+            ["id", "name", "friendly", "age"],
+            [1,    "cat",  1,          5],
+            [2,    "cat",  1,          5])
+        
+        let multi = MakeRelation(
+            ["id", "name", "friendly", "age"],
+            [1,    "cat",  1,          5],
+            [2,    "dog",  0,          3])
+        
+        let asString = { (value: RelationValue) -> String? in
+            return value.get()
+        }
+
+        let asInt = { (value: RelationValue) -> Int64? in
+            return value.get()
+        }
+
+        XCTAssertEqual(empty.project(["name"]).commonValue(asString), CommonValue.None)
+        XCTAssertEqual(one.project(["name"]).commonValue(asString), CommonValue.One("cat"))
+        XCTAssertEqual(multi.project(["name"]).commonValue(asString), CommonValue.Multi)
+        
+        XCTAssertEqual(empty.project(["age"]).commonValue(asInt), CommonValue.None)
+        XCTAssertEqual(one.project(["age"]).commonValue(asInt), CommonValue.One(5))
+        XCTAssertEqual(multi.project(["age"]).commonValue(asInt), CommonValue.Multi)
+    }
+    
     func testBind() {
         let db = makeDB().db
         let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
