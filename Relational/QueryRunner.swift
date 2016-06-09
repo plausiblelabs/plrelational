@@ -118,6 +118,10 @@ class QueryRunner {
             processUpdate(nodeIndex, inputIndex, newValues)
         case .Aggregate(let attribute, let initialValue, let agg):
             processAggregate(nodeIndex, inputIndex, attribute, initialValue, agg)
+        case .Otherwise:
+            processOtherwise(nodeIndex, inputIndex)
+        case .Unique(let attribute, let matching):
+            processUnique(nodeIndex, inputIndex, attribute, matching)
         default:
             fatalError("Don't know how to process operation \(op)")
         }
@@ -258,6 +262,44 @@ class QueryRunner {
                 writeOutput([Row(values: [attribute: soFar])], fromNode: nodeIndex)
             }
         }
+    }
+    
+    func processOtherwise(nodeIndex: Int, _ inputIndex: Int) {
+        // Wait until all buffers are complete before we process anything. We could optimize this a bit
+        // by streaming data if all *but one* buffer is complete. Maybe later.
+        if nodeStates[nodeIndex].activeBuffers > 0 {
+            return
+        }
+        
+        let nonemptyBuffer = nodeStates[nodeIndex].inputBuffers.find({ !$0.rows.isEmpty })
+        if let nonemptyBuffer = nonemptyBuffer {
+            writeOutput(Set(nonemptyBuffer.rows), fromNode: nodeIndex)
+        }
+        nodeStates[nodeIndex].inputBuffers = []
+        markDone(nodeIndex)
+    }
+    
+    func processUnique(nodeIndex: Int, _ inputIndex: Int, _ attribute: Attribute, _ matching: RelationValue) {
+        // We have to wait until everything is here before we can proceed.
+        if nodeStates[nodeIndex].activeBuffers > 0 {
+            return
+        }
+        
+        let rows = nodeStates[nodeIndex].inputBuffers[0].popAll()
+        var matchingCount = 0
+        for row in rows {
+            if row[attribute] == matching {
+                matchingCount += 1
+                if matchingCount > 1 {
+                    break
+                }
+            }
+        }
+        
+        if matchingCount == 1 {
+            writeOutput(Set(rows), fromNode: nodeIndex)
+        }
+        markDone(nodeIndex)
     }
 }
 

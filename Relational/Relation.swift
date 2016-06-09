@@ -148,29 +148,11 @@ extension Relation {
 extension Relation {
     public func otherwise(other: Relation) -> Relation {
         precondition(self.scheme.attributes == other.scheme.attributes)
-
-        // TODO: There must certainly be a more efficient way to do this
-        let r1 = other
-            .join(MakeRelation(["priority"], [1]))
-        let r2 = self
-            .join(MakeRelation(["priority"], [2]))
-        let union = r1.union(r2)
-        return union
-            .max("priority")
-            .join(union)
-            .project(self.scheme)
+        return IntermediateRelation(op: .Otherwise, operands: [self, other])
     }
     
     public func unique(attribute: Attribute, matching: RelationValue) -> Relation {
-        // TODO: There is probably a more efficient way to do this
-        return self
-            .project([attribute])
-            .count()
-            .join(self)
-            .select(
-                (Attribute("count") *== 1) *&&
-                (attribute *== matching))
-            .project(self.scheme)
+        return IntermediateRelation(op: .Unique(attribute, matching), operands: [self])
     }
 }
 
