@@ -55,9 +55,10 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
 
 extension Relation {
     public func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        let data = LogRelationIterationBegin(self)
         let planner = QueryPlanner(root: self)
         let runner = QueryRunner(planner: planner)
-        return runner.rows()
+        return LogRelationIterationReturn(data, runner.rows())
     }
 }
 
