@@ -104,6 +104,10 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
     }
     
     private override func update(newValue: T) {
+        if !changing(value, newValue) {
+            return
+        }
+        
         selfInitiatedChange = true
         if before == nil {
             before = config.snapshot()
@@ -114,6 +118,10 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
     }
     
     private override func commit(newValue: T) {
+        if !changing(value, newValue) {
+            return
+        }
+
         selfInitiatedChange = true
         if before == nil {
             before = config.snapshot()

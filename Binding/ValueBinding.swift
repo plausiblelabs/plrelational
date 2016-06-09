@@ -14,7 +14,7 @@ public class ValueBinding<T>: Binding {
     public typealias ChangeObserver = Changes -> Void
     
     internal(set) public var value: T
-    private let changing: (T, T) -> Bool
+    internal let changing: (T, T) -> Bool
     private var changeObservers: [UInt64: ChangeObserver] = [:]
     private var changeObserverNextID: UInt64 = 0
     

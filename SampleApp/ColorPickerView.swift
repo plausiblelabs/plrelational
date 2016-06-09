@@ -61,6 +61,7 @@ class ColorPickerView: NSView {
     }
     
     private let colorPopup: PopUpButton<ColorItem>
+    private let opacityCombo: ComboBox<Double>
     
     init() {
         var popupItems: [MenuItem<ColorItem>] = []
@@ -100,9 +101,19 @@ class ColorPickerView: NSView {
         colorPopup = PopUpButton(frame: NSZeroRect, pullsDown: false)
         colorPopup.items = ValueBinding.constant(popupItems)
         
+        let opacityValues: [Double] = 0.stride(through: 100, by: 10).map{ $0 / 100.0 }
+        opacityCombo = ComboBox(frame: NSZeroRect)
+        opacityCombo.formatter = OpacityFormatter()
+        opacityCombo.items = ValueBinding.constant(opacityValues)
+        let opacityValueBinding = bidiValueBinding(1.0)
+        opacityCombo.value = opacityValueBinding
+        _ = opacityValueBinding.addChangeObserver({ _ in
+            Swift.print("NEW OPACITY VALUE: \(opacityValueBinding.value)")
+        })
+        
         super.init(frame: NSZeroRect)
         
-        let horizontalStack = NSStackView(views: [colorPopup /*, opacityChooser*/])
+        let horizontalStack = NSStackView(views: [colorPopup, opacityCombo])
         horizontalStack.orientation = .Horizontal
         
         let verticalStack = NSStackView(views: [horizontalStack])
@@ -179,4 +190,55 @@ private func drawSwatch(rect: NSRect, color: NSColor) {
     
     color.setFill()
     NSRectFillUsingOperation(rect, .CompositeSourceOver)
+}
+
+private class OpacityFormatter: NSNumberFormatter {
+    
+    override init() {
+        super.init()
+        
+        numberStyle = .PercentStyle
+        minimum = 0.0
+        maximum = 1.0
+        maximumFractionDigits = 0
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func getObjectValue(obj: AutoreleasingUnsafeMutablePointer<AnyObject?>, forString string: String, errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>) -> Bool {
+        // Include the '%' suffix if it wasn't already there, just to make the formatter happy;
+        // this allows the user to go away from the combo box even if the user left off the '%' or
+        // left the box empty
+        var s = string
+        // XXX: This is locale-sensitive
+        if s.isEmpty {
+            s = "100%"
+        } else if !s.hasSuffix("%") {
+            s = "\(string)%"
+        }
+        return super.getObjectValue(obj, forString: s, errorDescription: error)
+    }
+    
+    override func isPartialStringValid(partialString: String, newEditingString newString: AutoreleasingUnsafeMutablePointer<NSString?>, errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>) -> Bool {
+        var s = partialString
+        
+        if s.isEmpty {
+            return true
+        }
+        
+        if s.hasSuffix("%") {
+            s = s[s.startIndex..<s.endIndex.predecessor()]
+        }
+        
+        if let intValue = Int(s) {
+            if intValue >= 0 && intValue <= 100 {
+                return true
+            }
+        }
+        
+        NSBeep()
+        return false
+    }
 }

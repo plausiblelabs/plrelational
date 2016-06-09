@@ -9,7 +9,7 @@
 import Cocoa
 import Binding
 
-class ComboBox<T>: NSComboBox, NSComboBoxDelegate {
+class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
 
     private let bindings = BindingSet()
     
@@ -29,13 +29,13 @@ class ComboBox<T>: NSComboBox, NSComboBoxDelegate {
             })
         }
     }
+    
+    private var previousCommittedValue: T?
 
     override init(frame: NSRect) {
         super.init(frame: frame)
         
         delegate = self
-        target = self
-        action = #selector(textChanged(_:))
     }
     
     required init?(coder: NSCoder) {
@@ -48,17 +48,22 @@ class ComboBox<T>: NSComboBox, NSComboBoxDelegate {
         }
     }
     
-    override func controlTextDidChange(notification: NSNotification) {
-        //Swift.print("CONTROL DID CHANGE!")
-        if let newValue = objectValue as? T {
-            value?.update(newValue)
-        }
+    override func controlTextDidBeginEditing(obj: NSNotification) {
+        previousCommittedValue = objectValue as? T
     }
-    
-    // TODO: Should probably just use controlTextDidEndEditing here instead
-    @objc func textChanged(sender: NSComboBox) {
-        if let newValue = objectValue as? T {
-            value?.commit(newValue)
+
+    override func controlTextDidEndEditing(obj: NSNotification) {
+        // Note that controlTextDidBeginEditing may not be called if the user gives focus to the text field
+        // but resigns first responder without typing anything, so we only commit the value if the user
+        // actually typed something that differs from the previous value
+        if let previousCommittedValue = previousCommittedValue, binding = value {
+            // TODO: Need to discard `before` snapshot if we're skipping the commit
+            if let newValue = objectValue as? T {
+                if newValue != previousCommittedValue {
+                    binding.commit(newValue)
+                }
+            }
         }
+        previousCommittedValue = nil
     }
 }

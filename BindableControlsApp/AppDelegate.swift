@@ -139,7 +139,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         rootView.addSubview(comboBox)
         
         colorPicker = ColorPickerView()
-        colorPicker.frame = NSMakeRect(200, 240, 120, 24)
+        colorPicker.frame = NSMakeRect(200, 240, 200, 24)
         rootView.addSubview(colorPicker)
             
         // Wire up the controls and bindings
