@@ -48,6 +48,12 @@ private var completionScheduled = false
 private var completedTopLevelRelations: [(String, NSTimeInterval)] = []
 #endif
 
+#if LOG_RELATION_ACTIVITY
+func elapsedTimeString(interval: NSTimeInterval) -> String {
+    return String(format: "%4fs", interval)
+}
+#endif
+
 @inline(__always) func LogRelationCreation<T: Relation>(caller: T) {
     #if LOG_RELATION_ACTIVITY
         if let obj = caller as? AnyObject {
@@ -95,10 +101,10 @@ private var completedTopLevelRelations: [(String, NSTimeInterval)] = []
                     if Flags.printTopLevelRunningTimes {
                         completedTopLevelRelations.sortInPlace({ $0.1 > $1.1 })
                         for (description, elapsedTime) in completedTopLevelRelations {
-                            print("\(elapsedTime)s: \(description)")
+                            print("\(elapsedTimeString(elapsedTime)): \(description)")
                         }
                         let total = completedTopLevelRelations.reduce(0, combine: { $0 + $1.1 })
-                        print("Total time: \(total)")
+                        print("Total time: \(elapsedTimeString(total))")
                         completedTopLevelRelations = []
                     }
                 })
@@ -144,7 +150,7 @@ private var completedTopLevelRelations: [(String, NSTimeInterval)] = []
             case .None:
                 let elapsedTime = NSProcessInfo().systemUptime - data.startTime
                 if Flags.printIterations {
-                    print("\(indentString)\(data.callerDescription) finished iteration, produced \(rowCount) rows in \(elapsedTime) seconds")
+                    print("\(indentString)\(data.callerDescription) finished iteration, produced \(rowCount) rows in \(elapsedTimeString(elapsedTime)) seconds")
                 }
                 if data.indentLevel == 0 && Flags.printTopLevelRunningTimes {
                     completedTopLevelRelations.append((data.callerDescription, elapsedTime))
