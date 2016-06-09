@@ -27,6 +27,9 @@ private struct Flags {
     
     /// Print information about the beginning, end, and each row of iteration
     static let printIterations = true
+    
+    /// Collect the running times for each top-level iteration in a given event loop, and print the times in sorted order
+    static let printTopLevelRunningTimes = true
 }
 #endif
 
@@ -39,8 +42,11 @@ struct RelationIterationLoggingData {
     #endif
 }
 
+#if LOG_RELATION_ACTIVITY
 private var indentLevel = 0
 private var completionScheduled = false
+private var completedTopLevelRelations: [(String, NSTimeInterval)] = []
+#endif
 
 @inline(__always) func LogRelationCreation<T: Relation>(caller: T) {
     #if LOG_RELATION_ACTIVITY
@@ -85,6 +91,16 @@ private var completionScheduled = false
                     print("RETURNED TO EVENT LOOP")
                     print("==========")
                     completionScheduled = false
+                    
+                    if Flags.printTopLevelRunningTimes {
+                        completedTopLevelRelations.sortInPlace({ $0.1 > $1.1 })
+                        for (description, elapsedTime) in completedTopLevelRelations {
+                            print("\(elapsedTime)s: \(description)")
+                        }
+                        let total = completedTopLevelRelations.reduce(0, combine: { $0 + $1.1 })
+                        print("Total time: \(total)")
+                        completedTopLevelRelations = []
+                    }
                 })
                 completionScheduled = true
             }
@@ -126,9 +142,12 @@ private var completionScheduled = false
                     print("\(indentString)\(data.callerDescription) returning error \(err)")
                 }
             case .None:
+                let elapsedTime = NSProcessInfo().systemUptime - data.startTime
                 if Flags.printIterations {
-                    let elapsedTime = NSProcessInfo().systemUptime - data.startTime
                     print("\(indentString)\(data.callerDescription) finished iteration, produced \(rowCount) rows in \(elapsedTime) seconds")
+                }
+                if data.indentLevel == 0 && Flags.printTopLevelRunningTimes {
+                    completedTopLevelRelations.append((data.callerDescription, elapsedTime))
                 }
             }
             return next
