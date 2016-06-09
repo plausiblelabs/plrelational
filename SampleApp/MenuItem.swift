@@ -21,13 +21,23 @@ struct MenuItemContent<T> {
     }
 }
 
-enum MenuItem<T> { case
+enum MenuItemType<T> { case
     Normal(MenuItemContent<T>),
     Separator
 }
 
+struct MenuItem<T> {
+    let type: MenuItemType<T>
+    let visible: ValueBinding<Bool>?
+    
+    init(_ type: MenuItemType<T>, visible: ValueBinding<Bool>? = nil) {
+        self.type = type
+        self.visible = visible
+    }
+}
+
 func titledMenuItem(title: ValueBinding<String>, object: String = "Default") -> MenuItem<String> {
-    return .Normal(MenuItemContent(object: object, title: title, image: nil))
+    return MenuItem(.Normal(MenuItemContent(object: object, title: title, image: nil)))
 }
 
 func titledMenuItem(title: String) -> MenuItem<String> {
@@ -39,9 +49,6 @@ class NativeMenuItem<T> {
     
     var visible: ValueBinding<Bool>? {
         didSet {
-            bindings.register("visible", visible, { [weak self] value in
-                self?.nsitem.hidden = !value
-            })
         }
     }
 
@@ -49,7 +56,7 @@ class NativeMenuItem<T> {
     let nsitem: NSMenuItem
 
     var object: T? {
-        switch model {
+        switch model.type {
         case .Normal(let content):
             return content.object
         case .Separator:
@@ -60,8 +67,12 @@ class NativeMenuItem<T> {
     private init(model: MenuItem<T>, nsitem: NSMenuItem) {
         self.model = model
         self.nsitem = nsitem
-        
-        switch model {
+
+        bindings.register("visible", model.visible, { [weak self] value in
+            self?.nsitem.hidden = !value
+        })
+
+        switch model.type {
         case .Normal(let content):
             // TODO: Avoid cycle here
             nsitem.representedObject = self
@@ -78,7 +89,7 @@ class NativeMenuItem<T> {
     
     convenience init(model: MenuItem<T>) {
         let nsitem: NSMenuItem
-        switch model {
+        switch model.type {
         case .Normal:
             nsitem = NSMenuItem()
         case .Separator:

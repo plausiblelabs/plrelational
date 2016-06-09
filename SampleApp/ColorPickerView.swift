@@ -9,117 +9,40 @@
 import Cocoa
 import Binding
 
-enum ColorItem: Equatable { case
-    Default,
-    Preset(Color),
-    Custom(Color),
-    Other
-}
-
-func ==(a: ColorItem, b: ColorItem) -> Bool {
-    switch (a, b) {
-    case let (.Preset(acolor), .Preset(bcolor)):
-        return acolor == bcolor
-    case let (.Custom(acolor), .Custom(bcolor)):
-        return acolor == bcolor
-    case (.Other, .Other):
-        return true
-    default:
-        return false
-    }
-}
-
 class ColorPickerView: NSView {
-    
-    private let bindings = BindingSet()
+
+    private let model: ColorPickerModel
     
     var color: BidiValueBinding<CommonValue<Color>>? {
         didSet {
             if let color = color {
-                self.setColorBinding(color)
+                setColorBinding(color)
             }
-            bindings.register("color", color, { [weak self] value in
-                guard let weakSelf = self else { return }
-                
-                // Set the selected item in the color popup button
-                let newColorItem: ColorItem?
-                if let color = value.orNil() {
-                    if weakSelf.presetColors.contains(color) {
-                        newColorItem = ColorItem.Preset(color)
-                    } else {
-                        newColorItem = ColorItem.Custom(color)
-                    }
-                } else {
-                    newColorItem = ColorItem.Default
-                }
-                weakSelf.colorItem.commit(newColorItem)
-                
-                // Set the value in the opacity combo box
-                weakSelf.opacityValue.commit(value.orNil()?.components.a)
-            })
+            model.color = color
         }
     }
     
-    private let presetColors: [Color]
-    
-    private let colorItem: BidiValueBinding<ColorItem?>
-    private let opacityValue: BidiValueBinding<CGFloat?>
-    
     private let colorPopup: PopUpButton<ColorItem>
     private let opacityCombo: ComboBox<CGFloat>
-    
-    init() {
-        var popupItems: [MenuItem<ColorItem>] = []
-        var presets: [Color] = []
+
+    init(defaultColor: Color) {
+        self.model = ColorPickerModel(defaultColor: defaultColor)
         
-        func addPreset(name: String, _ color: Color) {
-            let colorItem = ColorItem.Preset(color)
-            let content = MenuItemContent(
-                object: colorItem,
-                title: ValueBinding.constant(name),
-                image: ValueBinding.constant(colorSwatchImage(color, f: { _ in }))
-            )
-            let menuItem = MenuItem.Normal(content)
-            popupItems.append(menuItem)
-            presets.append(color)
-        }
-        
-        func addSeparator() {
-            popupItems.append(MenuItem.Separator)
-        }
-
-        func addOther() {
-            let content = MenuItemContent(object: ColorItem.Other, title: ValueBinding.constant("Other…"))
-            let menuItem = MenuItem.Normal(content)
-            popupItems.append(menuItem)
-        }
-
-        addPreset("Black", Color.black)
-        addPreset("White", Color.white)
-        addPreset("Red", Color.red)
-        addPreset("Orange", Color.orange)
-        addPreset("Yellow", Color.yellow)
-        addPreset("Green", Color.green)
-        addPreset("Blue", Color.blue)
-        addPreset("Purple", Color.purple)
-        addSeparator()
-        addOther()
-        presetColors = presets
-
+        // Configure color popup button
         colorPopup = PopUpButton(frame: NSZeroRect, pullsDown: false)
-        colorPopup.items = ValueBinding.constant(popupItems)
-        colorItem = bidiValueBinding(nil)
-        colorPopup.selectedObject = colorItem
+        colorPopup.items = ValueBinding.constant(model.popupItems)
+        colorPopup.selectedObject = model.colorItem
         
+        // Configure opacity combo box
         let opacityValues: [CGFloat] = 0.stride(through: 100, by: 10).map{ CGFloat($0) / 100.0 }
         opacityCombo = ComboBox(frame: NSZeroRect)
         opacityCombo.formatter = OpacityFormatter()
         opacityCombo.items = ValueBinding.constant(opacityValues)
-        opacityValue = bidiValueBinding(nil)
-        opacityCombo.value = opacityValue
+        opacityCombo.value = model.opacityValue
         
         super.init(frame: NSZeroRect)
         
+        // Configure the layout
         let horizontalStack = NSStackView(views: [colorPopup, opacityCombo])
         horizontalStack.orientation = .Horizontal
         
@@ -146,11 +69,204 @@ class ColorPickerView: NSView {
     }
     
     private func setColorBinding(binding: BidiValueBinding<CommonValue<Color>>) {
+        // TODO: Perhaps defaultItemContent should be a ValueBinding so that we can move this
+        // to the model
         colorPopup.defaultItemContent = MenuItemContent(
             object: ColorItem.Default,
             title: binding.map{ $0.whenMulti("Multiple", otherwise: "Default") },
             image: binding.map{ $0.whenMulti(multipleColorSwatchImage(), otherwise: unsetColorSwatchImage()) }
         )
+    }
+}
+
+private enum ColorItem: Equatable { case
+    Default,
+    Preset(Color),
+    Custom(Color),
+    Other
+}
+
+private func ==(a: ColorItem, b: ColorItem) -> Bool {
+    switch (a, b) {
+    case let (.Preset(acolor), .Preset(bcolor)):
+        return acolor == bcolor
+    case let (.Custom(acolor), .Custom(bcolor)):
+        return acolor == bcolor
+    case (.Other, .Other):
+        return true
+    default:
+        return false
+    }
+}
+
+private class ColorPickerModel {
+    
+    private let bindings = BindingSet()
+    
+    var color: BidiValueBinding<CommonValue<Color>>? {
+        didSet {
+            bindings.register("color", color, { [weak self] value in
+                self?.setColorValue(value)
+            })
+        }
+    }
+
+    /// The color to show in the color picker when there is no selected color.
+    private let defaultColor: Color
+
+    private let presetColors: [Color]
+    private let popupItems: [MenuItem<ColorItem>]
+    
+    private let colorItem: BidiValueBinding<ColorItem?>
+    private let opacityValue: BidiValueBinding<CGFloat?>
+    
+    private var selfInitiatedColorItemChange = false
+    private var selfInitiatedOpacityValueChange = false
+    
+    init(defaultColor: Color) {
+        self.defaultColor = defaultColor
+        
+        // Initialize the internal bindings
+        let colorItem: BidiValueBinding<ColorItem?> = bidiValueBinding(nil)
+        let customColor: ValueBinding<Color?> = colorItem.map{
+            switch $0 {
+            case .Some(.Custom(let color)):
+                return color
+            default:
+                return nil
+            }
+        }
+        let colorIsCustom: ValueBinding<Bool> = customColor.map{ $0 != nil }
+        self.colorItem = colorItem
+        self.opacityValue = bidiValueBinding(nil)
+        
+        // Configure color popup menu items
+        var popupItems: [MenuItem<ColorItem>] = []
+        var presets: [Color] = []
+        
+        func addPreset(name: String, _ color: Color) {
+            let colorItem = ColorItem.Preset(color)
+            let content = MenuItemContent(
+                object: colorItem,
+                title: ValueBinding.constant(name),
+                image: ValueBinding.constant(colorSwatchImage(color))
+            )
+            let menuItem = MenuItem(.Normal(content))
+            popupItems.append(menuItem)
+            presets.append(color)
+        }
+        
+        func addCustom() {
+            popupItems.append(MenuItem(.Separator, visible: colorIsCustom))
+            let content = MenuItemContent(
+                // TODO: Perhaps `object` should be a ValueBinding so that it can change if needed
+                object: ColorItem.Custom(defaultColor),
+                title: ValueBinding.constant("Custom"),
+                image: customColor.map{ colorSwatchImage($0 ?? defaultColor) }
+            )
+            popupItems.append(MenuItem(.Normal(content), visible: colorIsCustom))
+        }
+        
+        func addOther() {
+            popupItems.append(MenuItem(.Separator))
+            let content = MenuItemContent(object: ColorItem.Other, title: ValueBinding.constant("Other…"))
+            popupItems.append(MenuItem(.Normal(content)))
+        }
+        
+        addPreset("Black", Color.black)
+        addPreset("White", Color.white)
+        addPreset("Red", Color.red)
+        addPreset("Orange", Color.orange)
+        addPreset("Yellow", Color.yellow)
+        addPreset("Green", Color.green)
+        addPreset("Blue", Color.blue)
+        addPreset("Purple", Color.purple)
+        addCustom()
+        addOther()
+        
+        self.presetColors = presets
+        self.popupItems = popupItems
+        
+        // Configure the internal bindings
+        bindings.register("colorItem", colorItem, { [weak self] value in
+            Swift.print("COLOR ITEM CHANGING: \(value)")
+            
+            guard let weakSelf = self else { return }
+            guard let newColorItem = value else { return }
+            if weakSelf.selfInitiatedColorItemChange { return }
+            
+            let newColor: Color?
+            switch newColorItem {
+            case .Default:
+                return
+            case let .Preset(color):
+                newColor = color
+            case let .Custom(color):
+                newColor = color
+            case .Other:
+                // TODO: Open NSColorPanel
+                return
+            }
+            
+            if let newColor = newColor {
+                weakSelf.selfInitiatedColorItemChange = true
+                // TODO: RelationBidiValueBinding doesn't notify observers in commit(),
+                // so we have to manually call setColorValue() here; we should make the
+                // existing behavior in RelationBidiValueBinding optional or something
+                let newValue = CommonValue.One(newColor)
+                weakSelf.color?.commit(newValue)
+                weakSelf.setColorValue(newValue)
+                weakSelf.selfInitiatedColorItemChange = false
+            }
+        })
+        
+        bindings.register("opacityValue", opacityValue, { [weak self] value in
+            Swift.print("OPACITY VALUE CHANGING: \(value)")
+            
+            guard let weakSelf = self else { return }
+            guard let newOpacity = value else { return }
+            if weakSelf.selfInitiatedOpacityValueChange { return }
+            
+            let currentColor: Color
+            if let colorValue = weakSelf.color?.value {
+                currentColor = colorValue.orDefault(defaultColor)
+            } else {
+                currentColor = defaultColor
+            }
+            
+            weakSelf.selfInitiatedOpacityValueChange = true
+            let newValue = CommonValue.One(currentColor.withAlpha(newOpacity))
+            weakSelf.color?.commit(newValue)
+            weakSelf.setColorValue(newValue)
+            weakSelf.selfInitiatedOpacityValueChange = false
+        })
+    }
+    
+    private func setColorValue(value: CommonValue<Color>) {
+        Swift.print("COLOR CHANGING: \(value)")
+        
+        if !selfInitiatedColorItemChange {
+            // Set the selected item in the color popup button
+            let newColorItem: ColorItem?
+            if let color = value.orNil() {
+                if presetColors.contains(color) {
+                    newColorItem = ColorItem.Preset(color)
+                } else {
+                    newColorItem = ColorItem.Custom(color)
+                }
+            } else {
+                newColorItem = ColorItem.Default
+            }
+            Swift.print("  POKING COLOR ITEM: \(newColorItem)")
+            colorItem.commit(newColorItem)
+        }
+        
+        if !selfInitiatedOpacityValueChange {
+            // Set the value in the opacity combo box
+            let newOpacity = value.orNil()?.components.a
+            Swift.print("  POKING OPACITY: \(newOpacity)")
+            opacityValue.commit(newOpacity)
+        }
     }
 }
 
@@ -177,13 +293,13 @@ private func multipleColorSwatchImage() -> Image {
 }
 
 /// Returns a color swatch image.
-private func colorSwatchImage(color: Color, f: (NSRect) -> ()) -> Image {
+private func colorSwatchImage(color: Color, f: ((NSRect) -> ())? = nil) -> Image {
     let size = NSMakeSize(20, 12)
     let rect = NSRect(origin: NSZeroPoint, size: size)
     let image = NSImage(size: size)
     image.lockFocusFlipped(false)
     drawSwatch(rect, color: color.nscolor)
-    f(rect)
+    f?(rect)
     NSColor.blackColor().setStroke()
     NSBezierPath.strokeRect(rect.insetBy(dx: 0.5, dy: 0.5))
     image.unlockFocus()

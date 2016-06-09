@@ -64,6 +64,10 @@ struct Color: Hashable {
         self.init(r: comps[0], g: comps[1], b: comps[2], a: comps[3])
     }
     
+    func withAlpha(newAlpha: CGFloat) -> Color {
+        return Color(r: components.r, g: components.g, b: components.b, a: newAlpha)
+    }
+    
     var hashValue: Int {
         return components.hashValue
     }
