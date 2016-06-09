@@ -90,8 +90,10 @@ private func ==(a: ColorItem, b: ColorItem) -> Bool {
     switch (a, b) {
     case let (.Preset(acolor), .Preset(bcolor)):
         return acolor == bcolor
-    case let (.Custom(acolor), .Custom(bcolor)):
-        return acolor == bcolor
+    case (.Custom, .Custom):
+        // This is a little unusual: we don't actually compare the custom color values, this way
+        // the "Custom" menu item will be a match when setting any ColorItem.Custom value
+        return true
     case (.Other, .Other):
         return true
     default:
@@ -139,7 +141,7 @@ private class ColorPickerModel {
         let colorIsCustom: ValueBinding<Bool> = customColor.map{ $0 != nil }
         self.colorItem = colorItem
         self.opacityValue = bidiValueBinding(nil)
-        
+
         // Configure color popup menu items
         var popupItems: [MenuItem<ColorItem>] = []
         var presets: [Color] = []
@@ -157,6 +159,7 @@ private class ColorPickerModel {
         }
         
         func addCustom() {
+            // The "Custom" item and the separator above it are only visible when a custom color is defined
             popupItems.append(MenuItem(.Separator, visible: colorIsCustom))
             let content = MenuItemContent(
                 // TODO: Perhaps `object` should be a ValueBinding so that it can change if needed
@@ -168,6 +171,7 @@ private class ColorPickerModel {
         }
         
         func addOther() {
+            // The "Other" item and the separator above it are always visible
             popupItems.append(MenuItem(.Separator))
             let content = MenuItemContent(object: ColorItem.Other, title: ValueBinding.constant("Other…"))
             popupItems.append(MenuItem(.Normal(content)))
