@@ -5,6 +5,31 @@ import Foundation
 /// always-inlined functions. To enable, add this to Other Swift Flags:
 ///     -DLOG_RELATION_ACTIVITY
 
+/// When logging is enabled, individual logging features can be enabled or disabled with these properties.
+#if LOG_RELATION_ACTIVITY
+private struct Flags {
+    /// Print the stack trace of each Relation's creation.
+    static let printCreationStacks = true
+    
+    /// Do a simple dump of each top-level Relation that's iterated. Relations iterated while iterating
+    /// another Relation aren't considered top-level and don't get dumped.
+    static let dumpTopLevelSimple = true
+    
+    /// Do a uniquing dump of each top-level Relation that's iterated. This assigns a symbol to Relations
+    /// in the tree that are repeatedly referenced so they don't repeat in the dumped representation.
+    static let dumpTopLevelUniquing = true
+    
+    /// Dump each top-level Relation that's iterated to a Graphviz dot file which can be rendered graphically.
+    static let dumpTopLevelGraphviz = true
+    
+    /// Do a full (recursive) dump of iterated top-level Relations.
+    static let dumpTopLevelFull = true
+    
+    /// Print information about the beginning, end, and each row of iteration
+    static let printIterations = true
+}
+#endif
+
 struct RelationIterationLoggingData {
     #if LOG_RELATION_ACTIVITY
     var callerDescription: String
@@ -21,8 +46,10 @@ private var completionScheduled = false
     #if LOG_RELATION_ACTIVITY
         if let obj = caller as? AnyObject {
             print("Created \(caller.dynamicType) \(String(format: "%p", ObjectIdentifier(obj).uintValue))")
-            for line in NSThread.callStackSymbols() {
-                print(line)
+            if Flags.printCreationStacks {
+                for line in NSThread.callStackSymbols() {
+                    print(line)
+                }
             }
         }
     #endif
@@ -30,13 +57,27 @@ private var completionScheduled = false
 
 @inline(__always) func LogRelationIterationBegin<T: Relation>(caller: T) -> RelationIterationLoggingData {
     #if LOG_RELATION_ACTIVITY
+        let description: String
+        if let obj = caller as? AnyObject {
+            description = String(format: "%@ %p", NSStringFromClass(obj.dynamicType), unsafeAddressOf(obj))
+        } else {
+            description = String(caller.dynamicType)
+        }
         if indentLevel == 0 {
             print("----------")
-            print("Starting top-level iteration of:")
-            caller.simpleDump()
-            caller.uniquingDump()
-            caller.graphvizDump()
-            caller.fullDebugDump(showContents: false)
+            print("Starting top-level iteration of \(description)")
+            if Flags.dumpTopLevelSimple {
+                caller.simpleDump()
+            }
+            if Flags.dumpTopLevelUniquing {
+                caller.uniquingDump()
+            }
+            if Flags.dumpTopLevelGraphviz {
+                caller.graphvizDump()
+            }
+            if Flags.dumpTopLevelFull {
+                caller.fullDebugDump(showContents: false)
+            }
             
             if !completionScheduled {
                 dispatch_async(dispatch_get_main_queue(), {
@@ -48,16 +89,12 @@ private var completionScheduled = false
                 completionScheduled = true
             }
         }
-        let description: String
-        if let obj = caller as? AnyObject {
-            description = String(format: "%@ %p", NSStringFromClass(obj.dynamicType), unsafeAddressOf(obj))
-        } else {
-            description = String(caller.dynamicType)
-        }
         let now = NSProcessInfo().systemUptime
         
-        let indentString = "".stringByPaddingToLength(indentLevel * 4, withString: " ", startingAtIndex: 0)
-        print("\(indentString)\(description) began iteration at \(now)")
+        if Flags.printIterations {
+            let indentString = "".stringByPaddingToLength(indentLevel * 4, withString: " ", startingAtIndex: 0)
+            print("\(indentString)\(description) began iteration at \(now)")
+        }
         
         let data = RelationIterationLoggingData(
             callerDescription: description,
@@ -80,12 +117,19 @@ private var completionScheduled = false
             let next = generator.next()
             switch next {
             case .Some(.Ok(let row)):
-                print("\(indentString)\(data.callerDescription) returning row \(row)")
-                rowCount += 1
+                if Flags.printIterations {
+                    print("\(indentString)\(data.callerDescription) returning row \(row)")
+                    rowCount += 1
+                }
             case .Some(.Err(let err)):
-                print("\(indentString)\(data.callerDescription) returning error \(err)")
+                if Flags.printIterations {
+                    print("\(indentString)\(data.callerDescription) returning error \(err)")
+                }
             case .None:
-                print("\(indentString)\(data.callerDescription) finished iteration, produced \(rowCount) rows in \(NSProcessInfo().systemUptime - data.startTime) seconds")
+                if Flags.printIterations {
+                    let elapsedTime = NSProcessInfo().systemUptime - data.startTime
+                    print("\(indentString)\(data.callerDescription) finished iteration, produced \(rowCount) rows in \(elapsedTime) seconds")
+                }
             }
             return next
         })
