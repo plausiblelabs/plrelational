@@ -146,7 +146,7 @@ class BindableControlsAppUITests: XCTestCase {
         let window = XCUIApplication().windows["BindableControlsApp"]
         let fred = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(0).textFields["PageName"]
         let wilma = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(1).textFields["PageName"]
-        let popup = window.popUpButtons["Color"]
+        let popup = window.popUpButtons["Day"]
         
         func verifyItem(expected: String) {
             XCTAssertEqual(popup.value as? String, expected)
@@ -158,53 +158,53 @@ class BindableControlsAppUITests: XCTestCase {
         // Verify that popup button is initially set to "Default"
         verifyItem("Default")
         
-        // Click on popup button and select "Green"; verify new Fred state
+        // Click on popup button and select "Saturday"; verify new Fred state
         popup.click()
-        window.menuItems["Green"].click()
-        verifyItem("Green")
+        window.menuItems["Saturday"].click()
+        verifyItem("Saturday")
         
         // Select Wilma in outline view
         wilma.click()
         
-        // Verify that popup button is set to "Blue"
-        verifyItem("Blue")
+        // Verify that popup button is set to "Friday"
+        verifyItem("Friday")
 
-        // Click on popup button and select "Green"; verify new Wilma state
+        // Click on popup button and select "Saturday"; verify new Wilma state
         popup.click()
-        window.menuItems["Green"].click()
-        verifyItem("Green")
+        window.menuItems["Saturday"].click()
+        verifyItem("Saturday")
 
         // Select both Fred and Wilma in outline view
         XCUIElement.performWithKeyModifiers(.Shift) {
             fred.click()
         }
         
-        // Verify that popup button is set to "Green"
-        verifyItem("Green")
+        // Verify that popup button is set to "Saturday"
+        verifyItem("Saturday")
         
-        // Click on popup button and select "Orange"; verify new state for both Fred and Wilma
+        // Click on popup button and select "Tuesday"; verify new state for both Fred and Wilma
         popup.click()
-        window.menuItems["Orange"].click()
-        verifyItem("Orange")
+        window.menuItems["Tuesday"].click()
+        verifyItem("Tuesday")
         
         // Deselect Wilma in outline view
         XCUIElement.performWithKeyModifiers(.Command) {
             wilma.click()
         }
         
-        // Verify that popup button is still set to "Orange" for Fred
-        verifyItem("Orange")
+        // Verify that popup button is still set to "Tuesday" for Fred
+        verifyItem("Tuesday")
         
-        // Click on popup button and select "Violet"; verify new state for Fred
+        // Click on popup button and select "Sunday"; verify new state for Fred
         popup.click()
-        window.menuItems["Violet"].click()
-        verifyItem("Violet")
+        window.menuItems["Sunday"].click()
+        verifyItem("Sunday")
         
         // Select Wilma in outline view
         wilma.click()
         
-        // Verify that popup button is still set to "Orange" for Wilma
-        verifyItem("Orange")
+        // Verify that popup button is still set to "Tuesday" for Wilma
+        verifyItem("Tuesday")
         
         // Select both Fred and Wilma in outline view
         XCUIElement.performWithKeyModifiers(.Shift) {
@@ -214,10 +214,10 @@ class BindableControlsAppUITests: XCTestCase {
         // Verify that popup button shows "Multiple" placeholder
         verifyItem("Multiple")
         
-        // Click on popup button and select "Red"; verify new state for both Fred and Wilma
+        // Click on popup button and select "Monday"; verify new state for both Fred and Wilma
         popup.click()
-        window.menuItems["Red"].click()
-        verifyItem("Red")
+        window.menuItems["Monday"].click()
+        verifyItem("Monday")
     }
     
 //    func testStepper() {
