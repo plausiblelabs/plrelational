@@ -38,7 +38,6 @@ public class ValueBinding<T>: Binding {
     
     internal func setValue(value: T) {
         if changing(self.value, value) {
-            print("VALUE CHANGING: \(value)")
             self.value = value
             self.notifyChangeObservers()
         }

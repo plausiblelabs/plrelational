@@ -172,7 +172,6 @@ private class ColorPickerModel {
                     }
                     
                     let newColor = currentColor.withAlpha(newOpacity)
-                    Swift.print("HELLO UPDATED OPACITY: \(newOpacity) \(newColor)")
                     weakSelf.color?.commit(CommonValue.One(newColor))
                 }
             )
@@ -188,7 +187,9 @@ private class ColorPickerModel {
                 },
                 reverse: { [weak self] value in
                     // Color -> CommonValue<Color>
-                    self?.color?.commit(CommonValue.One(value))
+                    // TODO: Hmm, should use `update` when the user is interacting, and then
+                    // `commit` only when the user is done
+                    self?.color?.update(CommonValue.One(value))
                 }
             )
         }
@@ -209,7 +210,10 @@ private class ColorPickerModel {
         self.defaultColor = defaultColor
         
         // Initialize the internal bindings
-        let colorItem: BidiValueBinding<ColorItem?> = bidiValueBinding(nil)
+        // XXX: We use `valueChanging: { true }` so that binding observers are notified even
+        // when the item is changing from .Custom to .Custom; this is all because of the funky
+        // .Custom handling in `==` for ColorItem, need to revisit this...
+        let colorItem: BidiValueBinding<ColorItem?> = BidiValueBinding(initialValue: nil, valueChanging: { _ in true })
         let customColor: ValueBinding<Color?> = colorItem.map{
             switch $0 {
             case .Some(.Custom(let color)):

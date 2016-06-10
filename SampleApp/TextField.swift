@@ -16,7 +16,9 @@ class TextField: NSTextField, NSTextFieldDelegate {
     var string: ValueBinding<String>? {
         didSet {
             bindings.register("string", string, { [weak self] value in
-                self?.stringValue = value
+                guard let weakSelf = self else { return }
+                if weakSelf.selfInitiatedStringChange { return }
+                weakSelf.stringValue = value
             })
         }
     }
@@ -39,6 +41,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
     
     private var previousCommittedValue: String?
     private var previousValue: String?
+    private var selfInitiatedStringChange = false
     
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -61,7 +64,9 @@ class TextField: NSTextField, NSTextFieldDelegate {
     override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
         if let bidiBinding = string as? BidiValueBinding {
+            selfInitiatedStringChange = true
             bidiBinding.update(stringValue)
+            selfInitiatedStringChange = false
         }
         previousValue = stringValue
     }
@@ -74,7 +79,9 @@ class TextField: NSTextField, NSTextFieldDelegate {
         if let previousCommittedValue = previousCommittedValue, bidiBinding = string as? BidiValueBinding {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if stringValue != previousCommittedValue {
+                selfInitiatedStringChange = true
                 bidiBinding.commit(stringValue)
+                selfInitiatedStringChange = false
             }
         }
         previousCommittedValue = nil

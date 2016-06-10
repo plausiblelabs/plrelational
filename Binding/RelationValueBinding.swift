@@ -81,7 +81,6 @@ public struct RelationBidiConfig<T> {
 private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
     private let config: RelationBidiConfig<T>
     private var before: ChangeLoggingDatabaseSnapshot?
-    private var selfInitiatedChange = false
     private var removal: ObserverRemoval!
 
     init(relation: Relation, config: RelationBidiConfig<T>, relationToValue: Relation -> T, valueChanging: (T, T) -> Bool) {
@@ -92,11 +91,7 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
         self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
 
-            // TODO: We need to manage this externally
-            //if weakSelf.selfInitiatedChange { return }
-            
             let newValue = relationToValue(relation)
-            print("RELATION UPDATED: \(newValue)")
             weakSelf.setValue(newValue)
         })
     }
@@ -110,14 +105,12 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
             return
         }
         
-        //selfInitiatedChange = true
         if before == nil {
             before = config.snapshot()
         }
         // Note: We don't set self.value here; instead we wait to receive the change from the
         // relation in our change observer and then update the value there
         config.update(newValue: newValue)
-        //selfInitiatedChange = false
     }
     
     private override func commit(newValue: T) {
@@ -125,7 +118,6 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
             return
         }
 
-        //selfInitiatedChange = true
         if before == nil {
             before = config.snapshot()
         }
@@ -133,7 +125,6 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
         // relation in our change observer and then update the value there
         config.commit(before: before!, newValue: newValue)
         self.before = nil
-        //selfInitiatedChange = false
     }
 }
 
