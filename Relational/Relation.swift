@@ -5,6 +5,8 @@ public typealias RelationError = ErrorType
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     
+    var underlyingRelationForQueryExecution: Relation { get }
+    
     func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>>
     func contains(row: Row) -> Result<Bool, RelationError>
     
@@ -51,6 +53,12 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     func withUpdate(newValues: Row) -> Relation
     
     func renameAttributes(renames: [Attribute: Attribute]) -> Relation
+}
+
+extension Relation {
+    public var underlyingRelationForQueryExecution: Relation {
+        return self
+    }
 }
 
 extension Relation {

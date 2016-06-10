@@ -16,7 +16,7 @@ class QueryPlanner {
     var rootIndex: Int {
         // If the root is not an object then we'll only have one node. If it is, we can look it up.
         if rootRelation is AnyObject {
-            return getOrCreateNodeIndex(rootRelation)
+            return getOrCreateNodeIndex(rootRelation.underlyingRelationForQueryExecution)
         } else {
             return 0
         }
@@ -64,16 +64,17 @@ class QueryPlanner {
         var isRoot = true
         var iterationCount = 0
         while let r = toVisit.popLast() {
+            let realR = r.underlyingRelationForQueryExecution
             iterationCount += 1
-            if let obj = r as? AnyObject {
+            if let obj = realR as? AnyObject {
                 let retrievedCount = visited.getOrCreate(obj, defaultValue: iterationCount)
                 if retrievedCount != iterationCount {
                     continue
                 }
             }
-            f(r, isRoot: isRoot)
+            f(realR, isRoot: isRoot)
             isRoot = false
-            toVisit.appendContentsOf(relationChildren(r))
+            toVisit.appendContentsOf(relationChildren(realR))
         }
     }
     
