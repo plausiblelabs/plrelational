@@ -130,6 +130,10 @@ class QueryPlanner {
             return Node(op: .Update(newValues))
         case .Aggregate(let attribute, let initialValue, let aggregateFunction):
             return Node(op: .Aggregate(attribute, initialValue, aggregateFunction))
+        case .Otherwise:
+            return Node(op: .Otherwise)
+        case .Unique(let attribute, let value):
+            return Node(op: .Unique(attribute, value))
         }
     }
 }
@@ -158,5 +162,8 @@ extension QueryPlanner {
         case Rename([Attribute: Attribute])
         case Update(Row)
         case Aggregate(Attribute, RelationValue?, (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>)
+        
+        case Otherwise
+        case Unique(Attribute, RelationValue)
     }
 }

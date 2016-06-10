@@ -56,6 +56,9 @@ extension IntermediateRelation {
         case Rename([Attribute: Attribute])
         case Update(Row)
         case Aggregate(Attribute, RelationValue?, (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>)
+        
+        case Otherwise
+        case Unique(Attribute, RelationValue)
     }
 }
 
@@ -179,6 +182,10 @@ extension IntermediateRelation {
             generator = updateRows(newValues)
         case .Aggregate(let attribute, let initialValue, let aggregateFunction):
             generator = aggregateRows(attribute, initialValue: initialValue, agg: aggregateFunction)
+        case .Otherwise:
+            generator = otherwiseRows()
+        case .Unique(let attribute, let value):
+            generator = uniqueRows(attribute, value)
         }
         return LogRelationIterationReturn(data, generator)
     }
@@ -453,6 +460,60 @@ extension IntermediateRelation {
             return soFar.map({ .Ok(Row(values: [attribute: $0])) })
         })
     }
+    
+    private func otherwiseRows() -> AnyGenerator<Result<Row, RelationError>> {
+        var cursor = -1
+        var generator: AnyGenerator<Result<Row, RelationError>>? = nil
+        
+        return AnyGenerator(body: {
+            while true {
+                let row = generator?.next()
+                if row != nil {
+                    return row
+                } else if cursor < self.operands.count - 1 {
+                    cursor += 1
+                    generator = self.operands[cursor].rows()
+                } else {
+                    return nil
+                }
+            }
+        })
+    }
+    
+    private func uniqueRows(attribute: Attribute, _ value: RelationValue) -> AnyGenerator<Result<Row, RelationError>> {
+        var generator: AnyGenerator<Result<Row, RelationError>>? = nil
+        return AnyGenerator(body: {
+            if generator == nil {
+                switch self.isUnique(attribute, value) {
+                case .Ok(let unique):
+                    if unique {
+                        generator = self.operands[0].rows()
+                    }
+                case .Err(let err):
+                    return .Err(err)
+                }
+            }
+            return generator?.next()
+        })
+    }
+    
+    private func isUnique(attribute: Attribute, _ matching: RelationValue) -> Result<Bool, RelationError> {
+        var valueSoFar: RelationValue?
+        for rowResult in self.operands[0].rows() {
+            switch rowResult {
+            case .Ok(let row):
+                let value = row[attribute]
+                if valueSoFar == nil {
+                    valueSoFar = value
+                } else if valueSoFar != value {
+                    return .Ok(false)
+                }
+            case .Err(let err):
+                return .Err(err)
+            }
+        }
+        return .Ok(valueSoFar != nil)
+    }
 }
 
 extension IntermediateRelation {
@@ -476,6 +537,10 @@ extension IntermediateRelation {
             return updateContains(row, newValues: newValues)
         case .Aggregate:
             return aggregateContains(row)
+        case .Otherwise:
+            return otherwiseContains(row)
+        case .Unique(let attribute, let value):
+            return uniqueContains(row, attribute: attribute, value: value)
         }
     }
     
@@ -549,6 +614,39 @@ extension IntermediateRelation {
     func aggregateContains(row: Row) -> Result<Bool, RelationError> {
         return containsOk(rows(), { $0 == row })
     }
+    
+    func otherwiseContains(row: Row) -> Result<Bool, RelationError> {
+        for operand in operands {
+            switch operand.contains(row) {
+            case .Ok(let contains):
+                if contains {
+                    return .Ok(true)
+                }
+            case .Err(let err):
+                return .Err(err)
+            }
+            
+            switch operand.isEmpty {
+            case .Ok(let empty):
+                if !empty {
+                    return .Ok(false)
+                }
+            case .Err(let err):
+                return .Err(err)
+            }
+        }
+        return .Ok(false)
+    }
+    
+    func uniqueContains(row: Row, attribute: Attribute, value: RelationValue) -> Result<Bool, RelationError> {
+        return isUnique(attribute, value).then({
+            if $0 {
+                return operands[0].contains(row)
+            } else {
+                return .Ok(false)
+            }
+        })
+    }
 }
 
 extension IntermediateRelation {
@@ -572,6 +670,10 @@ extension IntermediateRelation {
             return updateUpdate(query, newValues: newValues, myNewValues: myNewValues)
         case .Aggregate:
             return aggregateUpdate(query, newValues: newValues)
+        case .Otherwise:
+            return otherwiseUpdate(query, newValues: newValues)
+        case .Unique(let attribute, let value):
+            return uniqueUpdate(query, newValues: newValues, attribute: attribute, value: value)
         }
     }
     
@@ -678,5 +780,29 @@ extension IntermediateRelation {
     func aggregateUpdate(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         // TODO: Error, no-op, or pass through to underlying relation?
         return .Ok(())
+    }
+    
+    func otherwiseUpdate(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        for i in operands.indices {
+            switch operands[i].isEmpty {
+            case .Ok(let empty):
+                if !empty {
+                    return operands[i].update(query, newValues: newValues)
+                }
+            case .Err(let err):
+                return .Err(err)
+            }
+        }
+        return .Ok()
+    }
+    
+    func uniqueUpdate(query: SelectExpression, newValues: Row, attribute: Attribute, value: RelationValue) -> Result<Void, RelationError> {
+        return isUnique(attribute, value).then({
+            if $0 {
+                return operands[0].update(query, newValues: newValues)
+            } else {
+                return .Ok()
+            }
+        })
     }
 }

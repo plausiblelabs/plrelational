@@ -177,6 +177,10 @@ extension RelationDifferentiator {
             return updateDerivative(r, newValues: newValues)
         case .Aggregate(let attribute, let initialValue, let aggregateFunction):
             return aggregateDerivative(r, attribute: attribute, initialValue: initialValue, aggregateFunction: aggregateFunction)
+        case .Otherwise:
+            return otherwiseDerivative(r)
+        case .Unique:
+            return uniqueDerivative(r)
         }
     }
     
@@ -300,6 +304,24 @@ extension RelationDifferentiator {
         let previousAgg = IntermediateRelation(op: .Aggregate(attribute, initialValue, aggregateFunction), operands: [preChangeRelation])
         return RelationChange(added: r.difference(previousAgg),
                                   removed: previousAgg.difference(r))
+    }
+    
+    private func otherwiseDerivative(r: IntermediateRelation) -> RelationChange {
+        // Do another brute before/after difference.
+        // A' = (new A) - (old A)
+        let preChangeRelations = r.operands.map(self.preChangeRelation)
+        let previousOtherwise = IntermediateRelation(op: .Otherwise, operands: preChangeRelations)
+        return RelationChange(added: r.difference(previousOtherwise),
+                              removed: previousOtherwise.difference(r))
+    }
+    
+    private func uniqueDerivative(r: IntermediateRelation) -> RelationChange {
+        // Do another brute before/after difference.
+        // A' = (new A) - (old A)
+        let preChangeRelations = r.operands.map(self.preChangeRelation)
+        let previousOtherwise = IntermediateRelation(op: r.op, operands: preChangeRelations)
+        return RelationChange(added: r.difference(previousOtherwise),
+                              removed: previousOtherwise.difference(r))
     }
 }
 
