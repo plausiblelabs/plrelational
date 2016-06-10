@@ -24,9 +24,8 @@ class ColorPickerView: NSView {
     
     private let colorPopup: PopUpButton<ColorItem>
     private let opacityCombo: ComboBox<CGFloat>
+    private let colorPanel: ColorPanel
 
-    private var ignorePanelUpdates = false
-    
     init(defaultColor: Color) {
         self.model = ColorPickerModel(defaultColor: defaultColor)
         
@@ -41,6 +40,11 @@ class ColorPickerView: NSView {
         opacityCombo.formatter = OpacityFormatter()
         opacityCombo.items = ValueBinding.constant(opacityValues)
         opacityCombo.value = model.opacityValue
+        
+        // Configure color panel
+        colorPanel = ColorPanel()
+        colorPanel.color = model.panelColor
+        colorPanel.visible = model.panelVisible
         
         super.init(frame: NSZeroRect)
         
@@ -64,8 +68,6 @@ class ColorPickerView: NSView {
             NSLayoutConstraint(item: self, attribute: .Top, relatedBy: .Equal, toItem: verticalStack, attribute: .Top, multiplier: 1, constant: 0),
             NSLayoutConstraint(item: self, attribute: .Bottom, relatedBy: .Equal, toItem: verticalStack, attribute: .Bottom, multiplier: 1, constant: 0),
         ])
-        
-        model.onOther = self.onOther
     }
     
     required init?(coder: NSCoder) {
@@ -80,35 +82,6 @@ class ColorPickerView: NSView {
             title: binding.map{ $0.whenMulti("Multiple", otherwise: "Default") },
             image: binding.map{ $0.whenMulti(multipleColorSwatchImage(), otherwise: unsetColorSwatchImage()) }
         )
-    }
-    
-    /// Called when the "Other" item is selected.
-    private func onOther() {
-        updateColorPanel(makeVisible: true)
-    }
-    
-    private func updateColorPanel(makeVisible makeVisible: Bool) {
-        ignorePanelUpdates = true
-        let colorPanel = NSColorPanel.sharedColorPanel()
-        colorPanel.setTarget(self)
-        colorPanel.setAction(#selector(colorPanelChanged(_:)))
-        //colorPanel.color = color?.value.nscolor
-        if makeVisible {
-            colorPanel.orderFront(nil)
-        }
-        ignorePanelUpdates = false
-    }
-    
-    /// Called when the color panel color has changed.
-    @objc func colorPanelChanged(panel: NSColorPanel) {
-        if ignorePanelUpdates {
-            return
-        }
-        
-        if let newColor = Color(panel.color) {
-            // TODO: Use `update` while value is changing
-            color?.commit(.One(newColor))
-        }
     }
 }
 
@@ -146,8 +119,6 @@ private class ColorPickerModel {
         }
     }
 
-    var onOther: (() -> Void)?
-    
     /// The color to show in the color picker when there is no selected color.
     private let defaultColor: Color
 
@@ -156,9 +127,12 @@ private class ColorPickerModel {
     
     private let colorItem: BidiValueBinding<ColorItem?>
     private let opacityValue: BidiValueBinding<CGFloat?>
+    private let panelColor: BidiValueBinding<Color>
+    private let panelVisible: BidiValueBinding<Bool>
     
     private var selfInitiatedColorItemChange = false
     private var selfInitiatedOpacityValueChange = false
+    private var selfInitiatedPanelColorChange = false
     
     init(defaultColor: Color) {
         self.defaultColor = defaultColor
@@ -176,6 +150,8 @@ private class ColorPickerModel {
         let colorIsCustom: ValueBinding<Bool> = customColor.map{ $0 != nil }
         self.colorItem = colorItem
         self.opacityValue = bidiValueBinding(nil)
+        self.panelColor = bidiValueBinding(defaultColor)
+        self.panelVisible = bidiValueBinding(false)
 
         // Configure color popup menu items
         var popupItems: [MenuItem<ColorItem>] = []
@@ -209,7 +185,7 @@ private class ColorPickerModel {
             // The "Other" item and the separator above it are always visible
             popupItems.append(MenuItem(.Separator))
             let content = MenuItemContent(object: ColorItem.Other, title: ValueBinding.constant("Other…"))
-            popupItems.append(MenuItem(.Momentary(content, { self.onOther?() })))
+            popupItems.append(MenuItem(.Momentary(content, { self.panelVisible.commit(true) })))
         }
         
         addPreset("Black", Color.black)
@@ -280,6 +256,19 @@ private class ColorPickerModel {
             weakSelf.setColorValue(newValue)
             weakSelf.selfInitiatedOpacityValueChange = false
         })
+        
+        bindings.register("panelColor", panelColor, { [weak self] value in
+            Swift.print("PANEL COLOR CHANGING: \(value)")
+            
+            guard let weakSelf = self else { return }
+            if weakSelf.selfInitiatedPanelColorChange { return }
+            
+            weakSelf.selfInitiatedPanelColorChange = true
+            let newValue = CommonValue.One(value)
+            weakSelf.color?.commit(newValue)
+            weakSelf.setColorValue(newValue)
+            weakSelf.selfInitiatedPanelColorChange = false
+        })
     }
     
     private func setColorValue(value: CommonValue<Color>) {
@@ -306,6 +295,14 @@ private class ColorPickerModel {
             let newOpacity = value.orNil()?.components.a
             Swift.print("  POKING OPACITY: \(newOpacity)")
             opacityValue.commit(newOpacity)
+        }
+        
+        if !selfInitiatedPanelColorChange {
+            // Set the value in the color panel
+            if let color = value.orNil() {
+                Swift.print("  POKING PANEL: \(color)")
+                panelColor.commit(color)
+            }
         }
     }
 }
