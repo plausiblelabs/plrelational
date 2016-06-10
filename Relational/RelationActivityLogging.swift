@@ -99,7 +99,7 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
                     completionScheduled = false
                     
                     if Flags.printTopLevelRunningTimes {
-                        completedTopLevelRelations.sortInPlace({ $0.1 > $1.1 })
+                        completedTopLevelRelations.sortInPlace({ $0.1 < $1.1 })
                         for (description, elapsedTime) in completedTopLevelRelations {
                             print("\(elapsedTimeString(elapsedTime)): \(description)")
                         }
