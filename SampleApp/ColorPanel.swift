@@ -24,6 +24,8 @@ class ColorPanel {
     // TODO: Need to watch color panel's window visibility and update this accordingly
     var visible: BidiValueBinding<Bool>? {
         didSet {
+            // TODO: If shared color panel is already visible, commit(true) to keep the
+            // binding value in sync
             bindings.register("visible", visible, { [weak self] value in
                 // TODO: Should we `orderOut` when visible goes to false?
                 if value {

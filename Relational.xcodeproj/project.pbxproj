@@ -89,7 +89,6 @@
 		37832EC61CFE9E0200256DB1 /* liblibRelational.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37832EC71CFE9E0200256DB1 /* libBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37A1CE511D07543F0067870D /* ImageObjectPropertiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE501D07543F0067870D /* ImageObjectPropertiesView.swift */; };
-		37A1CE561D089C370067870D /* BindingSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE541D0890970067870D /* BindingSet.swift */; };
 		37A1CE581D089CD70067870D /* BindingSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE571D089CD70067870D /* BindingSetTests.swift */; };
 		37A1CE5A1D08A2240067870D /* MenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE591D08A2240067870D /* MenuItem.swift */; };
 		37A1CE5B1D08A2240067870D /* MenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE591D08A2240067870D /* MenuItem.swift */; };
@@ -99,6 +98,7 @@
 		37A1CE611D08C70D0067870D /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE5F1D08C70D0067870D /* Color.swift */; };
 		37A1CE631D0B25F40067870D /* ColorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE621D0B25F40067870D /* ColorPanel.swift */; };
 		37A1CE641D0B25F70067870D /* ColorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE621D0B25F40067870D /* ColorPanel.swift */; };
+		37A1CE651D0B59700067870D /* BindingSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE541D0890970067870D /* BindingSet.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -1484,7 +1484,7 @@
 				372707B71CFE240E00710C80 /* CommonValue.swift in Sources */,
 				372707B91CFE240E00710C80 /* RelationArrayBinding.swift in Sources */,
 				372707BD1CFE24F600710C80 /* ArrayBinarySearch.swift in Sources */,
-				37A1CE561D089C370067870D /* BindingSet.swift in Sources */,
+				37A1CE651D0B59700067870D /* BindingSet.swift in Sources */,
 				372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */,
 				372707BB1CFE240E00710C80 /* RelationTreeBinding.swift in Sources */,
 				372707E31CFE2B6500710C80 /* ValueBinding.swift in Sources */,

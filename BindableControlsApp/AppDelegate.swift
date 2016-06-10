@@ -205,6 +205,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             },
             set: { (commonValue: CommonValue<Color>) in
                 guard let color = commonValue.orNil() else { preconditionFailure("Expected a single color value") }
+                Swift.print("UPDATING SELECTED OBJECTS COLOR: \(color.stringValue)")
                 selectedObjectsColor.updateString(color.stringValue)
             }
         )

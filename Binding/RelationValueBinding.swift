@@ -91,10 +91,12 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
     
         self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
-            
-            if weakSelf.selfInitiatedChange { return }
+
+            // TODO: We need to manage this externally
+            //if weakSelf.selfInitiatedChange { return }
             
             let newValue = relationToValue(relation)
+            print("RELATION UPDATED: \(newValue)")
             weakSelf.setValue(newValue)
         })
     }
@@ -108,13 +110,14 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
             return
         }
         
-        selfInitiatedChange = true
+        //selfInitiatedChange = true
         if before == nil {
             before = config.snapshot()
         }
-        value = newValue
+        // Note: We don't set self.value here; instead we wait to receive the change from the
+        // relation in our change observer and then update the value there
         config.update(newValue: newValue)
-        selfInitiatedChange = false
+        //selfInitiatedChange = false
     }
     
     private override func commit(newValue: T) {
@@ -122,14 +125,15 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
             return
         }
 
-        selfInitiatedChange = true
+        //selfInitiatedChange = true
         if before == nil {
             before = config.snapshot()
         }
-        value = newValue
+        // Note: We don't set self.value here; instead we wait to receive the change from the
+        // relation in our change observer and then update the value there
         config.commit(before: before!, newValue: newValue)
         self.before = nil
-        selfInitiatedChange = false
+        //selfInitiatedChange = false
     }
 }
 

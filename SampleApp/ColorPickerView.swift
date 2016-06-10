@@ -90,6 +90,17 @@ private enum ColorItem: Equatable { case
     Preset(Color),
     Custom(Color),
     Other
+    
+    var color: Color? {
+        switch self {
+        case .Preset(let color):
+            return color
+        case .Custom(let color):
+            return color
+        case .Default, .Other:
+            return nil
+        }
+    }
 }
 
 private func ==(a: ColorItem, b: ColorItem) -> Bool {
@@ -113,9 +124,73 @@ private class ColorPickerModel {
     
     var color: BidiValueBinding<CommonValue<Color>>? {
         didSet {
-            bindings.register("color", color, { [weak self] value in
-                self?.setColorValue(value)
-            })
+            bindings.connect(
+                "color", color,
+                "colorItem", colorItem,
+                forward: { [weak self] value in
+                    // CommonValue<Color> -> ColorItem
+                    guard let weakSelf = self else { return }
+                    
+                    let newColorItem: ColorItem
+                    if let color = value.orNil() {
+                        if weakSelf.presetColors.contains(color) {
+                            newColorItem = ColorItem.Preset(color)
+                        } else {
+                            newColorItem = ColorItem.Custom(color)
+                        }
+                    } else {
+                        newColorItem = ColorItem.Default
+                    }
+                    
+                    weakSelf.colorItem.commit(newColorItem)
+                },
+                reverse: { [weak self] value in
+                    // ColorItem -> CommonValue<Color>
+                    if let newColor = value?.color {
+                        self?.color?.commit(CommonValue.One(newColor))
+                    }
+                }
+            )
+            
+            bindings.connect(
+                "color", color,
+                "opacityValue", opacityValue,
+                forward: { [weak self] value in
+                    // CommonValue<Color> -> Double?
+                    self?.opacityValue.commit(value.orNil()?.components.a)
+                },
+                reverse: { [weak self] value in
+                    // Double? -> CommonValue<Color>
+                    guard let weakSelf = self else { return }
+                    guard let newOpacity = value else { return }
+                    
+                    let currentColor: Color
+                    if let colorValue = weakSelf.color?.value {
+                        currentColor = colorValue.orDefault(weakSelf.defaultColor)
+                    } else {
+                        currentColor = weakSelf.defaultColor
+                    }
+                    
+                    let newColor = currentColor.withAlpha(newOpacity)
+                    Swift.print("HELLO UPDATED OPACITY: \(newOpacity) \(newColor)")
+                    weakSelf.color?.commit(CommonValue.One(newColor))
+                }
+            )
+            
+            bindings.connect(
+                "color", color,
+                "panelColor", panelColor,
+                forward: { [weak self] value in
+                    // CommonValue<Color> -> Color
+                    if let color = value.orNil() {
+                        self?.panelColor.commit(color)
+                    }
+                },
+                reverse: { [weak self] value in
+                    // Color -> CommonValue<Color>
+                    self?.color?.commit(CommonValue.One(value))
+                }
+            )
         }
     }
 
@@ -129,10 +204,6 @@ private class ColorPickerModel {
     private let opacityValue: BidiValueBinding<CGFloat?>
     private let panelColor: BidiValueBinding<Color>
     private let panelVisible: BidiValueBinding<Bool>
-    
-    private var selfInitiatedColorItemChange = false
-    private var selfInitiatedOpacityValueChange = false
-    private var selfInitiatedPanelColorChange = false
     
     init(defaultColor: Color) {
         self.defaultColor = defaultColor
@@ -202,108 +273,6 @@ private class ColorPickerModel {
         addOther()
         
         self.popupItems = popupItems
-        
-        // Configure the internal bindings
-        bindings.register("colorItem", colorItem, { [weak self] value in
-            Swift.print("COLOR ITEM CHANGING: \(value)")
-            
-            guard let weakSelf = self else { return }
-            guard let newColorItem = value else { return }
-            if weakSelf.selfInitiatedColorItemChange { return }
-            
-            let newColor: Color?
-            switch newColorItem {
-            case .Default:
-                return
-            case let .Preset(color):
-                newColor = color
-            case let .Custom(color):
-                newColor = color
-            case .Other:
-                // TODO: Open NSColorPanel
-                return
-            }
-            
-            if let newColor = newColor {
-                weakSelf.selfInitiatedColorItemChange = true
-                // TODO: RelationBidiValueBinding doesn't notify observers in commit(),
-                // so we have to manually call setColorValue() here; we should make the
-                // existing behavior in RelationBidiValueBinding optional or something
-                let newValue = CommonValue.One(newColor)
-                weakSelf.color?.commit(newValue)
-                weakSelf.setColorValue(newValue)
-                weakSelf.selfInitiatedColorItemChange = false
-            }
-        })
-        
-        bindings.register("opacityValue", opacityValue, { [weak self] value in
-            Swift.print("OPACITY VALUE CHANGING: \(value)")
-            
-            guard let weakSelf = self else { return }
-            guard let newOpacity = value else { return }
-            if weakSelf.selfInitiatedOpacityValueChange { return }
-            
-            let currentColor: Color
-            if let colorValue = weakSelf.color?.value {
-                currentColor = colorValue.orDefault(defaultColor)
-            } else {
-                currentColor = defaultColor
-            }
-            
-            weakSelf.selfInitiatedOpacityValueChange = true
-            let newValue = CommonValue.One(currentColor.withAlpha(newOpacity))
-            weakSelf.color?.commit(newValue)
-            weakSelf.setColorValue(newValue)
-            weakSelf.selfInitiatedOpacityValueChange = false
-        })
-        
-        bindings.register("panelColor", panelColor, { [weak self] value in
-            Swift.print("PANEL COLOR CHANGING: \(value)")
-            
-            guard let weakSelf = self else { return }
-            if weakSelf.selfInitiatedPanelColorChange { return }
-            
-            weakSelf.selfInitiatedPanelColorChange = true
-            let newValue = CommonValue.One(value)
-            weakSelf.color?.commit(newValue)
-            weakSelf.setColorValue(newValue)
-            weakSelf.selfInitiatedPanelColorChange = false
-        })
-    }
-    
-    private func setColorValue(value: CommonValue<Color>) {
-        Swift.print("COLOR CHANGING: \(value)")
-        
-        if !selfInitiatedColorItemChange {
-            // Set the selected item in the color popup button
-            let newColorItem: ColorItem?
-            if let color = value.orNil() {
-                if presetColors.contains(color) {
-                    newColorItem = ColorItem.Preset(color)
-                } else {
-                    newColorItem = ColorItem.Custom(color)
-                }
-            } else {
-                newColorItem = ColorItem.Default
-            }
-            Swift.print("  POKING COLOR ITEM: \(newColorItem)")
-            colorItem.commit(newColorItem)
-        }
-        
-        if !selfInitiatedOpacityValueChange {
-            // Set the value in the opacity combo box
-            let newOpacity = value.orNil()?.components.a
-            Swift.print("  POKING OPACITY: \(newOpacity)")
-            opacityValue.commit(newOpacity)
-        }
-        
-        if !selfInitiatedPanelColorChange {
-            // Set the value in the color panel
-            if let color = value.orNil() {
-                Swift.print("  POKING PANEL: \(color)")
-                panelColor.commit(color)
-            }
-        }
     }
 }
 
