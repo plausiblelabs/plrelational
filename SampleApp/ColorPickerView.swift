@@ -25,6 +25,8 @@ class ColorPickerView: NSView {
     private let colorPopup: PopUpButton<ColorItem>
     private let opacityCombo: ComboBox<CGFloat>
 
+    private var ignorePanelUpdates = false
+    
     init(defaultColor: Color) {
         self.model = ColorPickerModel(defaultColor: defaultColor)
         
@@ -62,6 +64,8 @@ class ColorPickerView: NSView {
             NSLayoutConstraint(item: self, attribute: .Top, relatedBy: .Equal, toItem: verticalStack, attribute: .Top, multiplier: 1, constant: 0),
             NSLayoutConstraint(item: self, attribute: .Bottom, relatedBy: .Equal, toItem: verticalStack, attribute: .Bottom, multiplier: 1, constant: 0),
         ])
+        
+        model.onOther = self.onOther
     }
     
     required init?(coder: NSCoder) {
@@ -76,6 +80,35 @@ class ColorPickerView: NSView {
             title: binding.map{ $0.whenMulti("Multiple", otherwise: "Default") },
             image: binding.map{ $0.whenMulti(multipleColorSwatchImage(), otherwise: unsetColorSwatchImage()) }
         )
+    }
+    
+    /// Called when the "Other" item is selected.
+    private func onOther() {
+        updateColorPanel(makeVisible: true)
+    }
+    
+    private func updateColorPanel(makeVisible makeVisible: Bool) {
+        ignorePanelUpdates = true
+        let colorPanel = NSColorPanel.sharedColorPanel()
+        colorPanel.setTarget(self)
+        colorPanel.setAction(#selector(colorPanelChanged(_:)))
+        //colorPanel.color = color?.value.nscolor
+        if makeVisible {
+            colorPanel.orderFront(nil)
+        }
+        ignorePanelUpdates = false
+    }
+    
+    /// Called when the color panel color has changed.
+    @objc func colorPanelChanged(panel: NSColorPanel) {
+        if ignorePanelUpdates {
+            return
+        }
+        
+        if let newColor = Color(panel.color) {
+            // TODO: Use `update` while value is changing
+            color?.commit(.One(newColor))
+        }
     }
 }
 
@@ -113,11 +146,13 @@ private class ColorPickerModel {
         }
     }
 
+    var onOther: (() -> Void)?
+    
     /// The color to show in the color picker when there is no selected color.
     private let defaultColor: Color
 
     private let presetColors: [Color]
-    private let popupItems: [MenuItem<ColorItem>]
+    private var popupItems: [MenuItem<ColorItem>]!
     
     private let colorItem: BidiValueBinding<ColorItem?>
     private let opacityValue: BidiValueBinding<CGFloat?>
@@ -174,7 +209,7 @@ private class ColorPickerModel {
             // The "Other" item and the separator above it are always visible
             popupItems.append(MenuItem(.Separator))
             let content = MenuItemContent(object: ColorItem.Other, title: ValueBinding.constant("Other…"))
-            popupItems.append(MenuItem(.Normal(content)))
+            popupItems.append(MenuItem(.Momentary(content, { self.onOther?() })))
         }
         
         addPreset("Black", Color.black)
@@ -185,10 +220,11 @@ private class ColorPickerModel {
         addPreset("Green", Color.green)
         addPreset("Blue", Color.blue)
         addPreset("Purple", Color.purple)
+        self.presetColors = presets
+        
         addCustom()
         addOther()
         
-        self.presetColors = presets
         self.popupItems = popupItems
         
         // Configure the internal bindings

@@ -23,6 +23,7 @@ struct MenuItemContent<T> {
 
 enum MenuItemType<T> { case
     Normal(MenuItemContent<T>),
+    Momentary(MenuItemContent<T>, () -> Void),
     Separator
 }
 
@@ -47,17 +48,14 @@ func titledMenuItem(title: String) -> MenuItem<String> {
 class NativeMenuItem<T> {
     private let bindings = BindingSet()
     
-    var visible: ValueBinding<Bool>? {
-        didSet {
-        }
-    }
-
     let model: MenuItem<T>
     let nsitem: NSMenuItem
 
     var object: T? {
         switch model.type {
         case .Normal(let content):
+            return content.object
+        case .Momentary(let content, _):
             return content.object
         case .Separator:
             return nil
@@ -72,8 +70,17 @@ class NativeMenuItem<T> {
             self?.nsitem.hidden = !value
         })
 
+        let content: MenuItemContent<T>?
         switch model.type {
-        case .Normal(let content):
+        case .Normal(let c):
+            content = c
+        case .Momentary(let c, _):
+            content = c
+        case .Separator:
+            content = nil
+        }
+
+        if let content = content {
             // TODO: Avoid cycle here
             nsitem.representedObject = self
             bindings.register("title", content.title, { [weak self] value in
@@ -82,15 +89,13 @@ class NativeMenuItem<T> {
             bindings.register("image", content.image, { [weak self] value in
                 self?.nsitem.image = value.nsimage
             })
-        case .Separator:
-            break
         }
     }
     
     convenience init(model: MenuItem<T>) {
         let nsitem: NSMenuItem
         switch model.type {
-        case .Normal:
+        case .Normal, .Momentary:
             nsitem = NSMenuItem()
         case .Separator:
             nsitem = NSMenuItem.separatorItem()

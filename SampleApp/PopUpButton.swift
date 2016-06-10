@@ -67,6 +67,7 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
     private var defaultMenuItem: NativeMenuItem<T>?
     
     private var selfInitiatedSelectionChange = false
+    private var selectedIndex = -1
 
     override init(frame: NSRect, pullsDown flag: Bool) {
         super.init(frame: frame, pullsDown: flag)
@@ -90,12 +91,15 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
             })
             if let index = index {
                 selectItemAtIndex(index)
+                selectedIndex = index
             } else {
                 selectItem(defaultMenuItem?.nsitem)
+                selectedIndex = -1
             }
         } else {
             // Select the default item if one exists, otherwise clear selection
             selectItem(defaultMenuItem?.nsitem)
+            selectedIndex = -1
         }
         selfInitiatedSelectionChange = false
     }
@@ -105,10 +109,26 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
         
         guard let selectedItem = sender.selectedItem else { return }
         guard let nativeItem = selectedItem.representedObject as? NativeMenuItem<T> else { return }
-        guard let object = nativeItem.object else { return }
         
-        selfInitiatedSelectionChange = true
-        selectedObject?.commit(object)
-        selfInitiatedSelectionChange = false
+        switch nativeItem.model.type {
+        case .Normal:
+            guard let object = nativeItem.object else { return }
+            selfInitiatedSelectionChange = true
+            selectedObject?.commit(object)
+            selfInitiatedSelectionChange = false
+            
+        case .Momentary(_, let action):
+            selfInitiatedSelectionChange = true
+            if selectedIndex >= 0 {
+                selectItemAtIndex(selectedIndex)
+            } else {
+                selectItem(defaultMenuItem?.nsitem)
+            }
+            selfInitiatedSelectionChange = false
+            action()
+            
+        case .Separator:
+            break
+        }
     }
 }
