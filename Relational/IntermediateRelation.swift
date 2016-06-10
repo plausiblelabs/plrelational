@@ -497,22 +497,22 @@ extension IntermediateRelation {
         })
     }
     
-    private func isUnique(attribute: Attribute, _ value: RelationValue) -> Result<Bool, RelationError> {
-        var matchingCount = 0
+    private func isUnique(attribute: Attribute, _ matching: RelationValue) -> Result<Bool, RelationError> {
+        var valueSoFar: RelationValue?
         for rowResult in self.operands[0].rows() {
             switch rowResult {
             case .Ok(let row):
-                if row[attribute] == value {
-                    matchingCount += 1
-                    if matchingCount > 1 {
-                        return .Ok(false)
-                    }
+                let value = row[attribute]
+                if valueSoFar == nil {
+                    valueSoFar = value
+                } else if valueSoFar != value {
+                    return .Ok(false)
                 }
             case .Err(let err):
                 return .Err(err)
             }
         }
-        return .Ok(matchingCount == 1)
+        return .Ok(valueSoFar != nil)
     }
 }
 

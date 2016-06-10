@@ -285,17 +285,19 @@ class QueryRunner {
         }
         
         let rows = nodeStates[nodeIndex].inputBuffers[0].popAll()
-        var matchingCount = 0
+        var valueSoFar: RelationValue?
+        var isUnique = true
         for row in rows {
-            if row[attribute] == matching {
-                matchingCount += 1
-                if matchingCount > 1 {
-                    break
-                }
+            let value = row[attribute]
+            if valueSoFar == nil {
+                valueSoFar = value
+            } else if valueSoFar != value {
+                isUnique = false
+                break
             }
         }
         
-        if matchingCount == 1 {
+        if isUnique {
             writeOutput(Set(rows), fromNode: nodeIndex)
         }
     }
