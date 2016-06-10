@@ -276,7 +276,6 @@ class QueryRunner {
             writeOutput(Set(nonemptyBuffer.rows), fromNode: nodeIndex)
         }
         nodeStates[nodeIndex].inputBuffers = []
-        markDone(nodeIndex)
     }
     
     func processUnique(nodeIndex: Int, _ inputIndex: Int, _ attribute: Attribute, _ matching: RelationValue) {
@@ -299,7 +298,6 @@ class QueryRunner {
         if matchingCount == 1 {
             writeOutput(Set(rows), fromNode: nodeIndex)
         }
-        markDone(nodeIndex)
     }
 }
 
