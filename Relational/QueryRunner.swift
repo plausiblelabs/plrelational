@@ -329,7 +329,11 @@ extension QueryRunner {
             activeBuffers -= 1
         }
         
-        mutating func uniq<Seq: SequenceType where Seq.Generator.Element == Row>(rows: Seq) -> Set<Row> {
+        mutating func uniq<Seq: CollectionType where Seq.Generator.Element == Row>(rows: Seq) -> Set<Row> {
+            if rows.count == 0 {
+                return []
+            }
+            
             var rowsSet = Set(rows)
             rowsSet.subtractInPlace(outputForUniquing)
             outputForUniquing.unionInPlace(rowsSet)
