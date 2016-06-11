@@ -80,4 +80,8 @@ class BindingSetTests: XCTestCase {
         XCTAssertEqual(binding1.observerCount, 0)
         XCTAssertEqual(binding2.observerCount, 0)
     }
+    
+    func testConnect() {
+        // TODO
+    }
 }

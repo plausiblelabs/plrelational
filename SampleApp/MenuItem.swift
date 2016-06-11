@@ -23,7 +23,7 @@ struct MenuItemContent<T> {
 
 enum MenuItemType<T> { case
     Normal(MenuItemContent<T>),
-    Momentary(MenuItemContent<T>, () -> Void),
+    Momentary(MenuItemContent<T>, action: () -> Void),
     Separator
 }
 
@@ -66,10 +66,6 @@ class NativeMenuItem<T> {
         self.model = model
         self.nsitem = nsitem
 
-        bindings.register("visible", model.visible, { [weak self] value in
-            self?.nsitem.hidden = !value
-        })
-
         let content: MenuItemContent<T>?
         switch model.type {
         case .Normal(let c):
@@ -79,6 +75,10 @@ class NativeMenuItem<T> {
         case .Separator:
             content = nil
         }
+        
+        bindings.register("visible", model.visible, { [weak self] value in
+            self?.nsitem.hidden = !value
+        })
 
         if let content = content {
             // TODO: Avoid cycle here

@@ -22,8 +22,8 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
                 weakSelf.removeAllItems()
 
                 // Add the menu items
-                let nativeItems = value.map{ NativeMenuItem(model: $0) }
-                for item in nativeItems {
+                weakSelf.nativeMenuItems = value.map{ NativeMenuItem(model: $0) }
+                for item in weakSelf.nativeMenuItems! {
                     weakSelf.menu?.addItem(item.nsitem)
                 }
 
@@ -64,6 +64,9 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
         }
     }
 
+    // TODO: We hang on to these just to maintain strong references while their underlying
+    // NSMenuItems are attached to the NSMenu
+    private var nativeMenuItems: [NativeMenuItem<T>]?
     private var defaultMenuItem: NativeMenuItem<T>?
     
     private var selfInitiatedSelectionChange = false

@@ -247,20 +247,22 @@ private class ColorPickerModel {
         func addCustom() {
             // The "Custom" item and the separator above it are only visible when a custom color is defined
             popupItems.append(MenuItem(.Separator, visible: colorIsCustom))
+            //popupItems.append(MenuItem(.Separator))
             let content = MenuItemContent(
                 // TODO: Perhaps `object` should be a ValueBinding so that it can change if needed
                 object: ColorItem.Custom(defaultColor),
                 title: ValueBinding.constant("Custom"),
                 image: customColor.map{ colorSwatchImage($0 ?? defaultColor) }
             )
-            popupItems.append(MenuItem(.Normal(content), visible: colorIsCustom))
+            popupItems.append(MenuItem(.Momentary(content, action: {}), visible: colorIsCustom))
+            //popupItems.append(MenuItem(.Momentary(content, action: {})))
         }
         
         func addOther() {
             // The "Other" item and the separator above it are always visible
             popupItems.append(MenuItem(.Separator))
             let content = MenuItemContent(object: ColorItem.Other, title: ValueBinding.constant("Other…"))
-            popupItems.append(MenuItem(.Momentary(content, { self.panelVisible.commit(true) })))
+            popupItems.append(MenuItem(.Momentary(content, action: { self.panelVisible.commit(true) })))
         }
         
         addPreset("Black", Color.black)
