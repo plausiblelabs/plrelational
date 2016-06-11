@@ -27,6 +27,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var listView: ListView<RowArrayElement>!
 
     func applicationDidFinishLaunching(aNotification: NSNotification) {
+        // By default, NSColor is set to "ignore alpha" which means that color wells
+        // strip alpha, dragged-and-dropped colors lose alpha, and other assorted
+        // whatever. We turn this off here, because we actually want our color wells
+        // and such to work with alpha values. It's a global setting because Apple,
+        // so we set it once here at app startup.
+        NSColor.setIgnoresAlpha(false)
+        
         window.delegate = self
 
         func makeDB() -> (path: String, db: SQLiteDatabase) {
