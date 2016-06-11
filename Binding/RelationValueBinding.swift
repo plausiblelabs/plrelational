@@ -17,7 +17,7 @@ private class RelationValueBinding<T>: ValueBinding<T> {
         self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let weakSelf = self else { return }
             let newValue = relationToValue(relation)
-            weakSelf.setValue(newValue)
+            weakSelf.setValue(newValue, ChangeMetadata(transient: false))
         })
     }
     
@@ -47,11 +47,11 @@ private class WhenNonEmptyBinding<T>: ValueBinding<T?> {
             // Only re-evaluate if the relation is going from empty to non-empty or vice versa
             if weakSelf.value == nil {
                 if let newValue = evaluate() {
-                    weakSelf.setValue(newValue)
+                    weakSelf.setValue(newValue, ChangeMetadata(transient: false))
                 }
             } else {
                 if relation.isEmpty.ok != false {
-                    weakSelf.setValue(nil)
+                    weakSelf.setValue(nil, ChangeMetadata(transient: false))
                 }
             }
         })
@@ -92,7 +92,7 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
             guard let weakSelf = self else { return }
 
             let newValue = relationToValue(relation)
-            weakSelf.setValue(newValue)
+            weakSelf.setValue(newValue, ChangeMetadata(transient: false))
         })
     }
     
@@ -100,7 +100,7 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
         removal()
     }
     
-    private override func update(newValue: T) {
+    private override func update(newValue: T, _ metadata: ChangeMetadata) {
         if !changing(value, newValue) {
             return
         }
@@ -108,23 +108,15 @@ private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
         if before == nil {
             before = config.snapshot()
         }
+        
         // Note: We don't set self.value here; instead we wait to receive the change from the
         // relation in our change observer and then update the value there
-        config.update(newValue: newValue)
-    }
-    
-    private override func commit(newValue: T) {
-        if !changing(value, newValue) {
-            return
+        if metadata.transient {
+            config.update(newValue: newValue)
+        } else {
+            config.commit(before: before!, newValue: newValue)
+            self.before = nil
         }
-
-        if before == nil {
-            before = config.snapshot()
-        }
-        // Note: We don't set self.value here; instead we wait to receive the change from the
-        // relation in our change observer and then update the value there
-        config.commit(before: before!, newValue: newValue)
-        self.before = nil
     }
 }
 

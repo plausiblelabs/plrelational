@@ -60,8 +60,8 @@ class ColorPanel {
         }
         
         if let newColor = Color(panel.color) {
-            // TODO: Use `update` while value is changing, and `commit` when done
-            color?.update(newColor)
+            // TODO: Use `transient: true` only while user is actively changing the color
+            bindings.update(color, newValue: newColor, transient: true)
         }
     }
 }

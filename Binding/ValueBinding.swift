@@ -8,10 +8,18 @@
 
 import Foundation
 
+public struct ChangeMetadata {
+    public let transient: Bool
+    
+    public init(transient: Bool) {
+        self.transient = transient
+    }
+}
+
 public class ValueBinding<T>: Binding {
     public typealias Value = T
     public typealias Changes = Void
-    public typealias ChangeObserver = Changes -> Void
+    public typealias ChangeObserver = ChangeMetadata -> Void
     
     internal(set) public var value: T
     internal let changing: (T, T) -> Bool
@@ -30,16 +38,16 @@ public class ValueBinding<T>: Binding {
         return { self.changeObservers.removeValueForKey(id) }
     }
     
-    internal func notifyChangeObservers() {
+    internal func notifyChangeObservers(metadata: ChangeMetadata) {
         for (_, f) in changeObservers {
-            f()
+            f(metadata)
         }
     }
     
-    internal func setValue(value: T) {
+    internal func setValue(value: T, _ metadata: ChangeMetadata) {
         if changing(self.value, value) {
             self.value = value
-            self.notifyChangeObservers()
+            self.notifyChangeObservers(metadata)
         }
     }
     
@@ -92,8 +100,8 @@ private class MappedValueBinding<T>: ValueBinding<T> {
     
     init<U>(binding: ValueBinding<U>, transform: (U) -> T, valueChanging: (T, T) -> Bool) {
         super.init(initialValue: transform(binding.value), valueChanging: valueChanging)
-        self.removal = binding.addChangeObserver({ [weak self] in
-            self?.setValue(transform(binding.value))
+        self.removal = binding.addChangeObserver({ [weak self] metadata in
+            self?.setValue(transform(binding.value), metadata)
         })
     }
 }
@@ -104,11 +112,11 @@ private class ZippedValueBinding<U, V>: ValueBinding<(U, V)> {
     
     init(_ binding1: ValueBinding<U>, _ binding2: ValueBinding<V>) {
         super.init(initialValue: (binding1.value, binding2.value))
-        self.removal1 = binding1.addChangeObserver({ [weak self] in
-            self?.setValue((binding1.value, binding2.value))
+        self.removal1 = binding1.addChangeObserver({ [weak self] metadata in
+            self?.setValue((binding1.value, binding2.value), metadata)
         })
-        self.removal2 = binding2.addChangeObserver({ [weak self] in
-            self?.setValue((binding1.value, binding2.value))
+        self.removal2 = binding2.addChangeObserver({ [weak self] metadata in
+            self?.setValue((binding1.value, binding2.value), metadata)
         })
     }
 }
@@ -125,8 +133,8 @@ private class IsOneValueBinding<T: Equatable>: ValueBinding<Bool> {
         
         super.init(initialValue: isOne())
         
-        self.removal = binding.addChangeObserver({ [weak self] in
-            self?.setValue(isOne())
+        self.removal = binding.addChangeObserver({ [weak self] metadata in
+            self?.setValue(isOne(), metadata)
         })
     }
 }
@@ -150,8 +158,8 @@ private class CommonValueBinding<T: Hashable>: ValueBinding<CommonValue<T>> {
         
         super.init(initialValue: commonValue())
         
-        self.removal = binding.addChangeObserver({ [weak self] in
-            self?.setValue(commonValue())
+        self.removal = binding.addChangeObserver({ [weak self] metadata in
+            self?.setValue(commonValue(), metadata)
         })
     }
 }
@@ -161,12 +169,12 @@ public class BidiValueBinding<T>: ValueBinding<T> {
         super.init(initialValue: initialValue, valueChanging: valueChanging)
     }
     
-    public func update(newValue: T) {
-        setValue(newValue)
+    public func update(newValue: T, _ metadata: ChangeMetadata) {
+        setValue(newValue, metadata)
     }
     
-    public func commit(newValue: T) {
-        setValue(newValue)
+    public func update(newValue: T, transient: Bool) {
+        update(newValue, ChangeMetadata(transient: transient))
     }
 }
 
@@ -185,9 +193,9 @@ extension BidiValueBinding where T: Equatable {
 }
 
 extension BidiValueBinding where T: BooleanType {
-    public func toggle() {
+    public func toggle(metadata: ChangeMetadata = ChangeMetadata(transient: true)) {
         let newValue = !value
-        commit(newValue as! T)
+        update(newValue as! T, metadata)
     }
 }
 

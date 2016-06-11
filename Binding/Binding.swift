@@ -20,7 +20,7 @@ public protocol Binding {
     func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval
 }
 
-public protocol BidiBinding: Binding {
-    func update(newValue: Value)
-    func commit(newValue: Value)
-}
+//public protocol BidiBinding: Binding {
+//    func update(newValue: Value)
+//    func commit(newValue: Value)
+//}

@@ -124,10 +124,12 @@ private class ColorPickerModel {
     
     var color: BidiValueBinding<CommonValue<Color>>? {
         didSet {
+            // TODO: Should we call bindings.update() here instead of calling `update` directly
+            // on each binding?  Or perhaps we should have forward/reverse return a value instead.
             bindings.connect(
                 "color", color,
                 "colorItem", colorItem,
-                forward: { [weak self] value in
+                forward: { [weak self] value, metadata in
                     // CommonValue<Color> -> ColorItem
                     guard let weakSelf = self else { return }
                     
@@ -142,12 +144,12 @@ private class ColorPickerModel {
                         newColorItem = ColorItem.Default
                     }
                     
-                    weakSelf.colorItem.commit(newColorItem)
+                    weakSelf.colorItem.update(newColorItem, metadata)
                 },
-                reverse: { [weak self] value in
+                reverse: { [weak self] value, metadata in
                     // ColorItem -> CommonValue<Color>
                     if let newColor = value?.color {
-                        self?.color?.commit(CommonValue.One(newColor))
+                        self?.color?.update(CommonValue.One(newColor), metadata)
                     }
                 }
             )
@@ -155,11 +157,11 @@ private class ColorPickerModel {
             bindings.connect(
                 "color", color,
                 "opacityValue", opacityValue,
-                forward: { [weak self] value in
+                forward: { [weak self] value, metadata in
                     // CommonValue<Color> -> Double?
-                    self?.opacityValue.commit(value.orNil()?.components.a)
+                    self?.opacityValue.update(value.orNil()?.components.a, metadata)
                 },
-                reverse: { [weak self] value in
+                reverse: { [weak self] value, metadata in
                     // Double? -> CommonValue<Color>
                     guard let weakSelf = self else { return }
                     guard let newOpacity = value else { return }
@@ -172,24 +174,22 @@ private class ColorPickerModel {
                     }
                     
                     let newColor = currentColor.withAlpha(newOpacity)
-                    weakSelf.color?.commit(CommonValue.One(newColor))
+                    weakSelf.color?.update(CommonValue.One(newColor), metadata)
                 }
             )
             
             bindings.connect(
                 "color", color,
                 "panelColor", panelColor,
-                forward: { [weak self] value in
+                forward: { [weak self] value, metadata in
                     // CommonValue<Color> -> Color
                     if let color = value.orNil() {
-                        self?.panelColor.commit(color)
+                        self?.panelColor.update(color, metadata)
                     }
                 },
-                reverse: { [weak self] value in
+                reverse: { [weak self] value, metadata in
                     // Color -> CommonValue<Color>
-                    // TODO: Hmm, should use `update` when the user is interacting, and then
-                    // `commit` only when the user is done
-                    self?.color?.update(CommonValue.One(value))
+                    self?.color?.update(CommonValue.One(value), metadata)
                 }
             )
         }
@@ -260,7 +260,7 @@ private class ColorPickerModel {
             // The "Other" item and the separator above it are always visible
             popupItems.append(MenuItem(.Separator))
             let content = MenuItemContent(object: ColorItem.Other, title: ValueBinding.constant("Other…"))
-            popupItems.append(MenuItem(.Momentary(content, action: { self.panelVisible.commit(true) })))
+            popupItems.append(MenuItem(.Momentary(content, action: { self.bindings.update(self.panelVisible, newValue: true) })))
         }
         
         addPreset("Black", Color.black)

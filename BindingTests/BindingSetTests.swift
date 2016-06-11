@@ -22,6 +22,8 @@ class BindingSetTests: XCTestCase {
         
         var binding1Detached = false
         var binding2Detached = false
+        
+        let metadata = ChangeMetadata(transient: false)
 
         XCTAssertEqual(binding1Values, [])
         XCTAssertEqual(binding2Values, [])
@@ -48,14 +50,14 @@ class BindingSetTests: XCTestCase {
         XCTAssertEqual(binding1.observerCount, 1)
         XCTAssertEqual(binding2.observerCount, 1)
         
-        binding1.commit("Hallo")
+        binding1.update("Hallo", metadata)
         
         XCTAssertEqual(binding1Values, ["Hello", "Hallo"])
         XCTAssertEqual(binding2Values, ["there"])
         XCTAssertEqual(binding1Detached, false)
         XCTAssertEqual(binding2Detached, false)
         
-        binding2.commit("thar")
+        binding2.update("thar", metadata)
         
         XCTAssertEqual(binding1Values, ["Hello", "Hallo"])
         XCTAssertEqual(binding2Values, ["there", "thar"])

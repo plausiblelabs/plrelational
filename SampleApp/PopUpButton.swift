@@ -117,7 +117,7 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
         case .Normal:
             guard let object = nativeItem.object else { return }
             selfInitiatedSelectionChange = true
-            selectedObject?.commit(object)
+            bindings.update(selectedObject, newValue: object)
             selfInitiatedSelectionChange = false
             
         case .Momentary(_, let action):

@@ -14,8 +14,6 @@ class StepperView: NSControl, NSTextFieldDelegate {
         didSet {
             bindings.register("value", value, { [weak self] value in
                 guard let weakSelf = self else { return }
-                if weakSelf.selfInitiatedValueChange { return }
-                
                 if let intValue = value {
                     weakSelf.stepper.integerValue = intValue
                     weakSelf.textField.integerValue = intValue
@@ -39,8 +37,6 @@ class StepperView: NSControl, NSTextFieldDelegate {
     private var textField: NSTextField!
     private var stepper: NSStepper!
 
-    private var selfInitiatedValueChange = false
-    
     init(frame: NSRect, min: Int, max: Int, defaultValue: Int) {
         self.defaultValue = defaultValue
         
@@ -113,10 +109,7 @@ class StepperView: NSControl, NSTextFieldDelegate {
         } else {
             fatalError("Unexpected sender")
         }
-        
-        selfInitiatedValueChange = true
-        value?.commit(newValue)
-        selfInitiatedValueChange = false
+        bindings.update(value, newValue: newValue)
     }
     
     override func controlTextDidEndEditing(notification: NSNotification) {

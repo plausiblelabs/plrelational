@@ -25,15 +25,12 @@ class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
     var value: BidiValueBinding<T?>? {
         didSet {
             bindings.register("value", value, { [weak self] value in
-                guard let weakSelf = self else { return }
-                if weakSelf.selfInitiatedValueChange { return }
-                weakSelf.objectValue = value as? AnyObject
+                self?.objectValue = value as? AnyObject
             })
         }
     }
     
     private var previousCommittedValue: T?
-    private var selfInitiatedValueChange = false
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -47,9 +44,7 @@ class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
     
     @objc func comboBoxSelectionDidChange(notification: NSNotification) {
         if let newValue = objectValueOfSelectedItem {
-            selfInitiatedValueChange = true
-            value?.commit(newValue as? T)
-            selfInitiatedValueChange = false
+            bindings.update(value, newValue: newValue as? T)
         }
     }
     
@@ -65,9 +60,7 @@ class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if let newValue = objectValue as? T {
                 if newValue != previousCommittedValue {
-                    selfInitiatedValueChange = true
-                    binding.commit(newValue)
-                    selfInitiatedValueChange = false
+                    bindings.update(binding, newValue: newValue)
                 }
             }
         }

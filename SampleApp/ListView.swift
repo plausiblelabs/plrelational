@@ -143,8 +143,6 @@ class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineVi
     }
     
     func outlineViewSelectionDidChange(notification: NSNotification) {
-        // TODO: RelationBidiValueBinding has its own notion of selfInitiatedChange, so perhaps
-        // we don't need this any longer
         if selfInitiatedSelectionChange {
             return
         }
@@ -157,7 +155,7 @@ class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineVi
                 itemIDs.append(element.id)
             }
         }
-        model.selection.commit(Set(itemIDs))
+        model.selection.update(Set(itemIDs), ChangeMetadata(transient: false))
         
         selfInitiatedSelectionChange = false
     }

@@ -195,8 +195,6 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     }
     
     func outlineViewSelectionDidChange(notification: NSNotification) {
-        // TODO: RelationBidiValueBinding has its own notion of selfInitiatedChange, so perhaps
-        // we don't need this any longer
         if selfInitiatedSelectionChange {
             return
         }
@@ -209,7 +207,7 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
                 itemIDs.append(node.id)
             }
         }
-        model.selection.commit(Set(itemIDs))
+        model.selection.update(Set(itemIDs), ChangeMetadata(transient: false))
         
         selfInitiatedSelectionChange = false
     }

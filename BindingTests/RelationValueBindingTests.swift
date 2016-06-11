@@ -193,7 +193,7 @@ class RelationValueBindingTests: BindingTestCase {
         let binding = r.select(Attribute("id") *== 1).project(["name"]).bindBidi(config, relationToValue: { $0.oneString })
         var changed = false
         _ = binding.addChangeObserver({ _ in changed = true })
-        
+
         XCTAssertEqual(binding.value, "")
         XCTAssertFalse(changed)
         changed = false
@@ -205,16 +205,17 @@ class RelationValueBindingTests: BindingTestCase {
         changed = false
 
         // TODO: Verify that snapshot is taken?
-        binding.update("dog")
-        
+        binding.update("dog", ChangeMetadata(transient: true))
+
+        // TODO: Verify `transient`
         XCTAssertEqual(binding.value, "dog")
-        XCTAssertFalse(changed)
+        XCTAssertTrue(changed)
         changed = false
         
-        binding.commit("ant")
+        binding.update("ant", ChangeMetadata(transient: false))
         
         XCTAssertEqual(binding.value, "ant")
-        XCTAssertFalse(changed)
+        XCTAssertTrue(changed)
         changed = false
         
         r.delete(true)

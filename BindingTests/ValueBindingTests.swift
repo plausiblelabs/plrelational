@@ -16,22 +16,23 @@ class ValueBindingTests: BindingTestCase {
         let mapped = binding.map{ $0 ? 1 : 0 }
         var changed = false
         _ = mapped.addChangeObserver({ _ in changed = true })
+        let metadata = ChangeMetadata(transient: false)
         
         XCTAssertEqual(mapped.value, 0)
         XCTAssertEqual(changed, false)
         changed = false
 
-        binding.commit(true)
+        binding.update(true, metadata)
         XCTAssertEqual(mapped.value, 1)
         XCTAssertEqual(changed, true)
         changed = false
         
-        binding.commit(true)
+        binding.update(true, metadata)
         XCTAssertEqual(mapped.value, 1)
         XCTAssertEqual(changed, false)
         changed = false
         
-        binding.commit(false)
+        binding.update(false, metadata)
         XCTAssertEqual(mapped.value, 0)
         XCTAssertEqual(changed, true)
         changed = false
@@ -43,25 +44,26 @@ class ValueBindingTests: BindingTestCase {
         let zipped = binding1.zip(binding2)
         var changed = false
         _ = zipped.addChangeObserver({ _ in changed = true })
-        
+        let metadata = ChangeMetadata(transient: false)
+
         XCTAssertEqual(zipped.value.0, false)
         XCTAssertEqual(zipped.value.1, false)
         XCTAssertEqual(changed, false)
         changed = false
         
-        binding1.commit(true)
+        binding1.update(true, metadata)
         XCTAssertEqual(zipped.value.0, true)
         XCTAssertEqual(zipped.value.1, false)
         XCTAssertEqual(changed, true)
         changed = false
         
-        binding2.commit(true)
+        binding2.update(true, metadata)
         XCTAssertEqual(zipped.value.0, true)
         XCTAssertEqual(zipped.value.1, true)
         XCTAssertEqual(changed, true)
         changed = false
         
-        binding2.commit(true)
+        binding2.update(true, metadata)
         XCTAssertEqual(zipped.value.0, true)
         XCTAssertEqual(zipped.value.1, true)
         XCTAssertEqual(changed, false)
@@ -72,27 +74,28 @@ class ValueBindingTests: BindingTestCase {
         let binding = BidiValueBinding(false)
         var changed = false
         _ = binding.addChangeObserver({ _ in changed = true })
-        
+        let metadata = ChangeMetadata(transient: false)
+
         XCTAssertEqual(binding.value, false)
         XCTAssertEqual(changed, false)
         changed = false
 
-        binding.toggle()
+        binding.toggle(metadata)
         XCTAssertEqual(binding.value, true)
         XCTAssertEqual(changed, true)
         changed = false
 
-        binding.toggle()
+        binding.toggle(metadata)
         XCTAssertEqual(binding.value, false)
         XCTAssertEqual(changed, true)
         changed = false
 
-        binding.commit(true)
+        binding.update(true, metadata)
         XCTAssertEqual(binding.value, true)
         XCTAssertEqual(changed, true)
         changed = false
 
-        binding.commit(true)
+        binding.update(true, metadata)
         XCTAssertEqual(binding.value, true)
         XCTAssertEqual(changed, false)
         changed = false

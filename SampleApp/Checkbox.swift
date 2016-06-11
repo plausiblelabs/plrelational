@@ -69,18 +69,13 @@ class Checkbox: NSButton {
     var checked: BidiValueBinding<CheckState>? {
         didSet {
             bindings.register("checked", checked, { [weak self] value in
-                guard let weakSelf = self else { return }
-                if weakSelf.selfInitiatedCheckedChange { return }
-                
                 // Only allow mixed state if we are starting in a mixed state; otherwise we
                 // use simple two-state mode
-                weakSelf.allowsMixedState = value == .Mixed
-                weakSelf.state = value.nsValue
+                self?.allowsMixedState = value == .Mixed
+                self?.state = value.nsValue
             })
         }
     }
-    
-    private var selfInitiatedCheckedChange = false
     
     override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -108,9 +103,7 @@ class Checkbox: NSButton {
         } else {
             newState = state == NSOnState ? .On : .Off
         }
-        selfInitiatedCheckedChange = true
-        checked.commit(newState)
-        selfInitiatedCheckedChange = false
+        bindings.update(checked, newValue: newState)
     }
     
     override func accessibilityValue() -> AnyObject? {
