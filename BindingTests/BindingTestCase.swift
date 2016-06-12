@@ -53,20 +53,20 @@ class BindingTestCase: XCTestCase {
         }
     }
     
-    func prettyRoot(binding: TreeBinding<RowTreeNode>) -> [String] {
+    func prettyRoot(tree: ObservableTree<RowTreeNode>) -> [String] {
         var accum: [String] = []
-        for node in binding.root.children {
+        for node in tree.root.children {
             pretty(node, &accum, 0)
         }
         return accum
     }
     
-    func verifyTree(binding: TreeBinding<RowTreeNode>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
-        XCTAssertEqual(prettyRoot(binding), expected, file: file, line: line)
+    func verifyTree(tree: ObservableTree<RowTreeNode>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
+        XCTAssertEqual(prettyRoot(tree), expected, file: file, line: line)
     }
     
-    func path(treeBinding: TreeBinding<RowTreeNode>, parentID: Int64?, index: Int) -> TreePath<RowTreeNode> {
-        let parent = parentID.flatMap{ treeBinding.nodeForID(RelationValue($0)) }
+    func path(tree: ObservableTree<RowTreeNode>, parentID: Int64?, index: Int) -> TreePath<RowTreeNode> {
+        let parent = parentID.flatMap{ tree.nodeForID(RelationValue($0)) }
         return TreePath(parent: parent, index: index)
     }
 }

@@ -82,13 +82,13 @@ class DocModel {
     private let selectedInspectorItems: Relation
     private let selectedItems: Relation
 
-    private let docOutlineBinding: RelationTreeBinding
-    private let inspectorItemsBinding: RelationTreeBinding
+    private let docOutlineBinding: RelationObservableTree
+    private let inspectorItemsBinding: RelationObservableTree
     
     // TODO: To simplify implementation of the relation that controls the inspector tree view,
     // we put identifiers for both the `collection` and `object` relations into the same set.
     // A potentially better/safer alternative would be to introduce compound primary key
-    // support into RelationTreeBinding so that we can more easily merge data from different
+    // support into RelationObservableTree so that we can more easily merge data from different
     // source relations into a single relation.
     private var globalID: Int64 = 1
     
@@ -147,8 +147,8 @@ class DocModel {
         self.selectedItems = selectedInspectorItems.otherwise(selectedCollection)
 
         // Prepare the tree bindings
-        self.docOutlineBinding = RelationTreeBinding(relation: collections, idAttr: "id", parentAttr: "parent", orderAttr: "order")
-        self.inspectorItemsBinding = RelationTreeBinding(relation: inspectorItems, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        self.docOutlineBinding = RelationObservableTree(relation: collections, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        self.inspectorItemsBinding = RelationObservableTree(relation: inspectorItems, idAttr: "id", parentAttr: "parent", orderAttr: "order")
         
         self.db = db
         self.undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
@@ -203,7 +203,7 @@ class DocModel {
         ]
         let parent = parentID.map{RelationValue($0)}
         let previous = previousID.map{RelationValue($0)}
-        let pos = RelationTreeBinding.Pos(parentID: parent, previousID: previous, nextID: nil)
+        let pos = RelationObservableTree.Pos(parentID: parent, previousID: previous, nextID: nil)
         docOutlineBinding.insert(row, pos: pos)
     }
     

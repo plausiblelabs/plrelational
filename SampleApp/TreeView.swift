@@ -14,7 +14,7 @@ import Binding
 private let PasteboardType = "coop.plausible.vp.pasteboard.TreeViewItem"
 
 struct TreeViewModel<N: TreeNode> {
-    let data: TreeBinding<N>
+    let data: ObservableTree<N>
     let allowsChildren: (N.Data) -> Bool
     let contextMenu: ((N.Data) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
@@ -32,8 +32,8 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     private let model: TreeViewModel<N>
     private let outlineView: NSOutlineView
     
-    private var treeBindingRemoval: ObserverRemoval?
-    private var selectionBindingRemoval: ObserverRemoval?
+    private var treeObserverRemoval: ObserverRemoval?
+    private var selectionObserverRemoval: ObserverRemoval?
     private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
@@ -48,8 +48,8 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         
         super.init()
         
-        treeBindingRemoval = model.data.addChangeObserver({ [weak self] changes in self?.treeBindingChanged(changes) })
-        selectionBindingRemoval = model.selection.addChangeObserver({ [weak self] _ in self?.selectionBindingChanged() })
+        treeObserverRemoval = model.data.addChangeObserver({ [weak self] changes in self?.treeChanged(changes) })
+        selectionObserverRemoval = model.selection.addChangeObserver({ [weak self] _ in self?.selectionChanged() })
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
@@ -60,8 +60,8 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     }
     
     deinit {
-        treeBindingRemoval?()
-        selectionBindingRemoval?()
+        treeObserverRemoval?()
+        selectionObserverRemoval?()
     }
 
     // MARK: NSOutlineViewDataSource
@@ -153,7 +153,7 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
             let proposedParent = item as? N
 
             // Note that `index` will be -1 in the case where it is being dragged onto
-            // another node, but we will account for that in RelationTreeBinding.move()
+            // another node, but we will account for that in RelationObservableTree.move()
             let srcIndex = model.data.indexForID(nodeID)!
             let dstIndex = index
 
@@ -212,9 +212,9 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         selfInitiatedSelectionChange = false
     }
 
-    // MARK: Binding observers
+    // MARK: Observers
 
-    func selectionBindingChanged() {
+    func selectionChanged() {
         if selfInitiatedSelectionChange {
             return
         }
@@ -235,7 +235,7 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         selfInitiatedSelectionChange = false
     }
     
-    func treeBindingChanged(changes: [TreeChange<N>]) {
+    func treeChanged(changes: [TreeChange<N>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
         
         outlineView.beginUpdates()

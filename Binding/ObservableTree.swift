@@ -1,5 +1,5 @@
 //
-//  TreeBinding.swift
+//  ObservableTree.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/23/16.
@@ -61,7 +61,7 @@ public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     }
 }
 
-public class TreeBinding<N: TreeNode>: Binding {
+public class ObservableTree<N: TreeNode>: Binding {
     public typealias Value = N
     public typealias Changes = [TreeChange<N>]
     public typealias ChangeObserver = Changes -> Void
@@ -96,6 +96,16 @@ public class TreeBinding<N: TreeNode>: Binding {
         for (_, f) in changeObservers {
             f(changes)
         }
+    }
+    
+    // TODO: Move these to a MutableObservableTree subclass?
+    public func insert(data: N.Data, pos: Pos) {
+    }
+    
+    public func delete(id: N.ID) {
+    }
+    
+    public func move(srcPath srcPath: Path, dstPath: Path) {
     }
     
     /// Returns the node with the given identifier.

@@ -1,5 +1,5 @@
 //
-//  RelationTreeBindingTests.swift
+//  RelationObservableTreeTests.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/11/16.
@@ -10,7 +10,7 @@ import XCTest
 import libRelational
 @testable import Binding
 
-class RelationTreeBindingTests: BindingTestCase {
+class RelationObservableTreeTests: BindingTestCase {
 
     func testInit() {
         let sqliteDB = makeDB().db
@@ -40,9 +40,9 @@ class RelationTreeBindingTests: BindingTestCase {
         addCollection(6, name: "Child2", parentID: 2, order: 2.0)
         addCollection(7, name: "Group2", parentID: nil, order: 2.0)
         
-        let treeBinding = RelationTreeBinding(relation: sqliteRelation, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        let tree = sqliteRelation.observableTree()
         
-        verifyTree(treeBinding, [
+        verifyTree(tree, [
             "Group1",
             "  Collection1",
             "    Child1",
@@ -60,11 +60,11 @@ class RelationTreeBindingTests: BindingTestCase {
 
         XCTAssertNil(sqliteDB.createRelation("collection", scheme: ["id", "name", "parent", "order"]).err)
         let relation = db["collection"]
-        let treeBinding = RelationTreeBinding(relation: relation, idAttr: "id", parentAttr: "parent", orderAttr: "order")
-        XCTAssertEqual(treeBinding.root.children.count, 0)
+        let tree = relation.observableTree()
+        XCTAssertEqual(tree.root.children.count, 0)
         
-        var changes: [RelationTreeBinding.Change] = []
-        let removal = treeBinding.addChangeObserver({ treeChanges in
+        var changes: [RelationObservableTree.Change] = []
+        let removal = tree.addChangeObserver({ treeChanges in
             changes.appendContentsOf(treeChanges)
         })
         
@@ -76,24 +76,24 @@ class RelationTreeBindingTests: BindingTestCase {
                 ]
                 let parent = parentID.map{RelationValue($0)}
                 let previous = previousID.map{RelationValue($0)}
-                let pos = RelationTreeBinding.Pos(parentID: parent, previousID: previous, nextID: nil)
-                treeBinding.insert(row, pos: pos)
+                let pos = RelationObservableTree.Pos(parentID: parent, previousID: previous, nextID: nil)
+                tree.insert(row, pos: pos)
             })
         }
         
         func deleteCollection(collectionID: Int64) {
             db.transaction({
-                treeBinding.delete(RelationValue(collectionID))
+                tree.delete(RelationValue(collectionID))
             })
         }
         
-        func moveCollection(srcPath srcPath: RelationTreeBinding.Path, dstPath: RelationTreeBinding.Path) {
+        func moveCollection(srcPath srcPath: RelationObservableTree.Path, dstPath: RelationObservableTree.Path) {
             db.transaction({
-                treeBinding.move(srcPath: srcPath, dstPath: dstPath)
+                tree.move(srcPath: srcPath, dstPath: dstPath)
             })
         }
         
-        func verifyChanges(expected: [RelationTreeBinding.Change], file: StaticString = #file, line: UInt = #line) {
+        func verifyChanges(expected: [RelationObservableTree.Change], file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(changes, expected, file: file, line: line)
             changes = []
         }
@@ -103,8 +103,8 @@ class RelationTreeBindingTests: BindingTestCase {
             AssertEqual(sqliteDB["collection"]!, expected, file: file, line: line)
         }
         
-        func path(parentID: Int64?, _ index: Int) -> RelationTreeBinding.Path {
-            let parent = parentID.flatMap{ treeBinding.nodeForID(RelationValue($0)) }
+        func path(parentID: Int64?, _ index: Int) -> RelationObservableTree.Path {
+            let parent = parentID.flatMap{ tree.nodeForID(RelationValue($0)) }
             return TreePath(parent: parent, index: index)
         }
         
@@ -117,7 +117,7 @@ class RelationTreeBindingTests: BindingTestCase {
         addCollection(6, name: "Child2", parentID: 2, previousID: 5)
         addCollection(7, name: "Child3", parentID: 2, previousID: 6)
         addCollection(8, name: "Group2", parentID: nil, previousID: 1)
-        verifyTree(treeBinding, [
+        verifyTree(tree, [
             "Group1",
             "  Collection1",
             "    Child1",
@@ -151,7 +151,7 @@ class RelationTreeBindingTests: BindingTestCase {
 
         // Re-order a collection within its parent
         moveCollection(srcPath: path(2, 2), dstPath: path(2, 0))
-        verifyTree(treeBinding, [
+        verifyTree(tree, [
             "Group1",
             "  Collection1",
             "    Child3",
@@ -178,7 +178,7 @@ class RelationTreeBindingTests: BindingTestCase {
         
         // Move a collection to a new parent
         moveCollection(srcPath: path(1, 0), dstPath: path(8, 0))
-        verifyTree(treeBinding, [
+        verifyTree(tree, [
             "Group1",
             "  Page1",
             "  Page2",
@@ -205,7 +205,7 @@ class RelationTreeBindingTests: BindingTestCase {
         
         // Move a collection to the top level
         moveCollection(srcPath: path(2, 1), dstPath: path(nil, 1))
-        verifyTree(treeBinding, [
+        verifyTree(tree, [
             "Group1",
             "  Page1",
             "  Page2",
@@ -233,7 +233,7 @@ class RelationTreeBindingTests: BindingTestCase {
         // Delete a couple collections
         deleteCollection(4)
         deleteCollection(2)
-        verifyTree(treeBinding, [
+        verifyTree(tree, [
             "Group1",
             "  Page1",
             "Child1",

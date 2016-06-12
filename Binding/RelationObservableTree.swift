@@ -1,5 +1,5 @@
 //
-//  RelationTreeBinding.swift
+//  RelationObservableTree.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/6/16.
@@ -35,7 +35,7 @@ public final class RowTreeNode: TreeNode {
     }
 }
 
-public class RelationTreeBinding: TreeBinding<RowTreeNode> {
+class RelationObservableTree: ObservableTree<RowTreeNode> {
 
     private let relation: Relation
     private let idAttr: Attribute
@@ -44,7 +44,7 @@ public class RelationTreeBinding: TreeBinding<RowTreeNode> {
     
     private var removal: ObserverRemoval!
     
-    public init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
+    init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
         precondition(relation.scheme.attributes.isSupersetOf([idAttr, parentAttr, orderAttr]))
 
         // Map Rows from underlying Relation to Node values.
@@ -124,7 +124,7 @@ public class RelationTreeBinding: TreeBinding<RowTreeNode> {
         removal()
     }
     
-    public func insert(row: Row, pos: Pos) {
+    override func insert(row: Row, pos: Pos) {
         // TODO: Provide insert/delete/move as extension defined where R: MutableRelation
         guard var relation = relation as? MutableRelation else {
             fatalError("insert() is only supported when the underlying relation is mutable")
@@ -191,7 +191,7 @@ public class RelationTreeBinding: TreeBinding<RowTreeNode> {
         return changes
     }
     
-    public func delete(id: RelationValue) {
+    override func delete(id: RelationValue) {
         guard var relation = relation as? MutableRelation else {
             fatalError("delete() is only supported when the underlying relation is mutable")
         }
@@ -244,7 +244,7 @@ public class RelationTreeBinding: TreeBinding<RowTreeNode> {
     }
 
     /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
-    public func move(srcPath srcPath: Path, dstPath: Path) {
+    override func move(srcPath srcPath: Path, dstPath: Path) {
         let srcParent = srcPath.parent ?? root
         let dstParent = dstPath.parent ?? root
 
@@ -373,5 +373,12 @@ public class RelationTreeBinding: TreeBinding<RowTreeNode> {
         let next = pos.nextID.flatMap(nodeForID)
         
         return orderWithinParent(parent, previous: previous, next: next)
+    }
+}
+
+extension Relation {
+    /// Returns an ObservableTree that gets its data from this relation.
+    public func observableTree(idAttr: Attribute = "id", parentAttr: Attribute = "parent", orderAttr: Attribute = "order") -> ObservableTree<RowTreeNode> {
+        return RelationObservableTree(relation: self, idAttr: idAttr, parentAttr: parentAttr, orderAttr: orderAttr)
     }
 }

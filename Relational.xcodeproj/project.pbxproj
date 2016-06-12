@@ -42,8 +42,8 @@
 		372707B71CFE240E00710C80 /* CommonValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136921CF11C8D00F572C5 /* CommonValue.swift */; };
 		372707B81CFE240E00710C80 /* ArrayBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136941CF40A9600F572C5 /* ArrayBinding.swift */; };
 		372707B91CFE240E00710C80 /* RelationArrayBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114C1CDD603C001DAF59 /* RelationArrayBinding.swift */; };
-		372707BA1CFE240E00710C80 /* TreeBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707751CF391EC00710C80 /* TreeBinding.swift */; };
-		372707BB1CFE240E00710C80 /* RelationTreeBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114E1CDD6084001DAF59 /* RelationTreeBinding.swift */; };
+		372707BA1CFE240E00710C80 /* ObservableTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707751CF391EC00710C80 /* ObservableTree.swift */; };
+		372707BB1CFE240E00710C80 /* RelationObservableTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114E1CDD6084001DAF59 /* RelationObservableTree.swift */; };
 		372707BD1CFE24F600710C80 /* ArrayBinarySearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6115A1CE4F3BC001DAF59 /* ArrayBinarySearch.swift */; };
 		372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */; };
 		372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707771CF3C31200710C80 /* RelationValuePlistable.swift */; };
@@ -51,7 +51,7 @@
 		372707D01CFE25B000710C80 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
 		372707D61CFE25D400710C80 /* RelationValueBindingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727077B1CF8F3C100710C80 /* RelationValueBindingTests.swift */; };
 		372707D71CFE25D400710C80 /* RelationArrayBindingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136961CF40AB300F572C5 /* RelationArrayBindingTests.swift */; };
-		372707D81CFE25D400710C80 /* RelationTreeBindingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F8FBD31CE4FC30001C7C5F /* RelationTreeBindingTests.swift */; };
+		372707D81CFE25D400710C80 /* RelationObservableTreeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F8FBD31CE4FC30001C7C5F /* RelationObservableTreeTests.swift */; };
 		372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6115C1CE4F756001DAF59 /* ArrayBinarySearchTests.swift */; };
 		372707DB1CFE262700710C80 /* BindingTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707DA1CFE262700710C80 /* BindingTestCase.swift */; };
 		372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
@@ -361,7 +361,7 @@
 		372707671CED2F8100710C80 /* AppTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppTestCase.swift; sourceTree = "<group>"; };
 		3727076C1CEE60C900710C80 /* MutableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelation.swift; sourceTree = "<group>"; };
 		3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArraySafeIndex.swift; sourceTree = "<group>"; };
-		372707751CF391EC00710C80 /* TreeBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeBinding.swift; sourceTree = "<group>"; };
+		372707751CF391EC00710C80 /* ObservableTree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservableTree.swift; sourceTree = "<group>"; };
 		372707771CF3C31200710C80 /* RelationValuePlistable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValuePlistable.swift; sourceTree = "<group>"; };
 		372707791CF7B2CB00710C80 /* UndoableDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UndoableDatabase.swift; sourceTree = "<group>"; };
 		3727077B1CF8F3C100710C80 /* RelationValueBindingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationValueBindingTests.swift; path = BindingTests/RelationValueBindingTests.swift; sourceTree = SOURCE_ROOT; };
@@ -419,12 +419,12 @@
 		37C611471CDBCB4C001DAF59 /* DocOutlineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocOutlineView.swift; sourceTree = "<group>"; };
 		37C6114A1CDBCB5C001DAF59 /* PropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertiesView.swift; sourceTree = "<group>"; };
 		37C6114C1CDD603C001DAF59 /* RelationArrayBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationArrayBinding.swift; sourceTree = "<group>"; };
-		37C6114E1CDD6084001DAF59 /* RelationTreeBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationTreeBinding.swift; sourceTree = "<group>"; };
+		37C6114E1CDD6084001DAF59 /* RelationObservableTree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObservableTree.swift; sourceTree = "<group>"; };
 		37C611501CE10770001DAF59 /* TreeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeView.swift; sourceTree = "<group>"; };
 		37C611521CE3A942001DAF59 /* ContextMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextMenu.swift; sourceTree = "<group>"; };
 		37C6115A1CE4F3BC001DAF59 /* ArrayBinarySearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayBinarySearch.swift; sourceTree = "<group>"; };
 		37C6115C1CE4F756001DAF59 /* ArrayBinarySearchTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ArrayBinarySearchTests.swift; path = BindingTests/ArrayBinarySearchTests.swift; sourceTree = SOURCE_ROOT; };
-		37F8FBD31CE4FC30001C7C5F /* RelationTreeBindingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationTreeBindingTests.swift; path = BindingTests/RelationTreeBindingTests.swift; sourceTree = SOURCE_ROOT; };
+		37F8FBD31CE4FC30001C7C5F /* RelationObservableTreeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationObservableTreeTests.swift; path = BindingTests/RelationObservableTreeTests.swift; sourceTree = SOURCE_ROOT; };
 		47701CA01CF764CD00E3549D /* Checkbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
 		C204A14F1D071A9200DF297F /* RelationDerivative.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDerivative.swift; sourceTree = "<group>"; };
 		C204A1511D073E6100DF297F /* RelationObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObserver.swift; sourceTree = "<group>"; };
@@ -654,14 +654,14 @@
 			path = Binding;
 			sourceTree = "<group>";
 		};
-		372707731CF38FF600710C80 /* Tree Binding */ = {
+		372707731CF38FF600710C80 /* Observable Tree */ = {
 			isa = PBXGroup;
 			children = (
-				372707751CF391EC00710C80 /* TreeBinding.swift */,
-				37C6114E1CDD6084001DAF59 /* RelationTreeBinding.swift */,
-				37F8FBD31CE4FC30001C7C5F /* RelationTreeBindingTests.swift */,
+				372707751CF391EC00710C80 /* ObservableTree.swift */,
+				37C6114E1CDD6084001DAF59 /* RelationObservableTree.swift */,
+				37F8FBD31CE4FC30001C7C5F /* RelationObservableTreeTests.swift */,
 			);
-			name = "Tree Binding";
+			name = "Observable Tree";
 			path = Binding;
 			sourceTree = "<group>";
 		};
@@ -682,7 +682,7 @@
 				37C6113E1CD93069001DAF59 /* Binding.swift */,
 				372707721CF38FDC00710C80 /* Value Binding */,
 				372707741CF3904D00710C80 /* Array Binding */,
-				372707731CF38FF600710C80 /* Tree Binding */,
+				372707731CF38FF600710C80 /* Observable Tree */,
 				372707BC1CFE24C600710C80 /* Utilities */,
 			);
 			name = Binding;
@@ -1480,13 +1480,13 @@
 			files = (
 				372707B41CFE240E00710C80 /* Binding.swift in Sources */,
 				372707B61CFE240E00710C80 /* RelationValueBinding.swift in Sources */,
-				372707BA1CFE240E00710C80 /* TreeBinding.swift in Sources */,
+				372707BA1CFE240E00710C80 /* ObservableTree.swift in Sources */,
 				372707B71CFE240E00710C80 /* CommonValue.swift in Sources */,
 				372707B91CFE240E00710C80 /* RelationArrayBinding.swift in Sources */,
 				372707BD1CFE24F600710C80 /* ArrayBinarySearch.swift in Sources */,
 				37A1CE651D0B59700067870D /* BindingSet.swift in Sources */,
 				372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */,
-				372707BB1CFE240E00710C80 /* RelationTreeBinding.swift in Sources */,
+				372707BB1CFE240E00710C80 /* RelationObservableTree.swift in Sources */,
 				372707E31CFE2B6500710C80 /* ValueBinding.swift in Sources */,
 				372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */,
 				372707B81CFE240E00710C80 /* ArrayBinding.swift in Sources */,
@@ -1502,7 +1502,7 @@
 				37A1CE581D089CD70067870D /* BindingSetTests.swift in Sources */,
 				372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */,
 				372707D61CFE25D400710C80 /* RelationValueBindingTests.swift in Sources */,
-				372707D81CFE25D400710C80 /* RelationTreeBindingTests.swift in Sources */,
+				372707D81CFE25D400710C80 /* RelationObservableTreeTests.swift in Sources */,
 				372707DB1CFE262700710C80 /* BindingTestCase.swift in Sources */,
 				372707D71CFE25D400710C80 /* RelationArrayBindingTests.swift in Sources */,
 			);
