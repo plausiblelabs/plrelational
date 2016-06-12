@@ -8,23 +8,27 @@
 
 import Foundation
 
+public enum ChangeResult<T> { case
+    Change(T),
+    NoChange
+}
+
 public class BindingSet {
-    
-    /// An empty class used to determine whether a change was self-initiated.
-    private class ChangeKey {}
     
     private var removals: [String: ObserverRemoval] = [:]
 
     public init() {
     }
     
-    private func register<T>(binding: ValueBinding<T>?, removalKey: String, changeKey: ChangeKey, _ onValue: (T, ChangeMetadata) -> Void, onDetach: () -> Void = {}) {
+    private func register<T>(binding: ValueBinding<T>?, removalKey: String, updateOnAttach: Bool, _ onValue: (T, ChangeMetadata) -> Void, onDetach: () -> Void = {}) {
         if let removal = removals.removeValueForKey(removalKey) {
             removal()
         }
         
         if let binding = binding {
-            onValue(binding.value, ChangeMetadata(transient: false))
+            if updateOnAttach {
+                onValue(binding.value, ChangeMetadata(transient: false))
+            }
             
             let removal = binding.addChangeObserver({ metadata in
                 // TODO: selfInitiatedChange guard
@@ -38,7 +42,7 @@ public class BindingSet {
     }
     
     public func register<T>(key: String, _ binding: ValueBinding<T>?, _ onValue: (T) -> Void, onDetach: () -> Void = {}) {
-        register(binding, removalKey: key, changeKey: ChangeKey(), { value, _ in onValue(value) }, onDetach: onDetach)
+        register(binding, removalKey: key, updateOnAttach: true, { value, _ in onValue(value) }, onDetach: onDetach)
     }
     
     public func update<T>(binding: BidiValueBinding<T>?, newValue: T, transient: Bool = false) {
@@ -48,16 +52,40 @@ public class BindingSet {
         binding.update(newValue, ChangeMetadata(transient: transient))
     }
     
-    public func connect<T1, T2>(key1: String, _ binding1: BidiValueBinding<T1>?, _ key2: String, _ binding2: BidiValueBinding<T2>?, forward: (T1, ChangeMetadata) -> Void, reverse: (T2, ChangeMetadata) -> Void) {
-        let changeKey = ChangeKey()
+    public func connect<T1, T2>(key1: String, _ binding1: BidiValueBinding<T1>?, _ key2: String, _ binding2: BidiValueBinding<T2>?, forward: T1 -> ChangeResult<T2>, reverse: T2 -> ChangeResult<T1>) {
+        // Disconnect any existing bindings
+        let forwardKey = "\(key1)->\(key2)"
+        let reverseKey = "\(key2)->\(key1)"
+        if let removal = removals.removeValueForKey(forwardKey) { removal() }
+        if let removal = removals.removeValueForKey(reverseKey) { removal() }
+
+        // No connection is possible if either binding is nil
+        guard let binding1 = binding1 else { return }
+        guard let binding2 = binding2 else { return }
+        
+        // Note that we use `updateOnAttach: true` for the forward connection only to ensure that the
+        // primary binding provides its value to the secondary binding upon registration.
+        // TODO: Should we make this configurable?
         
         // Register the forward connection
-        let forwardKey = "\(key1)->\(key2)"
-        register(binding1, removalKey: forwardKey, changeKey: changeKey, forward)
+        register(binding1, removalKey: forwardKey, updateOnAttach: true, { value, metadata in
+            switch forward(value) {
+            case .Change(let newValue):
+                binding2.update(newValue, metadata)
+            case .NoChange:
+                break
+            }
+        })
         
         // Register the reverse connection
-        let reverseKey = "\(key2)->\(key1)"
-        register(binding2, removalKey: reverseKey, changeKey: changeKey, reverse)
+        register(binding2, removalKey: reverseKey, updateOnAttach: false, { value, metadata in
+            switch reverse(value) {
+            case .Change(let newValue):
+                binding1.update(newValue, metadata)
+            case .NoChange:
+                break
+            }
+        })
     }
     
     deinit {
