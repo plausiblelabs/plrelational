@@ -48,24 +48,29 @@ class BindingSetTests: XCTestCase {
         XCTAssertEqual(binding1.observerCount, 1)
         XCTAssertEqual(binding2.observerCount, 1)
         
-        set.update(binding1, newValue: "Hallo")
+        // Simulate binding1's value being updated externally (i.e., not through BindingSet.update, which
+        // has self-initiated change protection) and verify that the onValue callback is called with the
+        // new value
+        binding1.update("Hallo", ChangeMetadata(transient: false))
+        
+        XCTAssertEqual(binding1Values, ["Hello", "Hallo"])
+        XCTAssertEqual(binding2Values, ["there"])
+        XCTAssertEqual(binding1Detached, false)
+        XCTAssertEqual(binding2Detached, false)
+
+        // Simulate binding2's value being updated internally (i.e., via BindingSet.update, which suppresses
+        // the onValue call, so that the new value is not appended to binding2Values)
+        set.update(binding2, newValue: "thar")
         
         XCTAssertEqual(binding1Values, ["Hello", "Hallo"])
         XCTAssertEqual(binding2Values, ["there"])
         XCTAssertEqual(binding1Detached, false)
         XCTAssertEqual(binding2Detached, false)
         
-        set.update(binding2, newValue: "thar")
-        
-        XCTAssertEqual(binding1Values, ["Hello", "Hallo"])
-        XCTAssertEqual(binding2Values, ["there", "thar"])
-        XCTAssertEqual(binding1Detached, false)
-        XCTAssertEqual(binding2Detached, false)
-        
         set.register("2", nil, { binding2Values.append($0) }, onDetach: { binding2Detached = true })
         
         XCTAssertEqual(binding1Values, ["Hello", "Hallo"])
-        XCTAssertEqual(binding2Values, ["there", "thar"])
+        XCTAssertEqual(binding2Values, ["there"])
         XCTAssertEqual(binding1Detached, false)
         XCTAssertEqual(binding2Detached, true)
         XCTAssertEqual(binding1.observerCount, 1)
@@ -74,7 +79,7 @@ class BindingSetTests: XCTestCase {
         set = nil
         
         XCTAssertEqual(binding1Values, ["Hello", "Hallo"])
-        XCTAssertEqual(binding2Values, ["there", "thar"])
+        XCTAssertEqual(binding2Values, ["there"])
         XCTAssertEqual(binding1Detached, false)
         XCTAssertEqual(binding2Detached, true)
         XCTAssertEqual(binding1.observerCount, 0)

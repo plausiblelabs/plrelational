@@ -16,40 +16,58 @@ public enum ChangeResult<T> { case
 public class BindingSet {
     
     private var removals: [String: ObserverRemoval] = [:]
+    private var selfInitiatedChange = Set<String>()
 
     public init() {
     }
+
+    /// Returns a key that can be used to identify the given binding for the purposes of detecting
+    /// self-initiated changes.  A self-initiated change is detected when a binding's value is updated
+    /// via the `BindingSet.update` function and that change is witnessed by the observer that was
+    /// added when the binding was `register`ed.
+    private func changeKey<T>(binding: ValueBinding<T>) -> String {
+        // TODO: We can do better than this
+        return "\(unsafeAddressOf(binding))"
+    }
     
-    private func register<T>(binding: ValueBinding<T>?, removalKey: String, updateOnAttach: Bool, _ onValue: (T, ChangeMetadata) -> Void, onDetach: () -> Void = {}) {
-        if let removal = removals.removeValueForKey(removalKey) {
+    private func register<T>(binding: ValueBinding<T>, removalKey: String, changeKey: String, updateOnAttach: Bool, _ onValue: (T, ChangeMetadata) -> Void) {
+        if updateOnAttach {
+            onValue(binding.value, ChangeMetadata(transient: false))
+        }
+        
+        let removal = binding.addChangeObserver({ [weak self] metadata in
+            guard let weakSelf = self else { return }
+            if weakSelf.selfInitiatedChange.contains(changeKey) { return }
+            
+            onValue(binding.value, metadata)
+        })
+        
+        removals[removalKey] = removal
+    }
+    
+    public func register<T>(key: String, _ binding: ValueBinding<T>?, _ onValue: (T) -> Void, onDetach: () -> Void = {}) {
+        if let removal = removals.removeValueForKey(key) {
             removal()
         }
         
         if let binding = binding {
-            if updateOnAttach {
-                onValue(binding.value, ChangeMetadata(transient: false))
-            }
-            
-            let removal = binding.addChangeObserver({ metadata in
-                // TODO: selfInitiatedChange guard
-                onValue(binding.value, metadata)
-            })
-            
-            removals[removalKey] = removal
+            register(binding, removalKey: key, changeKey: changeKey(binding), updateOnAttach: true, { value, _ in onValue(value) })
         } else {
             onDetach()
         }
     }
     
-    public func register<T>(key: String, _ binding: ValueBinding<T>?, _ onValue: (T) -> Void, onDetach: () -> Void = {}) {
-        register(binding, removalKey: key, updateOnAttach: true, { value, _ in onValue(value) }, onDetach: onDetach)
+    private func update<T>(binding: BidiValueBinding<T>, newValue: T, metadata: ChangeMetadata, changeKey: String) {
+        selfInitiatedChange.insert(changeKey)
+        binding.update(newValue, metadata)
+        selfInitiatedChange.remove(changeKey)
     }
     
     public func update<T>(binding: BidiValueBinding<T>?, newValue: T, transient: Bool = false) {
         guard let binding = binding else { return }
         
-        // TODO: selfInitiatedChange guard
-        binding.update(newValue, ChangeMetadata(transient: transient))
+        let metadata = ChangeMetadata(transient: transient)
+        update(binding, newValue: newValue, metadata: metadata, changeKey: changeKey(binding))
     }
     
     public func connect<T1, T2>(key1: String, _ binding1: BidiValueBinding<T1>?, _ key2: String, _ binding2: BidiValueBinding<T2>?, forward: T1 -> ChangeResult<T2>, reverse: T2 -> ChangeResult<T1>) {
@@ -64,24 +82,27 @@ public class BindingSet {
         guard let binding2 = binding2 else { return }
         
         // Note that we use `updateOnAttach: true` for the forward connection only to ensure that the
-        // primary binding provides its value to the secondary binding upon registration.
+        // primary binding provides its value to the secondary binding upon registration
         // TODO: Should we make this configurable?
+        let changeKey = "\(self.changeKey(binding1))<->\(self.changeKey(binding2))"
         
         // Register the forward connection
-        register(binding1, removalKey: forwardKey, updateOnAttach: true, { value, metadata in
+        register(binding1, removalKey: forwardKey, changeKey: changeKey, updateOnAttach: true, { [weak self] value, metadata in
+            guard let weakSelf = self else { return }
             switch forward(value) {
             case .Change(let newValue):
-                binding2.update(newValue, metadata)
+                weakSelf.update(binding2, newValue: newValue, metadata: metadata, changeKey: changeKey)
             case .NoChange:
                 break
             }
         })
         
         // Register the reverse connection
-        register(binding2, removalKey: reverseKey, updateOnAttach: false, { value, metadata in
+        register(binding2, removalKey: reverseKey, changeKey: changeKey, updateOnAttach: false, { [weak self] value, metadata in
+            guard let weakSelf = self else { return }
             switch reverse(value) {
             case .Change(let newValue):
-                binding1.update(newValue, metadata)
+                weakSelf.update(binding1, newValue: newValue, metadata: metadata, changeKey: changeKey)
             case .NoChange:
                 break
             }
