@@ -124,14 +124,12 @@ private class ColorPickerModel {
     
     var color: BidiValueBinding<CommonValue<Color>>? {
         didSet {
-            // TODO: Should we call bindings.update() here instead of calling `update` directly
-            // on each binding?  Or perhaps we should have forward/reverse return a value instead.
             bindings.connect(
                 "color", color,
                 "colorItem", colorItem,
-                forward: { [weak self] value, metadata in
+                forward: { [weak self] value in
                     // CommonValue<Color> -> ColorItem
-                    guard let weakSelf = self else { return }
+                    guard let weakSelf = self else { return .NoChange }
                     
                     let newColorItem: ColorItem
                     if let color = value.orNil() {
@@ -144,12 +142,14 @@ private class ColorPickerModel {
                         newColorItem = ColorItem.Default
                     }
                     
-                    weakSelf.colorItem.update(newColorItem, metadata)
+                    return .Change(newColorItem)
                 },
-                reverse: { [weak self] value, metadata in
+                reverse: { value in
                     // ColorItem -> CommonValue<Color>
                     if let newColor = value?.color {
-                        self?.color?.update(CommonValue.One(newColor), metadata)
+                        return .Change(CommonValue.One(newColor))
+                    } else {
+                        return .NoChange
                     }
                 }
             )
@@ -157,14 +157,14 @@ private class ColorPickerModel {
             bindings.connect(
                 "color", color,
                 "opacityValue", opacityValue,
-                forward: { [weak self] value, metadata in
+                forward: { value in
                     // CommonValue<Color> -> Double?
-                    self?.opacityValue.update(value.orNil()?.components.a, metadata)
+                    .Change(value.orNil()?.components.a)
                 },
-                reverse: { [weak self] value, metadata in
+                reverse: { [weak self] value in
                     // Double? -> CommonValue<Color>
-                    guard let weakSelf = self else { return }
-                    guard let newOpacity = value else { return }
+                    guard let weakSelf = self else { return .NoChange }
+                    guard let newOpacity = value else { return .NoChange }
                     
                     let currentColor: Color
                     if let colorValue = weakSelf.color?.value {
@@ -174,22 +174,24 @@ private class ColorPickerModel {
                     }
                     
                     let newColor = currentColor.withAlpha(newOpacity)
-                    weakSelf.color?.update(CommonValue.One(newColor), metadata)
+                    return .Change(CommonValue.One(newColor))
                 }
             )
             
             bindings.connect(
                 "color", color,
                 "panelColor", panelColor,
-                forward: { [weak self] value, metadata in
+                forward: { value in
                     // CommonValue<Color> -> Color
                     if let color = value.orNil() {
-                        self?.panelColor.update(color, metadata)
+                        return .Change(color)
+                    } else {
+                        return .NoChange
                     }
                 },
-                reverse: { [weak self] value, metadata in
+                reverse: { value in
                     // Color -> CommonValue<Color>
-                    self?.color?.update(CommonValue.One(value), metadata)
+                    .Change(CommonValue.One(value))
                 }
             )
         }
