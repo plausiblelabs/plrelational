@@ -1,5 +1,5 @@
 //
-//  ArrayBinding.swift
+//  ObservableArray.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/23/16.
@@ -37,7 +37,7 @@ public func ==(a: ArrayChange, b: ArrayChange) -> Bool {
     }
 }
 
-public class ArrayBinding<E: ArrayElement>: Binding {
+public class ObservableArray<E: ArrayElement>: Binding {
     public typealias Value = [E]
     public typealias Changes = [ArrayChange]
     public typealias ChangeObserver = Changes -> Void
@@ -71,6 +71,15 @@ public class ArrayBinding<E: ArrayElement>: Binding {
         for (_, f) in changeObservers {
             f(changes)
         }
+    }
+    
+    public func insert(row: E.Data, pos: Pos) {
+    }
+    
+    public func delete(id: E.ID) {
+    }
+    
+    public func move(srcIndex srcIndex: Int, dstIndex: Int) {
     }
     
     /// Returns the index of the element with the given ID, relative to the sorted elements array.

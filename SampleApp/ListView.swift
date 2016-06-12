@@ -14,7 +14,7 @@ import Binding
 private let PasteboardType = "coop.plausible.vp.pasteboard.ListViewItem"
 
 struct ListViewModel<E: ArrayElement> {
-    let data: ArrayBinding<E>
+    let data: ObservableArray<E>
     let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     let move: ((srcIndex: Int, dstIndex: Int) -> Void)?

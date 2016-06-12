@@ -1,5 +1,5 @@
 //
-//  RelationArrayBindingTests.swift
+//  RelationObservableArrayTests.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/23/16.
@@ -10,7 +10,7 @@ import XCTest
 import libRelational
 @testable import Binding
 
-class RelationArrayBindingTests: BindingTestCase {
+class RelationObservableArrayTests: BindingTestCase {
     
     func testInit() {
         let sqliteDB = makeDB().db
@@ -29,10 +29,10 @@ class RelationArrayBindingTests: BindingTestCase {
         addPage(2, name: "Page2", order: 2.0)
         addPage(4, name: "Page4", order: 4.0)
         
-        let arrayBinding = RelationArrayBinding(relation: sqliteRelation, idAttr: "id", orderAttr: "order")
+        let array = sqliteRelation.observableArray()
         
         // Verify that in-memory array structure was built correctly during initialization
-        verifyArray(arrayBinding, [
+        verifyArray(array, [
             "Page1",
             "Page2",
             "Page3",
@@ -47,11 +47,11 @@ class RelationArrayBindingTests: BindingTestCase {
         
         XCTAssertNil(sqliteDB.createRelation("page", scheme: ["id", "name", "order"]).err)
         let relation = db["page"]
-        let arrayBinding = RelationArrayBinding(relation: relation, idAttr: "id", orderAttr: "order")
-        XCTAssertEqual(arrayBinding.elements.count, 0)
+        let array = relation.observableArray()
+        XCTAssertEqual(array.elements.count, 0)
         
-        var changes: [RelationArrayBinding.Change] = []
-        let removal = arrayBinding.addChangeObserver({ arrayChanges in
+        var changes: [RelationObservableArray.Change] = []
+        let removal = array.addChangeObserver({ arrayChanges in
             changes.appendContentsOf(arrayChanges)
         })
         
@@ -62,24 +62,24 @@ class RelationArrayBindingTests: BindingTestCase {
                     "name": RelationValue(name)
                 ]
                 let previous = previousID.map{RelationValue($0)}
-                let pos = RelationArrayBinding.Pos(previousID: previous, nextID: nil)
-                arrayBinding.insert(row, pos: pos)
+                let pos = RelationObservableArray.Pos(previousID: previous, nextID: nil)
+                array.insert(row, pos: pos)
             })
         }
         
         func deletePage(pageID: Int64) {
             db.transaction({
-                arrayBinding.delete(RelationValue(pageID))
+                array.delete(RelationValue(pageID))
             })
         }
         
         func movePage(srcIndex srcIndex: Int, dstIndex: Int) {
             db.transaction({
-                arrayBinding.move(srcIndex: srcIndex, dstIndex: dstIndex)
+                array.move(srcIndex: srcIndex, dstIndex: dstIndex)
             })
         }
         
-        func verifyChanges(expected: [RelationArrayBinding.Change], file: StaticString = #file, line: UInt = #line) {
+        func verifyChanges(expected: [RelationObservableArray.Change], file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(changes, expected, file: file, line: line)
             changes = []
         }
@@ -94,7 +94,7 @@ class RelationArrayBindingTests: BindingTestCase {
         addPage(2, name: "Page2", previousID: 1)
         addPage(3, name: "Page3", previousID: 2)
         addPage(4, name: "Page4", previousID: 3)
-        verifyArray(arrayBinding, [
+        verifyArray(array, [
             "Page1",
             "Page2",
             "Page3",
@@ -116,7 +116,7 @@ class RelationArrayBindingTests: BindingTestCase {
 
         // Re-order a page
         movePage(srcIndex: 2, dstIndex: 0)
-        verifyArray(arrayBinding, [
+        verifyArray(array, [
             "Page3",
             "Page1",
             "Page2",
@@ -135,7 +135,7 @@ class RelationArrayBindingTests: BindingTestCase {
 
         // Delete a page
         deletePage(1)
-        verifyArray(arrayBinding, [
+        verifyArray(array, [
             "Page3",
             "Page2",
             "Page4"

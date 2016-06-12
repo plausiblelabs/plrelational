@@ -1,5 +1,5 @@
 //
-//  RelationArrayBinding.swift
+//  RelationObservableArray.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/6/16.
@@ -22,7 +22,7 @@ public class RowArrayElement: ArrayElement {
     }
 }
 
-public class RelationArrayBinding: ArrayBinding<RowArrayElement> {
+class RelationObservableArray: ObservableArray<RowArrayElement> {
     
     private let relation: Relation
     private let idAttr: Attribute
@@ -30,7 +30,7 @@ public class RelationArrayBinding: ArrayBinding<RowArrayElement> {
     
     private var removal: ObserverRemoval!
 
-    public init(relation: Relation, idAttr: Attribute, orderAttr: Attribute) {
+    init(relation: Relation, idAttr: Attribute, orderAttr: Attribute) {
         precondition(relation.scheme.attributes.isSupersetOf([idAttr, orderAttr]))
         
         self.relation = relation
@@ -86,7 +86,7 @@ public class RelationArrayBinding: ArrayBinding<RowArrayElement> {
         removal()
     }
     
-    public func insert(row: Row, pos: Pos) {
+    override func insert(row: Row, pos: Pos) {
         // TODO: Provide insert/delete/move as extension defined where R: MutableRelation
         guard var relation = relation as? MutableRelation else {
             fatalError("insert() is only supported when the underlying relation is mutable")
@@ -119,7 +119,7 @@ public class RelationArrayBinding: ArrayBinding<RowArrayElement> {
         return changes
     }
 
-    public func delete(id: RelationValue) {
+    override func delete(id: RelationValue) {
         guard var relation = relation as? MutableRelation else {
             fatalError("delete() is only supported when the underlying relation is mutable")
         }
@@ -142,7 +142,7 @@ public class RelationArrayBinding: ArrayBinding<RowArrayElement> {
     }
 
     /// Note: dstIndex is relative to the state of the array *after* the item is removed.
-    public func move(srcIndex srcIndex: Int, dstIndex: Int) {
+    override func move(srcIndex srcIndex: Int, dstIndex: Int) {
         let element = elements[srcIndex]
         
         // Determine the order of the element in its new position
@@ -228,5 +228,12 @@ public class RelationArrayBinding: ArrayBinding<RowArrayElement> {
         let prev = pos.previousID.flatMap(elementForID)
         let next = pos.nextID.flatMap(elementForID)
         return orderForElementBetween(prev, next)
+    }
+}
+
+extension Relation {
+    /// Returns an ObservableArray that gets its data from this relation.
+    public func observableArray(idAttr: Attribute = "id", orderAttr: Attribute = "order") -> ObservableArray<RowArrayElement> {
+        return RelationObservableArray(relation: self, idAttr: idAttr, orderAttr: orderAttr)
     }
 }

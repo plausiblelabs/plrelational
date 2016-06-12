@@ -124,9 +124,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         
         // Set up the list view
-        let objectsArrayBinding = RelationArrayBinding(relation: objects, idAttr: "id", orderAttr: "order")
         let listViewModel = ListViewModel(
-            data: objectsArrayBinding,
+            data: objects.observableArray(),
             contextMenu: nil,
             move: nil,
             selection: selectionBinding(selectedObjectID),

@@ -33,16 +33,16 @@ class BindingTestCase: XCTestCase {
         return (path, db)
     }
     
-    func prettyArray(binding: RelationArrayBinding) -> [String] {
+    func prettyArray(array: ObservableArray<RowArrayElement>) -> [String] {
         var accum: [String] = []
-        for element in binding.elements {
+        for element in array.elements {
             accum.append("\(element.data["name"])")
         }
         return accum
     }
     
-    func verifyArray(binding: RelationArrayBinding, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
-        XCTAssertEqual(prettyArray(binding), expected, file: file, line: line)
+    func verifyArray(array: ObservableArray<RowArrayElement>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
+        XCTAssertEqual(prettyArray(array), expected, file: file, line: line)
     }
     
     func pretty(node: RowTreeNode, inout _ accum: [String], _ indent: Int) {

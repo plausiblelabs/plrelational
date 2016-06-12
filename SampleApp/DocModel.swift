@@ -82,8 +82,8 @@ class DocModel {
     private let selectedInspectorItems: Relation
     private let selectedItems: Relation
 
-    private let docOutlineBinding: RelationObservableTree
-    private let inspectorItemsBinding: RelationObservableTree
+    private let docOutlineTree: ObservableTree<RowTreeNode>
+    private let inspectorItemsTree: ObservableTree<RowTreeNode>
     
     // TODO: To simplify implementation of the relation that controls the inspector tree view,
     // we put identifiers for both the `collection` and `object` relations into the same set.
@@ -146,9 +146,9 @@ class DocModel {
         // inspector item(s) (if non-empty) OR the currently selected doc outline item
         self.selectedItems = selectedInspectorItems.otherwise(selectedCollection)
 
-        // Prepare the tree bindings
-        self.docOutlineBinding = RelationObservableTree(relation: collections, idAttr: "id", parentAttr: "parent", orderAttr: "order")
-        self.inspectorItemsBinding = RelationObservableTree(relation: inspectorItems, idAttr: "id", parentAttr: "parent", orderAttr: "order")
+        // Prepare the observable trees
+        self.docOutlineTree = collections.observableTree()
+        self.inspectorItemsTree = inspectorItems.observableTree()
         
         self.db = db
         self.undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
@@ -203,8 +203,8 @@ class DocModel {
         ]
         let parent = parentID.map{RelationValue($0)}
         let previous = previousID.map{RelationValue($0)}
-        let pos = RelationObservableTree.Pos(parentID: parent, previousID: previous, nextID: nil)
-        docOutlineBinding.insert(row, pos: pos)
+        let pos: TreePos<RowTreeNode> = TreePos(parentID: parent, previousID: previous, nextID: nil)
+        docOutlineTree.insert(row, pos: pos)
     }
     
     private func addObject(objectID: Int64, name: String, type: ItemType, collectionID: Int64, order: Double) {
@@ -252,13 +252,13 @@ class DocModel {
     
     func deleteCollection(id: RelationValue, type: ItemType) {
         performUndoableAction("Delete \(type.name)", {
-            self.docOutlineBinding.delete(id)
+            self.docOutlineTree.delete(id)
         })
     }
 
     lazy var docOutlineTreeViewModel: TreeViewModel<RowTreeNode> = { [unowned self] in
         return TreeViewModel(
-            data: self.docOutlineBinding,
+            data: self.docOutlineTree,
             allowsChildren: { row in
                 let type = ItemType(row)!
                 return type == .Group || type == .Collection
@@ -273,10 +273,10 @@ class DocModel {
                 ])
             },
             move: { (srcPath, dstPath) in
-                let srcNode = self.docOutlineBinding.nodeAtPath(srcPath)!
+                let srcNode = self.docOutlineTree.nodeAtPath(srcPath)!
                 let collectionType = ItemType(srcNode.data)!
                 self.performUndoableAction("Move \(collectionType.name)", {
-                    self.docOutlineBinding.move(srcPath: srcPath, dstPath: dstPath)
+                    self.docOutlineTree.move(srcPath: srcPath, dstPath: dstPath)
                 })
             },
             selection: self.bidiSelectionBinding(self.selectedCollectionID, clearInspectorSelection: true),
@@ -298,7 +298,7 @@ class DocModel {
 
     lazy var inspectorTreeViewModel: TreeViewModel<RowTreeNode> = { [unowned self] in
         return TreeViewModel(
-            data: self.inspectorItemsBinding,
+            data: self.inspectorItemsTree,
             allowsChildren: { row in
                 let type = ItemType(row)!
                 return type.isCollectionType
