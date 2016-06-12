@@ -172,10 +172,6 @@ public class BidiValueBinding<T>: ValueBinding<T> {
     public func update(newValue: T, _ metadata: ChangeMetadata) {
         setValue(newValue, metadata)
     }
-    
-    public func update(newValue: T, transient: Bool) {
-        update(newValue, ChangeMetadata(transient: transient))
-    }
 }
 
 public func bidiValueBinding<T: Equatable>(initialValue: T) -> BidiValueBinding<T> {

@@ -53,7 +53,8 @@ class DocModelTests: AppTestCase {
         }
         
         let model = defaultModel()
-        
+        let commit = ChangeMetadata(transient: false)
+
         func verifyBindings(expected: BindingVals, file: StaticString = #file, line: UInt = #line) {
             let propsModel = model.propertiesModel
             XCTAssertEqual(propsModel.itemSelected.value, expected.itemSelected, file: file, line: line)
@@ -92,7 +93,7 @@ class DocModelTests: AppTestCase {
             selectedItemsOnlyImage: false))
 
         // Select a page in the doc outline
-        model.docOutlineTreeViewModel.selection.update([4], transient: false)
+        model.docOutlineTreeViewModel.selection.update([4], commit)
         
         // Verify that the inspector is updated to show the selected page
         verifyTree(model.inspectorTreeViewModel.data, [
@@ -108,7 +109,7 @@ class DocModelTests: AppTestCase {
             selectedItemsOnlyImage: false))
 
         // Select a page in the doc outline that contains objects
-        model.docOutlineTreeViewModel.selection.update([3], transient: false)
+        model.docOutlineTreeViewModel.selection.update([3], commit)
 
         // Verify that the inspector is updated to show the selected page and its objects
         verifyTree(model.inspectorTreeViewModel.data, [
@@ -158,7 +159,7 @@ class DocModelTests: AppTestCase {
             selectedItemsOnlyImage: false))
         
         // Select a single object in the inspector
-        model.inspectorTreeViewModel.selection.update([9], transient: false)
+        model.inspectorTreeViewModel.selection.update([9], commit)
         
         // Verify properties-related bindings
         verifyBindings(BindingVals(
@@ -169,7 +170,7 @@ class DocModelTests: AppTestCase {
             selectedItemsOnlyImage: false))
 
         // Select two objects (of the same type) in the inspector
-        model.inspectorTreeViewModel.selection.update([10, 11], transient: false)
+        model.inspectorTreeViewModel.selection.update([10, 11], commit)
 
         // Verify properties-related bindings
         verifyBindings(BindingVals(
@@ -180,7 +181,7 @@ class DocModelTests: AppTestCase {
             selectedItemsOnlyImage: true))
         
         // Select two objects (of differing type) in the inspector
-        model.inspectorTreeViewModel.selection.update([9, 10], transient: false)
+        model.inspectorTreeViewModel.selection.update([9, 10], commit)
         
         // Verify properties-related bindings
         verifyBindings(BindingVals(
@@ -191,7 +192,7 @@ class DocModelTests: AppTestCase {
             selectedItemsOnlyImage: false))
         
         // Select a single text object in the inspector (again)
-        model.inspectorTreeViewModel.selection.update([9], transient: false)
+        model.inspectorTreeViewModel.selection.update([9], commit)
 
         // Verify properties-related bindings
         verifyBindings(BindingVals(
@@ -202,7 +203,7 @@ class DocModelTests: AppTestCase {
             selectedItemsOnlyImage: false))
         
         // Select a different page in the doc outline
-        model.docOutlineTreeViewModel.selection.update([4], transient: false)
+        model.docOutlineTreeViewModel.selection.update([4], commit)
         
         // Verify properties-related bindings
         verifyBindings(BindingVals(
@@ -217,11 +218,12 @@ class DocModelTests: AppTestCase {
         let model = defaultModel()
 
         // Toggle back and forth between two pages
+        let commit = ChangeMetadata(transient: false)
         let page1: Set<RelationValue> = [3]
         let page2: Set<RelationValue> = [4]
         var first = true
         measureBlock({
-            model.docOutlineTreeViewModel.selection.update(first ? page1 : page2, transient: false)
+            model.docOutlineTreeViewModel.selection.update(first ? page1 : page2, commit)
             first = !first
         })
     }
@@ -235,11 +237,12 @@ class DocModelTests: AppTestCase {
         _ = propsModel.selectedItemNames.addChangeObserver({ _ in changeCount += 1 })
 
         // Toggle back and forth between two pages
+        let commit = ChangeMetadata(transient: false)
         let page1: Set<RelationValue> = [3]
         let page2: Set<RelationValue> = [4]
         var first = true
         measureBlock({
-            model.docOutlineTreeViewModel.selection.update(first ? page1 : page2, transient: false)
+            model.docOutlineTreeViewModel.selection.update(first ? page1 : page2, commit)
             first = !first
         })
     }
@@ -257,11 +260,12 @@ class DocModelTests: AppTestCase {
         _ = propsModel.selectedItemNamesPlaceholder.addChangeObserver({ _ in changeCount += 1 })
         
         // Toggle back and forth between two pages
+        let commit = ChangeMetadata(transient: false)
         let page1: Set<RelationValue> = [3]
         let page2: Set<RelationValue> = [4]
         var first = true
         measureBlock({
-            model.docOutlineTreeViewModel.selection.update(first ? page1 : page2, transient: false)
+            model.docOutlineTreeViewModel.selection.update(first ? page1 : page2, commit)
             first = !first
         })
     }
@@ -270,14 +274,15 @@ class DocModelTests: AppTestCase {
         let model = defaultModel()
 
         // Select the first page
-        model.docOutlineTreeViewModel.selection.update([3], transient: false)
+        let commit = ChangeMetadata(transient: false)
+        model.docOutlineTreeViewModel.selection.update([3], commit)
         
         // Toggle back and forth between two objects (of differing type)
         let obj1: Set<RelationValue> = [9]
         let obj2: Set<RelationValue> = [10]
         var first = true
         measureBlock({
-            model.inspectorTreeViewModel.selection.update(first ? obj1 : obj2, transient: false)
+            model.inspectorTreeViewModel.selection.update(first ? obj1 : obj2, commit)
             first = !first
         })
     }
@@ -286,7 +291,8 @@ class DocModelTests: AppTestCase {
         let model = defaultModel()
         
         // Select the first page
-        model.docOutlineTreeViewModel.selection.update([3], transient: false)
+        let commit = ChangeMetadata(transient: false)
+        model.docOutlineTreeViewModel.selection.update([3], commit)
         
         // Observe the text object properties binding
         let propsModel = model.propertiesModel
@@ -298,7 +304,7 @@ class DocModelTests: AppTestCase {
         let obj2: Set<RelationValue> = [10]
         var first = true
         measureBlock({
-            model.inspectorTreeViewModel.selection.update(first ? obj1 : obj2, transient: false)
+            model.inspectorTreeViewModel.selection.update(first ? obj1 : obj2, commit)
             first = !first
         })
     }
@@ -309,12 +315,13 @@ class DocModelTests: AppTestCase {
         
         init(model: DocModel) {
             self.model = model
+            let commit = ChangeMetadata(transient: false)
             
             // Select the first page
-            model.docOutlineTreeViewModel.selection.update([3], transient: false)
+            model.docOutlineTreeViewModel.selection.update([3], commit)
             
             // Select the first text object
-            model.inspectorTreeViewModel.selection.update([9], transient: false)
+            model.inspectorTreeViewModel.selection.update([9], commit)
             
             // Observe a number of bindings
             let propsModel = model.propertiesModel
@@ -336,8 +343,9 @@ class DocModelTests: AppTestCase {
         let s2 = "Hallo"
         var first = true
         let propsModel = data.model.propertiesModel
+        let transient = ChangeMetadata(transient: true)
         measureBlock({
-            propsModel.selectedItemNames.update(first ? s1 : s2, transient: true)
+            propsModel.selectedItemNames.update(first ? s1 : s2, transient)
             first = !first
         })
     }
@@ -350,8 +358,9 @@ class DocModelTests: AppTestCase {
         let s2 = "Hallo"
         var first = true
         let propsModel = data.model.propertiesModel
+        let commit = ChangeMetadata(transient: false)
         measureBlock({
-            propsModel.selectedItemNames.update(first ? s1 : s2, transient: false)
+            propsModel.selectedItemNames.update(first ? s1 : s2, commit)
             first = !first
         })
     }
@@ -362,8 +371,9 @@ class DocModelTests: AppTestCase {
         
         // Toggle back and forth between two different names (via undo/redo)
         let propsModel = data.model.propertiesModel
-        propsModel.selectedItemNames.update("Hello", transient: false)
-        propsModel.selectedItemNames.update("Hallo", transient: false)
+        let commit = ChangeMetadata(transient: false)
+        propsModel.selectedItemNames.update("Hello", commit)
+        propsModel.selectedItemNames.update("Hallo", commit)
         var first = true
         measureBlock({
             if first {
