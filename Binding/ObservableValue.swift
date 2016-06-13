@@ -1,5 +1,5 @@
 //
-//  ValueBinding.swift
+//  ObservableValue.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/23/16.
@@ -16,7 +16,7 @@ public struct ChangeMetadata {
     }
 }
 
-public class ValueBinding<T>: Binding {
+public class ObservableValue<T>: Observable {
     public typealias Value = T
     public typealias Changes = Void
     public typealias ChangeObserver = ChangeMetadata -> Void
@@ -55,31 +55,31 @@ public class ValueBinding<T>: Binding {
     internal var observerCount: Int { return changeObservers.count }
 }
 
-extension ValueBinding {
-    public static func constant(value: T) -> ValueBinding<T> {
-        return ConstantValueBinding(value: value)
+extension ObservableValue {
+    public static func constant(value: T) -> ObservableValue<T> {
+        return ConstantObservableValue(value: value)
     }
     
-    public func map<U>(transform: (T) -> U) -> ValueBinding<U> {
-        return MappedValueBinding(binding: self, transform: transform, valueChanging: valueChanging)
+    public func map<U>(transform: (T) -> U) -> ObservableValue<U> {
+        return MappedObservableValue(binding: self, transform: transform, valueChanging: valueChanging)
     }
 
-    public func map<U: Equatable>(transform: (T) -> U) -> ValueBinding<U> {
-        return MappedValueBinding(binding: self, transform: transform, valueChanging: valueChanging)
+    public func map<U: Equatable>(transform: (T) -> U) -> ObservableValue<U> {
+        return MappedObservableValue(binding: self, transform: transform, valueChanging: valueChanging)
     }
 
-    public func zip<U>(other: ValueBinding<U>) -> ValueBinding<(T, U)> {
-        return ZippedValueBinding(self, other)
-    }
-}
-
-extension ValueBinding where T: SequenceType, T.Generator.Element: Hashable {
-    public func common() -> ValueBinding<CommonValue<T.Generator.Element>> {
-        return CommonValueBinding(binding: self)
+    public func zip<U>(other: ObservableValue<U>) -> ObservableValue<(T, U)> {
+        return ZippedObservableValue(self, other)
     }
 }
 
-private class ConstantValueBinding<T>: ValueBinding<T> {
+extension ObservableValue where T: SequenceType, T.Generator.Element: Hashable {
+    public func common() -> ObservableValue<CommonValue<T.Generator.Element>> {
+        return CommonObservableValue(binding: self)
+    }
+}
+
+private class ConstantObservableValue<T>: ObservableValue<T> {
     init(value: T) {
         super.init(initialValue: value)
     }
@@ -89,10 +89,10 @@ private class ConstantValueBinding<T>: ValueBinding<T> {
     }
 }
 
-private class MappedValueBinding<T>: ValueBinding<T> {
+private class MappedObservableValue<T>: ObservableValue<T> {
     private var removal: ObserverRemoval!
     
-    init<U>(binding: ValueBinding<U>, transform: (U) -> T, valueChanging: (T, T) -> Bool) {
+    init<U>(binding: ObservableValue<U>, transform: (U) -> T, valueChanging: (T, T) -> Bool) {
         super.init(initialValue: transform(binding.value), valueChanging: valueChanging)
         self.removal = binding.addChangeObserver({ [weak self] metadata in
             self?.setValue(transform(binding.value), metadata)
@@ -100,11 +100,11 @@ private class MappedValueBinding<T>: ValueBinding<T> {
     }
 }
 
-private class ZippedValueBinding<U, V>: ValueBinding<(U, V)> {
+private class ZippedObservableValue<U, V>: ObservableValue<(U, V)> {
     private var removal1: ObserverRemoval!
     private var removal2: ObserverRemoval!
     
-    init(_ binding1: ValueBinding<U>, _ binding2: ValueBinding<V>) {
+    init(_ binding1: ObservableValue<U>, _ binding2: ObservableValue<V>) {
         super.init(initialValue: (binding1.value, binding2.value))
         self.removal1 = binding1.addChangeObserver({ [weak self] metadata in
             self?.setValue((binding1.value, binding2.value), metadata)
@@ -115,10 +115,10 @@ private class ZippedValueBinding<U, V>: ValueBinding<(U, V)> {
     }
 }
 
-private class CommonValueBinding<T: Hashable>: ValueBinding<CommonValue<T>> {
+private class CommonObservableValue<T: Hashable>: ObservableValue<CommonValue<T>> {
     private var removal: ObserverRemoval!
     
-    init<S: SequenceType where S.Generator.Element == T>(binding: ValueBinding<S>) {
+    init<S: SequenceType where S.Generator.Element == T>(binding: ObservableValue<S>) {
         
         func commonValue() -> CommonValue<T> {
             let valuesSet = Set(binding.value)
@@ -140,7 +140,7 @@ private class CommonValueBinding<T: Hashable>: ValueBinding<CommonValue<T>> {
     }
 }
 
-public class BidiValueBinding<T>: ValueBinding<T> {
+public class BidiObservableValue<T>: ObservableValue<T> {
     public override init(initialValue: T, valueChanging: (T, T) -> Bool) {
         super.init(initialValue: initialValue, valueChanging: valueChanging)
     }
@@ -150,21 +150,21 @@ public class BidiValueBinding<T>: ValueBinding<T> {
     }
 }
 
-public func bidiValueBinding<T: Equatable>(initialValue: T) -> BidiValueBinding<T> {
-    return BidiValueBinding(initialValue: initialValue, valueChanging: valueChanging)
+public func bidiObservableValue<T: Equatable>(initialValue: T) -> BidiObservableValue<T> {
+    return BidiObservableValue(initialValue: initialValue, valueChanging: valueChanging)
 }
 
-public func bidiValueBinding<T: Equatable>(initialValue: T?) -> BidiValueBinding<T?> {
-    return BidiValueBinding(initialValue: initialValue, valueChanging: valueChanging)
+public func bidiObservableValue<T: Equatable>(initialValue: T?) -> BidiObservableValue<T?> {
+    return BidiObservableValue(initialValue: initialValue, valueChanging: valueChanging)
 }
 
-extension BidiValueBinding where T: Equatable {
+extension BidiObservableValue where T: Equatable {
     public convenience init(_ initialValue: T) {
         self.init(initialValue: initialValue, valueChanging: valueChanging)
     }
 }
 
-extension BidiValueBinding where T: BooleanType {
+extension BidiObservableValue where T: BooleanType {
     public func toggle(metadata: ChangeMetadata = ChangeMetadata(transient: true)) {
         let newValue = !value
         update(newValue as! T, metadata)

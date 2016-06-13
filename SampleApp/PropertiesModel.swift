@@ -37,19 +37,19 @@ class PropertiesModel {
         return self.selectedItems.project(["type"])
     }()
     
-    lazy var itemSelected: ValueBinding<Bool> = { [unowned self] in
+    lazy var itemSelected: ObservableValue<Bool> = { [unowned self] in
         return self.selectedItems.nonEmpty
     }()
     
-    lazy var itemNotSelected: ValueBinding<Bool> = { [unowned self] in
+    lazy var itemNotSelected: ObservableValue<Bool> = { [unowned self] in
         return self.selectedItems.empty
     }()
     
-    private lazy var selectedItemTypes: ValueBinding<Set<ItemType>> = { [unowned self] in
+    private lazy var selectedItemTypes: ObservableValue<Set<ItemType>> = { [unowned self] in
         return self.selectedItemTypesRelation.bindAllValues{ ItemType($0)! }
     }()
     
-    lazy var selectedItemTypesString: ValueBinding<String> = { [unowned self] in
+    lazy var selectedItemTypesString: ObservableValue<String> = { [unowned self] in
         // TODO: Is there a more efficient way to do this?
         let selectedItemCountBinding = self.selectedItems.count().bind{ $0.oneInteger }
         return selectedItemCountBinding.zip(self.selectedItemTypes).map { (count, types) in
@@ -67,7 +67,7 @@ class PropertiesModel {
         }
     }()
 
-    lazy var selectedItemNames: BidiValueBinding<String> = { [unowned self] in
+    lazy var selectedItemNames: BidiObservableValue<String> = { [unowned self] in
         // TODO: s/Item/type.name/
         let relation = self.selectedItemNamesRelation
         return self.db.bidiBinding(
@@ -78,7 +78,7 @@ class PropertiesModel {
         )
     }()
     
-    lazy var selectedItemNamesPlaceholder: ValueBinding<String> = { [unowned self] in
+    lazy var selectedItemNamesPlaceholder: ObservableValue<String> = { [unowned self] in
         return self.selectedItemNamesRelation.stringWhenMulti("Multiple Values")
     }()
     
@@ -88,13 +88,13 @@ class PropertiesModel {
             .equijoin(relation, matching: ["id": "id"])
     }
     
-    lazy var textObjectProperties: ValueBinding<TextObjectPropertiesModel?> = { [unowned self] in
+    lazy var textObjectProperties: ObservableValue<TextObjectPropertiesModel?> = { [unowned self] in
         return self.selectedObjects(.Text, self.textObjects).whenNonEmpty{
             TextObjectPropertiesModel(db: self.db, selectedTextObjects: $0)
         }
     }()
     
-    lazy var imageObjectProperties: ValueBinding<ImageObjectPropertiesModel?> = { [unowned self] in
+    lazy var imageObjectProperties: ObservableValue<ImageObjectPropertiesModel?> = { [unowned self] in
         return self.selectedObjects(.Image, self.imageObjects).whenNonEmpty{
             ImageObjectPropertiesModel(db: self.db, selectedImageObjects: $0)
         }

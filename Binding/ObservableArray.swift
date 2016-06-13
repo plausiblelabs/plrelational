@@ -37,7 +37,7 @@ public func ==(a: ArrayChange, b: ArrayChange) -> Bool {
     }
 }
 
-public class ObservableArray<E: ArrayElement>: Binding {
+public class ObservableArray<E: ArrayElement>: Observable {
     public typealias Value = [E]
     public typealias Changes = [ArrayChange]
     public typealias ChangeObserver = Changes -> Void

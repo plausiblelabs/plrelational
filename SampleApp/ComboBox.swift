@@ -13,7 +13,7 @@ class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
 
     private let bindings = BindingSet()
     
-    var items: ValueBinding<[T]>? {
+    var items: ObservableValue<[T]>? {
         didSet {
             bindings.register("items", items, { [weak self] value in
                 let objects = value.map{ $0 as! AnyObject }
@@ -22,7 +22,7 @@ class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
         }
     }
     
-    var value: BidiValueBinding<T?>? {
+    var value: BidiObservableValue<T?>? {
         didSet {
             bindings.register("value", value, { [weak self] value in
                 self?.objectValue = value as? AnyObject

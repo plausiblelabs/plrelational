@@ -14,8 +14,8 @@ class BindingSetTests: XCTestCase {
     func testRegister() {
         var set: BindingSet! = BindingSet()
         
-        let binding1 = BidiValueBinding("Hello")
-        let binding2 = BidiValueBinding("there")
+        let binding1 = BidiObservableValue("Hello")
+        let binding2 = BidiObservableValue("there")
         
         var binding1Values: [String] = []
         var binding2Values: [String] = []
@@ -89,9 +89,9 @@ class BindingSetTests: XCTestCase {
     func testConnect() {
         var bindings: BindingSet! = BindingSet()
         
-        let boolBinding = BidiValueBinding(false)
-        let stringBinding = BidiValueBinding("")
-        let intBinding = BidiValueBinding(6)
+        let boolBinding = BidiObservableValue(false)
+        let stringBinding = BidiObservableValue("")
+        let intBinding = BidiObservableValue(6)
        
 //        var boolValues: [Bool] = []
 //        var stringValues: [String] = []

@@ -13,7 +13,7 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
 
     private let bindings = BindingSet()
     
-    var items: ValueBinding<[MenuItem<T>]>? {
+    var items: ObservableValue<[MenuItem<T>]>? {
         didSet {
             bindings.register("items", items, { [weak self] value in
                 guard let weakSelf = self else { return }
@@ -38,7 +38,7 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
         }
     }
 
-    var selectedObject: BidiValueBinding<T?>? {
+    var selectedObject: BidiObservableValue<T?>? {
         didSet {
             bindings.register("selectedObject", selectedObject, { [weak self] value in
                 self?.setSelectedItem(value)

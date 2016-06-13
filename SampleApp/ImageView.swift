@@ -13,7 +13,7 @@ class ImageView: NSImageView {
 
     private let bindings = BindingSet()
     
-    var img: ValueBinding<Image>? {
+    var img: ObservableValue<Image>? {
         didSet {
             bindings.register("img", img, { [weak self] value in
                 self?.image = value.nsimage

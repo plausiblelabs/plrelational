@@ -11,10 +11,10 @@ import Binding
 
 struct MenuItemContent<T> {
     let object: T
-    let title: ValueBinding<String>?
-    let image: ValueBinding<Image>?
+    let title: ObservableValue<String>?
+    let image: ObservableValue<Image>?
     
-    init(object: T, title: ValueBinding<String>?, image: ValueBinding<Image>? = nil) {
+    init(object: T, title: ObservableValue<String>?, image: ObservableValue<Image>? = nil) {
         self.object = object
         self.title = title
         self.image = image
@@ -29,20 +29,20 @@ enum MenuItemType<T> { case
 
 struct MenuItem<T> {
     let type: MenuItemType<T>
-    let visible: ValueBinding<Bool>?
+    let visible: ObservableValue<Bool>?
     
-    init(_ type: MenuItemType<T>, visible: ValueBinding<Bool>? = nil) {
+    init(_ type: MenuItemType<T>, visible: ObservableValue<Bool>? = nil) {
         self.type = type
         self.visible = visible
     }
 }
 
-func titledMenuItem(title: ValueBinding<String>, object: String = "Default") -> MenuItem<String> {
+func titledMenuItem(title: ObservableValue<String>, object: String = "Default") -> MenuItem<String> {
     return MenuItem(.Normal(MenuItemContent(object: object, title: title, image: nil)))
 }
 
 func titledMenuItem(title: String) -> MenuItem<String> {
-    return titledMenuItem(ValueBinding.constant(title), object: title)
+    return titledMenuItem(ObservableValue.constant(title), object: title)
 }
 
 class NativeMenuItem<T> {

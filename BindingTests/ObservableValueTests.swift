@@ -1,5 +1,5 @@
 //
-//  ValueBindingTests.swift
+//  ObservableValueTests.swift
 //  Relational
 //
 //  Created by Chris Campbell on 6/3/16.
@@ -9,11 +9,11 @@
 import XCTest
 @testable import Binding
 
-class ValueBindingTests: BindingTestCase {
+class ObservableValueTests: BindingTestCase {
     
     func testMap() {
-        let binding = BidiValueBinding(false)
-        let mapped = binding.map{ $0 ? 1 : 0 }
+        let observable = BidiObservableValue(false)
+        let mapped = observable.map{ $0 ? 1 : 0 }
         var changed = false
         _ = mapped.addChangeObserver({ _ in changed = true })
         let metadata = ChangeMetadata(transient: false)
@@ -22,26 +22,26 @@ class ValueBindingTests: BindingTestCase {
         XCTAssertEqual(changed, false)
         changed = false
 
-        binding.update(true, metadata)
+        observable.update(true, metadata)
         XCTAssertEqual(mapped.value, 1)
         XCTAssertEqual(changed, true)
         changed = false
         
-        binding.update(true, metadata)
+        observable.update(true, metadata)
         XCTAssertEqual(mapped.value, 1)
         XCTAssertEqual(changed, false)
         changed = false
         
-        binding.update(false, metadata)
+        observable.update(false, metadata)
         XCTAssertEqual(mapped.value, 0)
         XCTAssertEqual(changed, true)
         changed = false
     }
     
     func testZip() {
-        let binding1 = BidiValueBinding(false)
-        let binding2 = BidiValueBinding(false)
-        let zipped = binding1.zip(binding2)
+        let observable1 = BidiObservableValue(false)
+        let observable2 = BidiObservableValue(false)
+        let zipped = observable1.zip(observable2)
         var changed = false
         _ = zipped.addChangeObserver({ _ in changed = true })
         let metadata = ChangeMetadata(transient: false)
@@ -51,19 +51,19 @@ class ValueBindingTests: BindingTestCase {
         XCTAssertEqual(changed, false)
         changed = false
         
-        binding1.update(true, metadata)
+        observable1.update(true, metadata)
         XCTAssertEqual(zipped.value.0, true)
         XCTAssertEqual(zipped.value.1, false)
         XCTAssertEqual(changed, true)
         changed = false
         
-        binding2.update(true, metadata)
+        observable2.update(true, metadata)
         XCTAssertEqual(zipped.value.0, true)
         XCTAssertEqual(zipped.value.1, true)
         XCTAssertEqual(changed, true)
         changed = false
         
-        binding2.update(true, metadata)
+        observable2.update(true, metadata)
         XCTAssertEqual(zipped.value.0, true)
         XCTAssertEqual(zipped.value.1, true)
         XCTAssertEqual(changed, false)
@@ -71,32 +71,32 @@ class ValueBindingTests: BindingTestCase {
     }
     
     func testBidiBoolBinding() {
-        let binding = BidiValueBinding(false)
+        let observable = BidiObservableValue(false)
         var changed = false
-        _ = binding.addChangeObserver({ _ in changed = true })
+        _ = observable.addChangeObserver({ _ in changed = true })
         let metadata = ChangeMetadata(transient: false)
 
-        XCTAssertEqual(binding.value, false)
+        XCTAssertEqual(observable.value, false)
         XCTAssertEqual(changed, false)
         changed = false
 
-        binding.toggle(metadata)
-        XCTAssertEqual(binding.value, true)
+        observable.toggle(metadata)
+        XCTAssertEqual(observable.value, true)
         XCTAssertEqual(changed, true)
         changed = false
 
-        binding.toggle(metadata)
-        XCTAssertEqual(binding.value, false)
+        observable.toggle(metadata)
+        XCTAssertEqual(observable.value, false)
         XCTAssertEqual(changed, true)
         changed = false
 
-        binding.update(true, metadata)
-        XCTAssertEqual(binding.value, true)
+        observable.update(true, metadata)
+        XCTAssertEqual(observable.value, true)
         XCTAssertEqual(changed, true)
         changed = false
 
-        binding.update(true, metadata)
-        XCTAssertEqual(binding.value, true)
+        observable.update(true, metadata)
+        XCTAssertEqual(observable.value, true)
         XCTAssertEqual(changed, false)
         changed = false
     }

@@ -8,7 +8,7 @@
 
 import libRelational
 
-private class RelationValueBinding<T>: ValueBinding<T> {
+private class RelationObservableValue<T>: ObservableValue<T> {
     private var removal: ObserverRemoval!
     
     init(relation: Relation, relationToValue: Relation -> T, valueChanging: (T, T) -> Bool) {
@@ -26,7 +26,7 @@ private class RelationValueBinding<T>: ValueBinding<T> {
     }
 }
 
-private class WhenNonEmptyBinding<T>: ValueBinding<T?> {
+private class WhenNonEmptyBinding<T>: ObservableValue<T?> {
     private var removal: ObserverRemoval!
     
     init(relation: Relation, relationToValue: Relation -> T) {
@@ -78,7 +78,7 @@ public struct RelationBidiConfig<T> {
     }
 }
 
-private class RelationBidiValueBinding<T>: BidiValueBinding<T> {
+private class RelationBidiObservableValue<T>: BidiObservableValue<T> {
     private let config: RelationBidiConfig<T>
     private var before: ChangeLoggingDatabaseSnapshot?
     private var removal: ObserverRemoval!
@@ -235,99 +235,99 @@ extension Relation {
 
 extension Relation {
     /// Returns a read-only binding that gets its value from this relation.
-    public func bind<V>(relationToValue: Relation -> V) -> ValueBinding<V> {
-        return RelationValueBinding(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
+    public func bind<V>(relationToValue: Relation -> V) -> ObservableValue<V> {
+        return RelationObservableValue(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a read-only binding that gets its value from this relation.
-    public func bind<V: Equatable>(relationToValue: Relation -> V) -> ValueBinding<V> {
-        return RelationValueBinding(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
+    public func bind<V: Equatable>(relationToValue: Relation -> V) -> ObservableValue<V> {
+        return RelationObservableValue(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a read-only binding that gets its value from this relation.
-    public func bind<V>(relationToValue: Relation -> V?) -> ValueBinding<V?> {
-        return RelationValueBinding(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
+    public func bind<V>(relationToValue: Relation -> V?) -> ObservableValue<V?> {
+        return RelationObservableValue(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a read-only binding that gets its value from this relation.
-    public func bind<V: Equatable>(relationToValue: Relation -> V?) -> ValueBinding<V?> {
-        return RelationValueBinding(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
+    public func bind<V: Equatable>(relationToValue: Relation -> V?) -> ObservableValue<V?> {
+        return RelationObservableValue(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a read-only binding that resolves to a set of all values for the single attribute.
-    public func bindAllValues<V: Hashable>(transform: RelationValue -> V?) -> ValueBinding<Set<V>> {
+    public func bindAllValues<V: Hashable>(transform: RelationValue -> V?) -> ObservableValue<Set<V>> {
         return bind{ $0.allValues(transform) }
     }
 
     /// Returns a read-only binding that resolves to some value for the single attribute, or nil if there are
     /// no non-error rows.
-    public func bindAnyValue<V>(transform: RelationValue -> V?) -> ValueBinding<V?> {
+    public func bindAnyValue<V>(transform: RelationValue -> V?) -> ObservableValue<V?> {
         return bind{ $0.anyValue(transform) }
     }
 
     /// Returns a read-only binding that resolves to some value for the single attribute, or nil if there are
     /// no non-error rows.
-    public func bindAnyValue<V: Equatable>(transform: RelationValue -> V?) -> ValueBinding<V?> {
+    public func bindAnyValue<V: Equatable>(transform: RelationValue -> V?) -> ObservableValue<V?> {
         return bind{ $0.anyValue(transform) }
     }
 
     /// Returns a read-only binding that resolves to a single value if there is exactly one row in the relation,
     /// otherwise resolves to nil.
-    public func bindOneValue<V>(transform: RelationValue -> V?) -> ValueBinding<V?> {
+    public func bindOneValue<V>(transform: RelationValue -> V?) -> ObservableValue<V?> {
         return bind{ $0.oneValue(transform) }
     }
 
     /// Returns a read-only binding that resolves to a single value if there is exactly one row in the relation,
     /// otherwise resolves to nil.
-    public func bindOneValue<V: Equatable>(transform: RelationValue -> V?) -> ValueBinding<V?> {
+    public func bindOneValue<V: Equatable>(transform: RelationValue -> V?) -> ObservableValue<V?> {
         return bind{ $0.oneValue(transform) }
     }
 
     /// Returns a bidirectional binding that gets its value from this relation and writes values back
     /// according to the provided bidi configuration.
-    public func bindBidi<V>(config: RelationBidiConfig<V>, relationToValue: Relation -> V) -> BidiValueBinding<V> {
-        return RelationBidiValueBinding(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
+    public func bindBidi<V>(config: RelationBidiConfig<V>, relationToValue: Relation -> V) -> BidiObservableValue<V> {
+        return RelationBidiObservableValue(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a bidirectional binding that gets its value from this relation and writes values back
     /// according to the provided bidi configuration.
-    public func bindBidi<V: Equatable>(config: RelationBidiConfig<V>, relationToValue: Relation -> V) -> BidiValueBinding<V> {
-        return RelationBidiValueBinding(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
+    public func bindBidi<V: Equatable>(config: RelationBidiConfig<V>, relationToValue: Relation -> V) -> BidiObservableValue<V> {
+        return RelationBidiObservableValue(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a bidirectional binding that gets its value from this relation and writes values back
     /// according to the provided bidi configuration.
-    public func bindBidi<V>(config: RelationBidiConfig<V?>, relationToValue: Relation -> V?) -> BidiValueBinding<V?> {
-        return RelationBidiValueBinding(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
+    public func bindBidi<V>(config: RelationBidiConfig<V?>, relationToValue: Relation -> V?) -> BidiObservableValue<V?> {
+        return RelationBidiObservableValue(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a bidirectional binding that gets its value from this relation and writes values back
     /// according to the provided bidi configuration.
-    public func bindBidi<V: Equatable>(config: RelationBidiConfig<V?>, relationToValue: Relation -> V?) -> BidiValueBinding<V?> {
-        return RelationBidiValueBinding(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
+    public func bindBidi<V: Equatable>(config: RelationBidiConfig<V?>, relationToValue: Relation -> V?) -> BidiObservableValue<V?> {
+        return RelationBidiObservableValue(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 }
 
 extension Relation {
     /// A read-only binding that resolves to `true` if there are zero rows in the relation.
-    public var empty: ValueBinding<Bool> {
+    public var empty: ObservableValue<Bool> {
         return bind{ $0.isEmpty.ok == true }
     }
     
     /// A read-only binding that resolves to `true` if there are one or more rows in the relation.
-    public var nonEmpty: ValueBinding<Bool> {
+    public var nonEmpty: ObservableValue<Bool> {
         return bind{ $0.isEmpty.ok == false }
     }
     
     /// Returns a read-only binding that resolves to an optional value, which is nil when this
     /// relation is empty and is reconstructed when this relation becomes non-empty.
-    public func whenNonEmpty<V>(relationToValue: Relation -> V) -> ValueBinding<V?> {
+    public func whenNonEmpty<V>(relationToValue: Relation -> V) -> ObservableValue<V?> {
         return WhenNonEmptyBinding(relation: self, relationToValue: relationToValue)
     }
     
     /// Returns a read-only binding that resolves to the given string value if there are multiple
     /// values in the relation, otherwise resolves to the alternate string.
-    public func stringWhenMulti(string: String, otherwise: String = "") -> ValueBinding<String> {
+    public func stringWhenMulti(string: String, otherwise: String = "") -> ObservableValue<String> {
         // TODO: Reimplement in terms of other bindings
         return bind{ $0.allValues.count > 1 ? string : otherwise }
     }

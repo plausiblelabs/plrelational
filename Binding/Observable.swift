@@ -1,5 +1,5 @@
 //
-//  Binding.swift
+//  Observable.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/3/16.
@@ -10,7 +10,7 @@ import Foundation
 
 public typealias ObserverRemoval = Void -> Void
 
-public protocol Binding {
+public protocol Observable {
     associatedtype Value
     associatedtype Changes
     associatedtype ChangeObserver = Changes -> Void
@@ -19,8 +19,3 @@ public protocol Binding {
     
     func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval
 }
-
-//public protocol BidiBinding: Binding {
-//    func update(newValue: Value)
-//    func commit(newValue: Value)
-//}

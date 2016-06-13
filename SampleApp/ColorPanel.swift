@@ -13,7 +13,7 @@ class ColorPanel {
     
     private let bindings = BindingSet()
     
-    var color: BidiValueBinding<Color>? {
+    var color: BidiObservableValue<Color>? {
         didSet {
             bindings.register("color", color, { [weak self] value in
                 self?.updateColorPanel(makeVisible: false)
@@ -22,7 +22,7 @@ class ColorPanel {
     }
     
     // TODO: Need to watch color panel's window visibility and update this accordingly
-    var visible: BidiValueBinding<Bool>? {
+    var visible: BidiObservableValue<Bool>? {
         didSet {
             // TODO: If shared color panel is already visible, commit(true) to keep the
             // binding value in sync

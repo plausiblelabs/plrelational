@@ -13,7 +13,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
 
     private let bindings = BindingSet()
 
-    var string: ValueBinding<String>? {
+    var string: ObservableValue<String>? {
         didSet {
             bindings.register("string", string, { [weak self] value in
                 self?.stringValue = value
@@ -21,7 +21,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
         }
     }
 
-    var placeholder: ValueBinding<String>? {
+    var placeholder: ObservableValue<String>? {
         didSet {
             bindings.register("placeholder", placeholder, { [weak self] value in
                 self?.placeholderString = value
@@ -29,7 +29,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
         }
     }
 
-    var visible: ValueBinding<Bool>? {
+    var visible: ObservableValue<Bool>? {
         didSet {
             bindings.register("visible", visible, { [weak self] value in
                 self?.hidden = !value
@@ -60,7 +60,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
     
     override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
-        if let bidiBinding = string as? BidiValueBinding {
+        if let bidiBinding = string as? BidiObservableValue {
             bindings.update(bidiBinding, newValue: stringValue, transient: true)
         }
         previousValue = stringValue
@@ -71,7 +71,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value
         //Swift.print("CONTROL DID END EDITING!")
-        if let previousCommittedValue = previousCommittedValue, bidiBinding = string as? BidiValueBinding {
+        if let previousCommittedValue = previousCommittedValue, bidiBinding = string as? BidiObservableValue {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if stringValue != previousCommittedValue {
                 bindings.update(bidiBinding, newValue: stringValue, transient: false)

@@ -25,12 +25,12 @@ public class BindingSet {
     /// self-initiated changes.  A self-initiated change is detected when a binding's value is updated
     /// via the `BindingSet.update` function and that change is witnessed by the observer that was
     /// added when the binding was `register`ed.
-    private func changeKey<T>(binding: ValueBinding<T>) -> String {
+    private func changeKey<T>(binding: ObservableValue<T>) -> String {
         // TODO: We can do better than this
         return "\(unsafeAddressOf(binding))"
     }
     
-    private func register<T>(binding: ValueBinding<T>, removalKey: String, changeKey: String, updateOnAttach: Bool, _ onValue: (T, ChangeMetadata) -> Void) {
+    private func register<T>(binding: ObservableValue<T>, removalKey: String, changeKey: String, updateOnAttach: Bool, _ onValue: (T, ChangeMetadata) -> Void) {
         if updateOnAttach {
             onValue(binding.value, ChangeMetadata(transient: false))
         }
@@ -45,7 +45,7 @@ public class BindingSet {
         removals[removalKey] = removal
     }
     
-    public func register<T>(key: String, _ binding: ValueBinding<T>?, _ onValue: (T) -> Void, onDetach: () -> Void = {}) {
+    public func register<T>(key: String, _ binding: ObservableValue<T>?, _ onValue: (T) -> Void, onDetach: () -> Void = {}) {
         if let removal = removals.removeValueForKey(key) {
             removal()
         }
@@ -57,20 +57,20 @@ public class BindingSet {
         }
     }
     
-    private func update<T>(binding: BidiValueBinding<T>, newValue: T, metadata: ChangeMetadata, changeKey: String) {
+    private func update<T>(binding: BidiObservableValue<T>, newValue: T, metadata: ChangeMetadata, changeKey: String) {
         selfInitiatedChange.insert(changeKey)
         binding.update(newValue, metadata)
         selfInitiatedChange.remove(changeKey)
     }
     
-    public func update<T>(binding: BidiValueBinding<T>?, newValue: T, transient: Bool = false) {
+    public func update<T>(binding: BidiObservableValue<T>?, newValue: T, transient: Bool = false) {
         guard let binding = binding else { return }
         
         let metadata = ChangeMetadata(transient: transient)
         update(binding, newValue: newValue, metadata: metadata, changeKey: changeKey(binding))
     }
     
-    public func connect<T1, T2>(key1: String, _ binding1: BidiValueBinding<T1>?, _ key2: String, _ binding2: BidiValueBinding<T2>?, forward: T1 -> ChangeResult<T2>, reverse: T2 -> ChangeResult<T1>) {
+    public func connect<T1, T2>(key1: String, _ binding1: BidiObservableValue<T1>?, _ key2: String, _ binding2: BidiObservableValue<T2>?, forward: T1 -> ChangeResult<T2>, reverse: T2 -> ChangeResult<T1>) {
         // Disconnect any existing bindings
         let forwardKey = "\(key1)->\(key2)"
         let reverseKey = "\(key2)->\(key1)"

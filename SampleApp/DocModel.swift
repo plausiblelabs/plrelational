@@ -291,7 +291,7 @@ class DocModel {
             },
             cellImage: { row in
                 let type = ItemType(row)!
-                return ValueBinding.constant(Image(named: type.cellImageName))
+                return ObservableValue.constant(Image(named: type.cellImageName))
             }
         )
     }()
@@ -315,13 +315,13 @@ class DocModel {
             },
             cellImage: { row in
                 let type = ItemType(row)!
-                return ValueBinding.constant(Image(named: type.cellImageName))
+                return ObservableValue.constant(Image(named: type.cellImageName))
             }
         )
     }()
     
-    lazy var propertiesSidebarVisible: BidiValueBinding<Bool> = { [unowned self] in
-        return BidiValueBinding(true)
+    lazy var propertiesSidebarVisible: BidiObservableValue<Bool> = { [unowned self] in
+        return BidiObservableValue(true)
     }()
     
     lazy var propertiesModel: PropertiesModel = { [unowned self] in
@@ -333,7 +333,7 @@ class DocModel {
         )
     }()
 
-    private func bidiStringBinding(relation: Relation, type: String) -> BidiValueBinding<String> {
+    private func bidiStringBinding(relation: Relation, type: String) -> BidiObservableValue<String> {
         return undoableDB.bidiBinding(
             relation,
             action: "Rename \(type)",
@@ -342,7 +342,7 @@ class DocModel {
         )
     }
 
-    private func bidiSelectionBinding(relation: MutableRelation, clearInspectorSelection: Bool) -> BidiValueBinding<Set<RelationValue>> {
+    private func bidiSelectionBinding(relation: MutableRelation, clearInspectorSelection: Bool) -> BidiObservableValue<Set<RelationValue>> {
         return undoableDB.bidiBinding(
             relation,
             action: "Change Selection",

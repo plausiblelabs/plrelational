@@ -19,10 +19,10 @@ struct TreeViewModel<N: TreeNode> {
     let contextMenu: ((N.Data) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
     let move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?
-    let selection: BidiValueBinding<Set<N.ID>>
+    let selection: BidiObservableValue<Set<N.ID>>
     let cellIdentifier: (N.Data) -> String
-    let cellText: (N.Data) -> ValueBinding<String>
-    let cellImage: ((N.Data) -> ValueBinding<Image>)?
+    let cellText: (N.Data) -> ObservableValue<String>
+    let cellImage: ((N.Data) -> ObservableValue<Image>)?
 }
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in

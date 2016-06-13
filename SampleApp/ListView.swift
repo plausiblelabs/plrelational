@@ -18,10 +18,10 @@ struct ListViewModel<E: ArrayElement> {
     let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
-    let selection: BidiValueBinding<Set<E.ID>>
+    let selection: BidiObservableValue<Set<E.ID>>
     let cellIdentifier: (E.Data) -> String
-    let cellText: (E.Data) -> ValueBinding<String>
-    let cellImage: ((E.Data) -> ValueBinding<Image>)?
+    let cellText: (E.Data) -> ObservableValue<String>
+    let cellImage: ((E.Data) -> ObservableValue<Image>)?
 }
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in

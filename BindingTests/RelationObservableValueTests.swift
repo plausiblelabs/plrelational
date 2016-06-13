@@ -1,5 +1,5 @@
 //
-//  RelationValueBindingTests.swift
+//  RelationObservableValueTests.swift
 //  Relational
 //
 //  Created by Chris Campbell on 5/27/16.
@@ -10,7 +10,7 @@ import XCTest
 import libRelational
 @testable import Binding
 
-class RelationValueBindingTests: BindingTestCase {
+class RelationObservableValueTests: BindingTestCase {
     
     func testAllValues() {
         let empty = MakeRelation(

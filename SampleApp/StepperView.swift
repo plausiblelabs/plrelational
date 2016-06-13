@@ -10,7 +10,7 @@ class StepperView: NSControl, NSTextFieldDelegate {
     
     private let bindings = BindingSet()
     
-    var value: BidiValueBinding<Int?>? {
+    var value: BidiObservableValue<Int?>? {
         didSet {
             bindings.register("value", value, { [weak self] value in
                 guard let weakSelf = self else { return }
@@ -25,7 +25,7 @@ class StepperView: NSControl, NSTextFieldDelegate {
         }
     }
 
-    var placeholder: ValueBinding<String>? {
+    var placeholder: ObservableValue<String>? {
         didSet {
             bindings.register("placeholder", placeholder, { [weak self] value in
                 self?.textField.placeholderString = value

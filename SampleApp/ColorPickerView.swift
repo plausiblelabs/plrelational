@@ -13,7 +13,7 @@ class ColorPickerView: NSView {
 
     private let model: ColorPickerModel
     
-    var color: BidiValueBinding<CommonValue<Color>>? {
+    var color: BidiObservableValue<CommonValue<Color>>? {
         didSet {
             if let color = color {
                 setColorBinding(color)
@@ -31,14 +31,14 @@ class ColorPickerView: NSView {
         
         // Configure color popup button
         colorPopup = PopUpButton(frame: NSZeroRect, pullsDown: false)
-        colorPopup.items = ValueBinding.constant(model.popupItems)
+        colorPopup.items = ObservableValue.constant(model.popupItems)
         colorPopup.selectedObject = model.colorItem
         
         // Configure opacity combo box
         let opacityValues: [CGFloat] = 0.stride(through: 100, by: 10).map{ CGFloat($0) / 100.0 }
         opacityCombo = ComboBox(frame: NSZeroRect)
         opacityCombo.formatter = OpacityFormatter()
-        opacityCombo.items = ValueBinding.constant(opacityValues)
+        opacityCombo.items = ObservableValue.constant(opacityValues)
         opacityCombo.value = model.opacityValue
         
         // Configure color panel
@@ -74,8 +74,8 @@ class ColorPickerView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setColorBinding(binding: BidiValueBinding<CommonValue<Color>>) {
-        // TODO: Perhaps defaultItemContent should be a ValueBinding so that we can move this
+    private func setColorBinding(binding: BidiObservableValue<CommonValue<Color>>) {
+        // TODO: Perhaps defaultItemContent should be a ObservableValue so that we can move this
         // to the model
         colorPopup.defaultItemContent = MenuItemContent(
             object: ColorItem.Default,
@@ -122,7 +122,7 @@ private class ColorPickerModel {
     
     private let bindings = BindingSet()
     
-    var color: BidiValueBinding<CommonValue<Color>>? {
+    var color: BidiObservableValue<CommonValue<Color>>? {
         didSet {
             bindings.connect(
                 "color", color,
@@ -203,10 +203,10 @@ private class ColorPickerModel {
     private let presetColors: [Color]
     private var popupItems: [MenuItem<ColorItem>]!
     
-    private let colorItem: BidiValueBinding<ColorItem?>
-    private let opacityValue: BidiValueBinding<CGFloat?>
-    private let panelColor: BidiValueBinding<Color>
-    private let panelVisible: BidiValueBinding<Bool>
+    private let colorItem: BidiObservableValue<ColorItem?>
+    private let opacityValue: BidiObservableValue<CGFloat?>
+    private let panelColor: BidiObservableValue<Color>
+    private let panelVisible: BidiObservableValue<Bool>
     
     init(defaultColor: Color) {
         self.defaultColor = defaultColor
@@ -215,8 +215,8 @@ private class ColorPickerModel {
         // XXX: We use `valueChanging: { true }` so that binding observers are notified even
         // when the item is changing from .Custom to .Custom; this is all because of the funky
         // .Custom handling in `==` for ColorItem, need to revisit this...
-        let colorItem: BidiValueBinding<ColorItem?> = BidiValueBinding(initialValue: nil, valueChanging: { _ in true })
-        let customColor: ValueBinding<Color?> = colorItem.map{
+        let colorItem: BidiObservableValue<ColorItem?> = BidiObservableValue(initialValue: nil, valueChanging: { _ in true })
+        let customColor: ObservableValue<Color?> = colorItem.map{
             switch $0 {
             case .Some(.Custom(let color)):
                 return color
@@ -224,11 +224,11 @@ private class ColorPickerModel {
                 return nil
             }
         }
-        let colorIsCustom: ValueBinding<Bool> = customColor.map{ $0 != nil }
+        let colorIsCustom: ObservableValue<Bool> = customColor.map{ $0 != nil }
         self.colorItem = colorItem
-        self.opacityValue = bidiValueBinding(nil)
-        self.panelColor = bidiValueBinding(defaultColor)
-        self.panelVisible = bidiValueBinding(false)
+        self.opacityValue = bidiObservableValue(nil)
+        self.panelColor = bidiObservableValue(defaultColor)
+        self.panelVisible = bidiObservableValue(false)
 
         // Configure color popup menu items
         var popupItems: [MenuItem<ColorItem>] = []
@@ -238,8 +238,8 @@ private class ColorPickerModel {
             let colorItem = ColorItem.Preset(color)
             let content = MenuItemContent(
                 object: colorItem,
-                title: ValueBinding.constant(name),
-                image: ValueBinding.constant(colorSwatchImage(color))
+                title: ObservableValue.constant(name),
+                image: ObservableValue.constant(colorSwatchImage(color))
             )
             let menuItem = MenuItem(.Normal(content))
             popupItems.append(menuItem)
@@ -250,9 +250,9 @@ private class ColorPickerModel {
             // The "Custom" item and the separator above it are only visible when a custom color is defined
             popupItems.append(MenuItem(.Separator, visible: colorIsCustom))
             let content = MenuItemContent(
-                // TODO: Perhaps `object` should be a ValueBinding so that it can change if needed
+                // TODO: Perhaps `object` should be a ObservableValue so that it can change if needed
                 object: ColorItem.Custom(defaultColor),
-                title: ValueBinding.constant("Custom"),
+                title: ObservableValue.constant("Custom"),
                 image: customColor.map{ colorSwatchImage($0 ?? defaultColor) }
             )
             popupItems.append(MenuItem(.Momentary(content, action: {}), visible: colorIsCustom))
@@ -261,7 +261,7 @@ private class ColorPickerModel {
         func addOther() {
             // The "Other" item and the separator above it are always visible
             popupItems.append(MenuItem(.Separator))
-            let content = MenuItemContent(object: ColorItem.Other, title: ValueBinding.constant("Other…"))
+            let content = MenuItemContent(object: ColorItem.Other, title: ObservableValue.constant("Other…"))
             popupItems.append(MenuItem(.Momentary(content, action: { self.bindings.update(self.panelVisible, newValue: true) })))
         }
         

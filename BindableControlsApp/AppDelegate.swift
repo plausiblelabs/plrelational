@@ -105,7 +105,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         addObject("Fred", editable: false, day: nil, color: nil, rocks: 17)
         addObject("Wilma", editable: true, day: "Friday", color: Color.blue, rocks: 42)
 
-        func nameBinding(relation: Relation) -> BidiValueBinding<String> {
+        func nameBinding(relation: Relation) -> BidiObservableValue<String> {
             return undoableDB.bidiBinding(
                 relation,
                 action: "Rename Object",
@@ -114,7 +114,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             )
         }
         
-        func selectionBinding(relation: MutableRelation) -> BidiValueBinding<Set<RelationValue>> {
+        func selectionBinding(relation: MutableRelation) -> BidiObservableValue<Set<RelationValue>> {
             return undoableDB.bidiBinding(
                 relation,
                 action: "Change Selection",
@@ -172,7 +172,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
         let popupItems = days.map{ titledMenuItem($0) }
-        popupButton.items = ValueBinding.constant(popupItems)
+        popupButton.items = ObservableValue.constant(popupItems)
         popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
         popupButton.selectedObject = undoableDB.bidiBinding(
             selectedObjectsDay,
@@ -189,13 +189,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
         stepper.placeholder = selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
         
-        let comboValueBinding: BidiValueBinding<String?> = bidiValueBinding("Alice")
-        _ = comboValueBinding.addChangeObserver({ _ in
-            Swift.print("NEW COMBO VALUE: \(comboValueBinding.value)")
+        let comboObservableValue: BidiObservableValue<String?> = bidiObservableValue("Alice")
+        _ = comboObservableValue.addChangeObserver({ _ in
+            Swift.print("NEW COMBO VALUE: \(comboObservableValue.value)")
         })
         
-        comboBox.items = ValueBinding.constant(["Alice", "Bob", "Carlos"])
-        comboBox.value = comboValueBinding
+        comboBox.items = ObservableValue.constant(["Alice", "Bob", "Carlos"])
+        comboBox.value = comboObservableValue
         
         colorPicker.color = undoableDB.bidiBinding(
             selectedObjectsColor,

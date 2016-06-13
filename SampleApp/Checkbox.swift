@@ -66,7 +66,7 @@ class Checkbox: NSButton {
 
     private let bindings = BindingSet()
     
-    var checked: BidiValueBinding<CheckState>? {
+    var checked: BidiObservableValue<CheckState>? {
         didSet {
             bindings.register("checked", checked, { [weak self] value in
                 // Only allow mixed state if we are starting in a mixed state; otherwise we
