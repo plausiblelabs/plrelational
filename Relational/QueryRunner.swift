@@ -307,7 +307,7 @@ extension QueryRunner {
     struct NodeState {
         let nodeIndex: Int
         
-        var outputForUniquing: Set<Row> = []
+        var outputForUniquing: Set<Row>? = nil
         var inputBuffers: [Buffer] = []
         
         var activeBuffers: Int
@@ -334,10 +334,15 @@ extension QueryRunner {
                 return []
             }
             
-            var rowsSet = Set(rows)
-            rowsSet.subtractInPlace(outputForUniquing)
-            outputForUniquing.unionInPlace(rowsSet)
-            return rowsSet
+            var rowsSet = (rows as? Set<Row>) ?? Set(rows)
+            if outputForUniquing == nil {
+                outputForUniquing = rowsSet
+                return rowsSet
+            } else {
+                rowsSet.subtractInPlace(outputForUniquing!)
+                outputForUniquing!.unionInPlace(rowsSet)
+                return rowsSet
+            }
         }
         
         mutating func getExtraState<T>(@noescape calculate: Void -> T) -> T {
