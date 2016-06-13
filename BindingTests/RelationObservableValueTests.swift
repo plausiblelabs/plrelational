@@ -131,40 +131,40 @@ class RelationObservableValueTests: BindingTestCase {
         XCTAssertEqual(multi.project(["age"]).commonValue(asInt), CommonValue.Multi)
     }
     
-    func testBind() {
+    func testObservable() {
         let db = makeDB().db
         let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
         let r = ChangeLoggingRelation(baseRelation: sqlr)
 
-        let binding = r.select(Attribute("id") *== 1).project(["name"]).bind{ $0.oneString }
+        let observable = r.select(Attribute("id") *== 1).project(["name"]).observable{ $0.oneString }
         var changed = false
-        _ = binding.addChangeObserver({ _ in changed = true })
+        _ = observable.addChangeObserver({ _ in changed = true })
         
-        XCTAssertEqual(binding.value, "")
+        XCTAssertEqual(observable.value, "")
         XCTAssertFalse(changed)
         changed = false
         
         r.add(["id": 1, "name": "cat"])
         
-        XCTAssertEqual(binding.value, "cat")
+        XCTAssertEqual(observable.value, "cat")
         XCTAssertTrue(changed)
         changed = false
         
         r.add(["id": 2, "name": "dog"])
 
-        XCTAssertNotNil(binding.value)
-        XCTAssertEqual(binding.value, "cat")
+        XCTAssertNotNil(observable.value)
+        XCTAssertEqual(observable.value, "cat")
         XCTAssertFalse(changed)
         changed = false
         
         r.delete(true)
         
-        XCTAssertEqual(binding.value, "")
+        XCTAssertEqual(observable.value, "")
         XCTAssertTrue(changed)
         changed = false
     }
     
-    func testBindBidi() {
+    func testMutableObservable() {
         let sqliteDB = makeDB().db
         let loggingDB = ChangeLoggingDatabase(sqliteDB)
         let db = TransactionalDatabase(loggingDB)
@@ -178,7 +178,7 @@ class RelationObservableValueTests: BindingTestCase {
             }
         }
         
-        let config: RelationBidiConfig<String> = RelationBidiConfig(
+        let config: RelationMutationConfig<String> = RelationMutationConfig(
             snapshot: {
                 return db.takeSnapshot()
             },
@@ -190,37 +190,37 @@ class RelationObservableValueTests: BindingTestCase {
             }
         )
         
-        let binding = r.select(Attribute("id") *== 1).project(["name"]).bindBidi(config, relationToValue: { $0.oneString })
+        let observable = r.select(Attribute("id") *== 1).project(["name"]).mutableObservable(config, relationToValue: { $0.oneString })
         var changed = false
-        _ = binding.addChangeObserver({ _ in changed = true })
+        _ = observable.addChangeObserver({ _ in changed = true })
 
-        XCTAssertEqual(binding.value, "")
+        XCTAssertEqual(observable.value, "")
         XCTAssertFalse(changed)
         changed = false
         
         r.add(["id": 1, "name": "cat"])
         
-        XCTAssertEqual(binding.value, "cat")
+        XCTAssertEqual(observable.value, "cat")
         XCTAssertTrue(changed)
         changed = false
 
         // TODO: Verify that snapshot is taken?
-        binding.update("dog", ChangeMetadata(transient: true))
+        observable.update("dog", ChangeMetadata(transient: true))
 
         // TODO: Verify `transient`
-        XCTAssertEqual(binding.value, "dog")
+        XCTAssertEqual(observable.value, "dog")
         XCTAssertTrue(changed)
         changed = false
         
-        binding.update("ant", ChangeMetadata(transient: false))
+        observable.update("ant", ChangeMetadata(transient: false))
         
-        XCTAssertEqual(binding.value, "ant")
+        XCTAssertEqual(observable.value, "ant")
         XCTAssertTrue(changed)
         changed = false
         
         r.delete(true)
         
-        XCTAssertEqual(binding.value, "")
+        XCTAssertEqual(observable.value, "")
         XCTAssertTrue(changed)
         changed = false
     }
@@ -230,30 +230,30 @@ class RelationObservableValueTests: BindingTestCase {
         let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
         let r = ChangeLoggingRelation(baseRelation: sqlr)
 
-        let binding = r.empty
+        let observable = r.empty
         var changed = false
-        _ = binding.addChangeObserver({ _ in changed = true })
+        _ = observable.addChangeObserver({ _ in changed = true })
         
-        XCTAssertTrue(binding.value)
+        XCTAssertTrue(observable.value)
         XCTAssertFalse(changed)
         changed = false
 
         r.add(["id": 1, "name": "cat"])
         
-        XCTAssertFalse(binding.value)
+        XCTAssertFalse(observable.value)
         XCTAssertTrue(changed)
         changed = false
 
         r.add(["id": 2, "name": "dog"])
         
-        // Verify that observers are not notified when binding value has not actually changed
-        XCTAssertFalse(binding.value)
+        // Verify that observers are not notified when observable value has not actually changed
+        XCTAssertFalse(observable.value)
         XCTAssertFalse(changed)
         changed = false
 
         r.delete(true)
 
-        XCTAssertTrue(binding.value)
+        XCTAssertTrue(observable.value)
         XCTAssertTrue(changed)
         changed = false
     }
@@ -263,30 +263,30 @@ class RelationObservableValueTests: BindingTestCase {
         let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
         let r = ChangeLoggingRelation(baseRelation: sqlr)
         
-        let binding = r.nonEmpty
+        let observable = r.nonEmpty
         var changed = false
-        _ = binding.addChangeObserver({ _ in changed = true })
+        _ = observable.addChangeObserver({ _ in changed = true })
         
-        XCTAssertFalse(binding.value)
+        XCTAssertFalse(observable.value)
         XCTAssertFalse(changed)
         changed = false
         
         r.add(["id": 1, "name": "cat"])
         
-        XCTAssertTrue(binding.value)
+        XCTAssertTrue(observable.value)
         XCTAssertTrue(changed)
         changed = false
         
         r.add(["id": 2, "name": "dog"])
         
-        // Verify that observers are not notified when binding value has not actually changed
-        XCTAssertTrue(binding.value)
+        // Verify that observers are not notified when observable value has not actually changed
+        XCTAssertTrue(observable.value)
         XCTAssertFalse(changed)
         changed = false
         
         r.delete(true)
         
-        XCTAssertFalse(binding.value)
+        XCTAssertFalse(observable.value)
         XCTAssertTrue(changed)
         changed = false
     }
@@ -301,38 +301,38 @@ class RelationObservableValueTests: BindingTestCase {
             let id: Int
         }
         
-        let binding = r.whenNonEmpty{ _ -> Thing in counter += 1; return Thing(id: counter) }
+        let observable = r.whenNonEmpty{ _ -> Thing in counter += 1; return Thing(id: counter) }
         var changed = false
-        _ = binding.addChangeObserver({ _ in changed = true })
+        _ = observable.addChangeObserver({ _ in changed = true })
         
-        XCTAssertNil(binding.value)
+        XCTAssertNil(observable.value)
         XCTAssertFalse(changed)
         changed = false
         
         r.add(["id": 1, "name": "cat"])
         
-        XCTAssertNotNil(binding.value)
-        XCTAssertEqual(binding.value!.id, 1)
+        XCTAssertNotNil(observable.value)
+        XCTAssertEqual(observable.value!.id, 1)
         XCTAssertTrue(changed)
         changed = false
         
         r.add(["id": 2, "name": "dog"])
         
-        XCTAssertNotNil(binding.value)
-        XCTAssertEqual(binding.value!.id, 1)
+        XCTAssertNotNil(observable.value)
+        XCTAssertEqual(observable.value!.id, 1)
         XCTAssertFalse(changed)
         changed = false
         
         r.delete(true)
         
-        XCTAssertNil(binding.value)
+        XCTAssertNil(observable.value)
         XCTAssertTrue(changed)
         changed = false
         
         r.add(["id": 3, "name": "fish"])
         
-        XCTAssertNotNil(binding.value)
-        XCTAssertEqual(binding.value!.id, 2)
+        XCTAssertNotNil(observable.value)
+        XCTAssertEqual(observable.value!.id, 2)
         XCTAssertTrue(changed)
         changed = false
     }
@@ -342,24 +342,24 @@ class RelationObservableValueTests: BindingTestCase {
         let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
         let r = ChangeLoggingRelation(baseRelation: sqlr)
         
-        let binding = r.project(["name"]).stringWhenMulti("multi")
+        let observable = r.project(["name"]).stringWhenMulti("multi")
         var changed = false
-        _ = binding.addChangeObserver({ _ in changed = true })
+        _ = observable.addChangeObserver({ _ in changed = true })
         
-        XCTAssertEqual(binding.value, "")
+        XCTAssertEqual(observable.value, "")
         XCTAssertFalse(changed)
         changed = false
         
         r.add(["id": 1, "name": "cat"])
         
-        // Verify that observers are not notified when binding value has not actually changed
-        XCTAssertEqual(binding.value, "")
+        // Verify that observers are not notified when observable value has not actually changed
+        XCTAssertEqual(observable.value, "")
         XCTAssertFalse(changed)
         changed = false
         
         r.add(["id": 2, "name": "dog"])
         
-        XCTAssertEqual(binding.value, "multi")
+        XCTAssertEqual(observable.value, "multi")
         XCTAssertTrue(changed)
         changed = false
 
@@ -367,13 +367,13 @@ class RelationObservableValueTests: BindingTestCase {
         // single NULL value
         r.update(Attribute("id") *== 2, newValues: ["name": .NULL])
 
-        XCTAssertEqual(binding.value, "multi")
+        XCTAssertEqual(observable.value, "multi")
         XCTAssertFalse(changed)
         changed = false
 
         r.delete(true)
         
-        XCTAssertEqual(binding.value, "")
+        XCTAssertEqual(observable.value, "")
         XCTAssertTrue(changed)
         changed = false
     }

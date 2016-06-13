@@ -105,7 +105,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         addObject("Fred", editable: false, day: nil, color: nil, rocks: 17)
         addObject("Wilma", editable: true, day: "Friday", color: Color.blue, rocks: 42)
 
-        func nameBinding(relation: Relation) -> BidiObservableValue<String> {
+        func nameBinding(relation: Relation) -> MutableObservableValue<String> {
             return undoableDB.bidiBinding(
                 relation,
                 action: "Rename Object",
@@ -114,7 +114,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             )
         }
         
-        func selectionBinding(relation: MutableRelation) -> BidiObservableValue<Set<RelationValue>> {
+        func selectionBinding(relation: MutableRelation) -> MutableObservableValue<Set<RelationValue>> {
             return undoableDB.bidiBinding(
                 relation,
                 action: "Change Selection",
@@ -189,7 +189,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
         stepper.placeholder = selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
         
-        let comboObservableValue: BidiObservableValue<String?> = bidiObservableValue("Alice")
+        let comboObservableValue: MutableObservableValue<String?> = mutableObservableValue("Alice")
         _ = comboObservableValue.addChangeObserver({ _ in
             Swift.print("NEW COMBO VALUE: \(comboObservableValue.value)")
         })

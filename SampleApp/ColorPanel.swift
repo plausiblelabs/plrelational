@@ -13,20 +13,20 @@ class ColorPanel {
     
     private let bindings = BindingSet()
     
-    var color: BidiObservableValue<Color>? {
+    var color: MutableObservableValue<Color>? {
         didSet {
-            bindings.register("color", color, { [weak self] value in
+            bindings.observe(color, "color", { [weak self] value in
                 self?.updateColorPanel(makeVisible: false)
             })
         }
     }
     
     // TODO: Need to watch color panel's window visibility and update this accordingly
-    var visible: BidiObservableValue<Bool>? {
+    var visible: MutableObservableValue<Bool>? {
         didSet {
             // TODO: If shared color panel is already visible, commit(true) to keep the
             // binding value in sync
-            bindings.register("visible", visible, { [weak self] value in
+            bindings.observe(visible, "visible", { [weak self] value in
                 // TODO: Should we `orderOut` when visible goes to false?
                 if value {
                     self?.updateColorPanel(makeVisible: true)

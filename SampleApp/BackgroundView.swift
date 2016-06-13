@@ -12,7 +12,7 @@ class BackgroundView: NSView {
     
     var visible: ObservableValue<Bool>? {
         didSet {
-            bindings.register("visible", visible, { [weak self] value in
+            bindings.observe(visible, "visible", { [weak self] value in
                 self?.hidden = !value
             })
         }

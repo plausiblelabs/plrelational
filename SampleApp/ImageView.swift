@@ -15,7 +15,7 @@ class ImageView: NSImageView {
     
     var img: ObservableValue<Image>? {
         didSet {
-            bindings.register("img", img, { [weak self] value in
+            bindings.observe(img, "img", { [weak self] value in
                 self?.image = value.nsimage
             })
         }

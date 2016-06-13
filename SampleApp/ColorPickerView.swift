@@ -13,7 +13,7 @@ class ColorPickerView: NSView {
 
     private let model: ColorPickerModel
     
-    var color: BidiObservableValue<CommonValue<Color>>? {
+    var color: MutableObservableValue<CommonValue<Color>>? {
         didSet {
             if let color = color {
                 setColorBinding(color)
@@ -74,7 +74,7 @@ class ColorPickerView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    private func setColorBinding(binding: BidiObservableValue<CommonValue<Color>>) {
+    private func setColorBinding(binding: MutableObservableValue<CommonValue<Color>>) {
         // TODO: Perhaps defaultItemContent should be a ObservableValue so that we can move this
         // to the model
         colorPopup.defaultItemContent = MenuItemContent(
@@ -122,11 +122,11 @@ private class ColorPickerModel {
     
     private let bindings = BindingSet()
     
-    var color: BidiObservableValue<CommonValue<Color>>? {
+    var color: MutableObservableValue<CommonValue<Color>>? {
         didSet {
             bindings.connect(
-                "color", color,
-                "colorItem", colorItem,
+                color, "color",
+                colorItem, "colorItem",
                 forward: { [weak self] value in
                     // CommonValue<Color> -> ColorItem
                     guard let weakSelf = self else { return .NoChange }
@@ -155,8 +155,8 @@ private class ColorPickerModel {
             )
             
             bindings.connect(
-                "color", color,
-                "opacityValue", opacityValue,
+                color, "color",
+                opacityValue, "opacityValue",
                 forward: { value in
                     // CommonValue<Color> -> Double?
                     .Change(value.orNil()?.components.a)
@@ -179,8 +179,8 @@ private class ColorPickerModel {
             )
             
             bindings.connect(
-                "color", color,
-                "panelColor", panelColor,
+                color, "color",
+                panelColor, "panelColor",
                 forward: { value in
                     // CommonValue<Color> -> Color
                     if let color = value.orNil() {
@@ -203,10 +203,10 @@ private class ColorPickerModel {
     private let presetColors: [Color]
     private var popupItems: [MenuItem<ColorItem>]!
     
-    private let colorItem: BidiObservableValue<ColorItem?>
-    private let opacityValue: BidiObservableValue<CGFloat?>
-    private let panelColor: BidiObservableValue<Color>
-    private let panelVisible: BidiObservableValue<Bool>
+    private let colorItem: MutableObservableValue<ColorItem?>
+    private let opacityValue: MutableObservableValue<CGFloat?>
+    private let panelColor: MutableObservableValue<Color>
+    private let panelVisible: MutableObservableValue<Bool>
     
     init(defaultColor: Color) {
         self.defaultColor = defaultColor
@@ -215,7 +215,7 @@ private class ColorPickerModel {
         // XXX: We use `valueChanging: { true }` so that binding observers are notified even
         // when the item is changing from .Custom to .Custom; this is all because of the funky
         // .Custom handling in `==` for ColorItem, need to revisit this...
-        let colorItem: BidiObservableValue<ColorItem?> = BidiObservableValue(initialValue: nil, valueChanging: { _ in true })
+        let colorItem: MutableObservableValue<ColorItem?> = mutableObservableValue(nil, valueChanging: { _ in true })
         let customColor: ObservableValue<Color?> = colorItem.map{
             switch $0 {
             case .Some(.Custom(let color)):
@@ -226,9 +226,9 @@ private class ColorPickerModel {
         }
         let colorIsCustom: ObservableValue<Bool> = customColor.map{ $0 != nil }
         self.colorItem = colorItem
-        self.opacityValue = bidiObservableValue(nil)
-        self.panelColor = bidiObservableValue(defaultColor)
-        self.panelVisible = bidiObservableValue(false)
+        self.opacityValue = mutableObservableValue(nil)
+        self.panelColor = mutableObservableValue(defaultColor)
+        self.panelVisible = mutableObservableValue(false)
 
         // Configure color popup menu items
         var popupItems: [MenuItem<ColorItem>] = []

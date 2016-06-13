@@ -46,12 +46,12 @@ class PropertiesModel {
     }()
     
     private lazy var selectedItemTypes: ObservableValue<Set<ItemType>> = { [unowned self] in
-        return self.selectedItemTypesRelation.bindAllValues{ ItemType($0)! }
+        return self.selectedItemTypesRelation.observableAllValues{ ItemType($0)! }
     }()
     
     lazy var selectedItemTypesString: ObservableValue<String> = { [unowned self] in
         // TODO: Is there a more efficient way to do this?
-        let selectedItemCountBinding = self.selectedItems.count().bind{ $0.oneInteger }
+        let selectedItemCountBinding = self.selectedItems.count().observable{ $0.oneInteger }
         return selectedItemCountBinding.zip(self.selectedItemTypes).map { (count, types) in
             if types.count == 0 {
                 return ""
@@ -67,7 +67,7 @@ class PropertiesModel {
         }
     }()
 
-    lazy var selectedItemNames: BidiObservableValue<String> = { [unowned self] in
+    lazy var selectedItemNames: MutableObservableValue<String> = { [unowned self] in
         // TODO: s/Item/type.name/
         let relation = self.selectedItemNamesRelation
         return self.db.bidiBinding(

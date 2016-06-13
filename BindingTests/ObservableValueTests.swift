@@ -12,7 +12,7 @@ import XCTest
 class ObservableValueTests: BindingTestCase {
     
     func testMap() {
-        let observable = BidiObservableValue(false)
+        let observable = mutableObservableValue(false)
         let mapped = observable.map{ $0 ? 1 : 0 }
         var changed = false
         _ = mapped.addChangeObserver({ _ in changed = true })
@@ -39,8 +39,8 @@ class ObservableValueTests: BindingTestCase {
     }
     
     func testZip() {
-        let observable1 = BidiObservableValue(false)
-        let observable2 = BidiObservableValue(false)
+        let observable1 = mutableObservableValue(false)
+        let observable2 = mutableObservableValue(false)
         let zipped = observable1.zip(observable2)
         var changed = false
         _ = zipped.addChangeObserver({ _ in changed = true })
@@ -70,8 +70,8 @@ class ObservableValueTests: BindingTestCase {
         changed = false
     }
     
-    func testBidiBoolBinding() {
-        let observable = BidiObservableValue(false)
+    func testMutableObservableBool() {
+        let observable = mutableObservableValue(false)
         var changed = false
         _ = observable.addChangeObserver({ _ in changed = true })
         let metadata = ChangeMetadata(transient: false)

@@ -76,17 +76,17 @@ class NativeMenuItem<T> {
             content = nil
         }
         
-        bindings.register("visible", model.visible, { [weak self] value in
+        bindings.observe(model.visible, "visible", { [weak self] value in
             self?.nsitem.hidden = !value
         })
 
         if let content = content {
             // TODO: Avoid cycle here
             nsitem.representedObject = self
-            bindings.register("title", content.title, { [weak self] value in
+            bindings.observe(content.title, "title", { [weak self] value in
                 self?.nsitem.title = value
             })
-            bindings.register("image", content.image, { [weak self] value in
+            bindings.observe(content.image, "image", { [weak self] value in
                 self?.nsitem.image = value.nsimage
             })
         }

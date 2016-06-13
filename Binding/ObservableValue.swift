@@ -61,11 +61,11 @@ extension ObservableValue {
     }
     
     public func map<U>(transform: (T) -> U) -> ObservableValue<U> {
-        return MappedObservableValue(binding: self, transform: transform, valueChanging: valueChanging)
+        return MappedObservableValue(observable: self, transform: transform, valueChanging: valueChanging)
     }
 
     public func map<U: Equatable>(transform: (T) -> U) -> ObservableValue<U> {
-        return MappedObservableValue(binding: self, transform: transform, valueChanging: valueChanging)
+        return MappedObservableValue(observable: self, transform: transform, valueChanging: valueChanging)
     }
 
     public func zip<U>(other: ObservableValue<U>) -> ObservableValue<(T, U)> {
@@ -75,7 +75,7 @@ extension ObservableValue {
 
 extension ObservableValue where T: SequenceType, T.Generator.Element: Hashable {
     public func common() -> ObservableValue<CommonValue<T.Generator.Element>> {
-        return CommonObservableValue(binding: self)
+        return CommonObservableValue(observable: self)
     }
 }
 
@@ -92,10 +92,10 @@ private class ConstantObservableValue<T>: ObservableValue<T> {
 private class MappedObservableValue<T>: ObservableValue<T> {
     private var removal: ObserverRemoval!
     
-    init<U>(binding: ObservableValue<U>, transform: (U) -> T, valueChanging: (T, T) -> Bool) {
-        super.init(initialValue: transform(binding.value), valueChanging: valueChanging)
-        self.removal = binding.addChangeObserver({ [weak self] metadata in
-            self?.setValue(transform(binding.value), metadata)
+    init<U>(observable: ObservableValue<U>, transform: (U) -> T, valueChanging: (T, T) -> Bool) {
+        super.init(initialValue: transform(observable.value), valueChanging: valueChanging)
+        self.removal = observable.addChangeObserver({ [weak self] metadata in
+            self?.setValue(transform(observable.value), metadata)
         })
     }
 }
@@ -104,13 +104,13 @@ private class ZippedObservableValue<U, V>: ObservableValue<(U, V)> {
     private var removal1: ObserverRemoval!
     private var removal2: ObserverRemoval!
     
-    init(_ binding1: ObservableValue<U>, _ binding2: ObservableValue<V>) {
-        super.init(initialValue: (binding1.value, binding2.value))
-        self.removal1 = binding1.addChangeObserver({ [weak self] metadata in
-            self?.setValue((binding1.value, binding2.value), metadata)
+    init(_ observable1: ObservableValue<U>, _ observable2: ObservableValue<V>) {
+        super.init(initialValue: (observable1.value, observable2.value))
+        self.removal1 = observable1.addChangeObserver({ [weak self] metadata in
+            self?.setValue((observable1.value, observable2.value), metadata)
         })
-        self.removal2 = binding2.addChangeObserver({ [weak self] metadata in
-            self?.setValue((binding1.value, binding2.value), metadata)
+        self.removal2 = observable2.addChangeObserver({ [weak self] metadata in
+            self?.setValue((observable1.value, observable2.value), metadata)
         })
     }
 }
@@ -118,10 +118,10 @@ private class ZippedObservableValue<U, V>: ObservableValue<(U, V)> {
 private class CommonObservableValue<T: Hashable>: ObservableValue<CommonValue<T>> {
     private var removal: ObserverRemoval!
     
-    init<S: SequenceType where S.Generator.Element == T>(binding: ObservableValue<S>) {
+    init<S: SequenceType where S.Generator.Element == T>(observable: ObservableValue<S>) {
         
         func commonValue() -> CommonValue<T> {
-            let valuesSet = Set(binding.value)
+            let valuesSet = Set(observable.value)
             switch valuesSet.count {
             case 0:
                 return .None
@@ -134,14 +134,14 @@ private class CommonObservableValue<T: Hashable>: ObservableValue<CommonValue<T>
         
         super.init(initialValue: commonValue())
         
-        self.removal = binding.addChangeObserver({ [weak self] metadata in
+        self.removal = observable.addChangeObserver({ [weak self] metadata in
             self?.setValue(commonValue(), metadata)
         })
     }
 }
 
-public class BidiObservableValue<T>: ObservableValue<T> {
-    public override init(initialValue: T, valueChanging: (T, T) -> Bool) {
+public class MutableObservableValue<T>: ObservableValue<T> {
+    internal override init(initialValue: T, valueChanging: (T, T) -> Bool) {
         super.init(initialValue: initialValue, valueChanging: valueChanging)
     }
     
@@ -150,21 +150,19 @@ public class BidiObservableValue<T>: ObservableValue<T> {
     }
 }
 
-public func bidiObservableValue<T: Equatable>(initialValue: T) -> BidiObservableValue<T> {
-    return BidiObservableValue(initialValue: initialValue, valueChanging: valueChanging)
+public func mutableObservableValue<T>(initialValue: T, valueChanging: (T, T) -> Bool) -> MutableObservableValue<T> {
+    return MutableObservableValue(initialValue: initialValue, valueChanging: valueChanging)
 }
 
-public func bidiObservableValue<T: Equatable>(initialValue: T?) -> BidiObservableValue<T?> {
-    return BidiObservableValue(initialValue: initialValue, valueChanging: valueChanging)
+public func mutableObservableValue<T: Equatable>(initialValue: T) -> MutableObservableValue<T> {
+    return MutableObservableValue(initialValue: initialValue, valueChanging: valueChanging)
 }
 
-extension BidiObservableValue where T: Equatable {
-    public convenience init(_ initialValue: T) {
-        self.init(initialValue: initialValue, valueChanging: valueChanging)
-    }
+public func mutableObservableValue<T: Equatable>(initialValue: T?) -> MutableObservableValue<T?> {
+    return MutableObservableValue(initialValue: initialValue, valueChanging: valueChanging)
 }
 
-extension BidiObservableValue where T: BooleanType {
+extension MutableObservableValue where T: BooleanType {
     public func toggle(metadata: ChangeMetadata = ChangeMetadata(transient: true)) {
         let newValue = !value
         update(newValue as! T, metadata)

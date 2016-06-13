@@ -19,7 +19,7 @@ struct TreeViewModel<N: TreeNode> {
     let contextMenu: ((N.Data) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
     let move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?
-    let selection: BidiObservableValue<Set<N.ID>>
+    let selection: MutableObservableValue<Set<N.ID>>
     let cellIdentifier: (N.Data) -> String
     let cellText: (N.Data) -> ObservableValue<String>
     let cellImage: ((N.Data) -> ObservableValue<Image>)?

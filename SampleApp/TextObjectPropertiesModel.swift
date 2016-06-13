@@ -35,7 +35,7 @@ class TextObjectPropertiesModel {
         return self.selectedTextObjects.project(["font"])
     }()
 
-    lazy var editable: BidiObservableValue<Checkbox.CheckState> = { [unowned self] in
+    lazy var editable: MutableObservableValue<Checkbox.CheckState> = { [unowned self] in
         return self.db.bidiBinding(
             self.editableRelation,
             action: "Change Editable",
@@ -44,7 +44,7 @@ class TextObjectPropertiesModel {
         )
     }()
     
-    lazy var hint: BidiObservableValue<String> = { [unowned self] in
+    lazy var hint: MutableObservableValue<String> = { [unowned self] in
         return self.db.bidiBinding(
             self.hintRelation,
             action: "Change Hint",
@@ -59,7 +59,7 @@ class TextObjectPropertiesModel {
     
     var availableFonts: [String] = ["Futura", "Helvetica", "Monaco"]
     
-    lazy var font: BidiObservableValue<String?> = { [unowned self] in
+    lazy var font: MutableObservableValue<String?> = { [unowned self] in
         return self.db.bidiBinding(
             self.fontRelation,
             action: "Change Font",

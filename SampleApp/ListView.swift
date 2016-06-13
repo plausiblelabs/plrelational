@@ -18,7 +18,7 @@ struct ListViewModel<E: ArrayElement> {
     let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
-    let selection: BidiObservableValue<Set<E.ID>>
+    let selection: MutableObservableValue<Set<E.ID>>
     let cellIdentifier: (E.Data) -> String
     let cellText: (E.Data) -> ObservableValue<String>
     let cellImage: ((E.Data) -> ObservableValue<Image>)?

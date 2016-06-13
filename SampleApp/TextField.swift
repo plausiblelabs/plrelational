@@ -15,7 +15,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
 
     var string: ObservableValue<String>? {
         didSet {
-            bindings.register("string", string, { [weak self] value in
+            bindings.observe(string, "string", { [weak self] value in
                 self?.stringValue = value
             })
         }
@@ -23,7 +23,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
 
     var placeholder: ObservableValue<String>? {
         didSet {
-            bindings.register("placeholder", placeholder, { [weak self] value in
+            bindings.observe(placeholder, "placeholder", { [weak self] value in
                 self?.placeholderString = value
             })
         }
@@ -31,7 +31,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
 
     var visible: ObservableValue<Bool>? {
         didSet {
-            bindings.register("visible", visible, { [weak self] value in
+            bindings.observe(visible, "visible", { [weak self] value in
                 self?.hidden = !value
             })
         }
@@ -60,7 +60,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
     
     override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
-        if let bidiBinding = string as? BidiObservableValue {
+        if let bidiBinding = string as? MutableObservableValue {
             bindings.update(bidiBinding, newValue: stringValue, transient: true)
         }
         previousValue = stringValue
@@ -71,7 +71,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value
         //Swift.print("CONTROL DID END EDITING!")
-        if let previousCommittedValue = previousCommittedValue, bidiBinding = string as? BidiObservableValue {
+        if let previousCommittedValue = previousCommittedValue, bidiBinding = string as? MutableObservableValue {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if stringValue != previousCommittedValue {
                 bindings.update(bidiBinding, newValue: stringValue, transient: false)

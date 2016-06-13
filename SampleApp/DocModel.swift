@@ -320,8 +320,8 @@ class DocModel {
         )
     }()
     
-    lazy var propertiesSidebarVisible: BidiObservableValue<Bool> = { [unowned self] in
-        return BidiObservableValue(true)
+    lazy var propertiesSidebarVisible: MutableObservableValue<Bool> = { [unowned self] in
+        return mutableObservableValue(true)
     }()
     
     lazy var propertiesModel: PropertiesModel = { [unowned self] in
@@ -333,7 +333,7 @@ class DocModel {
         )
     }()
 
-    private func bidiStringBinding(relation: Relation, type: String) -> BidiObservableValue<String> {
+    private func bidiStringBinding(relation: Relation, type: String) -> MutableObservableValue<String> {
         return undoableDB.bidiBinding(
             relation,
             action: "Rename \(type)",
@@ -342,7 +342,7 @@ class DocModel {
         )
     }
 
-    private func bidiSelectionBinding(relation: MutableRelation, clearInspectorSelection: Bool) -> BidiObservableValue<Set<RelationValue>> {
+    private func bidiSelectionBinding(relation: MutableRelation, clearInspectorSelection: Bool) -> MutableObservableValue<Set<RelationValue>> {
         return undoableDB.bidiBinding(
             relation,
             action: "Change Selection",

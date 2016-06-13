@@ -38,17 +38,17 @@ class UndoableDatabase {
     }
     
     /// Note: `set` will be called in the context of a database transaction.
-    func bidiBinding<T: Equatable>(relation: Relation, action: String, get: Relation -> T, set: T -> Void) -> BidiObservableValue<T> {
-        return relation.bindBidi(bidiConfig(action, set), relationToValue: get)
+    func bidiBinding<T: Equatable>(relation: Relation, action: String, get: Relation -> T, set: T -> Void) -> MutableObservableValue<T> {
+        return relation.mutableObservable(mutationConfig(action, set), relationToValue: get)
     }
     
     /// Note: `set` will be called in the context of a database transaction.
-    func bidiBinding<T: Equatable>(relation: Relation, action: String, get: Relation -> T?, set: T? -> Void) -> BidiObservableValue<T?> {
-        return relation.bindBidi(bidiConfig(action, set), relationToValue: get)
+    func bidiBinding<T: Equatable>(relation: Relation, action: String, get: Relation -> T?, set: T? -> Void) -> MutableObservableValue<T?> {
+        return relation.mutableObservable(mutationConfig(action, set), relationToValue: get)
     }
     
-    private func bidiConfig<T>(action: String, _ set: T -> Void) -> RelationBidiConfig<T> {
-        return RelationBidiConfig(
+    private func mutationConfig<T>(action: String, _ set: T -> Void) -> RelationMutationConfig<T> {
+        return RelationMutationConfig(
             snapshot: {
                 return self.db.takeSnapshot()
             },

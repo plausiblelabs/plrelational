@@ -15,16 +15,16 @@ class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
     
     var items: ObservableValue<[T]>? {
         didSet {
-            bindings.register("items", items, { [weak self] value in
+            bindings.observe(items, "items", { [weak self] value in
                 let objects = value.map{ $0 as! AnyObject }
                 self?.addItemsWithObjectValues(objects)
             })
         }
     }
     
-    var value: BidiObservableValue<T?>? {
+    var value: MutableObservableValue<T?>? {
         didSet {
-            bindings.register("value", value, { [weak self] value in
+            bindings.observe(value, "value", { [weak self] value in
                 self?.objectValue = value as? AnyObject
             })
         }

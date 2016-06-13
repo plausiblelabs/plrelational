@@ -11,113 +11,109 @@ import XCTest
 
 class BindingSetTests: XCTestCase {
     
-    func testRegister() {
+    func testObserve() {
         var set: BindingSet! = BindingSet()
         
-        let binding1 = BidiObservableValue("Hello")
-        let binding2 = BidiObservableValue("there")
+        let observable1 = mutableObservableValue("Hello")
+        let observable2 = mutableObservableValue("there")
         
-        var binding1Values: [String] = []
-        var binding2Values: [String] = []
+        var observable1Values: [String] = []
+        var observable2Values: [String] = []
         
-        var binding1Detached = false
-        var binding2Detached = false
+        var observable1Detached = false
+        var observable2Detached = false
         
-        XCTAssertEqual(binding1Values, [])
-        XCTAssertEqual(binding2Values, [])
-        XCTAssertEqual(binding1Detached, false)
-        XCTAssertEqual(binding2Detached, false)
-        XCTAssertEqual(binding1.observerCount, 0)
-        XCTAssertEqual(binding2.observerCount, 0)
+        XCTAssertEqual(observable1Values, [])
+        XCTAssertEqual(observable2Values, [])
+        XCTAssertEqual(observable1Detached, false)
+        XCTAssertEqual(observable2Detached, false)
+        XCTAssertEqual(observable1.observerCount, 0)
+        XCTAssertEqual(observable2.observerCount, 0)
         
-        set.register("1", binding1, { binding1Values.append($0) }, onDetach: { binding1Detached = true })
+        set.observe(observable1, "1", { observable1Values.append($0) }, onDetach: { observable1Detached = true })
 
-        XCTAssertEqual(binding1Values, ["Hello"])
-        XCTAssertEqual(binding2Values, [])
-        XCTAssertEqual(binding1Detached, false)
-        XCTAssertEqual(binding2Detached, false)
-        XCTAssertEqual(binding1.observerCount, 1)
-        XCTAssertEqual(binding2.observerCount, 0)
+        XCTAssertEqual(observable1Values, ["Hello"])
+        XCTAssertEqual(observable2Values, [])
+        XCTAssertEqual(observable1Detached, false)
+        XCTAssertEqual(observable2Detached, false)
+        XCTAssertEqual(observable1.observerCount, 1)
+        XCTAssertEqual(observable2.observerCount, 0)
 
-        set.register("2", binding2, { binding2Values.append($0) }, onDetach: { binding2Detached = true })
+        set.observe(observable2, "2", { observable2Values.append($0) }, onDetach: { observable2Detached = true })
         
-        XCTAssertEqual(binding1Values, ["Hello"])
-        XCTAssertEqual(binding2Values, ["there"])
-        XCTAssertEqual(binding1Detached, false)
-        XCTAssertEqual(binding2Detached, false)
-        XCTAssertEqual(binding1.observerCount, 1)
-        XCTAssertEqual(binding2.observerCount, 1)
+        XCTAssertEqual(observable1Values, ["Hello"])
+        XCTAssertEqual(observable2Values, ["there"])
+        XCTAssertEqual(observable1Detached, false)
+        XCTAssertEqual(observable2Detached, false)
+        XCTAssertEqual(observable1.observerCount, 1)
+        XCTAssertEqual(observable2.observerCount, 1)
         
-        // Simulate binding1's value being updated externally (i.e., not through BindingSet.update, which
+        // Simulate observable1's value being updated externally (i.e., not through BindingSet.update, which
         // has self-initiated change protection) and verify that the onValue callback is called with the
         // new value
-        binding1.update("Hallo", ChangeMetadata(transient: false))
+        observable1.update("Hallo", ChangeMetadata(transient: false))
         
-        XCTAssertEqual(binding1Values, ["Hello", "Hallo"])
-        XCTAssertEqual(binding2Values, ["there"])
-        XCTAssertEqual(binding1Detached, false)
-        XCTAssertEqual(binding2Detached, false)
+        XCTAssertEqual(observable1Values, ["Hello", "Hallo"])
+        XCTAssertEqual(observable2Values, ["there"])
+        XCTAssertEqual(observable1Detached, false)
+        XCTAssertEqual(observable2Detached, false)
 
-        // Simulate binding2's value being updated internally (i.e., via BindingSet.update, which suppresses
-        // the onValue call, so that the new value is not appended to binding2Values)
-        set.update(binding2, newValue: "thar")
+        // Simulate observable2's value being updated internally (i.e., via BindingSet.update, which suppresses
+        // the onValue call, so that the new value is not appended to observable2Values)
+        set.update(observable2, newValue: "thar")
         
-        XCTAssertEqual(binding1Values, ["Hello", "Hallo"])
-        XCTAssertEqual(binding2Values, ["there"])
-        XCTAssertEqual(binding1Detached, false)
-        XCTAssertEqual(binding2Detached, false)
+        XCTAssertEqual(observable1Values, ["Hello", "Hallo"])
+        XCTAssertEqual(observable2Values, ["there"])
+        XCTAssertEqual(observable1Detached, false)
+        XCTAssertEqual(observable2Detached, false)
         
-        set.register("2", nil, { binding2Values.append($0) }, onDetach: { binding2Detached = true })
+        set.observe(nil, "2", { observable2Values.append($0) }, onDetach: { observable2Detached = true })
         
-        XCTAssertEqual(binding1Values, ["Hello", "Hallo"])
-        XCTAssertEqual(binding2Values, ["there"])
-        XCTAssertEqual(binding1Detached, false)
-        XCTAssertEqual(binding2Detached, true)
-        XCTAssertEqual(binding1.observerCount, 1)
-        XCTAssertEqual(binding2.observerCount, 0)
+        XCTAssertEqual(observable1Values, ["Hello", "Hallo"])
+        XCTAssertEqual(observable2Values, ["there"])
+        XCTAssertEqual(observable1Detached, false)
+        XCTAssertEqual(observable2Detached, true)
+        XCTAssertEqual(observable1.observerCount, 1)
+        XCTAssertEqual(observable2.observerCount, 0)
         
         set = nil
         
-        XCTAssertEqual(binding1Values, ["Hello", "Hallo"])
-        XCTAssertEqual(binding2Values, ["there"])
-        XCTAssertEqual(binding1Detached, false)
-        XCTAssertEqual(binding2Detached, true)
-        XCTAssertEqual(binding1.observerCount, 0)
-        XCTAssertEqual(binding2.observerCount, 0)
+        XCTAssertEqual(observable1Values, ["Hello", "Hallo"])
+        XCTAssertEqual(observable2Values, ["there"])
+        XCTAssertEqual(observable1Detached, false)
+        XCTAssertEqual(observable2Detached, true)
+        XCTAssertEqual(observable1.observerCount, 0)
+        XCTAssertEqual(observable2.observerCount, 0)
     }
     
     func testConnect() {
-        var bindings: BindingSet! = BindingSet()
+        var set: BindingSet! = BindingSet()
         
-        let boolBinding = BidiObservableValue(false)
-        let stringBinding = BidiObservableValue("")
-        let intBinding = BidiObservableValue(6)
+        let mutableBool = mutableObservableValue(false)
+        let mutableString = mutableObservableValue("")
+        let mutableInt = mutableObservableValue(6)
        
-//        var boolValues: [Bool] = []
-//        var stringValues: [String] = []
-//        var intValues: [Int] = []
-
-        XCTAssertEqual(boolBinding.value, false)
-        XCTAssertEqual(stringBinding.value, "")
-        XCTAssertEqual(intBinding.value, 6)
+        XCTAssertEqual(mutableBool.value, false)
+        XCTAssertEqual(mutableString.value, "")
+        XCTAssertEqual(mutableInt.value, 6)
         
-        XCTAssertEqual(boolBinding.observerCount, 0)
-        XCTAssertEqual(stringBinding.observerCount, 0)
-        XCTAssertEqual(intBinding.observerCount, 0)
+        XCTAssertEqual(mutableBool.observerCount, 0)
+        XCTAssertEqual(mutableString.observerCount, 0)
+        XCTAssertEqual(mutableInt.observerCount, 0)
 
-        // We set up the connections such that `boolBinding` is the "master" value and the others
+        // We set up the connections such that `mutableBool` is the "master" value and the others
         // are secondary:
-        //   - If `boolBinding` is updated, then `stringBinding` and `intBinding` are updated.
-        //   - If `stringBinding` is updated, then `boolBinding` is updated, and `intBinding` should
+        //   - If `mutableBool` is updated, then `mutableString` and `mutableInt` are updated.
+        //   - If `mutableString` is updated, then `mutableBool` is updated, and `mutableInt` should
         //     but updated transitively.
-        //   - If `intBinding` is updated, then `boolBinding` is updated, and `stringBinding` should
+        //   - If `mutableInt` is updated, then `mutableBool` is updated, and `mutableString` should
         //     but updated transitively.
         
         // For this reverse case, we won't update the master value if the string is not "true" or "false"
         // (just to exercise the .NoChange case)
-        bindings.connect(
-            "boolBinding", boolBinding,
-            "stringBinding", stringBinding,
+        set.connect(
+            mutableBool, "mutableBool",
+            mutableString, "mutableString",
             forward: {
                 // Bool -> String
                 .Change($0.description)
@@ -135,18 +131,18 @@ class BindingSetTests: XCTestCase {
             }
         )
         
-        XCTAssertEqual(boolBinding.value, false)
-        XCTAssertEqual(stringBinding.value, "false")
-        XCTAssertEqual(intBinding.value, 6)
+        XCTAssertEqual(mutableBool.value, false)
+        XCTAssertEqual(mutableString.value, "false")
+        XCTAssertEqual(mutableInt.value, 6)
         
-        XCTAssertEqual(boolBinding.observerCount, 1)
-        XCTAssertEqual(stringBinding.observerCount, 1)
-        XCTAssertEqual(intBinding.observerCount, 0)
+        XCTAssertEqual(mutableBool.observerCount, 1)
+        XCTAssertEqual(mutableString.observerCount, 1)
+        XCTAssertEqual(mutableInt.observerCount, 0)
         
         // For this reverse case, we'll treat any non-zero value as true
-        bindings.connect(
-            "boolBinding", boolBinding,
-            "intBinding", intBinding,
+        set.connect(
+            mutableBool, "mutableBool",
+            mutableInt, "mutableInt",
             forward: {
                 // Bool -> Int
                 .Change($0 ? 1 : 0)
@@ -157,61 +153,61 @@ class BindingSetTests: XCTestCase {
             }
         )
         
-        XCTAssertEqual(boolBinding.value, false)
-        XCTAssertEqual(stringBinding.value, "false")
-        XCTAssertEqual(intBinding.value, 0)
+        XCTAssertEqual(mutableBool.value, false)
+        XCTAssertEqual(mutableString.value, "false")
+        XCTAssertEqual(mutableInt.value, 0)
         
-        XCTAssertEqual(boolBinding.observerCount, 2)
-        XCTAssertEqual(stringBinding.observerCount, 1)
-        XCTAssertEqual(intBinding.observerCount, 1)
+        XCTAssertEqual(mutableBool.observerCount, 2)
+        XCTAssertEqual(mutableString.observerCount, 1)
+        XCTAssertEqual(mutableInt.observerCount, 1)
 
-        // Update boolBinding and verify that secondary ones are updated
-        bindings.update(boolBinding, newValue: true)
+        // Update mutableBool and verify that secondary ones are updated
+        set.update(mutableBool, newValue: true)
         
-        XCTAssertEqual(boolBinding.value, true)
-        XCTAssertEqual(stringBinding.value, "true")
-        XCTAssertEqual(intBinding.value, 1)
+        XCTAssertEqual(mutableBool.value, true)
+        XCTAssertEqual(mutableString.value, "true")
+        XCTAssertEqual(mutableInt.value, 1)
         
-        // Update stringBinding and verify that others are updated
-        bindings.update(stringBinding, newValue: "false")
+        // Update mutableString and verify that others are updated
+        set.update(mutableString, newValue: "false")
         
-        XCTAssertEqual(boolBinding.value, false)
-        XCTAssertEqual(stringBinding.value, "false")
-        XCTAssertEqual(intBinding.value, 0)
+        XCTAssertEqual(mutableBool.value, false)
+        XCTAssertEqual(mutableString.value, "false")
+        XCTAssertEqual(mutableInt.value, 0)
         
-        // Update stringBinding and verify that there is no change reported
+        // Update mutableString and verify that there is no change reported
         // TODO: Verify the no change part
-        bindings.update(stringBinding, newValue: "false")
+        set.update(mutableString, newValue: "false")
         
-        XCTAssertEqual(boolBinding.value, false)
-        XCTAssertEqual(stringBinding.value, "false")
-        XCTAssertEqual(intBinding.value, 0)
+        XCTAssertEqual(mutableBool.value, false)
+        XCTAssertEqual(mutableString.value, "false")
+        XCTAssertEqual(mutableInt.value, 0)
         
-        // Update intBinding and verify that others are updated
-        bindings.update(intBinding, newValue: 8)
+        // Update mutableInt and verify that others are updated
+        set.update(mutableInt, newValue: 8)
         
-        XCTAssertEqual(boolBinding.value, true)
-        XCTAssertEqual(stringBinding.value, "true")
-        XCTAssertEqual(intBinding.value, 8)
+        XCTAssertEqual(mutableBool.value, true)
+        XCTAssertEqual(mutableString.value, "true")
+        XCTAssertEqual(mutableInt.value, 8)
         
-        // Update stringBinding with an unknown value and verify that others are not updated
-        bindings.update(stringBinding, newValue: "foo")
+        // Update mutableString with an unknown value and verify that others are not updated
+        set.update(mutableString, newValue: "foo")
         
-        XCTAssertEqual(boolBinding.value, true)
-        XCTAssertEqual(stringBinding.value, "foo")
-        XCTAssertEqual(intBinding.value, 8)
+        XCTAssertEqual(mutableBool.value, true)
+        XCTAssertEqual(mutableString.value, "foo")
+        XCTAssertEqual(mutableInt.value, 8)
         
-        // Update stringBinding with an known value and verify that others are updated
-        bindings.update(stringBinding, newValue: "false")
+        // Update mutableString with an known value and verify that others are updated
+        set.update(mutableString, newValue: "false")
         
-        XCTAssertEqual(boolBinding.value, false)
-        XCTAssertEqual(stringBinding.value, "false")
-        XCTAssertEqual(intBinding.value, 0)
+        XCTAssertEqual(mutableBool.value, false)
+        XCTAssertEqual(mutableString.value, "false")
+        XCTAssertEqual(mutableInt.value, 0)
         
-        bindings = nil
+        set = nil
         
-        XCTAssertEqual(boolBinding.observerCount, 0)
-        XCTAssertEqual(stringBinding.observerCount, 0)
-        XCTAssertEqual(intBinding.observerCount, 0)
+        XCTAssertEqual(mutableBool.observerCount, 0)
+        XCTAssertEqual(mutableString.observerCount, 0)
+        XCTAssertEqual(mutableInt.observerCount, 0)
     }
 }
