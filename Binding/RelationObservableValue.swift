@@ -98,10 +98,6 @@ private class RelationMutableObservableValue<T>: MutableObservableValue<T> {
     }
     
     private override func update(newValue: T, _ metadata: ChangeMetadata) {
-        if !changing(value, newValue) {
-            return
-        }
-        
         if before == nil {
             before = config.snapshot()
         }

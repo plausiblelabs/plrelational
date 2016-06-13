@@ -391,7 +391,7 @@
 		37832EB91CFCE63C00256DB1 /* PropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertiesModel.swift; sourceTree = "<group>"; };
 		37832EBB1CFCF17800256DB1 /* TextObjectPropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObjectPropertiesView.swift; sourceTree = "<group>"; };
 		37A1CE501D07543F0067870D /* ImageObjectPropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageObjectPropertiesView.swift; sourceTree = "<group>"; };
-		37A1CE541D0890970067870D /* BindingSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BindingSet.swift; sourceTree = "<group>"; };
+		37A1CE541D0890970067870D /* BindingSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BindingSet.swift; path = Binding/BindingSet.swift; sourceTree = "<group>"; };
 		37A1CE571D089CD70067870D /* BindingSetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BindingSetTests.swift; path = BindingTests/BindingSetTests.swift; sourceTree = SOURCE_ROOT; };
 		37A1CE591D08A2240067870D /* MenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuItem.swift; sourceTree = "<group>"; };
 		37A1CE5C1D08C3110067870D /* ColorPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
@@ -683,6 +683,7 @@
 				372707721CF38FDC00710C80 /* Observable Value */,
 				372707741CF3904D00710C80 /* Observable Array */,
 				372707731CF38FF600710C80 /* Observable Tree */,
+				37A1CE661D0F31140067870D /* Binding Set */,
 				372707BC1CFE24C600710C80 /* Utilities */,
 			);
 			name = Binding;
@@ -691,8 +692,6 @@
 		372707BC1CFE24C600710C80 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				37A1CE541D0890970067870D /* BindingSet.swift */,
-				37A1CE571D089CD70067870D /* BindingSetTests.swift */,
 				37C6115A1CE4F3BC001DAF59 /* ArrayBinarySearch.swift */,
 				37C6115C1CE4F756001DAF59 /* ArrayBinarySearchTests.swift */,
 				3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */,
@@ -729,6 +728,15 @@
 				372707FC1CFE2C7E00710C80 /* Info.plist */,
 			);
 			path = BindableControlsAppUITests;
+			sourceTree = "<group>";
+		};
+		37A1CE661D0F31140067870D /* Binding Set */ = {
+			isa = PBXGroup;
+			children = (
+				37A1CE541D0890970067870D /* BindingSet.swift */,
+				37A1CE571D089CD70067870D /* BindingSetTests.swift */,
+			);
+			name = "Binding Set";
 			sourceTree = "<group>";
 		};
 		37C610FE1CD7EFAE001DAF59 /* SampleApp */ = {
