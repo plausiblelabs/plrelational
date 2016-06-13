@@ -1,9 +1,6 @@
 //
-//  AppDelegate.swift
-//  BindableControlsApp
-//
-//  Created by Chris Campbell on 5/31/16.
-//  Copyright © 2016 mikeash. All rights reserved.
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
 //
 
 import Cocoa

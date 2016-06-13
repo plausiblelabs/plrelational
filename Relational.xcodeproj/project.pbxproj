@@ -740,7 +740,7 @@
 				37C611451CDBCB19001DAF59 /* Views */,
 				37C611461CDBCB2F001DAF59 /* Model */,
 				37C6112E1CD7F79A001DAF59 /* Custom Views */,
-				37C611401CD94772001DAF59 /* Utilities */,
+				37C611401CD94772001DAF59 /* Undo */,
 				371243A71D00B5C100E9BCFF /* Resources */,
 				37C6112F1CD7F7A5001DAF59 /* Other Stuff */,
 			);
@@ -798,13 +798,13 @@
 			name = "Other Stuff";
 			sourceTree = "<group>";
 		};
-		37C611401CD94772001DAF59 /* Utilities */ = {
+		37C611401CD94772001DAF59 /* Undo */ = {
 			isa = PBXGroup;
 			children = (
 				37C611411CD94784001DAF59 /* UndoManager.swift */,
 				372707791CF7B2CB00710C80 /* UndoableDatabase.swift */,
 			);
-			name = Utilities;
+			name = Undo;
 			sourceTree = "<group>";
 		};
 		37C611451CDBCB19001DAF59 /* Views */ = {

@@ -1,9 +1,6 @@
 //
-//  Checkbox.swift
-//  Relational
-//
-//  Created by Terri Kramer on 5/25/16.
-//  Copyright © 2016 mikeash. All rights reserved.
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
 //
 
 import Cocoa

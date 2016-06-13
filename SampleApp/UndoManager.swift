@@ -1,9 +1,6 @@
 //
-//  UndoManager.swift
-//  Change
-//
-//  Created by Chris Campbell on 4/25/16.
-//  Copyright © 2016 Plausible Labs. All rights reserved.
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
 //
 
 import Foundation
