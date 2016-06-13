@@ -334,7 +334,7 @@ class DocModel {
     }()
 
     private func bidiStringBinding(relation: Relation, type: String) -> MutableObservableValue<String> {
-        return undoableDB.bidiBinding(
+        return undoableDB.observe(
             relation,
             action: "Rename \(type)",
             get: { $0.oneString },
@@ -343,7 +343,7 @@ class DocModel {
     }
 
     private func bidiSelectionBinding(relation: MutableRelation, clearInspectorSelection: Bool) -> MutableObservableValue<Set<RelationValue>> {
-        return undoableDB.bidiBinding(
+        return undoableDB.observe(
             relation,
             action: "Change Selection",
             get: { $0.allValues },

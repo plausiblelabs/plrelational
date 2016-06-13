@@ -106,7 +106,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         addObject("Wilma", editable: true, day: "Friday", color: Color.blue, rocks: 42)
 
         func nameBinding(relation: Relation) -> MutableObservableValue<String> {
-            return undoableDB.bidiBinding(
+            return undoableDB.observe(
                 relation,
                 action: "Rename Object",
                 get: { $0.oneString },
@@ -115,7 +115,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         
         func selectionBinding(relation: MutableRelation) -> MutableObservableValue<Set<RelationValue>> {
-            return undoableDB.bidiBinding(
+            return undoableDB.observe(
                 relation,
                 action: "Change Selection",
                 get: { $0.allValues },
@@ -163,7 +163,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         textField.string = nameBinding(selectedObjectsName)
         textField.placeholder = selectedObjectsName.stringWhenMulti("Multiple Values")
 
-        checkbox.checked = undoableDB.bidiBinding(
+        checkbox.checked = undoableDB.observe(
             selectedObjectsEditable,
             action: "Change Editable",
             get: { Checkbox.CheckState($0.oneBoolOrNil) },
@@ -174,14 +174,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let popupItems = days.map{ titledMenuItem($0) }
         popupButton.items = ObservableValue.constant(popupItems)
         popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
-        popupButton.selectedObject = undoableDB.bidiBinding(
+        popupButton.selectedObject = undoableDB.observe(
             selectedObjectsDay,
             action: "Change Day",
             get: { $0.oneStringOrNil },
             set: { selectedObjectsDay.updateNullableString($0) }
         )
         
-        stepper.value = undoableDB.bidiBinding(
+        stepper.value = undoableDB.observe(
             selectedObjectsRocks,
             action: "Change Rocks",
             get: { $0.oneIntegerOrNil.map{ Int($0) } },
@@ -197,7 +197,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         comboBox.items = ObservableValue.constant(["Alice", "Bob", "Carlos"])
         comboBox.value = comboObservableValue
         
-        colorPicker.color = undoableDB.bidiBinding(
+        colorPicker.color = undoableDB.observe(
             selectedObjectsColor,
             action: "Change Color",
             get: {

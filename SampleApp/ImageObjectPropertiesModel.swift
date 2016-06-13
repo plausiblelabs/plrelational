@@ -28,7 +28,7 @@ class ImageObjectPropertiesModel {
     }()
     
     lazy var editable: MutableObservableValue<Checkbox.CheckState> = { [unowned self] in
-        return self.db.bidiBinding(
+        return self.db.observe(
             self.editableRelation,
             action: "Change Editable",
             get: { Checkbox.CheckState($0.oneBoolOrNil) },

@@ -60,8 +60,8 @@ class TextField: NSTextField, NSTextFieldDelegate {
     
     override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
-        if let bidiBinding = string as? MutableObservableValue {
-            bindings.update(bidiBinding, newValue: stringValue, transient: true)
+        if let mutableString = string as? MutableObservableValue {
+            bindings.update(mutableString, newValue: stringValue, transient: true)
         }
         previousValue = stringValue
     }
@@ -71,10 +71,10 @@ class TextField: NSTextField, NSTextFieldDelegate {
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value
         //Swift.print("CONTROL DID END EDITING!")
-        if let previousCommittedValue = previousCommittedValue, bidiBinding = string as? MutableObservableValue {
+        if let previousCommittedValue = previousCommittedValue, mutableString = string as? MutableObservableValue {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if stringValue != previousCommittedValue {
-                bindings.update(bidiBinding, newValue: stringValue, transient: false)
+                bindings.update(mutableString, newValue: stringValue, transient: false)
             }
         }
         previousCommittedValue = nil
