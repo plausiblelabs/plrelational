@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
+
 infix operator ∩ {
     associativity left
     precedence 140

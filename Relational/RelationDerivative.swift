@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 class RelationDerivative {
     /// A variable is a bottom-level Relation which changes directly (rather than changing because

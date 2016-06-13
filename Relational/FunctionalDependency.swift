@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
+
 struct FunctionalDependency {
     var left: Set<Attribute>
     var right: Set<Attribute>

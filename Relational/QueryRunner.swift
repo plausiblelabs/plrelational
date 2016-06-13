@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 class QueryRunner {
     let nodes: [QueryPlanner.Node]

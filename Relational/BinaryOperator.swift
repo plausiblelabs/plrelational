@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 public protocol BinaryOperator {
     func evaluate(a: RelationValue, _ b: RelationValue) -> RelationValue

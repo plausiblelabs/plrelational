@@ -1,9 +1,6 @@
 //
-//  QueryRunnerTests.swift
-//  Relational
-//
-//  Created by Mike Ash on 5/31/16.
-//  Copyright © 2016 mikeash. All rights reserved.
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
 //
 
 import XCTest

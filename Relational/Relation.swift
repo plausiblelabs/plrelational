@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 /// Silly placeholder until we figure out what the error type should actually look like.
 public typealias RelationError = ErrorType

@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 extension Set {
     var powerSet: Set<Set<Element>> {

@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 /// How many operations to perform between scrubs.
 private let scrubInterval = 10

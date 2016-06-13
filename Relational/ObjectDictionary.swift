@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 /// Like Dictionary, but the keys use object identity rather than value equality.
 struct ObjectDictionary<Key: AnyObject, Value>: SequenceType, DictionaryLiteralConvertible {

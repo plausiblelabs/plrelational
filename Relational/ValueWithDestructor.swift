@@ -1,3 +1,8 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
+
 class ValueWithDestructor<T> {
     var value: T
     let destructor: T -> Void

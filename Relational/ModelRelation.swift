@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 public class ModelRelation<T: Model>: SequenceType {
     let owningDatabase: ModelDatabase

@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 /// A generalized Relation which derives its value by performing some operation on other Relations.
 /// This implements operations such as union, intersection, difference, join, etc.

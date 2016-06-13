@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 /// Values which can be stored in a Relation. These are just the SQLite data types,
 /// Plus a "not found" value for when an attribute doesn't exist at all.

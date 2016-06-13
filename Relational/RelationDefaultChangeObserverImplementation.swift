@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 /// A mixin protocol which provides a default implementation to manage change
 /// observers. Types which conform must provide the one stored property in

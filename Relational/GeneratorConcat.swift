@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 extension GeneratorType {
     public func concat<OtherGen: GeneratorType where OtherGen.Element == Self.Element>(other: OtherGen) -> ConcatGenerator<Self, OtherGen> {

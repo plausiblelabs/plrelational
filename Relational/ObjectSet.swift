@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
+//
 
 /// Like a Set, but based on object identity rather than value equality.
 struct ObjectSet<T: AnyObject>: SequenceType {
