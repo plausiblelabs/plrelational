@@ -6,39 +6,39 @@
 import Cocoa
 import Binding
 
-struct MenuItemContent<T> {
-    let object: T
-    let title: ObservableValue<String>?
-    let image: ObservableValue<Image>?
+public struct MenuItemContent<T> {
+    public let object: T
+    public let title: ObservableValue<String>?
+    public let image: ObservableValue<Image>?
     
-    init(object: T, title: ObservableValue<String>?, image: ObservableValue<Image>? = nil) {
+    public init(object: T, title: ObservableValue<String>?, image: ObservableValue<Image>? = nil) {
         self.object = object
         self.title = title
         self.image = image
     }
 }
 
-enum MenuItemType<T> { case
+public enum MenuItemType<T> { case
     Normal(MenuItemContent<T>),
     Momentary(MenuItemContent<T>, action: () -> Void),
     Separator
 }
 
-struct MenuItem<T> {
-    let type: MenuItemType<T>
-    let visible: ObservableValue<Bool>?
+public struct MenuItem<T> {
+    public let type: MenuItemType<T>
+    public let visible: ObservableValue<Bool>?
     
-    init(_ type: MenuItemType<T>, visible: ObservableValue<Bool>? = nil) {
+    public init(_ type: MenuItemType<T>, visible: ObservableValue<Bool>? = nil) {
         self.type = type
         self.visible = visible
     }
 }
 
-func titledMenuItem(title: ObservableValue<String>, object: String = "Default") -> MenuItem<String> {
+public func titledMenuItem(title: ObservableValue<String>, object: String = "Default") -> MenuItem<String> {
     return MenuItem(.Normal(MenuItemContent(object: object, title: title, image: nil)))
 }
 
-func titledMenuItem(title: String) -> MenuItem<String> {
+public func titledMenuItem(title: String) -> MenuItem<String> {
     return titledMenuItem(ObservableValue.constant(title), object: title)
 }
 

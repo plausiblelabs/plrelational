@@ -6,11 +6,11 @@
 import Cocoa
 import Binding
 
-class ImageView: NSImageView {
+public class ImageView: NSImageView {
 
     private let bindings = BindingSet()
     
-    var img: ObservableValue<Image>? {
+    public var img: ObservableValue<Image>? {
         didSet {
             bindings.observe(img, "img", { [weak self] value in
                 self?.image = value.nsimage
@@ -18,11 +18,11 @@ class ImageView: NSImageView {
         }
     }
     
-    override init(frame: NSRect) {
+    public override init(frame: NSRect) {
         super.init(frame: frame)
     }
     
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
 }

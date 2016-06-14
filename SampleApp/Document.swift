@@ -4,6 +4,7 @@
 //
 
 import Cocoa
+import BindableControls
 
 class Document: NSDocument {
 

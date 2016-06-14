@@ -6,14 +6,14 @@
 import Cocoa
 import Binding
 
-class Checkbox: NSButton {
+public class Checkbox: NSButton {
     
-    enum CheckState: String { case
+    public enum CheckState: String { case
         On = "On",
         Off = "Off",
         Mixed = "Mixed"
         
-        init(_ boolValue: Bool?) {
+        public init(_ boolValue: Bool?) {
             switch boolValue {
             case nil:
                 self = .Mixed
@@ -37,6 +37,17 @@ class Checkbox: NSButton {
             }
         }
         
+        public var boolValue: Bool {
+            switch self {
+            case .On:
+                return true
+            case .Off:
+                return false
+            case .Mixed:
+                preconditionFailure("Cannot represent mixed state as a boolean")
+            }
+        }
+
         // Int value is used to set NSButton.state
         var nsValue: Int {
             switch self {
@@ -48,22 +59,11 @@ class Checkbox: NSButton {
                 return NSMixedState
             }
         }
-        
-        var boolValue: Bool {
-            switch self {
-            case .On:
-                return true
-            case .Off:
-                return false
-            case .Mixed:
-                preconditionFailure("Cannot represent mixed state as a boolean")
-            }
-        }
     }
 
     private let bindings = BindingSet()
     
-    var checked: MutableObservableValue<CheckState>? {
+    public var checked: MutableObservableValue<CheckState>? {
         didSet {
             bindings.observe(checked, "checked", { [weak self] value in
                 // Only allow mixed state if we are starting in a mixed state; otherwise we
@@ -74,14 +74,14 @@ class Checkbox: NSButton {
         }
     }
     
-    override init(frame frameRect: NSRect) {
+    public override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
         setButtonType(.SwitchButton)
         target = self
         action = #selector(checkboxToggled(_:))
     }
 
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
@@ -103,7 +103,7 @@ class Checkbox: NSButton {
         bindings.update(checked, newValue: newState)
     }
     
-    override func accessibilityValue() -> AnyObject? {
+    public override func accessibilityValue() -> AnyObject? {
         return CheckState(state).rawValue
     }
 }

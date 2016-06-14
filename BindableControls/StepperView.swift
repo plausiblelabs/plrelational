@@ -6,11 +6,11 @@
 import Cocoa
 import Binding
 
-class StepperView: NSControl, NSTextFieldDelegate {
+public class StepperView: NSControl, NSTextFieldDelegate {
     
     private let bindings = BindingSet()
     
-    var value: MutableObservableValue<Int?>? {
+    public var value: MutableObservableValue<Int?>? {
         didSet {
             bindings.observe(value, "value", { [weak self] value in
                 guard let weakSelf = self else { return }
@@ -25,7 +25,7 @@ class StepperView: NSControl, NSTextFieldDelegate {
         }
     }
 
-    var placeholder: ObservableValue<String>? {
+    public var placeholder: ObservableValue<String>? {
         didSet {
             bindings.observe(placeholder, "placeholder", { [weak self] value in
                 self?.textField.placeholderString = value
@@ -37,7 +37,7 @@ class StepperView: NSControl, NSTextFieldDelegate {
     private var textField: NSTextField!
     private var stepper: NSStepper!
 
-    init(frame: NSRect, min: Int, max: Int, defaultValue: Int) {
+    public init(frame: NSRect, min: Int, max: Int, defaultValue: Int) {
         self.defaultValue = defaultValue
         
         super.init(frame: frame)
@@ -67,15 +67,15 @@ class StepperView: NSControl, NSTextFieldDelegate {
         setFrameSize(frame.size)
     }
     
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("NSCoding not supported")
     }
     
-    override var flipped: Bool {
+    public override var flipped: Bool {
         return true
     }
     
-    override func setFrameSize(newSize: NSSize) {
+    public override func setFrameSize(newSize: NSSize) {
         super.setFrameSize(newSize)
         
         // XXX: NSStepper's width is zero until some later time, so for now just hardcode a width
@@ -112,7 +112,7 @@ class StepperView: NSControl, NSTextFieldDelegate {
         bindings.update(value, newValue: newValue)
     }
     
-    override func controlTextDidEndEditing(notification: NSNotification) {
+    public override func controlTextDidEndEditing(notification: NSNotification) {
         let textField = notification.object! as! NSTextField
         if !textField.stringValue.isEmpty {
             controlChanged(textField)

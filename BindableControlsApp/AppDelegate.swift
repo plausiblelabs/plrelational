@@ -6,6 +6,7 @@
 import Cocoa
 import libRelational
 import Binding
+import BindableControls
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {

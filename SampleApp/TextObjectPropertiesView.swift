@@ -5,6 +5,7 @@
 
 import Cocoa
 import Binding
+import BindableControls
 
 class TextObjectPropertiesView: BackgroundView {
 
