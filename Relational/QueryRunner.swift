@@ -321,6 +321,7 @@ extension QueryRunner {
         init(nodes: [QueryPlanner.Node], nodeIndex: Int) {
             self.nodeIndex = nodeIndex
             let childCount = nodes[nodeIndex].childCount
+            inputBuffers.reserveCapacity(childCount)
             while inputBuffers.count < childCount {
                 inputBuffers.append(Buffer())
             }
