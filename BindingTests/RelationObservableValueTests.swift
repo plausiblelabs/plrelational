@@ -67,7 +67,17 @@ class RelationObservableValueTests: BindingTestCase {
             ["id", "name", "friendly", "age"],
             [1,    "cat",  1,          5],
             [2,    "dog",  0,          3])
-        
+
+        let expr: SelectExpression = Attribute("id") *== 1
+        let transform = { (row: Row) -> String? in "\(row["name"]):\(row["age"])" }
+        XCTAssertNil(empty.oneValue(transform))
+        XCTAssertEqual(one.select(expr).oneValue(transform), "cat:5")
+        XCTAssertNil(multi.oneValue(transform))
+
+        XCTAssertEqual(empty.oneValue(transform, orDefault: "default"), "default")
+        XCTAssertEqual(one.select(expr).oneValue(transform, orDefault: "default"), "cat:5")
+        XCTAssertEqual(multi.oneValue(transform, orDefault: "default"), "default")
+
         XCTAssertNil(empty.project(["name"]).oneValue)
         XCTAssertEqual(one.project(["name"]).oneValue, RelationValue("cat"))
         XCTAssertNil(multi.project(["name"]).oneValue)

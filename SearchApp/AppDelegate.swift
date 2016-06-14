@@ -1,9 +1,6 @@
 //
-//  AppDelegate.swift
-//  SearchApp
-//
-//  Created by Chris Campbell on 6/14/16.
-//  Copyright © 2016 mikeash. All rights reserved.
+// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// All rights reserved.
 //
 
 import Cocoa
@@ -15,8 +12,9 @@ import BindableControls
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
     @IBOutlet weak var window: NSWindow!
-    @IBOutlet var outlineView: ExtOutlineView!
     @IBOutlet var textField: TextField!
+    @IBOutlet var outlineView: ExtOutlineView!
+    @IBOutlet var recordButton: Button!
     
     var nsUndoManager: SPUndoManager!
     var listView: ListView<RowArrayElement>!
@@ -118,12 +116,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 let rowID = row["id"]
                 return persons
                     .select(Attribute("id") *== rowID)
-                    .project(["name"])
-                    .observable{ $0.oneString }
+                    .observable{ $0.oneValue({ row in "\(row["name"]) (\(row["sales"]))" }, orDefault: "") }
             },
             cellImage: nil
         )
         listView = ListView(model: listViewModel, outlineView: outlineView)
+        
+        // Set up the other controls
+        recordButton.disabled = selectedPersonID.empty
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {
