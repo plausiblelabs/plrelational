@@ -4,18 +4,20 @@
 //
 
 class QueryRunner {
-    let nodes: [QueryPlanner.Node]
-    let rootIndex: Int
+    private let nodes: [QueryPlanner.Node]
+    private let rootIndex: Int
     
-    var activeInitiatorIndexes: [Int]
+    private var activeInitiatorIndexes: [Int]
     
-    var initiatorGenerators: Dictionary<Int, AnyGenerator<Result<Row, RelationError>>> = [:]
+    private var initiatorGenerators: Dictionary<Int, AnyGenerator<Result<Row, RelationError>>> = [:]
     
-    var nodeStates: [NodeState]
+    private var intermediatesToProcess: [IntermediateToProcess] = []
     
-    var collectedOutput: Set<Row> = []
+    private var nodeStates: [NodeState]
     
-    var done = false
+    private var collectedOutput: Set<Row> = []
+    
+    private var done = false
     
     init(planner: QueryPlanner) {
         let nodes = planner.nodes
@@ -43,27 +45,62 @@ class QueryRunner {
         })
     }
     
+    /// Run a round of processing on the query. This will either process some intermediate nodes
+    /// or generate some rows from initiator nodes. Any rows that are output from the graph during
+    /// processing are returned to the caller.
     private func pump() -> [Result<Row, RelationError>] {
+        let pumped = pumpIntermediates()
+        if !pumped {
+            let result = pumpInitiator()
+            if let err = result.err {
+                return [.Err(err)]
+            }
+        }
+        
+        let output = collectedOutput.map({ Result<Row, RelationError>.Ok($0) })
+        collectedOutput.removeAll(keepCapacity: true)
+        return output
+    }
+    
+    /// Process all pending intermediate nodes. If any intermediate nodes were processed, this method
+    /// returns true. If no intermediates are pending, it returns false.
+    private func pumpIntermediates() -> Bool {
+        guard !intermediatesToProcess.isEmpty else {
+            return false
+        }
+        
+        let localIntermediates = intermediatesToProcess
+        intermediatesToProcess.removeAll(keepCapacity: true)
+        
+        for intermediate in localIntermediates {
+            if !nodeStates[intermediate.nodeIndex].didMarkDone && nodeStates[intermediate.nodeIndex].activeBuffers == 0 {
+                markDone(intermediate.nodeIndex)
+            }
+            process(intermediate.nodeIndex, inputIndex: intermediate.inputIndex)
+        }
+        return true
+    }
+    
+    /// Process an active initiator node. If there are no active initiator nodes, sets the `done` property
+    /// to true. If the initiator node produces an error instead of a row, this method returns that error.
+    private func pumpInitiator() -> Result<Void, RelationError> {
         guard let nodeIndex = activeInitiatorIndexes.last else {
             done = true
-            return []
+            return .Ok()
         }
         
         let row = getInitiatorRow(nodeIndex)
         
         switch row {
         case .Some(.Err(let err)):
-            return [.Err(err)]
+            return .Err(err)
         case .Some(.Ok(let row)):
             writeOutput([row], fromNode: nodeIndex)
         case .None:
             activeInitiatorIndexes.removeLast()
             markDone(nodeIndex)
         }
-        
-        let output = collectedOutput
-        collectedOutput = []
-        return output.map({ .Ok($0) })
+        return .Ok()
     }
     
     private func getInitiatorRow(initiatorIndex: Int) -> Result<Row, RelationError>? {
@@ -86,18 +123,16 @@ class QueryRunner {
         } else {
             for (parentIndex, index) in nodes[fromNode].parentIndexes {
                 nodeStates[parentIndex].inputBuffers[index].add(rows)
-                process(parentIndex, inputIndex: index)
+                intermediatesToProcess.append(IntermediateToProcess(nodeIndex: parentIndex, inputIndex: index))
             }
         }
     }
     
     private func markDone(nodeIndex: Int) {
+        nodeStates[nodeIndex].didMarkDone = true
         for (parentIndex, index) in nodes[nodeIndex].parentIndexes {
             nodeStates[parentIndex].setInputBufferEOF(index)
-            process(parentIndex, inputIndex: index)
-            if nodeStates[parentIndex].activeBuffers == 0 {
-                markDone(parentIndex)
-            }
+            intermediatesToProcess.append(IntermediateToProcess(nodeIndex: parentIndex, inputIndex: index))
         }
     }
     
@@ -279,7 +314,6 @@ class QueryRunner {
         if let nonemptyBuffer = nonemptyBuffer {
             writeOutput(Set(nonemptyBuffer.rows), fromNode: nodeIndex)
         }
-        nodeStates[nodeIndex].inputBuffers = []
     }
     
     func processUnique(nodeIndex: Int, _ inputIndex: Int, _ attribute: Attribute, _ matching: RelationValue) {
@@ -313,6 +347,8 @@ extension QueryRunner {
         
         var outputForUniquing: Set<Row>? = nil
         var inputBuffers: [Buffer] = []
+        
+        var didMarkDone = false
         
         var activeBuffers: Int
         
@@ -385,4 +421,19 @@ extension QueryRunner {
             rows.appendContentsOf(seq)
         }
     }
+}
+
+extension QueryRunner {
+    private struct IntermediateToProcess: Hashable {
+        var nodeIndex: Int
+        var inputIndex: Int
+        
+        private var hashValue: Int {
+            return nodeIndex ^ inputIndex
+        }
+    }
+}
+
+private func ==(a: QueryRunner.IntermediateToProcess, b: QueryRunner.IntermediateToProcess) -> Bool {
+    return a.nodeIndex == b.nodeIndex && a.inputIndex == b.inputIndex
 }
