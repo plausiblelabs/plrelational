@@ -68,7 +68,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
     }
     
     public var underlyingRelationForQueryExecution: Relation {
-        return currentRelation()
+        return currentRelation().underlyingRelationForQueryExecution
     }
 
     public func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {

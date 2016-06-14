@@ -54,7 +54,7 @@ class QueryPlanner {
             if children.count > 0 || isRoot {
                 let nodeIndex = getOrCreateNodeIndex(relation)
                 for (index, childRelation) in children.enumerate() {
-                    let childNodeIndex = getOrCreateNodeIndex(childRelation)
+                    let childNodeIndex = getOrCreateNodeIndex(childRelation.underlyingRelationForQueryExecution)
                     internalNodes[childNodeIndex].parentIndexes.append((nodeIndex, index))
                 }
                 internalNodes[nodeIndex].childCount = children.count
