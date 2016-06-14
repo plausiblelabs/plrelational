@@ -3,6 +3,9 @@
 // All rights reserved.
 //
 
+import Foundation
+
+
 public struct Row: Hashable {
     private var internedRow: InternedRow
     
@@ -82,13 +85,18 @@ private func ==(a: InternedRow, b: InternedRow) -> Bool {
 }
 
 extension InternedRow {
-    static var extantRows: Set<InternedRow> = []
+    static var extantRows = NSHashTable(pointerFunctions: {
+        let pf = NSPointerFunctions(options: [.WeakMemory])
+        pf.hashFunction = { ptr, _ in unsafeBitCast(ptr, InternedRow.self).hashValue }
+        pf.isEqualFunction = { a, b, _ in ObjCBool(unsafeBitCast(a, InternedRow.self) == unsafeBitCast(b, InternedRow.self)) }
+        return pf
+        }(), capacity: 0)
     
     static func intern(row: InternedRow) -> InternedRow {
-        if let index = extantRows.indexOf(row) {
-            return extantRows[index]
+        if let extantRow = extantRows.member(row) {
+            return extantRow as! InternedRow
         } else {
-            extantRows.insert(row)
+            extantRows.addObject(row)
             return row
         }
     }
