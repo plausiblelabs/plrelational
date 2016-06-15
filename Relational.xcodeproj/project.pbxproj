@@ -107,6 +107,7 @@
 		37A1CED01D1091500067870D /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
 		37A1CED21D10B8690067870D /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED11D10B8690067870D /* Button.swift */; };
 		37A1CED41D11D9180067870D /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED31D11D9180067870D /* ProgressIndicator.swift */; };
+		37A1CED61D11DC410067870D /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED51D11DC410067870D /* ViewModel.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -491,6 +492,7 @@
 		37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libBindableControls.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		37A1CED11D10B8690067870D /* Button.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		37A1CED31D11D9180067870D /* ProgressIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
+		37A1CED51D11DC410067870D /* ViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -873,6 +875,7 @@
 			isa = PBXGroup;
 			children = (
 				37A1CE6D1D1081980067870D /* AppDelegate.swift */,
+				37A1CED51D11DC410067870D /* ViewModel.swift */,
 				37A1CE711D1081980067870D /* MainMenu.xib */,
 				37A1CE6F1D1081980067870D /* Assets.xcassets */,
 				37A1CE741D1081980067870D /* Info.plist */,
@@ -1868,6 +1871,7 @@
 			files = (
 				37A1CE6E1D1081980067870D /* AppDelegate.swift in Sources */,
 				37A1CECF1D1091500067870D /* UndoManager.swift in Sources */,
+				37A1CED61D11DC410067870D /* ViewModel.swift in Sources */,
 				37A1CED01D1091500067870D /* UndoableDatabase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
