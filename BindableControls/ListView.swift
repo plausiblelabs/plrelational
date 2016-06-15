@@ -11,14 +11,14 @@ import Binding
 private let PasteboardType = "coop.plausible.vp.pasteboard.ListViewItem"
 
 public struct ListViewModel<E: ArrayElement> {
-    let data: ObservableArray<E>
-    let contextMenu: ((E.Data) -> ContextMenu?)?
+    public let data: ObservableArray<E>
+    public let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
-    let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
-    let selection: MutableObservableValue<Set<E.ID>>
-    let cellIdentifier: (E.Data) -> String
-    let cellText: (E.Data) -> ObservableValue<String>
-    let cellImage: ((E.Data) -> ObservableValue<Image>)?
+    public let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
+    public let selection: MutableObservableValue<Set<E.ID>>
+    public let cellIdentifier: (E.Data) -> String
+    public let cellText: (E.Data) -> ObservableValue<String>
+    public let cellImage: ((E.Data) -> ObservableValue<Image>)?
 
     public init(
         data: ObservableArray<E>,
