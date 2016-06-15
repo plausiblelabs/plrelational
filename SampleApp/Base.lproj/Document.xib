@@ -25,7 +25,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="133" y="235" width="1000" height="800"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="877"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <value key="minSize" type="size" width="94" height="86"/>
             <view key="contentView" id="Ats-jv-7BQ">
                 <rect key="frame" x="0.0" y="0.0" width="1000" height="800"/>
@@ -34,7 +34,7 @@
                     <splitView arrangesAllSubviews="NO" dividerStyle="thin" vertical="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IvO-8k-h2R">
                         <rect key="frame" x="0.0" y="0.0" width="1000" height="800"/>
                         <subviews>
-                            <customView id="yub-2Y-fYN" userLabel="Left Sidebar View" customClass="BackgroundView" customModule="SampleApp" customModuleProvider="target">
+                            <customView id="yub-2Y-fYN" userLabel="Left Sidebar View" customClass="BackgroundView" customModule="BindableControls">
                                 <rect key="frame" x="0.0" y="0.0" width="200" height="800"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <subviews>
@@ -48,7 +48,7 @@
                                                     <rect key="frame" x="0.0" y="0.0" width="200" height="387"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
-                                                        <outlineView appearanceType="vibrantLight" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" viewBased="YES" floatsGroupRows="NO" indentationPerLevel="16" outlineTableColumn="fiS-ax-lsW" id="DUb-hy-bRa" userLabel="Document Outline View" customClass="ExtOutlineView" customModule="SampleApp" customModuleProvider="target">
+                                                        <outlineView appearanceType="vibrantLight" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" viewBased="YES" floatsGroupRows="NO" indentationPerLevel="16" outlineTableColumn="fiS-ax-lsW" id="DUb-hy-bRa" userLabel="Document Outline View" customClass="ExtOutlineView" customModule="BindableControls">
                                                             <rect key="frame" x="0.0" y="0.0" width="199" height="0.0"/>
                                                             <autoresizingMask key="autoresizingMask"/>
                                                             <size key="intercellSpacing" width="2" height="3"/>
@@ -72,7 +72,7 @@
                                                                             <rect key="frame" x="1" y="1" width="197" height="24"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <subviews>
-                                                                                <imageView translatesAutoresizingMaskIntoConstraints="NO" id="dGr-bL-Z49" customClass="ImageView" customModule="SampleApp" customModuleProvider="target">
+                                                                                <imageView translatesAutoresizingMaskIntoConstraints="NO" id="dGr-bL-Z49" customClass="ImageView" customModule="BindableControls">
                                                                                     <rect key="frame" x="3" y="3" width="18" height="18"/>
                                                                                     <constraints>
                                                                                         <constraint firstAttribute="height" constant="18" id="MRl-Nw-m15"/>
@@ -80,7 +80,7 @@
                                                                                     </constraints>
                                                                                     <imageCell key="cell" refusesFirstResponder="YES" imageScaling="proportionallyDown" image="NSFolder" id="uyb-OI-v8o"/>
                                                                                 </imageView>
-                                                                                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="vbF-Ei-Ymv" customClass="TextField" customModule="SampleApp" customModuleProvider="target">
+                                                                                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="vbF-Ei-Ymv" customClass="TextField" customModule="BindableControls">
                                                                                     <rect key="frame" x="26" y="3" width="170" height="18"/>
                                                                                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" title="Page Name" placeholderString="Untitled Page" usesSingleLineMode="YES" id="Gqc-uS-y7b">
                                                                                         <font key="font" metaFont="system"/>
@@ -129,7 +129,7 @@
                                                     <rect key="frame" x="0.0" y="0.0" width="200" height="386"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
-                                                        <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" viewBased="YES" floatsGroupRows="NO" indentationPerLevel="16" outlineTableColumn="BXm-8J-vHo" id="puU-ni-rOg" userLabel="Inspector Outline View" customClass="ExtOutlineView" customModule="SampleApp" customModuleProvider="target">
+                                                        <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" viewBased="YES" floatsGroupRows="NO" indentationPerLevel="16" outlineTableColumn="BXm-8J-vHo" id="puU-ni-rOg" userLabel="Inspector Outline View" customClass="ExtOutlineView" customModule="BindableControls">
                                                             <rect key="frame" x="0.0" y="0.0" width="199" height="0.0"/>
                                                             <autoresizingMask key="autoresizingMask"/>
                                                             <size key="intercellSpacing" width="2" height="3"/>
@@ -153,7 +153,7 @@
                                                                             <rect key="frame" x="1" y="1" width="197" height="24"/>
                                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                                             <subviews>
-                                                                                <imageView translatesAutoresizingMaskIntoConstraints="NO" id="R4a-R5-Jwl" customClass="ImageView" customModule="SampleApp" customModuleProvider="target">
+                                                                                <imageView translatesAutoresizingMaskIntoConstraints="NO" id="R4a-R5-Jwl" customClass="ImageView" customModule="BindableControls">
                                                                                     <rect key="frame" x="7" y="3" width="18" height="18"/>
                                                                                     <constraints>
                                                                                         <constraint firstAttribute="height" constant="18" id="Ody-oZ-wqQ"/>
@@ -161,7 +161,7 @@
                                                                                     </constraints>
                                                                                     <imageCell key="cell" refusesFirstResponder="YES" imageScaling="proportionallyDown" image="NSFolder" id="YWh-d0-sKD"/>
                                                                                 </imageView>
-                                                                                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="k59-aA-kGM" customClass="TextField" customModule="SampleApp" customModuleProvider="target">
+                                                                                <textField verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="k59-aA-kGM" customClass="TextField" customModule="BindableControls">
                                                                                     <rect key="frame" x="30" y="3" width="166" height="18"/>
                                                                                     <textFieldCell key="cell" truncatesLastVisibleLine="YES" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" title="Page Name" placeholderString="Untitled Page" usesSingleLineMode="YES" id="kIH-Hh-nYC">
                                                                                         <font key="font" metaFont="system"/>
@@ -253,14 +253,14 @@
                                     <constraint firstAttribute="bottom" secondItem="xu9-Ot-BUN" secondAttribute="bottom" id="y1s-4q-B4G"/>
                                 </constraints>
                             </customView>
-                            <customView id="CpE-XJ-ERX" userLabel="Content View" customClass="BackgroundView" customModule="SampleApp" customModuleProvider="target">
+                            <customView id="CpE-XJ-ERX" userLabel="Content View" customClass="BackgroundView" customModule="BindableControls">
                                 <rect key="frame" x="201" y="0.0" width="538" height="800"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="500" id="Zei-ic-3eU"/>
                                 </constraints>
                             </customView>
-                            <customView id="26w-XZ-NoD" userLabel="Right Sidebar View" customClass="BackgroundView" customModule="SampleApp" customModuleProvider="target">
+                            <customView id="26w-XZ-NoD" userLabel="Right Sidebar View" customClass="BackgroundView" customModule="BindableControls">
                                 <rect key="frame" x="740" y="0.0" width="260" height="800"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <constraints>

@@ -145,22 +145,40 @@ extension Relation {
     public var anyValue: RelationValue? {
         return anyValue{ $0 }
     }
-    
-    /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
+
+    /// Resolves to a single row if there is exactly one row in the relation, otherwise resolves
     /// to nil.
-    public func oneValue<V>(transform: RelationValue -> V?) -> V? {
-        precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
-        let attr = self.scheme.attributes.first!
+    public var oneRow: Row? {
         let rows = self.rows()
         if let row = rows.next()?.ok {
             if rows.next() == nil {
-                return transform(row[attr])
+                return row
             } else {
                 return nil
             }
         } else {
             return nil
         }
+    }
+
+    /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
+    /// to nil.
+    public func oneValue<V>(transform: Row -> V?) -> V? {
+        return oneRow.flatMap{ transform($0) }
+    }
+
+    /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
+    /// to the given default value.
+    public func oneValue<V>(transform: Row -> V?, orDefault defaultValue: V) -> V {
+        return oneValue{ transform($0) } ?? defaultValue
+    }
+
+    /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
+    /// to nil.
+    public func oneValue<V>(transform: RelationValue -> V?) -> V? {
+        precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
+        let attr = self.scheme.attributes.first!
+        return oneRow.flatMap{ transform($0[attr]) }
     }
     
     /// Resolves to a single RelationValue if there is exactly one row in the relation, otherwise resolves

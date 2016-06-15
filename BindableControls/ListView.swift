@@ -10,7 +10,7 @@ import Binding
 // is allowed by default
 private let PasteboardType = "coop.plausible.vp.pasteboard.ListViewItem"
 
-struct ListViewModel<E: ArrayElement> {
+public struct ListViewModel<E: ArrayElement> {
     let data: ObservableArray<E>
     let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
@@ -19,30 +19,48 @@ struct ListViewModel<E: ArrayElement> {
     let cellIdentifier: (E.Data) -> String
     let cellText: (E.Data) -> ObservableValue<String>
     let cellImage: ((E.Data) -> ObservableValue<Image>)?
+
+    public init(
+        data: ObservableArray<E>,
+        contextMenu: ((E.Data) -> ContextMenu?)?,
+        move: ((srcIndex: Int, dstIndex: Int) -> Void)?,
+        selection: MutableObservableValue<Set<E.ID>>,
+        cellIdentifier: (E.Data) -> String,
+        cellText: (E.Data) -> ObservableValue<String>,
+        cellImage: ((E.Data) -> ObservableValue<Image>)?)
+    {
+        self.data = data
+        self.contextMenu = contextMenu
+        self.move = move
+        self.selection = selection
+        self.cellIdentifier = cellIdentifier
+        self.cellText = cellText
+        self.cellImage = cellImage
+    }
 }
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
-class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
+public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
 
     private let model: ListViewModel<E>
     private let outlineView: NSOutlineView
 
-    private var arrayBindingRemoval: ObserverRemoval?
-    private var selectionBindingRemoval: ObserverRemoval?
+    private var arrayObserverRemoval: ObserverRemoval?
+    private var selectionObserverRemoval: ObserverRemoval?
     private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
-    var animateChanges = false
+    public var animateChanges = false
 
-    init(model: ListViewModel<E>, outlineView: NSOutlineView) {
+    public init(model: ListViewModel<E>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
         
         super.init()
         
-        arrayBindingRemoval = model.data.addChangeObserver({ [weak self] changes in self?.arrayBindingChanged(changes) })
-        selectionBindingRemoval = model.selection.addChangeObserver({ [weak self] _ in self?.selectionBindingChanged() })
+        arrayObserverRemoval = model.data.addChangeObserver({ [weak self] changes in self?.arrayChanged(changes) })
+        selectionObserverRemoval = model.selection.addChangeObserver({ [weak self] _ in self?.selectionChanged() })
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
@@ -53,25 +71,25 @@ class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineVi
     }
 
     deinit {
-        arrayBindingRemoval?()
-        selectionBindingRemoval?()
+        arrayObserverRemoval?()
+        selectionObserverRemoval?()
     }
 
     // MARK: NSOutlineViewDataSource
 
-    func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
+    public func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
         return model.data.elements.count
     }
     
-    func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
+    public func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
         return model.data.elements[index]
     }
     
-    func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
+    public func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
         return false
     }
     
-    func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
+    public func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
         if model.move == nil {
             return nil
         }
@@ -82,7 +100,7 @@ class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineVi
         return pboardItem
     }
     
-    func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
+    public func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
         
         if let idPlist = pboard.propertyListForType(PasteboardType) {
@@ -97,7 +115,7 @@ class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineVi
         return NSDragOperation.None
     }
 
-    func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
+    public func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
         
         if let idPlist = pboard.propertyListForType(PasteboardType), move = model.move {
@@ -113,7 +131,7 @@ class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineVi
 
     // MARK: ExtOutlineViewDelegate
 
-    func outlineView(outlineView: NSOutlineView, viewForTableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
+    public func outlineView(outlineView: NSOutlineView, viewForTableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
         let element = item as! E
         let identifier = model.cellIdentifier(element.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
@@ -126,20 +144,20 @@ class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineVi
         return view
     }
     
-    func outlineView(outlineView: NSOutlineView, isGroupItem item: AnyObject) -> Bool {
+    public func outlineView(outlineView: NSOutlineView, isGroupItem item: AnyObject) -> Bool {
         return false
     }
     
-    func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
+    public func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
         let element = item as! E
         return model.contextMenu?(element.data).map{$0.nsmenu}
     }
     
-    func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
+    public func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
         return true
     }
     
-    func outlineViewSelectionDidChange(notification: NSNotification) {
+    public func outlineViewSelectionDidChange(notification: NSNotification) {
         if selfInitiatedSelectionChange {
             return
         }
@@ -159,7 +177,7 @@ class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineVi
 
     // MARK: Binding observers
     
-    func selectionBindingChanged() {
+    private func selectionChanged() {
         if selfInitiatedSelectionChange {
             return
         }
@@ -180,7 +198,7 @@ class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineVi
         selfInitiatedSelectionChange = false
     }
 
-    func arrayBindingChanged(changes: [ArrayChange]) {
+    private func arrayChanged(changes: [ArrayChange]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
         
         outlineView.beginUpdates()
@@ -200,6 +218,11 @@ class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineVi
             }
         }
 
+        // XXX: This prevents a call to selection.set(); we need to figure out a better way, so that
+        // if the selection changes as a result of e.g. deleting an item, we update our selection
+        // state, but do it in a way that doesn't go through the undo manager
+        selfInitiatedSelectionChange = true
         outlineView.endUpdates()
+        selfInitiatedSelectionChange = false
     }
 }

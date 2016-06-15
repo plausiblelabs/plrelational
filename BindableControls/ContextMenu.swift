@@ -5,14 +5,19 @@
 
 import Cocoa
 
-struct ContextMenu {
+public struct ContextMenu {
     
-    enum Item { case
+    // TODO: Remove this in favor of MenuItem
+    public enum Item { case
         Titled(title: String, action: () -> Void),
         Separator
     }
     
-    let items: [Item]
+    public let items: [Item]
+    
+    public init(items: [Item]) {
+        self.items = items
+    }
 }
 
 extension ContextMenu {

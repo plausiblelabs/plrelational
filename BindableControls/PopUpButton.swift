@@ -6,11 +6,11 @@
 import Cocoa
 import Binding
 
-class PopUpButton<T: Equatable>: NSPopUpButton {
+public class PopUpButton<T: Equatable>: NSPopUpButton {
 
     private let bindings = BindingSet()
     
-    var items: ObservableValue<[MenuItem<T>]>? {
+    public var items: ObservableValue<[MenuItem<T>]>? {
         didSet {
             bindings.observe(items, "items", { [weak self] value in
                 guard let weakSelf = self else { return }
@@ -35,7 +35,7 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
         }
     }
 
-    var selectedObject: MutableObservableValue<T?>? {
+    public var selectedObject: MutableObservableValue<T?>? {
         didSet {
             bindings.observe(selectedObject, "selectedObject", { [weak self] value in
                 self?.setSelectedItem(value)
@@ -43,7 +43,7 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
         }
     }
 
-    var defaultItemContent: MenuItemContent<T>? {
+    public var defaultItemContent: MenuItemContent<T>? {
         didSet {
             if let existingItem = defaultMenuItem?.nsitem {
                 existingItem.menu?.removeItem(existingItem)
@@ -69,7 +69,7 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
     private var selfInitiatedSelectionChange = false
     private var selectedIndex = -1
 
-    override init(frame: NSRect, pullsDown flag: Bool) {
+    public override init(frame: NSRect, pullsDown flag: Bool) {
         super.init(frame: frame, pullsDown: flag)
         
         autoenablesItems = false
@@ -77,7 +77,7 @@ class PopUpButton<T: Equatable>: NSPopUpButton {
         action = #selector(selectionChanged(_:))
     }
     
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("NSCoding not supported")
     }
     

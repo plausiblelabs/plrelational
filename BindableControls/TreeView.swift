@@ -10,7 +10,7 @@ import Binding
 // is allowed by default
 private let PasteboardType = "coop.plausible.vp.pasteboard.TreeViewItem"
 
-struct TreeViewModel<N: TreeNode> {
+public struct TreeViewModel<N: TreeNode> {
     let data: ObservableTree<N>
     let allowsChildren: (N.Data) -> Bool
     let contextMenu: ((N.Data) -> ContextMenu?)?
@@ -20,11 +20,31 @@ struct TreeViewModel<N: TreeNode> {
     let cellIdentifier: (N.Data) -> String
     let cellText: (N.Data) -> ObservableValue<String>
     let cellImage: ((N.Data) -> ObservableValue<Image>)?
+    
+    public init(
+        data: ObservableTree<N>,
+        allowsChildren: (N.Data) -> Bool,
+        contextMenu: ((N.Data) -> ContextMenu?)?,
+        move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?,
+        selection: MutableObservableValue<Set<N.ID>>,
+        cellIdentifier: (N.Data) -> String,
+        cellText: (N.Data) -> ObservableValue<String>,
+        cellImage: ((N.Data) -> ObservableValue<Image>)?)
+    {
+        self.data = data
+        self.allowsChildren = allowsChildren
+        self.contextMenu = contextMenu
+        self.move = move
+        self.selection = selection
+        self.cellIdentifier = cellIdentifier
+        self.cellText = cellText
+        self.cellImage = cellImage
+    }
 }
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
-class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
+public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
     
     private let model: TreeViewModel<N>
     private let outlineView: NSOutlineView
@@ -34,12 +54,12 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
     private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
-    var animateChanges = false
+    public var animateChanges = false
     
     /// Whether to automatically expand a parent when a child is inserted.
-    var autoExpand = false
+    public var autoExpand = false
     
-    init(model: TreeViewModel<N>, outlineView: NSOutlineView) {
+    public init(model: TreeViewModel<N>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
         
@@ -63,7 +83,7 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
 
     // MARK: NSOutlineViewDataSource
 
-    func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
+    public func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
         switch item {
         case nil:
             return model.data.root.children.count
@@ -74,7 +94,7 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         }
     }
     
-    func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
+    public func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
         switch item {
         case nil:
             return model.data.root.children[index]
@@ -85,12 +105,12 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         }
     }
     
-    func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
+    public func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
         let node = item as! N
         return model.allowsChildren(node.data) && node.children.count > 0
     }
     
-    func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
+    public func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
         if model.move == nil {
             return nil
         }
@@ -101,7 +121,7 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         return pboardItem
     }
     
-    func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
+    public func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
         
         if let idPlist = pboard.propertyListForType(PasteboardType) {
@@ -140,7 +160,7 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         return .None
     }
     
-    func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
+    public func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
         
         if let idPlist = pboard.propertyListForType(PasteboardType), move = model.move {
@@ -165,7 +185,7 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
 
     // MARK: ExtOutlineViewDelegate
     
-    func outlineView(outlineView: NSOutlineView, viewForTableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
+    public func outlineView(outlineView: NSOutlineView, viewForTableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
         let node = item as! N
         let identifier = model.cellIdentifier(node.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
@@ -178,20 +198,20 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         return view
     }
     
-    func outlineView(outlineView: NSOutlineView, isGroupItem item: AnyObject) -> Bool {
+    public func outlineView(outlineView: NSOutlineView, isGroupItem item: AnyObject) -> Bool {
         return false
     }
     
-    func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
+    public func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
         let node = item as! N
         return model.contextMenu?(node.data).map{$0.nsmenu}
     }
     
-    func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
+    public func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
         return true
     }
     
-    func outlineViewSelectionDidChange(notification: NSNotification) {
+    public func outlineViewSelectionDidChange(notification: NSNotification) {
         if selfInitiatedSelectionChange {
             return
         }
@@ -211,7 +231,7 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
 
     // MARK: Observers
 
-    func selectionChanged() {
+    private func selectionChanged() {
         if selfInitiatedSelectionChange {
             return
         }
@@ -232,7 +252,7 @@ class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDe
         selfInitiatedSelectionChange = false
     }
     
-    func treeChanged(changes: [TreeChange<N>]) {
+    private func treeChanged(changes: [TreeChange<N>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
         
         outlineView.beginUpdates()

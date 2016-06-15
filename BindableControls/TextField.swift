@@ -6,11 +6,11 @@
 import Cocoa
 import Binding
 
-class TextField: NSTextField, NSTextFieldDelegate {
+public class TextField: NSTextField, NSTextFieldDelegate {
 
     private let bindings = BindingSet()
 
-    var string: ObservableValue<String>? {
+    public var string: ObservableValue<String>? {
         didSet {
             bindings.observe(string, "string", { [weak self] value in
                 self?.stringValue = value
@@ -18,7 +18,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
         }
     }
 
-    var placeholder: ObservableValue<String>? {
+    public var placeholder: ObservableValue<String>? {
         didSet {
             bindings.observe(placeholder, "placeholder", { [weak self] value in
                 self?.placeholderString = value
@@ -26,7 +26,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
         }
     }
 
-    var visible: ObservableValue<Bool>? {
+    public var visible: ObservableValue<Bool>? {
         didSet {
             bindings.observe(visible, "visible", { [weak self] value in
                 self?.hidden = !value
@@ -37,25 +37,25 @@ class TextField: NSTextField, NSTextFieldDelegate {
     private var previousCommittedValue: String?
     private var previousValue: String?
     
-    override init(frame: NSRect) {
+    public override init(frame: NSRect) {
         super.init(frame: frame)
         
         self.delegate = self
     }
     
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         super.init(coder: coder)
         
         self.delegate = self
     }
     
-    override func controlTextDidBeginEditing(obj: NSNotification) {
+    public override func controlTextDidBeginEditing(obj: NSNotification) {
         //Swift.print("CONTROL DID BEGIN EDITING!")
         previousCommittedValue = stringValue
         previousValue = stringValue
     }
     
-    override func controlTextDidChange(notification: NSNotification) {
+    public override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
         if let mutableString = string as? MutableObservableValue {
             bindings.update(mutableString, newValue: stringValue, transient: true)
@@ -63,7 +63,7 @@ class TextField: NSTextField, NSTextFieldDelegate {
         previousValue = stringValue
     }
     
-    override func controlTextDidEndEditing(obj: NSNotification) {
+    public override func controlTextDidEndEditing(obj: NSNotification) {
         // Note that controlTextDidBeginEditing may not be called if the user gives focus to the text field
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value

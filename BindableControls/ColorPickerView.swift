@@ -6,11 +6,11 @@
 import Cocoa
 import Binding
 
-class ColorPickerView: NSView {
+public class ColorPickerView: NSView {
 
     private let model: ColorPickerModel
     
-    var color: MutableObservableValue<CommonValue<Color>>? {
+    public var color: MutableObservableValue<CommonValue<Color>>? {
         didSet {
             if let color = color {
                 setColorBinding(color)
@@ -23,7 +23,7 @@ class ColorPickerView: NSView {
     private let opacityCombo: ComboBox<CGFloat>
     private let colorPanel: ColorPanel
 
-    init(defaultColor: Color) {
+    public init(defaultColor: Color) {
         self.model = ColorPickerModel(defaultColor: defaultColor)
         
         // Configure color popup button
@@ -67,7 +67,7 @@ class ColorPickerView: NSView {
         ])
     }
     
-    required init?(coder: NSCoder) {
+    public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     

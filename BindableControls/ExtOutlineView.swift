@@ -5,13 +5,13 @@
 
 import Cocoa
 
-protocol ExtOutlineViewDelegate: NSOutlineViewDelegate {
+public protocol ExtOutlineViewDelegate: NSOutlineViewDelegate {
     func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu?
 }
 
-class ExtOutlineView: NSOutlineView {
+public class ExtOutlineView: NSOutlineView {
     
-    override func validateProposedFirstResponder(responder: NSResponder, forEvent event: NSEvent?) -> Bool {
+    public override func validateProposedFirstResponder(responder: NSResponder, forEvent event: NSEvent?) -> Bool {
         // XXX: The following prevents the text field from becoming first responder if it is right-clicked
         // (which should instead cause the context menu to be shown)
         if let event = event {
@@ -25,7 +25,7 @@ class ExtOutlineView: NSOutlineView {
         }
     }
     
-    override func menuForEvent(event: NSEvent) -> NSMenu? {
+    public override func menuForEvent(event: NSEvent) -> NSMenu? {
         // Notify the delegate if a context menu is requested for an item
         let point = self.convertPoint(event.locationInWindow, fromView: nil)
         let row = self.rowAtPoint(point)

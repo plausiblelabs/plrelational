@@ -6,11 +6,11 @@
 import Cocoa
 import Binding
 
-class BackgroundView: NSView {
+public class BackgroundView: NSView {
     
     private let bindings = BindingSet()
     
-    var visible: ObservableValue<Bool>? {
+    public var visible: ObservableValue<Bool>? {
         didSet {
             bindings.observe(visible, "visible", { [weak self] value in
                 self?.hidden = !value
@@ -18,9 +18,9 @@ class BackgroundView: NSView {
         }
     }
 
-    var backgroundColor: NSColor?
+    public var backgroundColor: NSColor?
     
-    override func drawRect(dirtyRect: NSRect) {
+    public override func drawRect(dirtyRect: NSRect) {
         super.drawRect(dirtyRect)
         
         if let bg = backgroundColor {
@@ -29,7 +29,7 @@ class BackgroundView: NSView {
         }
     }
     
-    override var flipped: Bool {
+    public override var flipped: Bool {
         return true
     }
 }
