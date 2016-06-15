@@ -78,6 +78,8 @@ extension SQLiteRelation {
             return "AND"
         case is OrComparator:
             return "OR"
+        case is GlobComparator:
+            return "GLOB"
         default:
             return nil
         }

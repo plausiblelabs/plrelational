@@ -1425,4 +1425,59 @@ class RelationTests: DBTestCase {
                         ["Earth", "planet"],
                         ["Tim", "plant"]))
     }
+    
+    func testGlob() {
+        let concrete = MakeRelation(
+            ["name", "kind"],
+            ["Earth", "planet"],
+            ["Steve", "person"],
+            ["Tim", "plant"]
+        )
+        
+        AssertEqual(concrete.select(SelectExpressionBinaryOperator(lhs: Attribute("kind"), op: GlobComparator(), rhs: "pl*")),
+                    MakeRelation(
+                        ["name", "kind"],
+                        ["Earth", "planet"],
+                        ["Tim", "plant"]))
+        AssertEqual(concrete.select(SelectExpressionBinaryOperator(lhs: Attribute("kind"), op: GlobComparator(), rhs: "plan*t")),
+                    MakeRelation(
+                        ["name", "kind"],
+                        ["Earth", "planet"],
+                        ["Tim", "plant"]))
+        AssertEqual(concrete.select(SelectExpressionBinaryOperator(lhs: Attribute("kind"), op: GlobComparator(), rhs: "p?????")),
+                    MakeRelation(
+                        ["name", "kind"],
+                        ["Earth", "planet"],
+                        ["Steve", "person"]))
+        AssertEqual(concrete.select(SelectExpressionBinaryOperator(lhs: Attribute("kind"), op: GlobComparator(), rhs: "*r*")),
+                    MakeRelation(
+                        ["name", "kind"],
+                        ["Steve", "person"]))
+        
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteRelation = sqliteDB.createRelation("whatever", scheme: concrete.scheme).ok!
+        for row in concrete.rows() {
+            let result = sqliteRelation.add(row.ok!)
+            XCTAssertNil(result.err)
+        }
+        AssertEqual(sqliteRelation.select(SelectExpressionBinaryOperator(lhs: Attribute("kind"), op: GlobComparator(), rhs: "pl*")),
+                    MakeRelation(
+                        ["name", "kind"],
+                        ["Earth", "planet"],
+                        ["Tim", "plant"]))
+        AssertEqual(sqliteRelation.select(SelectExpressionBinaryOperator(lhs: Attribute("kind"), op: GlobComparator(), rhs: "plan*t")),
+                    MakeRelation(
+                        ["name", "kind"],
+                        ["Earth", "planet"],
+                        ["Tim", "plant"]))
+        AssertEqual(sqliteRelation.select(SelectExpressionBinaryOperator(lhs: Attribute("kind"), op: GlobComparator(), rhs: "p?????")),
+                    MakeRelation(
+                        ["name", "kind"],
+                        ["Earth", "planet"],
+                        ["Steve", "person"]))
+        AssertEqual(sqliteRelation.select(SelectExpressionBinaryOperator(lhs: Attribute("kind"), op: GlobComparator(), rhs: "*r*")),
+                    MakeRelation(
+                        ["name", "kind"],
+                        ["Steve", "person"]))
+    }
 }

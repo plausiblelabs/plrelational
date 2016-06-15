@@ -3,6 +3,8 @@
 // All rights reserved.
 //
 
+import sqlite3
+
 public protocol BinaryOperator {
     func evaluate(a: RelationValue, _ b: RelationValue) -> RelationValue
 }
@@ -39,6 +41,22 @@ public struct OrComparator: BinaryOperator {
     }
 }
 
+public struct GlobComparator: BinaryOperator {
+    public init() {}
+    
+    public func evaluate(a: RelationValue, _ b: RelationValue) -> RelationValue {
+        if let aString = a.get() as String?, bString = b.get() as String? {
+            return .boolValue(matches(aString, bString))
+        } else {
+            return .boolValue(false)
+        }
+    }
+    
+    private func matches(string: String, _ glob: String) -> Bool {
+        return sqlite3_strglob(glob, string) == 0
+    }
+}
+
 public struct AnyComparator: BinaryOperator {
     var compare: (RelationValue, RelationValue) -> Bool
     
@@ -72,5 +90,11 @@ extension AndComparator: CustomStringConvertible {
 extension OrComparator: CustomStringConvertible {
     public var description: String {
         return "OR"
+    }
+}
+
+extension GlobComparator: CustomStringConvertible {
+    public var description: String {
+        return "GLOB"
     }
 }
