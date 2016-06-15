@@ -89,30 +89,33 @@ class QueryRunner {
             return .Ok()
         }
         
-        let row = getInitiatorRow(nodeIndex)
-        
-        switch row {
-        case .Some(.Err(let err)):
-            return .Err(err)
-        case .Some(.Ok(let row)):
-            writeOutput([row], fromNode: nodeIndex)
-        case .None:
-            activeInitiatorIndexes.removeLast()
-            markDone(nodeIndex)
-        }
-        return .Ok()
-    }
-    
-    private func getInitiatorRow(initiatorIndex: Int) -> Result<Row, RelationError>? {
-        let op = nodes[initiatorIndex].op
+        let op = nodes[nodeIndex].op
         switch op {
         case .TableScan(let relation):
-            let generator = initiatorGenerators.getOrCreate(initiatorIndex, defaultValue: relation.rawGenerateRows())
-            let row = generator.next()
-            return row
+            let row = getTableScanRow(nodeIndex, relation: relation)
+            switch row {
+            case .Some(.Err(let err)):
+                return .Err(err)
+            case .Some(.Ok(let row)):
+                writeOutput([row], fromNode: nodeIndex)
+            case .None:
+                activeInitiatorIndexes.removeLast()
+                markDone(nodeIndex)
+            }
+        case .ConcreteRows(let rows):
+            writeOutput(rows, fromNode: nodeIndex)
+            activeInitiatorIndexes.removeLast()
+            markDone(nodeIndex)
         default:
             fatalError("Unknown initiator operation \(op)")
         }
+        
+        return .Ok()
+    }
+    
+    private func getTableScanRow(initiatorIndex: Int, relation: Relation) -> Result<Row, RelationError>? {
+        let generator = initiatorGenerators.getOrCreate(initiatorIndex, defaultValue: relation.rawGenerateRows())
+        return generator.next()
     }
     
     private func writeOutput(rows: Set<Row>, fromNode: Int) {

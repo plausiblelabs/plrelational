@@ -29,7 +29,7 @@ class QueryPlanner {
     var initiatorIndexes: [Int] {
         return (nodes.indices).filter({
             switch nodes[$0].op {
-            case .TableScan:
+            case .TableScan, .ConcreteRows:
                 return true
             default:
                 return false
@@ -101,6 +101,8 @@ class QueryPlanner {
         switch r {
         case let r as IntermediateRelation:
             return intermediateRelationToNode(r)
+        case let r as ConcreteRelation:
+            return Node(op: .ConcreteRows(r.values), parentIndexes: [])
         default:
             return Node(op: .TableScan(r), parentIndexes: [])
         }
@@ -157,6 +159,7 @@ extension QueryPlanner {
     
     enum Operation {
         case TableScan(Relation)
+        case ConcreteRows(Set<Row>)
         
         case Union
         case Intersection
