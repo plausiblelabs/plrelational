@@ -15,6 +15,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @IBOutlet var textField: TextField!
     @IBOutlet var outlineView: ExtOutlineView!
     @IBOutlet var recordButton: Button!
+    @IBOutlet var progressIndicator: ProgressIndicator!
     
     var nsUndoManager: SPUndoManager!
     var listView: ListView<RowArrayElement>!
@@ -123,6 +124,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         listView = ListView(model: listViewModel, outlineView: outlineView)
         
         // Set up the other controls
+        progressIndicator.visible = ObservableValue.constant(false)
         recordButton.disabled = selectedPersonID.empty
     }
     

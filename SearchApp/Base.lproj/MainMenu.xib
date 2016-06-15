@@ -15,6 +15,7 @@
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="SearchApp" customModuleProvider="target">
             <connections>
                 <outlet property="outlineView" destination="3Nn-Wq-K9X" id="ejC-cy-ub6"/>
+                <outlet property="progressIndicator" destination="231-Dk-KE5" id="B5x-fL-bwW"/>
                 <outlet property="recordButton" destination="bxd-va-K0Q" id="TFE-ev-aos"/>
                 <outlet property="textField" destination="2ud-gt-yoP" id="8kf-jW-dqT"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="gIp-Ho-8D9"/>
@@ -738,16 +739,19 @@
                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </clipView>
                         <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="Gus-Zu-noU">
-                            <rect key="frame" x="1" y="119" width="223" height="15"/>
+                            <rect key="frame" x="1" y="-15" width="0.0" height="16"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="NO" id="mqa-ve-E6g">
-                            <rect key="frame" x="224" y="17" width="15" height="102"/>
+                            <rect key="frame" x="-15" y="1" width="16" height="0.0"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
+                    <progressIndicator wantsLayer="YES" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" maxValue="100" bezeled="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="231-Dk-KE5" customClass="ProgressIndicator" customModule="BindableControls">
+                        <rect key="frame" x="20" y="20" width="16" height="16"/>
+                    </progressIndicator>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="bxd-va-K0Q" customClass="Button" customModule="BindableControls">
-                        <rect key="frame" x="184" y="13" width="113" height="32"/>
+                        <rect key="frame" x="353" y="13" width="113" height="32"/>
                         <buttonCell key="cell" type="push" title="Record Sale" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Shw-W5-kDO">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
