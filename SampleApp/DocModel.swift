@@ -64,7 +64,6 @@ enum ItemType: Int64 { case
 
 class DocModel {
 
-    private let undoManager: UndoManager
     private let db: TransactionalDatabase
     private let undoableDB: UndoableDatabase
 
@@ -93,8 +92,7 @@ class DocModel {
     private var removal: ObserverRemoval!
     
     init(undoManager: UndoManager) {
-        self.undoManager = undoManager
-        
+
         func makeDB() -> (path: String, db: SQLiteDatabase) {
             let tmp = NSTemporaryDirectory() as NSString
             let dbname = "testing-\(NSUUID()).db"
