@@ -49,7 +49,7 @@ class PropertiesModel {
     lazy var selectedItemTypesString: ObservableValue<String> = { [unowned self] in
         // TODO: Is there a more efficient way to do this?
         let selectedItemCountBinding = self.selectedItems.count().observable{ $0.oneInteger }
-        return selectedItemCountBinding.zip(self.selectedItemTypes).map { (count, types) in
+        return zip(selectedItemCountBinding, self.selectedItemTypes).map { (count, types) in
             if types.count == 0 {
                 return ""
             } else if count == 1 {

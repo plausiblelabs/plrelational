@@ -53,24 +53,60 @@ public class ObservableValue<T>: Observable {
 }
 
 extension ObservableValue {
+    /// Returns an ObservableValue whose value never changes.  Note that since the value cannot change,
+    /// observers will never be notified of changes.
     public static func constant(value: T) -> ObservableValue<T> {
         return ConstantObservableValue(value: value)
     }
     
+    /// Returns an ObservableValue whose value is derived from this ObservableValue's `value`.
+    /// The given `transform` will be applied whenever this ObservableValue`s value changes.
     public func map<U>(transform: (T) -> U) -> ObservableValue<U> {
         return MappedObservableValue(observable: self, transform: transform, valueChanging: valueChanging)
     }
 
+    /// Returns an ObservableValue whose value is derived from this ObservableValue's `value`.
+    /// The given `transform` will be applied whenever this ObservableValue`s value changes.
     public func map<U: Equatable>(transform: (T) -> U) -> ObservableValue<U> {
         return MappedObservableValue(observable: self, transform: transform, valueChanging: valueChanging)
     }
+}
 
-    public func zip<U>(other: ObservableValue<U>) -> ObservableValue<(T, U)> {
-        return ZippedObservableValue(self, other)
+/// Returns an ObservableValue whose value is a tuple (pair) containing the `value` from
+/// each of the given ObservableValues.  The returned ObservableValue's `value` will
+/// contain a fresh tuple any time the value of either input changes.
+public func zip<T, U>(observable1: ObservableValue<T>, _ observable2: ObservableValue<U>) -> ObservableValue<(T, U)> {
+    return ZippedObservableValue(observable1, observable2)
+}
+
+/// Returns an ObservableValue whose value is the negation of the boolean value of the given observable.
+public func not<T: BooleanType>(observable: ObservableValue<T>) -> ObservableValue<Bool> {
+    return observable.map{ !$0.boolValue }
+}
+
+extension SequenceType where Generator.Element == ObservableValue<Bool> {
+    /// Returns an ObservableValue whose value resolves to `true` if *any* of the ObservableValues
+    /// in this sequence resolve to `true`.
+    public func anyTrue() -> ObservableValue<Bool> {
+        return AnyTrueObservableValue(observables: self)
+    }
+    
+    /// Returns an ObservableValue whose value resolves to `true` if *all* of the ObservableValues
+    /// in this sequence resolve to `true`.
+    public func allTrue() -> ObservableValue<Bool> {
+        return AllTrueObservableValue(observables: self)
+    }
+    
+    /// Returns an ObservableValue whose value resolves to `true` if *none* of the ObservableValues
+    /// in this sequence resolve to `true`.
+    public func noneTrue() -> ObservableValue<Bool> {
+        return NoneTrueObservableValue(observables: self)
     }
 }
 
 extension ObservableValue where T: SequenceType, T.Generator.Element: Hashable {
+    /// Returns an ObservableValue whose value resolves to a CommonValue that describes this
+    /// ObservableValue's sequence value.
     public func common() -> ObservableValue<CommonValue<T.Generator.Element>> {
         return CommonObservableValue(observable: self)
     }
@@ -95,6 +131,10 @@ private class MappedObservableValue<T>: ObservableValue<T> {
             self?.setValue(transform(observable.value), metadata)
         })
     }
+    
+    deinit {
+        removal()
+    }
 }
 
 private class ZippedObservableValue<U, V>: ObservableValue<(U, V)> {
@@ -109,6 +149,114 @@ private class ZippedObservableValue<U, V>: ObservableValue<(U, V)> {
         self.removal2 = observable2.addChangeObserver({ [weak self] metadata in
             self?.setValue((observable1.value, observable2.value), metadata)
         })
+    }
+    
+    deinit {
+        removal1()
+        removal2()
+    }
+}
+
+private class AnyTrueObservableValue: ObservableValue<Bool> {
+    private var removals: [ObserverRemoval] = []
+    
+    init<B: BooleanType, S: SequenceType where S.Generator.Element == ObservableValue<B>>(observables: S) {
+        
+        func anyTrue() -> Bool {
+            for observable in observables {
+                if observable.value {
+                    return true
+                }
+            }
+            return false
+        }
+        
+        super.init(initialValue: anyTrue(), valueChanging: valueChanging)
+        
+        for observable in observables {
+            let removal = observable.addChangeObserver({ [weak self] metadata in
+                let newValue = observable.value
+                if newValue {
+                    self?.setValue(true, metadata)
+                } else {
+                    self?.setValue(anyTrue(), metadata)
+                }
+            })
+            removals.append(removal)
+        }
+    }
+    
+    deinit {
+        removals.forEach{ $0() }
+    }
+}
+
+private class AllTrueObservableValue: ObservableValue<Bool> {
+    private var removals: [ObserverRemoval] = []
+    
+    init<B: BooleanType, S: SequenceType where S.Generator.Element == ObservableValue<B>>(observables: S) {
+        // TODO: Require at least one element?
+
+        func allTrue() -> Bool {
+            for observable in observables {
+                if !observable.value {
+                    return false
+                }
+            }
+            return true
+        }
+        
+        super.init(initialValue: allTrue(), valueChanging: valueChanging)
+        
+        for observable in observables {
+            let removal = observable.addChangeObserver({ [weak self] metadata in
+                let newValue = observable.value
+                if !newValue {
+                    self?.setValue(false, metadata)
+                } else {
+                    self?.setValue(allTrue(), metadata)
+                }
+            })
+            removals.append(removal)
+        }
+    }
+    
+    deinit {
+        removals.forEach{ $0() }
+    }
+}
+
+private class NoneTrueObservableValue: ObservableValue<Bool> {
+    private var removals: [ObserverRemoval] = []
+    
+    init<B: BooleanType, S: SequenceType where S.Generator.Element == ObservableValue<B>>(observables: S) {
+        
+        func noneTrue() -> Bool {
+            for observable in observables {
+                if observable.value {
+                    return false
+                }
+            }
+            return true
+        }
+        
+        super.init(initialValue: noneTrue(), valueChanging: valueChanging)
+        
+        for observable in observables {
+            let removal = observable.addChangeObserver({ [weak self] metadata in
+                let newValue = observable.value
+                if newValue {
+                    self?.setValue(false, metadata)
+                } else {
+                    self?.setValue(noneTrue(), metadata)
+                }
+            })
+            removals.append(removal)
+        }
+    }
+    
+    deinit {
+        removals.forEach{ $0() }
     }
 }
 
@@ -134,6 +282,10 @@ private class CommonObservableValue<T: Hashable>: ObservableValue<CommonValue<T>
         self.removal = observable.addChangeObserver({ [weak self] metadata in
             self?.setValue(commonValue(), metadata)
         })
+    }
+    
+    deinit {
+        removal()
     }
 }
 
