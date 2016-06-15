@@ -11,15 +11,15 @@ import Binding
 private let PasteboardType = "coop.plausible.vp.pasteboard.TreeViewItem"
 
 public struct TreeViewModel<N: TreeNode> {
-    let data: ObservableTree<N>
-    let allowsChildren: (N.Data) -> Bool
-    let contextMenu: ((N.Data) -> ContextMenu?)?
+    public let data: ObservableTree<N>
+    public let allowsChildren: (N.Data) -> Bool
+    public let contextMenu: ((N.Data) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
-    let move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?
-    let selection: MutableObservableValue<Set<N.ID>>
-    let cellIdentifier: (N.Data) -> String
-    let cellText: (N.Data) -> ObservableValue<String>
-    let cellImage: ((N.Data) -> ObservableValue<Image>)?
+    public let move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?
+    public let selection: MutableObservableValue<Set<N.ID>>
+    public let cellIdentifier: (N.Data) -> String
+    public let cellText: (N.Data) -> ObservableValue<String>
+    public let cellImage: ((N.Data) -> ObservableValue<Image>)?
     
     public init(
         data: ObservableTree<N>,
