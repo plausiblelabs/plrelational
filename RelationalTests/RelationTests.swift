@@ -1398,4 +1398,31 @@ class RelationTests: DBTestCase {
             AssertEqual(nil, final)
         })
     }
+    
+    func testOr() {
+        let concrete = MakeRelation(
+            ["name", "kind"],
+            ["Earth", "planet"],
+            ["Steve", "person"],
+            ["Tim", "plant"]
+        )
+        
+        AssertEqual(concrete.select(Attribute("kind") *== "planet" *|| Attribute("name") *== "Tim"),
+                    MakeRelation(
+                        ["name", "kind"],
+                        ["Earth", "planet"],
+                        ["Tim", "plant"]))
+        
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteRelation = sqliteDB.createRelation("whatever", scheme: concrete.scheme).ok!
+        for row in concrete.rows() {
+            let result = sqliteRelation.add(row.ok!)
+            XCTAssertNil(result.err)
+        }
+        AssertEqual(sqliteRelation.select(Attribute("kind") *== "planet" *|| Attribute("name") *== "Tim"),
+                    MakeRelation(
+                        ["name", "kind"],
+                        ["Earth", "planet"],
+                        ["Tim", "plant"]))
+    }
 }

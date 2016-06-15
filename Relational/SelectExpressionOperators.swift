@@ -17,8 +17,17 @@ infix operator *&& {
     precedence 120
 }
 
+infix operator *|| {
+    associativity left
+    precedence 110
+}
+
 public func *&&(lhs: SelectExpression, rhs: SelectExpression) -> SelectExpression {
     return SelectExpressionBinaryOperator(lhs: lhs, op: AndComparator(), rhs: rhs)
+}
+
+public func *||(lhs: SelectExpression, rhs: SelectExpression) -> SelectExpression {
+    return SelectExpressionBinaryOperator(lhs: lhs, op: OrComparator(), rhs: rhs)
 }
 
 prefix operator *! {}

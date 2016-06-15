@@ -76,6 +76,8 @@ extension SQLiteRelation {
             return "="
         case is AndComparator:
             return "AND"
+        case is OrComparator:
+            return "OR"
         default:
             return nil
         }

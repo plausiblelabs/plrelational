@@ -31,6 +31,14 @@ public struct AndComparator: BinaryOperator {
     }
 }
 
+public struct OrComparator: BinaryOperator {
+    public init() {}
+    
+    public func evaluate(a: RelationValue, _ b: RelationValue) -> RelationValue {
+        return .boolValue(a.boolValue || b.boolValue)
+    }
+}
+
 public struct AnyComparator: BinaryOperator {
     var compare: (RelationValue, RelationValue) -> Bool
     
@@ -58,5 +66,11 @@ extension LTComparator: CustomStringConvertible {
 extension AndComparator: CustomStringConvertible {
     public var description: String {
         return "AND"
+    }
+}
+
+extension OrComparator: CustomStringConvertible {
+    public var description: String {
+        return "OR"
     }
 }
