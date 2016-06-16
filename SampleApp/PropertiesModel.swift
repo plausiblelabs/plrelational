@@ -50,16 +50,16 @@ class PropertiesModel {
         // TODO: Is there a more efficient way to do this?
         let selectedItemCountBinding = self.selectedItems.count().observable{ $0.oneInteger }
         return zip(selectedItemCountBinding, self.selectedItemTypes).map { (count, types) in
-            if types.count == 0 {
-                return ""
-            } else if count == 1 {
+            if count == 1 && types.count == 1 {
                 return types.first!.name
-            } else {
+            } else if count > 1 {
                 if types.count == 1 {
                     return "Multiple \(types.first!.name)s"
                 } else {
                     return "Multiple Items"
                 }
+            } else {
+                return ""
             }
         }
     }()

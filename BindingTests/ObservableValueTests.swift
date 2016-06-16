@@ -94,6 +94,105 @@ class ObservableValueTests: BindingTestCase {
         changeObserved = false
     }
     
+    func testOr() {
+        let observable1 = mutableObservableValue(false)
+        let observable2 = mutableObservableValue(false)
+        let mapped = observable1 *|| observable2
+        var changeObserved = false
+        _ = mapped.addChangeObserver({ _ in changeObserved = true })
+        let metadata = ChangeMetadata(transient: false)
+        
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        observable1.update(true, metadata)
+        XCTAssertEqual(mapped.value, true)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        observable2.update(true, metadata)
+        XCTAssertEqual(mapped.value, true)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        observable2.update(false, metadata)
+        XCTAssertEqual(mapped.value, true)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        observable1.update(false, metadata)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+    }
+    
+    func testAnd() {
+        let observable1 = mutableObservableValue(false)
+        let observable2 = mutableObservableValue(false)
+        let mapped = observable1 *&& observable2
+        var changeObserved = false
+        _ = mapped.addChangeObserver({ _ in changeObserved = true })
+        let metadata = ChangeMetadata(transient: false)
+        
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        observable1.update(true, metadata)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        observable2.update(true, metadata)
+        XCTAssertEqual(mapped.value, true)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        observable2.update(false, metadata)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        observable1.update(false, metadata)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+    }
+    
+    func testEq() {
+        let observable1 = mutableObservableValue(0)
+        let observable2 = mutableObservableValue(1)
+        let mapped = observable1 *== observable2
+        var changeObserved = false
+        _ = mapped.addChangeObserver({ _ in changeObserved = true })
+        let metadata = ChangeMetadata(transient: false)
+        
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        observable1.update(2, metadata)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        observable2.update(2, metadata)
+        XCTAssertEqual(mapped.value, true)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        observable2.update(3, metadata)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        observable1.update(4, metadata)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+    }
+    
     func testAnyTrue() {
         let observable1 = mutableObservableValue(false)
         let observable2 = mutableObservableValue(false)

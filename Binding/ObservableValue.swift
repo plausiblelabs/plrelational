@@ -84,6 +84,48 @@ public func not<T: BooleanType>(observable: ObservableValue<T>) -> ObservableVal
     return observable.map{ !$0.boolValue }
 }
 
+extension ObservableValue where T: BooleanType {
+    /// Returns an ObservableValue whose value resolves to `self.value || other.value`.  The returned
+    /// ObservableValue's `value` will be recomputed any time the value of either input changes.
+    public func or(other: ObservableValue<T>) -> ObservableValue<Bool> {
+        return BinaryOpObservableValue(self, other, { $0.boolValue || $1.boolValue })
+    }
+    
+    /// Returns an ObservableValue whose value resolves to `self.value && other.value`.  The returned
+    /// ObservableValue's `value` will be recomputed any time the value of either input changes.
+    public func and(other: ObservableValue<T>) -> ObservableValue<Bool> {
+        return BinaryOpObservableValue(self, other, { $0.boolValue && $1.boolValue })
+    }
+}
+
+// TODO: This syntax is same as SelectExpression operators; maybe we should use something different
+infix operator *|| {
+    associativity left
+    precedence 110
+}
+
+infix operator *&& {
+    associativity left
+    precedence 120
+}
+
+public func *||<T: BooleanType>(lhs: ObservableValue<T>, rhs: ObservableValue<T>) -> ObservableValue<Bool> {
+    return lhs.or(rhs)
+}
+
+public func *&&<T: BooleanType>(lhs: ObservableValue<T>, rhs: ObservableValue<T>) -> ObservableValue<Bool> {
+    return lhs.and(rhs)
+}
+
+infix operator *== {
+    associativity none
+    precedence 130
+}
+
+public func *==<T: Equatable>(lhs: ObservableValue<T>, rhs: ObservableValue<T>) -> ObservableValue<Bool> {
+    return BinaryOpObservableValue(lhs, rhs, { $0 == $1 })
+}
+
 extension SequenceType where Generator.Element == ObservableValue<Bool> {
     /// Returns an ObservableValue whose value resolves to `true` if *any* of the ObservableValues
     /// in this sequence resolve to `true`.
@@ -148,6 +190,28 @@ private class ZippedObservableValue<U, V>: ObservableValue<(U, V)> {
         })
         self.removal2 = observable2.addChangeObserver({ [weak self] metadata in
             self?.setValue((observable1.value, observable2.value), metadata)
+        })
+    }
+    
+    deinit {
+        removal1()
+        removal2()
+    }
+}
+
+private class BinaryOpObservableValue: ObservableValue<Bool> {
+    private var removal1: ObserverRemoval!
+    private var removal2: ObserverRemoval!
+    
+    init<U, V>(_ observable1: ObservableValue<U>, _ observable2: ObservableValue<V>, _ f: (U, V) -> Bool) {
+        super.init(initialValue: f(observable1.value, observable2.value), valueChanging: valueChanging)
+        
+        self.removal1 = observable1.addChangeObserver({ [weak self] metadata in
+            self?.setValue(f(observable1.value, observable2.value), metadata)
+        })
+        
+        self.removal2 = observable2.addChangeObserver({ [weak self] metadata in
+            self?.setValue(f(observable1.value, observable2.value), metadata)
         })
     }
     
