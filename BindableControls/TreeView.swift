@@ -193,7 +193,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
             textField.string = model.cellText(node.data)
         }
         if let imageView = view.imageView as? ImageView {
-            imageView.img = model.cellImage?(node.data)
+            imageView.img <~ model.cellImage?(node.data)
         }
         return view
     }

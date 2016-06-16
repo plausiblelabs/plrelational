@@ -10,13 +10,9 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
 
     private let bindings = BindingSet()
     
-    public var items: ObservableValue<[T]>? {
-        didSet {
-            bindings.observe(items, "items", { [weak self] value in
-                let objects = value.map{ $0 as! AnyObject }
-                self?.addItemsWithObjectValues(objects)
-            })
-        }
+    public lazy var items: Property<[T]> = Property { [weak self] value in
+        let objects = value.map{ $0 as! AnyObject }
+        self?.addItemsWithObjectValues(objects)
     }
     
     public var value: MutableObservableValue<T?>? {

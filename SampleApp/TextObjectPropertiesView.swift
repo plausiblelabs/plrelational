@@ -24,11 +24,11 @@ class TextObjectPropertiesView: BackgroundView {
         hintField = TextField()
         hintField.frame = NSMakeRect(10, 46, 120, 24)
         hintField.string = model.hint
-        hintField.placeholder = model.hintPlaceholder
+        hintField.placeholder <~ model.hintPlaceholder
         addSubview(hintField)
         
         fontPopupButton = PopUpButton(frame: NSMakeRect(10, 80, 120, 24), pullsDown: false)
-        fontPopupButton.items = ObservableValue.constant(model.availableFonts.map{ titledMenuItem($0) })
+        fontPopupButton.items <~ ObservableValue.constant(model.availableFonts.map{ titledMenuItem($0) })
         fontPopupButton.defaultItemContent = MenuItemContent(object: "Default", title: model.fontPlaceholder)
         fontPopupButton.selectedObject = model.font
         addSubview(fontPopupButton)

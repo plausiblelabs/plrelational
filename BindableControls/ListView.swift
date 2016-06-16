@@ -139,7 +139,7 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
             textField.string = model.cellText(element.data)
         }
         if let imageView = view.imageView as? ImageView {
-            imageView.img = model.cellImage?(element.data)
+            imageView.img <~ model.cellImage?(element.data)
         }
         return view
     }

@@ -159,18 +159,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             
         // Wire up the controls and bindings
         textField.string = nameBinding(selectedObjectsName)
-        textField.placeholder = selectedObjectsName.stringWhenMulti("Multiple Values")
+        textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
 
         checkbox.checked = undoableDB.observe(
             selectedObjectsEditable,
             action: "Change Editable",
-            get: { Checkbox.CheckState($0.oneBoolOrNil) },
+            get: { CheckState($0.oneBoolOrNil) },
             set: { selectedObjectsEditable.updateBoolean($0.boolValue) }
         )
         
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
         let popupItems = days.map{ titledMenuItem($0) }
-        popupButton.items = ObservableValue.constant(popupItems)
+        popupButton.items <~ ObservableValue.constant(popupItems)
         popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
         popupButton.selectedObject = undoableDB.observe(
             selectedObjectsDay,
@@ -185,14 +185,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             get: { $0.oneIntegerOrNil.map{ Int($0) } },
             set: { selectedObjectsRocks.updateInteger(Int64($0!)) }
         )
-        stepper.placeholder = selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
+        stepper.placeholder <~ selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
         
         let comboObservableValue: MutableObservableValue<String?> = mutableObservableValue("Alice")
         _ = comboObservableValue.addChangeObserver({ _ in
             Swift.print("NEW COMBO VALUE: \(comboObservableValue.value)")
         })
         
-        comboBox.items = ObservableValue.constant(["Alice", "Bob", "Carlos"])
+        comboBox.items <~ ObservableValue.constant(["Alice", "Bob", "Carlos"])
         comboBox.value = comboObservableValue
         
         colorPicker.color = undoableDB.observe(

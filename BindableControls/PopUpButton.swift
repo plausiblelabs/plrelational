@@ -10,29 +10,25 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
 
     private let bindings = BindingSet()
     
-    public var items: ObservableValue<[MenuItem<T>]>? {
-        didSet {
-            bindings.observe(items, "items", { [weak self] value in
-                guard let weakSelf = self else { return }
+    public lazy var items: Property<[MenuItem<T>]> = Property { [weak self] value in
+        guard let weakSelf = self else { return }
 
-                // Clear the menu
-                weakSelf.removeAllItems()
+        // Clear the menu
+        weakSelf.removeAllItems()
 
-                // Add the menu items
-                weakSelf.nativeMenuItems = value.map{ NativeMenuItem(model: $0) }
-                for item in weakSelf.nativeMenuItems! {
-                    weakSelf.menu?.addItem(item.nsitem)
-                }
-
-                // Insert the default menu item, if we have one
-                if let defaultMenuItem = weakSelf.defaultMenuItem {
-                    weakSelf.menu?.insertItem(defaultMenuItem.nsitem, atIndex: 0)
-                }
-                
-                // Set the selected item, if needed
-                weakSelf.setSelectedItem(weakSelf.selectedObject?.value)
-            })
+        // Add the menu items
+        weakSelf.nativeMenuItems = value.map{ NativeMenuItem(model: $0) }
+        for item in weakSelf.nativeMenuItems! {
+            weakSelf.menu?.addItem(item.nsitem)
         }
+
+        // Insert the default menu item, if we have one
+        if let defaultMenuItem = weakSelf.defaultMenuItem {
+            weakSelf.menu?.insertItem(defaultMenuItem.nsitem, atIndex: 0)
+        }
+        
+        // Set the selected item, if needed
+        weakSelf.setSelectedItem(weakSelf.selectedObject?.value)
     }
 
     public var selectedObject: MutableObservableValue<T?>? {

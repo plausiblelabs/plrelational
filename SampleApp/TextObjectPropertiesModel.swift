@@ -33,11 +33,11 @@ class TextObjectPropertiesModel {
         return self.selectedTextObjects.project(["font"])
     }()
 
-    lazy var editable: MutableObservableValue<Checkbox.CheckState> = { [unowned self] in
+    lazy var editable: MutableObservableValue<CheckState> = { [unowned self] in
         return self.db.observe(
             self.editableRelation,
             action: "Change Editable",
-            get: { Checkbox.CheckState($0.oneBoolOrNil) },
+            get: { CheckState($0.oneBoolOrNil) },
             set: { self.editableRelation.updateBoolean($0.boolValue) }
         )
     }()

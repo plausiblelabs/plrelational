@@ -33,10 +33,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         model = ViewModel(undoManager: undoManager)
         textField.string = model.queryString
         listView = ListView(model: model.listViewModel, outlineView: outlineView)
-        progressIndicator.visible = model.progressVisible
-        recordButton.disabled = model.recordDisabled
+        progressIndicator.visible <~ model.progressVisible
+        recordButton.disabled <~ model.recordDisabled
         recordButton.clicked = model.recordClicked
-        saveButton.disabled = model.saveDisabled
+        saveButton.disabled <~ model.saveDisabled
         saveButton.clicked = model.saveClicked
     }
     

@@ -18,20 +18,12 @@ public class TextField: NSTextField, NSTextFieldDelegate {
         }
     }
 
-    public var placeholder: ObservableValue<String>? {
-        didSet {
-            bindings.observe(placeholder, "placeholder", { [weak self] value in
-                self?.placeholderString = value
-            })
-        }
+    public lazy var placeholder: Property<String> = Property { [weak self] value in
+        self?.placeholderString = value
     }
 
-    public var visible: ObservableValue<Bool>? {
-        didSet {
-            bindings.observe(visible, "visible", { [weak self] value in
-                self?.hidden = !value
-            })
-        }
+    public lazy var visible: Property<Bool> = Property { [weak self] value in
+        self?.hidden = !value
     }
     
     private var previousCommittedValue: String?

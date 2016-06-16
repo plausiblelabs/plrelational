@@ -108,6 +108,8 @@
 		37A1CED21D10B8690067870D /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED11D10B8690067870D /* Button.swift */; };
 		37A1CED41D11D9180067870D /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED31D11D9180067870D /* ProgressIndicator.swift */; };
 		37A1CED61D11DC410067870D /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED51D11DC410067870D /* ViewModel.swift */; };
+		37A1CED91D1354DD0067870D /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED81D1354DD0067870D /* Property.swift */; };
+		37A1CEDC1D1358670067870D /* CheckState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEDB1D1358670067870D /* CheckState.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -493,6 +495,8 @@
 		37A1CED11D10B8690067870D /* Button.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		37A1CED31D11D9180067870D /* ProgressIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
 		37A1CED51D11DC410067870D /* ViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		37A1CED81D1354DD0067870D /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Property.swift; path = Binding/Property.swift; sourceTree = "<group>"; };
+		37A1CEDB1D1358670067870D /* CheckState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckState.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -815,6 +819,7 @@
 				372707721CF38FDC00710C80 /* Observable Value */,
 				372707741CF3904D00710C80 /* Observable Array */,
 				372707731CF38FF600710C80 /* Observable Tree */,
+				37A1CED71D1350C00067870D /* Properties */,
 				37A1CE661D0F31140067870D /* Binding Set */,
 				372707BC1CFE24C600710C80 /* Utilities */,
 			);
@@ -926,6 +931,7 @@
 			children = (
 				37A1CED11D10B8690067870D /* Button.swift */,
 				47701CA01CF764CD00E3549D /* Checkbox.swift */,
+				37A1CEDB1D1358670067870D /* CheckState.swift */,
 				37A1CE5F1D08C70D0067870D /* Color.swift */,
 				37A1CE621D0B25F40067870D /* ColorPanel.swift */,
 				37A1CE5C1D08C3110067870D /* ColorPickerView.swift */,
@@ -956,6 +962,14 @@
 				37A1CED31D11D9180067870D /* ProgressIndicator.swift */,
 			);
 			name = "Basic Views";
+			sourceTree = "<group>";
+		};
+		37A1CED71D1350C00067870D /* Properties */ = {
+			isa = PBXGroup;
+			children = (
+				37A1CED81D1354DD0067870D /* Property.swift */,
+			);
+			name = Properties;
 			sourceTree = "<group>";
 		};
 		37C610FE1CD7EFAE001DAF59 /* SampleApp */ = {
@@ -1823,6 +1837,7 @@
 				372707B71CFE240E00710C80 /* CommonValue.swift in Sources */,
 				372707B91CFE240E00710C80 /* RelationObservableArray.swift in Sources */,
 				372707BD1CFE24F600710C80 /* ArrayBinarySearch.swift in Sources */,
+				37A1CED91D1354DD0067870D /* Property.swift in Sources */,
 				37A1CE651D0B59700067870D /* BindingSet.swift in Sources */,
 				372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */,
 				372707BB1CFE240E00710C80 /* RelationObservableTree.swift in Sources */,
@@ -1903,6 +1918,7 @@
 				37A1CEB71D1083FD0067870D /* TextField.swift in Sources */,
 				37A1CEBC1D1083FD0067870D /* Color.swift in Sources */,
 				37A1CEB31D1083FD0067870D /* Image.swift in Sources */,
+				37A1CEDC1D1358670067870D /* CheckState.swift in Sources */,
 				37A1CEBA1D1083FD0067870D /* StepperView.swift in Sources */,
 				37A1CEBB1D1083FD0067870D /* ColorPickerView.swift in Sources */,
 				37A1CEB11D1083FD0067870D /* BackgroundView.swift in Sources */,

@@ -10,12 +10,8 @@ public class Button: NSButton {
 
     private let bindings = BindingSet()
     
-    public var disabled: ObservableValue<Bool>? {
-        didSet {
-            bindings.observe(disabled, "disabled", { [weak self] value in
-                self?.enabled = !value
-            })
-        }
+    public lazy var disabled: Property<Bool> = Property { [weak self] value in
+        self?.enabled = !value
     }
 
     // TODO: Make this an event stream, and then bind the view model to the stream

@@ -25,12 +25,8 @@ public class StepperView: NSControl, NSTextFieldDelegate {
         }
     }
 
-    public var placeholder: ObservableValue<String>? {
-        didSet {
-            bindings.observe(placeholder, "placeholder", { [weak self] value in
-                self?.textField.placeholderString = value
-            })
-        }
+    public lazy var placeholder: Property<String> = Property { [weak self] value in
+        self?.textField.placeholderString = value
     }
 
     private let defaultValue: Int

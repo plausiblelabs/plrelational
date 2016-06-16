@@ -4,6 +4,7 @@
 //
 
 import Cocoa
+import Binding
 import BindableControls
 
 class Document: NSDocument {
@@ -71,7 +72,7 @@ class Document: NSDocument {
         inspectorView = InspectorView(model: docModel.inspectorTreeViewModel, outlineView: inspectorOutlineView)
         propertiesView = PropertiesView(frame: rightSidebarView.bounds, model: docModel.propertiesModel)
         rightSidebarView.addSubview(propertiesView)
-        rightSidebarView.visible = docModel.propertiesSidebarVisible
+        rightSidebarView.visible <~ docModel.propertiesSidebarVisible
     }
     
     @IBAction func newPageAction(sender: NSMenuItem) {
