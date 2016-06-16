@@ -5,8 +5,8 @@
 
 /// A generalized Relation which derives its value by performing some operation on other Relations.
 /// This implements operations such as union, intersection, difference, join, etc.
-class IntermediateRelation: Relation, RelationDefaultChangeObserverImplementation {
-    let op: Operator
+public class IntermediateRelation: Relation, RelationDefaultChangeObserverImplementation {
+    var op: Operator
     var operands: [Relation] {
         didSet {
             let objs = operands.flatMap({ $0 as? AnyObject })
@@ -16,7 +16,7 @@ class IntermediateRelation: Relation, RelationDefaultChangeObserverImplementatio
         }
     }
     
-    var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     var derivative: RelationDerivative?
     var inTransaction = 0 // Like a refcount, incremented for begin, decremented for end, action at 0
@@ -100,38 +100,38 @@ extension IntermediateRelation {
 }
 
 extension IntermediateRelation: RelationObserver {
-    func onAddFirstObserver() {
+    public func onAddFirstObserver() {
         let differentiator = RelationDifferentiator(relation: self)
         let derivative = differentiator.computeDerivative()
         self.derivative = derivative
         
-        for variable in derivative.allVariables {
+        for variable in derivative.allVariables where variable !== self {
             let proxy = WeakRelationObserverProxy(target: self)
-            proxy.registerOn(variable)
+            proxy.registerOn(variable, kinds: [.DirectChange])
         }
     }
     
-    func transactionBegan() {
+    public func transactionBegan() {
         inTransaction += 1
         derivative?.clearVariables()
     }
     
-    func relationChanged(relation: Relation, change: RelationChange) {
+    public func relationChanged(relation: Relation, change: RelationChange) {
         if let derivative = derivative {
             if inTransaction == 0 {
                 derivative.clearVariables()
                 derivative.setChange(change, forVariable: relation as! protocol<AnyObject, Relation>)
-                notifyChangeObservers(derivative.change)
+                notifyChangeObservers(derivative.change, kind: .DependentChange)
             } else {
                 derivative.setChange(change, forVariable: relation as! protocol<AnyObject, Relation>)
             }
         }
     }
     
-    func transactionEnded() {
+    public func transactionEnded() {
         inTransaction -= 1
         if let derivative = derivative where inTransaction == 0 {
-            notifyChangeObservers(derivative.change)
+            notifyChangeObservers(derivative.change, kind: .DependentChange)
         }
     }
 }
@@ -145,7 +145,7 @@ extension IntermediateRelation {
 }
 
 extension IntermediateRelation {
-    var scheme: Scheme {
+    public var scheme: Scheme {
         switch op {
         case .Project(let scheme):
             return scheme
@@ -164,7 +164,7 @@ extension IntermediateRelation {
 }
 
 extension IntermediateRelation {
-    func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {
+    public func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {
         let data = LogRelationIterationBegin(self)
         let generator: AnyGenerator<Result<Row, RelationError>>
         switch op {
@@ -521,7 +521,7 @@ extension IntermediateRelation {
 }
 
 extension IntermediateRelation {
-    func contains(row: Row) -> Result<Bool, RelationError> {
+    public func contains(row: Row) -> Result<Bool, RelationError> {
         switch op {
         case .Union:
             return unionContains(row)
@@ -654,7 +654,7 @@ extension IntermediateRelation {
 }
 
 extension IntermediateRelation {
-    func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+    public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         switch op {
         case .Union:
             return updateOperandsDirectly(query, newValues: newValues)
@@ -808,5 +808,29 @@ extension IntermediateRelation {
                 return .Ok()
             }
         })
+    }
+}
+
+extension IntermediateRelation {
+    public var selectExpression: SelectExpression {
+        get {
+            if case .Select(let expression) = op {
+                return expression
+            } else {
+                fatalError("Can't get the select expression from an IntermediateRelation with operator \(op)")
+            }
+        }
+        set {
+            if case .Select = op {
+                let oldRelation = IntermediateRelation(op: op, operands: operands)
+                op = .Select(newValue)
+                
+                let change = RelationChange(added: self - oldRelation, removed: oldRelation - self)
+                notifyChangeObservers(change, kind: .DirectChange)
+            } else {
+                fatalError("Can't set the select expression from an IntermediateRelation with operator \(op)")
+            }
+            
+        }
     }
 }

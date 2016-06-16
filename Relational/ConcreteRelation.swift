@@ -128,7 +128,7 @@ public struct ConcreteRelation: MutableRelation {
 //        return (one, two)
 //    }
     
-    public func addChangeObserver(observer: RelationObserver) -> (Void -> Void) {
+    public func addChangeObserver(observer: RelationObserver, kinds: [RelationObservationKind]) -> (Void -> Void) {
         //fatalError("Change observation isn't implemented for ConcreteRelation. Its implementation as a value type makes that weird. We might change that if we ever need it.")
         return { _ in }
     }

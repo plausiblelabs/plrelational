@@ -88,15 +88,15 @@ extension ChangeLoggingDatabase {
         }
         
         for (relation, _) in changes {
-            relation.notifyObserversTransactionBegan()
+            relation.notifyObserversTransactionBegan(.DirectChange)
         }
         
         for (relation, change) in changes {
-            relation.notifyChangeObservers(change)
+            relation.notifyChangeObservers(change, kind: .DirectChange)
         }
         
         for (relation, _) in changes {
-            relation.notifyObserversTransactionEnded()
+            relation.notifyObserversTransactionEnded(.DirectChange)
         }
 
         return .Ok()
@@ -139,7 +139,7 @@ extension ChangeLoggingDatabase {
         }
         
         for (relation, change) in changes {
-            relation.notifyChangeObservers(change)
+            relation.notifyChangeObservers(change, kind: .DirectChange)
         }
         
         return .Ok()

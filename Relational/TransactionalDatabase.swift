@@ -60,15 +60,15 @@ public class TransactionalDatabase {
         }
         
         for (r, _) in changes {
-            r.notifyObserversTransactionBegan()
+            r.notifyObserversTransactionBegan(.DirectChange)
         }
         
         for (r, change) in changes {
-            r.notifyChangeObservers(change)
+            r.notifyChangeObservers(change, kind: .DirectChange)
         }
         
         for (r, _) in changes {
-            r.notifyObserversTransactionEnded()
+            r.notifyObserversTransactionEnded(.DirectChange)
         }
         
         inTransaction = false
@@ -152,7 +152,7 @@ extension TransactionalDatabase {
         }
         
         func observeUnderlyingChange(change: RelationChange) {
-            self.notifyChangeObservers(change)
+            self.notifyChangeObservers(change, kind: .DirectChange)
         }
     }
 }

@@ -55,7 +55,7 @@ public class ChangeLoggingRelation<BaseRelation: Relation> {
             }
             log.append(ChangeLoggingRelationLogEntry(forward: change, backward: reverse))
             
-            notifyChangeObservers($0)
+            notifyChangeObservers($0, kind: .DirectChange)
             
             return .Ok()
         })
@@ -91,7 +91,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                 log.append(logEntry)
                 let result = self.applyLogToCurrentRelationAndGetChanges([change])
                 return result.map({
-                    notifyChangeObservers($0)
+                    notifyChangeObservers($0, kind: .DirectChange)
                     return 0
                 })
             } else {
@@ -111,7 +111,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
             log.append(logEntry)
             let result = self.applyLogToCurrentRelationAndGetChanges([change])
             return result.map({
-                notifyChangeObservers($0)
+                notifyChangeObservers($0, kind: .DirectChange)
             })
         })
     }
@@ -257,7 +257,7 @@ extension ChangeLoggingRelation {
     public func restoreSnapshot(snapshot: ChangeLoggingRelationSnapshot) -> Result<Void, RelationError> {
         let change = rawRestoreSnapshot(snapshot)
         return change.map({
-            notifyChangeObservers($0)
+            notifyChangeObservers($0, kind: .DirectChange)
         })
     }
     

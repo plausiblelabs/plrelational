@@ -22,7 +22,7 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// changes. The return value is a function which removes the observation when
     /// invoked. The caller can use that function to cancel the observation when
     /// it no longer needs it.
-    func addChangeObserver(observer: RelationObserver) -> (Void -> Void)
+    func addChangeObserver(observer: RelationObserver, kinds: [RelationObservationKind]) -> (Void -> Void)
     
     func union(other: Relation) -> Relation
     func intersection(other: Relation) -> Relation
@@ -57,6 +57,21 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     func withUpdate(newValues: Row) -> Relation
     
     func renameAttributes(renames: [Attribute: Attribute]) -> Relation
+}
+
+public enum RelationObservationKind {
+    /// A change due to something in the Relation itself.
+    case DirectChange
+    
+    /// A change due to something in a dependency of an intermediate relation, not the Relation itself.
+    case DependentChange
+}
+
+extension Relation {
+    /// A shortcut that adds a change observer for all kinds.
+    public func addChangeObserver(observer: RelationObserver) -> (Void -> Void) {
+        return addChangeObserver(observer, kinds: [.DirectChange, .DependentChange])
+    }
 }
 
 extension Relation {

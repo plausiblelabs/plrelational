@@ -1480,4 +1480,45 @@ class RelationTests: DBTestCase {
                         ["name", "kind"],
                         ["Steve", "person"]))
     }
+    
+    func testSelectExpressionMutation() {
+        let concrete = MakeRelation(
+            ["number", "word"],
+            [1, "one"],
+            [2, "two"],
+            [3, "three"])
+        
+        let select = concrete.select(Attribute("number") *== 1 *|| Attribute("word") *== "two") as! IntermediateRelation
+        var lastChange: RelationChange?
+        _ = select.addChangeObserver({ lastChange = $0 })
+        
+        let union = select.union(select)
+        var lastChangeUnion: RelationChange?
+        _ = union.addChangeObserver({ lastChangeUnion = $0 })
+        
+        AssertEqual(select, MakeRelation(
+            ["number", "word"],
+            [1, "one"],
+            [2, "two"]))
+        
+        select.selectExpression = Attribute("number") *== 2 *|| Attribute("word") *== "three"
+        AssertEqual(select, MakeRelation(
+            ["number", "word"],
+            [2, "two"],
+            [3, "three"]))
+        
+        AssertEqual(lastChange?.added, MakeRelation(
+            ["number", "word"],
+            [3, "three"]))
+        AssertEqual(lastChange?.removed, MakeRelation(
+            ["number", "word"],
+            [1, "one"]))
+        
+        AssertEqual(lastChangeUnion?.added, MakeRelation(
+            ["number", "word"],
+            [3, "three"]))
+        AssertEqual(lastChangeUnion?.removed, MakeRelation(
+            ["number", "word"],
+            [1, "one"]))
+    }
 }

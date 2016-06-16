@@ -17,12 +17,12 @@ public protocol RelationDefaultChangeObserverImplementation: class, Relation {
 
 public struct RelationDefaultChangeObserverImplementationData {
     private var didAddFirstObserver = false
-    private var observers: [UInt64: RelationObserver]?
+    private var observers: [UInt64: (observer: RelationObserver, kinds: [RelationObservationKind])]?
     private var nextID: UInt64 = 0
 }
 
 extension RelationDefaultChangeObserverImplementation {
-    public func addChangeObserver(observer: RelationObserver) -> (Void -> Void) {
+    public func addChangeObserver(observer: RelationObserver, kinds: [RelationObservationKind]) -> (Void -> Void) {
         let id = changeObserverData.nextID
         changeObserverData.nextID += 1
         
@@ -30,7 +30,7 @@ extension RelationDefaultChangeObserverImplementation {
             changeObserverData.observers = [:]
         }
         
-        changeObserverData.observers![id] = observer
+        changeObserverData.observers![id] = (observer, kinds)
         
         if !changeObserverData.didAddFirstObserver {
             changeObserverData.didAddFirstObserver = true
@@ -42,15 +42,15 @@ extension RelationDefaultChangeObserverImplementation {
     
     public func onAddFirstObserver() {}
     
-    func notifyObserversTransactionBegan() {
+    func notifyObserversTransactionBegan(kind: RelationObservationKind) {
         if let observers = changeObserverData.observers {
-            for (_, observer) in observers {
-                observer.transactionBegan()
+            for (_, entry) in observers where entry.kinds.contains(kind) {
+                entry.observer.transactionBegan()
             }
         }
     }
     
-    func notifyChangeObservers(change: RelationChange) {
+    func notifyChangeObservers(change: RelationChange, kind: RelationObservationKind) {
         func isEmpty(r: Relation?) -> Bool {
             return r == nil || r?.isEmpty.ok == true
         }
@@ -61,16 +61,16 @@ extension RelationDefaultChangeObserverImplementation {
                 return
             }
         
-            for (_, observer) in observers {
-                observer.relationChanged(self, change: change)
+            for (_, entry) in observers where entry.kinds.contains(kind) {
+                entry.observer.relationChanged(self, change: change)
             }
         }
     }
     
-    func notifyObserversTransactionEnded() {
+    func notifyObserversTransactionEnded(kind: RelationObservationKind) {
         if let observers = changeObserverData.observers {
-            for (_, observer) in observers {
-                observer.transactionEnded()
+            for (_, entry) in observers where entry.kinds.contains(kind) {
+                entry.observer.transactionEnded()
             }
         }
     }

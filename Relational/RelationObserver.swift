@@ -17,8 +17,8 @@ class WeakRelationObserverProxy: RelationObserver {
         self.target = target
     }
     
-    func registerOn(observee: Relation) {
-        removal = observee.addChangeObserver(self)
+    func registerOn(observee: Relation, kinds: [RelationObservationKind]) {
+        removal = observee.addChangeObserver(self, kinds: kinds)
     }
     
     func transactionBegan() {

@@ -270,8 +270,12 @@ extension RelationDifferentiator {
         // Our changes are equal to the underlying changes with the same select applied.
         // (select A)' = select A'
         let underlyingDerivative = derivativeOf(r.operands[0])
-        return RelationChange(added: underlyingDerivative.added?.select(expression),
-                                  removed: underlyingDerivative.removed?.select(expression))
+        let changesFromUnderlying = RelationChange(added: underlyingDerivative.added?.select(expression),
+                                                   removed: underlyingDerivative.removed?.select(expression))
+        let placeholders = derivative.placeholdersForVariable(r)
+        return RelationChange(
+            added: changesFromUnderlying.added + placeholders.added,
+            removed: changesFromUnderlying.removed + placeholders.removed)
     }
     
     private func equijoinDerivative(r: IntermediateRelation, matching: [Attribute: Attribute]) -> RelationChange {

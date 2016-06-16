@@ -65,7 +65,9 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
     
     public func onAddFirstObserver() {
         let baseTable = db[tableName]!
-        baseTable.addWeakChangeObserver(self, method: self.dynamicType.notifyChangeObservers)
+        baseTable.addWeakChangeObserver(self, call: {
+            $0.notifyChangeObservers($1, kind: .DirectChange)
+        })
     }
 }
 
@@ -168,7 +170,7 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
             let array = Array(rows)
             precondition(array.isEmpty, "Unexpected results from INSERT INTO statement: \(array)")
             let rowid = sqlite3_last_insert_rowid(db.db)
-            self.notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil))
+            self.notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .DirectChange)
             return rowid
         })
     }
@@ -182,7 +184,7 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
                 return result.map({ rows in
                     let array = Array(rows)
                     precondition(array.isEmpty, "Unexpected results from DELETE FROM statement: \(array)")
-                    self.notifyChangeObservers(RelationChange(added: nil, removed: willDelete))
+                    self.notifyChangeObservers(RelationChange(added: nil, removed: willDelete), kind: .DirectChange)
                 })
             })
         } else {
@@ -206,7 +208,7 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
                     precondition(array.isEmpty, "Unexpected results from UPDATE statement: \(array)")
                     
                     let updated = willUpdate.withUpdate(newValues)
-                    self.notifyChangeObservers(RelationChange(added: updated, removed: willUpdate))
+                    self.notifyChangeObservers(RelationChange(added: updated, removed: willUpdate), kind: .DirectChange)
                 })
             })
         } else {
