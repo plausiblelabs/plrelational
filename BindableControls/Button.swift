@@ -18,6 +18,7 @@ public class Button: NSButton {
         }
     }
 
+    // TODO: Make this an event stream, and then bind the view model to the stream
     public var clicked: MutableObservableValue<Bool>? {
         didSet {
             bindings.observe(clicked, "clicked", { _ in })

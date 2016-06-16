@@ -11,9 +11,8 @@ import BindableControls
 class ViewModel {
 
     private var persons: MutableRelation
-    private var personQuery: MutableRelation
     private var selectedPersonID: MutableRelation
-    private var personResults: Relation
+    private var personResults: MutableSelectIntermediateRelation
     
     private let undoableDB: UndoableDatabase
 
@@ -41,14 +40,12 @@ class ViewModel {
             return db[name]
         }
         persons = createRelation("person", ["id", "name", "sales", "order"])
-        personQuery = createRelation("person_query", ["name"])
         selectedPersonID = createRelation("selected_person", ["id"])
-        personResults = personQuery.join(persons)
+        personResults = persons.mutableSelect(false)
         
         undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
 
-        _ = personQuery.addChangeObserver({ _ in
-            Swift.print("QUERY: \(self.personQuery)")
+        _ = personResults.addChangeObserver({ _ in
             Swift.print("RESULTS: \(self.personResults)")
         })
         
@@ -78,13 +75,16 @@ class ViewModel {
     }
     
     lazy var queryString: MutableObservableValue<String> = { [unowned self] in
-        // TODO: Make these changes transient only?
-        return self.undoableDB.observe(
-            self.personQuery,
-            action: "Update Query",
-            get: { $0.oneString },
-            set: { self.personQuery.replaceValues([RelationValue($0)]) }
-        )
+        let query = mutableObservableValue("")
+        let removal = query.addChangeObserver({ _ in
+            if query.value.isEmpty {
+                self.personResults.selectExpression = false
+            } else {
+                self.personResults.selectExpression = SelectExpressionBinaryOperator(lhs: Attribute("name"), op: GlobComparator(), rhs: "\(query.value)*")
+            }
+        })
+        self.removals.append(removal)
+        return query
     }()
     
     lazy var listViewModel: ListViewModel<RowArrayElement> = { [unowned self] in

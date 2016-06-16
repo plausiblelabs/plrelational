@@ -33,7 +33,7 @@ extension Int: SelectExpression {
 
 extension Bool: SelectExpression {
     public func valueWithRow(row: Row) -> RelationValue {
-        return RelationValue.boolValue(true)
+        return RelationValue.boolValue(self)
     }
 }
 

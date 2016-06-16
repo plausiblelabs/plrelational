@@ -1520,5 +1520,25 @@ class RelationTests: DBTestCase {
         AssertEqual(lastChangeUnion?.removed, MakeRelation(
             ["number", "word"],
             [1, "one"]))
+        
+        select.selectExpression = Attribute("number") *== 1 *|| Attribute("word") *== "two"
+        AssertEqual(select, MakeRelation(
+            ["number", "word"],
+            [1, "one"],
+            [2, "two"]))
+
+        AssertEqual(lastChange?.added, MakeRelation(
+            ["number", "word"],
+            [1, "one"]))
+        AssertEqual(lastChange?.removed, MakeRelation(
+            ["number", "word"],
+            [3, "three"]))
+        
+        AssertEqual(lastChangeUnion?.added, MakeRelation(
+            ["number", "word"],
+            [1, "one"]))
+        AssertEqual(lastChangeUnion?.removed, MakeRelation(
+            ["number", "word"],
+            [3, "three"]))
     }
 }
