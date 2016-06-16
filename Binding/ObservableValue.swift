@@ -75,8 +75,8 @@ extension ObservableValue {
 /// Returns an ObservableValue whose value is a tuple (pair) containing the `value` from
 /// each of the given ObservableValues.  The returned ObservableValue's `value` will
 /// contain a fresh tuple any time the value of either input changes.
-public func zip<T, U>(observable1: ObservableValue<T>, _ observable2: ObservableValue<U>) -> ObservableValue<(T, U)> {
-    return ZippedObservableValue(observable1, observable2)
+public func zip<T, U>(lhs: ObservableValue<T>, _ rhs: ObservableValue<U>) -> ObservableValue<(T, U)> {
+    return BinaryOpObservableValue(lhs, rhs, { ($0, $1) }, valueChanging)
 }
 
 /// Returns an ObservableValue whose value is the negation of the boolean value of the given observable.
@@ -88,13 +88,13 @@ extension ObservableValue where T: BooleanType {
     /// Returns an ObservableValue whose value resolves to `self.value || other.value`.  The returned
     /// ObservableValue's `value` will be recomputed any time the value of either input changes.
     public func or(other: ObservableValue<T>) -> ObservableValue<Bool> {
-        return BinaryOpObservableValue(self, other, { $0.boolValue || $1.boolValue })
+        return BinaryOpObservableValue(self, other, { $0.boolValue || $1.boolValue }, valueChanging)
     }
     
     /// Returns an ObservableValue whose value resolves to `self.value && other.value`.  The returned
     /// ObservableValue's `value` will be recomputed any time the value of either input changes.
     public func and(other: ObservableValue<T>) -> ObservableValue<Bool> {
-        return BinaryOpObservableValue(self, other, { $0.boolValue && $1.boolValue })
+        return BinaryOpObservableValue(self, other, { $0.boolValue && $1.boolValue }, valueChanging)
     }
 }
 
@@ -123,7 +123,7 @@ infix operator *== {
 }
 
 public func *==<T: Equatable>(lhs: ObservableValue<T>, rhs: ObservableValue<T>) -> ObservableValue<Bool> {
-    return BinaryOpObservableValue(lhs, rhs, { $0 == $1 })
+    return BinaryOpObservableValue(lhs, rhs, { $0 == $1 }, valueChanging)
 }
 
 extension SequenceType where Generator.Element == ObservableValue<Bool> {
@@ -179,31 +179,11 @@ private class MappedObservableValue<T>: ObservableValue<T> {
     }
 }
 
-private class ZippedObservableValue<U, V>: ObservableValue<(U, V)> {
+private class BinaryOpObservableValue<T>: ObservableValue<T> {
     private var removal1: ObserverRemoval!
     private var removal2: ObserverRemoval!
     
-    init(_ observable1: ObservableValue<U>, _ observable2: ObservableValue<V>) {
-        super.init(initialValue: (observable1.value, observable2.value))
-        self.removal1 = observable1.addChangeObserver({ [weak self] metadata in
-            self?.setValue((observable1.value, observable2.value), metadata)
-        })
-        self.removal2 = observable2.addChangeObserver({ [weak self] metadata in
-            self?.setValue((observable1.value, observable2.value), metadata)
-        })
-    }
-    
-    deinit {
-        removal1()
-        removal2()
-    }
-}
-
-private class BinaryOpObservableValue: ObservableValue<Bool> {
-    private var removal1: ObserverRemoval!
-    private var removal2: ObserverRemoval!
-    
-    init<U, V>(_ observable1: ObservableValue<U>, _ observable2: ObservableValue<V>, _ f: (U, V) -> Bool) {
+    init<U, V>(_ observable1: ObservableValue<U>, _ observable2: ObservableValue<V>, _ f: (U, V) -> T, _ valueChanging: (T, T) -> Bool) {
         super.init(initialValue: f(observable1.value, observable2.value), valueChanging: valueChanging)
         
         self.removal1 = observable1.addChangeObserver({ [weak self] metadata in
