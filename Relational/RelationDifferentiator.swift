@@ -173,6 +173,8 @@ extension RelationDifferentiator {
             return projectionDerivative(r, scheme: scheme)
         case .Select(let expression):
             return selectDerivative(r, expression: expression)
+        case .MutableSelect(let expression):
+            return mutableSelectDerivative(r, expression: expression)
         case .Equijoin(let matching):
             return equijoinDerivative(r, matching: matching)
         case .Rename(let renames):
@@ -269,6 +271,16 @@ extension RelationDifferentiator {
     private func selectDerivative(r: IntermediateRelation, expression: SelectExpression) -> RelationChange {
         // Our changes are equal to the underlying changes with the same select applied.
         // (select A)' = select A'
+        let underlyingDerivative = derivativeOf(r.operands[0])
+        return RelationChange(added: underlyingDerivative.added?.select(expression),
+                              removed: underlyingDerivative.removed?.select(expression))
+    }
+    
+    private func mutableSelectDerivative(r: IntermediateRelation, expression: SelectExpression) -> RelationChange {
+        // This is like the plain select derivative, but we add in changes made to the select expression
+        // itself as well. It's never possible to have changes made to the select expression itself at
+        // the same time as there are changes made to operands (for now?) so there doesn't need to be
+        // any fancy business when combining them.
         let underlyingDerivative = derivativeOf(r.operands[0])
         let changesFromUnderlying = RelationChange(added: underlyingDerivative.added?.select(expression),
                                                    removed: underlyingDerivative.removed?.select(expression))

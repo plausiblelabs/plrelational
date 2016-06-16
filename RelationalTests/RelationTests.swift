@@ -1488,7 +1488,7 @@ class RelationTests: DBTestCase {
             [2, "two"],
             [3, "three"])
         
-        let select = concrete.select(Attribute("number") *== 1 *|| Attribute("word") *== "two") as! IntermediateRelation
+        let select = concrete.mutableSelect(Attribute("number") *== 1 *|| Attribute("word") *== "two")
         var lastChange: RelationChange?
         _ = select.addChangeObserver({ lastChange = $0 })
         

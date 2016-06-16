@@ -56,6 +56,7 @@ extension IntermediateRelation {
         
         case Project(Scheme)
         case Select(SelectExpression)
+        case MutableSelect(SelectExpression)
         case Equijoin([Attribute: Attribute])
         case Rename([Attribute: Attribute])
         case Update(Row)
@@ -177,6 +178,8 @@ extension IntermediateRelation {
         case .Project(let scheme):
             generator = projectRows(scheme)
         case .Select(let expression):
+            generator = selectRows(expression)
+        case .MutableSelect(let expression):
             generator = selectRows(expression)
         case .Equijoin(let matching):
             generator = equijoinRows(matching)
@@ -533,6 +536,8 @@ extension IntermediateRelation {
             return projectContains(row)
         case .Select(let expression):
             return selectContains(row, expression: expression)
+        case .MutableSelect(let expression):
+            return selectContains(row, expression: expression)
         case .Equijoin:
             return equijoinContains(row)
         case .Rename(let renames):
@@ -665,6 +670,8 @@ extension IntermediateRelation {
         case .Project:
             return updateOperandsDirectly(query, newValues: newValues)
         case .Select(let expression):
+            return selectUpdate(query, newValues: newValues, expression: expression)
+        case .MutableSelect(let expression):
             return selectUpdate(query, newValues: newValues, expression: expression)
         case .Equijoin:
             return equijoinUpdate(query, newValues: newValues)
@@ -811,17 +818,17 @@ extension IntermediateRelation {
     }
 }
 
-extension IntermediateRelation {
+public class MutableSelectIntermediateRelation: IntermediateRelation {
     public var selectExpression: SelectExpression {
         get {
-            if case .Select(let expression) = op {
+            if case .MutableSelect(let expression) = op {
                 return expression
             } else {
                 fatalError("Can't get the select expression from an IntermediateRelation with operator \(op)")
             }
         }
         set {
-            if case .Select = op {
+            if case .MutableSelect = op {
                 let oldRelation = IntermediateRelation(op: op, operands: operands)
                 op = .Select(newValue)
                 
@@ -832,5 +839,11 @@ extension IntermediateRelation {
             }
             
         }
+    }
+}
+
+extension Relation {
+    public func mutableSelect(expression: SelectExpression) -> MutableSelectIntermediateRelation {
+        return MutableSelectIntermediateRelation(op: .MutableSelect(expression), operands: [self])
     }
 }

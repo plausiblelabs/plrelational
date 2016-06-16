@@ -129,6 +129,8 @@ class QueryPlanner {
             return Node(op: .Project(scheme))
         case .Select(let expression):
             return Node(op: .Select(expression))
+        case .MutableSelect(let expression):
+            return Node(op: .Select(expression))
         case .Equijoin(let matching):
             return Node(op: .Equijoin(matching))
         case .Rename(let renames):
