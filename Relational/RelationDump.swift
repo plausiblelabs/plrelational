@@ -189,7 +189,12 @@ extension Relation {
             objDescription = "\(self.dynamicType)"
         }
         
-        let filename = "/tmp/\(objDescription).dot"
+        var filename = "/tmp/\(objDescription).dot"
+        var counter = 2
+        if NSFileManager.defaultManager().fileExistsAtPath(filename) {
+            filename = "/tmp/\(objDescription) \(counter).dot"
+            counter += 1
+        }
         try! output.writeToFile(filename, atomically: true, encoding: NSUTF8StringEncoding)
         NSWorkspace.sharedWorkspace().openFile(filename, withApplication: "Graphviz")
     }
