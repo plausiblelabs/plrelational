@@ -96,6 +96,12 @@ extension ObservableValue where T: BooleanType {
     public func and(other: ObservableValue<T>) -> ObservableValue<Bool> {
         return BinaryOpObservableValue(self, other, { $0.boolValue && $1.boolValue }, valueChanging)
     }
+    
+    /// Returns an ObservableValue that invokes the given function whenever this ObservableValue's
+    /// `value` resolves to `true`.
+    public func then(f: () -> Void) -> ObservableValue<()> {
+        return ThenObservableValue(self, f)
+    }
 }
 
 // TODO: This syntax is same as SelectExpression operators; maybe we should use something different
@@ -198,6 +204,23 @@ private class BinaryOpObservableValue<T>: ObservableValue<T> {
     deinit {
         removal1()
         removal2()
+    }
+}
+
+private class ThenObservableValue: ObservableValue<()> {
+    private var removal: ObserverRemoval!
+    
+    init<B: BooleanType>(_ observable: ObservableValue<B>, _ f: () -> Void) {
+        super.init(initialValue: (), valueChanging: { _ in false })
+        self.removal = observable.addChangeObserver({ _ in
+            if observable.value.boolValue {
+                f()
+            }
+        })
+    }
+    
+    deinit {
+        removal()
     }
 }
 

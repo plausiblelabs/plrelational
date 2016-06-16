@@ -15,6 +15,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @IBOutlet var textField: TextField!
     @IBOutlet var outlineView: ExtOutlineView!
     @IBOutlet var recordButton: Button!
+    @IBOutlet var saveButton: Button!
     @IBOutlet var progressIndicator: ProgressIndicator!
     
     var nsUndoManager: SPUndoManager!
@@ -34,6 +35,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         listView = ListView(model: model.listViewModel, outlineView: outlineView)
         progressIndicator.visible = model.progressVisible
         recordButton.disabled = model.recordDisabled
+        recordButton.clicked = model.recordClicked
+        saveButton.disabled = model.saveDisabled
+        saveButton.clicked = model.saveClicked
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {

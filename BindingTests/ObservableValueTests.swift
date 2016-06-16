@@ -193,6 +193,38 @@ class ObservableValueTests: BindingTestCase {
         changeObserved = false
     }
     
+    func testThen() {
+        var count = 0
+        let observable = mutableObservableValue(false)
+        let then = observable.then{ count += 1 }
+        var changeObserved = false
+        _ = then.addChangeObserver({ _ in changeObserved = true })
+        let metadata = ChangeMetadata(transient: false)
+        
+        XCTAssertEqual(count, 0)
+        XCTAssertEqual(changeObserved, false)
+        
+        observable.update(false, metadata)
+        XCTAssertEqual(count, 0)
+        XCTAssertEqual(changeObserved, false)
+        
+        observable.update(true, metadata)
+        XCTAssertEqual(count, 1)
+        XCTAssertEqual(changeObserved, false)
+        
+        observable.update(true, metadata)
+        XCTAssertEqual(count, 1)
+        XCTAssertEqual(changeObserved, false)
+        
+        observable.update(false, metadata)
+        XCTAssertEqual(count, 1)
+        XCTAssertEqual(changeObserved, false)
+        
+        observable.update(true, metadata)
+        XCTAssertEqual(count, 2)
+        XCTAssertEqual(changeObserved, false)
+    }
+    
     func testAnyTrue() {
         let observable1 = mutableObservableValue(false)
         let observable2 = mutableObservableValue(false)

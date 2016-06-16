@@ -17,6 +17,8 @@ class ViewModel {
     
     private let undoableDB: UndoableDatabase
 
+    private var removals: [ObserverRemoval] = []
+    
     init(undoManager: UndoManager) {
         
         func makeDB() -> (path: String, db: SQLiteDatabase) {
@@ -60,7 +62,7 @@ class ViewModel {
                 "sales": RelationValue(sales),
                 "order": RelationValue(order)
             ]
-            persons.add(row)
+            sqliteDB["person"]!.add(row)
             
             id += 1
             order += 1.0
@@ -69,6 +71,10 @@ class ViewModel {
         addPerson("Wilma", 7)
         addPerson("Barney", 3)
         addPerson("Betty", 9)
+    }
+    
+    deinit {
+        removals.forEach{ $0() }
     }
     
     lazy var queryString: MutableObservableValue<String> = { [unowned self] in
@@ -116,5 +122,32 @@ class ViewModel {
     
     lazy var recordDisabled: ObservableValue<Bool> = { [unowned self] in
         return self.selectedPersonID.empty
+    }()
+
+    lazy var recordClicked: MutableObservableValue<Bool> = { [unowned self] in
+        let clicked = mutableObservableValue(false)
+        let removal = clicked.addChangeObserver({ _ in
+            if clicked.value {
+                Swift.print("TODO: INCREMENT SALES")
+            }
+        })
+        self.removals.append(removal)
+        return clicked
+    }()
+
+    lazy var saveDisabled: ObservableValue<Bool> = { [unowned self] in
+        // TODO: Return true only when there are no changes
+        return ObservableValue.constant(true)
+    }()
+    
+    lazy var saveClicked: MutableObservableValue<Bool> = { [unowned self] in
+        let clicked = mutableObservableValue(false)
+        let removal = clicked.addChangeObserver({ _ in
+            if clicked.value {
+                Swift.print("TODO: SAVE CHANGES")
+            }
+        })
+        self.removals.append(removal)
+        return clicked
     }()
 }
