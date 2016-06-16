@@ -924,15 +924,15 @@
 		37A1CEAE1D1082530067870D /* Controls */ = {
 			isa = PBXGroup;
 			children = (
-				37C611321CD7F80F001DAF59 /* TextField.swift */,
+				37A1CED11D10B8690067870D /* Button.swift */,
 				47701CA01CF764CD00E3549D /* Checkbox.swift */,
+				37A1CE5F1D08C70D0067870D /* Color.swift */,
+				37A1CE621D0B25F40067870D /* ColorPanel.swift */,
+				37A1CE5C1D08C3110067870D /* ColorPickerView.swift */,
+				376A96371D09225900E696AE /* ComboBox.swift */,
 				3761369A1CF9523A00F572C5 /* PopUpButton.swift */,
 				3761369C1CFBA42100F572C5 /* StepperView.swift */,
-				37A1CE5C1D08C3110067870D /* ColorPickerView.swift */,
-				37A1CE5F1D08C70D0067870D /* Color.swift */,
-				376A96371D09225900E696AE /* ComboBox.swift */,
-				37A1CE621D0B25F40067870D /* ColorPanel.swift */,
-				37A1CED11D10B8690067870D /* Button.swift */,
+				37C611321CD7F80F001DAF59 /* TextField.swift */,
 			);
 			name = Controls;
 			sourceTree = "<group>";

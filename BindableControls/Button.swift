@@ -17,12 +17,30 @@ public class Button: NSButton {
             })
         }
     }
-    
+
+    public var clicked: MutableObservableValue<Bool>? {
+        didSet {
+            bindings.observe(clicked, "clicked", { _ in })
+        }
+    }
+
     public override init(frame: NSRect) {
         super.init(frame: frame)
+        target = self
+        action = #selector(buttonClicked(_:))
     }
     
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
+        target = self
+        action = #selector(buttonClicked(_:))
+    }
+    
+    @objc func buttonClicked(sender: Button) {
+        guard let clicked = clicked else { return }
+
+        let metadata = ChangeMetadata(transient: true)
+        clicked.update(true, metadata)
+        clicked.update(false, metadata)
     }
 }
