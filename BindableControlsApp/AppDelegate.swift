@@ -103,8 +103,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         addObject("Fred", editable: false, day: nil, color: nil, rocks: 17)
         addObject("Wilma", editable: true, day: "Friday", color: Color.blue, rocks: 42)
 
-        func nameBinding(relation: Relation) -> MutableObservableValue<String> {
-            return undoableDB.observe(
+        func nameBidiProperty(relation: Relation) -> BidiProperty<String> {
+            return undoableDB.bidiProperty(
                 relation,
                 action: "Rename Object",
                 get: { $0.oneString },
@@ -131,7 +131,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             cellText: { row in
                 let rowID = row["id"]
                 let nameRelation = objects.select(Attribute("id") *== rowID).project(["name"])
-                return nameBinding(nameRelation)
+                return nameBidiProperty(nameRelation)
             },
             cellImage: nil
         )
@@ -158,7 +158,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         rootView.addSubview(colorPicker)
             
         // Wire up the controls and bindings
-        textField.string <~ nameBinding(selectedObjectsName)
+        textField.string <~> nameBidiProperty(selectedObjectsName)
         textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
 
         checkbox.checked = undoableDB.observe(

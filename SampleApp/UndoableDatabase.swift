@@ -43,7 +43,12 @@ class UndoableDatabase {
     func observe<T: Equatable>(relation: Relation, action: String, get: Relation -> T?, set: T? -> Void) -> MutableObservableValue<T?> {
         return relation.mutableObservable(mutationConfig(action, set), relationToValue: get)
     }
-    
+
+    /// Note: `set` will be called in the context of a database transaction.
+    func bidiProperty<T: Equatable>(relation: Relation, action: String, get: Relation -> T, set: T -> Void) -> BidiProperty<T> {
+        return relation.bidiProperty(mutationConfig(action, set), relationToValue: get)
+    }
+
     private func mutationConfig<T>(action: String, _ set: T -> Void) -> RelationMutationConfig<T> {
         return RelationMutationConfig(
             snapshot: {

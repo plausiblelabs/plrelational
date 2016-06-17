@@ -10,7 +10,7 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
 
     private let bindings = BindingSet()
     
-    public lazy var items: Property<[MenuItem<T>]> = Property { [weak self] value in
+    public lazy var items: Property<[MenuItem<T>]> = Property { [weak self] value, _ in
         guard let weakSelf = self else { return }
 
         // Clear the menu

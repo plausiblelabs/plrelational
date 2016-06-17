@@ -10,7 +10,7 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
 
     private let bindings = BindingSet()
     
-    public lazy var items: Property<[T]> = Property { [weak self] value in
+    public lazy var items: Property<[T]> = Property { [weak self] value, _ in
         let objects = value.map{ $0 as! AnyObject }
         self?.addItemsWithObjectValues(objects)
     }

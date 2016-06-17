@@ -17,7 +17,7 @@ public struct ListViewModel<E: ArrayElement> {
     public let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
     public let selection: MutableObservableValue<Set<E.ID>>
     public let cellIdentifier: (E.Data) -> String
-    public let cellText: (E.Data) -> ObservableValue<String>
+    public let cellText: (E.Data) -> ObservableProperty<String>
     public let cellImage: ((E.Data) -> ObservableValue<Image>)?
 
     public init(
@@ -26,7 +26,7 @@ public struct ListViewModel<E: ArrayElement> {
         move: ((srcIndex: Int, dstIndex: Int) -> Void)?,
         selection: MutableObservableValue<Set<E.ID>>,
         cellIdentifier: (E.Data) -> String,
-        cellText: (E.Data) -> ObservableValue<String>,
+        cellText: (E.Data) -> ObservableProperty<String>,
         cellImage: ((E.Data) -> ObservableValue<Image>)?)
     {
         self.data = data
@@ -136,7 +136,12 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         let identifier = model.cellIdentifier(element.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            textField.string <~ model.cellText(element.data)
+            let text = model.cellText(element.data)
+            if let bidiText = text as? BidiProperty {
+                textField.string <~> bidiText
+            } else {
+                textField.string <~ text
+            }
         }
         if let imageView = view.imageView as? ImageView {
             imageView.img <~ model.cellImage?(element.data)

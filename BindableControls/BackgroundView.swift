@@ -8,7 +8,7 @@ import Binding
 
 public class BackgroundView: NSView {
     
-    public lazy var visible: Property<Bool> = Property({ [weak self] value in
+    public lazy var visible: Property<Bool> = Property({ [weak self] value, _ in
         self?.hidden = !value
     })
 

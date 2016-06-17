@@ -18,7 +18,7 @@ public struct TreeViewModel<N: TreeNode> {
     public let move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?
     public let selection: MutableObservableValue<Set<N.ID>>
     public let cellIdentifier: (N.Data) -> String
-    public let cellText: (N.Data) -> ObservableValue<String>
+    public let cellText: (N.Data) -> ObservableProperty<String>
     public let cellImage: ((N.Data) -> ObservableValue<Image>)?
     
     public init(
@@ -28,7 +28,7 @@ public struct TreeViewModel<N: TreeNode> {
         move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?,
         selection: MutableObservableValue<Set<N.ID>>,
         cellIdentifier: (N.Data) -> String,
-        cellText: (N.Data) -> ObservableValue<String>,
+        cellText: (N.Data) -> ObservableProperty<String>,
         cellImage: ((N.Data) -> ObservableValue<Image>)?)
     {
         self.data = data
@@ -190,7 +190,12 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         let identifier = model.cellIdentifier(node.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            textField.string <~ model.cellText(node.data)
+            let text = model.cellText(node.data)
+            if let bidiText = text as? BidiProperty {
+                textField.string <~> bidiText
+            } else {
+                textField.string <~ text
+            }
         }
         if let imageView = view.imageView as? ImageView {
             imageView.img <~ model.cellImage?(node.data)

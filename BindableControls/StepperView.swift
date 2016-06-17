@@ -25,7 +25,7 @@ public class StepperView: NSControl, NSTextFieldDelegate {
         }
     }
 
-    public lazy var placeholder: Property<String> = Property { [weak self] value in
+    public lazy var placeholder: Property<String> = Property { [weak self] value, _ in
         self?.textField.placeholderString = value
     }
 

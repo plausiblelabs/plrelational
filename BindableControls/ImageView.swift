@@ -10,7 +10,7 @@ public class ImageView: NSImageView {
 
     private let bindings = BindingSet()
     
-    public lazy var img: Property<Image> = Property { [weak self] value in
+    public lazy var img: Property<Image> = Property { [weak self] value, _ in
         self?.image = value.nsimage
     }
     

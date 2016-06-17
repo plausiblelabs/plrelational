@@ -6,12 +6,13 @@
 import Foundation
 
 public class Property<T> {
-
-    private let onValue: T -> Void
+    public typealias Setter = (T, ChangeMetadata) -> Void
+    
+    private let set: Setter
     private var removal: ObserverRemoval?
     
-    public init(_ onValue: T -> Void) {
-        self.onValue = onValue
+    public init(_ set: Setter) {
+        self.set = set
     }
 
     deinit {
@@ -23,13 +24,13 @@ public class Property<T> {
         unbind()
         
         // Make this property take on the given initial value
-        self.onValue(initialValue)
+        // TODO: Does metadata have meaning here?
+        self.set(initialValue, ChangeMetadata(transient: true))
         
         // Observe the given signal for changes
         self.removal = signal.observe({ [weak self] value, metadata in
             guard let weakSelf = self else { return }
-            //if weakSelf.selfInitiatedChange.contains(changeKey) { return }
-            weakSelf.onValue(value)
+            weakSelf.set(value, metadata)
         })
     }
     
@@ -39,41 +40,100 @@ public class Property<T> {
     }
 }
 
-public class BidiProperty<T>: Property<T> {
-
-    private let internalValue: MutableObservableValue<T>
-    private var bidiRemoval: ObserverRemoval?
+public class ReadableProperty<T>: Property<T> {
+    public typealias Getter = () -> T
     
-    public init(initialValue: T, _ onValue: T -> Void, valueChanging: (T, T) -> Bool = valueChanging) {
-        self.internalValue = mutableObservableValue(initialValue, valueChanging: valueChanging)
-        super.init(onValue)
+    public let get: Getter
+    
+    public init(get: Getter, set: Setter) {
+        self.get = get
+        super.init(set)
     }
+}
+
+public class ObservableProperty<T>: ReadableProperty<T> {
     
+    public let signal: Signal<T>
+    
+    public init(get: Getter, set: Setter, signal: Signal<T>) {
+        self.signal = signal
+        super.init(get: get, set: set)
+    }
+}
+
+public class BidiProperty<T>: ObservableProperty<T> {
+
+    private var otherRemoval: ObserverRemoval?
+    
+    public override init(get: Getter, set: Setter, signal: Signal<T>) {
+        super.init(get: get, set: set, signal: signal)
+    }
+
     deinit {
-        bidiRemoval?()
+        otherRemoval?()
     }
 
     public func bindBidi(other: BidiProperty<T>) {
-        // TODO
+        // Unbind if already bound to something
+        unbind()
+
+        // Make this property initially take on the current value of the other property
+        self.set(other.get(), ChangeMetadata(transient: true))
+        
+        // Observe the signal of the other property
+        self.removal = other.signal.observe({ [weak self] value, metadata in
+            guard let weakSelf = self else { return }
+            weakSelf.set(value, metadata)
+        })
+        
+        // Make the other property observe this property's signal
+        self.otherRemoval = signal.observe({ value, metadata in
+            other.set(value, metadata)
+        })
     }
 
     public override func unbind() {
         super.unbind()
         
-        bidiRemoval?()
-        bidiRemoval = nil
+        otherRemoval?()
+        otherRemoval = nil
     }
 }
     
 public class MutableBidiProperty<T>: BidiProperty<T> {
-    public override init(initialValue: T, _ onValue: T -> Void, valueChanging: (T, T) -> Bool = valueChanging) {
-        super.init(initialValue: initialValue, onValue, valueChanging: valueChanging)
-    }
 
-    public func update(newValue: T, transient: Bool) {
-        //selfInitiatedChange.insert(changeKey)
-        internalValue.update(newValue, ChangeMetadata(transient: transient))
-        //selfInitiatedChange.remove(changeKey)
+    public let changed: (transient: Bool) -> Void
+    
+    public init(get: Getter, set: Setter) {
+        let signal: Signal<T>
+        let notify: Signal<T>.Notify
+        (signal, notify) = Signal.pipe()
+        
+        changed = { (transient: Bool) in
+            notify(newValue: get(), metadata: ChangeMetadata(transient: transient))
+        }
+        
+        super.init(get: get, set: set, signal: signal)
+    }
+}
+
+public class ValueBidiProperty<T>: BidiProperty<T> {
+    
+    public let change: (newValue: T, transient: Bool) -> Void
+    
+    public init(initialValue: T) {
+        let signal: Signal<T>
+        let notify: Signal<T>.Notify
+        (signal, notify) = Signal.pipe()
+        
+        var value = initialValue
+
+        change = { (newValue: T, transient: Bool) in
+            value = newValue
+            notify(newValue: newValue, metadata: ChangeMetadata(transient: transient))
+        }
+        
+        super.init(get: { value }, set: { newValue, _ in value = newValue }, signal: signal)
     }
 }
 
@@ -83,11 +143,19 @@ infix operator <~ {
     precedence 93
 }
 
-public func <~ <T>(property: Property<T>, observable: ObservableValue<T>?) {
-    if let observable = observable {
-        property.bind(observable.signal, initialValue: observable.value)
+public func <~ <T>(lhs: Property<T>, rhs: ObservableValue<T>?) {
+    if let rhs = rhs {
+        lhs.bind(rhs.signal, initialValue: rhs.value)
     } else {
-        property.unbind()
+        lhs.unbind()
+    }
+}
+
+public func <~ <T>(lhs: Property<T>, rhs: ObservableProperty<T>?) {
+    if let rhs = rhs {
+        lhs.bind(rhs.signal, initialValue: rhs.get())
+    } else {
+        lhs.unbind()
     }
 }
 

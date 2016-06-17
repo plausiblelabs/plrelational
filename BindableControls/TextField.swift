@@ -8,19 +8,24 @@ import Binding
 
 public class TextField: NSTextField, NSTextFieldDelegate {
 
-    private lazy var mutableString: MutableBidiProperty<String> = MutableBidiProperty(initialValue: "", { [weak self] value in
-        self?.stringValue = value
-    })
+    private lazy var mutableString: MutableBidiProperty<String> = MutableBidiProperty(
+        get: { [unowned self] in
+            self.stringValue ?? ""
+        },
+        set: { [unowned self] value, _ in
+            self.stringValue = value
+        }
+    )
     
     public var string: BidiProperty<String> {
         return mutableString
     }
     
-    public lazy var placeholder: Property<String> = Property { [weak self] value in
+    public lazy var placeholder: Property<String> = Property { [weak self] value, _ in
         self?.placeholderString = value
     }
 
-    public lazy var visible: Property<Bool> = Property { [weak self] value in
+    public lazy var visible: Property<Bool> = Property { [weak self] value, _ in
         self?.hidden = !value
     }
     
@@ -47,7 +52,7 @@ public class TextField: NSTextField, NSTextFieldDelegate {
     
     public override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
-        mutableString.update(stringValue, transient: true)
+        mutableString.changed(transient: true)
         previousValue = stringValue
     }
     
@@ -59,7 +64,7 @@ public class TextField: NSTextField, NSTextFieldDelegate {
         if let previousCommittedValue = previousCommittedValue {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if stringValue != previousCommittedValue {
-                mutableString.update(stringValue, transient: false)
+                mutableString.changed(transient: false)
             }
         }
         previousCommittedValue = nil

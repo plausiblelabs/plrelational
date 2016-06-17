@@ -8,9 +8,7 @@ import Binding
 
 public class Button: NSButton {
 
-    private let bindings = BindingSet()
-    
-    public lazy var disabled: Property<Bool> = Property { [weak self] value in
+    public lazy var disabled: Property<Bool> = Property { [weak self] value, _ in
         self?.enabled = !value
     }
 
