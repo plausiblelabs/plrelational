@@ -36,10 +36,14 @@ public struct Row: Hashable {
     }
     
     public func renameAttributes(renames: [Attribute: Attribute]) -> Row {
-        return Row(values: Dictionary(values.map({ attribute, value in
-            let newAttribute = renames[attribute] ?? attribute
-            return (newAttribute, value)
-        })))
+        if renames.isEmpty {
+            return self
+        } else {
+            return Row(values: Dictionary(values.map({ attribute, value in
+                let newAttribute = renames[attribute] ?? attribute
+                return (newAttribute, value)
+            })))
+        }
     }
     
     /// Create a new row containing only the values whose attributes are also in the attributes parameter.
