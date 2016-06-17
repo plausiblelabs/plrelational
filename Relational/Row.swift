@@ -65,18 +65,16 @@ public func ==(a: Row, b: Row) -> Bool {
 }
 
 
-private class InternedRow {
+private class InternedRow: Hashable {
     let values: [Attribute: RelationValue]
+    
+    let hashValue: Int
     
     init(values: [Attribute: RelationValue]) {
         self.values = values
-    }
-}
-
-extension InternedRow: Hashable {
-    var hashValue: Int {
+        
         // Note: needs to ensure the same value is produced regardless of order, so no fancy stuff.
-        return values.map({ $0.0.hashValue ^ $0.1.hashValue }).reduce(0, combine: ^)
+        self.hashValue = values.map({ $0.0.hashValue ^ $0.1.hashValue }).reduce(0, combine: ^)
     }
 }
 
