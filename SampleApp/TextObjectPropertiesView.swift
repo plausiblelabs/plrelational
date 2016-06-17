@@ -23,7 +23,7 @@ class TextObjectPropertiesView: BackgroundView {
         
         hintField = TextField()
         hintField.frame = NSMakeRect(10, 46, 120, 24)
-        hintField.string = model.hint
+        hintField.string <~ model.hint
         hintField.placeholder <~ model.hintPlaceholder
         addSubview(hintField)
         

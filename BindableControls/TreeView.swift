@@ -190,7 +190,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         let identifier = model.cellIdentifier(node.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            textField.string = model.cellText(node.data)
+            textField.string <~ model.cellText(node.data)
         }
         if let imageView = view.imageView as? ImageView {
             imageView.img <~ model.cellImage?(node.data)

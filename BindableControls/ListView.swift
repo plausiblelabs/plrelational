@@ -136,7 +136,7 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         let identifier = model.cellIdentifier(element.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            textField.string = model.cellText(element.data)
+            textField.string <~ model.cellText(element.data)
         }
         if let imageView = view.imageView as? ImageView {
             imageView.img <~ model.cellImage?(element.data)

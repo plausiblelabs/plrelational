@@ -110,6 +110,7 @@
 		37A1CED61D11DC410067870D /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED51D11DC410067870D /* ViewModel.swift */; };
 		37A1CED91D1354DD0067870D /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED81D1354DD0067870D /* Property.swift */; };
 		37A1CEDC1D1358670067870D /* CheckState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEDB1D1358670067870D /* CheckState.swift */; };
+		37A1CEDE1D1469720067870D /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEDD1D1469720067870D /* Signal.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -497,6 +498,7 @@
 		37A1CED51D11DC410067870D /* ViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		37A1CED81D1354DD0067870D /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Property.swift; path = Binding/Property.swift; sourceTree = "<group>"; };
 		37A1CEDB1D1358670067870D /* CheckState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckState.swift; sourceTree = "<group>"; };
+		37A1CEDD1D1469720067870D /* Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Signal.swift; path = Binding/Signal.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -815,10 +817,8 @@
 		372707B31CFE23CA00710C80 /* Binding */ = {
 			isa = PBXGroup;
 			children = (
-				37C6113E1CD93069001DAF59 /* Observable.swift */,
-				372707721CF38FDC00710C80 /* Observable Value */,
-				372707741CF3904D00710C80 /* Observable Array */,
-				372707731CF38FF600710C80 /* Observable Tree */,
+				37A1CEDF1D1469900067870D /* Signal */,
+				37A1CEE01D1469960067870D /* Observables */,
 				37A1CED71D1350C00067870D /* Properties */,
 				37A1CE661D0F31140067870D /* Binding Set */,
 				372707BC1CFE24C600710C80 /* Utilities */,
@@ -970,6 +970,25 @@
 				37A1CED81D1354DD0067870D /* Property.swift */,
 			);
 			name = Properties;
+			sourceTree = "<group>";
+		};
+		37A1CEDF1D1469900067870D /* Signal */ = {
+			isa = PBXGroup;
+			children = (
+				37A1CEDD1D1469720067870D /* Signal.swift */,
+			);
+			name = Signal;
+			sourceTree = "<group>";
+		};
+		37A1CEE01D1469960067870D /* Observables */ = {
+			isa = PBXGroup;
+			children = (
+				37C6113E1CD93069001DAF59 /* Observable.swift */,
+				372707721CF38FDC00710C80 /* Observable Value */,
+				372707741CF3904D00710C80 /* Observable Array */,
+				372707731CF38FF600710C80 /* Observable Tree */,
+			);
+			name = Observables;
 			sourceTree = "<group>";
 		};
 		37C610FE1CD7EFAE001DAF59 /* SampleApp */ = {
@@ -1840,6 +1859,7 @@
 				37A1CED91D1354DD0067870D /* Property.swift in Sources */,
 				37A1CE651D0B59700067870D /* BindingSet.swift in Sources */,
 				372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */,
+				37A1CEDE1D1469720067870D /* Signal.swift in Sources */,
 				372707BB1CFE240E00710C80 /* RelationObservableTree.swift in Sources */,
 				372707E31CFE2B6500710C80 /* ObservableValue.swift in Sources */,
 				372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */,

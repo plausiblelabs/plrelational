@@ -158,7 +158,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         rootView.addSubview(colorPicker)
             
         // Wire up the controls and bindings
-        textField.string = nameBinding(selectedObjectsName)
+        textField.string <~ nameBinding(selectedObjectsName)
         textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
 
         checkbox.checked = undoableDB.observe(

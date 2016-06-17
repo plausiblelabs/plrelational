@@ -65,7 +65,7 @@ class PropertiesView: BackgroundView {
         
         itemTypeLabel = label(NSMakeRect(pad, 12, frame.width - (pad * 2), 24))
         itemTypeLabel.alignment = .Center
-        itemTypeLabel.string = model.selectedItemTypesString
+        itemTypeLabel.string <~ model.selectedItemTypesString
         itemTypeLabel.visible <~ model.itemSelected
         addSubview(itemTypeLabel)
         
@@ -76,7 +76,8 @@ class PropertiesView: BackgroundView {
         addSubview(nameLabel)
 
         nameField = field(NSMakeRect(nameLabel.frame.maxX + pad, 50, frame.width - nameLabel.frame.maxX - (pad * 2), 24))
-        nameField.string = model.selectedItemNames
+        // TODO: Bidi
+        nameField.string <~ model.selectedItemNames
         nameField.placeholder <~ model.selectedItemNamesPlaceholder
         nameField.visible <~ model.itemSelected
         addSubview(nameField)

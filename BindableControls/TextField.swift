@@ -8,16 +8,14 @@ import Binding
 
 public class TextField: NSTextField, NSTextFieldDelegate {
 
-    private let bindings = BindingSet()
-
-    public var string: ObservableValue<String>? {
-        didSet {
-            bindings.observe(string, "string", { [weak self] value in
-                self?.stringValue = value
-            })
-        }
+    private lazy var mutableString: MutableBidiProperty<String> = MutableBidiProperty(initialValue: "", { [weak self] value in
+        self?.stringValue = value
+    })
+    
+    public var string: BidiProperty<String> {
+        return mutableString
     }
-
+    
     public lazy var placeholder: Property<String> = Property { [weak self] value in
         self?.placeholderString = value
     }
@@ -49,9 +47,7 @@ public class TextField: NSTextField, NSTextFieldDelegate {
     
     public override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
-        if let mutableString = string as? MutableObservableValue {
-            bindings.update(mutableString, newValue: stringValue, transient: true)
-        }
+        mutableString.update(stringValue, transient: true)
         previousValue = stringValue
     }
     
@@ -60,10 +56,10 @@ public class TextField: NSTextField, NSTextFieldDelegate {
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value
         //Swift.print("CONTROL DID END EDITING!")
-        if let previousCommittedValue = previousCommittedValue, mutableString = string as? MutableObservableValue {
+        if let previousCommittedValue = previousCommittedValue {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if stringValue != previousCommittedValue {
-                bindings.update(mutableString, newValue: stringValue, transient: false)
+                mutableString.update(stringValue, transient: false)
             }
         }
         previousCommittedValue = nil

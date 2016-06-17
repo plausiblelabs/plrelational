@@ -32,7 +32,7 @@ public class BindingSet {
             onValue(observable.value, ChangeMetadata(transient: false))
         }
         
-        let removal = observable.addChangeObserver({ [weak self] metadata in
+        let removal = observable.addChangeObserver({ [weak self] _, metadata in
             guard let weakSelf = self else { return }
             if weakSelf.selfInitiatedChange.contains(changeKey) { return }
             

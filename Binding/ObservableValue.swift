@@ -15,41 +15,34 @@ public struct ChangeMetadata {
 
 public class ObservableValue<T>: Observable {
     public typealias Value = T
-    public typealias Changes = Void
-    public typealias ChangeObserver = ChangeMetadata -> Void
+    public typealias Changes = Value
+    public typealias ChangeObserver = (Value, ChangeMetadata) -> Void
     
     internal(set) public var value: T
     internal let changing: (T, T) -> Bool
-    private var changeObservers: [UInt64: ChangeObserver] = [:]
-    private var changeObserverNextID: UInt64 = 0
+    internal let signal: Signal<T>
+    private let notify: Signal<T>.Notify
     
     public init(initialValue: T, valueChanging: (T, T) -> Bool = valueChanging) {
         self.value = initialValue
         self.changing = valueChanging
+        (self.signal, self.notify) = Signal.pipe()
     }
-    
+
+    // TODO: Remove this in favor of making `signal` public?
     public func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval {
-        let id = changeObserverNextID
-        changeObserverNextID += 1
-        changeObservers[id] = observer
-        return { self.changeObservers.removeValueForKey(id) }
-    }
-    
-    internal func notifyChangeObservers(metadata: ChangeMetadata) {
-        for (_, f) in changeObservers {
-            f(metadata)
-        }
+        return signal.observe(observer)
     }
     
     internal func setValue(value: T, _ metadata: ChangeMetadata) {
         if changing(self.value, value) {
             self.value = value
-            self.notifyChangeObservers(metadata)
+            notify(newValue: value, metadata: metadata)
         }
     }
     
     // For testing purposes only.
-    internal var observerCount: Int { return changeObservers.count }
+    internal var observerCount: Int { return signal.observerCount }
 }
 
 extension ObservableValue {
@@ -175,7 +168,7 @@ private class MappedObservableValue<T>: ObservableValue<T> {
     
     init<U>(observable: ObservableValue<U>, transform: (U) -> T, valueChanging: (T, T) -> Bool) {
         super.init(initialValue: transform(observable.value), valueChanging: valueChanging)
-        self.removal = observable.addChangeObserver({ [weak self] metadata in
+        self.removal = observable.addChangeObserver({ [weak self] _, metadata in
             self?.setValue(transform(observable.value), metadata)
         })
     }
@@ -192,11 +185,11 @@ private class BinaryOpObservableValue<T>: ObservableValue<T> {
     init<U, V>(_ observable1: ObservableValue<U>, _ observable2: ObservableValue<V>, _ f: (U, V) -> T, _ valueChanging: (T, T) -> Bool) {
         super.init(initialValue: f(observable1.value, observable2.value), valueChanging: valueChanging)
         
-        self.removal1 = observable1.addChangeObserver({ [weak self] metadata in
+        self.removal1 = observable1.addChangeObserver({ [weak self] _, metadata in
             self?.setValue(f(observable1.value, observable2.value), metadata)
         })
         
-        self.removal2 = observable2.addChangeObserver({ [weak self] metadata in
+        self.removal2 = observable2.addChangeObserver({ [weak self] _, metadata in
             self?.setValue(f(observable1.value, observable2.value), metadata)
         })
     }
@@ -241,7 +234,7 @@ private class AnyTrueObservableValue: ObservableValue<Bool> {
         super.init(initialValue: anyTrue(), valueChanging: valueChanging)
         
         for observable in observables {
-            let removal = observable.addChangeObserver({ [weak self] metadata in
+            let removal = observable.addChangeObserver({ [weak self] _, metadata in
                 let newValue = observable.value
                 if newValue {
                     self?.setValue(true, metadata)
@@ -276,7 +269,7 @@ private class AllTrueObservableValue: ObservableValue<Bool> {
         super.init(initialValue: allTrue(), valueChanging: valueChanging)
         
         for observable in observables {
-            let removal = observable.addChangeObserver({ [weak self] metadata in
+            let removal = observable.addChangeObserver({ [weak self] _, metadata in
                 let newValue = observable.value
                 if !newValue {
                     self?.setValue(false, metadata)
@@ -310,7 +303,7 @@ private class NoneTrueObservableValue: ObservableValue<Bool> {
         super.init(initialValue: noneTrue(), valueChanging: valueChanging)
         
         for observable in observables {
-            let removal = observable.addChangeObserver({ [weak self] metadata in
+            let removal = observable.addChangeObserver({ [weak self] _, metadata in
                 let newValue = observable.value
                 if newValue {
                     self?.setValue(false, metadata)
@@ -346,7 +339,7 @@ private class CommonObservableValue<T: Hashable>: ObservableValue<CommonValue<T>
         
         super.init(initialValue: commonValue())
         
-        self.removal = observable.addChangeObserver({ [weak self] metadata in
+        self.removal = observable.addChangeObserver({ [weak self] _, metadata in
             self?.setValue(commonValue(), metadata)
         })
     }
