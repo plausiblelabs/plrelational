@@ -72,7 +72,7 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
     )
 
     private var arrayObserverRemoval: ObserverRemoval?
-    private var selfInitiatedSelectionChange = false
+    //private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
     public var animateChanges = false

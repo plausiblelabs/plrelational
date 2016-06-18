@@ -6,10 +6,12 @@
 import Foundation
 
 public class Property<T> {
+
     public typealias Setter = (T, ChangeMetadata) -> Void
     
     private let set: Setter
     private var removal: ObserverRemoval?
+    private var owner: AnyObject?
     
     public init(_ set: Setter) {
         self.set = set
@@ -19,7 +21,7 @@ public class Property<T> {
         removal?()
     }
     
-    public func bind(signal: Signal<T>, initialValue: T) {
+    private func bind(signal: Signal<T>, initialValue: T, owner: AnyObject) {
         // Unbind if already bound to something
         unbind()
         
@@ -32,15 +34,23 @@ public class Property<T> {
             guard let weakSelf = self else { return }
             weakSelf.set(value, metadata)
         })
+        
+        // XXX: Hang on to the owner of the signal, otherwise if no one else is
+        // holding a strong reference to it, it may go away and the signal won't
+        // deliver any changes
+        // TODO: Find a better solution
+        self.owner = owner
     }
     
     public func unbind() {
         removal?()
         removal = nil
+        owner = nil
     }
 }
 
 public class ReadableProperty<T>: Property<T> {
+
     public typealias Getter = () -> T
     
     public let get: Getter
@@ -52,7 +62,7 @@ public class ReadableProperty<T>: Property<T> {
 }
 
 public class ObservableProperty<T>: ReadableProperty<T> {
-    
+
     public let signal: Signal<T>
     
     public init(get: Getter, set: Setter, signal: Signal<T>) {
@@ -118,7 +128,7 @@ public class MutableBidiProperty<T>: BidiProperty<T> {
 }
 
 public class ValueBidiProperty<T>: BidiProperty<T> {
-    
+
     public let change: (newValue: T, transient: Bool) -> Void
     
     public init(initialValue: T) {
@@ -145,7 +155,7 @@ infix operator <~ {
 
 public func <~ <T>(lhs: Property<T>, rhs: ObservableValue<T>?) {
     if let rhs = rhs {
-        lhs.bind(rhs.signal, initialValue: rhs.value)
+        lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
     } else {
         lhs.unbind()
     }
@@ -153,7 +163,7 @@ public func <~ <T>(lhs: Property<T>, rhs: ObservableValue<T>?) {
 
 public func <~ <T>(lhs: Property<T>, rhs: ObservableProperty<T>?) {
     if let rhs = rhs {
-        lhs.bind(rhs.signal, initialValue: rhs.get())
+        lhs.bind(rhs.signal, initialValue: rhs.get(), owner: rhs)
     } else {
         lhs.unbind()
     }
