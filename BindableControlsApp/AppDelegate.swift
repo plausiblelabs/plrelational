@@ -187,13 +187,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 //        )
         stepper.placeholder <~ selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
         
-        let comboObservableValue: MutableObservableValue<String?> = mutableObservableValue("Alice")
-        _ = comboObservableValue.addChangeObserver({ _ in
-            Swift.print("NEW COMBO VALUE: \(comboObservableValue.value)")
+        let comboValue: ValueBidiProperty<String?> = ValueBidiProperty(initialValue: "Bob")
+        _ = comboValue.signal.observe({ value, _ in
+            Swift.print("NEW COMBO VALUE: \(value)")
         })
         
         comboBox.items <~ ObservableValue.constant(["Alice", "Bob", "Carlos"])
-        comboBox.value = comboObservableValue
+        comboBox.value <~> comboValue
         
 //        colorPicker.color <~> undoableDB.observe(
 //            selectedObjectsColor,

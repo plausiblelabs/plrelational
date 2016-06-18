@@ -15,15 +15,20 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
         self?.addItemsWithObjectValues(objects)
     }
     
-    public var value: MutableObservableValue<T?>? {
-        didSet {
-            bindings.observe(value, "value", { [weak self] value in
-                self?.objectValue = value as? AnyObject
-            })
+    private lazy var _value: MutableBidiProperty<T?> = MutableBidiProperty(
+        get: { [unowned self] in
+            return self.internalValue
+        },
+        set: { [unowned self] value, _ in
+            self.internalValue = value
+            self.objectValue = value as? AnyObject
         }
-    }
+    )
+    
+    public var value: BidiProperty<T?> { return _value }
     
     private var previousCommittedValue: T?
+    private var internalValue: T?
 
     public override init(frame: NSRect) {
         super.init(frame: frame)
@@ -37,7 +42,8 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
     
     @objc public func comboBoxSelectionDidChange(notification: NSNotification) {
         if let newValue = objectValueOfSelectedItem {
-            bindings.update(value, newValue: newValue as? T)
+            internalValue = newValue as? T
+            _value.changed(transient: false)
         }
     }
     
@@ -49,11 +55,12 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
         // Note that controlTextDidBeginEditing may not be called if the user gives focus to the text field
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value
-        if let previousCommittedValue = previousCommittedValue, binding = value {
+        if let previousCommittedValue = previousCommittedValue {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if let newValue = objectValue as? T {
                 if newValue != previousCommittedValue {
-                    bindings.update(binding, newValue: newValue)
+                    internalValue = newValue
+                    _value.changed(transient: false)
                 }
             }
         }

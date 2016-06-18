@@ -37,7 +37,8 @@ public class ColorPickerView: NSView {
         opacityCombo = ComboBox(frame: NSZeroRect)
         opacityCombo.formatter = OpacityFormatter()
         opacityCombo.items <~ ObservableValue.constant(opacityValues)
-        opacityCombo.value = model.opacityValue
+        // TODO
+        //opacityCombo.value = model.opacityValue
         
         // Configure color panel
         colorPanel = ColorPanel()
