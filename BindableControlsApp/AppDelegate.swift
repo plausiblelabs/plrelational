@@ -172,12 +172,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let popupItems = days.map{ titledMenuItem($0) }
         popupButton.items <~ ObservableValue.constant(popupItems)
         popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
-//        popupButton.selectedObject = undoableDB.bidiProperty(
-//            selectedObjectsDay,
-//            action: "Change Day",
-//            get: { $0.oneStringOrNil },
-//            set: { selectedObjectsDay.updateNullableString($0) }
-//        )
+        popupButton.selectedObject <~> undoableDB.bidiProperty(
+            selectedObjectsDay,
+            action: "Change Day",
+            get: { $0.oneStringOrNil },
+            set: { selectedObjectsDay.updateNullableString($0) }
+        )
         
 //        stepper.value <~> undoableDB.bidiProperty(
 //            selectedObjectsRocks,

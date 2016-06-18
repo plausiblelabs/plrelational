@@ -29,7 +29,8 @@ public class ColorPickerView: NSView {
         // Configure color popup button
         colorPopup = PopUpButton(frame: NSZeroRect, pullsDown: false)
         colorPopup.items <~ ObservableValue.constant(model.popupItems)
-        colorPopup.selectedObject = model.colorItem
+        // TODO
+        //colorPopup.selectedObject <~> model.colorItem
         
         // Configure opacity combo box
         let opacityValues: [CGFloat] = 0.stride(through: 100, by: 10).map{ CGFloat($0) / 100.0 }

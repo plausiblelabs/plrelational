@@ -8,7 +8,7 @@ import Binding
 
 public class TextField: NSTextField, NSTextFieldDelegate {
 
-    private lazy var mutableString: MutableBidiProperty<String> = MutableBidiProperty(
+    private lazy var _string: MutableBidiProperty<String> = MutableBidiProperty(
         get: { [unowned self] in
             self.stringValue ?? ""
         },
@@ -17,9 +17,7 @@ public class TextField: NSTextField, NSTextFieldDelegate {
         }
     )
     
-    public var string: BidiProperty<String> {
-        return mutableString
-    }
+    public var string: BidiProperty<String> { return _string }
     
     public lazy var placeholder: Property<String> = Property { [weak self] value, _ in
         self?.placeholderString = value
@@ -52,7 +50,7 @@ public class TextField: NSTextField, NSTextFieldDelegate {
     
     public override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
-        mutableString.changed(transient: true)
+        _string.changed(transient: true)
         previousValue = stringValue
     }
     
@@ -64,7 +62,7 @@ public class TextField: NSTextField, NSTextFieldDelegate {
         if let previousCommittedValue = previousCommittedValue {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if stringValue != previousCommittedValue {
-                mutableString.changed(transient: false)
+                _string.changed(transient: false)
             }
         }
         previousCommittedValue = nil

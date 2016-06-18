@@ -8,7 +8,7 @@ import Binding
 
 public class Checkbox: NSButton {
     
-    private lazy var mutableChecked: MutableBidiProperty<CheckState> = MutableBidiProperty(
+    private lazy var _checked: MutableBidiProperty<CheckState> = MutableBidiProperty(
         get: { [unowned self] in
             return CheckState(self.state)
         },
@@ -20,9 +20,7 @@ public class Checkbox: NSButton {
         }
     )
     
-    public var checked: BidiProperty<CheckState> {
-        return mutableChecked
-    }
+    public var checked: BidiProperty<CheckState> { return _checked }
     
     public override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -43,7 +41,7 @@ public class Checkbox: NSButton {
         // Cocoa always wants to cycle through the states (including mixed), but we only want the user
         // to be able to choose on/off, so disable allowsMixedState here.
         allowsMixedState = false
-        mutableChecked.changed(transient: false)
+        _checked.changed(transient: false)
     }
     
     public override func accessibilityValue() -> AnyObject? {
