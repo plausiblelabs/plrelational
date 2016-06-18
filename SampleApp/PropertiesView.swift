@@ -76,8 +76,7 @@ class PropertiesView: BackgroundView {
         addSubview(nameLabel)
 
         nameField = field(NSMakeRect(nameLabel.frame.maxX + pad, 50, frame.width - nameLabel.frame.maxX - (pad * 2), 24))
-        // TODO: Bidi
-        nameField.string <~ model.selectedItemNames
+        nameField.string <~> model.selectedItemNames
         nameField.placeholder <~ model.selectedItemNamesPlaceholder
         nameField.visible <~ model.itemSelected
         addSubview(nameField)

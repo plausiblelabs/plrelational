@@ -6,6 +6,22 @@
 import Foundation
 import libRelational
 
+public struct RelationMutationConfig<T> {
+    public let snapshot: () -> ChangeLoggingDatabaseSnapshot
+    public let update: (newValue: T) -> Void
+    public let commit: (before: ChangeLoggingDatabaseSnapshot, newValue: T) -> Void
+    
+    public init(
+        snapshot: () -> ChangeLoggingDatabaseSnapshot,
+        update: (newValue: T) -> Void,
+        commit: (before: ChangeLoggingDatabaseSnapshot, newValue: T) -> Void)
+    {
+        self.snapshot = snapshot
+        self.update = update
+        self.commit = commit
+    }
+}
+
 private class RelationBidiProperty<T>: BidiProperty<T> {
     private var removal: ObserverRemoval!
     
@@ -57,5 +73,21 @@ extension Relation {
         return RelationBidiProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
     
-    // TODO: Other bidiProperty variants
+    /// Returns a BidiProperty that gets its value from this relation and writes values back to the relation
+    /// according to the provided configuration.
+    public func bidiProperty<V: Equatable>(config: RelationMutationConfig<V>, relationToValue: Relation -> V) -> BidiProperty<V> {
+        return RelationBidiProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
+    }
+
+    /// Returns a BidiProperty that gets its value from this relation and writes values back to the relation
+    /// according to the provided configuration.
+    public func bidiProperty<V>(config: RelationMutationConfig<V?>, relationToValue: Relation -> V?) -> BidiProperty<V?> {
+        return RelationBidiProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
+    }
+    
+    /// Returns a BidiProperty that gets its value from this relation and writes values back to the relation
+    /// according to the provided configuration.
+    public func bidiProperty<V: Equatable>(config: RelationMutationConfig<V?>, relationToValue: Relation -> V?) -> BidiProperty<V?> {
+        return RelationBidiProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
+    }
 }

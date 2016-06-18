@@ -112,8 +112,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             )
         }
         
-        func selectionBinding(relation: MutableRelation) -> MutableObservableValue<Set<RelationValue>> {
-            return undoableDB.observe(
+        func listSelectionBidiProperty(relation: MutableRelation) -> BidiProperty<Set<RelationValue>> {
+            return undoableDB.bidiProperty(
                 relation,
                 action: "Change Selection",
                 get: { $0.allValues },
@@ -126,7 +126,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             data: objects.observableArray(),
             contextMenu: nil,
             move: nil,
-            selection: selectionBinding(selectedObjectID),
+            selection: listSelectionBidiProperty(selectedObjectID),
             cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 let rowID = row["id"]
@@ -161,7 +161,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         textField.string <~> nameBidiProperty(selectedObjectsName)
         textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
 
-        checkbox.checked = undoableDB.observe(
+        checkbox.checked <~> undoableDB.bidiProperty(
             selectedObjectsEditable,
             action: "Change Editable",
             get: { CheckState($0.oneBoolOrNil) },
@@ -172,19 +172,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let popupItems = days.map{ titledMenuItem($0) }
         popupButton.items <~ ObservableValue.constant(popupItems)
         popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
-        popupButton.selectedObject = undoableDB.observe(
-            selectedObjectsDay,
-            action: "Change Day",
-            get: { $0.oneStringOrNil },
-            set: { selectedObjectsDay.updateNullableString($0) }
-        )
+//        popupButton.selectedObject = undoableDB.bidiProperty(
+//            selectedObjectsDay,
+//            action: "Change Day",
+//            get: { $0.oneStringOrNil },
+//            set: { selectedObjectsDay.updateNullableString($0) }
+//        )
         
-        stepper.value = undoableDB.observe(
-            selectedObjectsRocks,
-            action: "Change Rocks",
-            get: { $0.oneIntegerOrNil.map{ Int($0) } },
-            set: { selectedObjectsRocks.updateInteger(Int64($0!)) }
-        )
+//        stepper.value <~> undoableDB.bidiProperty(
+//            selectedObjectsRocks,
+//            action: "Change Rocks",
+//            get: { $0.oneIntegerOrNil.map{ Int($0) } },
+//            set: { selectedObjectsRocks.updateInteger(Int64($0!)) }
+//        )
         stepper.placeholder <~ selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
         
         let comboObservableValue: MutableObservableValue<String?> = mutableObservableValue("Alice")
@@ -195,23 +195,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         comboBox.items <~ ObservableValue.constant(["Alice", "Bob", "Carlos"])
         comboBox.value = comboObservableValue
         
-        colorPicker.color = undoableDB.observe(
-            selectedObjectsColor,
-            action: "Change Color",
-            get: {
-                $0.commonValue{ rv -> Color? in
-                    if let s: String = rv.get() {
-                        return Color(string: s)
-                    } else {
-                        return nil
-                    }
-                }
-            },
-            set: { (commonValue: CommonValue<Color>) in
-                guard let color = commonValue.orNil() else { preconditionFailure("Expected a single color value") }
-                selectedObjectsColor.updateString(color.stringValue)
-            }
-        )
+//        colorPicker.color <~> undoableDB.observe(
+//            selectedObjectsColor,
+//            action: "Change Color",
+//            get: {
+//                $0.commonValue{ rv -> Color? in
+//                    if let s: String = rv.get() {
+//                        return Color(string: s)
+//                    } else {
+//                        return nil
+//                    }
+//                }
+//            },
+//            set: { (commonValue: CommonValue<Color>) in
+//                guard let color = commonValue.orNil() else { preconditionFailure("Expected a single color value") }
+//                selectedObjectsColor.updateString(color.stringValue)
+//            }
+//        )
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {

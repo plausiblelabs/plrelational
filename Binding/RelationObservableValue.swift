@@ -59,60 +59,6 @@ private class WhenNonEmpty<T>: ObservableValue<T?> {
     }
 }
 
-public struct RelationMutationConfig<T> {
-    public let snapshot: () -> ChangeLoggingDatabaseSnapshot
-    public let update: (newValue: T) -> Void
-    public let commit: (before: ChangeLoggingDatabaseSnapshot, newValue: T) -> Void
-    
-    public init(
-        snapshot: () -> ChangeLoggingDatabaseSnapshot,
-        update: (newValue: T) -> Void,
-        commit: (before: ChangeLoggingDatabaseSnapshot, newValue: T) -> Void)
-    {
-        self.snapshot = snapshot
-        self.update = update
-        self.commit = commit
-    }
-}
-
-private class RelationMutableObservableValue<T>: MutableObservableValue<T> {
-    private let config: RelationMutationConfig<T>
-    private var before: ChangeLoggingDatabaseSnapshot?
-    private var removal: ObserverRemoval!
-
-    init(relation: Relation, config: RelationMutationConfig<T>, relationToValue: Relation -> T, valueChanging: (T, T) -> Bool) {
-        self.config = config
-
-        super.init(initialValue: relationToValue(relation), valueChanging: valueChanging)
-    
-        self.removal = relation.addChangeObserver({ [weak self] _ in
-            guard let weakSelf = self else { return }
-
-            let newValue = relationToValue(relation)
-            weakSelf.setValue(newValue, ChangeMetadata(transient: false))
-        })
-    }
-    
-    deinit {
-        removal()
-    }
-    
-    private override func update(newValue: T, _ metadata: ChangeMetadata) {
-        if before == nil {
-            before = config.snapshot()
-        }
-        
-        // Note: We don't set self.value here; instead we wait to receive the change from the
-        // relation in our change observer and then update the value there
-        if metadata.transient {
-            config.update(newValue: newValue)
-        } else {
-            config.commit(before: before!, newValue: newValue)
-            self.before = nil
-        }
-    }
-}
-
 extension Relation {
     /// Returns a read-only ObservableValue that gets its value from this relation.
     public func observable<V>(relationToValue: Relation -> V) -> ObservableValue<V> {
@@ -161,30 +107,6 @@ extension Relation {
     /// otherwise resolves to nil.
     public func observableOneValue<V: Equatable>(transform: RelationValue -> V?) -> ObservableValue<V?> {
         return observable{ $0.oneValue(transform) }
-    }
-
-    /// Returns a mutable ObservableValue that gets its value from this relation and writes values back
-    /// according to the provided configuration.
-    public func mutableObservable<V>(config: RelationMutationConfig<V>, relationToValue: Relation -> V) -> MutableObservableValue<V> {
-        return RelationMutableObservableValue(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
-    }
-
-    /// Returns a mutable ObservableValue that gets its value from this relation and writes values back
-    /// according to the provided configuration.
-    public func mutableObservable<V: Equatable>(config: RelationMutationConfig<V>, relationToValue: Relation -> V) -> MutableObservableValue<V> {
-        return RelationMutableObservableValue(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
-    }
-
-    /// Returns a mutable ObservableValue that gets its value from this relation and writes values back
-    /// according to the provided configuration.
-    public func mutableObservable<V>(config: RelationMutationConfig<V?>, relationToValue: Relation -> V?) -> MutableObservableValue<V?> {
-        return RelationMutableObservableValue(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
-    }
-
-    /// Returns a mutable ObservableValue that gets its value from this relation and writes values back
-    /// according to the provided configuration.
-    public func mutableObservable<V: Equatable>(config: RelationMutationConfig<V?>, relationToValue: Relation -> V?) -> MutableObservableValue<V?> {
-        return RelationMutableObservableValue(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 }
 

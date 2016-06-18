@@ -8,17 +8,20 @@ import Binding
 
 public class Checkbox: NSButton {
     
-    private let bindings = BindingSet()
-    
-    public var checked: MutableObservableValue<CheckState>? {
-        didSet {
-            bindings.observe(checked, "checked", { [weak self] value in
-                // Only allow mixed state if we are starting in a mixed state; otherwise we
-                // use simple two-state mode
-                self?.allowsMixedState = value == .Mixed
-                self?.state = value.nsValue
-            })
+    private lazy var mutableChecked: MutableBidiProperty<CheckState> = MutableBidiProperty(
+        get: { [unowned self] in
+            return CheckState(self.state)
+        },
+        set: { [unowned self] value, _ in
+            // Only allow mixed state if we are starting in a mixed state; otherwise we
+            // use simple two-state mode
+            self.allowsMixedState = value == .Mixed
+            self.state = value.nsValue
         }
+    )
+    
+    public var checked: BidiProperty<CheckState> {
+        return mutableChecked
     }
     
     public override init(frame frameRect: NSRect) {
@@ -36,21 +39,11 @@ public class Checkbox: NSButton {
     }
     
     @objc func checkboxToggled(sender: Checkbox) {
-        guard let checked = checked else { return }
-        
         // Note that by the time this function is called, `state` already reflects the new value.
         // Cocoa always wants to cycle through the states (including mixed), but we only want the user
-        // to be able to choose on/off; we shouldn't ever see a mixed state here (Cocoa goes from
-        // Mixed to On), but just in case, treat it as On and disable allowsMixedState.
-        let mixed = state == NSMixedState
+        // to be able to choose on/off, so disable allowsMixedState here.
         allowsMixedState = false
-        let newState: CheckState
-        if mixed {
-            newState = .On
-        } else {
-            newState = state == NSOnState ? .On : .Off
-        }
-        bindings.update(checked, newValue: newState)
+        mutableChecked.changed(transient: false)
     }
     
     public override func accessibilityValue() -> AnyObject? {
