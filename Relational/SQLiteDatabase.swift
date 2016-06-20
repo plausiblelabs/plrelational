@@ -23,7 +23,7 @@ public class SQLiteDatabase {
     
     public init(_ path: String) throws {
         var localdb: sqlite3 = nil
-        let result = sqlite3_open_v2(path, &localdb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil)
+        let result = sqlite3_open_v2(path, &localdb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, nil)
         if result != SQLITE_OK {
             let message = String.fromCString(sqlite3_errstr(result))
             throw Error(code: result, message: message ?? "")
