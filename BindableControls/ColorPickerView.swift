@@ -8,16 +8,11 @@ import Binding
 
 public class ColorPickerView: NSView {
 
-    private let model: ColorPickerModel
+    public lazy var color: BidiProperty<CommonValue<Color>> = { [unowned self] in
+        return self.model.color
+    }()
     
-    public var color: MutableObservableValue<CommonValue<Color>>? {
-        didSet {
-            if let color = color {
-                setColorBinding(color)
-            }
-            model.color = color
-        }
-    }
+    private let model: ColorPickerModel
     
     private let colorPopup: PopUpButton<ColorItem>
     private let opacityCombo: ComboBox<CGFloat>
@@ -29,22 +24,25 @@ public class ColorPickerView: NSView {
         // Configure color popup button
         colorPopup = PopUpButton(frame: NSZeroRect, pullsDown: false)
         colorPopup.items <~ ObservableValue.constant(model.popupItems)
-        // TODO
-        //colorPopup.selectedObject <~> model.colorItem
+        colorPopup.selectedObject <~> model.colorItem
+        let colorValue = model.color.observableValue
+        colorPopup.defaultItemContent = MenuItemContent(
+            object: ColorItem.Default,
+            title: colorValue.map{ $0.whenMulti("Multiple", otherwise: "Default") },
+            image: colorValue.map{ $0.whenMulti(multipleColorSwatchImage(), otherwise: unsetColorSwatchImage()) }
+        )
         
         // Configure opacity combo box
         let opacityValues: [CGFloat] = 0.stride(through: 100, by: 10).map{ CGFloat($0) / 100.0 }
         opacityCombo = ComboBox(frame: NSZeroRect)
         opacityCombo.formatter = OpacityFormatter()
         opacityCombo.items <~ ObservableValue.constant(opacityValues)
-        // TODO
-        //opacityCombo.value = model.opacityValue
+        opacityCombo.value <~> model.opacityValue
         
         // Configure color panel
         colorPanel = ColorPanel()
-        // TODO
-//        colorPanel.color = model.panelColor
-//        colorPanel.visible = model.panelVisible
+        colorPanel.color <~> model.panelColor
+        colorPanel.visible <~> model.panelVisible
         
         super.init(frame: NSZeroRect)
         
@@ -72,16 +70,6 @@ public class ColorPickerView: NSView {
     
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func setColorBinding(binding: MutableObservableValue<CommonValue<Color>>) {
-        // TODO: Perhaps defaultItemContent should be a ObservableValue so that we can move this
-        // to the model
-        colorPopup.defaultItemContent = MenuItemContent(
-            object: ColorItem.Default,
-            title: binding.map{ $0.whenMulti("Multiple", otherwise: "Default") },
-            image: binding.map{ $0.whenMulti(multipleColorSwatchImage(), otherwise: unsetColorSwatchImage()) }
-        )
     }
 }
 
@@ -120,98 +108,24 @@ private func ==(a: ColorItem, b: ColorItem) -> Bool {
 
 private class ColorPickerModel {
     
-    private let bindings = BindingSet()
-    
-    var color: MutableObservableValue<CommonValue<Color>>? {
-        didSet {
-            bindings.connect(
-                color, "color",
-                colorItem, "colorItem",
-                forward: { [weak self] value in
-                    // CommonValue<Color> -> ColorItem
-                    guard let weakSelf = self else { return .NoChange }
-                    
-                    let newColorItem: ColorItem
-                    if let color = value.orNil() {
-                        if weakSelf.presetColors.contains(color) {
-                            newColorItem = ColorItem.Preset(color)
-                        } else {
-                            newColorItem = ColorItem.Custom(color)
-                        }
-                    } else {
-                        newColorItem = ColorItem.Default
-                    }
-                    
-                    return .Change(newColorItem)
-                },
-                reverse: { value in
-                    // ColorItem -> CommonValue<Color>
-                    if let newColor = value?.color {
-                        return .Change(CommonValue.One(newColor))
-                    } else {
-                        return .NoChange
-                    }
-                }
-            )
-            
-            bindings.connect(
-                color, "color",
-                opacityValue, "opacityValue",
-                forward: { value in
-                    // CommonValue<Color> -> Double?
-                    .Change(value.orNil()?.components.a)
-                },
-                reverse: { [weak self] value in
-                    // Double? -> CommonValue<Color>
-                    guard let weakSelf = self else { return .NoChange }
-                    guard let newOpacity = value else { return .NoChange }
-                    
-                    let currentColor: Color
-                    if let colorValue = weakSelf.color?.value {
-                        currentColor = colorValue.orDefault(weakSelf.defaultColor)
-                    } else {
-                        currentColor = weakSelf.defaultColor
-                    }
-                    
-                    let newColor = currentColor.withAlpha(newOpacity)
-                    return .Change(CommonValue.One(newColor))
-                }
-            )
-            
-            bindings.connect(
-                color, "color",
-                panelColor, "panelColor",
-                forward: { value in
-                    // CommonValue<Color> -> Color
-                    if let color = value.orNil() {
-                        return .Change(color)
-                    } else {
-                        return .NoChange
-                    }
-                },
-                reverse: { value in
-                    // Color -> CommonValue<Color>
-                    .Change(CommonValue.One(value))
-                }
-            )
-        }
-    }
-
     /// The color to show in the color picker when there is no selected color.
     private let defaultColor: Color
 
     private let presetColors: [Color]
     private var popupItems: [MenuItem<ColorItem>]!
     
-    private let colorItem: MutableObservableValue<ColorItem?>
-    private let opacityValue: MutableObservableValue<CGFloat?>
-    private let panelColor: MutableObservableValue<Color>
-    private let panelVisible: MutableObservableValue<Bool>
+    private let color: BidiProperty<CommonValue<Color>>
+    
+    private let colorItem: BidiProperty<ColorItem?>
+    private let opacityValue: BidiProperty<CGFloat?>
+    private let panelColor: BidiProperty<Color>
+    private let panelVisible: BidiProperty<Bool>
     
     init(defaultColor: Color) {
         self.defaultColor = defaultColor
-        
-        // Initialize the internal bindings
+        self.color = ValueBidiProperty(.One(defaultColor))
+
+        // Initialize the internal properties
         // XXX: We use `valueChanging: { true }` so that binding observers are notified even
         // when the item is changing from .Custom to .Custom; this is all because of the funky
         // .Custom handling in `==` for ColorItem, need to revisit this...
@@ -225,11 +139,12 @@ private class ColorPickerModel {
             }
         }
         let colorIsCustom: ObservableValue<Bool> = customColor.map{ $0 != nil }
-        self.colorItem = colorItem
-        self.opacityValue = mutableObservableValue(nil)
-        self.panelColor = mutableObservableValue(defaultColor)
-        self.panelVisible = mutableObservableValue(false)
-
+        self.colorItem = colorItem.property
+        self.opacityValue = ValueBidiProperty(nil)
+        self.panelColor = ValueBidiProperty(defaultColor)
+        let panelVisible = ValueBidiProperty(false)
+        self.panelVisible = panelVisible
+        
         // Configure color popup menu items
         var popupItems: [MenuItem<ColorItem>] = []
         var presets: [Color] = []
@@ -262,7 +177,7 @@ private class ColorPickerModel {
             // The "Other" item and the separator above it are always visible
             popupItems.append(MenuItem(.Separator))
             let content = MenuItemContent(object: ColorItem.Other, title: ObservableValue.constant("Other…"))
-            popupItems.append(MenuItem(.Momentary(content, action: { self.bindings.update(self.panelVisible, newValue: true) })))
+            popupItems.append(MenuItem(.Momentary(content, action: { panelVisible.change(newValue: true, transient: true) })))
         }
         
         addPreset("Black", Color.black)
@@ -279,6 +194,73 @@ private class ColorPickerModel {
         addOther()
         
         self.popupItems = popupItems
+        
+        // Prepare the internal property connections
+        
+        // color <-> colorItem
+        self.color.connectBidi(
+            self.colorItem,
+            forward: { [weak self] value in
+                // CommonValue<Color> -> ColorItem
+                guard let weakSelf = self else { return .NoChange }
+                
+                let newColorItem: ColorItem
+                if let color = value.orNil() {
+                    if weakSelf.presetColors.contains(color) {
+                        newColorItem = ColorItem.Preset(color)
+                    } else {
+                        newColorItem = ColorItem.Custom(color)
+                    }
+                } else {
+                    newColorItem = ColorItem.Default
+                }
+                
+                return .Change(newColorItem)
+            },
+            reverse: { value in
+                // ColorItem -> CommonValue<Color>
+                if let newColor = value?.color {
+                    return .Change(CommonValue.One(newColor))
+                } else {
+                    return .NoChange
+                }
+            }
+        )
+        
+        // color <-> opacityValue
+        self.color.connectBidi(
+            self.opacityValue,
+            forward: { value in
+                // CommonValue<Color> -> Double?
+                .Change(value.orNil()?.components.a)
+            },
+            reverse: { [weak self] value in
+                // Double? -> CommonValue<Color>
+                guard let weakSelf = self else { return .NoChange }
+                guard let newOpacity = value else { return .NoChange }
+                
+                let currentColor: Color = weakSelf.color.get().orDefault(weakSelf.defaultColor)
+                let newColor = currentColor.withAlpha(newOpacity)
+                return .Change(CommonValue.One(newColor))
+            }
+        )
+        
+        // color <-> panelColor
+        self.color.connectBidi(
+            self.panelColor,
+            forward: { value in
+                // CommonValue<Color> -> Color
+                if let color = value.orNil() {
+                    return .Change(color)
+                } else {
+                    return .NoChange
+                }
+            },
+            reverse: { value in
+                // Color -> CommonValue<Color>
+                .Change(CommonValue.One(value))
+            }
+        )
     }
 }
 

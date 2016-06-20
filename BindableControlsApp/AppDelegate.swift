@@ -198,23 +198,23 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
         comboBox.placeholder <~ selectedObjectsFriend.stringWhenMulti("Multiple", otherwise: "Default")
         
-//        colorPicker.color <~> undoableDB.observe(
-//            selectedObjectsColor,
-//            action: "Change Favorite Color",
-//            get: {
-//                $0.commonValue{ rv -> Color? in
-//                    if let s: String = rv.get() {
-//                        return Color(string: s)
-//                    } else {
-//                        return nil
-//                    }
-//                }
-//            },
-//            set: { (commonValue: CommonValue<Color>) in
-//                guard let color = commonValue.orNil() else { preconditionFailure("Expected a single color value") }
-//                selectedObjectsColor.updateString(color.stringValue)
-//            }
-//        )
+        colorPicker.color <~> undoableDB.bidiProperty(
+            selectedObjectsColor,
+            action: "Change Favorite Color",
+            get: {
+                $0.commonValue{ rv -> Color? in
+                    if let s: String = rv.get() {
+                        return Color(string: s)
+                    } else {
+                        return nil
+                    }
+                }
+            },
+            set: { (commonValue: CommonValue<Color>) in
+                guard let color = commonValue.orNil() else { preconditionFailure("Expected a single color value") }
+                selectedObjectsColor.updateString(color.stringValue)
+            }
+        )
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {

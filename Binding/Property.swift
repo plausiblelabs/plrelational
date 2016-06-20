@@ -112,7 +112,10 @@ public class ObservableProperty<T>: ReadableProperty<T> {
 
 public class BidiProperty<T>: ObservableProperty<T> {
 
-    public override init(get: Getter, set: Setter, signal: Signal<T>) {
+    private let notify: Signal<T>.Notify
+    
+    public init(get: Getter, set: Setter, signal: Signal<T>, notify: Signal<T>.Notify) {
+        self.notify = notify
         super.init(get: get, set: set, signal: signal)
     }
 
@@ -208,7 +211,8 @@ public class MutableBidiProperty<T>: BidiProperty<T> {
                 set(newValue, metadata)
                 notify(newValue: newValue, metadata: metadata)
             },
-            signal: signal
+            signal: signal,
+            notify: notify
         )
     }
 }
@@ -238,7 +242,20 @@ public class ValueBidiProperty<T>: BidiProperty<T> {
                 didSet?(newValue, metadata)
                 notify(newValue: newValue, metadata: metadata)
             },
-            signal: signal
+            signal: signal,
+            notify: notify
+        )
+    }
+}
+
+extension BidiProperty {
+    /// Returns an `ObservableValue` representation of this property.
+    public var observableValue: ObservableValue<T> {
+        return ObservableValue(
+            initialValue: self.get(),
+            signal: self.signal,
+            notify: self.notify,
+            valueChanging: valueChanging
         )
     }
 }

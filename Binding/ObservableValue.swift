@@ -23,6 +23,13 @@ public class ObservableValue<T>: Observable {
     internal let signal: Signal<T>
     private let notify: Signal<T>.Notify
     
+    internal init(initialValue: T, signal: Signal<T>, notify: Signal<T>.Notify, valueChanging: (T, T) -> Bool = valueChanging) {
+        self.value = initialValue
+        self.signal = signal
+        self.notify = notify
+        self.changing = valueChanging
+    }
+    
     public init(initialValue: T, valueChanging: (T, T) -> Bool = valueChanging) {
         self.value = initialValue
         self.changing = valueChanging
@@ -375,6 +382,22 @@ extension MutableObservableValue where T: BooleanType {
     public func toggle(metadata: ChangeMetadata = ChangeMetadata(transient: true)) {
         let newValue = !value
         update(newValue as! T, metadata)
+    }
+}
+
+extension ObservableValue {
+    /// Returns a `BidiProperty` that wraps this `ObservableValue`.
+    public var property: BidiProperty<T> {
+        return BidiProperty(
+            get: {
+                return self.value
+            },
+            set: { (newValue: T, metadata: ChangeMetadata) in
+                self.setValue(newValue, metadata)
+            },
+            signal: self.signal,
+            notify: self.notify
+        )
     }
 }
 

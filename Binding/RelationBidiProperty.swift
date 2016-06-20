@@ -49,7 +49,8 @@ private class RelationBidiProperty<T>: BidiProperty<T> {
                     before = nil
                 }
             },
-            signal: signal
+            signal: signal,
+            notify: notify
         )
         
         self.removal = relation.addChangeObserver({ _ in
