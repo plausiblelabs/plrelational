@@ -68,6 +68,12 @@ public func ==(a: Row, b: Row) -> Bool {
     return a.internedRow === b.internedRow
 }
 
+extension Row: CustomStringConvertible {
+    public var description: String {
+        return internedRow.values.description
+    }
+}
+
 
 private class InternedRow: Hashable {
     let values: [Attribute: RelationValue]
