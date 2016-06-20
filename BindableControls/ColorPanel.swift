@@ -6,41 +6,39 @@
 import Cocoa
 import Binding
 
-class ColorPanel {
+public class ColorPanel {
     
-    private let bindings = BindingSet()
-    
-    var color: MutableObservableValue<Color>? {
-        didSet {
-            bindings.observe(color, "color", { [weak self] value in
-                self?.updateColorPanel(makeVisible: false)
-            })
+    private lazy var _color: ValueBidiProperty<Color> = ValueBidiProperty(
+        // XXX
+        initialValue: Color.blue,
+        didSet: { [unowned self] newValue, _ in
+            self.updateColorPanel(newColor: newValue, makeVisible: false)
         }
-    }
-    
+    )
+    public var color: BidiProperty<Color> { return _color }
+
     // TODO: Need to watch color panel's window visibility and update this accordingly
-    var visible: MutableObservableValue<Bool>? {
-        didSet {
-            // TODO: If shared color panel is already visible, commit(true) to keep the
-            // binding value in sync
-            bindings.observe(visible, "visible", { [weak self] value in
-                // TODO: Should we `orderOut` when visible goes to false?
-                if value {
-                    self?.updateColorPanel(makeVisible: true)
-                }
-            })
+    private lazy var _visible: ValueBidiProperty<Bool> = ValueBidiProperty(
+        // TODO: Check whether shared color panel is already visible
+        initialValue: false,
+        didSet: { [unowned self] newValue, _ in
+            // TODO: Should we `orderOut` when visible goes to false?
+            if newValue {
+                self.updateColorPanel(newColor: self.color.get(), makeVisible: true)
+            }
         }
-    }
+    )
+    public var visible: BidiProperty<Bool> { return _visible }
     
     private var ignorePanelUpdates = false
     
-    private func updateColorPanel(makeVisible makeVisible: Bool) {
+    private func updateColorPanel(newColor newColor: Color?, makeVisible: Bool) {
         ignorePanelUpdates = true
         
         let colorPanel = NSColorPanel.sharedColorPanel()
         colorPanel.setTarget(self)
         colorPanel.setAction(#selector(colorPanelChanged(_:)))
-        if let nscolor = color?.value.nscolor {
+        if let nscolor = newColor?.nscolor {
             colorPanel.color = nscolor
         }
         if makeVisible {
@@ -58,7 +56,7 @@ class ColorPanel {
         
         if let newColor = Color(panel.color) {
             // TODO: Use `transient: true` only while user is actively changing the color
-            bindings.update(color, newValue: newColor, transient: true)
+            _color.change(newValue: newColor, transient: true)
         }
     }
 }

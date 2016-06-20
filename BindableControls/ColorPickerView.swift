@@ -42,8 +42,9 @@ public class ColorPickerView: NSView {
         
         // Configure color panel
         colorPanel = ColorPanel()
-        colorPanel.color = model.panelColor
-        colorPanel.visible = model.panelVisible
+        // TODO
+//        colorPanel.color = model.panelColor
+//        colorPanel.visible = model.panelVisible
         
         super.init(frame: NSZeroRect)
         

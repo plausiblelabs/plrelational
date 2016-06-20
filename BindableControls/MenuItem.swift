@@ -43,8 +43,6 @@ public func titledMenuItem(title: String) -> MenuItem<String> {
 }
 
 class NativeMenuItem<T> {
-    private let bindings = BindingSet()
-    
     let model: MenuItem<T>
     let nsitem: NSMenuItem
 
@@ -59,6 +57,18 @@ class NativeMenuItem<T> {
         }
     }
     
+    private lazy var visible: Property<Bool> = Property { [unowned self] value, _ in
+        self.nsitem.hidden = !value
+    }
+
+    private lazy var title: Property<String> = Property { [unowned self] value, _ in
+        self.nsitem.title = value
+    }
+
+    private lazy var image: Property<Image> = Property { [unowned self] value, _ in
+        self.nsitem.image = value.nsimage
+    }
+
     private init(model: MenuItem<T>, nsitem: NSMenuItem) {
         self.model = model
         self.nsitem = nsitem
@@ -73,19 +83,19 @@ class NativeMenuItem<T> {
             content = nil
         }
         
-        bindings.observe(model.visible, "visible", { [weak self] value in
-            self?.nsitem.hidden = !value
-        })
-
+        if let v = model.visible {
+            visible <~ v
+        }
+        
         if let content = content {
             // TODO: Avoid cycle here
             nsitem.representedObject = self
-            bindings.observe(content.title, "title", { [weak self] value in
-                self?.nsitem.title = value
-            })
-            bindings.observe(content.image, "image", { [weak self] value in
-                self?.nsitem.image = value.nsimage
-            })
+            if let t = content.title {
+                title <~ t
+            }
+            if let i = content.image {
+                image <~ i
+            }
         }
     }
     

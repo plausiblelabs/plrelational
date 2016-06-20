@@ -181,12 +181,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             set: { selectedObjectsDay.updateNullableString($0) }
         )
         
-//        stepper.value <~> undoableDB.bidiProperty(
-//            selectedObjectsRocks,
-//            action: "Change Rocks",
-//            get: { $0.oneIntegerOrNil.map{ Int($0) } },
-//            set: { selectedObjectsRocks.updateInteger(Int64($0!)) }
-//        )
+        stepper.value <~> undoableDB.bidiProperty(
+            selectedObjectsRocks,
+            action: "Change Rocks",
+            get: { $0.oneIntegerOrNil.map{ Int($0) } },
+            set: { selectedObjectsRocks.updateInteger(Int64($0!)) }
+        )
         stepper.placeholder <~ selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
         
         comboBox.items <~ ObservableValue.constant(["Alice", "Bob", "Carlos"])

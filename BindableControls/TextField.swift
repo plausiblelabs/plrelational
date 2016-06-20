@@ -16,15 +16,14 @@ public class TextField: NSTextField, NSTextFieldDelegate {
             self.stringValue = value
         }
     )
-    
     public var string: BidiProperty<String> { return _string }
     
-    public lazy var placeholder: Property<String> = Property { [weak self] value, _ in
-        self?.placeholderString = value
+    public lazy var placeholder: Property<String> = Property { [unowned self] value, _ in
+        self.placeholderString = value
     }
 
-    public lazy var visible: Property<Bool> = Property { [weak self] value, _ in
-        self?.hidden = !value
+    public lazy var visible: Property<Bool> = Property { [unowned self] value, _ in
+        self.hidden = !value
     }
     
     private var previousCommittedValue: String?

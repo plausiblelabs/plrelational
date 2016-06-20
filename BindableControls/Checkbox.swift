@@ -19,7 +19,6 @@ public class Checkbox: NSButton {
             self.state = value.nsValue
         }
     )
-    
     public var checked: BidiProperty<CheckState> { return _checked }
     
     public override init(frame frameRect: NSRect) {

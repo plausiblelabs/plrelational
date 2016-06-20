@@ -8,34 +8,31 @@ import Binding
 
 public class PopUpButton<T: Equatable>: NSPopUpButton {
 
-    public lazy var items: Property<[MenuItem<T>]> = Property { [weak self] value, _ in
-        guard let weakSelf = self else { return }
-
+    public lazy var items: Property<[MenuItem<T>]> = Property { [unowned self] value, _ in
         // Clear the menu
-        weakSelf.removeAllItems()
+        self.removeAllItems()
 
         // Add the menu items
-        weakSelf.nativeMenuItems = value.map{ NativeMenuItem(model: $0) }
-        for item in weakSelf.nativeMenuItems! {
-            weakSelf.menu?.addItem(item.nsitem)
+        self.nativeMenuItems = value.map{ NativeMenuItem(model: $0) }
+        for item in self.nativeMenuItems! {
+            self.menu?.addItem(item.nsitem)
         }
 
         // Insert the default menu item, if we have one
-        if let defaultMenuItem = weakSelf.defaultMenuItem {
-            weakSelf.menu?.insertItem(defaultMenuItem.nsitem, atIndex: 0)
+        if let defaultMenuItem = self.defaultMenuItem {
+            self.menu?.insertItem(defaultMenuItem.nsitem, atIndex: 0)
         }
         
-        // Set the selected item, if needed
-        weakSelf.setSelectedItem(weakSelf.selectedObject.get())
+        // Set the selected item
+        self.setSelectedItem(self.selectedObject.get())
     }
 
     private lazy var _selectedObject: ValueBidiProperty<T?> = ValueBidiProperty(
         initialValue: nil,
-        didSet: { [weak self] value, _ in
-            self?.setSelectedItem(value)
+        didSet: { [unowned self] value, _ in
+            self.setSelectedItem(value)
         }
     )
-    
     public var selectedObject: BidiProperty<T?> { return _selectedObject }
 
     public var defaultItemContent: MenuItemContent<T>? {

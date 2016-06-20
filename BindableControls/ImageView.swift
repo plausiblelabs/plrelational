@@ -8,10 +8,8 @@ import Binding
 
 public class ImageView: NSImageView {
 
-    private let bindings = BindingSet()
-    
-    public lazy var img: Property<Image> = Property { [weak self] value, _ in
-        self?.image = value.nsimage
+    public lazy var img: Property<Image> = Property { [unowned self] value, _ in
+        self.image = value.nsimage
     }
     
     public override init(frame: NSRect) {

@@ -8,8 +8,8 @@ import Binding
 
 public class Button: NSButton {
 
-    public lazy var disabled: Property<Bool> = Property { [weak self] value, _ in
-        self?.enabled = !value
+    public lazy var disabled: Property<Bool> = Property { [unowned self] value, _ in
+        self.enabled = !value
     }
 
     public let clicks: Signal<()>

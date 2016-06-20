@@ -15,15 +15,14 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
     
     private lazy var _value: ValueBidiProperty<T?> = ValueBidiProperty(
         initialValue: nil,
-        didSet: { [weak self] value, _ in
-            self?.objectValue = value as? AnyObject
+        didSet: { [unowned self] value, _ in
+            self.objectValue = value as? AnyObject
         }
     )
-    
     public var value: BidiProperty<T?> { return _value }
     
-    public lazy var placeholder: Property<String> = Property { [weak self] value, _ in
-        self?.placeholderString = value
+    public lazy var placeholder: Property<String> = Property { [unowned self] value, _ in
+        self.placeholderString = value
     }
     
     private var previousCommittedValue: T?
