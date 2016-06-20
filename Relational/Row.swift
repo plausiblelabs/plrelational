@@ -93,20 +93,23 @@ private func ==(a: InternedRow, b: InternedRow) -> Bool {
 }
 
 extension InternedRow {
-    static var extantRows = NSHashTable(pointerFunctions: {
+    static let extantRows = Mutexed(NSHashTable(pointerFunctions: {
         let pf = NSPointerFunctions(options: [.WeakMemory])
         pf.hashFunction = { ptr, _ in unsafeBitCast(ptr, InternedRow.self).hashValue }
         pf.isEqualFunction = { a, b, _ in ObjCBool(unsafeBitCast(a, InternedRow.self) == unsafeBitCast(b, InternedRow.self)) }
         return pf
-        }(), capacity: 0)
+        }(), capacity: 0))
+    
     
     static func intern(row: InternedRow) -> InternedRow {
-        if let extantRow = extantRows.member(row) {
-            return extantRow as! InternedRow
-        } else {
-            extantRows.addObject(row)
-            return row
-        }
+        return extantRows.withValue({
+            if let extantRow = $0.member(row) {
+                return extantRow as! InternedRow
+            } else {
+                $0.addObject(row)
+                return row
+            }
+        })
     }
     
     static func intern(values: [Attribute: RelationValue]) -> InternedRow {
