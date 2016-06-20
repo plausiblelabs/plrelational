@@ -8,17 +8,14 @@ import Binding
 
 public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
 
-    public lazy var items: Property<[T]> = Property { [weak self] value, _ in
+    public lazy var items: Property<[T]> = Property { [unowned self] value, _ in
         let objects = value.map{ $0 as! AnyObject }
-        self?.addItemsWithObjectValues(objects)
+        self.addItemsWithObjectValues(objects)
     }
     
-    private lazy var _value: ValueBidiProperty<T?> = ValueBidiProperty(
-        initialValue: nil,
-        didSet: { [unowned self] value, _ in
-            self.objectValue = value as? AnyObject
-        }
-    )
+    private lazy var _value: ValueBidiProperty<T?> = ValueBidiProperty(nil, { [unowned self] value, _ in
+        self.objectValue = value as? AnyObject
+    })
     public var value: BidiProperty<T?> { return _value }
     
     public lazy var placeholder: Property<String> = Property { [unowned self] value, _ in

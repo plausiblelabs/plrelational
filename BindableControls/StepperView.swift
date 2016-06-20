@@ -8,18 +8,15 @@ import Binding
 
 public class StepperView: NSControl, NSTextFieldDelegate {
     
-    private lazy var _value: ValueBidiProperty<Int?> = ValueBidiProperty(
-        initialValue: nil,
-        didSet: { value, _ in
-            if let intValue = value {
-                self.stepper.integerValue = intValue
-                self.textField.integerValue = intValue
-            } else {
-                self.stepper.integerValue = self.defaultValue
-                self.textField.stringValue = ""
-            }
+    private lazy var _value: ValueBidiProperty<Int?> = ValueBidiProperty(nil, { [unowned self] value, _ in
+        if let intValue = value {
+            self.stepper.integerValue = intValue
+            self.textField.integerValue = intValue
+        } else {
+            self.stepper.integerValue = self.defaultValue
+            self.textField.stringValue = ""
         }
-    )
+    })
     public var value: BidiProperty<Int?> { return _value }
 
     public lazy var placeholder: Property<String> = Property { [unowned self] value, _ in

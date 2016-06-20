@@ -27,12 +27,9 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
         self.setSelectedItem(self.selectedObject.get())
     }
 
-    private lazy var _selectedObject: ValueBidiProperty<T?> = ValueBidiProperty(
-        initialValue: nil,
-        didSet: { [unowned self] value, _ in
-            self.setSelectedItem(value)
-        }
-    )
+    private lazy var _selectedObject: ValueBidiProperty<T?> = ValueBidiProperty(nil, { [unowned self] value, _ in
+        self.setSelectedItem(value)
+    })
     public var selectedObject: BidiProperty<T?> { return _selectedObject }
 
     public var defaultItemContent: MenuItemContent<T>? {

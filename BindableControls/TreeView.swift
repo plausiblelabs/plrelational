@@ -213,6 +213,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         let identifier = model.cellIdentifier(node.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
+            textField.string.unbindAll()
             let text = model.cellText(node.data)
             if let bidiText = text as? BidiProperty {
                 textField.string <~> bidiText
@@ -221,10 +222,9 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
             }
         }
         if let imageView = view.imageView as? ImageView {
+            imageView.img.unbindAll()
             if let image = model.cellImage?(node.data) {
                 imageView.img <~ image
-            } else {
-                imageView.img.unbindAll()
             }
         }
         return view

@@ -5,6 +5,11 @@
 
 import Foundation
 
+public enum ChangeResult<T> { case
+    Change(T),
+    NoChange
+}
+
 public class Binding {
 
     // XXX: Hang on to the owner of the signal, otherwise if no one else is
@@ -46,6 +51,10 @@ public class Property<T> {
         }
     }
 
+    /// Establishes a unidirectional binding between this property and the given signal.
+    /// When the other property's value changes, this property's value will be updated.
+    /// Note that calling `bind` will cause this property to take on the given initial
+    /// value immediately.
     private func bind(signal: Signal<T>, initialValue: T, owner: AnyObject) -> Binding {
         // Make this property take on the given initial value
         // TODO: Maybe only do this if this is the first thing being bound (i.e., when
@@ -70,6 +79,7 @@ public class Property<T> {
         return binding
     }
     
+    /// Unbinds all existing bindings.
     public func unbindAll() {
         for (_, binding) in bindings {
             binding.unbind()
@@ -106,30 +116,64 @@ public class BidiProperty<T>: ObservableProperty<T> {
         super.init(get: get, set: set, signal: signal)
     }
 
+    /// Establishes a bidirectional binding between this property and the given property.
+    /// When this property's value changes, the other property's value will be updated and
+    /// vice versa.  Note that calling `bindBidi` will cause this property to take on the
+    /// other property's value immedately.
     public func bindBidi(other: BidiProperty<T>) -> Binding {
-        var selfInitiatedChange = false
+        return connectBidi(
+            other,
+            initial: {
+                self.set(other.get(), ChangeMetadata(transient: true))
+            },
+            forward: { .Change($0) },
+            reverse: { .Change($0) }
+        )
+    }
 
+    /// Establishes a bidirectional connection between this property and the given property,
+    /// using `forward` and `reverse` to conditionally apply changes in each direction.
+    /// Note that calling `connectBidi` will cause the other property to take on this
+    /// property's value immediately (this is the opposite behavior from `bindBidi`).
+    public func connectBidi<U>(other: BidiProperty<U>, forward: T -> ChangeResult<U>, reverse: U -> ChangeResult<T>) -> Binding {
+        return connectBidi(
+            other,
+            initial: {
+                if case .Change(let initialValue) = forward(self.get()) {
+                    other.set(initialValue, ChangeMetadata(transient: true))
+                }
+            },
+            forward: forward,
+            reverse: reverse
+        )
+    }
+
+    private func connectBidi<U>(other: BidiProperty<U>, initial: () -> Void, forward: T -> ChangeResult<U>, reverse: U -> ChangeResult<T>) -> Binding {
+        var selfInitiatedChange = false
+        
         // Observe the signal of the other property
         let signalObserverRemoval1 = other.signal.observe({ [weak self] value, metadata in
             if selfInitiatedChange { return }
-            selfInitiatedChange = true
-            self?.set(value, metadata)
-            selfInitiatedChange = false
+            if case .Change(let newValue) = reverse(value) {
+                selfInitiatedChange = true
+                self?.set(newValue, metadata)
+                selfInitiatedChange = false
+            }
         })
         
         // Make the other property observe this property's signal
         let signalObserverRemoval2 = signal.observe({ [weak other] value, metadata in
             if selfInitiatedChange { return }
-            selfInitiatedChange = true
-            other?.set(value, metadata)
-            selfInitiatedChange = false
+            if case .Change(let newValue) = forward(value) {
+                selfInitiatedChange = true
+                other?.set(newValue, metadata)
+                selfInitiatedChange = false
+            }
         })
-
-        // Make this property take on the initial value from the other property
-        // TODO: Maybe only do this if this is the first thing being bound (i.e., when
-        // the set of bindings is empty)
+        
+        // Make this property take on the initial value from the other property (or vice versa)
         selfInitiatedChange = true
-        self.set(other.get(), ChangeMetadata(transient: true))
+        initial()
         selfInitiatedChange = false
         
         // Save and return the binding
@@ -173,7 +217,7 @@ public class ValueBidiProperty<T>: BidiProperty<T> {
 
     public let change: (newValue: T, transient: Bool) -> Void
     
-    public init(initialValue: T, didSet: Setter? = nil) {
+    public init(_ initialValue: T, _ didSet: Setter? = nil) {
         let signal: Signal<T>
         let notify: Signal<T>.Notify
         (signal, notify) = Signal.pipe()

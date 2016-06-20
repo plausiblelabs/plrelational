@@ -62,7 +62,7 @@ class RelationBidiPropertyTests: BindingTestCase {
         XCTAssertEqual(changeObserved, true)
         changeObserved = false
 
-        let otherProperty = ValueBidiProperty(initialValue: "")
+        let otherProperty = ValueBidiProperty("")
         otherProperty <~> relationProperty
         
         otherProperty.change(newValue: "dog", transient: true)

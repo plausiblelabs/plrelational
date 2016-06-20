@@ -5,11 +5,6 @@
 
 import Foundation
 
-public enum ChangeResult<T> { case
-    Change(T),
-    NoChange
-}
-
 public class BindingSet {
     
     private var removals: [String: ObserverRemoval] = [:]

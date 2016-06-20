@@ -8,26 +8,20 @@ import Binding
 
 public class ColorPanel {
     
-    private lazy var _color: ValueBidiProperty<Color> = ValueBidiProperty(
-        // XXX
-        initialValue: Color.blue,
-        didSet: { [unowned self] newValue, _ in
-            self.updateColorPanel(newColor: newValue, makeVisible: false)
-        }
-    )
+    // XXX: Fix initial value
+    private lazy var _color: ValueBidiProperty<Color> = ValueBidiProperty(Color.blue, { [unowned self] newValue, _ in
+        self.updateColorPanel(newColor: newValue, makeVisible: false)
+    })
     public var color: BidiProperty<Color> { return _color }
 
     // TODO: Need to watch color panel's window visibility and update this accordingly
-    private lazy var _visible: ValueBidiProperty<Bool> = ValueBidiProperty(
-        // TODO: Check whether shared color panel is already visible
-        initialValue: false,
-        didSet: { [unowned self] newValue, _ in
-            // TODO: Should we `orderOut` when visible goes to false?
-            if newValue {
-                self.updateColorPanel(newColor: self.color.get(), makeVisible: true)
-            }
+    // TODO: Check whether shared color panel is already visible
+    private lazy var _visible: ValueBidiProperty<Bool> = ValueBidiProperty(false, { [unowned self] newValue, _ in
+        // TODO: Should we `orderOut` when visible goes to false?
+        if newValue {
+            self.updateColorPanel(newColor: self.color.get(), makeVisible: true)
         }
-    )
+    })
     public var visible: BidiProperty<Bool> { return _visible }
     
     private var ignorePanelUpdates = false
