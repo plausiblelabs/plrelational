@@ -167,7 +167,11 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
             }
         }
         if let imageView = view.imageView as? ImageView {
-            imageView.img <~ model.cellImage?(element.data)
+            if let image = model.cellImage?(element.data) {
+                imageView.img <~ image
+            } else {
+                imageView.img.unbindAll()
+            }
         }
         return view
     }

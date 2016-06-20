@@ -221,7 +221,11 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
             }
         }
         if let imageView = view.imageView as? ImageView {
-            imageView.img <~ model.cellImage?(node.data)
+            if let image = model.cellImage?(node.data) {
+                imageView.img <~ image
+            } else {
+                imageView.img.unbindAll()
+            }
         }
         return view
     }
