@@ -131,7 +131,7 @@ public class ValueBidiProperty<T>: BidiProperty<T> {
 
     public let change: (newValue: T, transient: Bool) -> Void
     
-    public init(initialValue: T) {
+    public init(initialValue: T, didSet: Setter? = nil) {
         let signal: Signal<T>
         let notify: Signal<T>.Notify
         (signal, notify) = Signal.pipe()
@@ -143,7 +143,16 @@ public class ValueBidiProperty<T>: BidiProperty<T> {
             notify(newValue: newValue, metadata: ChangeMetadata(transient: transient))
         }
         
-        super.init(get: { value }, set: { newValue, _ in value = newValue }, signal: signal)
+        super.init(
+            get: {
+                value
+            },
+            set: { newValue, metadata in
+                value = newValue
+                didSet?(newValue, metadata)
+            },
+            signal: signal
+        )
     }
 }
 

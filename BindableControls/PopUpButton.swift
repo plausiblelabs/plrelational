@@ -26,15 +26,13 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
         }
         
         // Set the selected item, if needed
-        weakSelf.setSelectedItem(weakSelf.selectedObjectValue)
+        weakSelf.setSelectedItem(weakSelf.selectedObject.get())
     }
 
-    private lazy var _selectedObject: MutableBidiProperty<T?> = MutableBidiProperty(
-        get: { [unowned self] in
-            return self.selectedObjectValue
-        },
-        set: { [unowned self] value, _ in
-            self.setSelectedItem(value)
+    private lazy var _selectedObject: ValueBidiProperty<T?> = ValueBidiProperty(
+        initialValue: nil,
+        didSet: { [weak self] value, _ in
+            self?.setSelectedItem(value)
         }
     )
     
@@ -64,7 +62,6 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
     private var defaultMenuItem: NativeMenuItem<T>?
     
     private var selfInitiatedSelectionChange = false
-    private var selectedObjectValue: T?
     private var selectedIndex = -1
 
     public override init(frame: NSRect, pullsDown flag: Bool) {
@@ -89,17 +86,14 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
             })
             if let index = index {
                 selectItemAtIndex(index)
-                selectedObjectValue = object
                 selectedIndex = index
             } else {
                 selectItem(defaultMenuItem?.nsitem)
-                selectedObjectValue = nil
                 selectedIndex = -1
             }
         } else {
             // Select the default item if one exists, otherwise clear selection
             selectItem(defaultMenuItem?.nsitem)
-            selectedObjectValue = nil
             selectedIndex = -1
         }
         selfInitiatedSelectionChange = false
@@ -113,9 +107,9 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
         
         switch nativeItem.model.type {
         case .Normal:
+            guard let object = nativeItem.object else { return }
             selfInitiatedSelectionChange = true
-            selectedObjectValue = nativeItem.object
-            _selectedObject.changed(transient: false)
+            _selectedObject.change(newValue: object, transient: false)
             selfInitiatedSelectionChange = false
             
         case .Momentary(_, let action):

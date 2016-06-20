@@ -53,11 +53,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             precondition(createResult.ok != nil)
             return db[name]
         }
-        var objects = createRelation("object", ["id", "name", "editable", "fav_day", "fav_color", "rocks", "parent", "order"])
+        var objects = createRelation("object", ["id", "name", "editable", "best_friend", "fav_day", "fav_color", "rocks", "parent", "order"])
         var selectedObjectID = createRelation("selected_object", ["id"])
         let selectedObjects = selectedObjectID.join(objects)
         let selectedObjectsName = selectedObjects.project(["name"])
         let selectedObjectsEditable = selectedObjects.project(["editable"])
+        let selectedObjectsFriend = selectedObjects.project(["best_friend"])
         let selectedObjectsDay = selectedObjects.project(["fav_day"])
         let selectedObjectsColor = selectedObjects.project(["fav_color"])
         let selectedObjectsRocks = selectedObjects.project(["rocks"])
@@ -89,6 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 "id": RelationValue(id),
                 "name": RelationValue(name),
                 "editable": RelationValue(Int64(editable ? 1 : 0)),
+                "best_friend": .NULL,
                 "fav_day": dayValue,
                 "fav_color": colorValue,
                 "rocks": RelationValue(rocks),
@@ -174,7 +176,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
         popupButton.selectedObject <~> undoableDB.bidiProperty(
             selectedObjectsDay,
-            action: "Change Day",
+            action: "Change Favorite Day",
             get: { $0.oneStringOrNil },
             set: { selectedObjectsDay.updateNullableString($0) }
         )
@@ -187,17 +189,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 //        )
         stepper.placeholder <~ selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
         
-        let comboValue: ValueBidiProperty<String?> = ValueBidiProperty(initialValue: "Bob")
-        _ = comboValue.signal.observe({ value, _ in
-            Swift.print("NEW COMBO VALUE: \(value)")
-        })
-        
         comboBox.items <~ ObservableValue.constant(["Alice", "Bob", "Carlos"])
-        comboBox.value <~> comboValue
+        comboBox.value <~> undoableDB.bidiProperty(
+            selectedObjectsFriend,
+            action: "Change Best Friend",
+            get: { $0.oneStringOrNil },
+            set: { selectedObjectsFriend.updateNullableString($0) }
+        )
+        comboBox.placeholder <~ selectedObjectsFriend.stringWhenMulti("Multiple", otherwise: "Default")
         
 //        colorPicker.color <~> undoableDB.observe(
 //            selectedObjectsColor,
-//            action: "Change Color",
+//            action: "Change Favorite Color",
 //            get: {
 //                $0.commonValue{ rv -> Color? in
 //                    if let s: String = rv.get() {

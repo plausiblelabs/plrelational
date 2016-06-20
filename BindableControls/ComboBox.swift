@@ -15,20 +15,20 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
         self?.addItemsWithObjectValues(objects)
     }
     
-    private lazy var _value: MutableBidiProperty<T?> = MutableBidiProperty(
-        get: { [unowned self] in
-            return self.internalValue
-        },
-        set: { [unowned self] value, _ in
-            self.internalValue = value
-            self.objectValue = value as? AnyObject
+    private lazy var _value: ValueBidiProperty<T?> = ValueBidiProperty(
+        initialValue: nil,
+        didSet: { [weak self] value, _ in
+            self?.objectValue = value as? AnyObject
         }
     )
     
     public var value: BidiProperty<T?> { return _value }
     
+    public lazy var placeholder: Property<String> = Property { [weak self] value, _ in
+        self?.placeholderString = value
+    }
+    
     private var previousCommittedValue: T?
-    private var internalValue: T?
 
     public override init(frame: NSRect) {
         super.init(frame: frame)
@@ -42,8 +42,7 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
     
     @objc public func comboBoxSelectionDidChange(notification: NSNotification) {
         if let newValue = objectValueOfSelectedItem {
-            internalValue = newValue as? T
-            _value.changed(transient: false)
+            _value.change(newValue: newValue as? T, transient: false)
         }
     }
     
@@ -59,8 +58,7 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if let newValue = objectValue as? T {
                 if newValue != previousCommittedValue {
-                    internalValue = newValue
-                    _value.changed(transient: false)
+                    _value.change(newValue: newValue, transient: false)
                 }
             }
         }
