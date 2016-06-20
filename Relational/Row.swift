@@ -23,7 +23,7 @@ public struct Row: Hashable {
     }
     
     public var hashValue: Int {
-        return unsafeBitCast(internedRow, Int.self)
+        return ObjectIdentifier(internedRow).hashValue
     }
     
     public subscript(attribute: Attribute) -> RelationValue {
