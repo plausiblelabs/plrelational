@@ -334,4 +334,34 @@ class PropertyTests: XCTestCase {
         XCTAssertEqual(stringProperty.signal.observerCount, 0)
         XCTAssertEqual(intProperty.signal.observerCount, 0)
     }
+    
+    func testObservableValueConversion() {
+        let property = ValueBidiProperty("1")
+        let observable = property.observableValue
+
+        var propertyChange: String?
+        _ = property.signal.observe({ value, _ in propertyChange = value })
+        
+        var observableChange: String?
+        _ = observable.addChangeObserver({ value, _ in observableChange = value })
+        
+        let metadata = ChangeMetadata(transient: false)
+        
+        // Verify that observable value reflects initial property value
+        XCTAssertEqual(property.get(), "1")
+        XCTAssertEqual(observable.value, "1")
+        XCTAssertEqual(propertyChange, nil)
+        XCTAssertEqual(observableChange, nil)
+        propertyChange = nil
+        observableChange = nil
+
+        // Verify that observable reflects changes made to the property
+        property.set("2", metadata)
+        XCTAssertEqual(property.get(), "2")
+        XCTAssertEqual(observable.value, "2")
+        XCTAssertEqual(propertyChange, "2")
+        XCTAssertEqual(observableChange, "2")
+        propertyChange = nil
+        observableChange = nil
+    }
 }

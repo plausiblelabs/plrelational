@@ -23,13 +23,6 @@ public class ObservableValue<T>: Observable {
     internal let signal: Signal<T>
     private let notify: Signal<T>.Notify
     
-    internal init(initialValue: T, signal: Signal<T>, notify: Signal<T>.Notify, valueChanging: (T, T) -> Bool = valueChanging) {
-        self.value = initialValue
-        self.signal = signal
-        self.notify = notify
-        self.changing = valueChanging
-    }
-    
     public init(initialValue: T, valueChanging: (T, T) -> Bool = valueChanging) {
         self.value = initialValue
         self.changing = valueChanging
@@ -175,7 +168,7 @@ private class MappedObservableValue<T>: ObservableValue<T> {
     
     init<U>(observable: ObservableValue<U>, transform: (U) -> T, valueChanging: (T, T) -> Bool) {
         super.init(initialValue: transform(observable.value), valueChanging: valueChanging)
-        self.removal = observable.addChangeObserver({ [weak self] _, metadata in
+        self.removal = observable.addChangeObserver({ [weak self] newValue, metadata in
             self?.setValue(transform(observable.value), metadata)
         })
     }

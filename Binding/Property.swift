@@ -248,15 +248,25 @@ public class ValueBidiProperty<T>: BidiProperty<T> {
     }
 }
 
+private class PropertyObservableValue<T>: ObservableValue<T> {
+    private var removal: ObserverRemoval!
+    
+    init(property: BidiProperty<T>, valueChanging: (T, T) -> Bool) {
+        super.init(initialValue: property.get(), valueChanging: valueChanging)
+        self.removal = property.signal.observe({ [weak self] newValue, metadata in
+            self?.setValue(newValue, metadata)
+        })
+    }
+    
+    deinit {
+        removal()
+    }
+}
+
 extension BidiProperty {
     /// Returns an `ObservableValue` representation of this property.
     public var observableValue: ObservableValue<T> {
-        return ObservableValue(
-            initialValue: self.get(),
-            signal: self.signal,
-            notify: self.notify,
-            valueChanging: valueChanging
-        )
+        return PropertyObservableValue(property: self, valueChanging: valueChanging)
     }
 }
 
