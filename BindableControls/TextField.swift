@@ -8,30 +8,22 @@ import Binding
 
 public class TextField: NSTextField, NSTextFieldDelegate {
 
-    private let bindings = BindingSet()
-
-    public var string: ObservableValue<String>? {
-        didSet {
-            bindings.observe(string, "string", { [weak self] value in
-                self?.stringValue = value
-            })
+    private lazy var _string: MutableBidiProperty<String> = MutableBidiProperty(
+        get: { [unowned self] in
+            self.stringValue ?? ""
+        },
+        set: { [unowned self] value, _ in
+            self.stringValue = value
         }
+    )
+    public var string: BidiProperty<String> { return _string }
+    
+    public lazy var placeholder: Property<String> = Property { [unowned self] value, _ in
+        self.placeholderString = value
     }
 
-    public var placeholder: ObservableValue<String>? {
-        didSet {
-            bindings.observe(placeholder, "placeholder", { [weak self] value in
-                self?.placeholderString = value
-            })
-        }
-    }
-
-    public var visible: ObservableValue<Bool>? {
-        didSet {
-            bindings.observe(visible, "visible", { [weak self] value in
-                self?.hidden = !value
-            })
-        }
+    public lazy var visible: Property<Bool> = Property { [unowned self] value, _ in
+        self.hidden = !value
     }
     
     private var previousCommittedValue: String?
@@ -57,9 +49,7 @@ public class TextField: NSTextField, NSTextFieldDelegate {
     
     public override func controlTextDidChange(notification: NSNotification) {
         //Swift.print("CONTROL DID CHANGE!")
-        if let mutableString = string as? MutableObservableValue {
-            bindings.update(mutableString, newValue: stringValue, transient: true)
-        }
+        _string.changed(transient: true)
         previousValue = stringValue
     }
     
@@ -68,10 +58,10 @@ public class TextField: NSTextField, NSTextFieldDelegate {
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value
         //Swift.print("CONTROL DID END EDITING!")
-        if let previousCommittedValue = previousCommittedValue, mutableString = string as? MutableObservableValue {
+        if let previousCommittedValue = previousCommittedValue {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if stringValue != previousCommittedValue {
-                bindings.update(mutableString, newValue: stringValue, transient: false)
+                _string.changed(transient: false)
             }
         }
         previousCommittedValue = nil

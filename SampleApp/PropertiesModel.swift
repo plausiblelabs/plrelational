@@ -64,10 +64,10 @@ class PropertiesModel {
         }
     }()
 
-    lazy var selectedItemNames: MutableObservableValue<String> = { [unowned self] in
+    lazy var selectedItemNames: BidiProperty<String> = { [unowned self] in
         // TODO: s/Item/type.name/
         let relation = self.selectedItemNamesRelation
-        return self.db.observe(
+        return self.db.bidiProperty(
             relation,
             action: "Rename Item",
             get: { $0.oneString },

@@ -275,7 +275,7 @@ class DocModel {
                     self.docOutlineTree.move(srcPath: srcPath, dstPath: dstPath)
                 })
             },
-            selection: self.bidiSelectionBinding(self.selectedCollectionID, clearInspectorSelection: true),
+            selection: self.treeSelectionBidiProperty(self.selectedCollectionID, clearInspectorSelection: true),
             cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 // TODO: Could we have a convenience for creating a projection Relation directly
@@ -283,7 +283,7 @@ class DocModel {
                 let rowID = row["id"]
                 let type = ItemType(row)!
                 let nameRelation = self.collections.select(Attribute("id") *== rowID).project(["name"])
-                return self.bidiStringBinding(nameRelation, type: type.name)
+                return self.nameBidiProperty(nameRelation, type: type.name)
             },
             cellImage: { row in
                 let type = ItemType(row)!
@@ -301,13 +301,13 @@ class DocModel {
             },
             contextMenu: nil,
             move: nil,
-            selection: self.bidiSelectionBinding(self.selectedInspectorItemIDs, clearInspectorSelection: false),
+            selection: self.treeSelectionBidiProperty(self.selectedInspectorItemIDs, clearInspectorSelection: false),
             cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 let rowID = row["id"]
                 let type = ItemType(row)!
                 let nameRelation = self.inspectorItems.select(Attribute("id") *== rowID).project(["name"])
-                return self.bidiStringBinding(nameRelation, type: type.name)
+                return self.nameBidiProperty(nameRelation, type: type.name)
             },
             cellImage: { row in
                 let type = ItemType(row)!
@@ -329,8 +329,8 @@ class DocModel {
         )
     }()
 
-    private func bidiStringBinding(relation: Relation, type: String) -> MutableObservableValue<String> {
-        return undoableDB.observe(
+    private func nameBidiProperty(relation: Relation, type: String) -> BidiProperty<String> {
+        return undoableDB.bidiProperty(
             relation,
             action: "Rename \(type)",
             get: { $0.oneString },
@@ -338,8 +338,8 @@ class DocModel {
         )
     }
 
-    private func bidiSelectionBinding(relation: MutableRelation, clearInspectorSelection: Bool) -> MutableObservableValue<Set<RelationValue>> {
-        return undoableDB.observe(
+    private func treeSelectionBidiProperty(relation: MutableRelation, clearInspectorSelection: Bool) -> BidiProperty<Set<RelationValue>> {
+        return undoableDB.bidiProperty(
             relation,
             action: "Change Selection",
             get: { $0.allValues },

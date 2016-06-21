@@ -8,23 +8,18 @@ import Binding
 
 public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
 
-    private let bindings = BindingSet()
-    
-    public var items: ObservableValue<[T]>? {
-        didSet {
-            bindings.observe(items, "items", { [weak self] value in
-                let objects = value.map{ $0 as! AnyObject }
-                self?.addItemsWithObjectValues(objects)
-            })
-        }
+    public lazy var items: Property<[T]> = Property { [unowned self] value, _ in
+        let objects = value.map{ $0 as! AnyObject }
+        self.addItemsWithObjectValues(objects)
     }
     
-    public var value: MutableObservableValue<T?>? {
-        didSet {
-            bindings.observe(value, "value", { [weak self] value in
-                self?.objectValue = value as? AnyObject
-            })
-        }
+    private lazy var _value: ValueBidiProperty<T?> = ValueBidiProperty(nil, { [unowned self] value, _ in
+        self.objectValue = value as? AnyObject
+    })
+    public var value: BidiProperty<T?> { return _value }
+    
+    public lazy var placeholder: Property<String> = Property { [unowned self] value, _ in
+        self.placeholderString = value
     }
     
     private var previousCommittedValue: T?
@@ -41,7 +36,7 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
     
     @objc public func comboBoxSelectionDidChange(notification: NSNotification) {
         if let newValue = objectValueOfSelectedItem {
-            bindings.update(value, newValue: newValue as? T)
+            _value.change(newValue: newValue as? T, transient: false)
         }
     }
     
@@ -53,11 +48,11 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
         // Note that controlTextDidBeginEditing may not be called if the user gives focus to the text field
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value
-        if let previousCommittedValue = previousCommittedValue, binding = value {
+        if let previousCommittedValue = previousCommittedValue {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if let newValue = objectValue as? T {
                 if newValue != previousCommittedValue {
-                    bindings.update(binding, newValue: newValue)
+                    _value.change(newValue: newValue, transient: false)
                 }
             }
         }

@@ -53,11 +53,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             precondition(createResult.ok != nil)
             return db[name]
         }
-        var objects = createRelation("object", ["id", "name", "editable", "fav_day", "fav_color", "rocks", "parent", "order"])
+        var objects = createRelation("object", ["id", "name", "editable", "best_friend", "fav_day", "fav_color", "rocks", "parent", "order"])
         var selectedObjectID = createRelation("selected_object", ["id"])
         let selectedObjects = selectedObjectID.join(objects)
         let selectedObjectsName = selectedObjects.project(["name"])
         let selectedObjectsEditable = selectedObjects.project(["editable"])
+        let selectedObjectsFriend = selectedObjects.project(["best_friend"])
         let selectedObjectsDay = selectedObjects.project(["fav_day"])
         let selectedObjectsColor = selectedObjects.project(["fav_color"])
         let selectedObjectsRocks = selectedObjects.project(["rocks"])
@@ -89,6 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 "id": RelationValue(id),
                 "name": RelationValue(name),
                 "editable": RelationValue(Int64(editable ? 1 : 0)),
+                "best_friend": .NULL,
                 "fav_day": dayValue,
                 "fav_color": colorValue,
                 "rocks": RelationValue(rocks),
@@ -103,8 +105,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         addObject("Fred", editable: false, day: nil, color: nil, rocks: 17)
         addObject("Wilma", editable: true, day: "Friday", color: Color.blue, rocks: 42)
 
-        func nameBinding(relation: Relation) -> MutableObservableValue<String> {
-            return undoableDB.observe(
+        func nameBidiProperty(relation: Relation) -> BidiProperty<String> {
+            return undoableDB.bidiProperty(
                 relation,
                 action: "Rename Object",
                 get: { $0.oneString },
@@ -112,8 +114,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             )
         }
         
-        func selectionBinding(relation: MutableRelation) -> MutableObservableValue<Set<RelationValue>> {
-            return undoableDB.observe(
+        func listSelectionBidiProperty(relation: MutableRelation) -> BidiProperty<Set<RelationValue>> {
+            return undoableDB.bidiProperty(
                 relation,
                 action: "Change Selection",
                 get: { $0.allValues },
@@ -126,12 +128,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             data: objects.observableArray(),
             contextMenu: nil,
             move: nil,
-            selection: selectionBinding(selectedObjectID),
+            selection: listSelectionBidiProperty(selectedObjectID),
             cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 let rowID = row["id"]
                 let nameRelation = objects.select(Attribute("id") *== rowID).project(["name"])
-                return nameBinding(nameRelation)
+                return nameBidiProperty(nameRelation)
             },
             cellImage: nil
         )
@@ -158,46 +160,47 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         rootView.addSubview(colorPicker)
             
         // Wire up the controls and bindings
-        textField.string = nameBinding(selectedObjectsName)
-        textField.placeholder = selectedObjectsName.stringWhenMulti("Multiple Values")
+        textField.string <~> nameBidiProperty(selectedObjectsName)
+        textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
 
-        checkbox.checked = undoableDB.observe(
+        checkbox.checked <~> undoableDB.bidiProperty(
             selectedObjectsEditable,
             action: "Change Editable",
-            get: { Checkbox.CheckState($0.oneBoolOrNil) },
+            get: { CheckState($0.oneBoolOrNil) },
             set: { selectedObjectsEditable.updateBoolean($0.boolValue) }
         )
         
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
         let popupItems = days.map{ titledMenuItem($0) }
-        popupButton.items = ObservableValue.constant(popupItems)
+        popupButton.items <~ ObservableValue.constant(popupItems)
         popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
-        popupButton.selectedObject = undoableDB.observe(
+        popupButton.selectedObject <~> undoableDB.bidiProperty(
             selectedObjectsDay,
-            action: "Change Day",
+            action: "Change Favorite Day",
             get: { $0.oneStringOrNil },
             set: { selectedObjectsDay.updateNullableString($0) }
         )
         
-        stepper.value = undoableDB.observe(
+        stepper.value <~> undoableDB.bidiProperty(
             selectedObjectsRocks,
             action: "Change Rocks",
             get: { $0.oneIntegerOrNil.map{ Int($0) } },
             set: { selectedObjectsRocks.updateInteger(Int64($0!)) }
         )
-        stepper.placeholder = selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
+        stepper.placeholder <~ selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
         
-        let comboObservableValue: MutableObservableValue<String?> = mutableObservableValue("Alice")
-        _ = comboObservableValue.addChangeObserver({ _ in
-            Swift.print("NEW COMBO VALUE: \(comboObservableValue.value)")
-        })
+        comboBox.items <~ ObservableValue.constant(["Alice", "Bob", "Carlos"])
+        comboBox.value <~> undoableDB.bidiProperty(
+            selectedObjectsFriend,
+            action: "Change Best Friend",
+            get: { $0.oneStringOrNil },
+            set: { selectedObjectsFriend.updateNullableString($0) }
+        )
+        comboBox.placeholder <~ selectedObjectsFriend.stringWhenMulti("Multiple", otherwise: "Default")
         
-        comboBox.items = ObservableValue.constant(["Alice", "Bob", "Carlos"])
-        comboBox.value = comboObservableValue
-        
-        colorPicker.color = undoableDB.observe(
+        colorPicker.color <~> undoableDB.bidiProperty(
             selectedObjectsColor,
-            action: "Change Color",
+            action: "Change Favorite Color",
             get: {
                 $0.commonValue{ rv -> Color? in
                     if let s: String = rv.get() {

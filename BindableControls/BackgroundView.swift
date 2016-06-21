@@ -8,15 +8,9 @@ import Binding
 
 public class BackgroundView: NSView {
     
-    private let bindings = BindingSet()
-    
-    public var visible: ObservableValue<Bool>? {
-        didSet {
-            bindings.observe(visible, "visible", { [weak self] value in
-                self?.hidden = !value
-            })
-        }
-    }
+    public lazy var visible: Property<Bool> = Property({ [weak self] value, _ in
+        self?.hidden = !value
+    })
 
     public var backgroundColor: NSColor?
     

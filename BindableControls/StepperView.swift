@@ -8,29 +8,19 @@ import Binding
 
 public class StepperView: NSControl, NSTextFieldDelegate {
     
-    private let bindings = BindingSet()
-    
-    public var value: MutableObservableValue<Int?>? {
-        didSet {
-            bindings.observe(value, "value", { [weak self] value in
-                guard let weakSelf = self else { return }
-                if let intValue = value {
-                    weakSelf.stepper.integerValue = intValue
-                    weakSelf.textField.integerValue = intValue
-                } else {
-                    weakSelf.stepper.integerValue = weakSelf.defaultValue
-                    weakSelf.textField.stringValue = ""
-                }
-            })
+    private lazy var _value: ValueBidiProperty<Int?> = ValueBidiProperty(nil, { [unowned self] value, _ in
+        if let intValue = value {
+            self.stepper.integerValue = intValue
+            self.textField.integerValue = intValue
+        } else {
+            self.stepper.integerValue = self.defaultValue
+            self.textField.stringValue = ""
         }
-    }
+    })
+    public var value: BidiProperty<Int?> { return _value }
 
-    public var placeholder: ObservableValue<String>? {
-        didSet {
-            bindings.observe(placeholder, "placeholder", { [weak self] value in
-                self?.textField.placeholderString = value
-            })
-        }
+    public lazy var placeholder: Property<String> = Property { [unowned self] value, _ in
+        self.textField.placeholderString = value
     }
 
     private let defaultValue: Int
@@ -109,7 +99,7 @@ public class StepperView: NSControl, NSTextFieldDelegate {
         } else {
             fatalError("Unexpected sender")
         }
-        bindings.update(value, newValue: newValue)
+        _value.change(newValue: newValue, transient: false)
     }
     
     public override func controlTextDidEndEditing(notification: NSNotification) {

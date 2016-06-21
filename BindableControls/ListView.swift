@@ -15,18 +15,18 @@ public struct ListViewModel<E: ArrayElement> {
     public let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     public let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
-    public let selection: MutableObservableValue<Set<E.ID>>
+    public let selection: BidiProperty<Set<E.ID>>
     public let cellIdentifier: (E.Data) -> String
-    public let cellText: (E.Data) -> ObservableValue<String>
+    public let cellText: (E.Data) -> ObservableProperty<String>
     public let cellImage: ((E.Data) -> ObservableValue<Image>)?
 
     public init(
         data: ObservableArray<E>,
         contextMenu: ((E.Data) -> ContextMenu?)?,
         move: ((srcIndex: Int, dstIndex: Int) -> Void)?,
-        selection: MutableObservableValue<Set<E.ID>>,
+        selection: BidiProperty<Set<E.ID>>,
         cellIdentifier: (E.Data) -> String,
-        cellText: (E.Data) -> ObservableValue<String>,
+        cellText: (E.Data) -> ObservableProperty<String>,
         cellImage: ((E.Data) -> ObservableValue<Image>)?)
     {
         self.data = data
@@ -46,9 +46,33 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
     private let model: ListViewModel<E>
     private let outlineView: NSOutlineView
 
+    private lazy var selection: MutableBidiProperty<Set<E.ID>> = MutableBidiProperty(
+        get: { [unowned self] in
+            var itemIDs: [E.ID] = []
+            self.outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
+                if let element = self.outlineView.itemAtRow(index) as? E {
+                    itemIDs.append(element.id)
+                }
+            }
+            return Set(itemIDs)
+        },
+        set: { [unowned self] selectedIDs, _ in
+            let indexes = NSMutableIndexSet()
+            for id in selectedIDs {
+                if let element = self.model.data.elementForID(id) {
+                    // TODO: This is inefficient
+                    let index = self.outlineView.rowForItem(element)
+                    if index >= 0 {
+                        indexes.addIndex(index)
+                    }
+                }
+            }
+            self.outlineView.selectRowIndexes(indexes, byExtendingSelection: false)
+        }
+    )
+
     private var arrayObserverRemoval: ObserverRemoval?
-    private var selectionObserverRemoval: ObserverRemoval?
-    private var selfInitiatedSelectionChange = false
+    //private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
     public var animateChanges = false
@@ -60,7 +84,7 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         super.init()
         
         arrayObserverRemoval = model.data.addChangeObserver({ [weak self] changes in self?.arrayChanged(changes) })
-        selectionObserverRemoval = model.selection.addChangeObserver({ [weak self] _ in self?.selectionChanged() })
+        selection <~> model.selection
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
@@ -72,7 +96,6 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
 
     deinit {
         arrayObserverRemoval?()
-        selectionObserverRemoval?()
     }
 
     // MARK: NSOutlineViewDataSource
@@ -136,10 +159,19 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         let identifier = model.cellIdentifier(element.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            textField.string = model.cellText(element.data)
+            textField.string.unbindAll()
+            let text = model.cellText(element.data)
+            if let bidiText = text as? BidiProperty {
+                textField.string <~> bidiText
+            } else {
+                textField.string <~ text
+            }
         }
         if let imageView = view.imageView as? ImageView {
-            imageView.img = model.cellImage?(element.data)
+            imageView.img.unbindAll()
+            if let image = model.cellImage?(element.data) {
+                imageView.img <~ image
+            }
         }
         return view
     }
@@ -158,45 +190,17 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
     }
     
     public func outlineViewSelectionDidChange(notification: NSNotification) {
-        if selfInitiatedSelectionChange {
-            return
-        }
-        
-        selfInitiatedSelectionChange = true
-        
-        var itemIDs: [E.ID] = []
-        outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
-            if let element = self.outlineView.itemAtRow(index) as? E {
-                itemIDs.append(element.id)
-            }
-        }
-        model.selection.update(Set(itemIDs), ChangeMetadata(transient: false))
-        
-        selfInitiatedSelectionChange = false
+        // TODO: Do we need this flag anymore?
+//        if selfInitiatedSelectionChange {
+//            return
+//        }
+
+//        selfInitiatedSelectionChange = true
+        selection.changed(transient: false)
+//        selfInitiatedSelectionChange = false
     }
 
     // MARK: Binding observers
-    
-    private func selectionChanged() {
-        if selfInitiatedSelectionChange {
-            return
-        }
-        
-        let indexes = NSMutableIndexSet()
-        for id in model.selection.value {
-            if let element = model.data.elementForID(id) {
-                // TODO: This is inefficient
-                let index = outlineView.rowForItem(element)
-                if index >= 0 {
-                    indexes.addIndex(index)
-                }
-            }
-        }
-        
-        selfInitiatedSelectionChange = true
-        outlineView.selectRowIndexes(indexes, byExtendingSelection: false)
-        selfInitiatedSelectionChange = false
-    }
 
     private func arrayChanged(changes: [ArrayChange]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
@@ -221,8 +225,8 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         // XXX: This prevents a call to selection.set(); we need to figure out a better way, so that
         // if the selection changes as a result of e.g. deleting an item, we update our selection
         // state, but do it in a way that doesn't go through the undo manager
-        selfInitiatedSelectionChange = true
+        //selfInitiatedSelectionChange = true
         outlineView.endUpdates()
-        selfInitiatedSelectionChange = false
+        //selfInitiatedSelectionChange = false
     }
 }

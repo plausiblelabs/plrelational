@@ -4,6 +4,7 @@
 //
 
 import Cocoa
+import Binding
 import BindableControls
 
 class ImageObjectPropertiesView: BackgroundView {
@@ -15,7 +16,7 @@ class ImageObjectPropertiesView: BackgroundView {
         
         editableCheckbox = Checkbox(frame: NSMakeRect(10, 10, 120, 24))
         editableCheckbox.title = "Editable"
-        editableCheckbox.checked = model.editable
+        editableCheckbox.checked <~> model.editable
         addSubview(editableCheckbox)
     }
     

@@ -65,26 +65,26 @@ class PropertiesView: BackgroundView {
         
         itemTypeLabel = label(NSMakeRect(pad, 12, frame.width - (pad * 2), 24))
         itemTypeLabel.alignment = .Center
-        itemTypeLabel.string = model.selectedItemTypesString
-        itemTypeLabel.visible = model.itemSelected
+        itemTypeLabel.string <~ model.selectedItemTypesString
+        itemTypeLabel.visible <~ model.itemSelected
         addSubview(itemTypeLabel)
         
         nameLabel = label(NSMakeRect(pad, 52, 50, 24))
         nameLabel.stringValue = "Name"
         nameLabel.alignment = .Right
-        nameLabel.visible = model.itemSelected
+        nameLabel.visible <~ model.itemSelected
         addSubview(nameLabel)
 
         nameField = field(NSMakeRect(nameLabel.frame.maxX + pad, 50, frame.width - nameLabel.frame.maxX - (pad * 2), 24))
-        nameField.string = model.selectedItemNames
-        nameField.placeholder = model.selectedItemNamesPlaceholder
-        nameField.visible = model.itemSelected
+        nameField.string <~> model.selectedItemNames
+        nameField.placeholder <~ model.selectedItemNamesPlaceholder
+        nameField.visible <~ model.itemSelected
         addSubview(nameField)
         
         noSelectionLabel = label(NSMakeRect(pad, 400, frame.width - (pad * 2), 24))
         noSelectionLabel.stringValue = "No Selection"
         noSelectionLabel.alignment = .Center
-        noSelectionLabel.visible = model.itemNotSelected
+        noSelectionLabel.visible <~ model.itemNotSelected
         addSubview(noSelectionLabel)
 
         func addSection<T>(binding: ObservableValue<T?>, _ createView: T -> NSView) {

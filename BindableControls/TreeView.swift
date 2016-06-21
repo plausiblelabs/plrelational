@@ -16,9 +16,9 @@ public struct TreeViewModel<N: TreeNode> {
     public let contextMenu: ((N.Data) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
     public let move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?
-    public let selection: MutableObservableValue<Set<N.ID>>
+    public let selection: BidiProperty<Set<N.ID>>
     public let cellIdentifier: (N.Data) -> String
-    public let cellText: (N.Data) -> ObservableValue<String>
+    public let cellText: (N.Data) -> ObservableProperty<String>
     public let cellImage: ((N.Data) -> ObservableValue<Image>)?
     
     public init(
@@ -26,9 +26,9 @@ public struct TreeViewModel<N: TreeNode> {
         allowsChildren: (N.Data) -> Bool,
         contextMenu: ((N.Data) -> ContextMenu?)?,
         move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?,
-        selection: MutableObservableValue<Set<N.ID>>,
+        selection: BidiProperty<Set<N.ID>>,
         cellIdentifier: (N.Data) -> String,
-        cellText: (N.Data) -> ObservableValue<String>,
+        cellText: (N.Data) -> ObservableProperty<String>,
         cellImage: ((N.Data) -> ObservableValue<Image>)?)
     {
         self.data = data
@@ -49,8 +49,32 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     private let model: TreeViewModel<N>
     private let outlineView: NSOutlineView
     
+    private lazy var selection: MutableBidiProperty<Set<N.ID>> = MutableBidiProperty(
+        get: { [unowned self] in
+            var itemIDs: [N.ID] = []
+            self.outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
+                if let node = self.outlineView.itemAtRow(index) as? N {
+                    itemIDs.append(node.id)
+                }
+            }
+            return Set(itemIDs)
+        },
+        set: { [unowned self] selectedIDs, _ in
+            let indexes = NSMutableIndexSet()
+            for id in selectedIDs {
+                if let node = self.model.data.nodeForID(id) {
+                    // TODO: This is inefficient
+                    let index = self.outlineView.rowForItem(node)
+                    if index >= 0 {
+                        indexes.addIndex(index)
+                    }
+                }
+            }
+            self.outlineView.selectRowIndexes(indexes, byExtendingSelection: false)
+        }
+    )
+
     private var treeObserverRemoval: ObserverRemoval?
-    private var selectionObserverRemoval: ObserverRemoval?
     private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
@@ -66,7 +90,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         super.init()
         
         treeObserverRemoval = model.data.addChangeObserver({ [weak self] changes in self?.treeChanged(changes) })
-        selectionObserverRemoval = model.selection.addChangeObserver({ [weak self] _ in self?.selectionChanged() })
+        selection <~> model.selection
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
@@ -78,7 +102,6 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     
     deinit {
         treeObserverRemoval?()
-        selectionObserverRemoval?()
     }
 
     // MARK: NSOutlineViewDataSource
@@ -190,10 +213,19 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         let identifier = model.cellIdentifier(node.data)
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            textField.string = model.cellText(node.data)
+            textField.string.unbindAll()
+            let text = model.cellText(node.data)
+            if let bidiText = text as? BidiProperty {
+                textField.string <~> bidiText
+            } else {
+                textField.string <~ text
+            }
         }
         if let imageView = view.imageView as? ImageView {
-            imageView.img = model.cellImage?(node.data)
+            imageView.img.unbindAll()
+            if let image = model.cellImage?(node.data) {
+                imageView.img <~ image
+            }
         }
         return view
     }
@@ -212,46 +244,18 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     }
     
     public func outlineViewSelectionDidChange(notification: NSNotification) {
-        if selfInitiatedSelectionChange {
-            return
-        }
+        // TODO: Do we need this flag anymore?
+//        if selfInitiatedSelectionChange {
+//            return
+//        }
         
-        selfInitiatedSelectionChange = true
-        
-        var itemIDs: [N.ID] = []
-        outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
-            if let node = self.outlineView.itemAtRow(index) as? N {
-                itemIDs.append(node.id)
-            }
-        }
-        model.selection.update(Set(itemIDs), ChangeMetadata(transient: false))
-        
-        selfInitiatedSelectionChange = false
+//        selfInitiatedSelectionChange = true
+        selection.changed(transient: false)
+//        selfInitiatedSelectionChange = false
     }
 
     // MARK: Observers
 
-    private func selectionChanged() {
-        if selfInitiatedSelectionChange {
-            return
-        }
-
-        let indexes = NSMutableIndexSet()
-        for id in model.selection.value {
-            if let node = model.data.nodeForID(id) {
-                // TODO: This is inefficient
-                let index = outlineView.rowForItem(node)
-                if index >= 0 {
-                    indexes.addIndex(index)
-                }
-            }
-        }
-        
-        selfInitiatedSelectionChange = true
-        outlineView.selectRowIndexes(indexes, byExtendingSelection: false)
-        selfInitiatedSelectionChange = false
-    }
-    
     private func treeChanged(changes: [TreeChange<N>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
         
@@ -300,8 +304,8 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         // XXX: This prevents a call to selection.set(); we need to figure out a better way, so that
         // if the selection changes as a result of e.g. deleting an item, we update our selection
         // state, but do it in a way that doesn't go through the undo manager
-        selfInitiatedSelectionChange = true
+        //selfInitiatedSelectionChange = true
         outlineView.endUpdates()
-        selfInitiatedSelectionChange = false
+        //selfInitiatedSelectionChange = false
     }
 }

@@ -61,6 +61,11 @@
 		3727080C1CFE2CBA00710C80 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
 		3727080E1CFE2FB600710C80 /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
 		3727080F1CFE300200710C80 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
+		3747072D1D19B5ED0048E857 /* libBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; };
+		3747072E1D19BA9E0048E857 /* libBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		374707301D19BAF50048E857 /* liblibRelational.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		374707311D19BAF50048E857 /* libBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		374707321D19BAF50048E857 /* libBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
 		376136991CF65F0A00F572C5 /* TextObjectPropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */; };
@@ -72,8 +77,6 @@
 		37832EC61CFE9E0200256DB1 /* liblibRelational.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37832EC71CFE9E0200256DB1 /* libBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37A1CE511D07543F0067870D /* ImageObjectPropertiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE501D07543F0067870D /* ImageObjectPropertiesView.swift */; };
-		37A1CE581D089CD70067870D /* BindingSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE571D089CD70067870D /* BindingSetTests.swift */; };
-		37A1CE651D0B59700067870D /* BindingSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE541D0890970067870D /* BindingSet.swift */; };
 		37A1CE6E1D1081980067870D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE6D1D1081980067870D /* AppDelegate.swift */; };
 		37A1CE701D1081980067870D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37A1CE6F1D1081980067870D /* Assets.xcassets */; };
 		37A1CE731D1081980067870D /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37A1CE711D1081980067870D /* MainMenu.xib */; };
@@ -108,6 +111,16 @@
 		37A1CED21D10B8690067870D /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED11D10B8690067870D /* Button.swift */; };
 		37A1CED41D11D9180067870D /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED31D11D9180067870D /* ProgressIndicator.swift */; };
 		37A1CED61D11DC410067870D /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED51D11DC410067870D /* ViewModel.swift */; };
+		37A1CED91D1354DD0067870D /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED81D1354DD0067870D /* Property.swift */; };
+		37A1CEDC1D1358670067870D /* CheckState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEDB1D1358670067870D /* CheckState.swift */; };
+		37A1CEDE1D1469720067870D /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEDD1D1469720067870D /* Signal.swift */; };
+		37A1CEE31D147ACA0067870D /* RelationAsTypedValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE21D147ACA0067870D /* RelationAsTypedValue.swift */; };
+		37A1CEE51D147B0E0067870D /* RelationAsTypedValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE41D147B0E0067870D /* RelationAsTypedValueTests.swift */; };
+		37A1CEE71D147BD80067870D /* RelationMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE61D147BD80067870D /* RelationMutation.swift */; };
+		37A1CEE91D147C190067870D /* RelationMutationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE81D147C190067870D /* RelationMutationTests.swift */; };
+		37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEEA1D1480120067870D /* PropertyTests.swift */; };
+		37A1CEED1D14A32C0067870D /* RelationBidiProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEEC1D14A32C0067870D /* RelationBidiProperty.swift */; };
+		37A1CEEF1D14A5560067870D /* RelationBidiPropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEEE1D14A5560067870D /* RelationBidiPropertyTests.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -266,6 +279,13 @@
 			remoteGlobalIDString = 372707AD1CFE238700710C80;
 			remoteInfo = Binding;
 		};
+		3747072B1D19B5E50048E857 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37A1CE9D1D1081FC0067870D;
+			remoteInfo = BindableControls;
+		};
 		37832EBF1CFE9BB200256DB1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
@@ -388,6 +408,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		3747072F1D19BAD60048E857 /* Copy Embedded Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				374707301D19BAF50048E857 /* liblibRelational.dylib in Copy Embedded Libraries */,
+				374707311D19BAF50048E857 /* libBinding.dylib in Copy Embedded Libraries */,
+				374707321D19BAF50048E857 /* libBindableControls.dylib in Copy Embedded Libraries */,
+			);
+			name = "Copy Embedded Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		37832EC51CFE9DF100256DB1 /* Copy Embedded Libraries */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -407,6 +440,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				3747072E1D19BA9E0048E857 /* libBindableControls.dylib in Copy Embedded Libraries */,
 				37832EC31CFE9DB400256DB1 /* libBinding.dylib in Copy Embedded Libraries */,
 				C23AAF441CF758D1009E28E0 /* liblibRelational.dylib in Copy Embedded Libraries */,
 			);
@@ -474,8 +508,6 @@
 		37832EB91CFCE63C00256DB1 /* PropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertiesModel.swift; sourceTree = "<group>"; };
 		37832EBB1CFCF17800256DB1 /* TextObjectPropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObjectPropertiesView.swift; sourceTree = "<group>"; };
 		37A1CE501D07543F0067870D /* ImageObjectPropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageObjectPropertiesView.swift; sourceTree = "<group>"; };
-		37A1CE541D0890970067870D /* BindingSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BindingSet.swift; path = Binding/BindingSet.swift; sourceTree = "<group>"; };
-		37A1CE571D089CD70067870D /* BindingSetTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BindingSetTests.swift; path = BindingTests/BindingSetTests.swift; sourceTree = SOURCE_ROOT; };
 		37A1CE591D08A2240067870D /* MenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuItem.swift; sourceTree = "<group>"; };
 		37A1CE5C1D08C3110067870D /* ColorPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
 		37A1CE5F1D08C70D0067870D /* Color.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
@@ -495,6 +527,16 @@
 		37A1CED11D10B8690067870D /* Button.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		37A1CED31D11D9180067870D /* ProgressIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
 		37A1CED51D11DC410067870D /* ViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		37A1CED81D1354DD0067870D /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Property.swift; path = Binding/Property.swift; sourceTree = "<group>"; };
+		37A1CEDB1D1358670067870D /* CheckState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckState.swift; sourceTree = "<group>"; };
+		37A1CEDD1D1469720067870D /* Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Signal.swift; path = Binding/Signal.swift; sourceTree = "<group>"; };
+		37A1CEE21D147ACA0067870D /* RelationAsTypedValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationAsTypedValue.swift; path = Binding/RelationAsTypedValue.swift; sourceTree = "<group>"; };
+		37A1CEE41D147B0E0067870D /* RelationAsTypedValueTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationAsTypedValueTests.swift; path = BindingTests/RelationAsTypedValueTests.swift; sourceTree = "<group>"; };
+		37A1CEE61D147BD80067870D /* RelationMutation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationMutation.swift; path = Binding/RelationMutation.swift; sourceTree = "<group>"; };
+		37A1CEE81D147C190067870D /* RelationMutationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationMutationTests.swift; path = BindingTests/RelationMutationTests.swift; sourceTree = "<group>"; };
+		37A1CEEA1D1480120067870D /* PropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyTests.swift; path = BindingTests/PropertyTests.swift; sourceTree = "<group>"; };
+		37A1CEEC1D14A32C0067870D /* RelationBidiProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationBidiProperty.swift; path = Binding/RelationBidiProperty.swift; sourceTree = "<group>"; };
+		37A1CEEE1D14A5560067870D /* RelationBidiPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationBidiPropertyTests.swift; path = BindingTests/RelationBidiPropertyTests.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -601,6 +643,7 @@
 			files = (
 				371243F61D01051700E9BCFF /* libBinding.dylib in Frameworks */,
 				371243F71D01051700E9BCFF /* liblibRelational.dylib in Frameworks */,
+				3747072D1D19B5ED0048E857 /* libBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -815,11 +858,10 @@
 		372707B31CFE23CA00710C80 /* Binding */ = {
 			isa = PBXGroup;
 			children = (
-				37C6113E1CD93069001DAF59 /* Observable.swift */,
-				372707721CF38FDC00710C80 /* Observable Value */,
-				372707741CF3904D00710C80 /* Observable Array */,
-				372707731CF38FF600710C80 /* Observable Tree */,
-				37A1CE661D0F31140067870D /* Binding Set */,
+				37A1CEDF1D1469900067870D /* Signal */,
+				37A1CEE01D1469960067870D /* Observables */,
+				37A1CED71D1350C00067870D /* Property */,
+				37A1CEE11D147A970067870D /* Relation Extensions */,
 				372707BC1CFE24C600710C80 /* Utilities */,
 			);
 			name = Binding;
@@ -864,15 +906,6 @@
 				372707FC1CFE2C7E00710C80 /* Info.plist */,
 			);
 			path = BindableControlsAppUITests;
-			sourceTree = "<group>";
-		};
-		37A1CE661D0F31140067870D /* Binding Set */ = {
-			isa = PBXGroup;
-			children = (
-				37A1CE541D0890970067870D /* BindingSet.swift */,
-				37A1CE571D089CD70067870D /* BindingSetTests.swift */,
-			);
-			name = "Binding Set";
 			sourceTree = "<group>";
 		};
 		37A1CE6C1D1081980067870D /* SearchApp */ = {
@@ -930,6 +963,7 @@
 			children = (
 				37A1CED11D10B8690067870D /* Button.swift */,
 				47701CA01CF764CD00E3549D /* Checkbox.swift */,
+				37A1CEDB1D1358670067870D /* CheckState.swift */,
 				37A1CE5F1D08C70D0067870D /* Color.swift */,
 				37A1CE621D0B25F40067870D /* ColorPanel.swift */,
 				37A1CE5C1D08C3110067870D /* ColorPickerView.swift */,
@@ -960,6 +994,47 @@
 				37A1CED31D11D9180067870D /* ProgressIndicator.swift */,
 			);
 			name = "Basic Views";
+			sourceTree = "<group>";
+		};
+		37A1CED71D1350C00067870D /* Property */ = {
+			isa = PBXGroup;
+			children = (
+				37A1CED81D1354DD0067870D /* Property.swift */,
+				37A1CEEA1D1480120067870D /* PropertyTests.swift */,
+				37A1CEEC1D14A32C0067870D /* RelationBidiProperty.swift */,
+				37A1CEEE1D14A5560067870D /* RelationBidiPropertyTests.swift */,
+			);
+			name = Property;
+			sourceTree = "<group>";
+		};
+		37A1CEDF1D1469900067870D /* Signal */ = {
+			isa = PBXGroup;
+			children = (
+				37A1CEDD1D1469720067870D /* Signal.swift */,
+			);
+			name = Signal;
+			sourceTree = "<group>";
+		};
+		37A1CEE01D1469960067870D /* Observables */ = {
+			isa = PBXGroup;
+			children = (
+				37C6113E1CD93069001DAF59 /* Observable.swift */,
+				372707721CF38FDC00710C80 /* Observable Value */,
+				372707741CF3904D00710C80 /* Observable Array */,
+				372707731CF38FF600710C80 /* Observable Tree */,
+			);
+			name = Observables;
+			sourceTree = "<group>";
+		};
+		37A1CEE11D147A970067870D /* Relation Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				37A1CEE21D147ACA0067870D /* RelationAsTypedValue.swift */,
+				37A1CEE41D147B0E0067870D /* RelationAsTypedValueTests.swift */,
+				37A1CEE61D147BD80067870D /* RelationMutation.swift */,
+				37A1CEE81D147C190067870D /* RelationMutationTests.swift */,
+			);
+			name = "Relation Extensions";
 			sourceTree = "<group>";
 		};
 		37C610FE1CD7EFAE001DAF59 /* SampleApp */ = {
@@ -1267,12 +1342,14 @@
 				371243C01D0104F700E9BCFF /* Sources */,
 				371243C11D0104F700E9BCFF /* Frameworks */,
 				371243C21D0104F700E9BCFF /* Resources */,
+				3747072F1D19BAD60048E857 /* Copy Embedded Libraries */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				371243F31D01050D00E9BCFF /* PBXTargetDependency */,
 				371243F51D01050D00E9BCFF /* PBXTargetDependency */,
+				3747072C1D19B5E50048E857 /* PBXTargetDependency */,
 			);
 			name = RichText;
 			productName = RichText;
@@ -1823,16 +1900,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37A1CEE71D147BD80067870D /* RelationMutation.swift in Sources */,
 				372707B41CFE240E00710C80 /* Observable.swift in Sources */,
 				372707B61CFE240E00710C80 /* RelationObservableValue.swift in Sources */,
 				372707BA1CFE240E00710C80 /* ObservableTree.swift in Sources */,
 				372707B71CFE240E00710C80 /* CommonValue.swift in Sources */,
 				372707B91CFE240E00710C80 /* RelationObservableArray.swift in Sources */,
 				372707BD1CFE24F600710C80 /* ArrayBinarySearch.swift in Sources */,
-				37A1CE651D0B59700067870D /* BindingSet.swift in Sources */,
+				37A1CED91D1354DD0067870D /* Property.swift in Sources */,
 				372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */,
+				37A1CEDE1D1469720067870D /* Signal.swift in Sources */,
 				372707BB1CFE240E00710C80 /* RelationObservableTree.swift in Sources */,
 				372707E31CFE2B6500710C80 /* ObservableValue.swift in Sources */,
+				37A1CEE31D147ACA0067870D /* RelationAsTypedValue.swift in Sources */,
+				37A1CEED1D14A32C0067870D /* RelationBidiProperty.swift in Sources */,
 				372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */,
 				372707B81CFE240E00710C80 /* ObservableArray.swift in Sources */,
 			);
@@ -1842,13 +1923,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37A1CEEF1D14A5560067870D /* RelationBidiPropertyTests.swift in Sources */,
+				37A1CEE51D147B0E0067870D /* RelationAsTypedValueTests.swift in Sources */,
 				371243F91D024A9200E9BCFF /* ObservableValueTests.swift in Sources */,
 				372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */,
-				37A1CE581D089CD70067870D /* BindingSetTests.swift in Sources */,
 				372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */,
+				37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */,
 				372707D61CFE25D400710C80 /* RelationObservableValueTests.swift in Sources */,
 				372707D81CFE25D400710C80 /* RelationObservableTreeTests.swift in Sources */,
 				372707DB1CFE262700710C80 /* BindingTestCase.swift in Sources */,
+				37A1CEE91D147C190067870D /* RelationMutationTests.swift in Sources */,
 				372707D71CFE25D400710C80 /* RelationObservableArrayTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1909,6 +1993,7 @@
 				37A1CEB71D1083FD0067870D /* TextField.swift in Sources */,
 				37A1CEBC1D1083FD0067870D /* Color.swift in Sources */,
 				37A1CEB31D1083FD0067870D /* Image.swift in Sources */,
+				37A1CEDC1D1358670067870D /* CheckState.swift in Sources */,
 				37A1CEBA1D1083FD0067870D /* StepperView.swift in Sources */,
 				37A1CEBB1D1083FD0067870D /* ColorPickerView.swift in Sources */,
 				37A1CEB11D1083FD0067870D /* BackgroundView.swift in Sources */,
@@ -2086,6 +2171,11 @@
 			isa = PBXTargetDependency;
 			target = 372707AD1CFE238700710C80 /* Binding */;
 			targetProxy = 372708091CFE2CB300710C80 /* PBXContainerItemProxy */;
+		};
+		3747072C1D19B5E50048E857 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37A1CE9D1D1081FC0067870D /* BindableControls */;
+			targetProxy = 3747072B1D19B5E50048E857 /* PBXContainerItemProxy */;
 		};
 		37832EC01CFE9BB200256DB1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -2495,6 +2585,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = SampleApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -2507,6 +2598,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = SampleApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -2569,6 +2661,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXECUTABLE_PREFIX = lib;
+				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -2580,6 +2673,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXECUTABLE_PREFIX = lib;
+				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

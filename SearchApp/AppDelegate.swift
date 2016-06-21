@@ -31,13 +31,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // Bind the views to the view model
         model = ViewModel(undoManager: undoManager)
-        textField.string = model.queryString
+        textField.string <~ model.queryString
         listView = ListView(model: model.listViewModel, outlineView: outlineView)
-        progressIndicator.visible = model.progressVisible
-        recordButton.disabled = model.recordDisabled
-        recordButton.clicked = model.recordClicked
-        saveButton.disabled = model.saveDisabled
-        saveButton.clicked = model.saveClicked
+        progressIndicator.visible <~ model.progressVisible
+        recordButton.disabled <~ model.recordDisabled
+        //recordButton.clicked = model.recordClicked
+        saveButton.disabled <~ model.saveDisabled
+        //saveButton.clicked = model.saveClicked
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {
