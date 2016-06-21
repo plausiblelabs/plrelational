@@ -29,7 +29,7 @@ class QueryPlanner {
     var initiatorIndexes: [Int] {
         return (nodes.indices).filter({
             switch nodes[$0].op {
-            case .TableScan, .ConcreteRows:
+            case .SQLiteTableScan, .ConcreteRows:
                 return true
             default:
                 return false
@@ -39,7 +39,7 @@ class QueryPlanner {
     
     func initiatorRelation(initiator: QueryPlanner.Node) -> Relation {
         switch initiator.op {
-        case .TableScan(let relation):
+        case .SQLiteTableScan(let relation):
             return relation
         default:
             fatalError("Node operation \(initiator.op) is not a known initiator operation")
@@ -103,8 +103,10 @@ class QueryPlanner {
             return intermediateRelationToNode(r)
         case let r as ConcreteRelation:
             return Node(op: .ConcreteRows(r.values), parentIndexes: [])
+        case let r as SQLiteRelation:
+            return Node(op: .SQLiteTableScan(r), parentIndexes: [])
         default:
-            return Node(op: .TableScan(r), parentIndexes: [])
+            fatalError("Don't know how to handle node type \(r.dynamicType)")
         }
     }
     
@@ -160,7 +162,7 @@ extension QueryPlanner {
     }
     
     enum Operation {
-        case TableScan(Relation)
+        case SQLiteTableScan(SQLiteRelation)
         case ConcreteRows(Set<Row>)
         
         case Union

@@ -73,7 +73,7 @@ public struct ConcreteRelation: MutableRelation {
     public mutating func update(rowToFind: Row, newValues: Row) {
         let rowsToUpdate = select(rowToFind)
         delete(rowToFind)
-        for rowToUpdate in rowsToUpdate.rawGenerateRows() {
+        for rowToUpdate in rowsToUpdate.rows() {
             // We know that rows never fail, because this is ultimately our own implementation.
             var rowToAdd = rowToUpdate.ok!
             for (attribute, value) in newValues.values {
@@ -86,7 +86,7 @@ public struct ConcreteRelation: MutableRelation {
     public mutating func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let rowsToUpdate = select(query)
         delete(query)
-        for rowToUpdate in rowsToUpdate.rawGenerateRows() {
+        for rowToUpdate in rowsToUpdate.rows() {
             // We know that rows never fail, because this is ultimately our own implementation.
             var rowToAdd = rowToUpdate.ok!
             for (attribute, value) in newValues.values {
@@ -95,11 +95,6 @@ public struct ConcreteRelation: MutableRelation {
             self.add(rowToAdd)
         }
         return .Ok()
-    }
-    
-    public func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {
-        let data = LogRelationIterationBegin(self)
-        return LogRelationIterationReturn(data, AnyGenerator(values.lazy.map(Result.Ok).generate()))
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {

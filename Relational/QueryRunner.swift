@@ -91,8 +91,8 @@ class QueryRunner {
         
         let op = nodes[nodeIndex].op
         switch op {
-        case .TableScan(let relation):
-            let row = getTableScanRow(nodeIndex, relation: relation)
+        case .SQLiteTableScan(let relation):
+            let row = getSQLiteTableScanRow(nodeIndex, relation: relation)
             switch row {
             case .Some(.Err(let err)):
                 return .Err(err)
@@ -113,7 +113,7 @@ class QueryRunner {
         return .Ok()
     }
     
-    private func getTableScanRow(initiatorIndex: Int, relation: Relation) -> Result<Row, RelationError>? {
+    private func getSQLiteTableScanRow(initiatorIndex: Int, relation: SQLiteRelation) -> Result<Row, RelationError>? {
         let generator = initiatorGenerators.getOrCreate(initiatorIndex, defaultValue: relation.rawGenerateRows())
         return generator.next()
     }

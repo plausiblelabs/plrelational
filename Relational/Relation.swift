@@ -11,7 +11,6 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     
     var underlyingRelationForQueryExecution: Relation { get }
     
-    func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>>
     func contains(row: Row) -> Result<Bool, RelationError>
     
     func forEach(@noescape f: (Row, Void -> Void) -> Void) -> Result<Void, RelationError>
