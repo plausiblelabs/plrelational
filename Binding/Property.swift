@@ -36,7 +36,7 @@ public class Property<T> {
 
     public typealias Setter = (T, ChangeMetadata) -> Void
     
-    private let set: Setter
+    internal let set: Setter
     
     private var bindings: [UInt64: Binding] = [:]
     private var nextBindingID: UInt64 = 0
