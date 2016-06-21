@@ -64,7 +64,9 @@ class ObjectMap<Value> {
         table[index].value = value
     }
     
-    private func reallocateIfNecessary() {
+    // Right now (2016-06-17) there is a duplicate symbol error on this func when whole module
+    // optimization is enabled. Marking it final prevents that, somehow.
+    private final func reallocateIfNecessary() {
         if Double(count) / Double(capacity) > 0.75 {
             let newCapacity = capacity * 2
             let newTable = ObjectMap.allocate(newCapacity)

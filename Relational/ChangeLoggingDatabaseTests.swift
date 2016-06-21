@@ -1045,4 +1045,20 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             db.restoreSnapshot(endSnapshot)
         })
     }
+    
+    func testConcurrentIteration() {
+        let underlying = MakeRelation(["a"])
+        let r = ChangeLoggingRelation(baseRelation: underlying)
+        
+        for i: Int64 in 0..<10000 {
+            r.delete(Attribute("a") *== i - 1)
+            r.add(["a": .Integer(i)])
+            
+            dispatch_apply(2, dispatch_get_global_queue(0, 0), { _ in
+                for row in r.rows() {
+                    XCTAssertNil(row.err)
+                }
+            })
+        }
+    }
 }

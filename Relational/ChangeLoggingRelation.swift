@@ -27,7 +27,7 @@ public class ChangeLoggingRelation<BaseRelation: Relation> {
     
     var currentChange: (added: ConcreteRelation, removed: ConcreteRelation)
     
-    var cachedCurrentRelation: Relation?
+    var cachedCurrentRelation = Mutexed<Relation?>(nil)
     
     public init(baseRelation: BaseRelation) {
         self.baseRelation = baseRelation
@@ -120,17 +120,19 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
     /// This is what rows() returns data from, but it won't reflect any future
     /// changes to the ChangeLoggingRelation.
     internal func currentRelation() -> Relation {
-        if let cached = cachedCurrentRelation {
-            return cached
-        } else {
-            let relation = baseRelation.difference(currentChange.removed).union(currentChange.added)
-            cachedCurrentRelation = relation
-            return relation
-        }
+        return cachedCurrentRelation.withMutableValue({
+            if let cached = $0 {
+                return cached
+            } else {
+                let relation = baseRelation.difference(currentChange.removed).union(currentChange.added)
+                $0 = relation
+                return relation
+            }
+        })
     }
     
     private func applyLogToCurrentRelation<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log) -> Result<(didAdd: Bool, didRemove: Bool), RelationError> {
-        cachedCurrentRelation = nil
+        cachedCurrentRelation.withMutableValue({ $0 = nil })
         
         var didAdd = false
         var didRemove = false

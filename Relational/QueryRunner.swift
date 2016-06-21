@@ -248,6 +248,11 @@ class QueryRunner {
             let largerAttributes = smallerInput == 0 ? matching.values : matching.keys
             let largerToSmallerRenaming = smallerInput == 0 ? matching.reversed : matching
             
+            // It's common to join identical attributes, so filter out any renames which "rename"
+            // to the same attribute. This speeds things up and will allow skipping rename work
+            // altogether if they're all like that.
+            let largerToSmallerRenamingWithoutNoops = largerToSmallerRenaming.filter({ $0 != $1 })
+            
             var keyed: [Row: [Row]] = [:]
             for row in nodeStates[nodeIndex].inputBuffers[smallerInput].popAll() {
                 let joinKey = row.rowWithAttributes(smallerAttributes)
@@ -262,7 +267,7 @@ class QueryRunner {
                 keyed: keyed,
                 largerIndex: 1 - smallerInput,
                 largerAttributes: Array(largerAttributes),
-                largerToSmallerRenaming: largerToSmallerRenaming)
+                largerToSmallerRenaming: Dictionary(largerToSmallerRenamingWithoutNoops))
         })
         
         let joined = nodeStates[nodeIndex].inputBuffers[extraState.largerIndex].popAll().flatMap({ row -> [Row] in

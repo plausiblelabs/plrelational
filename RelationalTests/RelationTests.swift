@@ -1541,4 +1541,52 @@ class RelationTests: DBTestCase {
             ["number", "word"],
             [3, "three"]))
     }
+    
+    func testConcurrentConcreteIteration() {
+        var r1 = ConcreteRelation(scheme: ["n"])
+        var r2 = ConcreteRelation(scheme: ["w"])
+        
+        for i: Int64 in 1...10 {
+            r1.add(["n": .Integer(i)])
+        }
+        
+        r2.add(["w": "teapot"])
+        r2.add(["w": "dome"])
+        r2.add(["w": "scandal"])
+        r2.add(["w": "walrus"])
+        r2.add(["w": "businessmanlike"])
+        
+        let joined = r1.join(r2)
+        
+        dispatch_apply(1000, dispatch_get_global_queue(0, 0), { _ in
+            for row in joined.rows() {
+                XCTAssertNil(row.err)
+            }
+        })
+    }
+    
+    func testConcurrentSQLiteIteration() {
+        let db = makeDB().db.sqliteDatabase
+        
+        let r1 = db.getOrCreateRelation("numbers", scheme: ["n"]).ok!
+        let r2 = db.getOrCreateRelation("words", scheme: ["w"]).ok!
+        
+        for i: Int64 in 1...10 {
+            r1.add(["n": .Integer(i)])
+        }
+        
+        r2.add(["w": "teapot"])
+        r2.add(["w": "dome"])
+        r2.add(["w": "scandal"])
+        r2.add(["w": "walrus"])
+        r2.add(["w": "businessmanlike"])
+        
+        let joined = r1.join(r2)
+        
+        dispatch_apply(1000, dispatch_get_global_queue(0, 0), { _ in
+            for row in joined.rows() {
+                XCTAssertNil(row.err)
+            }
+        })
+    }
 }

@@ -19,18 +19,18 @@ private struct BLOBHeaders {
 public class SQLiteDatabase {
     let db: sqlite3
     
-    private var tables: [String: SQLiteTableRelation] = [:]
+    private var tables = Mutexed<[String: SQLiteTableRelation]>([:])
     
     public init(_ path: String) throws {
         var localdb: sqlite3 = nil
-        let result = sqlite3_open_v2(path, &localdb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, nil)
+        let result = sqlite3_open_v2(path, &localdb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, nil)
         if result != SQLITE_OK {
             let message = String.fromCString(sqlite3_errstr(result))
             throw Error(code: result, message: message ?? "")
         }
         self.db = localdb
         
-        tables = try self.queryTables().orThrow()
+        try tables.withMutableValue({ $0 = try self.queryTables().orThrow() })
     }
     
     deinit {
@@ -99,12 +99,13 @@ extension SQLiteDatabase {
             precondition(array.isEmpty, "Unexpected result from CREATE TABLE statement: \(array)")
             
             let relation = SQLiteTableRelation(db: self, tableName: name, scheme: scheme)
-            tables[name] = relation
+            tables.withMutableValue({ $0[name] = relation })
             return relation
         })
     }
     
     public func getOrCreateRelation(name: String, scheme: Scheme) -> Result<SQLiteTableRelation, RelationError> {
+        // TODO: this is not thread safe. Does it need to be?
         if let relation = self[name] {
             return .Ok(relation)
         } else {
@@ -113,7 +114,7 @@ extension SQLiteDatabase {
     }
     
     public subscript(name: String) -> SQLiteTableRelation? {
-        return tables[name]
+        return tables.withValue({ $0[name] })
     }
 }
 

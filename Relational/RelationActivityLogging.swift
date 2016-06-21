@@ -108,7 +108,7 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
                             print("\(elapsedTimeString(elapsedTime)): \(description)")
                         }
                         let total = completedTopLevelRelations.reduce(0, combine: { $0 + $1.1 })
-                        print("Total time: \(elapsedTimeString(total))")
+                        print("Iterated \(completedTopLevelRelations.count) relations in total time: \(elapsedTimeString(total))")
                         completedTopLevelRelations = []
                     }
                 })

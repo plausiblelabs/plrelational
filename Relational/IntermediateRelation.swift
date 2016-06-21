@@ -830,7 +830,7 @@ public class MutableSelectIntermediateRelation: IntermediateRelation {
         set {
             if case .MutableSelect = op {
                 let oldRelation = IntermediateRelation(op: op, operands: operands)
-                op = .Select(newValue)
+                op = .MutableSelect(newValue)
                 
                 let change = RelationChange(added: self - oldRelation, removed: oldRelation - self)
                 notifyChangeObservers(change, kind: .DirectChange)

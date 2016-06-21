@@ -23,7 +23,7 @@ public struct Row: Hashable {
     }
     
     public var hashValue: Int {
-        return unsafeBitCast(internedRow, Int.self)
+        return ObjectIdentifier(internedRow).hashValue
     }
     
     public subscript(attribute: Attribute) -> RelationValue {
@@ -36,10 +36,14 @@ public struct Row: Hashable {
     }
     
     public func renameAttributes(renames: [Attribute: Attribute]) -> Row {
-        return Row(values: Dictionary(values.map({ attribute, value in
-            let newAttribute = renames[attribute] ?? attribute
-            return (newAttribute, value)
-        })))
+        if renames.isEmpty {
+            return self
+        } else {
+            return Row(values: Dictionary(values.map({ attribute, value in
+                let newAttribute = renames[attribute] ?? attribute
+                return (newAttribute, value)
+            })))
+        }
     }
     
     /// Create a new row containing only the values whose attributes are also in the attributes parameter.
@@ -64,19 +68,23 @@ public func ==(a: Row, b: Row) -> Bool {
     return a.internedRow === b.internedRow
 }
 
-
-private class InternedRow {
-    let values: [Attribute: RelationValue]
-    
-    init(values: [Attribute: RelationValue]) {
-        self.values = values
+extension Row: CustomStringConvertible {
+    public var description: String {
+        return internedRow.values.description
     }
 }
 
-extension InternedRow: Hashable {
-    var hashValue: Int {
+
+private class InternedRow: Hashable {
+    let values: [Attribute: RelationValue]
+    
+    let hashValue: Int
+    
+    init(values: [Attribute: RelationValue]) {
+        self.values = values
+        
         // Note: needs to ensure the same value is produced regardless of order, so no fancy stuff.
-        return values.map({ $0.0.hashValue ^ $0.1.hashValue }).reduce(0, combine: ^)
+        self.hashValue = values.map({ $0.0.hashValue ^ $0.1.hashValue }).reduce(0, combine: ^)
     }
 }
 
@@ -85,20 +93,23 @@ private func ==(a: InternedRow, b: InternedRow) -> Bool {
 }
 
 extension InternedRow {
-    static var extantRows = NSHashTable(pointerFunctions: {
+    static let extantRows = Mutexed(NSHashTable(pointerFunctions: {
         let pf = NSPointerFunctions(options: [.WeakMemory])
         pf.hashFunction = { ptr, _ in unsafeBitCast(ptr, InternedRow.self).hashValue }
         pf.isEqualFunction = { a, b, _ in ObjCBool(unsafeBitCast(a, InternedRow.self) == unsafeBitCast(b, InternedRow.self)) }
         return pf
-        }(), capacity: 0)
+        }(), capacity: 0))
+    
     
     static func intern(row: InternedRow) -> InternedRow {
-        if let extantRow = extantRows.member(row) {
-            return extantRow as! InternedRow
-        } else {
-            extantRows.addObject(row)
-            return row
-        }
+        return extantRows.withValue({
+            if let extantRow = $0.member(row) {
+                return extantRow as! InternedRow
+            } else {
+                $0.addObject(row)
+                return row
+            }
+        })
     }
     
     static func intern(values: [Attribute: RelationValue]) -> InternedRow {
