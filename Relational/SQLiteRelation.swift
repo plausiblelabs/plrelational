@@ -104,6 +104,8 @@ extension SQLiteRelation {
             return ("?", [value])
         case let value as Attribute:
             return (db.escapeIdentifier(value.name), [])
+        case let value as Bool:
+            return (value ? "1" : "0", [])
         case let value as String:
             return ("?", [RelationValue(value)])
         case let value as Int:
