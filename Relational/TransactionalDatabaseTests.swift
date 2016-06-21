@@ -309,4 +309,44 @@ class TransactionalDatabaseTests: DBTestCase {
                         ["42",     "JFK", "DC-10"],
                         ["123",    "JFK", "DC-10"]))
     }
+    
+    func testConcurrentReadAndWriteTransactions() {
+        let sqlite = makeDB().db.sqliteDatabase
+        XCTAssertNil(sqlite.getOrCreateRelation("a", scheme: ["n"]).err)
+        XCTAssertNil(sqlite.getOrCreateRelation("b", scheme: ["n"]).err)
+        
+        let db = TransactionalDatabase(sqlite)
+        let a = db["a"]
+        let b = db["b"]
+        let intersection = a.intersection(b)
+        
+        dispatch_async(dispatch_get_global_queue(0, 0), {
+            for _ in 0..<100 {
+                db.beginTransaction()
+                a.add(["n": 1])
+                b.delete(Attribute("n") *== 1)
+                db.endTransaction()
+                
+                db.beginTransaction()
+                b.add(["n": 1])
+                a.delete(Attribute("n") *== 1)
+                db.endTransaction()
+            }
+            
+            db.beginTransaction()
+            a.add(["n": 2])
+            b.add(["n": 2])
+            db.endTransaction()
+        })
+        
+        var done = false
+        while !done {
+            for row in intersection.rows() {
+                XCTAssertFalse(done)
+                XCTAssertNil(row.err)
+                XCTAssertEqual(row.ok?["n"], 2)
+                done = true
+            }
+        }
+    }
 }

@@ -6,15 +6,13 @@
 class QueryPlanner {
     private let rootRelation: Relation
     private var relationNodeIndexMap = ObjectMap<Int>()
-    private var internalNodes: [Node] = []
     
-    lazy var nodes: [Node] = {
-        self.computeNodes()
-        return self.internalNodes
-    }()
+    var nodes: [Node] = []
+    var transactionalDatabases: ObjectSet<TransactionalDatabase> = []
     
     init(root: Relation) {
         self.rootRelation = root
+        computeNodes()
     }
     
     var rootIndex: Int {
@@ -47,6 +45,10 @@ class QueryPlanner {
     }
     
     private func computeNodes() {
+        // When visiting nodes, we get the underlying relations, so to catch the original root we have to do it here.
+        // When iterating the children of a node, we get the originals, so we can call noteTransactionalDatabases
+        // on those and it works. This is weird and should probably be revisited.
+        noteTransactionalDatabases(rootRelation)
         visitRelationTree(rootRelation, { relation, isRoot in
             let children = relationChildren(relation)
             // Skip this whole thing for relations with no children. They'll have nodes created for them by their parents.
@@ -54,10 +56,11 @@ class QueryPlanner {
             if children.count > 0 || isRoot {
                 let nodeIndex = getOrCreateNodeIndex(relation)
                 for (index, childRelation) in children.enumerate() {
+                    noteTransactionalDatabases(childRelation)
                     let childNodeIndex = getOrCreateNodeIndex(childRelation.underlyingRelationForQueryExecution)
-                    internalNodes[childNodeIndex].parentIndexes.append((nodeIndex, index))
+                    nodes[childNodeIndex].parentIndexes.append((nodeIndex, index))
                 }
-                internalNodes[nodeIndex].childCount = children.count
+                nodes[nodeIndex].childCount = children.count
             }
         })
     }
@@ -92,8 +95,8 @@ class QueryPlanner {
     
     private func relationToNodeIndex(r: Relation) -> Int {
         let node = relationToNode(r)
-        let index = internalNodes.count
-        internalNodes.append(node)
+        let index = nodes.count
+        nodes.append(node)
         return index
     }
     
@@ -145,6 +148,14 @@ class QueryPlanner {
             return Node(op: .Otherwise)
         case .Unique(let attribute, let value):
             return Node(op: .Unique(attribute, value))
+        }
+    }
+    
+    private func noteTransactionalDatabases(r: Relation) {
+        if let
+            transactionalRelation = r as? TransactionalDatabase.TransactionalRelation,
+            db = transactionalRelation.db {
+            transactionalDatabases.insert(db)
         }
     }
 }

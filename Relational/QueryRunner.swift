@@ -7,6 +7,8 @@ class QueryRunner {
     private let nodes: [QueryPlanner.Node]
     private let rootIndex: Int
     
+    private let transactionalDatabases: [TransactionalDatabase]
+    
     private var activeInitiatorIndexes: [Int]
     
     private var initiatorGenerators: Dictionary<Int, AnyGenerator<Result<Row, RelationError>>> = [:]
@@ -22,6 +24,8 @@ class QueryRunner {
     init(planner: QueryPlanner) {
         let nodes = planner.nodes
         self.nodes = nodes
+        
+        transactionalDatabases = Array(planner.transactionalDatabases)
         rootIndex = planner.rootIndex
         activeInitiatorIndexes = planner.initiatorIndexes
         nodeStates = Array()
@@ -32,6 +36,21 @@ class QueryRunner {
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        for db in transactionalDatabases {
+            db.lockReading()
+        }
+        
+        // We need to unlock the databases when we're done, which can be when the generator runs off
+        // the end, or when the generator is deallocated without running off the end. This value stores
+        // a function that unlocks the databases as the value, and calls its value as the destructor.
+        // When we run off the end of the generator, we call the value manually, and then set it to
+        // an empty function to prevent the destructor from doing anything.
+        let unlocker = ValueWithDestructor(value: {
+            for db in self.transactionalDatabases {
+                db.unlockReading()
+            }
+        }, destructor: { $0() })
+        
         var buffer: [Result<Row, RelationError>] = []
         return AnyGenerator(body: {
             while !self.done {
@@ -41,6 +60,8 @@ class QueryRunner {
                     buffer = self.pump()
                 }
             }
+            unlocker.value()
+            unlocker.value = {}
             return nil
         })
     }

@@ -3,12 +3,17 @@
 // All rights reserved.
 //
 
+import Darwin
+
+
 public class TransactionalDatabase {
     let changeLoggingDatabase: ChangeLoggingDatabase
     
     var inTransaction = false
     
     var relations: [String: TransactionalRelation] = [:]
+    
+    let lock = RWLock()
     
     public init(_ db: ChangeLoggingDatabase) {
         self.changeLoggingDatabase = db
@@ -22,7 +27,7 @@ public class TransactionalDatabase {
         if let r = relations[name] {
             return r
         } else {
-            let r = TransactionalRelation(underlyingRelation: changeLoggingDatabase[name])
+            let r = TransactionalRelation(db: self, underlyingRelation: changeLoggingDatabase[name])
             if inTransaction {
                 self.beginTransactionForRelation(r)
             }
@@ -31,8 +36,18 @@ public class TransactionalDatabase {
         }
     }
     
+    public func lockReading() {
+        lock.readLock()
+    }
+    
+    public func unlockReading() {
+        lock.unlock()
+    }
+    
     public func beginTransaction() {
         precondition(!inTransaction, "We don't do nested transactions (yet?)")
+        
+        lock.writeLock()
         
         for (_, r) in relations {
             self.beginTransactionForRelation(r)
@@ -73,6 +88,8 @@ public class TransactionalDatabase {
         
         inTransaction = false
         
+        lock.unlock()
+        
         return .Ok()
     }
     
@@ -112,12 +129,14 @@ public class TransactionalDatabase {
 
 extension TransactionalDatabase {
     public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
+        weak var db: TransactionalDatabase?
         var underlyingRelation: ChangeLoggingRelation<SQLiteTableRelation>
         var transactionRelation: ChangeLoggingRelation<SQLiteTableRelation>?
         
         public var changeObserverData = RelationDefaultChangeObserverImplementationData()
         
-        init(underlyingRelation: ChangeLoggingRelation<SQLiteTableRelation>) {
+        init(db: TransactionalDatabase, underlyingRelation: ChangeLoggingRelation<SQLiteTableRelation>) {
+            self.db = db
             self.underlyingRelation = underlyingRelation
             underlyingRelation.addWeakChangeObserver(self, method: self.dynamicType.observeUnderlyingChange)
         }
