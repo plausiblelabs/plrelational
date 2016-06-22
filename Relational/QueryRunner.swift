@@ -328,6 +328,7 @@ class QueryRunner {
         if nodeStates[nodeIndex].activeBuffers == 0 {
             if let soFar = soFar {
                 writeOutput([Row(values: [attribute: soFar])], fromNode: nodeIndex)
+                nodeStates[nodeIndex].setExtraState(nil as RelationValue?)
             }
         }
     }
@@ -339,9 +340,13 @@ class QueryRunner {
             return
         }
         
-        let nonemptyBuffer = nodeStates[nodeIndex].inputBuffers.find({ !$0.rows.isEmpty })
-        if let nonemptyBuffer = nonemptyBuffer {
-            writeOutput(Set(nonemptyBuffer.rows), fromNode: nodeIndex)
+        var found = false
+        for i in nodeStates[nodeIndex].inputBuffers.indices {
+            let rows = nodeStates[nodeIndex].inputBuffers[i].popAll()
+            if !found && !rows.isEmpty {
+                found = true
+                writeOutput(Set(rows), fromNode: nodeIndex)
+            }
         }
     }
     
