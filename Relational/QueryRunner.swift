@@ -190,6 +190,29 @@ class QueryRunner {
         }
     }
     
+    // Tips for implementing a process function.
+    //
+    // A process function corresponds to an enum case. Add a new case to the list above. Have the
+    // function take the appropriate data stored in the enum case, if any.
+    //
+    // The process function is called repeatedly as data flows through the system. The nodeIndex
+    // indicates which node is being processed. Access node-specific data using nodeStates[nodeIndex].
+    // The inputIndex indicates which input data came in on. For operations which can deal with one
+    // input at a time, this can be used to avoid scanning the entire thing.
+    //
+    // For nodes which need to wait for complete data before they can process, check the activeBuffers
+    // property to see if any data is pending. When activeBuffers is 0 then no more data will arrive.
+    //
+    // The process function may be called multiple times for a node even when no more data is available.
+    // This can happen if data was written to it multiple times before that node was processed. Make
+    // sure that the processing code correctly handles this by altering the node's state as necessary
+    // so that subsequent calls produce correct output. For example, when pulling data out of an input
+    // buffer, use popAll() rather than rows, so that the next call will see an empty buffer.
+    //
+    // For operations which need to store custom state across calls, use the getExtraState and
+    // setExtraState calls. These can store arbitrary data. Single values can go in directly, or they
+    // can be used with tuple types, or a struct type for more complex situations.
+    
     func processUnion(nodeIndex: Int, _ inputIndex: Int) {
         let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
         writeOutput(nodeStates[nodeIndex].uniq(rows), fromNode: nodeIndex)
