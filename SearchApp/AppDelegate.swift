@@ -35,9 +35,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         listView = ListView(model: model.listViewModel, outlineView: outlineView)
         progressIndicator.visible <~ model.progressVisible
         recordButton.disabled <~ model.recordDisabled
-        //recordButton.clicked = model.recordClicked
+        recordButton.clicks ~~> model.recordClicked
         saveButton.disabled <~ model.saveDisabled
-        //saveButton.clicked = model.saveClicked
+        saveButton.clicks ~~> model.saveClicked
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {

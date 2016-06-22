@@ -55,12 +55,15 @@ public class Property<T> {
     /// When the other property's value changes, this property's value will be updated.
     /// Note that calling `bind` will cause this property to take on the given initial
     /// value immediately.
-    private func bind(signal: Signal<T>, initialValue: T, owner: AnyObject) -> Binding {
-        // Make this property take on the given initial value
-        // TODO: Maybe only do this if this is the first thing being bound (i.e., when
-        // the set of bindings is empty)
-        // TODO: Does metadata have meaning here?
-        self.set(initialValue, ChangeMetadata(transient: true))
+    private func bind(signal: Signal<T>, initialValue: T?, owner: AnyObject) -> Binding {
+        
+        if let initialValue = initialValue {
+            // Make this property take on the given initial value
+            // TODO: Maybe only do this if this is the first thing being bound (i.e., when
+            // the set of bindings is empty)
+            // TODO: Does metadata have meaning here?
+            self.set(initialValue, ChangeMetadata(transient: true))
+        }
         
         // Observe the given signal for changes
         let signalObserverRemoval = signal.observe({ [weak self] value, metadata in
@@ -107,6 +110,15 @@ public class ObservableProperty<T>: ReadableProperty<T> {
     public init(get: Getter, set: Setter, signal: Signal<T>) {
         self.signal = signal
         super.init(get: get, set: set)
+    }
+}
+
+public class ActionProperty: Property<()> {
+    
+    public init(_ action: () -> Void) {
+        super.init({ _ in
+            action()
+        })
     }
 }
 
@@ -282,6 +294,18 @@ public func <~ <T>(lhs: Property<T>, rhs: ObservableValue<T>) -> Binding {
 
 public func <~ <T>(lhs: Property<T>, rhs: ObservableProperty<T>) -> Binding {
     return lhs.bind(rhs.signal, initialValue: rhs.get(), owner: rhs)
+}
+
+// TODO: It seems that `~>` is defined somewhere already (not sure where exactly), so to avoid
+// conflicts we use `~~>` here instead
+infix operator ~~> {
+    associativity right
+    precedence 93
+}
+
+public func ~~> (lhs: Signal<()>, rhs: ActionProperty) -> Binding {
+    // TODO: We invent an owner here; what if no one else owns the signal?
+    return rhs.bind(lhs, initialValue: nil, owner: "")
 }
 
 infix operator <~> {

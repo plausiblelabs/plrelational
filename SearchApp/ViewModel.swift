@@ -122,30 +122,16 @@ class ViewModel {
         return self.selectedPersonID.empty
     }()
 
-    lazy var recordClicked: MutableObservableValue<Bool> = { [unowned self] in
-        let clicked = mutableObservableValue(false)
-        let removal = clicked.addChangeObserver({ _ in
-            if clicked.value {
-                Swift.print("TODO: INCREMENT SALES")
-            }
-        })
-        self.removals.append(removal)
-        return clicked
-    }()
+    lazy var recordClicked: ActionProperty = ActionProperty {
+        Swift.print("TODO: INCREMENT SALES")
+    }
 
     lazy var saveDisabled: ObservableValue<Bool> = { [unowned self] in
         // TODO: Return true only when there are no changes
         return ObservableValue.constant(true)
     }()
     
-    lazy var saveClicked: MutableObservableValue<Bool> = { [unowned self] in
-        let clicked = mutableObservableValue(false)
-        let removal = clicked.addChangeObserver({ _ in
-            if clicked.value {
-                Swift.print("TODO: SAVE CHANGES")
-            }
-        })
-        self.removals.append(removal)
-        return clicked
-    }()
+    lazy var saveClicked: ActionProperty = ActionProperty {
+        Swift.print("TODO: SAVE CHANGES")
+    }
 }
