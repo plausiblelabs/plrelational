@@ -534,6 +534,22 @@ class RelationTests: DBTestCase {
         AssertEqual(r1.otherwise(empty), r1)
     }
     
+    func testOtherwiseCount() {
+        let r1 = MakeRelation(
+            ["id", "name"],
+            [1,    "cat"])
+        var r2 = MakeRelation(
+            ["id", "name"])
+
+        let r = r2.otherwise(r1)
+        
+        AssertEqual(r.count(), MakeRelation(["count"], [1]))
+        
+        r2.add(["id": 2, "name": "dog"])
+        
+        AssertEqual(r.count(), MakeRelation(["count"], [1]))
+    }
+    
     func testUnique() {
         let r1 = MakeRelation(
             ["id", "name", "type"],
@@ -1160,6 +1176,98 @@ class RelationTests: DBTestCase {
                     MakeRelation(
                         ["type"],
                         ["obj"]))
+    }
+    
+    func testComplexCount() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let db = TransactionalDatabase(sqliteDB)
+        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+            let createResult = sqliteDB.createRelation(name, scheme: scheme)
+            precondition(createResult.ok != nil)
+            return db[name]
+        }
+        
+        var collections = createRelation("collection", ["id", "type", "name", "parent", "order"])
+        var objects = createRelation("object", ["id", "type", "name", "coll_id", "order"])
+        var selectedCollectionID = createRelation("selected_collection", ["coll_id"])
+        var selectedInspectorItemIDs = createRelation("selected_inspector_item", ["item_id"])
+        
+        let selectedCollection = selectedCollectionID
+            .equijoin(collections, matching: ["coll_id": "id"])
+            .project(["id", "type", "name"])
+        
+        let inspectorCollectionItems = selectedCollection
+            .join(MakeRelation(["parent", "order"], [.NULL, 5.0]))
+        let inspectorObjectItems = selectedCollectionID
+            .join(objects)
+            .renameAttributes(["coll_id": "parent"])
+        let inspectorItems = inspectorCollectionItems
+            .union(inspectorObjectItems)
+        let selectedInspectorItems = selectedInspectorItemIDs
+            .equijoin(inspectorItems, matching: ["item_id": "id"])
+            .project(["id", "type", "name"])
+        
+        let selectedItems = selectedInspectorItems.otherwise(selectedCollection)
+        let selectedItemTypes = selectedItems.project(["type"])
+        let selectedItemsCount = selectedItems.count()
+        
+        var id: Int64 = 1
+        var order: Double = 1.0
+        
+        func addCollection(name: String) {
+            let row: Row = [
+                "id": RelationValue(id),
+                "type": "coll",
+                "name": RelationValue(name),
+                "parent": .NULL,
+                "order": RelationValue(order)
+            ]
+            collections.add(row)
+            id += 1
+            order += 1.0
+        }
+        
+        func addObject(name: String) {
+            let row: Row = [
+                "id": RelationValue(id),
+                "type": "obj",
+                "name": RelationValue(name),
+                "coll_id": 1,
+                "order": RelationValue(order)
+            ]
+            objects.add(row)
+            id += 1
+            order += 1.0
+        }
+        
+        addCollection("Page1")
+        addCollection("Page2")
+        addObject("Obj1")
+        addObject("Obj2")
+        
+        selectedInspectorItemIDs.delete(true)
+        selectedCollectionID.add(["coll_id": 1])
+        
+        AssertEqual(selectedItems,
+                    MakeRelation(
+                        ["id", "name", "type"],
+                        [1, "Page1", "coll"]))
+        AssertEqual(selectedItemsCount,
+                    MakeRelation(
+                        ["count"],
+                        [1]))
+        
+        selectedInspectorItemIDs.delete(true)
+        selectedInspectorItemIDs.add(["item_id": 1])
+        
+        AssertEqual(selectedItems,
+                    MakeRelation(
+                        ["id", "name", "type"],
+                        [1, "Page1", "coll"]))
+        AssertEqual(selectedItemsCount,
+                    MakeRelation(
+                        ["count"],
+                        [1]))
     }
 
     func testUniqueObservation() {

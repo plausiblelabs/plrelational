@@ -174,6 +174,17 @@ class DocModelTests: AppTestCase {
             selectedItemsOnlyText: false,
             selectedItemsOnlyImage: false))
         
+        // Select the page item in the inspector
+        model.selectInspectorItems([3])
+
+        // Verify properties-related bindings
+        verifyBindings(BindingVals(
+            itemSelected: true,
+            selectedItemType: "Page",
+            selectedItemName: "Page1",
+            selectedItemsOnlyText: false,
+            selectedItemsOnlyImage: false))
+
         // Select a single object in the inspector
         model.selectInspectorItems([9])
         
