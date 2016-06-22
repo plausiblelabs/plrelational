@@ -349,4 +349,33 @@ class TransactionalDatabaseTests: DBTestCase {
             }
         }
     }
+    
+    func testConcurrentReadAndWriteNoTransactions() {
+        let sqlite = makeDB().db.sqliteDatabase
+        XCTAssertNil(sqlite.getOrCreateRelation("a", scheme: ["n", "m"]).err)
+        
+        let db = TransactionalDatabase(sqlite)
+        let a = db["a"]
+        a.add(["n": 1, "m": 1])
+        
+        dispatch_async(dispatch_get_global_queue(0, 0), {
+            for _ in 0..<100 {
+                a.update(true, newValues: ["m": 2])
+                a.update(true, newValues: ["m": 1])
+            }
+            a.update(true, newValues: ["n": 2])
+            print("done")
+        })
+        
+        var done = false
+        while !done {
+            for row in a.rows() {
+                if row.ok!["n"] == 2 {
+                    done = true
+                } else {
+                    XCTAssertEqual(row.ok!["n"], 1)
+                }
+            }
+        }
+    }
 }

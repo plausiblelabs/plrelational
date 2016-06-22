@@ -15,6 +15,8 @@ public class TransactionalDatabase {
     
     let lock = RWLock()
     
+    var currentTransactionThread: pthread_t = nil
+    
     public init(_ db: ChangeLoggingDatabase) {
         self.changeLoggingDatabase = db
     }
@@ -53,6 +55,7 @@ public class TransactionalDatabase {
             self.beginTransactionForRelation(r)
         }
         
+        currentTransactionThread = pthread_self()
         inTransaction = true
     }
     
@@ -87,6 +90,7 @@ public class TransactionalDatabase {
         }
         
         inTransaction = false
+        currentTransactionThread = nil
         
         lock.unlock()
         
@@ -125,6 +129,10 @@ public class TransactionalDatabase {
         let after = takeSnapshot()
         return (before, after)
     }
+    
+    private var inTransactionThread: Bool {
+        return currentTransactionThread == pthread_self()
+    }
 }
 
 extension TransactionalDatabase {
@@ -154,19 +162,35 @@ extension TransactionalDatabase {
         }
         
         public func add(row: Row) -> Result<Int64, RelationError> {
-            return (transactionRelation ?? underlyingRelation).add(row)
+            return wrapInTransactionIfNecessary({
+                (transactionRelation ?? underlyingRelation).add(row)
+            })
         }
         
         public func delete(query: SelectExpression) -> Result<Void, RelationError> {
-            return (transactionRelation ?? underlyingRelation).delete(query)
+            return wrapInTransactionIfNecessary({
+                (transactionRelation ?? underlyingRelation).delete(query)
+            })
         }
         
         public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
-            return (transactionRelation ?? underlyingRelation).update(query, newValues: newValues)
+            return wrapInTransactionIfNecessary({
+                (transactionRelation ?? underlyingRelation).update(query, newValues: newValues)
+            })
         }
         
         func observeUnderlyingChange(change: RelationChange) {
             self.notifyChangeObservers(change, kind: .DirectChange)
+        }
+        
+        func wrapInTransactionIfNecessary<T>(@noescape f: Void -> T) -> T {
+            if let db = db where !db.inTransactionThread {
+                db.beginTransaction()
+                defer { db.endTransaction() }
+                return f()
+            } else {
+                return f()
+            }
         }
     }
 }
