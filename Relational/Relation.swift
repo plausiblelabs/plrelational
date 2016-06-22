@@ -268,15 +268,24 @@ extension Relation {
     }
     
     public func addWeakChangeObserver<T: AnyObject>(target: T, method: T -> RelationChange -> Void) {
-        var remove: (Void -> Void)? = nil
+        var relationRemove: (Void -> Void)? = nil
+        var deallocRemove: (Void -> Void)? = nil
         
-        remove = self.addChangeObserver({ [weak target] in
+        relationRemove = self.addChangeObserver({ [weak target] in
             if let target = target {
                 method(target)($0)
             } else {
-                guard let remove = remove else { preconditionFailure("Change observer fired but remove function was never set!") }
-                remove()
+                guard let relationRemove = relationRemove else { preconditionFailure("Change observer fired but relation remove function was never set!") }
+                relationRemove()
+                
+                guard let deallocRemove = deallocRemove else { preconditionFailure("Change observer fired but target remove function was never set!") }
+                deallocRemove()
             }
+        })
+        
+        deallocRemove = ObserveDeallocation(target, {
+            guard let relationRemove = relationRemove else { preconditionFailure("Dealloc observation fired but relation remove function was never set!") }
+            relationRemove()
         })
     }
     

@@ -1602,4 +1602,26 @@ class RelationTests: DBTestCase {
         }
         XCTAssertNil(shouldDeallocate)
     }
+    
+    func testWeakObservationRemovalLeak() {
+        let concrete = MakeRelation([])
+        weak var shouldDeallocate1: IntermediateRelation?
+        weak var shouldDeallocate2: IntermediateRelation?
+        
+        do {
+            let select1 = concrete.mutableSelect(true)
+            shouldDeallocate1 = select1
+            
+            let select2 = select1.mutableSelect(true)
+            shouldDeallocate2 = select2
+            
+            class Observer {
+                func dummy(_: RelationChange) {}
+            }
+            let observer = Observer()
+            select2.addWeakChangeObserver(observer, method: Observer.dummy)
+        }
+        XCTAssertNil(shouldDeallocate1)
+        XCTAssertNil(shouldDeallocate2)
+    }
 }

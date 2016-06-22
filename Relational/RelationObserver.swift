@@ -11,14 +11,18 @@ public protocol RelationObserver {
 
 class WeakRelationObserverProxy: RelationObserver {
     private weak var target: protocol<RelationObserver, AnyObject>?
-    private var removal: Void -> Void = { fatalError("Observer method called, but removal function never set.") }
+    private var targetRemoval: Void -> Void = { fatalError("Proxy deallocated, but target removal function never set.") }
+    private var relationRemoval: Void -> Void = { fatalError("Observer method called, but relation removal function never set.") }
     
     init(target: protocol<RelationObserver, AnyObject>) {
         self.target = target
+        targetRemoval = ObserveDeallocation(target, { [weak self] in
+            self?.relationRemoval()
+        })
     }
     
     func registerOn(observee: Relation, kinds: [RelationObservationKind]) {
-        removal = observee.addChangeObserver(self, kinds: kinds)
+        relationRemoval = observee.addChangeObserver(self, kinds: kinds)
     }
     
     func transactionBegan() {
@@ -37,7 +41,7 @@ class WeakRelationObserverProxy: RelationObserver {
         if let target = target {
             return target
         } else {
-            removal()
+            relationRemoval()
             return nil
         }
     }

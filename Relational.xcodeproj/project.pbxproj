@@ -187,6 +187,7 @@
 		C2B339DE1CEA54E7008568E9 /* RelationDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B339DD1CEA54E7008568E9 /* RelationDump.swift */; };
 		C2B53CB51D1862ED006B6278 /* Mutex.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CB41D1862ED006B6278 /* Mutex.swift */; };
 		C2B53CBB1D197814006B6278 /* RWLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CBA1D197814006B6278 /* RWLock.swift */; };
+		C2B53CBD1D1AF4FC006B6278 /* DeallocObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CBC1D1AF4FC006B6278 /* DeallocObservation.swift */; };
 		C2BD29921CD251870081FD05 /* Flight.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
 		C2BD29931CD251870081FD05 /* Store.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
@@ -624,6 +625,7 @@
 		C2B339DD1CEA54E7008568E9 /* RelationDump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDump.swift; sourceTree = "<group>"; };
 		C2B53CB41D1862ED006B6278 /* Mutex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Mutex.swift; path = Relational/Mutex.swift; sourceTree = "<group>"; };
 		C2B53CBA1D197814006B6278 /* RWLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RWLock.swift; path = Relational/RWLock.swift; sourceTree = "<group>"; };
+		C2B53CBC1D1AF4FC006B6278 /* DeallocObservation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DeallocObservation.swift; path = Relational/DeallocObservation.swift; sourceTree = "<group>"; };
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
 		C2BD29911CD251870081FD05 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 		C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteBinding.swift; sourceTree = "<group>"; };
@@ -1287,6 +1289,7 @@
 			isa = PBXGroup;
 			children = (
 				C22921A91CCE605D00518184 /* ArrayHashing.swift */,
+				C2B53CBC1D1AF4FC006B6278 /* DeallocObservation.swift */,
 				C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */,
 				C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */,
 				C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */,
@@ -2052,6 +2055,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */,
+				C2B53CBD1D1AF4FC006B6278 /* DeallocObservation.swift in Sources */,
 				C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */,
 				C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */,
 				C23AAF4E1CF8E3F8009E28E0 /* SequenceFind.swift in Sources */,
