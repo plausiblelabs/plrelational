@@ -9,10 +9,16 @@
 public protocol RelationDefaultChangeObserverImplementation: class, Relation {
     var changeObserverData: RelationDefaultChangeObserverImplementationData { get set }
     
-    /// This function is called the first time an observer is added. This allows
-    /// implementors to lazily set up any necessay infrastructure for providing
+    /// This function is called when an observer is added where there were previously none.
+    /// This allows implementors to lazily set up any necessay infrastructure for providing
     /// observation calls. The default implementation does nothing.
     func onAddFirstObserver()
+    
+    /// This function is called when the last observer is removed, leaving the Relation free
+    /// of observers. This allows implementors to clean up observation-related stuff. Note:
+    /// Once this is called, onAddFirstObserver will be called again if another observation
+    /// is added.
+    func onRemoveLastObserver()
 }
 
 public struct RelationDefaultChangeObserverImplementationData {
@@ -37,10 +43,17 @@ extension RelationDefaultChangeObserverImplementation {
             self.onAddFirstObserver()
         }
         
-        return { self.changeObserverData.observers!.removeValueForKey(id) }
+        return {
+            self.changeObserverData.observers!.removeValueForKey(id)
+            if self.changeObserverData.observers!.count == 0 {
+                self.changeObserverData.didAddFirstObserver = false
+                self.onRemoveLastObserver()
+            }
+        }
     }
     
     public func onAddFirstObserver() {}
+    public func onRemoveLastObserver() {}
     
     func notifyObserversTransactionBegan(kind: RelationObservationKind) {
         if let observers = changeObserverData.observers {

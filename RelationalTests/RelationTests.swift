@@ -1589,4 +1589,17 @@ class RelationTests: DBTestCase {
             }
         })
     }
+    
+    func testObservationRemovalLeak() {
+        let concrete = MakeRelation([])
+        weak var shouldDeallocate: IntermediateRelation?
+        
+        do {
+            let select = concrete.mutableSelect(true)
+            shouldDeallocate = select
+            let removal = select.addChangeObserver({ _ in })
+            removal()
+        }
+        XCTAssertNil(shouldDeallocate)
+    }
 }

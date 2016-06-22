@@ -21,6 +21,8 @@ public class IntermediateRelation: Relation, RelationDefaultChangeObserverImplem
     var derivative: RelationDerivative?
     var inTransaction = 0 // Like a refcount, incremented for begin, decremented for end, action at 0
     
+    var didRegisterObservers = false
+    
     init(op: Operator, operands: [Relation]) {
         self.op = op
         self.operands = operands
@@ -106,10 +108,17 @@ extension IntermediateRelation: RelationObserver {
         let derivative = differentiator.computeDerivative()
         self.derivative = derivative
         
-        for variable in derivative.allVariables where variable !== self {
-            let proxy = WeakRelationObserverProxy(target: self)
-            proxy.registerOn(variable, kinds: [.DirectChange])
+        if !didRegisterObservers {
+            for variable in derivative.allVariables where variable !== self {
+                let proxy = WeakRelationObserverProxy(target: self)
+                proxy.registerOn(variable, kinds: [.DirectChange])
+            }
+            didRegisterObservers = true
         }
+    }
+    
+    public func onRemoveLastObserver() {
+        self.derivative = nil
     }
     
     public func transactionBegan() {
