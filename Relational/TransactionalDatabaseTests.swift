@@ -37,20 +37,20 @@ class TransactionalDatabaseTests: DBTestCase {
         
         db.endTransaction()
         
-        AssertEqual(lastFlightsChange!.added,
+        AssertEqual(lastFlightsChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         [1, "Jones", "777"],
                         [2, "Smith", "787"],
                         [3, "Johnson", "797"]))
-        AssertEqual(lastFlightsChange!.removed, nil)
-        AssertEqual(lastPilotsChange!.added,
+        AssertEqual(lastFlightsChange?.removed, nil)
+        AssertEqual(lastPilotsChange?.added,
                     MakeRelation(
                         ["name", "home"],
                         ["Jones", "New York"],
                         ["Smith", "Chicago"],
                         ["Johnson", "Seattle"]))
-        AssertEqual(lastPilotsChange!.removed, nil)
+        AssertEqual(lastPilotsChange?.removed, nil)
         
         db.beginTransaction()
         
@@ -64,22 +64,22 @@ class TransactionalDatabaseTests: DBTestCase {
         
         db.endTransaction()
     
-        AssertEqual(lastFlightsChange!.added,
+        AssertEqual(lastFlightsChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         [4, "Jones", "DC-10"],
                         [1, "Smith", "777"]))
-        AssertEqual(lastFlightsChange!.removed,
+        AssertEqual(lastFlightsChange?.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         [3, "Johnson", "797"],
                         [1, "Jones", "777"]))
-        AssertEqual(lastPilotsChange!.added,
+        AssertEqual(lastPilotsChange?.added,
                     MakeRelation(
                         ["name", "home"],
                         ["Horton", "Miami"],
                         ["Jones", "Boston"]))
-        AssertEqual(lastPilotsChange!.removed,
+        AssertEqual(lastPilotsChange?.removed,
                     MakeRelation(
                         ["name", "home"],
                         ["Jones", "New York"],
@@ -188,32 +188,32 @@ class TransactionalDatabaseTests: DBTestCase {
         _ = flights.addChangeObserver({ lastChange = $0 })
         
         flights.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
-        AssertEqual(lastChange!.added!,
+        AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "MD-11"]))
-        AssertEqual(lastChange!.removed, nil)
+        AssertEqual(lastChange?.removed, nil)
         
         flights.add(["number": "43", "pilot": "Adams", "equipment": "MD-11"])
-        AssertEqual(lastChange!.added!,
+        AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["43",     "Adams", "MD-11"]))
-        AssertEqual(lastChange!.removed, nil)
+        AssertEqual(lastChange?.removed, nil)
         
         flights.add(["number": "44", "pilot": "Adams", "equipment": "MD-11"])
-        AssertEqual(lastChange!.added!,
+        AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["44",     "Adams", "MD-11"]))
-        AssertEqual(lastChange!.removed, nil)
+        AssertEqual(lastChange?.removed, nil)
         
         flights.add(["number": "45", "pilot": "Adams", "equipment": "MD-11"])
-        AssertEqual(lastChange!.added!,
+        AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["45",     "Adams", "MD-11"]))
-        AssertEqual(lastChange!.removed, nil)
+        AssertEqual(lastChange?.removed, nil)
     }
     
     func testDeleteNotify() {
@@ -240,19 +240,19 @@ class TransactionalDatabaseTests: DBTestCase {
         flights.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
         
         flights.delete(Attribute("number") *== "42")
-        AssertEqual(lastChange!.removed,
+        AssertEqual(lastChange?.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "MD-11"]))
-        AssertEqual(lastChange!.added, nil)
+        AssertEqual(lastChange?.added, nil)
         
         
         flights.delete(Attribute("number") *== "123")
-        AssertEqual(lastChange!.removed,
+        AssertEqual(lastChange?.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["123",    "Jones", "707"]))
-        AssertEqual(lastChange!.added, nil)
+        AssertEqual(lastChange?.added, nil)
     }
     
     func testUpdateNotify() {
@@ -278,32 +278,32 @@ class TransactionalDatabaseTests: DBTestCase {
         
         flights.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
         flights.update(Attribute("number") *== "42", newValues: ["equipment": "DC-10"])
-        AssertEqual(lastChange!.removed,
+        AssertEqual(lastChange?.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "MD-11"]))
-        AssertEqual(lastChange!.added,
+        AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "DC-10"]))
         
         flights.update(Attribute("number") *== "123", newValues: ["equipment": "DC-10"])
-        AssertEqual(lastChange!.removed,
+        AssertEqual(lastChange?.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["123",    "Jones", "707"]))
-        AssertEqual(lastChange!.added,
+        AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["123",    "Jones", "DC-10"]))
         
         flights.update(Attribute("equipment") *== "DC-10", newValues: ["pilot": "JFK"])
-        AssertEqual(lastChange!.removed,
+        AssertEqual(lastChange?.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "DC-10"],
                         ["123",    "Jones", "DC-10"]))
-        AssertEqual(lastChange!.added,
+        AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "JFK", "DC-10"],
