@@ -21,6 +21,8 @@ extension Dictionary {
     }
 }
 
+/// Combine two dictionaries. Any keys that exist in both dictionaries will
+/// have the value from the second dictionary in the result.
 func +<K: Hashable, V>(a: [K: V], b: [K: V]) -> [K: V] {
     var result = a
     for (k, v) in b {
