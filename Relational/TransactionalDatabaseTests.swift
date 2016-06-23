@@ -378,4 +378,20 @@ class TransactionalDatabaseTests: DBTestCase {
             }
         }
     }
+    
+    func testConcurrentReadWhileInTransaction() {
+        let sqlite = makeDB().db.sqliteDatabase
+        XCTAssertNil(sqlite.getOrCreateRelation("a", scheme: ["n"]).err)
+        
+        let db = TransactionalDatabase(sqlite)
+        let a = db["a"]
+        
+        db.beginTransaction()
+        let group = dispatch_group_create()
+        dispatch_group_async(group, dispatch_get_global_queue(0, 0), {
+            AssertEqual(a, MakeRelation(["n"]))
+        })
+        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+        db.endTransaction()
+    }
 }

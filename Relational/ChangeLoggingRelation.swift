@@ -14,6 +14,15 @@ struct ChangeLoggingRelationLogEntry {
     var backward: [ChangeLoggingRelationChange]
 }
 
+private struct ChangeLoggingRelationCurrentChange {
+    var added: MemoryTableRelation
+    var removed: MemoryTableRelation
+    
+    func copy() -> ChangeLoggingRelationCurrentChange {
+        return ChangeLoggingRelationCurrentChange(added: added.copy(), removed: removed.copy())
+    }
+}
+
 public struct ChangeLoggingRelationSnapshot {
     var savedLog: [ChangeLoggingRelationLogEntry]
 }
@@ -25,14 +34,25 @@ public class ChangeLoggingRelation<BaseRelation: Relation> {
     
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    var currentChange: (added: ConcreteRelation, removed: ConcreteRelation)
+    private var currentChange: ChangeLoggingRelationCurrentChange {
+        didSet {
+            fullUnderlyingRelation = self.dynamicType.computeFullUnderlyingRelation(baseRelation, currentChange)
+        }
+    }
     
-    var cachedCurrentRelation = Mutexed<Relation?>(nil)
+    var fullUnderlyingRelation: Relation
     
     public init(baseRelation: BaseRelation) {
         self.baseRelation = baseRelation
-        currentChange = (ConcreteRelation(scheme: baseRelation.scheme), ConcreteRelation(scheme: baseRelation.scheme))
+        currentChange = ChangeLoggingRelationCurrentChange(
+            added: MemoryTableRelation(scheme: baseRelation.scheme),
+            removed: MemoryTableRelation(scheme: baseRelation.scheme))
+        fullUnderlyingRelation = self.dynamicType.computeFullUnderlyingRelation(baseRelation, currentChange)
         LogRelationCreation(self)
+    }
+    
+    private static func computeFullUnderlyingRelation(baseRelation: BaseRelation, _ currentChange: ChangeLoggingRelationCurrentChange) -> Relation {
+        return baseRelation.difference(currentChange.removed).union(currentChange.added)
     }
     
     public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
@@ -68,11 +88,11 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
     }
     
     public var underlyingRelationForQueryExecution: Relation {
-        return currentRelation().underlyingRelationForQueryExecution
+        return fullUnderlyingRelation.underlyingRelationForQueryExecution
     }
 
     public func contains(row: Row) -> Result<Bool, RelationError> {
-        return currentRelation().contains(row)
+        return fullUnderlyingRelation.contains(row)
     }
     
     public func add(row: Row) -> Result<Int64, RelationError> {
@@ -111,24 +131,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
         })
     }
     
-    /// A Relation that describes the current state of the ChangeLoggingRelation.
-    /// This is what rows() returns data from, but it won't reflect any future
-    /// changes to the ChangeLoggingRelation.
-    internal func currentRelation() -> Relation {
-        return cachedCurrentRelation.withMutableValue({
-            if let cached = $0 {
-                return cached
-            } else {
-                let relation = baseRelation.difference(currentChange.removed).union(currentChange.added)
-                $0 = relation
-                return relation
-            }
-        })
-    }
-    
     private func applyLogToCurrentRelation<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log) -> Result<(didAdd: Bool, didRemove: Bool), RelationError> {
-        cachedCurrentRelation.withMutableValue({ $0 = nil })
-        
         var didAdd = false
         var didRemove = false
         for change in log {
@@ -173,9 +176,9 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
         let ret = (didAdd: didAdd, didRemove: didRemove)
         return .Ok(ret)
     }
-    
+
     private func applyLogToCurrentRelationAndGetChanges<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log) -> Result<RelationChange, RelationError> {
-        let before = currentChange
+        let before = currentChange.copy()
         let result = applyLogToCurrentRelation(log)
         return result.map({ didAdd, didRemove in
             let after = currentChange
@@ -279,7 +282,7 @@ extension ChangeLoggingRelation {
     func deriveChangeLoggingRelation() -> ChangeLoggingRelation<BaseRelation> {
         let relation = ChangeLoggingRelation(baseRelation: self.baseRelation)
         relation.log = self.log
-        relation.currentChange = self.currentChange
+        relation.currentChange = self.currentChange.copy()
         return relation
     }
     

@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-import Darwin
+import Foundation
 
 
 public class TransactionalDatabase {
@@ -13,7 +13,8 @@ public class TransactionalDatabase {
     
     var relations: [String: TransactionalRelation] = [:]
     
-    let lock = RWLock()
+    let readWriteLock = RWLock()
+    let transactionLock = NSLock()
     
     var currentTransactionThread: pthread_t = nil
     
@@ -39,17 +40,17 @@ public class TransactionalDatabase {
     }
     
     public func lockReading() {
-        lock.readLock()
+        readWriteLock.readLock()
     }
     
     public func unlockReading() {
-        lock.unlock()
+        readWriteLock.unlock()
     }
     
     public func beginTransaction() {
-        precondition(!inTransaction, "We don't do nested transactions (yet?)")
+        transactionLock.lock()
         
-        lock.writeLock()
+        precondition(!inTransaction, "We don't do nested transactions (yet?)")
         
         for (_, r) in relations {
             self.beginTransactionForRelation(r)
@@ -67,34 +68,40 @@ public class TransactionalDatabase {
         precondition(inTransaction, "Can't end transaction when we're not in one")
         
         var changes: [(TransactionalRelation, RelationChange)] = []
-        for (_, r) in relations {
-            let result = endTransactionForRelation(r)
-            switch result {
-            case .Ok(let change):
-                changes.append((r, change))
-            case .Err(let err):
-                return .Err(err)
+        
+        let result: Result<Void, RelationError> = readWriteLock.write({
+            for (_, r) in relations {
+                let result = endTransactionForRelation(r)
+                switch result {
+                case .Ok(let change):
+                    changes.append((r, change))
+                case .Err(let err):
+                    return .Err(err)
+                }
+            }
+            
+            inTransaction = false
+            currentTransactionThread = nil
+            transactionLock.unlock()
+            
+            return .Ok()
+        })
+        
+        if result.ok != nil {
+            for (r, _) in changes {
+                r.notifyObserversTransactionBegan(.DirectChange)
+            }
+            
+            for (r, change) in changes {
+                r.notifyChangeObservers(change, kind: .DirectChange)
+            }
+            
+            for (r, _) in changes {
+                r.notifyObserversTransactionEnded(.DirectChange)
             }
         }
         
-        for (r, _) in changes {
-            r.notifyObserversTransactionBegan(.DirectChange)
-        }
-        
-        for (r, change) in changes {
-            r.notifyChangeObservers(change, kind: .DirectChange)
-        }
-        
-        for (r, _) in changes {
-            r.notifyObserversTransactionEnded(.DirectChange)
-        }
-        
-        inTransaction = false
-        currentTransactionThread = nil
-        
-        lock.unlock()
-        
-        return .Ok()
+        return result
     }
     
     func endTransactionForRelation(r: TransactionalRelation) -> Result<RelationChange, RelationError> {
@@ -154,11 +161,15 @@ extension TransactionalDatabase {
         }
         
         public var underlyingRelationForQueryExecution: Relation {
-            return (transactionRelation ?? underlyingRelation).underlyingRelationForQueryExecution
+            if let db = db where !db.inTransactionThread {
+                return underlyingRelation.underlyingRelationForQueryExecution
+            } else {
+                return (transactionRelation ?? underlyingRelation).underlyingRelationForQueryExecution
+            }
         }
         
         public func contains(row: Row) -> Result<Bool, RelationError> {
-            return (transactionRelation ?? underlyingRelation).contains(row)
+            return underlyingRelationForQueryExecution.contains(row)
         }
         
         public func add(row: Row) -> Result<Int64, RelationError> {
