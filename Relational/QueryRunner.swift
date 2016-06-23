@@ -127,8 +127,18 @@ class QueryRunner {
             writeOutput(rows, fromNode: nodeIndex)
             activeInitiatorIndexes.removeLast()
             markDone(nodeIndex)
+        case .MemoryTableScan(let relation):
+            writeOutput(relation.values, fromNode: nodeIndex)
+            activeInitiatorIndexes.removeLast()
+            markDone(nodeIndex)
         default:
-            fatalError("Unknown initiator operation \(op)")
+            // These shenanigans let us print the operation without descending into an infinite recursion
+            // from trying to print the contents of Relations contained within. We cut off subsequent lines
+            // to avoid leaking data from the Relation contents, just in case there's something sensitive.
+            var stream = ""
+            dump(op, &stream)
+            let firstLine = stream.componentsSeparatedByString("\n").first ?? "(empty)"
+            fatalError("Unknown initiator operation \(firstLine)")
         }
         
         return .Ok()

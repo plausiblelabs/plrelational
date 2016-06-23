@@ -56,6 +56,14 @@ public struct Row: Hashable {
             }
         })))
     }
+    
+    /// Produce a new Row by applying updated values to this Row. Any attributes that exist in `newValues`
+    /// but not `self` will be added. Any attributes that exist in both will be set to the new value.
+    /// Attributes only in `self` are left alone.
+    public func rowWithUpdate(newValues: Row) -> Row {
+        let updatedValues = values + newValues.values
+        return Row(values: updatedValues)
+    }
 }
 
 extension Row: DictionaryLiteralConvertible {

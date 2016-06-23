@@ -188,6 +188,7 @@
 		C2B53CB51D1862ED006B6278 /* Mutex.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CB41D1862ED006B6278 /* Mutex.swift */; };
 		C2B53CBB1D197814006B6278 /* RWLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CBA1D197814006B6278 /* RWLock.swift */; };
 		C2B53CBD1D1AF4FC006B6278 /* DeallocObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CBC1D1AF4FC006B6278 /* DeallocObservation.swift */; };
+		C2B53CBF1D1C2B0A006B6278 /* MemoryTableRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CBE1D1C2B0A006B6278 /* MemoryTableRelation.swift */; };
 		C2BD29921CD251870081FD05 /* Flight.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
 		C2BD29931CD251870081FD05 /* Store.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
@@ -626,6 +627,7 @@
 		C2B53CB41D1862ED006B6278 /* Mutex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Mutex.swift; path = Relational/Mutex.swift; sourceTree = "<group>"; };
 		C2B53CBA1D197814006B6278 /* RWLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RWLock.swift; path = Relational/RWLock.swift; sourceTree = "<group>"; };
 		C2B53CBC1D1AF4FC006B6278 /* DeallocObservation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DeallocObservation.swift; path = Relational/DeallocObservation.swift; sourceTree = "<group>"; };
+		C2B53CBE1D1C2B0A006B6278 /* MemoryTableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoryTableRelation.swift; sourceTree = "<group>"; };
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
 		C2BD29911CD251870081FD05 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 		C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteBinding.swift; sourceTree = "<group>"; };
@@ -1236,6 +1238,7 @@
 				C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */,
 				C257C74F1CBEB18A00234A89 /* FunctionalDependency.swift */,
 				C23AAF451CF76CFA009E28E0 /* IntermediateRelation.swift */,
+				C2B53CBE1D1C2B0A006B6278 /* MemoryTableRelation.swift */,
 				3727076C1CEE60C900710C80 /* MutableRelation.swift */,
 				C23AAF471CF8CD89009E28E0 /* QueryPlanner.swift */,
 				C23AAF4B1CF8DAED009E28E0 /* QueryRunner.swift */,
@@ -2097,6 +2100,7 @@
 				C22921D81CD12A9E00518184 /* ModelError.swift in Sources */,
 				C277E8071CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift in Sources */,
 				C22921D91CD12A9E00518184 /* ModelHelpers.swift in Sources */,
+				C2B53CBF1D1C2B0A006B6278 /* MemoryTableRelation.swift in Sources */,
 				C22921DA1CD12AA200518184 /* ModelDatabase.swift in Sources */,
 				C2B339DE1CEA54E7008568E9 /* RelationDump.swift in Sources */,
 				C22921DB1CD12AA200518184 /* ModelRelation.swift in Sources */,

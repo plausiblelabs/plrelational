@@ -27,7 +27,7 @@ class QueryPlanner {
     var initiatorIndexes: [Int] {
         return (nodes.indices).filter({
             switch nodes[$0].op {
-            case .SQLiteTableScan, .ConcreteRows:
+            case .SQLiteTableScan, .ConcreteRows, .MemoryTableScan:
                 return true
             default:
                 return false
@@ -108,6 +108,8 @@ class QueryPlanner {
             return Node(op: .ConcreteRows(r.values), parentIndexes: [])
         case let r as SQLiteRelation:
             return Node(op: .SQLiteTableScan(r), parentIndexes: [])
+        case let r as MemoryTableRelation:
+            return Node(op: .MemoryTableScan(r))
         default:
             fatalError("Don't know how to handle node type \(r.dynamicType)")
         }
@@ -175,6 +177,7 @@ extension QueryPlanner {
     enum Operation {
         case SQLiteTableScan(SQLiteRelation)
         case ConcreteRows(Set<Row>)
+        case MemoryTableScan(MemoryTableRelation)
         
         case Union
         case Intersection
