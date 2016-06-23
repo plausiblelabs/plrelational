@@ -38,13 +38,13 @@ class RWLock {
         pthread_rwlock_unlock(lock)
     }
     
-    func read<T>(f: Void -> T) -> T {
+    func read<T>(@noescape f: Void -> T) -> T {
         readLock()
         defer { unlock() }
         return f()
     }
     
-    func write<T>(f: Void -> T) -> T {
+    func write<T>(@noescape f: Void -> T) -> T {
         writeLock()
         defer { unlock() }
         return f()
