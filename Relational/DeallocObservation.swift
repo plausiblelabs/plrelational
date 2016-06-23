@@ -11,27 +11,26 @@ import Foundation
 /// - parameter f: The function to call when `target` is deallocated.
 /// - returns: A removal function. Call this to remove the observation before `target` has been deallocated.
 public func ObserveDeallocation(target: AnyObject, _ f: Void -> Void) -> (Void -> Void) {
-    lock.lock()
-    defer { lock.unlock() }
-    
-    let callOnDeinit: CallOnDeinit
-    if let obj = objc_getAssociatedObject(target, key) as? CallOnDeinit {
-        callOnDeinit = obj
-    } else {
-        callOnDeinit = CallOnDeinit()
-        objc_setAssociatedObject(target, key, callOnDeinit, .OBJC_ASSOCIATION_RETAIN)
-    }
-    
-    let counter = callOnDeinit.counter
-    callOnDeinit.counter += 1
-    
-    callOnDeinit.calls[counter] = f
-    
-    return { [weak callOnDeinit] in
-        lock.lock()
-        defer { lock.unlock() }
-        callOnDeinit?.calls.removeValueForKey(counter)
-    }
+    return mutex.locked({
+        let callOnDeinit: CallOnDeinit
+        if let obj = objc_getAssociatedObject(target, key) as? CallOnDeinit {
+            callOnDeinit = obj
+        } else {
+            callOnDeinit = CallOnDeinit()
+            objc_setAssociatedObject(target, key, callOnDeinit, .OBJC_ASSOCIATION_RETAIN)
+        }
+        
+        let counter = callOnDeinit.counter
+        callOnDeinit.counter += 1
+        
+        callOnDeinit.calls[counter] = f
+        
+        return { [weak callOnDeinit] in
+            mutex.locked({
+                callOnDeinit?.calls.removeValueForKey(counter)
+            })
+        }
+    })
 }
 
 private class CallOnDeinit {
@@ -45,5 +44,5 @@ private class CallOnDeinit {
     }
 }
 
-private let lock = NSLock()
+private let mutex = Mutex()
 private let key = malloc(1)
