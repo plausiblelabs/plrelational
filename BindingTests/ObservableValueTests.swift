@@ -358,42 +358,42 @@ class ObservableValueTests: BindingTestCase {
         changeObserved = false
     }
     
-    func testPropertyConversion() {
-        let observable = mutableObservableValue("1")
-        let property = observable.property
-        
-        var observableChange: String?
-        _ = observable.addChangeObserver({ value, _ in observableChange = value })
-
-        var propertyChange: String?
-        _ = property.signal.observe({ value, _ in propertyChange = value })
-
-        let metadata = ChangeMetadata(transient: false)
-
-        // Verify that property reflects initial observable value
-        XCTAssertEqual(observable.value, "1")
-        XCTAssertEqual(property.get(), "1")
-        XCTAssertEqual(observableChange, nil)
-        XCTAssertEqual(propertyChange, nil)
-        observableChange = nil
-        propertyChange = nil
-
-        // Verify that property reflects changes made to the observable
-        observable.update("2", metadata)
-        XCTAssertEqual(observable.value, "2")
-        XCTAssertEqual(property.get(), "2")
-        XCTAssertEqual(observableChange, "2")
-        XCTAssertEqual(propertyChange, "2")
-        observableChange = nil
-        propertyChange = nil
-        
-        // Verify that observable reflects changes made to the property
-        property.set("3", metadata)
-        XCTAssertEqual(observable.value, "3")
-        XCTAssertEqual(property.get(), "3")
-        XCTAssertEqual(observableChange, "3")
-        XCTAssertEqual(propertyChange, "3")
-        observableChange = nil
-        propertyChange = nil
-    }
+//    func testPropertyConversion() {
+//        let observable = mutableObservableValue("1")
+//        let property = observable.property
+//        
+//        var observableChange: String?
+//        _ = observable.addChangeObserver({ value, _ in observableChange = value })
+//
+//        var propertyChange: String?
+//        _ = property.signal.observe({ value, _ in propertyChange = value })
+//
+//        let metadata = ChangeMetadata(transient: false)
+//
+//        // Verify that property reflects initial observable value
+//        XCTAssertEqual(observable.value, "1")
+//        XCTAssertEqual(property.get(), "1")
+//        XCTAssertEqual(observableChange, nil)
+//        XCTAssertEqual(propertyChange, nil)
+//        observableChange = nil
+//        propertyChange = nil
+//
+//        // Verify that property reflects changes made to the observable
+//        observable.update("2", metadata)
+//        XCTAssertEqual(observable.value, "2")
+//        XCTAssertEqual(property.get(), "2")
+//        XCTAssertEqual(observableChange, "2")
+//        XCTAssertEqual(propertyChange, "2")
+//        observableChange = nil
+//        propertyChange = nil
+//        
+//        // Verify that observable reflects changes made to the property
+//        property.set("3", metadata)
+//        XCTAssertEqual(observable.value, "3")
+//        XCTAssertEqual(property.get(), "3")
+//        XCTAssertEqual(observableChange, "3")
+//        XCTAssertEqual(propertyChange, "3")
+//        observableChange = nil
+//        propertyChange = nil
+//    }
 }
