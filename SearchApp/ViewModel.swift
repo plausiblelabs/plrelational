@@ -74,23 +74,20 @@ class ViewModel {
         removals.forEach{ $0() }
     }
     
-    lazy var queryString: MutableObservableValue<String> = { [unowned self] in
-        let query = mutableObservableValue("")
-        let removal = query.addChangeObserver({ _ in
-            if query.value.isEmpty {
-                self.personResults.selectExpression = false
+    lazy var queryString: BidiProperty<String> = { [unowned self] in
+        return ValueBidiProperty("", { [weak self] query, _ in
+            if query.isEmpty {
+                self?.personResults.selectExpression = false
             } else {
-                self.personResults.selectExpression = SelectExpressionBinaryOperator(lhs: Attribute("name"), op: GlobComparator(), rhs: "\(query.value)*")
+                self?.personResults.selectExpression = SelectExpressionBinaryOperator(lhs: Attribute("name"), op: GlobComparator(), rhs: "\(query)*")
             }
         })
-        self.removals.append(removal)
-        return query
     }()
     
     lazy var listViewModel: ListViewModel<RowArrayElement> = { [unowned self] in
         
-        func selectionBinding(relation: MutableRelation) -> MutableObservableValue<Set<RelationValue>> {
-            return self.undoableDB.observe(
+        func selectionBidiProperty(relation: MutableRelation) -> BidiProperty<Set<RelationValue>> {
+            return self.undoableDB.bidiProperty(
                 relation,
                 action: "Change Selection",
                 get: { $0.allValues },
@@ -106,13 +103,14 @@ class ViewModel {
             data: self.personResults.observableArray(),
             contextMenu: nil,
             move: nil,
-            selection: selectionBinding(self.selectedPersonID),
+            selection: selectionBidiProperty(self.selectedPersonID),
             cellIdentifier: { _ in "Cell" },
             cellText: { row in
                 let rowID = row["id"]
                 return self.persons
                     .select(Attribute("id") *== rowID)
                     .observable{ $0.oneValue(cellString, orDefault: "") }
+                    .property
             },
             cellImage: nil
         )
@@ -124,30 +122,16 @@ class ViewModel {
         return self.selectedPersonID.empty
     }()
 
-    lazy var recordClicked: MutableObservableValue<Bool> = { [unowned self] in
-        let clicked = mutableObservableValue(false)
-        let removal = clicked.addChangeObserver({ _ in
-            if clicked.value {
-                Swift.print("TODO: INCREMENT SALES")
-            }
-        })
-        self.removals.append(removal)
-        return clicked
-    }()
+    lazy var recordClicked: ActionProperty = ActionProperty {
+        Swift.print("TODO: INCREMENT SALES")
+    }
 
     lazy var saveDisabled: ObservableValue<Bool> = { [unowned self] in
         // TODO: Return true only when there are no changes
         return ObservableValue.constant(true)
     }()
     
-    lazy var saveClicked: MutableObservableValue<Bool> = { [unowned self] in
-        let clicked = mutableObservableValue(false)
-        let removal = clicked.addChangeObserver({ _ in
-            if clicked.value {
-                Swift.print("TODO: SAVE CHANGES")
-            }
-        })
-        self.removals.append(removal)
-        return clicked
-    }()
+    lazy var saveClicked: ActionProperty = ActionProperty {
+        Swift.print("TODO: SAVE CHANGES")
+    }
 }

@@ -364,4 +364,32 @@ class PropertyTests: XCTestCase {
         propertyChange = nil
         observableChange = nil
     }
+    
+    func testActionProperty() {
+        var changeCount = 0
+        let property = ActionProperty {
+            changeCount += 1
+        }
+
+        XCTAssertEqual(changeCount, 0)
+
+        let (signal, notify) = Signal<()>.pipe()
+        XCTAssertEqual(signal.observerCount, 0)
+        
+        let binding = signal ~~> property
+        XCTAssertEqual(changeCount, 0)
+        XCTAssertEqual(signal.observerCount, 1)
+        
+        notify(newValue: (), metadata: ChangeMetadata(transient: false))
+        XCTAssertEqual(changeCount, 1)
+        XCTAssertEqual(signal.observerCount, 1)
+        
+        notify(newValue: (), metadata: ChangeMetadata(transient: false))
+        XCTAssertEqual(changeCount, 2)
+        XCTAssertEqual(signal.observerCount, 1)
+        
+        binding.unbind()
+        XCTAssertEqual(changeCount, 2)
+        XCTAssertEqual(signal.observerCount, 0)
+    }
 }
