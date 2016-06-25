@@ -123,6 +123,8 @@
 		37A1CEEF1D14A5560067870D /* RelationBidiPropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEEE1D14A5560067870D /* RelationBidiPropertyTests.swift */; };
 		37A4A23A1D1DB343005CAEA5 /* ValueProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2391D1DB343005CAEA5 /* ValueProperty.swift */; };
 		37A4A23C1D1DB3DC005CAEA5 /* ValuePropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23B1D1DB3DC005CAEA5 /* ValuePropertyTests.swift */; };
+		37A4A23E1D1F1677005CAEA5 /* RelationProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */; };
+		37A4A2401D1F4FD9005CAEA5 /* RelationPropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -544,6 +546,8 @@
 		37A1CEEE1D14A5560067870D /* RelationBidiPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationBidiPropertyTests.swift; path = BindingTests/RelationBidiPropertyTests.swift; sourceTree = "<group>"; };
 		37A4A2391D1DB343005CAEA5 /* ValueProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ValueProperty.swift; path = Binding/ValueProperty.swift; sourceTree = "<group>"; };
 		37A4A23B1D1DB3DC005CAEA5 /* ValuePropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ValuePropertyTests.swift; path = BindingTests/ValuePropertyTests.swift; sourceTree = "<group>"; };
+		37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationProperty.swift; path = Binding/RelationProperty.swift; sourceTree = "<group>"; };
+		37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationPropertyTests.swift; path = BindingTests/RelationPropertyTests.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -1013,6 +1017,8 @@
 				37A1CEEA1D1480120067870D /* PropertyTests.swift */,
 				37A4A2391D1DB343005CAEA5 /* ValueProperty.swift */,
 				37A4A23B1D1DB3DC005CAEA5 /* ValuePropertyTests.swift */,
+				37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */,
+				37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */,
 				37A1CEEC1D14A32C0067870D /* RelationBidiProperty.swift */,
 				37A1CEEE1D14A5560067870D /* RelationBidiPropertyTests.swift */,
 			);
@@ -1919,6 +1925,7 @@
 				372707B41CFE240E00710C80 /* Observable.swift in Sources */,
 				372707B61CFE240E00710C80 /* RelationObservableValue.swift in Sources */,
 				372707BA1CFE240E00710C80 /* ObservableTree.swift in Sources */,
+				37A4A23E1D1F1677005CAEA5 /* RelationProperty.swift in Sources */,
 				372707B71CFE240E00710C80 /* CommonValue.swift in Sources */,
 				372707B91CFE240E00710C80 /* RelationObservableArray.swift in Sources */,
 				37A4A23A1D1DB343005CAEA5 /* ValueProperty.swift in Sources */,
@@ -1945,6 +1952,7 @@
 				372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */,
 				372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */,
 				37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */,
+				37A4A2401D1F4FD9005CAEA5 /* RelationPropertyTests.swift in Sources */,
 				372707D61CFE25D400710C80 /* RelationObservableValueTests.swift in Sources */,
 				372707D81CFE25D400710C80 /* RelationObservableTreeTests.swift in Sources */,
 				37A4A23C1D1DB3DC005CAEA5 /* ValuePropertyTests.swift in Sources */,
