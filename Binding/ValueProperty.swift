@@ -71,11 +71,75 @@ extension ReadablePropertyType {
         return MappedValueProperty(property: self, transform: transform, valueChanging: valueChanging)
     }
     
-    /// Returns a ValueProperty whose value is derived from this ValueProperty's `value`.
-    /// The given `transform` will be applied whenever this ValueProperty`s value changes.
+    /// Returns a ReadableProperty whose value is derived from this property's `value`.
+    /// The given `transform` will be applied whenever this property's value changes.
     public func map<U: Equatable>(transform: Self.Value -> U) -> ReadableProperty<U> {
         return MappedValueProperty(property: self, transform: transform, valueChanging: valueChanging)
     }
+}
+
+/// Returns a ReadableProperty whose value is a tuple (pair) containing the `value` from
+/// each of the given properties.  The returned property's `value` will contain a fresh tuple
+/// any time the value of either input changes.
+public func zip<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(lhs: LHS, _ rhs: RHS) -> ReadableProperty<(LHS.Value, RHS.Value)> {
+    return BinaryOpValueProperty(lhs, rhs, { ($0, $1) }, valueChanging)
+}
+
+/// Returns a ReadableProperty whose value is the negation of the boolean value of the given property.
+public func not<P: ReadablePropertyType where P.Value: BooleanType>(property: P) -> ReadableProperty<Bool> {
+    return property.map{ !$0.boolValue }
+}
+
+extension ReadablePropertyType where Value: BooleanType {
+    /// Returns a ReadableProperty whose value resolves to `self.value || other.value`.  The returned
+    /// property's value will be recomputed any time the value of either input changes.
+    public func or(other: Self) -> ReadableProperty<Bool> {
+        return BinaryOpValueProperty(self, other, { $0.boolValue || $1.boolValue }, valueChanging)
+    }
+    
+    /// Returns a ReadableProperty whose value resolves to `self.value && other.value`.  The returned
+    /// property's value will be recomputed any time the value of either input changes.
+    public func and(other: Self) -> ReadableProperty<Bool> {
+        return BinaryOpValueProperty(self, other, { $0.boolValue && $1.boolValue }, valueChanging)
+    }
+    
+    /// Returns a ReadableProperty that invokes the given function whenever this property's
+    /// value resolves to `true`.
+    public func then(f: () -> Void) -> ReadableProperty<()> {
+        return MappedValueProperty(
+            property: self,
+            transform: { if $0.boolValue { f() } },
+            valueChanging: { _ in false }
+        )
+    }
+}
+
+// TODO: This syntax is same as SelectExpression operators; maybe we should use something different
+infix operator *|| {
+    associativity left
+    precedence 110
+}
+
+infix operator *&& {
+    associativity left
+    precedence 120
+}
+
+public func *||<P: ReadablePropertyType where P.Value: BooleanType>(lhs: P, rhs: P) -> ReadableProperty<Bool> {
+    return lhs.or(rhs)
+}
+
+public func *&&<P: ReadablePropertyType where P.Value: BooleanType>(lhs: P, rhs: P) -> ReadableProperty<Bool> {
+    return lhs.and(rhs)
+}
+
+infix operator *== {
+    associativity none
+    precedence 130
+}
+
+public func *==<P: ReadablePropertyType where P.Value: Equatable>(lhs: P, rhs: P) -> ReadableProperty<Bool> {
+    return BinaryOpValueProperty(lhs, rhs, { $0 == $1 }, valueChanging)
 }
 
 private class MappedValueProperty<T>: ReadableProperty<T> {
@@ -83,7 +147,9 @@ private class MappedValueProperty<T>: ReadableProperty<T> {
     
     init<P: ReadablePropertyType>(property: P, transform: (P.Value) -> T, valueChanging: (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
+        
         super.init(initialValue: transform(property.value), signal: signal, notify: notify, changing: valueChanging)
+        
         self.removal = property.signal.observe({ [weak self] _, metadata in
             self?.setValue(transform(property.value), metadata)
         })
@@ -91,5 +157,28 @@ private class MappedValueProperty<T>: ReadableProperty<T> {
     
     deinit {
         removal()
+    }
+}
+
+private class BinaryOpValueProperty<T>: ReadableProperty<T> {
+    private var removal1: ObserverRemoval!
+    private var removal2: ObserverRemoval!
+    
+    init<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(_ lhs: LHS, _ rhs: RHS, _ f: (LHS.Value, RHS.Value) -> T, _ valueChanging: (T, T) -> Bool) {
+        let (signal, notify) = Signal<T>.pipe()
+
+        super.init(initialValue: f(lhs.value, rhs.value), signal: signal, notify: notify, changing: valueChanging)
+        
+        self.removal1 = lhs.signal.observe({ [weak self] _, metadata in
+            self?.setValue(f(lhs.value, rhs.value), metadata)
+        })
+        self.removal2 = rhs.signal.observe({ [weak self] _, metadata in
+            self?.setValue(f(lhs.value, rhs.value), metadata)
+        })
+    }
+    
+    deinit {
+        removal1()
+        removal2()
     }
 }

@@ -378,22 +378,6 @@ extension MutableObservableValue where T: BooleanType {
     }
 }
 
-//extension ObservableValue {
-//    /// Returns a `BidiProperty` that wraps this `ObservableValue`.
-//    public var property: BidiProperty<T> {
-//        return BidiProperty(
-//            get: {
-//                return self.value
-//            },
-//            set: { (newValue: T, metadata: ChangeMetadata) in
-//                self.setValue(newValue, metadata)
-//            },
-//            signal: self.signal,
-//            notify: self.notify
-//        )
-//    }
-//}
-
 internal func valueChanging<T>(v0: T, v1: T) -> Bool {
     return true
 }
