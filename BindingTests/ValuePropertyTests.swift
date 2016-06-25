@@ -238,4 +238,103 @@ class ValuePropertyTests: BindingTestCase {
         XCTAssertEqual(count, 2)
         XCTAssertEqual(changeObserved, false)
     }
+    
+    func testAnyTrue() {
+        let property1 = mutableValueProperty(false)
+        let property2 = mutableValueProperty(false)
+        let properties: [MutableValueProperty<Bool>] = [property1, property2]
+        let mapped = properties.anyTrue()
+        var changeObserved = false
+        _ = mapped.signal.observe({ _ in changeObserved = true })
+        
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        property1.change(true, transient: false)
+        XCTAssertEqual(mapped.value, true)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        property2.change(true, transient: false)
+        XCTAssertEqual(mapped.value, true)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        property2.change(false, transient: false)
+        XCTAssertEqual(mapped.value, true)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        property1.change(false, transient: false)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+    }
+    
+    func testAllTrue() {
+        let property1 = mutableValueProperty(false)
+        let property2 = mutableValueProperty(false)
+        let properties: [MutableValueProperty<Bool>] = [property1, property2]
+        let mapped = properties.allTrue()
+        var changeObserved = false
+        _ = mapped.signal.observe({ _ in changeObserved = true })
+        
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        property1.change(true, transient: false)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        property2.change(true, transient: false)
+        XCTAssertEqual(mapped.value, true)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        property2.change(false, transient: false)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        property1.change(false, transient: false)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+    }
+    
+    func testNoneTrue() {
+        let property1 = mutableValueProperty(false)
+        let property2 = mutableValueProperty(false)
+        let properties: [MutableValueProperty<Bool>] = [property1, property2]
+        let mapped = properties.noneTrue()
+        var changeObserved = false
+        _ = mapped.signal.observe({ _ in changeObserved = true })
+        
+        XCTAssertEqual(mapped.value, true)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        property1.change(true, transient: false)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        property2.change(true, transient: false)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        property2.change(false, transient: false)
+        XCTAssertEqual(mapped.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        property1.change(false, transient: false)
+        XCTAssertEqual(mapped.value, true)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+    }
 }

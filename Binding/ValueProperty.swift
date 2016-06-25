@@ -142,6 +142,26 @@ public func *==<P: ReadablePropertyType where P.Value: Equatable>(lhs: P, rhs: P
     return BinaryOpValueProperty(lhs, rhs, { $0 == $1 }, valueChanging)
 }
 
+extension SequenceType where Generator.Element: ReadablePropertyType, Generator.Element.Value: BooleanType {
+    /// Returns a ReadableProperty whose value resolves to `true` if *any* of the properties
+    /// in this sequence resolve to `true`.
+    public func anyTrue() -> ReadableProperty<Bool> {
+        return AnyTrueValueProperty(properties: self)
+    }
+    
+    /// Returns a ReadableProperty whose value resolves to `true` if *all* of the properties
+    /// in this sequence resolve to `true`.
+    public func allTrue() -> ReadableProperty<Bool> {
+        return AllTrueValueProperty(properties: self)
+    }
+    
+    /// Returns a ValueProperty whose value resolves to `true` if *none* of the properties
+    /// in this sequence resolve to `true`.
+    public func noneTrue() -> ReadableProperty<Bool> {
+        return NoneTrueValueProperty(properties: self)
+    }
+}
+
 private class MappedValueProperty<T>: ReadableProperty<T> {
     private var removal: ObserverRemoval!
     
@@ -180,5 +200,111 @@ private class BinaryOpValueProperty<T>: ReadableProperty<T> {
     deinit {
         removal1()
         removal2()
+    }
+}
+
+private class AnyTrueValueProperty: ReadableProperty<Bool> {
+    private var removals: [ObserverRemoval] = []
+    
+    init<S: SequenceType where S.Generator.Element: ReadablePropertyType, S.Generator.Element.Value: BooleanType>(properties: S) {
+        let (signal, notify) = Signal<Bool>.pipe()
+
+        func anyTrue() -> Bool {
+            for property in properties {
+                if property.value {
+                    return true
+                }
+            }
+            return false
+        }
+        
+        super.init(initialValue: anyTrue(), signal: signal, notify: notify, changing: valueChanging)
+        
+        for property in properties {
+            let removal = property.signal.observe({ [weak self] _, metadata in
+                let newValue = property.value
+                if newValue {
+                    self?.setValue(true, metadata)
+                } else {
+                    self?.setValue(anyTrue(), metadata)
+                }
+            })
+            removals.append(removal)
+        }
+    }
+    
+    deinit {
+        removals.forEach{ $0() }
+    }
+}
+
+private class AllTrueValueProperty: ReadableProperty<Bool> {
+    private var removals: [ObserverRemoval] = []
+    
+    init<S: SequenceType where S.Generator.Element: ReadablePropertyType, S.Generator.Element.Value: BooleanType>(properties: S) {
+        // TODO: Require at least one element?
+        let (signal, notify) = Signal<Bool>.pipe()
+
+        func allTrue() -> Bool {
+            for property in properties {
+                if !property.value {
+                    return false
+                }
+            }
+            return true
+        }
+        
+        super.init(initialValue: allTrue(), signal: signal, notify: notify, changing: valueChanging)
+        
+        for property in properties {
+            let removal = property.signal.observe({ [weak self] _, metadata in
+                let newValue = property.value
+                if !newValue {
+                    self?.setValue(false, metadata)
+                } else {
+                    self?.setValue(allTrue(), metadata)
+                }
+            })
+            removals.append(removal)
+        }
+    }
+    
+    deinit {
+        removals.forEach{ $0() }
+    }
+}
+
+private class NoneTrueValueProperty: ReadableProperty<Bool> {
+    private var removals: [ObserverRemoval] = []
+    
+    init<S: SequenceType where S.Generator.Element: ReadablePropertyType, S.Generator.Element.Value: BooleanType>(properties: S) {
+        let (signal, notify) = Signal<Bool>.pipe()
+
+        func noneTrue() -> Bool {
+            for property in properties {
+                if property.value {
+                    return false
+                }
+            }
+            return true
+        }
+        
+        super.init(initialValue: noneTrue(), signal: signal, notify: notify, changing: valueChanging)
+        
+        for property in properties {
+            let removal = property.signal.observe({ [weak self] _, metadata in
+                let newValue = property.value
+                if newValue {
+                    self?.setValue(false, metadata)
+                } else {
+                    self?.setValue(noneTrue(), metadata)
+                }
+            })
+            removals.append(removal)
+        }
+    }
+    
+    deinit {
+        removals.forEach{ $0() }
     }
 }

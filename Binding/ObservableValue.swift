@@ -125,25 +125,25 @@ public func *==<T: Equatable>(lhs: ObservableValue<T>, rhs: ObservableValue<T>) 
     return BinaryOpObservableValue(lhs, rhs, { $0 == $1 }, valueChanging)
 }
 
-extension SequenceType where Generator.Element == ObservableValue<Bool> {
-    /// Returns an ObservableValue whose value resolves to `true` if *any* of the ObservableValues
-    /// in this sequence resolve to `true`.
-    public func anyTrue() -> ObservableValue<Bool> {
-        return AnyTrueObservableValue(observables: self)
-    }
-    
-    /// Returns an ObservableValue whose value resolves to `true` if *all* of the ObservableValues
-    /// in this sequence resolve to `true`.
-    public func allTrue() -> ObservableValue<Bool> {
-        return AllTrueObservableValue(observables: self)
-    }
-    
-    /// Returns an ObservableValue whose value resolves to `true` if *none* of the ObservableValues
-    /// in this sequence resolve to `true`.
-    public func noneTrue() -> ObservableValue<Bool> {
-        return NoneTrueObservableValue(observables: self)
-    }
-}
+//extension SequenceType where Generator.Element == ObservableValue<Bool> {
+//    /// Returns an ObservableValue whose value resolves to `true` if *any* of the ObservableValues
+//    /// in this sequence resolve to `true`.
+//    public func anyTrue() -> ObservableValue<Bool> {
+//        return AnyTrueObservableValue(observables: self)
+//    }
+//    
+//    /// Returns an ObservableValue whose value resolves to `true` if *all* of the ObservableValues
+//    /// in this sequence resolve to `true`.
+//    public func allTrue() -> ObservableValue<Bool> {
+//        return AllTrueObservableValue(observables: self)
+//    }
+//    
+//    /// Returns an ObservableValue whose value resolves to `true` if *none* of the ObservableValues
+//    /// in this sequence resolve to `true`.
+//    public func noneTrue() -> ObservableValue<Bool> {
+//        return NoneTrueObservableValue(observables: self)
+//    }
+//}
 
 extension ObservableValue where T: SequenceType, T.Generator.Element: Hashable {
     /// Returns an ObservableValue whose value resolves to a CommonValue that describes this

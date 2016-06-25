@@ -225,107 +225,107 @@ class ObservableValueTests: BindingTestCase {
         XCTAssertEqual(changeObserved, false)
     }
     
-    func testAnyTrue() {
-        let observable1 = mutableObservableValue(false)
-        let observable2 = mutableObservableValue(false)
-        let observables: [ObservableValue<Bool>] = [observable1, observable2]
-        let mapped = observables.anyTrue()
-        var changeObserved = false
-        _ = mapped.addChangeObserver({ _ in changeObserved = true })
-        let metadata = ChangeMetadata(transient: false)
-        
-        XCTAssertEqual(mapped.value, false)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-        
-        observable1.update(true, metadata)
-        XCTAssertEqual(mapped.value, true)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
-        
-        observable2.update(true, metadata)
-        XCTAssertEqual(mapped.value, true)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-        
-        observable2.update(false, metadata)
-        XCTAssertEqual(mapped.value, true)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-        
-        observable1.update(false, metadata)
-        XCTAssertEqual(mapped.value, false)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
-    }
-    
-    func testAllTrue() {
-        let observable1 = mutableObservableValue(false)
-        let observable2 = mutableObservableValue(false)
-        let observables: [ObservableValue<Bool>] = [observable1, observable2]
-        let mapped = observables.allTrue()
-        var changeObserved = false
-        _ = mapped.addChangeObserver({ _ in changeObserved = true })
-        let metadata = ChangeMetadata(transient: false)
-        
-        XCTAssertEqual(mapped.value, false)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-        
-        observable1.update(true, metadata)
-        XCTAssertEqual(mapped.value, false)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-        
-        observable2.update(true, metadata)
-        XCTAssertEqual(mapped.value, true)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
-        
-        observable2.update(false, metadata)
-        XCTAssertEqual(mapped.value, false)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
-        
-        observable1.update(false, metadata)
-        XCTAssertEqual(mapped.value, false)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-    }
-
-    func testNoneTrue() {
-        let observable1 = mutableObservableValue(false)
-        let observable2 = mutableObservableValue(false)
-        let observables: [ObservableValue<Bool>] = [observable1, observable2]
-        let mapped = observables.noneTrue()
-        var changeObserved = false
-        _ = mapped.addChangeObserver({ _ in changeObserved = true })
-        let metadata = ChangeMetadata(transient: false)
-        
-        XCTAssertEqual(mapped.value, true)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-        
-        observable1.update(true, metadata)
-        XCTAssertEqual(mapped.value, false)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
-        
-        observable2.update(true, metadata)
-        XCTAssertEqual(mapped.value, false)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-        
-        observable2.update(false, metadata)
-        XCTAssertEqual(mapped.value, false)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-        
-        observable1.update(false, metadata)
-        XCTAssertEqual(mapped.value, true)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
-    }
+//    func testAnyTrue() {
+//        let observable1 = mutableObservableValue(false)
+//        let observable2 = mutableObservableValue(false)
+//        let observables: [ObservableValue<Bool>] = [observable1, observable2]
+//        let mapped = observables.anyTrue()
+//        var changeObserved = false
+//        _ = mapped.addChangeObserver({ _ in changeObserved = true })
+//        let metadata = ChangeMetadata(transient: false)
+//        
+//        XCTAssertEqual(mapped.value, false)
+//        XCTAssertEqual(changeObserved, false)
+//        changeObserved = false
+//        
+//        observable1.update(true, metadata)
+//        XCTAssertEqual(mapped.value, true)
+//        XCTAssertEqual(changeObserved, true)
+//        changeObserved = false
+//        
+//        observable2.update(true, metadata)
+//        XCTAssertEqual(mapped.value, true)
+//        XCTAssertEqual(changeObserved, false)
+//        changeObserved = false
+//        
+//        observable2.update(false, metadata)
+//        XCTAssertEqual(mapped.value, true)
+//        XCTAssertEqual(changeObserved, false)
+//        changeObserved = false
+//        
+//        observable1.update(false, metadata)
+//        XCTAssertEqual(mapped.value, false)
+//        XCTAssertEqual(changeObserved, true)
+//        changeObserved = false
+//    }
+//    
+//    func testAllTrue() {
+//        let observable1 = mutableObservableValue(false)
+//        let observable2 = mutableObservableValue(false)
+//        let observables: [ObservableValue<Bool>] = [observable1, observable2]
+//        let mapped = observables.allTrue()
+//        var changeObserved = false
+//        _ = mapped.addChangeObserver({ _ in changeObserved = true })
+//        let metadata = ChangeMetadata(transient: false)
+//        
+//        XCTAssertEqual(mapped.value, false)
+//        XCTAssertEqual(changeObserved, false)
+//        changeObserved = false
+//        
+//        observable1.update(true, metadata)
+//        XCTAssertEqual(mapped.value, false)
+//        XCTAssertEqual(changeObserved, false)
+//        changeObserved = false
+//        
+//        observable2.update(true, metadata)
+//        XCTAssertEqual(mapped.value, true)
+//        XCTAssertEqual(changeObserved, true)
+//        changeObserved = false
+//        
+//        observable2.update(false, metadata)
+//        XCTAssertEqual(mapped.value, false)
+//        XCTAssertEqual(changeObserved, true)
+//        changeObserved = false
+//        
+//        observable1.update(false, metadata)
+//        XCTAssertEqual(mapped.value, false)
+//        XCTAssertEqual(changeObserved, false)
+//        changeObserved = false
+//    }
+//
+//    func testNoneTrue() {
+//        let observable1 = mutableObservableValue(false)
+//        let observable2 = mutableObservableValue(false)
+//        let observables: [ObservableValue<Bool>] = [observable1, observable2]
+//        let mapped = observables.noneTrue()
+//        var changeObserved = false
+//        _ = mapped.addChangeObserver({ _ in changeObserved = true })
+//        let metadata = ChangeMetadata(transient: false)
+//        
+//        XCTAssertEqual(mapped.value, true)
+//        XCTAssertEqual(changeObserved, false)
+//        changeObserved = false
+//        
+//        observable1.update(true, metadata)
+//        XCTAssertEqual(mapped.value, false)
+//        XCTAssertEqual(changeObserved, true)
+//        changeObserved = false
+//        
+//        observable2.update(true, metadata)
+//        XCTAssertEqual(mapped.value, false)
+//        XCTAssertEqual(changeObserved, false)
+//        changeObserved = false
+//        
+//        observable2.update(false, metadata)
+//        XCTAssertEqual(mapped.value, false)
+//        XCTAssertEqual(changeObserved, false)
+//        changeObserved = false
+//        
+//        observable1.update(false, metadata)
+//        XCTAssertEqual(mapped.value, true)
+//        XCTAssertEqual(changeObserved, true)
+//        changeObserved = false
+//    }
 
     func testMutableObservableBool() {
         let observable = mutableObservableValue(false)
