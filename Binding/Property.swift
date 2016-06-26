@@ -5,6 +5,14 @@
 
 import Foundation
 
+public struct ChangeMetadata {
+    public let transient: Bool
+    
+    public init(transient: Bool) {
+        self.transient = transient
+    }
+}
+
 public enum ChangeResult<T> { case
     Change(T),
     NoChange
@@ -315,4 +323,20 @@ infix operator <~> {
 
 public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Binding {
     return lhs.bindBidi(rhs)
+}
+
+internal func valueChanging<T>(v0: T, v1: T) -> Bool {
+    return true
+}
+
+internal func valueChanging<T: Equatable>(v0: T, v1: T) -> Bool {
+    return v0 != v1
+}
+
+internal func valueChanging<T>(v0: T?, v1: T?) -> Bool {
+    return true
+}
+
+internal func valueChanging<T: Equatable>(v0: T?, v1: T?) -> Bool {
+    return v0 != v1
 }
