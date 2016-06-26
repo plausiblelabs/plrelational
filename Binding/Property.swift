@@ -286,33 +286,33 @@ public class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
 //}
 //
 //
-//// This syntax is borrowed from ReactiveCocoa.
-//infix operator <~ {
+// This syntax is borrowed from ReactiveCocoa.
+infix operator <~ {
+    associativity right
+    precedence 93
+}
+
+public func <~ <T, RHS: ReadablePropertyType where RHS.Value == T>(lhs: BindableProperty<T>, rhs: RHS) -> Binding {
+    return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
+}
+
+// TODO: It seems that `~>` is defined somewhere already (not sure where exactly), so to avoid
+// conflicts we use `~~>` here instead
+//infix operator ~~> {
 //    associativity right
 //    precedence 93
 //}
 //
-//public func <~ <T, RHS: ReadableProperty where RHS.Value==T>(lhs: BindableProperty<T>, rhs: RHS) -> Binding {
-//    return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
+//public func ~~> (lhs: Signal<()>, rhs: ActionProperty) -> Binding {
+//    // TODO: We invent an owner here; what if no one else owns the signal?
+//    return rhs.bind(lhs, initialValue: nil, owner: "")
 //}
-//
-//// TODO: It seems that `~>` is defined somewhere already (not sure where exactly), so to avoid
-//// conflicts we use `~~>` here instead
-////infix operator ~~> {
-////    associativity right
-////    precedence 93
-////}
-////
-////public func ~~> (lhs: Signal<()>, rhs: ActionProperty) -> Binding {
-////    // TODO: We invent an owner here; what if no one else owns the signal?
-////    return rhs.bind(lhs, initialValue: nil, owner: "")
-////}
-//
-//infix operator <~> {
-//    associativity right
-//    precedence 93
-//}
-//
-//public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Binding {
-//    return lhs.bindBidi(rhs)
-//}
+
+infix operator <~> {
+    associativity right
+    precedence 93
+}
+
+public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Binding {
+    return lhs.bindBidi(rhs)
+}
