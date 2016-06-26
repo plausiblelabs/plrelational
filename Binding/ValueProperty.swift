@@ -162,6 +162,14 @@ extension SequenceType where Generator.Element: ReadablePropertyType, Generator.
     }
 }
 
+extension ReadablePropertyType where Value: SequenceType, Value.Generator.Element: Hashable {
+    /// Returns a ReadableProperty whose value resolves to a CommonValue that describes this
+    /// property's sequence.
+    public func common() -> ReadableProperty<CommonValue<Value.Generator.Element>> {
+        return CommonValueProperty(property: self)
+    }
+}
+
 private class MappedValueProperty<T>: ReadableProperty<T> {
     private var removal: ObserverRemoval!
     
@@ -306,5 +314,35 @@ private class NoneTrueValueProperty: ReadableProperty<Bool> {
     
     deinit {
         removals.forEach{ $0() }
+    }
+}
+
+private class CommonValueProperty<T: Hashable>: ReadableProperty<CommonValue<T>> {
+    private var removal: ObserverRemoval!
+    
+    init<S: SequenceType, P: ReadablePropertyType where S.Generator.Element == T, P.Value == S>(property: P) {
+        let (signal, notify) = Signal<CommonValue<T>>.pipe()
+
+        func commonValue() -> CommonValue<T> {
+            let valuesSet = Set(property.value)
+            switch valuesSet.count {
+            case 0:
+                return .None
+            case 1:
+                return .One(valuesSet.first!)
+            default:
+                return .Multi
+            }
+        }
+        
+        super.init(initialValue: commonValue(), signal: signal, notify: notify, changing: valueChanging)
+        
+        self.removal = property.signal.observe({ [weak self] _, metadata in
+            self?.setValue(commonValue(), metadata)
+        })
+    }
+    
+    deinit {
+        removal()
     }
 }

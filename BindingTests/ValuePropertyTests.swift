@@ -337,4 +337,8 @@ class ValuePropertyTests: BindingTestCase {
         XCTAssertEqual(changeObserved, true)
         changeObserved = false
     }
+    
+    func testCommon() {
+        // TODO
+    }
 }
