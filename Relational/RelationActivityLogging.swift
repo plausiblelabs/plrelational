@@ -13,27 +13,27 @@ import Foundation
 #if LOG_RELATION_ACTIVITY
 private struct Flags {
     /// Print the stack trace of each Relation's creation.
-    static let printCreationStacks = true
+    static let printCreationStacks = false
     
     /// Do a simple dump of each top-level Relation that's iterated. Relations iterated while iterating
     /// another Relation aren't considered top-level and don't get dumped.
-    static let dumpTopLevelSimple = true
+    static let dumpTopLevelSimple = false
     
     /// Do a uniquing dump of each top-level Relation that's iterated. This assigns a symbol to Relations
     /// in the tree that are repeatedly referenced so they don't repeat in the dumped representation.
-    static let dumpTopLevelUniquing = true
+    static let dumpTopLevelUniquing = false
     
     /// Dump each top-level Relation that's iterated to a Graphviz dot file which can be rendered graphically.
-    static let dumpTopLevelGraphviz = true
+    static let dumpTopLevelGraphviz = false
     
     /// Do a full (recursive) dump of iterated top-level Relations.
-    static let dumpTopLevelFull = true
+    static let dumpTopLevelFull = false
     
     /// Print information about the beginning, end, and each row of iteration
-    static let printIterations = true
+    static let printIterations = false
     
     /// Collect the running times for each top-level iteration in a given event loop, and print the times in sorted order
-    static let printTopLevelRunningTimes = true
+    static let printTopLevelRunningTimes = false
 }
 #endif
 
