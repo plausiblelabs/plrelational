@@ -45,4 +45,10 @@ public struct Mutexed<T> {
             return try f(&value)
         })
     }
+    
+    /// Fetch the wrapped value. Obviously, only use this when it's safe to use (but not necessarily fetch)
+    /// the value without locking, like with value types.
+    public func get() -> T {
+        return withValue({ $0 })
+    }
 }

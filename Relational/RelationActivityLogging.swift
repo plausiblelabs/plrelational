@@ -47,7 +47,7 @@ struct RelationIterationLoggingData {
 }
 
 #if LOG_RELATION_ACTIVITY
-private var indentLevel = 0
+private var indentLevel = Mutexed(0)
 private var completionScheduled = false
 private var completedTopLevelRelations: [(String, NSTimeInterval)] = []
 #endif
@@ -79,7 +79,7 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
         } else {
             description = String(caller.dynamicType)
         }
-        if indentLevel == 0 {
+        if indentLevel.get() == 0 {
             print("----------")
             print("Starting top-level iteration of \(description)")
             if Flags.dumpTopLevelSimple {
@@ -118,17 +118,17 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
         let now = NSProcessInfo().systemUptime
         
         if Flags.printIterations {
-            let indentString = "".stringByPaddingToLength(indentLevel * 4, withString: " ", startingAtIndex: 0)
+            let indentString = "".stringByPaddingToLength(indentLevel.get() * 4, withString: " ", startingAtIndex: 0)
             print("\(indentString)\(description) began iteration at \(now)")
         }
         
         let data = RelationIterationLoggingData(
             callerDescription: description,
             startTime: now,
-            indentLevel: indentLevel,
-            indentDecrementor: ValueWithDestructor(value: (), destructor: { indentLevel -= 1 })
+            indentLevel: indentLevel.get(),
+            indentDecrementor: ValueWithDestructor(value: (), destructor: { indentLevel.withMutableValue({ $0 -= 1 }) })
         )
-        indentLevel += 1
+        indentLevel.withMutableValue({ $0 += 1 })
         return data
     #else
     return RelationIterationLoggingData()
