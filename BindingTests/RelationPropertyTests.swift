@@ -248,7 +248,11 @@ class RelationPropertyTests: BindingTestCase {
         XCTAssertEqual(changeObserved, true)
         changeObserved = false
 
-        let otherProperty = mutableValueProperty("")
+        // TODO: We use `valueChanging: { true }` here to simulate how TextField.string works
+        // (since that one is an ExternalValueProperty) relative to the "Note" comment below.
+        // Possibly a better way to deal with all this would be to actually notify observers
+        // in the the case where the value is not changing but the transient flag *is* changing.
+        let otherProperty = mutableValueProperty("", valueChanging: { _ in true })
         otherProperty <~> relationProperty
 
         otherProperty.change("dog", transient: true)
@@ -275,6 +279,7 @@ class RelationPropertyTests: BindingTestCase {
         // previous transient value, the value still needs to be committed to the
         // underlying database (although observers will not be notified, since from
         // their perspective the value is not changing)
+        // TODO: This only works because of the `valueChanging` hack for `otherProperty`, see TODO above.
         XCTAssertEqual(relationProperty.value, "dogg")
         XCTAssertEqual(snapshotCount, 1)
         XCTAssertEqual(updateCount, 2)
