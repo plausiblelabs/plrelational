@@ -18,11 +18,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSColor.setIgnoresAlpha(false)
     }
     
-    @IBAction func dumpRelationOnClipboard(sender: AnyObject) {
-        func fail(text: String) {
+    func relationOnClipboard() -> Relation? {
+        func fail(text: String) -> Relation? {
             let alert = NSAlert()
             alert.messageText = text
             alert.informativeText = "To use this debugging facility, copy an address to the clipboard that points to a valid Relation object."
+            return nil
         }
         
         guard let string = NSPasteboard.generalPasteboard().stringForType(NSPasteboardTypeString) else {
@@ -40,6 +41,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return fail("The object at \(string) is not a Relation")
         }
         
-        relation.graphvizDumpAndOpen(showContents: true)
+        return relation
+    }
+    
+    @IBAction func dumpRelationOnClipboard(sender: AnyObject) {
+        relationOnClipboard()?.graphvizDumpAndOpen(showContents: true)
+    }
+    
+    @IBAction func dumpQueryPlanOfRelationOnClipboard(sender: AnyObject) {
+        relationOnClipboard()?.dumpQueryPlanAndOpen()
     }
 }

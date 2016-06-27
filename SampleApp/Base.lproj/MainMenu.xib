@@ -32,6 +32,12 @@
                                     <action selector="dumpRelationOnClipboard:" target="Voe-Tx-rLC" id="9ZH-fx-9lD"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="DEBUG - Dump Query Plan for Relation on Clipboard" id="dDX-dK-6bL">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="dumpQueryPlanOfRelationOnClipboard:" target="Voe-Tx-rLC" id="QKT-YI-u6e"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
                             <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW"/>
                             <menuItem isSeparatorItem="YES" id="wFC-TO-SCJ"/>
