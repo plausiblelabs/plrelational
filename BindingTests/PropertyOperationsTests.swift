@@ -6,29 +6,8 @@
 import XCTest
 @testable import Binding
 
-class ValuePropertyTests: BindingTestCase {
+class PropertyOperationsTests: BindingTestCase {
     
-    func testMutable() {
-        let property = mutableValueProperty(false)
-        
-        var changeObserved = false
-        _ = property.signal.observe({ _ in changeObserved = true })
-
-        XCTAssertEqual(property.value, false)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-
-        property.change(true, transient: false)
-        XCTAssertEqual(property.value, true)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
-
-        property.change(true, transient: false)
-        XCTAssertEqual(property.value, true)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-    }
-
     func testMap() {
         let property = mutableValueProperty(false)
         let mapped = property.map{ $0 ? 1 : 0 }

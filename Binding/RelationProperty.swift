@@ -155,7 +155,7 @@ public struct RelationMutationConfig<T> {
     }
 }
 
-private class RelationBidiProperty<T>: ReadWriteProperty<T> {
+private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
     private var removal: ObserverRemoval!
 
     init(relation: Relation, config: RelationMutationConfig<T>, relationToValue: Relation -> T, valueChanging: (T, T) -> Bool) {
@@ -204,24 +204,24 @@ extension Relation {
     /// Returns a ReadWriteProperty that gets its value from this relation and writes values back to the relation
     /// according to the provided configuration.
     public func property<V>(config: RelationMutationConfig<V>, relationToValue: Relation -> V) -> ReadWriteProperty<V> {
-        return RelationBidiProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
+        return RelationReadWriteProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
-    /// Returns a BidiProperty that gets its value from this relation and writes values back to the relation
+    /// Returns a ReadWriteProperty that gets its value from this relation and writes values back to the relation
     /// according to the provided configuration.
     public func property<V: Equatable>(config: RelationMutationConfig<V>, relationToValue: Relation -> V) -> ReadWriteProperty<V> {
-        return RelationBidiProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
+        return RelationReadWriteProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a ReadWriteProperty that gets its value from this relation and writes values back to the relation
     /// according to the provided configuration.
     public func property<V>(config: RelationMutationConfig<V?>, relationToValue: Relation -> V?) -> ReadWriteProperty<V?> {
-        return RelationBidiProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
+        return RelationReadWriteProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a ReadWriteProperty that gets its value from this relation and writes values back to the relation
     /// according to the provided configuration.
     public func property<V: Equatable>(config: RelationMutationConfig<V?>, relationToValue: Relation -> V?) -> ReadWriteProperty<V?> {
-        return RelationBidiProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
+        return RelationReadWriteProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 }

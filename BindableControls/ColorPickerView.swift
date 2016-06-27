@@ -8,7 +8,7 @@ import Binding
 
 public class ColorPickerView: NSView {
 
-    public lazy var color: BidiProperty<CommonValue<Color>> = { [unowned self] in
+    public lazy var color: ReadWriteProperty<CommonValue<Color>> = { [unowned self] in
         return self.model.color
     }()
     
@@ -23,20 +23,19 @@ public class ColorPickerView: NSView {
         
         // Configure color popup button
         colorPopup = PopUpButton(frame: NSZeroRect, pullsDown: false)
-        colorPopup.items <~ ObservableValue.constant(model.popupItems)
+        colorPopup.items <~ constantValueProperty(model.popupItems)
         colorPopup.selectedObject <~> model.colorItem
-        let colorValue = model.color.observableValue
         colorPopup.defaultItemContent = MenuItemContent(
             object: ColorItem.Default,
-            title: colorValue.map{ $0.whenMulti("Multiple", otherwise: "Default") },
-            image: colorValue.map{ $0.whenMulti(multipleColorSwatchImage(), otherwise: unsetColorSwatchImage()) }
+            title: model.color.map{ $0.whenMulti("Multiple", otherwise: "Default") },
+            image: model.color.map{ $0.whenMulti(multipleColorSwatchImage(), otherwise: unsetColorSwatchImage()) }
         )
         
         // Configure opacity combo box
         let opacityValues: [CGFloat] = 0.stride(through: 100, by: 10).map{ CGFloat($0) / 100.0 }
         opacityCombo = ComboBox(frame: NSZeroRect)
         opacityCombo.formatter = OpacityFormatter()
-        opacityCombo.items <~ ObservableValue.constant(opacityValues)
+        opacityCombo.items <~ constantValueProperty(opacityValues)
         opacityCombo.value <~> model.opacityValue
         
         // Configure color panel
@@ -114,23 +113,23 @@ private class ColorPickerModel {
     private let presetColors: [Color]
     private var popupItems: [MenuItem<ColorItem>]!
     
-    private let color: BidiProperty<CommonValue<Color>>
+    private let color: ReadWriteProperty<CommonValue<Color>>
     
-    private let colorItem: BidiProperty<ColorItem?>
-    private let opacityValue: BidiProperty<CGFloat?>
-    private let panelColor: BidiProperty<Color>
-    private let panelVisible: BidiProperty<Bool>
+    private let colorItem: ReadWriteProperty<ColorItem?>
+    private let opacityValue: ReadWriteProperty<CGFloat?>
+    private let panelColor: ReadWriteProperty<Color>
+    private let panelVisible: ReadWriteProperty<Bool>
     
     init(defaultColor: Color) {
         self.defaultColor = defaultColor
-        self.color = ValueBidiProperty(.One(defaultColor))
+        self.color = mutableValueProperty(.One(defaultColor))
 
         // Initialize the internal properties
         // XXX: We use `valueChanging: { true }` so that binding observers are notified even
         // when the item is changing from .Custom to .Custom; this is all because of the funky
         // .Custom handling in `==` for ColorItem, need to revisit this...
-        let colorItem: MutableObservableValue<ColorItem?> = mutableObservableValue(nil, valueChanging: { _ in true })
-        let customColor: ObservableValue<Color?> = colorItem.map{
+        let colorItem: MutableValueProperty<ColorItem?> = mutableValueProperty(nil, valueChanging: { _ in true })
+        let customColor: ReadableProperty<Color?> = colorItem.map{
             switch $0 {
             case .Some(.Custom(let color)):
                 return color
@@ -138,11 +137,11 @@ private class ColorPickerModel {
                 return nil
             }
         }
-        let colorIsCustom: ObservableValue<Bool> = customColor.map{ $0 != nil }
-        self.colorItem = colorItem.property
-        self.opacityValue = ValueBidiProperty(nil)
-        self.panelColor = ValueBidiProperty(defaultColor)
-        let panelVisible = ValueBidiProperty(false)
+        let colorIsCustom: ReadableProperty<Bool> = customColor.map{ $0 != nil }
+        self.colorItem = colorItem
+        self.opacityValue = mutableValueProperty(nil)
+        self.panelColor = mutableValueProperty(defaultColor)
+        let panelVisible = mutableValueProperty(false)
         self.panelVisible = panelVisible
         
         // Configure color popup menu items
@@ -153,8 +152,8 @@ private class ColorPickerModel {
             let colorItem = ColorItem.Preset(color)
             let content = MenuItemContent(
                 object: colorItem,
-                title: ObservableValue.constant(name),
-                image: ObservableValue.constant(colorSwatchImage(color))
+                title: constantValueProperty(name),
+                image: constantValueProperty(colorSwatchImage(color))
             )
             let menuItem = MenuItem(.Normal(content))
             popupItems.append(menuItem)
@@ -165,9 +164,9 @@ private class ColorPickerModel {
             // The "Custom" item and the separator above it are only visible when a custom color is defined
             popupItems.append(MenuItem(.Separator, visible: colorIsCustom))
             let content = MenuItemContent(
-                // TODO: Perhaps `object` should be a ObservableValue so that it can change if needed
+                // TODO: Perhaps `object` should be a ReadableProperty so that it can change if needed
                 object: ColorItem.Custom(defaultColor),
-                title: ObservableValue.constant("Custom"),
+                title: constantValueProperty("Custom"),
                 image: customColor.map{ colorSwatchImage($0 ?? defaultColor) }
             )
             popupItems.append(MenuItem(.Momentary(content, action: {}), visible: colorIsCustom))
@@ -176,8 +175,8 @@ private class ColorPickerModel {
         func addOther() {
             // The "Other" item and the separator above it are always visible
             popupItems.append(MenuItem(.Separator))
-            let content = MenuItemContent(object: ColorItem.Other, title: ObservableValue.constant("Other…"))
-            popupItems.append(MenuItem(.Momentary(content, action: { panelVisible.change(newValue: true, transient: true) })))
+            let content = MenuItemContent(object: ColorItem.Other, title: constantValueProperty("Other…"))
+            popupItems.append(MenuItem(.Momentary(content, action: { panelVisible.change(true, transient: true) })))
         }
         
         addPreset("Black", Color.black)
@@ -239,7 +238,7 @@ private class ColorPickerModel {
                 guard let weakSelf = self else { return .NoChange }
                 guard let newOpacity = value else { return .NoChange }
                 
-                let currentColor: Color = weakSelf.color.get().orDefault(weakSelf.defaultColor)
+                let currentColor: Color = weakSelf.color.value.orDefault(weakSelf.defaultColor)
                 let newColor = currentColor.withAlpha(newOpacity)
                 return .Change(CommonValue.One(newColor))
             }

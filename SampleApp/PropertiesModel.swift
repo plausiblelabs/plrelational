@@ -34,19 +34,19 @@ class PropertiesModel {
         return self.selectedItems.project(["type"])
     }()
     
-    lazy var itemSelected: ObservableValue<Bool> = { [unowned self] in
+    lazy var itemSelected: ReadableProperty<Bool> = { [unowned self] in
         return self.selectedItems.nonEmpty
     }()
     
-    lazy var itemNotSelected: ObservableValue<Bool> = { [unowned self] in
+    lazy var itemNotSelected: ReadableProperty<Bool> = { [unowned self] in
         return self.selectedItems.empty
     }()
     
-    private lazy var selectedItemTypes: ObservableValue<Set<ItemType>> = { [unowned self] in
+    private lazy var selectedItemTypes: ReadableProperty<Set<ItemType>> = { [unowned self] in
         return self.selectedItemTypesRelation.observableAllValues{ ItemType($0)! }
     }()
     
-    lazy var selectedItemTypesString: ObservableValue<String> = { [unowned self] in
+    lazy var selectedItemTypesString: ReadableProperty<String> = { [unowned self] in
         // TODO: Is there a more efficient way to do this?
         let selectedItemCountBinding = self.selectedItems.count().observable{ $0.oneInteger }
         return zip(selectedItemCountBinding, self.selectedItemTypes).map { (count, types) in
@@ -64,7 +64,7 @@ class PropertiesModel {
         }
     }()
 
-    lazy var selectedItemNames: BidiProperty<String> = { [unowned self] in
+    lazy var selectedItemNames: ReadWriteProperty<String> = { [unowned self] in
         // TODO: s/Item/type.name/
         let relation = self.selectedItemNamesRelation
         return self.db.bidiProperty(
@@ -75,7 +75,7 @@ class PropertiesModel {
         )
     }()
     
-    lazy var selectedItemNamesPlaceholder: ObservableValue<String> = { [unowned self] in
+    lazy var selectedItemNamesPlaceholder: ReadableProperty<String> = { [unowned self] in
         return self.selectedItemNamesRelation.stringWhenMulti("Multiple Values")
     }()
     
@@ -85,13 +85,13 @@ class PropertiesModel {
             .equijoin(relation, matching: ["id": "id"])
     }
     
-    lazy var textObjectProperties: ObservableValue<TextObjectPropertiesModel?> = { [unowned self] in
+    lazy var textObjectProperties: ReadableProperty<TextObjectPropertiesModel?> = { [unowned self] in
         return self.selectedObjects(.Text, self.textObjects).whenNonEmpty{
             TextObjectPropertiesModel(db: self.db, selectedTextObjects: $0)
         }
     }()
     
-    lazy var imageObjectProperties: ObservableValue<ImageObjectPropertiesModel?> = { [unowned self] in
+    lazy var imageObjectProperties: ReadableProperty<ImageObjectPropertiesModel?> = { [unowned self] in
         return self.selectedObjects(.Image, self.imageObjects).whenNonEmpty{
             ImageObjectPropertiesModel(db: self.db, selectedImageObjects: $0)
         }

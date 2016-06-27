@@ -74,8 +74,8 @@ class ViewModel {
         removals.forEach{ $0() }
     }
     
-    lazy var queryString: BidiProperty<String> = { [unowned self] in
-        return ValueBidiProperty("", { [weak self] query, _ in
+    lazy var queryString: ReadWriteProperty<String> = { [unowned self] in
+        return MutableValueProperty("", { [weak self] query, _ in
             if query.isEmpty {
                 self?.personResults.selectExpression = false
             } else {
@@ -86,7 +86,7 @@ class ViewModel {
     
     lazy var listViewModel: ListViewModel<RowArrayElement> = { [unowned self] in
         
-        func selectionBidiProperty(relation: MutableRelation) -> BidiProperty<Set<RelationValue>> {
+        func selectionReadWriteProperty(relation: MutableRelation) -> ReadWriteProperty<Set<RelationValue>> {
             return self.undoableDB.bidiProperty(
                 relation,
                 action: "Change Selection",
@@ -103,7 +103,7 @@ class ViewModel {
             data: self.personResults.observableArray(),
             contextMenu: nil,
             move: nil,
-            selection: selectionBidiProperty(self.selectedPersonID),
+            selection: selectionReadWriteProperty(self.selectedPersonID),
             cellIdentifier: { _ in "Cell" },
             cellText: { row in
                 let rowID = row["id"]
@@ -116,9 +116,9 @@ class ViewModel {
         )
     }()
     
-    let progressVisible: ObservableValue<Bool> = ObservableValue.constant(false)
+    let progressVisible: ReadableProperty<Bool> = constantValueProperty(false)
     
-    lazy var recordDisabled: ObservableValue<Bool> = { [unowned self] in
+    lazy var recordDisabled: ReadableProperty<Bool> = { [unowned self] in
         return self.selectedPersonID.empty
     }()
 
@@ -126,9 +126,9 @@ class ViewModel {
         Swift.print("TODO: INCREMENT SALES")
     }
 
-    lazy var saveDisabled: ObservableValue<Bool> = { [unowned self] in
+    lazy var saveDisabled: ReadableProperty<Bool> = { [unowned self] in
         // TODO: Return true only when there are no changes
-        return ObservableValue.constant(true)
+        return constantValueProperty(true)
     }()
     
     lazy var saveClicked: ActionProperty = ActionProperty {

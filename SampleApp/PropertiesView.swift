@@ -13,7 +13,7 @@ class PropertiesView: BackgroundView {
         var view: NSView?
         var observerRemoval: ObserverRemoval!
         
-        init<T>(binding: ObservableValue<T?>, attachView: T -> NSView) {
+        init<T>(property: ReadableProperty<T?>, attachView: T -> NSView) {
             
             func validate(section: Section) {
                 if let view = section.view {
@@ -27,7 +27,7 @@ class PropertiesView: BackgroundView {
             
             validate(self)
             
-            self.observerRemoval = binding.addChangeObserver({ [weak self] _ in
+            self.observerRemoval = property.signal.observe({ [weak self] _ in
                 guard let weakSelf = self else { return }
                 validate(weakSelf)
             })
@@ -87,7 +87,7 @@ class PropertiesView: BackgroundView {
         noSelectionLabel.visible <~ model.itemNotSelected
         addSubview(noSelectionLabel)
 
-        func addSection<T>(binding: ObservableValue<T?>, _ createView: T -> NSView) {
+        func addSection<T>(property: ReadableProperty<T?>, _ createView: T -> NSView) {
             let section = Section(binding: binding, attachView: { [weak self] model in
                 let view = createView(model)
                 if let parentView = self?.itemTypeLabel.superview {

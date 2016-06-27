@@ -131,22 +131,16 @@ public class BindableProperty<T> {
     }
 }
 
-//public class ActionProperty: Property<()> {
-//    
-//    public init(_ action: () -> Void) {
-//        super.init({ _ in
-//            action()
-//        })
-//    }
-//}
-
 public class WriteOnlyProperty<T>: BindableProperty<T> {
-    // TODO
+    
+    public init(_ set: Setter) {
+        super.init(set: set)
+    }
 }
 
 public class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     public typealias Value = T
-    internal typealias Getter = () -> T
+    public typealias Getter = () -> T
 
     public var value: T {
         return get()
@@ -235,65 +229,98 @@ public class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         return binding
     }
 }
-//
-//// TODO: Maybe this should be called ExternalBidiProperty to emphasize that the value is stored externally
-//public class MutableBidiProperty<T>: BidiProperty<T> {
-//
-//    public let changed: (transient: Bool) -> Void
-//    
-//    public init(get: Getter, set: Setter) {
-//        let signal: Signal<T>
-//        let notify: Signal<T>.Notify
-//        (signal, notify) = Signal.pipe()
-//        
-//        changed = { (transient: Bool) in
-//            notify(newValue: get(), metadata: ChangeMetadata(transient: transient))
-//        }
-//        
-//        super.init(
-//            get: get,
-//            set: { newValue, metadata in
-//                set(newValue, metadata)
-//                notify(newValue: newValue, metadata: metadata)
-//            },
-//            signal: signal,
-//            notify: notify
-//        )
-//    }
-//}
-//
-//public class ValueBidiProperty<T>: BidiProperty<T> {
-//
-//    public let change: (newValue: T, transient: Bool) -> Void
-//    
-//    public init(_ initialValue: T, _ didSet: Setter? = nil) {
-//        let signal: Signal<T>
-//        let notify: Signal<T>.Notify
-//        (signal, notify) = Signal.pipe()
-//        
-//        var value = initialValue
-//
-//        change = { (newValue: T, transient: Bool) in
-//            value = newValue
-//            notify(newValue: newValue, metadata: ChangeMetadata(transient: transient))
-//        }
-//        
-//        super.init(
-//            get: {
-//                value
-//            },
-//            set: { newValue, metadata in
-//                value = newValue
-//                didSet?(newValue, metadata)
-//                notify(newValue: newValue, metadata: metadata)
-//            },
-//            signal: signal,
-//            notify: notify
-//        )
-//    }
-//}
-//
-//
+
+private class ConstantValueProperty<T>: ReadableProperty<T> {
+    private init(_ value: T) {
+        // TODO: Use a no-op signal here
+        let (signal, notify) = Signal<T>.pipe()
+        super.init(initialValue: value, signal: signal, notify: notify, changing: { _ in false })
+    }
+}
+
+/// Returns a ValueProperty whose value never changes.  Note that since the value cannot change,
+/// observers will never be notified of changes.
+public func constantValueProperty<T>(value: T) -> ReadableProperty<T> {
+    return ConstantValueProperty(value)
+}
+
+public class MutableValueProperty<T>: ReadWriteProperty<T> {
+    
+    public let change: (T, transient: Bool) -> Void
+    
+    private init(_ initialValue: T, valueChanging: (T, T) -> Bool, didSet: Setter?) {
+        let (signal, notify) = Signal<T>.pipe()
+        
+        var value = initialValue
+        
+        change = { (newValue: T, transient: Bool) in
+            if valueChanging(value, newValue) {
+                value = newValue
+                notify(newValue: newValue, metadata: ChangeMetadata(transient: transient))
+            }
+        }
+        
+        super.init(
+            get: {
+                value
+            },
+            set: { newValue, metadata in
+                if valueChanging(value, newValue) {
+                    value = newValue
+                    didSet?(newValue, metadata)
+                    notify(newValue: newValue, metadata: metadata)
+                }
+            },
+            signal: signal,
+            notify: notify
+        )
+    }
+}
+
+public func mutableValueProperty<T>(initialValue: T, valueChanging: (T, T) -> Bool, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
+    return MutableValueProperty(initialValue, valueChanging: valueChanging, didSet: didSet)
+}
+
+public func mutableValueProperty<T: Equatable>(initialValue: T, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
+    return MutableValueProperty(initialValue, valueChanging: valueChanging, didSet: didSet)
+}
+
+public func mutableValueProperty<T: Equatable>(initialValue: T?, _ didSet: BindableProperty<T?>.Setter? = nil) -> MutableValueProperty<T?> {
+    return MutableValueProperty(initialValue, valueChanging: valueChanging, didSet: didSet)
+}
+
+public class ExternalValueProperty<T>: ReadWriteProperty<T> {
+
+    public let changed: (transient: Bool) -> Void
+
+    public init(get: Getter, set: Setter) {
+        let (signal, notify) = Signal<T>.pipe()
+
+        changed = { (transient: Bool) in
+            notify(newValue: get(), metadata: ChangeMetadata(transient: transient))
+        }
+
+        super.init(
+            get: get,
+            set: { newValue, metadata in
+                set(newValue, metadata)
+                notify(newValue: newValue, metadata: metadata)
+            },
+            signal: signal,
+            notify: notify
+        )
+    }
+}
+
+public class ActionProperty: WriteOnlyProperty<()> {
+
+    public init(_ action: () -> Void) {
+        super.init({ _ in
+            action()
+        })
+    }
+}
+
 // This syntax is borrowed from ReactiveCocoa.
 infix operator <~ {
     associativity right
@@ -306,15 +333,15 @@ public func <~ <T, RHS: ReadablePropertyType where RHS.Value == T>(lhs: Bindable
 
 // TODO: It seems that `~>` is defined somewhere already (not sure where exactly), so to avoid
 // conflicts we use `~~>` here instead
-//infix operator ~~> {
-//    associativity right
-//    precedence 93
-//}
-//
-//public func ~~> (lhs: Signal<()>, rhs: ActionProperty) -> Binding {
-//    // TODO: We invent an owner here; what if no one else owns the signal?
-//    return rhs.bind(lhs, initialValue: nil, owner: "")
-//}
+infix operator ~~> {
+    associativity right
+    precedence 93
+}
+
+public func ~~> (lhs: Signal<()>, rhs: ActionProperty) -> Binding {
+    // TODO: We invent an owner here; what if no one else owns the signal?
+    return rhs.bind(lhs, initialValue: nil, owner: "")
+}
 
 infix operator <~> {
     associativity right

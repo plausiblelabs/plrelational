@@ -8,7 +8,7 @@ import Binding
 
 public class TextField: NSTextField, NSTextFieldDelegate {
 
-    private lazy var _string: MutableBidiProperty<String> = MutableBidiProperty(
+    private lazy var _string: ExternalValueProperty<String> = ExternalValueProperty(
         get: { [unowned self] in
             self.stringValue ?? ""
         },
@@ -16,13 +16,13 @@ public class TextField: NSTextField, NSTextFieldDelegate {
             self.stringValue = value
         }
     )
-    public var string: BidiProperty<String> { return _string }
+    public var string: ReadWriteProperty<String> { return _string }
     
-    public lazy var placeholder: Property<String> = Property { [unowned self] value, _ in
+    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty { [unowned self] value, _ in
         self.placeholderString = value
     }
 
-    public lazy var visible: Property<Bool> = Property { [unowned self] value, _ in
+    public lazy var visible: BindableProperty<Bool> = WriteOnlyProperty { [unowned self] value, _ in
         self.hidden = !value
     }
     
