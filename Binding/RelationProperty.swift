@@ -159,9 +159,7 @@ private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
     private var removal: ObserverRemoval!
 
     init(relation: Relation, config: RelationMutationConfig<T>, relationToValue: Relation -> T, valueChanging: (T, T) -> Bool) {
-        let signal: Signal<T>
-        let notify: Signal<T>.Notify
-        (signal, notify) = Signal.pipe()
+        let (signal, notify) = Signal<T>.pipe()
 
         var value = relationToValue(relation)
         var before: ChangeLoggingDatabaseSnapshot?

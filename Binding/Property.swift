@@ -75,8 +75,9 @@ public class ReadableProperty<T>: ReadablePropertyType {
 public class BindableProperty<T> {
 
     public typealias Setter = (T, ChangeMetadata) -> Void
-    
-    private let set: Setter
+
+    // Note: This is exposed as `internal` only for easier access by tests.
+    internal let set: Setter
     
     private var bindings: [UInt64: Binding] = [:]
     private var nextBindingID: UInt64 = 0
@@ -246,17 +247,17 @@ public func constantValueProperty<T>(value: T) -> ReadableProperty<T> {
 
 public class MutableValueProperty<T>: ReadWriteProperty<T> {
     
-    public let change: (T, transient: Bool) -> Void
+    public let change: (T, metadata: ChangeMetadata) -> Void
     
     private init(_ initialValue: T, valueChanging: (T, T) -> Bool, didSet: Setter?) {
         let (signal, notify) = Signal<T>.pipe()
         
         var value = initialValue
         
-        change = { (newValue: T, transient: Bool) in
+        change = { (newValue: T, metadata: ChangeMetadata) in
             if valueChanging(value, newValue) {
                 value = newValue
-                notify(newValue: newValue, metadata: ChangeMetadata(transient: transient))
+                notify(newValue: newValue, metadata: metadata)
             }
         }
         
@@ -274,6 +275,10 @@ public class MutableValueProperty<T>: ReadWriteProperty<T> {
             signal: signal,
             notify: notify
         )
+    }
+    
+    public func change(newValue: T, transient: Bool) {
+        change(newValue, metadata: ChangeMetadata(transient: transient))
     }
 }
 

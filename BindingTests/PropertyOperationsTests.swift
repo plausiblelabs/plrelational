@@ -91,6 +91,26 @@ class PropertyOperationsTests: BindingTestCase {
         changeObserved = false
     }
     
+    func testToggle() {
+        let property = mutableValueProperty(false)
+        var changeObserved = false
+        _ = property.signal.observe({ _ in changeObserved = true })
+        
+        XCTAssertEqual(property.value, false)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        property.toggle(transient: false)
+        XCTAssertEqual(property.value, true)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        property.toggle(transient: false)
+        XCTAssertEqual(property.value, false)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+    }
+    
     func testOr() {
         let property1 = mutableValueProperty(false)
         let property2 = mutableValueProperty(false)

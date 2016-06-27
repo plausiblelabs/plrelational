@@ -20,7 +20,7 @@ class PropertiesView: BackgroundView {
                     view.removeFromSuperview()
                     section.view = nil
                 }
-                if let model = binding.value {
+                if let model = property.value {
                     section.view = attachView(model)
                 }
             }
@@ -88,7 +88,7 @@ class PropertiesView: BackgroundView {
         addSubview(noSelectionLabel)
 
         func addSection<T>(property: ReadableProperty<T?>, _ createView: T -> NSView) {
-            let section = Section(binding: binding, attachView: { [weak self] model in
+            let section = Section(property: property, attachView: { [weak self] model in
                 let view = createView(model)
                 if let parentView = self?.itemTypeLabel.superview {
                     parentView.addSubview(view)

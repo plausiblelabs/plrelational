@@ -80,6 +80,6 @@ class Document: NSDocument {
     }
     
     @IBAction func togglePropertiesSidebar(sender: NSMenuItem) {
-        docModel.propertiesSidebarVisible.toggle()
+        docModel.propertiesSidebarVisible.toggle(transient: false)
     }
 }

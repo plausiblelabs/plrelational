@@ -55,6 +55,13 @@ extension ReadablePropertyType where Value: BooleanType {
     }
 }
 
+extension MutableValueProperty where T: BooleanType {
+    public func toggle(transient transient: Bool) {
+        let newValue = !value
+        self.change(newValue as! T, transient: transient)
+    }
+}
+
 // TODO: This syntax is same as SelectExpression operators; maybe we should use something different
 infix operator *|| {
     associativity left
