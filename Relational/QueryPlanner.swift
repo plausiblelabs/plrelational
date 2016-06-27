@@ -13,6 +13,9 @@ class QueryPlanner {
     init(root: Relation) {
         self.rootRelation = root
         computeNodes()
+        
+        let optimizer = QueryOptimizer(nodes: nodes)
+        nodes = optimizer.nodes
     }
     
     var rootIndex: Int {
@@ -54,13 +57,14 @@ class QueryPlanner {
             // Skip this whole thing for relations with no children. They'll have nodes created for them by their parents.
             // Except if the root node has no children, we still need to hit that one if anything is to happen at all.
             if children.count > 0 || isRoot {
-                let nodeIndex = getOrCreateNodeIndex(relation)
+                let parentNodeIndex = getOrCreateNodeIndex(relation)
                 for (index, childRelation) in children.enumerate() {
                     noteTransactionalDatabases(childRelation)
                     let childNodeIndex = getOrCreateNodeIndex(childRelation.underlyingRelationForQueryExecution)
-                    nodes[childNodeIndex].parentIndexes.append((nodeIndex, index))
+                    nodes[childNodeIndex].parentIndexes.append((parentNodeIndex, index))
+                    nodes[parentNodeIndex].childIndexes.append(childNodeIndex)
                 }
-                nodes[nodeIndex].childCount = children.count
+                nodes[parentNodeIndex].childCount = children.count
             }
         })
     }
@@ -105,9 +109,9 @@ class QueryPlanner {
         case let r as IntermediateRelation:
             return intermediateRelationToNode(r)
         case let r as ConcreteRelation:
-            return Node(op: .ConcreteRows(r.values), parentIndexes: [])
+            return Node(op: .ConcreteRows(r.values))
         case let r as SQLiteRelation:
-            return Node(op: .SQLiteTableScan(r), parentIndexes: [])
+            return Node(op: .SQLiteTableScan(r))
         case let r as MemoryTableRelation:
             return Node(op: .MemoryTableScan(r))
         default:
@@ -167,10 +171,12 @@ extension QueryPlanner {
         let op: Operation
         var childCount = 0
         var parentIndexes: [(nodeIndex: Int, childIndex: Int)]
+        var childIndexes: [Int]
         
-        init(op: Operation, parentIndexes: [(nodeIndex: Int, childIndex: Int)] = []) {
+        init(op: Operation) {
             self.op = op
-            self.parentIndexes = parentIndexes
+            self.parentIndexes = []
+            self.childIndexes = []
         }
     }
     
