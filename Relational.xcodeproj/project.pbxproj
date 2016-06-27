@@ -189,6 +189,8 @@
 		C2B53CBD1D1AF4FC006B6278 /* DeallocObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CBC1D1AF4FC006B6278 /* DeallocObservation.swift */; };
 		C2B53CBF1D1C2B0A006B6278 /* MemoryTableRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CBE1D1C2B0A006B6278 /* MemoryTableRelation.swift */; };
 		C2B53CDC1D1C7BA0006B6278 /* QueryPlannerDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */; };
+		C2B53CDE1D1DBC3F006B6278 /* ObjectMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */; };
+		C2B53CE01D1DBCAE006B6278 /* ConsistentPRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */; };
 		C2BD29921CD251870081FD05 /* Flight.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
 		C2BD29931CD251870081FD05 /* Store.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
@@ -628,6 +630,8 @@
 		C2B53CBC1D1AF4FC006B6278 /* DeallocObservation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DeallocObservation.swift; path = Relational/DeallocObservation.swift; sourceTree = "<group>"; };
 		C2B53CBE1D1C2B0A006B6278 /* MemoryTableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoryTableRelation.swift; sourceTree = "<group>"; };
 		C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryPlannerDump.swift; sourceTree = "<group>"; };
+		C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectMapTests.swift; path = Relational/ObjectMapTests.swift; sourceTree = "<group>"; };
+		C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ConsistentPRNG.swift; path = Relational/ConsistentPRNG.swift; sourceTree = "<group>"; };
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
 		C2BD29911CD251870081FD05 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 		C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteBinding.swift; sourceTree = "<group>"; };
@@ -1283,6 +1287,7 @@
 			isa = PBXGroup;
 			children = (
 				C22921A91CCE605D00518184 /* ArrayHashing.swift */,
+				C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */,
 				C2B53CBC1D1AF4FC006B6278 /* DeallocObservation.swift */,
 				C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */,
 				C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */,
@@ -1291,6 +1296,7 @@
 				C2B53CB41D1862ED006B6278 /* Mutex.swift */,
 				C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */,
 				C204A1531D088B6300DF297F /* ObjectMap.swift */,
+				C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */,
 				C23AAF491CF8D651009E28E0 /* ObjectSet.swift */,
 				C22921B51CD10BA800518184 /* ObserverSet.swift */,
 				C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */,
@@ -2055,6 +2061,7 @@
 				C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */,
 				C204A1541D088B6300DF297F /* ObjectMap.swift in Sources */,
 				C277E8031CDB9D3400B7B8F6 /* GeneratorConcat.swift in Sources */,
+				C2B53CE01D1DBCAE006B6278 /* ConsistentPRNG.swift in Sources */,
 				C2B53CDC1D1C7BA0006B6278 /* QueryPlannerDump.swift in Sources */,
 				C23AAF4A1CF8D651009E28E0 /* ObjectSet.swift in Sources */,
 				C23AAF421CF61890009E28E0 /* MirrorChildren.swift in Sources */,
@@ -2116,6 +2123,7 @@
 				C2BD29951CD251A20081FD05 /* Store.model in Sources */,
 				C2DF2BA01CFDE2B100ED8695 /* QueryRunnerTests.swift in Sources */,
 				C277E80C1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift in Sources */,
+				C2B53CDE1D1DBC3F006B6278 /* ObjectMapTests.swift in Sources */,
 				C2FE9B9B1CEE3A810004E635 /* TransactionalDatabaseTests.swift in Sources */,
 				C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */,
 				C277E8051CDBD2A000B7B8F6 /* DBTestCase.swift in Sources */,
