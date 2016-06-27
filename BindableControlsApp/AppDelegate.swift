@@ -105,7 +105,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         addObject("Fred", editable: false, day: nil, color: nil, rocks: 17)
         addObject("Wilma", editable: true, day: "Friday", color: Color.blue, rocks: 42)
 
-        func nameBidiProperty(relation: Relation) -> BidiProperty<String> {
+        func nameProperty(relation: Relation) -> ReadWriteProperty<String> {
             return undoableDB.bidiProperty(
                 relation,
                 action: "Rename Object",
@@ -114,7 +114,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             )
         }
         
-        func listSelectionBidiProperty(relation: MutableRelation) -> BidiProperty<Set<RelationValue>> {
+        func listSelectionProperty(relation: MutableRelation) -> ReadWriteProperty<Set<RelationValue>> {
             return undoableDB.bidiProperty(
                 relation,
                 action: "Change Selection",
@@ -128,12 +128,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             data: objects.observableArray(),
             contextMenu: nil,
             move: nil,
-            selection: listSelectionBidiProperty(selectedObjectID),
+            selection: listSelectionProperty(selectedObjectID),
             cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 let rowID = row["id"]
                 let nameRelation = objects.select(Attribute("id") *== rowID).project(["name"])
-                return nameBidiProperty(nameRelation)
+                return .ReadWrite(nameProperty(nameRelation))
             },
             cellImage: nil
         )
@@ -159,8 +159,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         colorPicker.frame = NSMakeRect(200, 240, 200, 24)
         rootView.addSubview(colorPicker)
             
-        // Wire up the controls and bindings
-        textField.string <~> nameBidiProperty(selectedObjectsName)
+        // Set up the bindings between controls and view model
+        textField.string <~> nameProperty(selectedObjectsName)
         textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
 
         checkbox.checked <~> undoableDB.bidiProperty(
@@ -172,7 +172,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         
         let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
         let popupItems = days.map{ titledMenuItem($0) }
-        popupButton.items <~ ObservableValue.constant(popupItems)
+        popupButton.items <~ constantValueProperty(popupItems)
         popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
         popupButton.selectedObject <~> undoableDB.bidiProperty(
             selectedObjectsDay,
@@ -189,7 +189,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         )
         stepper.placeholder <~ selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
         
-        comboBox.items <~ ObservableValue.constant(["Alice", "Bob", "Carlos"])
+        comboBox.items <~ constantValueProperty(["Alice", "Bob", "Carlos"])
         comboBox.value <~> undoableDB.bidiProperty(
             selectedObjectsFriend,
             action: "Change Best Friend",

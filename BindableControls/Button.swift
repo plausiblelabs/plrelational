@@ -8,7 +8,7 @@ import Binding
 
 public class Button: NSButton {
 
-    public lazy var disabled: Property<Bool> = Property { [unowned self] value, _ in
+    public lazy var disabled: BindableProperty<Bool> = WriteOnlyProperty { [unowned self] value, _ in
         self.enabled = !value
     }
 

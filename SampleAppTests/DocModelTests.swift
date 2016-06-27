@@ -24,7 +24,7 @@ extension DocModel {
 
 extension PropertiesModel {
     func updateSelectedItemName(name: String, _ metadata: ChangeMetadata) {
-        selectedItemNames.set("name", metadata)
+        selectedItemNames.set(name, metadata)
     }
 }
 
@@ -76,7 +76,7 @@ class DocModelTests: AppTestCase {
             XCTAssertEqual(propsModel.itemSelected.value, expected.itemSelected, file: file, line: line)
             XCTAssertEqual(propsModel.itemNotSelected.value, !expected.itemSelected, file: file, line: line)
             XCTAssertEqual(propsModel.selectedItemTypesString.value, expected.selectedItemType, file: file, line: line)
-            XCTAssertEqual(propsModel.selectedItemNames.get(), expected.selectedItemName, file: file, line: line)
+            XCTAssertEqual(propsModel.selectedItemNames.value, expected.selectedItemName, file: file, line: line)
             XCTAssertEqual(propsModel.textObjectProperties.value != nil, expected.selectedItemsOnlyText, file: file, line: line)
             XCTAssertEqual(propsModel.imageObjectProperties.value != nil, expected.selectedItemsOnlyImage, file: file, line: line)
         }
@@ -280,11 +280,11 @@ class DocModelTests: AppTestCase {
         // Observe a number of related bindings
         let propsModel = model.propertiesModel
         var changeCount = 0
-        _ = propsModel.itemSelected.addChangeObserver({ _ in changeCount += 1 })
-        _ = propsModel.itemNotSelected.addChangeObserver({ _ in changeCount += 1 })
-        _ = propsModel.selectedItemTypesString.addChangeObserver({ _ in changeCount += 1 })
+        _ = propsModel.itemSelected.signal.observe({ _ in changeCount += 1 })
+        _ = propsModel.itemNotSelected.signal.observe({ _ in changeCount += 1 })
+        _ = propsModel.selectedItemTypesString.signal.observe({ _ in changeCount += 1 })
         _ = propsModel.selectedItemNames.signal.observe({ _ in changeCount += 1 })
-        _ = propsModel.selectedItemNamesPlaceholder.addChangeObserver({ _ in changeCount += 1 })
+        _ = propsModel.selectedItemNamesPlaceholder.signal.observe({ _ in changeCount += 1 })
         
         // Toggle back and forth between two pages
         let commit = ChangeMetadata(transient: false)
@@ -324,7 +324,7 @@ class DocModelTests: AppTestCase {
         // Observe the text object properties binding
         let propsModel = model.propertiesModel
         var changeCount = 0
-        _ = propsModel.textObjectProperties.addChangeObserver({ _ in changeCount += 1 })
+        _ = propsModel.textObjectProperties.signal.observe({ _ in changeCount += 1 })
 
         // Toggle back and forth between two objects (of differing type)
         let obj1: Set<RelationValue> = [9]
@@ -354,11 +354,11 @@ class DocModelTests: AppTestCase {
             let propsModel = model.propertiesModel
             _ = model.docOutlineTreeViewModel.data.addChangeObserver({ _ in self.changeCount += 1 })
             _ = model.inspectorTreeViewModel.data.addChangeObserver({ _ in self.changeCount += 1 })
-            _ = propsModel.itemSelected.addChangeObserver({ _ in self.changeCount += 1 })
-            _ = propsModel.itemNotSelected.addChangeObserver({ _ in self.changeCount += 1 })
-            _ = propsModel.selectedItemTypesString.addChangeObserver({ _ in self.changeCount += 1 })
+            _ = propsModel.itemSelected.signal.observe({ _ in self.changeCount += 1 })
+            _ = propsModel.itemNotSelected.signal.observe({ _ in self.changeCount += 1 })
+            _ = propsModel.selectedItemTypesString.signal.observe({ _ in self.changeCount += 1 })
             _ = propsModel.selectedItemNames.signal.observe({ _ in self.changeCount += 1 })
-            _ = propsModel.selectedItemNamesPlaceholder.addChangeObserver({ _ in self.changeCount += 1 })
+            _ = propsModel.selectedItemNamesPlaceholder.signal.observe({ _ in self.changeCount += 1 })
         }
     }
     

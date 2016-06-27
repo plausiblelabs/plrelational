@@ -8,7 +8,7 @@ import Binding
 
 public class PopUpButton<T: Equatable>: NSPopUpButton {
 
-    public lazy var items: Property<[MenuItem<T>]> = Property { [unowned self] value, _ in
+    public lazy var items: BindableProperty<[MenuItem<T>]> = WriteOnlyProperty { [unowned self] value, _ in
         // Clear the menu
         self.removeAllItems()
 
@@ -24,13 +24,13 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
         }
         
         // Set the selected item
-        self.setSelectedItem(self.selectedObject.get())
+        self.setSelectedItem(self.selectedObject.value)
     }
 
-    private lazy var _selectedObject: ValueBidiProperty<T?> = ValueBidiProperty(nil, { [unowned self] value, _ in
+    private lazy var _selectedObject: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
         self.setSelectedItem(value)
     })
-    public var selectedObject: BidiProperty<T?> { return _selectedObject }
+    public var selectedObject: ReadWriteProperty<T?> { return _selectedObject }
 
     public var defaultItemContent: MenuItemContent<T>? {
         didSet {
@@ -103,7 +103,7 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
         case .Normal:
             guard let object = nativeItem.object else { return }
             selfInitiatedSelectionChange = true
-            _selectedObject.change(newValue: object, transient: false)
+            _selectedObject.change(object, transient: false)
             selfInitiatedSelectionChange = false
             
         case .Momentary(_, let action):

@@ -5,6 +5,14 @@
 
 import Foundation
 
+public struct ChangeMetadata {
+    public let transient: Bool
+    
+    public init(transient: Bool) {
+        self.transient = transient
+    }
+}
+
 public enum ChangeResult<T> { case
     Change(T),
     NoChange
@@ -32,16 +40,49 @@ public class Binding {
     }
 }
 
-public class Property<T> {
+public protocol ReadablePropertyType: class {
+    associatedtype Value
+    
+    var value: Value { get }
+    var signal: Signal<Value> { get }
+}
+
+/// A concrete property that is readable and observable.
+public class ReadableProperty<T>: ReadablePropertyType {
+    public typealias Value = T
+    
+    public private(set) var value: T
+    public let signal: Signal<T>
+    private let notify: Signal<T>.Notify
+    private let changing: (T, T) -> Bool
+    
+    public init(initialValue: T, signal: Signal<T>, notify: Signal<T>.Notify, changing: (T, T) -> Bool) {
+        self.value = initialValue
+        self.signal = signal
+        self.notify = notify
+        self.changing = changing
+    }
+    
+    internal func setValue(newValue: T, _ metadata: ChangeMetadata) {
+        if changing(value, newValue) {
+            value = newValue
+            notify(newValue: newValue, metadata: metadata)
+        }
+    }
+}
+
+/// A concrete property that can be updated when bound to another property.
+public class BindableProperty<T> {
 
     public typealias Setter = (T, ChangeMetadata) -> Void
-    
+
+    // Note: This is exposed as `internal` only for easier access by tests.
     internal let set: Setter
     
     private var bindings: [UInt64: Binding] = [:]
     private var nextBindingID: UInt64 = 0
 
-    public init(_ set: Setter) {
+    internal init(set: Setter) {
         self.set = set
     }
     
@@ -91,51 +132,37 @@ public class Property<T> {
     }
 }
 
-public class ReadableProperty<T>: Property<T> {
-
-    public typealias Getter = () -> T
+public class WriteOnlyProperty<T>: BindableProperty<T> {
     
-    public let get: Getter
-    
-    public init(get: Getter, set: Setter) {
-        self.get = get
-        super.init(set)
+    public init(_ set: Setter) {
+        super.init(set: set)
     }
 }
 
-public class ObservableProperty<T>: ReadableProperty<T> {
-    
+public class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
+    public typealias Value = T
+    public typealias Getter = () -> T
+
+    public var value: T {
+        return get()
+    }
     public let signal: Signal<T>
     
-    public init(get: Getter, set: Setter, signal: Signal<T>) {
-        self.signal = signal
-        super.init(get: get, set: set)
-    }
-}
-
-public class ActionProperty: Property<()> {
-    
-    public init(_ action: () -> Void) {
-        super.init({ _ in
-            action()
-        })
-    }
-}
-
-public class BidiProperty<T>: ObservableProperty<T> {
-
+    private let get: Getter
     private let notify: Signal<T>.Notify
     
-    public init(get: Getter, set: Setter, signal: Signal<T>, notify: Signal<T>.Notify) {
+    internal init(get: Getter, set: Setter, signal: Signal<T>, notify: Signal<T>.Notify) {
+        self.get = get
+        self.signal = signal
         self.notify = notify
-        super.init(get: get, set: set, signal: signal)
+        super.init(set: set)
     }
 
     /// Establishes a bidirectional binding between this property and the given property.
     /// When this property's value changes, the other property's value will be updated and
     /// vice versa.  Note that calling `bindBidi` will cause this property to take on the
     /// other property's value immedately.
-    public func bindBidi(other: BidiProperty<T>) -> Binding {
+    public func bindBidi(other: ReadWriteProperty<T>) -> Binding {
         return connectBidi(
             other,
             initial: {
@@ -150,7 +177,7 @@ public class BidiProperty<T>: ObservableProperty<T> {
     /// using `forward` and `reverse` to conditionally apply changes in each direction.
     /// Note that calling `connectBidi` will cause the other property to take on this
     /// property's value immediately (this is the opposite behavior from `bindBidi`).
-    public func connectBidi<U>(other: BidiProperty<U>, forward: T -> ChangeResult<U>, reverse: U -> ChangeResult<T>) -> Binding {
+    public func connectBidi<U>(other: ReadWriteProperty<U>, forward: T -> ChangeResult<U>, reverse: U -> ChangeResult<T>) -> Binding {
         return connectBidi(
             other,
             initial: {
@@ -163,7 +190,7 @@ public class BidiProperty<T>: ObservableProperty<T> {
         )
     }
 
-    private func connectBidi<U>(other: BidiProperty<U>, initial: () -> Void, forward: T -> ChangeResult<U>, reverse: U -> ChangeResult<T>) -> Binding {
+    private func connectBidi<U>(other: ReadWriteProperty<U>, initial: () -> Void, forward: T -> ChangeResult<U>, reverse: U -> ChangeResult<T>) -> Binding {
         var selfInitiatedChange = false
         
         // Observe the signal of the other property
@@ -204,19 +231,80 @@ public class BidiProperty<T>: ObservableProperty<T> {
     }
 }
 
-public class MutableBidiProperty<T>: BidiProperty<T> {
+private class ConstantValueProperty<T>: ReadableProperty<T> {
+    private init(_ value: T) {
+        // TODO: Use a no-op signal here
+        let (signal, notify) = Signal<T>.pipe()
+        super.init(initialValue: value, signal: signal, notify: notify, changing: { _ in false })
+    }
+}
+
+/// Returns a ValueProperty whose value never changes.  Note that since the value cannot change,
+/// observers will never be notified of changes.
+public func constantValueProperty<T>(value: T) -> ReadableProperty<T> {
+    return ConstantValueProperty(value)
+}
+
+public class MutableValueProperty<T>: ReadWriteProperty<T> {
+    
+    public let change: (T, metadata: ChangeMetadata) -> Void
+    
+    private init(_ initialValue: T, valueChanging: (T, T) -> Bool, didSet: Setter?) {
+        let (signal, notify) = Signal<T>.pipe()
+        
+        var value = initialValue
+        
+        change = { (newValue: T, metadata: ChangeMetadata) in
+            if valueChanging(value, newValue) {
+                value = newValue
+                notify(newValue: newValue, metadata: metadata)
+            }
+        }
+        
+        super.init(
+            get: {
+                value
+            },
+            set: { newValue, metadata in
+                if valueChanging(value, newValue) {
+                    value = newValue
+                    didSet?(newValue, metadata)
+                    notify(newValue: newValue, metadata: metadata)
+                }
+            },
+            signal: signal,
+            notify: notify
+        )
+    }
+    
+    public func change(newValue: T, transient: Bool) {
+        change(newValue, metadata: ChangeMetadata(transient: transient))
+    }
+}
+
+public func mutableValueProperty<T>(initialValue: T, valueChanging: (T, T) -> Bool, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
+    return MutableValueProperty(initialValue, valueChanging: valueChanging, didSet: didSet)
+}
+
+public func mutableValueProperty<T: Equatable>(initialValue: T, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
+    return MutableValueProperty(initialValue, valueChanging: valueChanging, didSet: didSet)
+}
+
+public func mutableValueProperty<T: Equatable>(initialValue: T?, _ didSet: BindableProperty<T?>.Setter? = nil) -> MutableValueProperty<T?> {
+    return MutableValueProperty(initialValue, valueChanging: valueChanging, didSet: didSet)
+}
+
+public class ExternalValueProperty<T>: ReadWriteProperty<T> {
 
     public let changed: (transient: Bool) -> Void
-    
+
     public init(get: Getter, set: Setter) {
-        let signal: Signal<T>
-        let notify: Signal<T>.Notify
-        (signal, notify) = Signal.pipe()
-        
+        let (signal, notify) = Signal<T>.pipe()
+
         changed = { (transient: Bool) in
             notify(newValue: get(), metadata: ChangeMetadata(transient: transient))
         }
-        
+
         super.init(
             get: get,
             set: { newValue, metadata in
@@ -229,56 +317,12 @@ public class MutableBidiProperty<T>: BidiProperty<T> {
     }
 }
 
-public class ValueBidiProperty<T>: BidiProperty<T> {
+public class ActionProperty: WriteOnlyProperty<()> {
 
-    public let change: (newValue: T, transient: Bool) -> Void
-    
-    public init(_ initialValue: T, _ didSet: Setter? = nil) {
-        let signal: Signal<T>
-        let notify: Signal<T>.Notify
-        (signal, notify) = Signal.pipe()
-        
-        var value = initialValue
-
-        change = { (newValue: T, transient: Bool) in
-            value = newValue
-            notify(newValue: newValue, metadata: ChangeMetadata(transient: transient))
-        }
-        
-        super.init(
-            get: {
-                value
-            },
-            set: { newValue, metadata in
-                value = newValue
-                didSet?(newValue, metadata)
-                notify(newValue: newValue, metadata: metadata)
-            },
-            signal: signal,
-            notify: notify
-        )
-    }
-}
-
-private class PropertyObservableValue<T>: ObservableValue<T> {
-    private var removal: ObserverRemoval!
-    
-    init(property: BidiProperty<T>, valueChanging: (T, T) -> Bool) {
-        super.init(initialValue: property.get(), valueChanging: valueChanging)
-        self.removal = property.signal.observe({ [weak self] newValue, metadata in
-            self?.setValue(newValue, metadata)
+    public init(_ action: () -> Void) {
+        super.init({ _ in
+            action()
         })
-    }
-    
-    deinit {
-        removal()
-    }
-}
-
-extension BidiProperty {
-    /// Returns an `ObservableValue` representation of this property.
-    public var observableValue: ObservableValue<T> {
-        return PropertyObservableValue(property: self, valueChanging: valueChanging)
     }
 }
 
@@ -288,12 +332,8 @@ infix operator <~ {
     precedence 93
 }
 
-public func <~ <T>(lhs: Property<T>, rhs: ObservableValue<T>) -> Binding {
+public func <~ <T, RHS: ReadablePropertyType where RHS.Value == T>(lhs: BindableProperty<T>, rhs: RHS) -> Binding {
     return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
-}
-
-public func <~ <T>(lhs: Property<T>, rhs: ObservableProperty<T>) -> Binding {
-    return lhs.bind(rhs.signal, initialValue: rhs.get(), owner: rhs)
 }
 
 // TODO: It seems that `~>` is defined somewhere already (not sure where exactly), so to avoid
@@ -313,6 +353,22 @@ infix operator <~> {
     precedence 93
 }
 
-public func <~> <T>(lhs: BidiProperty<T>, rhs: BidiProperty<T>) -> Binding {
+public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Binding {
     return lhs.bindBidi(rhs)
+}
+
+internal func valueChanging<T>(v0: T, v1: T) -> Bool {
+    return true
+}
+
+internal func valueChanging<T: Equatable>(v0: T, v1: T) -> Bool {
+    return v0 != v1
+}
+
+internal func valueChanging<T>(v0: T?, v1: T?) -> Bool {
+    return true
+}
+
+internal func valueChanging<T: Equatable>(v0: T?, v1: T?) -> Bool {
+    return v0 != v1
 }

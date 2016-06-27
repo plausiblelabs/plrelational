@@ -24,7 +24,6 @@
 		371243E71D0104F700E9BCFF /* RichTextUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371243E61D0104F700E9BCFF /* RichTextUITests.swift */; };
 		371243F61D01051700E9BCFF /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
 		371243F71D01051700E9BCFF /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
-		371243F91D024A9200E9BCFF /* ObservableValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371243F81D024A9200E9BCFF /* ObservableValueTests.swift */; };
 		371243FB1D062ECC00E9BCFF /* BindingTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707DA1CFE262700710C80 /* BindingTestCase.swift */; };
 		371243FD1D074E2200E9BCFF /* ImageObjectPropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371243FC1D074E2200E9BCFF /* ImageObjectPropertiesModel.swift */; };
 		372707681CED2F8100710C80 /* AppTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707671CED2F8100710C80 /* AppTestCase.swift */; };
@@ -33,7 +32,6 @@
 		3727077A1CF7B2CB00710C80 /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
 		372707B21CFE23BB00710C80 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
 		372707B41CFE240E00710C80 /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6113E1CD93069001DAF59 /* Observable.swift */; };
-		372707B61CFE240E00710C80 /* RelationObservableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136901CF11C0A00F572C5 /* RelationObservableValue.swift */; };
 		372707B71CFE240E00710C80 /* CommonValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136921CF11C8D00F572C5 /* CommonValue.swift */; };
 		372707B81CFE240E00710C80 /* ObservableArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136941CF40A9600F572C5 /* ObservableArray.swift */; };
 		372707B91CFE240E00710C80 /* RelationObservableArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114C1CDD603C001DAF59 /* RelationObservableArray.swift */; };
@@ -44,7 +42,6 @@
 		372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707771CF3C31200710C80 /* RelationValuePlistable.swift */; };
 		372707C61CFE258B00710C80 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
 		372707D01CFE25B000710C80 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
-		372707D61CFE25D400710C80 /* RelationObservableValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727077B1CF8F3C100710C80 /* RelationObservableValueTests.swift */; };
 		372707D71CFE25D400710C80 /* RelationObservableArrayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136961CF40AB300F572C5 /* RelationObservableArrayTests.swift */; };
 		372707D81CFE25D400710C80 /* RelationObservableTreeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F8FBD31CE4FC30001C7C5F /* RelationObservableTreeTests.swift */; };
 		372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6115C1CE4F756001DAF59 /* ArrayBinarySearchTests.swift */; };
@@ -52,7 +49,6 @@
 		372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		372707DD1CFE268C00710C80 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
 		372707E01CFE293000710C80 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
-		372707E31CFE2B6500710C80 /* ObservableValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707E11CFE2B6000710C80 /* ObservableValue.swift */; };
 		372707EB1CFE2C7E00710C80 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707EA1CFE2C7E00710C80 /* AppDelegate.swift */; };
 		372707ED1CFE2C7E00710C80 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 372707EC1CFE2C7E00710C80 /* Assets.xcassets */; };
 		372707F01CFE2C7E00710C80 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 372707EE1CFE2C7E00710C80 /* MainMenu.xib */; };
@@ -119,8 +115,11 @@
 		37A1CEE71D147BD80067870D /* RelationMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE61D147BD80067870D /* RelationMutation.swift */; };
 		37A1CEE91D147C190067870D /* RelationMutationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE81D147C190067870D /* RelationMutationTests.swift */; };
 		37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEEA1D1480120067870D /* PropertyTests.swift */; };
-		37A1CEED1D14A32C0067870D /* RelationBidiProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEEC1D14A32C0067870D /* RelationBidiProperty.swift */; };
-		37A1CEEF1D14A5560067870D /* RelationBidiPropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEEE1D14A5560067870D /* RelationBidiPropertyTests.swift */; };
+		37A4A23A1D1DB343005CAEA5 /* PropertyOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2391D1DB343005CAEA5 /* PropertyOperations.swift */; };
+		37A4A23C1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */; };
+		37A4A23E1D1F1677005CAEA5 /* RelationProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */; };
+		37A4A2401D1F4FD9005CAEA5 /* RelationPropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */; };
+		37A4A2421D21A613005CAEA5 /* CellTextProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2411D21A613005CAEA5 /* CellTextProperty.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -478,7 +477,6 @@
 		371243E21D0104F700E9BCFF /* RichTextUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RichTextUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		371243E61D0104F700E9BCFF /* RichTextUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RichTextUITests.swift; sourceTree = "<group>"; };
 		371243E81D0104F700E9BCFF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		371243F81D024A9200E9BCFF /* ObservableValueTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObservableValueTests.swift; path = BindingTests/ObservableValueTests.swift; sourceTree = SOURCE_ROOT; };
 		371243FC1D074E2200E9BCFF /* ImageObjectPropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageObjectPropertiesModel.swift; sourceTree = "<group>"; };
 		372707671CED2F8100710C80 /* AppTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppTestCase.swift; sourceTree = "<group>"; };
 		3727076C1CEE60C900710C80 /* MutableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelation.swift; sourceTree = "<group>"; };
@@ -486,12 +484,10 @@
 		372707751CF391EC00710C80 /* ObservableTree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservableTree.swift; sourceTree = "<group>"; };
 		372707771CF3C31200710C80 /* RelationValuePlistable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValuePlistable.swift; sourceTree = "<group>"; };
 		372707791CF7B2CB00710C80 /* UndoableDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UndoableDatabase.swift; sourceTree = "<group>"; };
-		3727077B1CF8F3C100710C80 /* RelationObservableValueTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationObservableValueTests.swift; path = BindingTests/RelationObservableValueTests.swift; sourceTree = SOURCE_ROOT; };
 		372707AE1CFE238700710C80 /* libBinding.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libBinding.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		372707CB1CFE25AF00710C80 /* BindingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BindingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		372707CF1CFE25B000710C80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		372707DA1CFE262700710C80 /* BindingTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BindingTestCase.swift; sourceTree = "<group>"; };
-		372707E11CFE2B6000710C80 /* ObservableValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservableValue.swift; sourceTree = "<group>"; };
 		372707E81CFE2C7E00710C80 /* BindableControlsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BindableControlsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		372707EA1CFE2C7E00710C80 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		372707EC1CFE2C7E00710C80 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -502,8 +498,7 @@
 		372707FC1CFE2C7E00710C80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = SampleAppTests/DocModelTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
-		376136901CF11C0A00F572C5 /* RelationObservableValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObservableValue.swift; sourceTree = "<group>"; };
-		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonValue.swift; sourceTree = "<group>"; };
+		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CommonValue.swift; path = Binding/CommonValue.swift; sourceTree = "<group>"; };
 		376136941CF40A9600F572C5 /* ObservableArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservableArray.swift; sourceTree = "<group>"; };
 		376136961CF40AB300F572C5 /* RelationObservableArrayTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationObservableArrayTests.swift; path = BindingTests/RelationObservableArrayTests.swift; sourceTree = SOURCE_ROOT; };
 		376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObjectPropertiesModel.swift; sourceTree = "<group>"; };
@@ -540,8 +535,11 @@
 		37A1CEE61D147BD80067870D /* RelationMutation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationMutation.swift; path = Binding/RelationMutation.swift; sourceTree = "<group>"; };
 		37A1CEE81D147C190067870D /* RelationMutationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationMutationTests.swift; path = BindingTests/RelationMutationTests.swift; sourceTree = "<group>"; };
 		37A1CEEA1D1480120067870D /* PropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyTests.swift; path = BindingTests/PropertyTests.swift; sourceTree = "<group>"; };
-		37A1CEEC1D14A32C0067870D /* RelationBidiProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationBidiProperty.swift; path = Binding/RelationBidiProperty.swift; sourceTree = "<group>"; };
-		37A1CEEE1D14A5560067870D /* RelationBidiPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationBidiPropertyTests.swift; path = BindingTests/RelationBidiPropertyTests.swift; sourceTree = "<group>"; };
+		37A4A2391D1DB343005CAEA5 /* PropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyOperations.swift; path = Binding/PropertyOperations.swift; sourceTree = "<group>"; };
+		37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyOperationsTests.swift; path = BindingTests/PropertyOperationsTests.swift; sourceTree = "<group>"; };
+		37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationProperty.swift; path = Binding/RelationProperty.swift; sourceTree = "<group>"; };
+		37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationPropertyTests.swift; path = BindingTests/RelationPropertyTests.swift; sourceTree = "<group>"; };
+		37A4A2411D21A613005CAEA5 /* CellTextProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CellTextProperty.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -830,19 +828,6 @@
 			path = RichTextUITests;
 			sourceTree = "<group>";
 		};
-		372707721CF38FDC00710C80 /* Observable Value */ = {
-			isa = PBXGroup;
-			children = (
-				372707E11CFE2B6000710C80 /* ObservableValue.swift */,
-				371243F81D024A9200E9BCFF /* ObservableValueTests.swift */,
-				376136901CF11C0A00F572C5 /* RelationObservableValue.swift */,
-				3727077B1CF8F3C100710C80 /* RelationObservableValueTests.swift */,
-				376136921CF11C8D00F572C5 /* CommonValue.swift */,
-			);
-			name = "Observable Value";
-			path = Binding;
-			sourceTree = "<group>";
-		};
 		372707731CF38FF600710C80 /* Observable Tree */ = {
 			isa = PBXGroup;
 			children = (
@@ -988,6 +973,7 @@
 		37A1CEAF1D10827F0067870D /* Outline Views */ = {
 			isa = PBXGroup;
 			children = (
+				37A4A2411D21A613005CAEA5 /* CellTextProperty.swift */,
 				37C611351CD7FB07001DAF59 /* ListView.swift */,
 				37C611501CE10770001DAF59 /* TreeView.swift */,
 				37C611371CD7FB9C001DAF59 /* ExtOutlineView.swift */,
@@ -1011,8 +997,11 @@
 			children = (
 				37A1CED81D1354DD0067870D /* Property.swift */,
 				37A1CEEA1D1480120067870D /* PropertyTests.swift */,
-				37A1CEEC1D14A32C0067870D /* RelationBidiProperty.swift */,
-				37A1CEEE1D14A5560067870D /* RelationBidiPropertyTests.swift */,
+				37A4A2391D1DB343005CAEA5 /* PropertyOperations.swift */,
+				37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */,
+				37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */,
+				37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */,
+				376136921CF11C8D00F572C5 /* CommonValue.swift */,
 			);
 			name = Property;
 			sourceTree = "<group>";
@@ -1029,7 +1018,6 @@
 			isa = PBXGroup;
 			children = (
 				37C6113E1CD93069001DAF59 /* Observable.swift */,
-				372707721CF38FDC00710C80 /* Observable Value */,
 				372707741CF3904D00710C80 /* Observable Array */,
 				372707731CF38FF600710C80 /* Observable Tree */,
 			);
@@ -1917,18 +1905,17 @@
 			files = (
 				37A1CEE71D147BD80067870D /* RelationMutation.swift in Sources */,
 				372707B41CFE240E00710C80 /* Observable.swift in Sources */,
-				372707B61CFE240E00710C80 /* RelationObservableValue.swift in Sources */,
 				372707BA1CFE240E00710C80 /* ObservableTree.swift in Sources */,
+				37A4A23E1D1F1677005CAEA5 /* RelationProperty.swift in Sources */,
 				372707B71CFE240E00710C80 /* CommonValue.swift in Sources */,
 				372707B91CFE240E00710C80 /* RelationObservableArray.swift in Sources */,
+				37A4A23A1D1DB343005CAEA5 /* PropertyOperations.swift in Sources */,
 				372707BD1CFE24F600710C80 /* ArrayBinarySearch.swift in Sources */,
 				37A1CED91D1354DD0067870D /* Property.swift in Sources */,
 				372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */,
 				37A1CEDE1D1469720067870D /* Signal.swift in Sources */,
 				372707BB1CFE240E00710C80 /* RelationObservableTree.swift in Sources */,
-				372707E31CFE2B6500710C80 /* ObservableValue.swift in Sources */,
 				37A1CEE31D147ACA0067870D /* RelationAsTypedValue.swift in Sources */,
-				37A1CEED1D14A32C0067870D /* RelationBidiProperty.swift in Sources */,
 				372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */,
 				372707B81CFE240E00710C80 /* ObservableArray.swift in Sources */,
 			);
@@ -1938,14 +1925,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37A1CEEF1D14A5560067870D /* RelationBidiPropertyTests.swift in Sources */,
 				37A1CEE51D147B0E0067870D /* RelationAsTypedValueTests.swift in Sources */,
-				371243F91D024A9200E9BCFF /* ObservableValueTests.swift in Sources */,
 				372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */,
 				372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */,
 				37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */,
-				372707D61CFE25D400710C80 /* RelationObservableValueTests.swift in Sources */,
+				37A4A2401D1F4FD9005CAEA5 /* RelationPropertyTests.swift in Sources */,
 				372707D81CFE25D400710C80 /* RelationObservableTreeTests.swift in Sources */,
+				37A4A23C1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift in Sources */,
 				372707DB1CFE262700710C80 /* BindingTestCase.swift in Sources */,
 				37A1CEE91D147C190067870D /* RelationMutationTests.swift in Sources */,
 				372707D71CFE25D400710C80 /* RelationObservableArrayTests.swift in Sources */,
@@ -2020,6 +2006,7 @@
 				37A1CEBE1D1083FD0067870D /* ColorPanel.swift in Sources */,
 				37A1CEBD1D1083FD0067870D /* ComboBox.swift in Sources */,
 				37A1CED21D10B8690067870D /* Button.swift in Sources */,
+				37A4A2421D21A613005CAEA5 /* CellTextProperty.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
