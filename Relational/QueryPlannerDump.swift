@@ -17,8 +17,10 @@ extension QueryPlanner {
         for (index, node) in nodes.enumerate() {
             let label = "\(nodename(index)) \(node.op)"
             print("\(nodename(index)) [label=\"\(label)\"]")
-            for (parentIndex, childIndex) in node.parentIndexes {
-                print("\(nodename(index)) -> \(nodename(parentIndex)) [label=\"child \(childIndex)\"]")
+            for parentIndex in node.parentIndexes {
+                let childIndex = nodes[parentIndex].childIndexes.indexOf(index)
+                let childIndexString = childIndex.map(String.init) ?? "UNKNOWN CHILD INDEX"
+                print("\(nodename(index)) -> \(nodename(parentIndex)) [label=\"child \(childIndexString)\"]")
             }
         }
         

@@ -58,10 +58,10 @@ class QueryPlanner {
             // Except if the root node has no children, we still need to hit that one if anything is to happen at all.
             if children.count > 0 || isRoot {
                 let parentNodeIndex = getOrCreateNodeIndex(relation)
-                for (index, childRelation) in children.enumerate() {
+                for childRelation in children {
                     noteTransactionalDatabases(childRelation)
                     let childNodeIndex = getOrCreateNodeIndex(childRelation.underlyingRelationForQueryExecution)
-                    nodes[childNodeIndex].parentIndexes.append((parentNodeIndex, index))
+                    nodes[childNodeIndex].parentIndexes.append(parentNodeIndex)
                     nodes[parentNodeIndex].childIndexes.append(childNodeIndex)
                 }
                 nodes[parentNodeIndex].childCount = children.count
@@ -170,13 +170,16 @@ extension QueryPlanner {
     struct Node {
         let op: Operation
         var childCount = 0
-        var parentIndexes: [(nodeIndex: Int, childIndex: Int)]
-        var childIndexes: [Int]
+        
+        var parentIndexes: [Int] = []
+        
+        /// All children of this node. The child is represented as its index, and the parent's
+        /// index within the parent. `parentIndexInChild` is the index of the parent within the
+        /// child's parentIndexes.
+        var childIndexes: [Int] = []
         
         init(op: Operation) {
             self.op = op
-            self.parentIndexes = []
-            self.childIndexes = []
         }
     }
     

@@ -175,6 +175,7 @@
 		C23AAF4C1CF8DAED009E28E0 /* QueryRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF4B1CF8DAED009E28E0 /* QueryRunner.swift */; };
 		C23AAF4E1CF8E3F8009E28E0 /* SequenceFind.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF4D1CF8E3F8009E28E0 /* SequenceFind.swift */; };
 		C23BC0501D21AEDF00188F86 /* QueryOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC04F1D21AEDF00188F86 /* QueryOptimizer.swift */; };
+		C23BC0521D21C5B100188F86 /* CollectionConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */; };
 		C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C263BBF21CE51B51006B7662 /* UnaryOperator.swift */; };
 		C277E7FD1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */; };
 		C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */; };
@@ -610,6 +611,7 @@
 		C23AAF4B1CF8DAED009E28E0 /* QueryRunner.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryRunner.swift; sourceTree = "<group>"; };
 		C23AAF4D1CF8E3F8009E28E0 /* SequenceFind.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SequenceFind.swift; path = Relational/SequenceFind.swift; sourceTree = "<group>"; };
 		C23BC04F1D21AEDF00188F86 /* QueryOptimizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryOptimizer.swift; sourceTree = "<group>"; };
+		C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CollectionConvenience.swift; path = Relational/CollectionConvenience.swift; sourceTree = "<group>"; };
 		C257C7491CBD7F4500234A89 /* BinaryOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinaryOperator.swift; sourceTree = "<group>"; };
 		C257C74B1CBD835600234A89 /* RelationParts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationParts.swift; sourceTree = "<group>"; };
 		C257C74D1CBD8A9400234A89 /* StringConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StringConvenience.swift; path = Relational/StringConvenience.swift; sourceTree = "<group>"; };
@@ -1302,6 +1304,7 @@
 			isa = PBXGroup;
 			children = (
 				C22921A91CCE605D00518184 /* ArrayHashing.swift */,
+				C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */,
 				C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */,
 				C2B53CBC1D1AF4FC006B6278 /* DeallocObservation.swift */,
 				C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */,
@@ -2072,6 +2075,7 @@
 				C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */,
 				C2B53CBD1D1AF4FC006B6278 /* DeallocObservation.swift in Sources */,
 				C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */,
+				C23BC0521D21C5B100188F86 /* CollectionConvenience.swift in Sources */,
 				C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */,
 				C23AAF4E1CF8E3F8009E28E0 /* SequenceFind.swift in Sources */,
 				C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */,

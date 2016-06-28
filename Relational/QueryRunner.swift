@@ -4,7 +4,7 @@
 //
 
 class QueryRunner {
-    private let nodes: [QueryPlanner.Node]
+    private var nodes: [QueryPlanner.Node]
     private let rootIndex: Int
     
     private let transactionalDatabases: [TransactionalDatabase]
@@ -33,6 +33,7 @@ class QueryRunner {
         for index in nodes.indices {
             nodeStates.append(NodeState(nodes: nodes, nodeIndex: index))
         }
+        computeParentChildIndexes()
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
@@ -64,6 +65,38 @@ class QueryRunner {
             unlocker.value = {}
             return nil
         })
+    }
+    
+    /// Fill out each NodeState's `parentChildIndexes` array by scanning their parents.
+    /// This computes each child's index within the parent, which the other code needs
+    /// in order to write data and propagate EOF info.
+    private func computeParentChildIndexes() {
+        for nodeIndex in nodeStates.indices {
+            nodeStates[nodeIndex].parentChildIndexes.reserveCapacity(nodes[nodeIndex].parentIndexes.count)
+            
+            // This would be simple, except that it's possible for the same parent to be in `parentIndexes` more
+            // than once. In that scenario, the parent's `childIndexes` will also have multiple entries pointing
+            // to the child. The child needs to collect all of those indexes. To simplify the computation, we
+            // first sort the parent indexes so that all identical parents are adjacent. (The order of `parentIndexes`
+            // does NOT matter, except that it needs to correspond with the items in `parentChildIndexes` which we
+            // haven't computed yet.) We then skip over runs of duplicate parents, and add all matching indexes
+            // from the parent when we encounter the first one. The result is that everything lines up.
+            nodes[nodeIndex].parentIndexes.sortInPlace()
+            
+            let parentIndexes = nodes[nodeIndex].parentIndexes
+            let parentIndexesCount = parentIndexes.count
+            var parentIndexesIndex = 0
+            while parentIndexesIndex < parentIndexesCount {
+                let parentIndex = parentIndexes[parentIndexesIndex]
+                let parentNode = nodes[parentIndex]
+                
+                nodeStates[nodeIndex].parentChildIndexes.appendContentsOf(parentNode.childIndexes.indexesOf(nodeIndex))
+                
+                while parentIndexesIndex < parentIndexesCount && parentIndex == parentIndexes[parentIndexesIndex] {
+                    parentIndexesIndex += 1
+                }
+            }
+        }
     }
     
     /// Run a round of processing on the query. This will either process some intermediate nodes
@@ -155,7 +188,7 @@ class QueryRunner {
         if fromNode == rootIndex {
             collectedOutput.unionInPlace(rows)
         } else {
-            for (parentIndex, index) in nodes[fromNode].parentIndexes {
+            for (parentIndex, index) in zip(nodes[fromNode].parentIndexes, nodeStates[fromNode].parentChildIndexes) {
                 nodeStates[parentIndex].inputBuffers[index].add(rows)
                 intermediatesToProcess.append(IntermediateToProcess(nodeIndex: parentIndex, inputIndex: index))
             }
@@ -164,7 +197,7 @@ class QueryRunner {
     
     private func markDone(nodeIndex: Int) {
         nodeStates[nodeIndex].didMarkDone = true
-        for (parentIndex, index) in nodes[nodeIndex].parentIndexes {
+        for (parentIndex, index) in zip(nodes[nodeIndex].parentIndexes, nodeStates[nodeIndex].parentChildIndexes) {
             nodeStates[parentIndex].setInputBufferEOF(index)
             intermediatesToProcess.append(IntermediateToProcess(nodeIndex: parentIndex, inputIndex: index))
         }
@@ -414,6 +447,10 @@ extension QueryRunner {
         
         var outputForUniquing: Set<Row>? = nil
         var inputBuffers: [Buffer] = []
+        
+        /// Each entry here corresponds to the same index in QueryPlanner.Node's `parentIndexes`.
+        /// An entry refers to this node's index within the corresponding parent node.
+        var parentChildIndexes: [Int] = []
         
         var didMarkDone = false
         
