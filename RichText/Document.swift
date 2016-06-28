@@ -100,9 +100,8 @@ class Document: NSDocument {
         first = !first
         
         let selectedItemName = collections.select(Attribute("id") *== rowID).project(["name"])
-        //let nameObservable = selectedItemName.observable{ $0.oneString }
-        //let nameProperty = selectedItemName.observable{ $0.oneString }.property
-        //Swift.print("NAME: \(nameObservable.value)")
+        //let nameProperty = selectedItemName.property{ $0.oneString }
+        //Swift.print("NAME: \(nameProperty.value)")
         
         let removal = selectedItemName.addChangeObserver({ _ in
             Swift.print("CHANGED")

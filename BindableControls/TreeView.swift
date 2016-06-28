@@ -193,7 +193,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
             let proposedParent = item as? N
 
             // Note that `index` will be -1 in the case where it is being dragged onto
-            // another node, but we will account for that in RelationObservableTree.move()
+            // another node, but we will account for that in RelationTreeProperty.move()
             let srcIndex = model.data.indexForID(nodeID)!
             let dstIndex = index
 

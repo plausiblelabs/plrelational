@@ -87,7 +87,7 @@ public class TreeProperty<N: TreeNode>: ReadablePropertyType {
         notify(change: changes, metadata: metadata)
     }
     
-    // TODO: Move these to a MutableObservableTree subclass?
+    // TODO: Move these to a MutableTreeProperty subclass?
     public func insert(data: N.Data, pos: Pos) {
     }
     

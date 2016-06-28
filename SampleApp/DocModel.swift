@@ -85,7 +85,7 @@ class DocModel {
     // TODO: To simplify implementation of the relation that controls the inspector tree view,
     // we put identifiers for both the `collection` and `object` relations into the same set.
     // A potentially better/safer alternative would be to introduce compound primary key
-    // support into RelationObservableTree so that we can more easily merge data from different
+    // support into RelationTreeProperty so that we can more easily merge data from different
     // source relations into a single relation.
     private var globalID: Int64 = 1
     
