@@ -36,3 +36,14 @@ public extension MutableCollectionType where Generator.Element: Equatable {
         }
     }
 }
+
+public extension SequenceType {
+    func all(@noescape predicate: Generator.Element -> Bool) -> Bool {
+        for elt in self {
+            if !predicate(elt) {
+                return false
+            }
+        }
+        return true
+    }
+}

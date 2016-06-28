@@ -64,7 +64,6 @@ class QueryPlanner {
                     nodes[childNodeIndex].parentIndexes.append(parentNodeIndex)
                     nodes[parentNodeIndex].childIndexes.append(childNodeIndex)
                 }
-                nodes[parentNodeIndex].childCount = children.count
             }
         })
     }
@@ -169,7 +168,14 @@ class QueryPlanner {
 extension QueryPlanner {
     struct Node {
         let op: Operation
-        var childCount = 0
+        
+        var childCount: Int {
+            return childIndexes.count
+        }
+        
+        var parentCount: Int {
+            return parentIndexes.count
+        }
         
         var parentIndexes: [Int] = []
         
