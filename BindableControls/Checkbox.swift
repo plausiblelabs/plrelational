@@ -8,7 +8,7 @@ import Binding
 
 public class Checkbox: NSButton {
     
-    private lazy var _checked: MutableBidiProperty<CheckState> = MutableBidiProperty(
+    private lazy var _checked: ExternalValueProperty<CheckState> = ExternalValueProperty(
         get: { [unowned self] in
             return CheckState(self.state)
         },
@@ -19,7 +19,7 @@ public class Checkbox: NSButton {
             self.state = value.nsValue
         }
     )
-    public var checked: BidiProperty<CheckState> { return _checked }
+    public var checked: ReadWriteProperty<CheckState> { return _checked }
     
     public override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)

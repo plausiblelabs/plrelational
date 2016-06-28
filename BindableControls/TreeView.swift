@@ -16,20 +16,20 @@ public struct TreeViewModel<N: TreeNode> {
     public let contextMenu: ((N.Data) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
     public let move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?
-    public let selection: BidiProperty<Set<N.ID>>
+    public let selection: ReadWriteProperty<Set<N.ID>>
     public let cellIdentifier: (N.Data) -> String
-    public let cellText: (N.Data) -> ObservableProperty<String>
-    public let cellImage: ((N.Data) -> ObservableValue<Image>)?
+    public let cellText: (N.Data) -> CellTextProperty
+    public let cellImage: ((N.Data) -> ReadableProperty<Image>)?
     
     public init(
         data: ObservableTree<N>,
         allowsChildren: (N.Data) -> Bool,
         contextMenu: ((N.Data) -> ContextMenu?)?,
         move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?,
-        selection: BidiProperty<Set<N.ID>>,
+        selection: ReadWriteProperty<Set<N.ID>>,
         cellIdentifier: (N.Data) -> String,
-        cellText: (N.Data) -> ObservableProperty<String>,
-        cellImage: ((N.Data) -> ObservableValue<Image>)?)
+        cellText: (N.Data) -> CellTextProperty,
+        cellImage: ((N.Data) -> ReadableProperty<Image>)?)
     {
         self.data = data
         self.allowsChildren = allowsChildren
@@ -49,7 +49,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     private let model: TreeViewModel<N>
     private let outlineView: NSOutlineView
     
-    private lazy var selection: MutableBidiProperty<Set<N.ID>> = MutableBidiProperty(
+    private lazy var selection: ExternalValueProperty<Set<N.ID>> = ExternalValueProperty(
         get: { [unowned self] in
             var itemIDs: [N.ID] = []
             self.outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
@@ -214,11 +214,11 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
             textField.string.unbindAll()
-            let text = model.cellText(node.data)
-            if let bidiText = text as? BidiProperty {
-                textField.string <~> bidiText
-            } else {
+            switch model.cellText(node.data) {
+            case .ReadOnly(let text):
                 textField.string <~ text
+            case .ReadWrite(let text):
+                textField.string <~> text
             }
         }
         if let imageView = view.imageView as? ImageView {

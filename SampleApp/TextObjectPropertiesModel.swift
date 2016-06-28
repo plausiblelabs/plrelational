@@ -33,7 +33,7 @@ class TextObjectPropertiesModel {
         return self.selectedTextObjects.project(["font"])
     }()
 
-    lazy var editable: BidiProperty<CheckState> = { [unowned self] in
+    lazy var editable: ReadWriteProperty<CheckState> = { [unowned self] in
         return self.db.bidiProperty(
             self.editableRelation,
             action: "Change Editable",
@@ -42,7 +42,7 @@ class TextObjectPropertiesModel {
         )
     }()
     
-    lazy var hint: BidiProperty<String> = { [unowned self] in
+    lazy var hint: ReadWriteProperty<String> = { [unowned self] in
         return self.db.bidiProperty(
             self.hintRelation,
             action: "Change Hint",
@@ -51,13 +51,13 @@ class TextObjectPropertiesModel {
         )
     }()
     
-    lazy var hintPlaceholder: ObservableValue<String> = { [unowned self] in
+    lazy var hintPlaceholder: ReadableProperty<String> = { [unowned self] in
         return self.hintRelation.stringWhenMulti("Multiple Values")
     }()
     
     var availableFonts: [String] = ["Futura", "Helvetica", "Monaco"]
     
-    lazy var font: BidiProperty<String?> = { [unowned self] in
+    lazy var font: ReadWriteProperty<String?> = { [unowned self] in
         return self.db.bidiProperty(
             self.fontRelation,
             action: "Change Font",
@@ -66,7 +66,7 @@ class TextObjectPropertiesModel {
         )
     }()
     
-    lazy var fontPlaceholder: ObservableValue<String> = { [unowned self] in
+    lazy var fontPlaceholder: ReadableProperty<String> = { [unowned self] in
         return self.fontRelation.stringWhenMulti("Multiple", otherwise: "Default")
     }()
 }

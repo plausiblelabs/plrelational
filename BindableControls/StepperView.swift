@@ -8,7 +8,7 @@ import Binding
 
 public class StepperView: NSControl, NSTextFieldDelegate {
     
-    private lazy var _value: ValueBidiProperty<Int?> = ValueBidiProperty(nil, { [unowned self] value, _ in
+    private lazy var _value: MutableValueProperty<Int?> = mutableValueProperty(nil, { [unowned self] value, _ in
         if let intValue = value {
             self.stepper.integerValue = intValue
             self.textField.integerValue = intValue
@@ -17,9 +17,9 @@ public class StepperView: NSControl, NSTextFieldDelegate {
             self.textField.stringValue = ""
         }
     })
-    public var value: BidiProperty<Int?> { return _value }
+    public var value: ReadWriteProperty<Int?> { return _value }
 
-    public lazy var placeholder: Property<String> = Property { [unowned self] value, _ in
+    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty { [unowned self] value, _ in
         self.textField.placeholderString = value
     }
 
@@ -99,7 +99,7 @@ public class StepperView: NSControl, NSTextFieldDelegate {
         } else {
             fatalError("Unexpected sender")
         }
-        _value.change(newValue: newValue, transient: false)
+        _value.change(newValue, transient: false)
     }
     
     public override func controlTextDidEndEditing(notification: NSNotification) {

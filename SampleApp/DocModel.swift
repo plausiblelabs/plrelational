@@ -275,7 +275,7 @@ class DocModel {
                     self.docOutlineTree.move(srcPath: srcPath, dstPath: dstPath)
                 })
             },
-            selection: self.treeSelectionBidiProperty(self.selectedCollectionID, clearInspectorSelection: true),
+            selection: self.treeSelectionProperty(self.selectedCollectionID, clearInspectorSelection: true),
             cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 // TODO: Could we have a convenience for creating a projection Relation directly
@@ -283,11 +283,11 @@ class DocModel {
                 let rowID = row["id"]
                 let type = ItemType(row)!
                 let nameRelation = self.collections.select(Attribute("id") *== rowID).project(["name"])
-                return self.nameBidiProperty(nameRelation, type: type.name)
+                return .ReadWrite(self.nameProperty(nameRelation, type: type.name))
             },
             cellImage: { row in
                 let type = ItemType(row)!
-                return ObservableValue.constant(Image(named: type.cellImageName))
+                return constantValueProperty(Image(named: type.cellImageName))
             }
         )
     }()
@@ -301,23 +301,25 @@ class DocModel {
             },
             contextMenu: nil,
             move: nil,
-            selection: self.treeSelectionBidiProperty(self.selectedInspectorItemIDs, clearInspectorSelection: false),
+            selection: self.treeSelectionProperty(self.selectedInspectorItemIDs, clearInspectorSelection: false),
             cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 let rowID = row["id"]
                 let type = ItemType(row)!
                 let nameRelation = self.inspectorItems.select(Attribute("id") *== rowID).project(["name"])
-                return self.nameBidiProperty(nameRelation, type: type.name)
+                return .ReadWrite(self.nameProperty(nameRelation, type: type.name))
             },
             cellImage: { row in
                 let type = ItemType(row)!
-                return ObservableValue.constant(Image(named: type.cellImageName))
+                return constantValueProperty(Image(named: type.cellImageName))
             }
         )
     }()
     
-    lazy var propertiesSidebarVisible: MutableObservableValue<Bool> = { [unowned self] in
-        return mutableObservableValue(true)
+    // TODO: This would be better as a ReadWriteProperty that is bidirectionally bound to a check-style MenuItem.
+    // For now we declare it as MutableValueProperty so that it can be toggled directly in an NSMenuItem action handler.
+    lazy var propertiesSidebarVisible: MutableValueProperty<Bool> = { [unowned self] in
+        return mutableValueProperty(true)
     }()
     
     lazy var propertiesModel: PropertiesModel = { [unowned self] in
@@ -329,7 +331,7 @@ class DocModel {
         )
     }()
 
-    private func nameBidiProperty(relation: Relation, type: String) -> BidiProperty<String> {
+    private func nameProperty(relation: Relation, type: String) -> ReadWriteProperty<String> {
         return undoableDB.bidiProperty(
             relation,
             action: "Rename \(type)",
@@ -338,7 +340,7 @@ class DocModel {
         )
     }
 
-    private func treeSelectionBidiProperty(relation: MutableRelation, clearInspectorSelection: Bool) -> BidiProperty<Set<RelationValue>> {
+    private func treeSelectionProperty(relation: MutableRelation, clearInspectorSelection: Bool) -> ReadWriteProperty<Set<RelationValue>> {
         return undoableDB.bidiProperty(
             relation,
             action: "Change Selection",

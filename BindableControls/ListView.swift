@@ -15,19 +15,19 @@ public struct ListViewModel<E: ArrayElement> {
     public let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     public let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
-    public let selection: BidiProperty<Set<E.ID>>
+    public let selection: ReadWriteProperty<Set<E.ID>>
     public let cellIdentifier: (E.Data) -> String
-    public let cellText: (E.Data) -> ObservableProperty<String>
-    public let cellImage: ((E.Data) -> ObservableValue<Image>)?
+    public let cellText: (E.Data) -> CellTextProperty
+    public let cellImage: ((E.Data) -> ReadableProperty<Image>)?
 
     public init(
         data: ObservableArray<E>,
         contextMenu: ((E.Data) -> ContextMenu?)?,
         move: ((srcIndex: Int, dstIndex: Int) -> Void)?,
-        selection: BidiProperty<Set<E.ID>>,
+        selection: ReadWriteProperty<Set<E.ID>>,
         cellIdentifier: (E.Data) -> String,
-        cellText: (E.Data) -> ObservableProperty<String>,
-        cellImage: ((E.Data) -> ObservableValue<Image>)?)
+        cellText: (E.Data) -> CellTextProperty,
+        cellImage: ((E.Data) -> ReadableProperty<Image>)?)
     {
         self.data = data
         self.contextMenu = contextMenu
@@ -46,7 +46,7 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
     private let model: ListViewModel<E>
     private let outlineView: NSOutlineView
 
-    private lazy var selection: MutableBidiProperty<Set<E.ID>> = MutableBidiProperty(
+    private lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
         get: { [unowned self] in
             var itemIDs: [E.ID] = []
             self.outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
@@ -160,11 +160,11 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
             textField.string.unbindAll()
-            let text = model.cellText(element.data)
-            if let bidiText = text as? BidiProperty {
-                textField.string <~> bidiText
-            } else {
+            switch model.cellText(element.data) {
+            case .ReadOnly(let text):
                 textField.string <~ text
+            case .ReadWrite(let text):
+                textField.string <~> text
             }
         }
         if let imageView = view.imageView as? ImageView {

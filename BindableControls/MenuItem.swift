@@ -8,10 +8,10 @@ import Binding
 
 public struct MenuItemContent<T> {
     public let object: T
-    public let title: ObservableValue<String>?
-    public let image: ObservableValue<Image>?
+    public let title: ReadableProperty<String>?
+    public let image: ReadableProperty<Image>?
     
-    public init(object: T, title: ObservableValue<String>?, image: ObservableValue<Image>? = nil) {
+    public init(object: T, title: ReadableProperty<String>?, image: ReadableProperty<Image>? = nil) {
         self.object = object
         self.title = title
         self.image = image
@@ -26,20 +26,20 @@ public enum MenuItemType<T> { case
 
 public struct MenuItem<T> {
     public let type: MenuItemType<T>
-    public let visible: ObservableValue<Bool>?
+    public let visible: ReadableProperty<Bool>?
     
-    public init(_ type: MenuItemType<T>, visible: ObservableValue<Bool>? = nil) {
+    public init(_ type: MenuItemType<T>, visible: ReadableProperty<Bool>? = nil) {
         self.type = type
         self.visible = visible
     }
 }
 
-public func titledMenuItem(title: ObservableValue<String>, object: String = "Default") -> MenuItem<String> {
+public func titledMenuItem(title: ReadableProperty<String>, object: String = "Default") -> MenuItem<String> {
     return MenuItem(.Normal(MenuItemContent(object: object, title: title, image: nil)))
 }
 
 public func titledMenuItem(title: String) -> MenuItem<String> {
-    return titledMenuItem(ObservableValue.constant(title), object: title)
+    return titledMenuItem(constantValueProperty(title), object: title)
 }
 
 class NativeMenuItem<T> {
@@ -57,15 +57,15 @@ class NativeMenuItem<T> {
         }
     }
     
-    private lazy var visible: Property<Bool> = Property { [unowned self] value, _ in
+    private lazy var visible: BindableProperty<Bool> = WriteOnlyProperty { [unowned self] value, _ in
         self.nsitem.hidden = !value
     }
 
-    private lazy var title: Property<String> = Property { [unowned self] value, _ in
+    private lazy var title: BindableProperty<String> = WriteOnlyProperty { [unowned self] value, _ in
         self.nsitem.title = value
     }
 
-    private lazy var image: Property<Image> = Property { [unowned self] value, _ in
+    private lazy var image: BindableProperty<Image> = WriteOnlyProperty { [unowned self] value, _ in
         self.nsitem.image = value.nsimage
     }
 

@@ -8,17 +8,17 @@ import Binding
 
 public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
 
-    public lazy var items: Property<[T]> = Property { [unowned self] value, _ in
+    public lazy var items: BindableProperty<[T]> = WriteOnlyProperty { [unowned self] value, _ in
         let objects = value.map{ $0 as! AnyObject }
         self.addItemsWithObjectValues(objects)
     }
     
-    private lazy var _value: ValueBidiProperty<T?> = ValueBidiProperty(nil, { [unowned self] value, _ in
+    private lazy var _value: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
         self.objectValue = value as? AnyObject
     })
-    public var value: BidiProperty<T?> { return _value }
+    public var value: ReadWriteProperty<T?> { return _value }
     
-    public lazy var placeholder: Property<String> = Property { [unowned self] value, _ in
+    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty { [unowned self] value, _ in
         self.placeholderString = value
     }
     
@@ -36,7 +36,7 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
     
     @objc public func comboBoxSelectionDidChange(notification: NSNotification) {
         if let newValue = objectValueOfSelectedItem {
-            _value.change(newValue: newValue as? T, transient: false)
+            _value.change(newValue as? T, transient: false)
         }
     }
     
@@ -52,7 +52,7 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if let newValue = objectValue as? T {
                 if newValue != previousCommittedValue {
-                    _value.change(newValue: newValue, transient: false)
+                    _value.change(newValue, transient: false)
                 }
             }
         }
