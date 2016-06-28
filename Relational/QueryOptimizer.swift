@@ -39,6 +39,7 @@ class QueryOptimizer {
                         nodes[childIndex].parentIndexes.append(parentIndex)
                     }
                 }
+                nodes[i].parentIndexes = []
             default:
                 break
             }
