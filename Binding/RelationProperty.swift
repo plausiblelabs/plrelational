@@ -115,12 +115,12 @@ extension Relation {
 }
 
 extension Relation {
-    /// a ReadableProperty that resolves to `true` if there are zero rows in the relation.
+    /// Returns a ReadableProperty that resolves to `true` if there are zero rows in the relation.
     public var empty: ReadableProperty<Bool> {
         return property{ $0.isEmpty.ok == true }
     }
     
-    /// a ReadableProperty that resolves to `true` if there are one or more rows in the relation.
+    /// Returns a ReadableProperty that resolves to `true` if there are one or more rows in the relation.
     public var nonEmpty: ReadableProperty<Bool> {
         return property{ $0.isEmpty.ok == false }
     }
@@ -188,7 +188,7 @@ private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
             let newValue = relationToValue(relation)
             if valueChanging(value, newValue) {
                 value = newValue
-                notify(newValue: newValue, metadata: ChangeMetadata(transient: false))
+                notify(change: newValue, metadata: ChangeMetadata(transient: false))
             }
         })
     }

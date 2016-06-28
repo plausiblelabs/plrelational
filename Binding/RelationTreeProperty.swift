@@ -32,7 +32,7 @@ public final class RowTreeNode: TreeNode {
     }
 }
 
-class RelationObservableTree: ObservableTree<RowTreeNode> {
+class RelationTreeProperty: TreeProperty<RowTreeNode> {
 
     private let relation: Relation
     private let idAttr: Attribute
@@ -374,8 +374,8 @@ class RelationObservableTree: ObservableTree<RowTreeNode> {
 }
 
 extension Relation {
-    /// Returns an ObservableTree that gets its data from this relation.
-    public func observableTree(idAttr: Attribute = "id", parentAttr: Attribute = "parent", orderAttr: Attribute = "order") -> ObservableTree<RowTreeNode> {
-        return RelationObservableTree(relation: self, idAttr: idAttr, parentAttr: parentAttr, orderAttr: orderAttr)
+    /// Returns a TreeProperty that gets its data from this relation.
+    public func treeProperty(idAttr: Attribute = "id", parentAttr: Attribute = "parent", orderAttr: Attribute = "order") -> TreeProperty<RowTreeNode> {
+        return RelationTreeProperty(relation: self, idAttr: idAttr, parentAttr: parentAttr, orderAttr: orderAttr)
     }
 }

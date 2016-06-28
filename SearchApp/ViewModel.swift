@@ -74,6 +74,7 @@ class ViewModel {
         removals.forEach{ $0() }
     }
     
+    // ASYNC: Reads string changes on MAIN thread, writes to selectExpression on MAIN thread
     lazy var queryString: ReadWriteProperty<String> = mutableValueProperty("", { [weak self] query, _ in
         if query.isEmpty {
             self?.personResults.selectExpression = false
@@ -84,6 +85,7 @@ class ViewModel {
     
     lazy var listViewModel: ListViewModel<RowArrayElement> = { [unowned self] in
         
+        // ASYNC: Reads values on MAIN thread, writes to relation on MAIN thread
         func selectionProperty(relation: MutableRelation) -> ReadWriteProperty<Set<RelationValue>> {
             return self.undoableDB.bidiProperty(
                 relation,
@@ -92,13 +94,15 @@ class ViewModel {
                 set: { relation.replaceValues(Array($0)) }
             )
         }
-        
+
+        // ASYNC: Reads value on MAIN thread
         func cellString(row: Row) -> String {
             return "\(row["name"]) (\(row["sales"]))"
         }
         
         return ListViewModel(
-            data: self.personResults.observableArray(),
+            // ASYNC: Changes from relation calculated on BG thread, reported on MAIN thread
+            data: self.personResults.arrayProperty(),
             contextMenu: nil,
             move: nil,
             selection: selectionProperty(self.selectedPersonID),
@@ -114,21 +118,26 @@ class ViewModel {
         )
     }()
     
+    // ASYNC: Should be bound to `executing` property on `personResults` relation?
     let progressVisible: ReadableProperty<Bool> = constantValueProperty(false)
     
+    // ASYNC: Reads value on MAIN thread (since `selectedPersonID` relation is in-memory only)
     lazy var recordDisabled: ReadableProperty<Bool> = { [unowned self] in
         return self.selectedPersonID.empty
     }()
 
+    // ASYNC: Reads clicks on MAIN thread, writes to relation on MAIN thread (assuming in-memory relation)
     lazy var recordClicked: ActionProperty = ActionProperty {
         Swift.print("TODO: INCREMENT SALES")
     }
 
+    // ASYNC: Reads value on MAIN thread (assuming changes are stored in-memory only)
     lazy var saveDisabled: ReadableProperty<Bool> = { [unowned self] in
         // TODO: Return true only when there are no changes
         return constantValueProperty(true)
     }()
-    
+
+    // ASYNC: Reads clicks on MAIN thread, writes to SQLite relation on BG thread
     lazy var saveClicked: ActionProperty = ActionProperty {
         Swift.print("TODO: SAVE CHANGES")
     }

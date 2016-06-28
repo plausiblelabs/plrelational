@@ -19,7 +19,7 @@ public class RowArrayElement: ArrayElement {
     }
 }
 
-class RelationObservableArray: ObservableArray<RowArrayElement> {
+class RelationArrayProperty: ArrayProperty<RowArrayElement> {
     
     private let relation: Relation
     private let idAttr: Attribute
@@ -229,8 +229,8 @@ class RelationObservableArray: ObservableArray<RowArrayElement> {
 }
 
 extension Relation {
-    /// Returns an ObservableArray that gets its data from this relation.
-    public func observableArray(idAttr: Attribute = "id", orderAttr: Attribute = "order") -> ObservableArray<RowArrayElement> {
-        return RelationObservableArray(relation: self, idAttr: idAttr, orderAttr: orderAttr)
+    /// Returns an ArrayProperty that gets its data from this relation.
+    public func arrayProperty(idAttr: Attribute = "id", orderAttr: Attribute = "order") -> ArrayProperty<RowArrayElement> {
+        return RelationArrayProperty(relation: self, idAttr: idAttr, orderAttr: orderAttr)
     }
 }

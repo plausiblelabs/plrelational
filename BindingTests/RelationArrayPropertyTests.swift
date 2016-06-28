@@ -7,7 +7,7 @@ import XCTest
 import libRelational
 @testable import Binding
 
-class RelationObservableArrayTests: BindingTestCase {
+class RelationArrayPropertyTests: BindingTestCase {
     
     func testInit() {
         let sqliteDB = makeDB().db
@@ -26,7 +26,7 @@ class RelationObservableArrayTests: BindingTestCase {
         addPage(2, name: "Page2", order: 2.0)
         addPage(4, name: "Page4", order: 4.0)
         
-        let array = sqliteRelation.observableArray()
+        let array = sqliteRelation.arrayProperty()
         
         // Verify that in-memory array structure was built correctly during initialization
         verifyArray(array, [
@@ -44,11 +44,11 @@ class RelationObservableArrayTests: BindingTestCase {
         
         XCTAssertNil(sqliteDB.createRelation("page", scheme: ["id", "name", "order"]).err)
         let relation = db["page"]
-        let array = relation.observableArray()
+        let array = relation.arrayProperty()
         XCTAssertEqual(array.elements.count, 0)
         
-        var changes: [RelationObservableArray.Change] = []
-        let removal = array.addChangeObserver({ arrayChanges in
+        var changes: [RelationArrayProperty.Change] = []
+        let removal = array.signal.observe({ arrayChanges, _ in
             changes.appendContentsOf(arrayChanges)
         })
         
@@ -59,7 +59,7 @@ class RelationObservableArrayTests: BindingTestCase {
                     "name": RelationValue(name)
                 ]
                 let previous = previousID.map{RelationValue($0)}
-                let pos = RelationObservableArray.Pos(previousID: previous, nextID: nil)
+                let pos = RelationArrayProperty.Pos(previousID: previous, nextID: nil)
                 array.insert(row, pos: pos)
             })
         }
@@ -76,7 +76,7 @@ class RelationObservableArrayTests: BindingTestCase {
             })
         }
         
-        func verifyChanges(expected: [RelationObservableArray.Change], file: StaticString = #file, line: UInt = #line) {
+        func verifyChanges(expected: [RelationArrayProperty.Change], file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(changes, expected, file: file, line: line)
             changes = []
         }

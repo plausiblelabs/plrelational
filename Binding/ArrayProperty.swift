@@ -34,10 +34,9 @@ public func ==(a: ArrayChange, b: ArrayChange) -> Bool {
     }
 }
 
-public class ObservableArray<E: ArrayElement>: Observable {
+public class ArrayProperty<E: ArrayElement>: ReadablePropertyType {
     public typealias Value = [E]
-    public typealias Changes = [ArrayChange]
-    public typealias ChangeObserver = Changes -> Void
+    public typealias SignalChange = [ArrayChange]
     
     public typealias ElementID = E.ID
     public typealias Element = E
@@ -49,25 +48,18 @@ public class ObservableArray<E: ArrayElement>: Observable {
     public var value: [Element] {
         return elements
     }
-    
-    private var changeObservers: [UInt64: ChangeObserver] = [:]
-    private var changeObserverNextID: UInt64 = 0
 
+    public let signal: Signal<[ArrayChange]>
+    private let notify: Signal<[ArrayChange]>.Notify
+    
     init(elements: [Element]) {
+        (self.signal, self.notify) = Signal<[ArrayChange]>.pipe()
         self.elements = elements
     }
     
-    public func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval {
-        let id = changeObserverNextID
-        changeObserverNextID += 1
-        changeObservers[id] = observer
-        return { self.changeObservers.removeValueForKey(id) }
-    }
-    
-    internal func notifyChangeObservers(changes: Changes) {
-        for (_, f) in changeObservers {
-            f(changes)
-        }
+    internal func notifyChangeObservers(changes: [ArrayChange]) {
+        let metadata = ChangeMetadata(transient: false)
+        notify(change: changes, metadata: metadata)
     }
     
     public func insert(row: E.Data, pos: Pos) {

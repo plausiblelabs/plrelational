@@ -352,8 +352,8 @@ class DocModelTests: AppTestCase {
             
             // Observe a number of bindings
             let propsModel = model.propertiesModel
-            _ = model.docOutlineTreeViewModel.data.addChangeObserver({ _ in self.changeCount += 1 })
-            _ = model.inspectorTreeViewModel.data.addChangeObserver({ _ in self.changeCount += 1 })
+            _ = model.docOutlineTreeViewModel.data.signal.observe({ _ in self.changeCount += 1 })
+            _ = model.inspectorTreeViewModel.data.signal.observe({ _ in self.changeCount += 1 })
             _ = propsModel.itemSelected.signal.observe({ _ in self.changeCount += 1 })
             _ = propsModel.itemNotSelected.signal.observe({ _ in self.changeCount += 1 })
             _ = propsModel.selectedItemTypesString.signal.observe({ _ in self.changeCount += 1 })

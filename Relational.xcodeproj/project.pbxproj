@@ -31,19 +31,18 @@
 		3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076C1CEE60C900710C80 /* MutableRelation.swift */; };
 		3727077A1CF7B2CB00710C80 /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
 		372707B21CFE23BB00710C80 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
-		372707B41CFE240E00710C80 /* Observable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6113E1CD93069001DAF59 /* Observable.swift */; };
 		372707B71CFE240E00710C80 /* CommonValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136921CF11C8D00F572C5 /* CommonValue.swift */; };
-		372707B81CFE240E00710C80 /* ObservableArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136941CF40A9600F572C5 /* ObservableArray.swift */; };
-		372707B91CFE240E00710C80 /* RelationObservableArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114C1CDD603C001DAF59 /* RelationObservableArray.swift */; };
-		372707BA1CFE240E00710C80 /* ObservableTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707751CF391EC00710C80 /* ObservableTree.swift */; };
-		372707BB1CFE240E00710C80 /* RelationObservableTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114E1CDD6084001DAF59 /* RelationObservableTree.swift */; };
+		372707B81CFE240E00710C80 /* ArrayProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136941CF40A9600F572C5 /* ArrayProperty.swift */; };
+		372707B91CFE240E00710C80 /* RelationArrayProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114C1CDD603C001DAF59 /* RelationArrayProperty.swift */; };
+		372707BA1CFE240E00710C80 /* TreeProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707751CF391EC00710C80 /* TreeProperty.swift */; };
+		372707BB1CFE240E00710C80 /* RelationTreeProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114E1CDD6084001DAF59 /* RelationTreeProperty.swift */; };
 		372707BD1CFE24F600710C80 /* ArrayBinarySearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6115A1CE4F3BC001DAF59 /* ArrayBinarySearch.swift */; };
 		372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */; };
 		372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707771CF3C31200710C80 /* RelationValuePlistable.swift */; };
 		372707C61CFE258B00710C80 /* liblibRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; };
 		372707D01CFE25B000710C80 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
-		372707D71CFE25D400710C80 /* RelationObservableArrayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136961CF40AB300F572C5 /* RelationObservableArrayTests.swift */; };
-		372707D81CFE25D400710C80 /* RelationObservableTreeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F8FBD31CE4FC30001C7C5F /* RelationObservableTreeTests.swift */; };
+		372707D71CFE25D400710C80 /* RelationArrayPropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136961CF40AB300F572C5 /* RelationArrayPropertyTests.swift */; };
+		372707D81CFE25D400710C80 /* RelationTreePropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */; };
 		372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6115C1CE4F756001DAF59 /* ArrayBinarySearchTests.swift */; };
 		372707DB1CFE262700710C80 /* BindingTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707DA1CFE262700710C80 /* BindingTestCase.swift */; };
 		372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
@@ -483,7 +482,7 @@
 		372707671CED2F8100710C80 /* AppTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppTestCase.swift; sourceTree = "<group>"; };
 		3727076C1CEE60C900710C80 /* MutableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelation.swift; sourceTree = "<group>"; };
 		3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArraySafeIndex.swift; sourceTree = "<group>"; };
-		372707751CF391EC00710C80 /* ObservableTree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservableTree.swift; sourceTree = "<group>"; };
+		372707751CF391EC00710C80 /* TreeProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeProperty.swift; sourceTree = "<group>"; };
 		372707771CF3C31200710C80 /* RelationValuePlistable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValuePlistable.swift; sourceTree = "<group>"; };
 		372707791CF7B2CB00710C80 /* UndoableDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UndoableDatabase.swift; sourceTree = "<group>"; };
 		372707AE1CFE238700710C80 /* libBinding.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libBinding.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -501,8 +500,8 @@
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = SampleAppTests/DocModelTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CommonValue.swift; path = Binding/CommonValue.swift; sourceTree = "<group>"; };
-		376136941CF40A9600F572C5 /* ObservableArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObservableArray.swift; sourceTree = "<group>"; };
-		376136961CF40AB300F572C5 /* RelationObservableArrayTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationObservableArrayTests.swift; path = BindingTests/RelationObservableArrayTests.swift; sourceTree = SOURCE_ROOT; };
+		376136941CF40A9600F572C5 /* ArrayProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayProperty.swift; sourceTree = "<group>"; };
+		376136961CF40AB300F572C5 /* RelationArrayPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationArrayPropertyTests.swift; path = BindingTests/RelationArrayPropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObjectPropertiesModel.swift; sourceTree = "<group>"; };
 		3761369A1CF9523A00F572C5 /* PopUpButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopUpButton.swift; sourceTree = "<group>"; };
 		3761369C1CFBA42100F572C5 /* StepperView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StepperView.swift; sourceTree = "<group>"; };
@@ -559,17 +558,16 @@
 		37C611351CD7FB07001DAF59 /* ListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		37C611371CD7FB9C001DAF59 /* ExtOutlineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtOutlineView.swift; sourceTree = "<group>"; };
 		37C611391CD80566001DAF59 /* DocModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocModel.swift; sourceTree = "<group>"; };
-		37C6113E1CD93069001DAF59 /* Observable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Observable.swift; path = Binding/Observable.swift; sourceTree = "<group>"; };
 		37C611411CD94784001DAF59 /* UndoManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UndoManager.swift; sourceTree = "<group>"; };
 		37C611471CDBCB4C001DAF59 /* DocOutlineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocOutlineView.swift; sourceTree = "<group>"; };
 		37C6114A1CDBCB5C001DAF59 /* PropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertiesView.swift; sourceTree = "<group>"; };
-		37C6114C1CDD603C001DAF59 /* RelationObservableArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObservableArray.swift; sourceTree = "<group>"; };
-		37C6114E1CDD6084001DAF59 /* RelationObservableTree.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObservableTree.swift; sourceTree = "<group>"; };
+		37C6114C1CDD603C001DAF59 /* RelationArrayProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationArrayProperty.swift; sourceTree = "<group>"; };
+		37C6114E1CDD6084001DAF59 /* RelationTreeProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationTreeProperty.swift; sourceTree = "<group>"; };
 		37C611501CE10770001DAF59 /* TreeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeView.swift; sourceTree = "<group>"; };
 		37C611521CE3A942001DAF59 /* ContextMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextMenu.swift; sourceTree = "<group>"; };
 		37C6115A1CE4F3BC001DAF59 /* ArrayBinarySearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayBinarySearch.swift; sourceTree = "<group>"; };
 		37C6115C1CE4F756001DAF59 /* ArrayBinarySearchTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ArrayBinarySearchTests.swift; path = BindingTests/ArrayBinarySearchTests.swift; sourceTree = SOURCE_ROOT; };
-		37F8FBD31CE4FC30001C7C5F /* RelationObservableTreeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationObservableTreeTests.swift; path = BindingTests/RelationObservableTreeTests.swift; sourceTree = SOURCE_ROOT; };
+		37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationTreePropertyTests.swift; path = BindingTests/RelationTreePropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		47701CA01CF764CD00E3549D /* Checkbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
 		C204A14F1D071A9200DF297F /* RelationDerivative.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDerivative.swift; sourceTree = "<group>"; };
 		C204A1511D073E6100DF297F /* RelationObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObserver.swift; sourceTree = "<group>"; };
@@ -832,25 +830,25 @@
 			path = RichTextUITests;
 			sourceTree = "<group>";
 		};
-		372707731CF38FF600710C80 /* Observable Tree */ = {
+		372707731CF38FF600710C80 /* Tree Property */ = {
 			isa = PBXGroup;
 			children = (
-				372707751CF391EC00710C80 /* ObservableTree.swift */,
-				37C6114E1CDD6084001DAF59 /* RelationObservableTree.swift */,
-				37F8FBD31CE4FC30001C7C5F /* RelationObservableTreeTests.swift */,
+				372707751CF391EC00710C80 /* TreeProperty.swift */,
+				37C6114E1CDD6084001DAF59 /* RelationTreeProperty.swift */,
+				37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */,
 			);
-			name = "Observable Tree";
+			name = "Tree Property";
 			path = Binding;
 			sourceTree = "<group>";
 		};
-		372707741CF3904D00710C80 /* Observable Array */ = {
+		372707741CF3904D00710C80 /* Array Property */ = {
 			isa = PBXGroup;
 			children = (
-				376136941CF40A9600F572C5 /* ObservableArray.swift */,
-				37C6114C1CDD603C001DAF59 /* RelationObservableArray.swift */,
-				376136961CF40AB300F572C5 /* RelationObservableArrayTests.swift */,
+				376136941CF40A9600F572C5 /* ArrayProperty.swift */,
+				37C6114C1CDD603C001DAF59 /* RelationArrayProperty.swift */,
+				376136961CF40AB300F572C5 /* RelationArrayPropertyTests.swift */,
 			);
-			name = "Observable Array";
+			name = "Array Property";
 			path = Binding;
 			sourceTree = "<group>";
 		};
@@ -858,7 +856,6 @@
 			isa = PBXGroup;
 			children = (
 				37A1CEDF1D1469900067870D /* Signal */,
-				37A1CEE01D1469960067870D /* Observables */,
 				37A1CED71D1350C00067870D /* Property */,
 				37A1CEE11D147A970067870D /* Relation Extensions */,
 				372707BC1CFE24C600710C80 /* Utilities */,
@@ -1006,6 +1003,8 @@
 				37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */,
 				37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */,
 				376136921CF11C8D00F572C5 /* CommonValue.swift */,
+				372707741CF3904D00710C80 /* Array Property */,
+				372707731CF38FF600710C80 /* Tree Property */,
 			);
 			name = Property;
 			sourceTree = "<group>";
@@ -1016,16 +1015,6 @@
 				37A1CEDD1D1469720067870D /* Signal.swift */,
 			);
 			name = Signal;
-			sourceTree = "<group>";
-		};
-		37A1CEE01D1469960067870D /* Observables */ = {
-			isa = PBXGroup;
-			children = (
-				37C6113E1CD93069001DAF59 /* Observable.swift */,
-				372707741CF3904D00710C80 /* Observable Array */,
-				372707731CF38FF600710C80 /* Observable Tree */,
-			);
-			name = Observables;
 			sourceTree = "<group>";
 		};
 		37A1CEE11D147A970067870D /* Relation Extensions */ = {
@@ -1910,20 +1899,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				37A1CEE71D147BD80067870D /* RelationMutation.swift in Sources */,
-				372707B41CFE240E00710C80 /* Observable.swift in Sources */,
-				372707BA1CFE240E00710C80 /* ObservableTree.swift in Sources */,
+				372707BA1CFE240E00710C80 /* TreeProperty.swift in Sources */,
 				37A4A23E1D1F1677005CAEA5 /* RelationProperty.swift in Sources */,
 				372707B71CFE240E00710C80 /* CommonValue.swift in Sources */,
-				372707B91CFE240E00710C80 /* RelationObservableArray.swift in Sources */,
+				372707B91CFE240E00710C80 /* RelationArrayProperty.swift in Sources */,
 				37A4A23A1D1DB343005CAEA5 /* PropertyOperations.swift in Sources */,
 				372707BD1CFE24F600710C80 /* ArrayBinarySearch.swift in Sources */,
 				37A1CED91D1354DD0067870D /* Property.swift in Sources */,
 				372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */,
 				37A1CEDE1D1469720067870D /* Signal.swift in Sources */,
-				372707BB1CFE240E00710C80 /* RelationObservableTree.swift in Sources */,
+				372707BB1CFE240E00710C80 /* RelationTreeProperty.swift in Sources */,
 				37A1CEE31D147ACA0067870D /* RelationAsTypedValue.swift in Sources */,
 				372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */,
-				372707B81CFE240E00710C80 /* ObservableArray.swift in Sources */,
+				372707B81CFE240E00710C80 /* ArrayProperty.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1936,11 +1924,11 @@
 				372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */,
 				37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */,
 				37A4A2401D1F4FD9005CAEA5 /* RelationPropertyTests.swift in Sources */,
-				372707D81CFE25D400710C80 /* RelationObservableTreeTests.swift in Sources */,
+				372707D81CFE25D400710C80 /* RelationTreePropertyTests.swift in Sources */,
 				37A4A23C1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift in Sources */,
 				372707DB1CFE262700710C80 /* BindingTestCase.swift in Sources */,
 				37A1CEE91D147C190067870D /* RelationMutationTests.swift in Sources */,
-				372707D71CFE25D400710C80 /* RelationObservableArrayTests.swift in Sources */,
+				372707D71CFE25D400710C80 /* RelationArrayPropertyTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -5,9 +5,19 @@
 
 import Foundation
 
+public typealias ObserverRemoval = Void -> Void
+
+public struct ChangeMetadata {
+    public let transient: Bool
+    
+    public init(transient: Bool) {
+        self.transient = transient
+    }
+}
+
 public class Signal<T> {
     public typealias Observer = (T, ChangeMetadata) -> Void
-    public typealias Notify = (newValue: T, metadata: ChangeMetadata) -> Void
+    public typealias Notify = (change: T, metadata: ChangeMetadata) -> Void
 
     private var observers: [UInt64: Observer] = [:]
     private var nextObserverID: UInt64 = 0

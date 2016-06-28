@@ -30,7 +30,7 @@ class BindingTestCase: XCTestCase {
         return (path, db)
     }
     
-    func prettyArray(array: ObservableArray<RowArrayElement>) -> [String] {
+    func prettyArray(array: ArrayProperty<RowArrayElement>) -> [String] {
         var accum: [String] = []
         for element in array.elements {
             accum.append("\(element.data["name"])")
@@ -38,7 +38,7 @@ class BindingTestCase: XCTestCase {
         return accum
     }
     
-    func verifyArray(array: ObservableArray<RowArrayElement>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
+    func verifyArray(array: ArrayProperty<RowArrayElement>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
         XCTAssertEqual(prettyArray(array), expected, file: file, line: line)
     }
     
@@ -50,7 +50,7 @@ class BindingTestCase: XCTestCase {
         }
     }
     
-    func prettyRoot(tree: ObservableTree<RowTreeNode>) -> [String] {
+    func prettyRoot(tree: TreeProperty<RowTreeNode>) -> [String] {
         var accum: [String] = []
         for node in tree.root.children {
             pretty(node, &accum, 0)
@@ -58,11 +58,11 @@ class BindingTestCase: XCTestCase {
         return accum
     }
     
-    func verifyTree(tree: ObservableTree<RowTreeNode>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
+    func verifyTree(tree: TreeProperty<RowTreeNode>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
         XCTAssertEqual(prettyRoot(tree), expected, file: file, line: line)
     }
     
-    func path(tree: ObservableTree<RowTreeNode>, parentID: Int64?, index: Int) -> TreePath<RowTreeNode> {
+    func path(tree: TreeProperty<RowTreeNode>, parentID: Int64?, index: Int) -> TreePath<RowTreeNode> {
         let parent = parentID.flatMap{ tree.nodeForID(RelationValue($0)) }
         return TreePath(parent: parent, index: index)
     }

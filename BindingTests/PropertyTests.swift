@@ -405,11 +405,11 @@ class PropertyTests: XCTestCase {
         XCTAssertEqual(changeCount, 0)
         XCTAssertEqual(signal.observerCount, 1)
         
-        notify(newValue: (), metadata: ChangeMetadata(transient: false))
+        notify(change: (), metadata: ChangeMetadata(transient: false))
         XCTAssertEqual(changeCount, 1)
         XCTAssertEqual(signal.observerCount, 1)
         
-        notify(newValue: (), metadata: ChangeMetadata(transient: false))
+        notify(change: (), metadata: ChangeMetadata(transient: false))
         XCTAssertEqual(changeCount, 2)
         XCTAssertEqual(signal.observerCount, 1)
         

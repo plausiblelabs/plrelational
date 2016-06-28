@@ -11,7 +11,7 @@ import Binding
 private let PasteboardType = "coop.plausible.vp.pasteboard.TreeViewItem"
 
 public struct TreeViewModel<N: TreeNode> {
-    public let data: ObservableTree<N>
+    public let data: TreeProperty<N>
     public let allowsChildren: (N.Data) -> Bool
     public let contextMenu: ((N.Data) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
@@ -22,7 +22,7 @@ public struct TreeViewModel<N: TreeNode> {
     public let cellImage: ((N.Data) -> ReadableProperty<Image>)?
     
     public init(
-        data: ObservableTree<N>,
+        data: TreeProperty<N>,
         allowsChildren: (N.Data) -> Bool,
         contextMenu: ((N.Data) -> ContextMenu?)?,
         move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?,
@@ -89,7 +89,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         
         super.init()
         
-        treeObserverRemoval = model.data.addChangeObserver({ [weak self] changes in self?.treeChanged(changes) })
+        treeObserverRemoval = model.data.signal.observe({ [weak self] changes, _ in self?.treeChanged(changes) })
         selection <~> model.selection
         
         outlineView.setDelegate(self)

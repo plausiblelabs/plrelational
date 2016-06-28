@@ -7,7 +7,7 @@ import XCTest
 import libRelational
 @testable import Binding
 
-class RelationObservableTreeTests: BindingTestCase {
+class RelationTreePropertyTests: BindingTestCase {
 
     func testInit() {
         let sqliteDB = makeDB().db
@@ -37,7 +37,7 @@ class RelationObservableTreeTests: BindingTestCase {
         addCollection(6, name: "Child2", parentID: 2, order: 2.0)
         addCollection(7, name: "Group2", parentID: nil, order: 2.0)
         
-        let tree = sqliteRelation.observableTree()
+        let tree = sqliteRelation.treeProperty()
         
         verifyTree(tree, [
             "Group1",
@@ -57,11 +57,11 @@ class RelationObservableTreeTests: BindingTestCase {
 
         XCTAssertNil(sqliteDB.createRelation("collection", scheme: ["id", "name", "parent", "order"]).err)
         let relation = db["collection"]
-        let tree = relation.observableTree()
+        let tree = relation.treeProperty()
         XCTAssertEqual(tree.root.children.count, 0)
         
-        var changes: [RelationObservableTree.Change] = []
-        let removal = tree.addChangeObserver({ treeChanges in
+        var changes: [RelationTreeProperty.Change] = []
+        let removal = tree.signal.observe({ treeChanges, _ in
             changes.appendContentsOf(treeChanges)
         })
         
@@ -73,7 +73,7 @@ class RelationObservableTreeTests: BindingTestCase {
                 ]
                 let parent = parentID.map{RelationValue($0)}
                 let previous = previousID.map{RelationValue($0)}
-                let pos = RelationObservableTree.Pos(parentID: parent, previousID: previous, nextID: nil)
+                let pos = RelationTreeProperty.Pos(parentID: parent, previousID: previous, nextID: nil)
                 tree.insert(row, pos: pos)
             })
         }
@@ -84,13 +84,13 @@ class RelationObservableTreeTests: BindingTestCase {
             })
         }
         
-        func moveCollection(srcPath srcPath: RelationObservableTree.Path, dstPath: RelationObservableTree.Path) {
+        func moveCollection(srcPath srcPath: RelationTreeProperty.Path, dstPath: RelationTreeProperty.Path) {
             db.transaction({
                 tree.move(srcPath: srcPath, dstPath: dstPath)
             })
         }
         
-        func verifyChanges(expected: [RelationObservableTree.Change], file: StaticString = #file, line: UInt = #line) {
+        func verifyChanges(expected: [RelationTreeProperty.Change], file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(changes, expected, file: file, line: line)
             changes = []
         }
@@ -100,7 +100,7 @@ class RelationObservableTreeTests: BindingTestCase {
             AssertEqual(sqliteDB["collection"]!, expected, file: file, line: line)
         }
         
-        func path(parentID: Int64?, _ index: Int) -> RelationObservableTree.Path {
+        func path(parentID: Int64?, _ index: Int) -> RelationTreeProperty.Path {
             let parent = parentID.flatMap{ tree.nodeForID(RelationValue($0)) }
             return TreePath(parent: parent, index: index)
         }

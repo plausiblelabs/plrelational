@@ -58,10 +58,9 @@ public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     }
 }
 
-public class ObservableTree<N: TreeNode>: Observable {
+public class TreeProperty<N: TreeNode>: ReadablePropertyType {
     public typealias Value = N
-    public typealias Changes = [TreeChange<N>]
-    public typealias ChangeObserver = Changes -> Void
+    public typealias SignalChange = [TreeChange<N>]
 
     public typealias NodeID = N.ID
     public typealias Node = N
@@ -69,30 +68,23 @@ public class ObservableTree<N: TreeNode>: Observable {
     public typealias Pos = TreePos<N>
     public typealias Change = TreeChange<N>
     
-    private var changeObservers: [UInt64: ChangeObserver] = [:]
-    private var changeObserverNextID: UInt64 = 0
-    
     public let root: Node
     
     public var value: Node {
         return root
     }
     
+    public let signal: Signal<[Change]>
+    private let notify: Signal<[Change]>.Notify
+    
     init(root: Node) {
+        (self.signal, self.notify) = Signal<[Change]>.pipe()
         self.root = root
     }
     
-    public func addChangeObserver(observer: ChangeObserver) -> ObserverRemoval {
-        let id = changeObserverNextID
-        changeObserverNextID += 1
-        changeObservers[id] = observer
-        return { self.changeObservers.removeValueForKey(id) }
-    }
-    
-    internal func notifyChangeObservers(changes: Changes) {
-        for (_, f) in changeObservers {
-            f(changes)
-        }
+    internal func notifyChangeObservers(changes: [Change]) {
+        let metadata = ChangeMetadata(transient: false)
+        notify(change: changes, metadata: metadata)
     }
     
     // TODO: Move these to a MutableObservableTree subclass?

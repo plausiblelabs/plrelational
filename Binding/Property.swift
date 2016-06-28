@@ -5,14 +5,6 @@
 
 import Foundation
 
-public struct ChangeMetadata {
-    public let transient: Bool
-    
-    public init(transient: Bool) {
-        self.transient = transient
-    }
-}
-
 public enum ChangeResult<T> { case
     Change(T),
     NoChange
@@ -42,14 +34,16 @@ public class Binding {
 
 public protocol ReadablePropertyType: class {
     associatedtype Value
+    associatedtype SignalChange = Value
     
     var value: Value { get }
-    var signal: Signal<Value> { get }
+    var signal: Signal<SignalChange> { get }
 }
 
 /// A concrete property that is readable and observable.
 public class ReadableProperty<T>: ReadablePropertyType {
     public typealias Value = T
+    public typealias Change = T
     
     public private(set) var value: T
     public let signal: Signal<T>
@@ -66,7 +60,7 @@ public class ReadableProperty<T>: ReadablePropertyType {
     internal func setValue(newValue: T, _ metadata: ChangeMetadata) {
         if changing(value, newValue) {
             value = newValue
-            notify(newValue: newValue, metadata: metadata)
+            notify(change: newValue, metadata: metadata)
         }
     }
 }
@@ -257,7 +251,7 @@ public class MutableValueProperty<T>: ReadWriteProperty<T> {
         change = { (newValue: T, metadata: ChangeMetadata) in
             if valueChanging(value, newValue) {
                 value = newValue
-                notify(newValue: newValue, metadata: metadata)
+                notify(change: newValue, metadata: metadata)
             }
         }
         
@@ -269,7 +263,7 @@ public class MutableValueProperty<T>: ReadWriteProperty<T> {
                 if valueChanging(value, newValue) {
                     value = newValue
                     didSet?(newValue, metadata)
-                    notify(newValue: newValue, metadata: metadata)
+                    notify(change: newValue, metadata: metadata)
                 }
             },
             signal: signal,
@@ -302,14 +296,14 @@ public class ExternalValueProperty<T>: ReadWriteProperty<T> {
         let (signal, notify) = Signal<T>.pipe()
 
         changed = { (transient: Bool) in
-            notify(newValue: get(), metadata: ChangeMetadata(transient: transient))
+            notify(change: get(), metadata: ChangeMetadata(transient: transient))
         }
 
         super.init(
             get: get,
             set: { newValue, metadata in
                 set(newValue, metadata)
-                notify(newValue: newValue, metadata: metadata)
+                notify(change: newValue, metadata: metadata)
             },
             signal: signal,
             notify: notify
@@ -332,7 +326,7 @@ infix operator <~ {
     precedence 93
 }
 
-public func <~ <T, RHS: ReadablePropertyType where RHS.Value == T>(lhs: BindableProperty<T>, rhs: RHS) -> Binding {
+public func <~ <T, RHS: ReadablePropertyType where RHS.Value == T, RHS.SignalChange == T>(lhs: BindableProperty<T>, rhs: RHS) -> Binding {
     return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
 }
 

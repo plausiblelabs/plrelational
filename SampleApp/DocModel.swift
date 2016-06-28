@@ -79,8 +79,8 @@ class DocModel {
     private let selectedInspectorItems: Relation
     private let selectedItems: Relation
 
-    private let docOutlineTree: ObservableTree<RowTreeNode>
-    private let inspectorItemsTree: ObservableTree<RowTreeNode>
+    private let docOutlineTree: TreeProperty<RowTreeNode>
+    private let inspectorItemsTree: TreeProperty<RowTreeNode>
     
     // TODO: To simplify implementation of the relation that controls the inspector tree view,
     // we put identifiers for both the `collection` and `object` relations into the same set.
@@ -142,9 +142,9 @@ class DocModel {
         // inspector item(s) (if non-empty) OR the currently selected doc outline item
         self.selectedItems = selectedInspectorItems.otherwise(selectedCollection)
 
-        // Prepare the observable trees
-        self.docOutlineTree = collections.observableTree()
-        self.inspectorItemsTree = inspectorItems.observableTree()
+        // Prepare the tree properties
+        self.docOutlineTree = collections.treeProperty()
+        self.inspectorItemsTree = inspectorItems.treeProperty()
         
         self.db = db
         self.undoableDB = UndoableDatabase(db: db, undoManager: undoManager)

@@ -30,6 +30,6 @@ public class Button: NSButton {
     }
     
     @objc func buttonClicked(sender: Button) {
-        clicksNotify(newValue: (), metadata: ChangeMetadata(transient: true))
+        clicksNotify(change: (), metadata: ChangeMetadata(transient: true))
     }
 }

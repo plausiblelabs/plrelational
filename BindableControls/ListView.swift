@@ -11,7 +11,7 @@ import Binding
 private let PasteboardType = "coop.plausible.vp.pasteboard.ListViewItem"
 
 public struct ListViewModel<E: ArrayElement> {
-    public let data: ObservableArray<E>
+    public let data: ArrayProperty<E>
     public let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     public let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
@@ -21,7 +21,7 @@ public struct ListViewModel<E: ArrayElement> {
     public let cellImage: ((E.Data) -> ReadableProperty<Image>)?
 
     public init(
-        data: ObservableArray<E>,
+        data: ArrayProperty<E>,
         contextMenu: ((E.Data) -> ContextMenu?)?,
         move: ((srcIndex: Int, dstIndex: Int) -> Void)?,
         selection: ReadWriteProperty<Set<E.ID>>,
@@ -83,7 +83,7 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         
         super.init()
         
-        arrayObserverRemoval = model.data.addChangeObserver({ [weak self] changes in self?.arrayChanged(changes) })
+        arrayObserverRemoval = model.data.signal.observe({ [weak self] changes, _ in self?.arrayChanged(changes) })
         selection <~> model.selection
         
         outlineView.setDelegate(self)
