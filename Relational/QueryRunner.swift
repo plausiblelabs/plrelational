@@ -81,7 +81,7 @@ class QueryRunner {
             // does NOT matter, except that it needs to correspond with the items in `parentChildIndexes` which we
             // haven't computed yet.) We then skip over runs of duplicate parents, and add all matching indexes
             // from the parent when we encounter the first one. The result is that everything lines up.
-            nodes[nodeIndex].parentIndexes.sortInPlace()
+            nodes[nodeIndex].parentIndexes.fastSmallSortInPlace()
             
             let parentIndexes = nodes[nodeIndex].parentIndexes
             let parentIndexesCount = parentIndexes.count

@@ -47,3 +47,53 @@ public extension SequenceType {
         return true
     }
 }
+
+public extension Array where Element: Comparable {
+    /// Sort the array in place, ordered smallest to largest. Optimized for small arrays.
+    /// For larger arrays, it just calls through to sortInPlace.
+    mutating func fastSmallSortInPlace() {
+        switch count {
+        case 0, 1:
+            return
+            
+        case 2:
+            if self[0] > self[1] {
+                swap(&self[0], &self[1])
+            }
+            
+        default:
+            sortInPlace()
+        }
+    }
+}
+
+public extension Array where Element: Equatable {
+    func indexesOf(toFind: Element) -> [Int] {
+        switch count {
+        case 0: return []
+        case 1 where self[0] == toFind:
+            return [0]
+        case 1:
+            return []
+        case 2 where self[0] == toFind && self[1] == toFind:
+            return [0, 1]
+        case 2 where self[0] == toFind:
+            return [0]
+        case 2 where self[1] == toFind:
+            return [1]
+        case 2:
+            return []
+        default:
+            var result: [Int] = []
+            result.reserveCapacity(4)
+            
+            for (index, element) in self.enumerate() {
+                if element == toFind {
+                    result.append(index)
+                }
+            }
+            
+            return result
+        }
+    }
+}
