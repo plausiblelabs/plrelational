@@ -446,7 +446,7 @@ extension QueryRunner {
         let nodeIndex: Int
         
         var outputForUniquing: Set<Row>? = nil
-        var inputBuffers: [Buffer] = []
+        var inputBuffers = SmallInlineArray<Buffer>()
         
         /// Each entry here corresponds to the same index in QueryPlanner.Node's `parentIndexes`.
         /// An entry refers to this node's index within the corresponding parent node.
@@ -461,7 +461,6 @@ extension QueryRunner {
         init(nodes: [QueryPlanner.Node], nodeIndex: Int) {
             self.nodeIndex = nodeIndex
             let childCount = nodes[nodeIndex].childCount
-            inputBuffers.reserveCapacity(childCount)
             while inputBuffers.count < childCount {
                 inputBuffers.append(Buffer())
             }
