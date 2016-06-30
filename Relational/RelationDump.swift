@@ -151,7 +151,14 @@ extension Relation {
                 let idString = String(format: "_%lx", id.uintValue)
                 if !seenIDs.contains(id) {
                     let name = "\(r.dynamicType) \(idString)"
-                    let label = ([name] + supplemental).joinWithSeparator("\n") + (showContents ? "\n" + r.description : "")
+                    var label = ([name] + supplemental).joinWithSeparator("\n")
+                    if showContents {
+                        var lines = r.description.componentsSeparatedByString("\n")
+                        if lines.count > 10 {
+                           lines = lines.prefix(10) + ["..."]
+                        }
+                        label += "\n" + lines.joinWithSeparator("\n")
+                    }
                     print("\(idString) [label=\"\(label)\"]")
                     for (name, child) in r.getChildRelationsForDump() {
                         let graphID = visit(child, nonobjectID: "\(idString)xxx\(name)")

@@ -15,7 +15,12 @@ extension QueryPlanner {
         }
         
         for (index, node) in nodes.enumerate() {
-            let label = "\(nodename(index)) \(node.op)"
+            var opLines = String(node.op).componentsSeparatedByString("\n")
+            if opLines.count > 10 {
+                opLines = opLines.prefix(10) + ["..."]
+            }
+            let opString = opLines.joinWithSeparator("\n")
+            let label = "\(nodename(index)) \(opString)"
             print("\(nodename(index)) [label=\"\(label)\"]")
             for parentIndex in node.parentIndexes {
                 let childIndex = nodes[parentIndex].childIndexes.indexOf(index)
