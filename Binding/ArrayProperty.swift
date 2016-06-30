@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import libRelational
 
 public protocol ArrayElement: class {
     associatedtype ID: Hashable, Plistable
@@ -35,7 +36,7 @@ public func ==(a: ArrayChange, b: ArrayChange) -> Bool {
 }
 
 public class ArrayProperty<E: ArrayElement>: ReadablePropertyType {
-    public typealias Value = [E]
+    public typealias Value = AsyncState<[E]>
     public typealias SignalChange = [ArrayChange]
     
     public typealias ElementID = E.ID
@@ -43,18 +44,22 @@ public class ArrayProperty<E: ArrayElement>: ReadablePropertyType {
     public typealias Pos = ArrayPos<E>
     public typealias Change = ArrayChange
 
-    internal(set) public var elements: [Element] = []
-    
-    public var value: [Element] {
-        return elements
-    }
+    internal var state: Mutexed<AsyncState<[Element]>>
 
+    public var value: AsyncState<[Element]> {
+        return state.get()
+    }
+    
+    public var elements: [Element] {
+        return value.data ?? []
+    }
+    
     public let signal: Signal<[ArrayChange]>
     private let notify: Signal<[ArrayChange]>.Notify
     
-    init(elements: [Element]) {
+    init(initialState: AsyncState<[Element]>) {
         (self.signal, self.notify) = Signal<[ArrayChange]>.pipe()
-        self.elements = elements
+        self.state = Mutexed(initialState)
     }
     
     internal func notifyChangeObservers(changes: [ArrayChange]) {

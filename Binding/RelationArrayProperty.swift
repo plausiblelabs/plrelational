@@ -22,24 +22,35 @@ public class RowArrayElement: ArrayElement {
 class RelationArrayProperty: ArrayProperty<RowArrayElement> {
     
     private let relation: Relation
+    private let workOn: Scheduler
+    private let observeOn: Scheduler
     private let idAttr: Attribute
     private let orderAttr: Attribute
     
     private var removal: ObserverRemoval!
 
-    init(relation: Relation, idAttr: Attribute, orderAttr: Attribute) {
+    init(relation: Relation, workOn: Scheduler, observeOn: Scheduler, idAttr: Attribute, orderAttr: Attribute) {
         precondition(relation.scheme.attributes.isSupersetOf([idAttr, orderAttr]))
         
         self.relation = relation
+        self.workOn = workOn
+        self.observeOn = observeOn
         self.idAttr = idAttr
         self.orderAttr = orderAttr
-        
-        // TODO: Error handling
-        let unsortedRows = relation.rows().map{$0.ok!}
-        let sortedRows = unsortedRows.sort({ $0[orderAttr] < $1[orderAttr] })
-        let elements = sortedRows.map{RowArrayElement(id: $0[idAttr], data: $0)}
-        
-        super.init(elements: elements)
+
+        super.init(initialState: .Computing(nil))
+
+        // TODO: There's a race here; need to make sure any relation changes observed while loading the
+        // initial relation data are accounted for
+        workOn.schedule{ [weak self] in
+            guard let weakSelf = self else { return }
+            // TODO: Error handling
+            let unsortedRows = relation.rows().map{$0.ok!}
+            let sortedRows = unsortedRows.sort({ $0[orderAttr] < $1[orderAttr] })
+            let elements = sortedRows.map{RowArrayElement(id: $0[idAttr], data: $0)}
+            weakSelf.state.withMutableValue{ $0 = .Ready(elements) }
+            // TODO: Need to notify observers here
+        }
         
         self.removal = relation.addChangeObserver({ [weak self] changes in
             self?.handleRelationChanges(changes)
@@ -49,17 +60,28 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
     deinit {
         removal()
     }
-    
-    private func handleRelationChanges(relationChanges: RelationChange) {
-        let parts = relationChanges.parts(self.idAttr)
-        
-        var arrayChanges: [Change] = []
-        arrayChanges.appendContentsOf(self.onInsert(parts.addedRows))
-        arrayChanges.appendContentsOf(self.onUpdate(parts.updatedRows))
-        arrayChanges.appendContentsOf(self.onDelete(parts.deletedIDs))
 
+    // Must be called in the context of the `workOn` scheduler.
+    private func handleRelationChanges(relationChanges: RelationChange) {
+        var arrayChanges: [Change] = []
+        
+        self.state.withMutableValue{
+            var elems = $0.data ?? []
+            let parts = relationChanges.parts(self.idAttr)
+        
+            arrayChanges.appendContentsOf(self.onInsert(parts.addedRows, elems: &elems))
+            arrayChanges.appendContentsOf(self.onUpdate(parts.updatedRows, elems: &elems))
+            arrayChanges.appendContentsOf(self.onDelete(parts.deletedIDs, elems: &elems))
+
+            $0 = .Ready(elems)
+        }
+
+        // TODO: This is unsafe; observers really need to be notified while mutex is held
+        // to ensure that changes are relative to current `state`
         if arrayChanges.count > 0 {
-            self.notifyChangeObservers(arrayChanges)
+            observeOn.schedule{ [weak self] in
+                self?.notifyChangeObservers(arrayChanges)
+            }
         }
     }
 
@@ -70,15 +92,17 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
         }
         
         var mutableRow = row
+        // TODO: This depends on the current `state`, so need to grab mutex
         mutableRow[orderAttr] = orderForPos(pos)
         
+        // TODO: Need to perform `add` on the `workOn` scheduler
         relation.add(mutableRow)
     }
     
-    private func onInsert(rows: [Row]) -> [Change] {
+    private func onInsert(rows: [Row], inout elems: [Element]) -> [Change] {
 
         func insertElement(element: Element) -> Int {
-            return elements.insertSorted(element, { $0.data[self.orderAttr] })
+            return elems.insertSorted(element, { $0.data[self.orderAttr] })
         }
 
         func insertRow(row: Row) -> Int {
@@ -102,15 +126,16 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
         }
 
         // Delete from the relation
+        // TODO: Need to perform `delete` on the `workOn` scheduler
         relation.delete(idAttr *== id)
     }
 
-    private func onDelete(ids: [RelationValue]) -> [Change] {
+    private func onDelete(ids: [RelationValue], inout elems: [Element]) -> [Change] {
         var changes: [Change] = []
         
         for id in ids {
-            if let index = indexForID(id) {
-                elements.removeAtIndex(index)
+            if let index = elems.indexOf({ $0.id == id }) {
+                elems.removeAtIndex(index)
                 changes.append(.Delete(index))
             }
         }
@@ -120,6 +145,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
 
     /// Note: dstIndex is relative to the state of the array *after* the item is removed.
     override func move(srcIndex srcIndex: Int, dstIndex: Int) {
+        // TODO: This depends on the current `state`, so need to grab mutex
         let element = elements[srcIndex]
         
         // Determine the order of the element in its new position
@@ -127,10 +153,11 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
         let newOrder = orderForElementBetween(previous, next)
         
         var mutableRelation = relation
+        // TODO: Need to perform `update` on the `workOn` scheduler
         mutableRelation.update(idAttr *== element.id, newValues: [orderAttr: newOrder])
     }
     
-    private func onUpdate(rows: [Row]) -> [Change] {
+    private func onUpdate(rows: [Row], inout elems: [Element]) -> [Change] {
         var changes: [Change] = []
         
         for row in rows {
@@ -138,23 +165,23 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
             if newOrder != .NotFound {
                 let id = row[idAttr]
                 let element = elementForID(id)!
-                changes.append(self.onMove(element, dstOrder: newOrder))
+                changes.append(self.onMove(element, dstOrder: newOrder, elems: &elems))
             }
         }
         
         return changes
     }
     
-    private func onMove(element: Element, dstOrder: RelationValue) -> Change {
+    private func onMove(element: Element, dstOrder: RelationValue, inout elems: [Element]) -> Change {
         // Remove the element from the array
         let srcIndex = indexForID(element.id)!
-        elements.removeAtIndex(srcIndex)
+        elems.removeAtIndex(srcIndex)
         
         // Update the order value in the element's row
         element.data[orderAttr] = dstOrder
         
         // Insert the element in its new position
-        let dstIndex = elements.insertSorted(element, { $0.data[self.orderAttr] })
+        let dstIndex = elems.insertSorted(element, { $0.data[self.orderAttr] })
         
         return .Move(srcIndex: srcIndex, dstIndex: dstIndex)
     }
@@ -210,7 +237,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
 
 extension Relation {
     /// Returns an ArrayProperty that gets its data from this relation.
-    public func arrayProperty(idAttr: Attribute = "id", orderAttr: Attribute = "order") -> ArrayProperty<RowArrayElement> {
-        return RelationArrayProperty(relation: self, idAttr: idAttr, orderAttr: orderAttr)
+    public func arrayProperty(workOn workOn: Scheduler = QueueScheduler(), observeOn: Scheduler = UIScheduler(), idAttr: Attribute = "id", orderAttr: Attribute = "order") -> ArrayProperty<RowArrayElement> {
+        return RelationArrayProperty(relation: self, workOn: workOn, observeOn: observeOn, idAttr: idAttr, orderAttr: orderAttr)
     }
 }

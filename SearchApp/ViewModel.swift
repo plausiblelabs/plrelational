@@ -74,14 +74,22 @@ class ViewModel {
         removals.forEach{ $0() }
     }
     
-    // ASYNC: Reads string changes on MAIN thread, writes to selectExpression on MAIN thread
+    private lazy var queueScheduler: Scheduler = QueueScheduler()
+    
+    // ASYNC: Reads string changes on MAIN thread, writes to selectExpression on BG thread,
     lazy var queryString: ReadWriteProperty<String> = mutableValueProperty("", { [weak self] query, _ in
-        if query.isEmpty {
-            self?.personResults.selectExpression = false
-        } else {
-            self?.personResults.selectExpression = SelectExpressionBinaryOperator(lhs: Attribute("name"), op: GlobComparator(), rhs: "\(query)*")
+        self?.queueScheduler.schedule{ [weak self] in
+            if query.isEmpty {
+                self?.personResults.selectExpression = false
+            } else {
+                self?.personResults.selectExpression = SelectExpressionBinaryOperator(lhs: Attribute("name"), op: GlobComparator(), rhs: "\(query)*")
+            }
         }
     })
+    
+    lazy var personResultsArray: ArrayProperty<RowArrayElement> = { [unowned self] in
+        return self.personResults.arrayProperty(workOn: self.queueScheduler)
+    }()
     
     lazy var listViewModel: ListViewModel<RowArrayElement> = { [unowned self] in
         
@@ -102,7 +110,7 @@ class ViewModel {
         
         return ListViewModel(
             // ASYNC: Changes from relation calculated on BG thread, reported on MAIN thread
-            data: self.personResults.arrayProperty(),
+            data: self.personResultsArray,
             contextMenu: nil,
             move: nil,
             selection: selectionProperty(self.selectedPersonID),
@@ -118,8 +126,10 @@ class ViewModel {
         )
     }()
     
-    // ASYNC: Should be bound to `executing` property on `personResults` relation?
-    let progressVisible: ReadableProperty<Bool> = constantValueProperty(false)
+    // ASYNC: Should resolve to `true` when `personResultsArray` is in `Calculating` state
+    lazy var progressVisible: ReadableProperty<Bool> = { [unowned self] in
+        return self.personResultsArray.map{ $0.isComputing }
+    }()
     
     // ASYNC: Reads value on MAIN thread (since `selectedPersonID` relation is in-memory only)
     lazy var recordDisabled: ReadableProperty<Bool> = { [unowned self] in
