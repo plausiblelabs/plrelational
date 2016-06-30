@@ -41,41 +41,8 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
         
         super.init(elements: elements)
         
-        self.removal = relation.addChangeObserver({ changes in
-            var arrayChanges: [Change] = []
-            
-            if let adds = changes.added {
-                let added: Relation
-                if let removes = changes.removed {
-                    added = adds.project([self.idAttr]).difference(removes.project([self.idAttr])).join(adds)
-                } else {
-                    added = adds
-                }
-                // TODO: Error handling
-                let addedRows = added.rows().flatMap{$0.ok}
-                arrayChanges.appendContentsOf(self.onInsert(addedRows))
-            }
-            
-            if let adds = changes.added, removes = changes.removed {
-                let updated = removes.project([self.idAttr]).join(adds)
-                let updatedRows = updated.rows().flatMap{$0.ok}
-                arrayChanges.appendContentsOf(self.onUpdate(updatedRows))
-            }
-            
-            if let removes = changes.removed {
-                let removedIDs: Relation
-                if let adds = changes.added {
-                    removedIDs = removes.project([self.idAttr]).difference(adds.project([self.idAttr]))
-                } else {
-                    removedIDs = removes.project([self.idAttr])
-                }
-                let idsToDelete = removedIDs.rows().flatMap{$0.ok?[self.idAttr]}
-                arrayChanges.appendContentsOf(self.onDelete(idsToDelete))
-            }
-            
-            if arrayChanges.count > 0 {
-                self.notifyChangeObservers(arrayChanges)
-            }
+        self.removal = relation.addChangeObserver({ [weak self] changes in
+            self?.handleRelationChanges(changes)
         })
     }
     
@@ -83,6 +50,19 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
         removal()
     }
     
+    private func handleRelationChanges(relationChanges: RelationChange) {
+        let parts = relationChanges.parts(self.idAttr)
+        
+        var arrayChanges: [Change] = []
+        arrayChanges.appendContentsOf(self.onInsert(parts.addedRows))
+        arrayChanges.appendContentsOf(self.onUpdate(parts.updatedRows))
+        arrayChanges.appendContentsOf(self.onDelete(parts.deletedIDs))
+
+        if arrayChanges.count > 0 {
+            self.notifyChangeObservers(arrayChanges)
+        }
+    }
+
     override func insert(row: Row, pos: Pos) {
         // TODO: Provide insert/delete/move as extension defined where R: MutableRelation
         guard var relation = relation as? MutableRelation else {

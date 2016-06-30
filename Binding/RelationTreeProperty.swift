@@ -66,59 +66,26 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         
         super.init(root: rootNode)
         
-        self.removal = relation.addChangeObserver({ changes in
-            var treeChanges: [Change] = []
-            
-            if let adds = changes.added {
-                let added: Relation
-                if let removes = changes.removed {
-                    added = adds.project([self.idAttr]).difference(removes.project([self.idAttr])).join(adds)
-                } else {
-                    added = adds
-                }
-                // TODO: Error handling
-                let addedRows = added.rows().flatMap{$0.ok}
-                treeChanges.appendContentsOf(self.onInsert(addedRows))
-            }
-            
-            if let adds = changes.added, removes = changes.removed {
-                let updated = removes.project([self.idAttr]).join(adds)
-                let updatedRows = updated.rows().flatMap{$0.ok}
-                for row in updatedRows {
-                    treeChanges.appendContentsOf(self.onUpdate(row))
-                }
-            }
-
-            if let removes = changes.removed {
-                let removedIDs: Relation
-                if let adds = changes.added {
-                    removedIDs = removes.project([self.idAttr]).difference(adds.project([self.idAttr]))
-                } else {
-                    removedIDs = removes.project([self.idAttr])
-                }
-                
-                // Observers should only be notified about the top-most nodes that were deleted.
-                // We handle this by looking at the identifiers of the rows/nodes to be deleted,
-                // and only deleting the unique (top-most) parents.
-                let idsToDelete: [RelationValue] = removedIDs.rows().flatMap{$0.ok?[self.idAttr]}
-                for id in idsToDelete {
-                    if let node = self.nodeForID(id) {
-                        let parentID = node.parentID
-                        if parentID == nil || !idsToDelete.contains(parentID!) {
-                            treeChanges.appendContentsOf(self.onDelete(id))
-                        }
-                    }
-                }
-            }
-            
-            if treeChanges.count > 0 {
-                self.notifyChangeObservers(treeChanges)
-            }
+        self.removal = relation.addChangeObserver({ [weak self] changes in
+            self?.handleRelationChanges(changes)
         })
     }
     
     deinit {
         removal()
+    }
+    
+    private func handleRelationChanges(relationChanges: RelationChange) {
+        let parts = relationChanges.parts(self.idAttr)
+        
+        var treeChanges: [Change] = []
+        treeChanges.appendContentsOf(self.onInsert(parts.addedRows))
+        treeChanges.appendContentsOf(self.onUpdate(parts.updatedRows))
+        treeChanges.appendContentsOf(self.onDelete(parts.deletedIDs))
+        
+        if treeChanges.count > 0 {
+            self.notifyChangeObservers(treeChanges)
+        }
     }
     
     override func insert(row: Row, pos: Pos) {
@@ -211,8 +178,26 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
             }
         }
     }
-    
-    private func onDelete(id: RelationValue) -> [Change] {
+
+    private func onDelete(idsToDelete: [RelationValue]) -> [Change] {
+        // Observers should only be notified about the top-most nodes that were deleted.
+        // We handle this by looking at the identifiers of the rows/nodes to be deleted,
+        // and only deleting the unique (top-most) parents.
+        var changes: [Change] = []
+        for id in idsToDelete {
+            if let node = self.nodeForID(id) {
+                let parentID = node.parentID
+                if parentID == nil || !idsToDelete.contains(parentID!) {
+                    if let change = self.onDelete(id) {
+                        changes.append(change)
+                    }
+                }
+            }
+        }
+        return changes
+    }
+
+    private func onDelete(id: RelationValue) -> Change? {
 
         func deleteNode(node: Node, inout _ nodes: [Node]) -> Int {
             let index = nodes.indexOf({$0 === node})!
@@ -220,7 +205,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
             return index
         }
         
-        if let node = nodeForID(id) {
+        return nodeForID(id).map{ node in
             let parent: Node?
             let index: Int
             let parentID = node.data[parentAttr]
@@ -234,9 +219,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
             }
             
             let path = TreePath(parent: parent, index: index)
-            return [.Delete(path)]
-        } else {
-            return []
+            return .Delete(path)
         }
     }
 
@@ -274,12 +257,22 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         ])
     }
 
-    private func onUpdate(row: Row) -> [Change] {
+    private func onUpdate(rows: [Row]) -> [Change] {
+        var changes: [Change] = []
+        for row in rows {
+            if let change = self.onUpdate(row) {
+                changes.append(change)
+            }
+        }
+        return changes
+    }
+    
+    private func onUpdate(row: Row) -> Change? {
         let newParentID = row[parentAttr]
         let newOrder = row[orderAttr]
         if newParentID == .NotFound || newOrder == .NotFound {
             // TODO: We should be able to perform the move if only one of parent/order were updated
-            return []
+            return nil
         }
 
         let srcID = row[idAttr]
@@ -287,7 +280,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         return onMove(srcNode, dstParentID: newParentID, dstOrder: newOrder)
     }
     
-    private func onMove(node: Node, dstParentID: RelationValue, dstOrder: RelationValue) -> [Change] {
+    private func onMove(node: Node, dstParentID: RelationValue, dstOrder: RelationValue) -> Change {
         let optSrcParent = parentForNode(node)
         let optDstParent: Node?
         if dstParentID == .NULL {
@@ -313,7 +306,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         // Prepare changes
         let newSrcPath = TreePath(parent: optSrcParent, index: srcIndex)
         let newDstPath = TreePath(parent: optDstParent, index: dstIndex)
-        return [.Move(src: newSrcPath, dst: newDstPath)]
+        return .Move(src: newSrcPath, dst: newDstPath)
     }
 
     private func adjacentNodesForIndex(index: Int, inParent parent: Node, notMatching node: Node) -> (Node?, Node?) {

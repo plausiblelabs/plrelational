@@ -4,8 +4,13 @@
 //
 
 public struct RelationChange {
-    public var added: Relation?
-    public var removed: Relation?
+    public let added: Relation?
+    public let removed: Relation?
+    
+    public init(added: Relation?, removed: Relation?) {
+        self.added = added
+        self.removed = removed
+    }
 }
 
 extension RelationChange: CustomStringConvertible {
