@@ -370,10 +370,17 @@ class TransactionalDatabaseTests: DBTestCase {
         var done = false
         while !done {
             for row in a.rows() {
-                if row.ok!["n"] == 2 {
-                    done = true
-                } else {
-                    XCTAssertEqual(row.ok!["n"], 1)
+                switch row {
+                case .Err(QueryRunner.Error.MutatedDuringEnumeration):
+                    continue
+                case .Err(let err):
+                    XCTFail("Unexpected error \(err)")
+                case .Ok(let row):
+                    if row["n"] == 2 {
+                        done = true
+                    } else {
+                        XCTAssertEqual(row["n"], 1)
+                    }
                 }
             }
         }
@@ -393,5 +400,33 @@ class TransactionalDatabaseTests: DBTestCase {
         })
         dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
         db.endTransaction()
+    }
+    
+    func testTransactionWhileReading() {
+        let sqlite = makeDB().db.sqliteDatabase
+        XCTAssertNil(sqlite.getOrCreateRelation("a", scheme: ["n"]).err)
+        
+        let db = TransactionalDatabase(sqlite)
+        let a = db["a"]
+        
+        AssertEqual(a, nil)
+        
+        let rows = a.rows()
+        db.beginTransaction()
+        a.add(["n": 1])
+        db.endTransaction()
+        
+        let row = rows.next()
+        switch row {
+        case .Some(.Err(QueryRunner.Error.MutatedDuringEnumeration)):
+            break
+        default:
+            XCTFail("Unexpected row result: \(row)")
+        }
+        
+        AssertEqual(a,
+                    MakeRelation(
+                        ["n"],
+                        [1]))
     }
 }

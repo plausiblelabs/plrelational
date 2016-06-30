@@ -3,11 +3,9 @@
 // All rights reserved.
 //
 
-class QueryRunner {
+public class QueryRunner {
     private var nodes: [QueryPlanner.Node]
     private let rootIndex: Int
-    
-    private let transactionalDatabases: [TransactionalDatabase]
     
     private var activeInitiatorIndexes: [Int]
     
@@ -25,7 +23,6 @@ class QueryRunner {
         let nodes = planner.nodes
         self.nodes = nodes
         
-        transactionalDatabases = Array(planner.transactionalDatabases)
         rootIndex = planner.rootIndex
         activeInitiatorIndexes = planner.initiatorIndexes
         nodeStates = Array()
@@ -34,24 +31,10 @@ class QueryRunner {
             nodeStates.append(NodeState(nodes: nodes, nodeIndex: index))
         }
         computeParentChildIndexes()
+        computeTransactionalDatabases(planner.transactionalDatabases)
     }
     
     func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        for db in transactionalDatabases {
-            db.lockReading()
-        }
-        
-        // We need to unlock the databases when we're done, which can be when the generator runs off
-        // the end, or when the generator is deallocated without running off the end. This value stores
-        // a function that unlocks the databases as the value, and calls its value as the destructor.
-        // When we run off the end of the generator, we call the value manually, and then set it to
-        // an empty function to prevent the destructor from doing anything.
-        let unlocker = ValueWithDestructor(value: {
-            for db in self.transactionalDatabases {
-                db.unlockReading()
-            }
-        }, destructor: { $0() })
-        
         var buffer: [Result<Row, RelationError>] = []
         return AnyGenerator(body: {
             while !self.done {
@@ -61,8 +44,6 @@ class QueryRunner {
                     buffer = self.pump()
                 }
             }
-            unlocker.value()
-            unlocker.value = {}
             return nil
         })
     }
@@ -96,6 +77,24 @@ class QueryRunner {
                     parentIndexesIndex += 1
                 }
             }
+        }
+    }
+    
+    /// For each node associated with a TransactionalDatabase, mark that node and all of its children
+    /// as associated with that database, and fetch the database's transaction counter into the node
+    /// state.
+    private func computeTransactionalDatabases(map: ObjectDictionary<TransactionalDatabase, Int>) {
+        for (db, topIndex) in map {
+            db.lockReading()
+            
+            var queue = [topIndex]
+            while let index = queue.popLast() {
+                nodeStates[index].transactionalDatabase = db
+                nodeStates[index].transactionalDatabaseTransactionID = db.transactionCounter
+                queue.appendContentsOf(nodes[index].childIndexes)
+            }
+            
+            db.unlockReading()
         }
     }
     
@@ -141,6 +140,17 @@ class QueryRunner {
         guard let nodeIndex = activeInitiatorIndexes.last else {
             done = true
             return .Ok()
+        }
+        
+        let db = nodeStates[nodeIndex].transactionalDatabase
+        db?.lockReading()
+        defer { db?.unlockReading() }
+        
+        // If the node is associated with a transactional database, it's now locked. Get the current transaction
+        // counter and compare with what's in the node state. If it's different, then a transaction has been
+        // committed since we started running, and the we're now in an invalid state. Return an error.
+        if let db = db where db.transactionCounter != nodeStates[nodeIndex].transactionalDatabaseTransactionID {
+            return .Err(Error.MutatedDuringEnumeration)
         }
         
         let op = nodes[nodeIndex].op
@@ -456,6 +466,10 @@ extension QueryRunner {
         
         var activeBuffers: Int
         
+        var transactionalDatabase: TransactionalDatabase? = nil
+        
+        var transactionalDatabaseTransactionID: UInt64 = 0
+        
         var extraState: Any?
         
         init(nodes: [QueryPlanner.Node], nodeIndex: Int) {
@@ -539,4 +553,10 @@ extension QueryRunner {
 
 private func ==(a: QueryRunner.IntermediateToProcess, b: QueryRunner.IntermediateToProcess) -> Bool {
     return a.nodeIndex == b.nodeIndex && a.inputIndex == b.inputIndex
+}
+
+extension QueryRunner {
+    public enum Error: ErrorType {
+        case MutatedDuringEnumeration
+    }
 }
