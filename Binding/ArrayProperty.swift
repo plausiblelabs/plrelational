@@ -37,7 +37,7 @@ public func ==(a: ArrayChange, b: ArrayChange) -> Bool {
 
 public class ArrayProperty<E: ArrayElement>: ReadablePropertyType {
     public typealias Value = AsyncState<[E]>
-    public typealias SignalChange = [ArrayChange]
+    public typealias SignalChange = (newState: AsyncState<[E]>, arrayChanges: [ArrayChange])
     
     public typealias ElementID = E.ID
     public typealias Element = E
@@ -50,21 +50,17 @@ public class ArrayProperty<E: ArrayElement>: ReadablePropertyType {
         return state.get()
     }
     
-    public var elements: [Element] {
-        return value.data ?? []
-    }
-    
-    public let signal: Signal<[ArrayChange]>
-    private let notify: Signal<[ArrayChange]>.Notify
+    public let signal: Signal<SignalChange>
+    private let notify: Signal<SignalChange>.Notify
     
     init(initialState: AsyncState<[Element]>) {
-        (self.signal, self.notify) = Signal<[ArrayChange]>.pipe()
+        (self.signal, self.notify) = Signal<SignalChange>.pipe()
         self.state = Mutexed(initialState)
     }
     
-    internal func notifyChangeObservers(changes: [ArrayChange]) {
+    internal func notifyObservers(newState newState: AsyncState<[Element]>, arrayChanges: [ArrayChange]) {
         let metadata = ChangeMetadata(transient: false)
-        notify(change: changes, metadata: metadata)
+        notify(change: (newState: newState, arrayChanges: arrayChanges), metadata: metadata)
     }
     
     public func insert(row: E.Data, pos: Pos) {
@@ -77,12 +73,12 @@ public class ArrayProperty<E: ArrayElement>: ReadablePropertyType {
     }
     
     /// Returns the index of the element with the given ID, relative to the sorted elements array.
-    public func indexForID(id: E.ID) -> Int? {
+    public func indexForID(id: E.ID, _ elements: [Element]) -> Int? {
         return elements.indexOf({ $0.id == id })
     }
     
     /// Returns the element with the given ID.
-    public func elementForID(id: E.ID) -> Element? {
-        return indexForID(id).map{ elements[$0] }
+    public func elementForID(id: E.ID, _ elements: [Element]) -> Element? {
+        return indexForID(id, elements).map{ elements[$0] }
     }
 }

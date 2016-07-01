@@ -254,7 +254,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
 //        selfInitiatedSelectionChange = false
     }
 
-    // MARK: Observers
+    // MARK: Property observers
 
     private func treeChanged(changes: [TreeChange<N>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]

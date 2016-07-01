@@ -126,7 +126,9 @@ class ViewModel {
         )
     }()
     
-    // ASYNC: Should resolve to `true` when `personResultsArray` is in `Calculating` state
+    // ASYNC: Should resolve to `true` when `personResultsArray` is in `Computing` state
+    // TODO: Hmm, background work actually begins when `queryString` updates the select expression,
+    // but here we only show progress indicator once the changes make their way to `personResultsArray`
     lazy var progressVisible: ReadableProperty<Bool> = { [unowned self] in
         return self.personResultsArray.map{ $0.isComputing }
     }()

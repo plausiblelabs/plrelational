@@ -32,7 +32,8 @@ class BindingTestCase: XCTestCase {
     
     func prettyArray(array: ArrayProperty<RowArrayElement>) -> [String] {
         var accum: [String] = []
-        for element in array.elements {
+        let elements = array.value.data!
+        for element in elements {
             accum.append("\(element.data["name"])")
         }
         return accum

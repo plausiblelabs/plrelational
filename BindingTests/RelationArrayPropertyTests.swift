@@ -45,11 +45,11 @@ class RelationArrayPropertyTests: BindingTestCase {
         XCTAssertNil(sqliteDB.createRelation("page", scheme: ["id", "name", "order"]).err)
         let relation = db["page"]
         let array = relation.arrayProperty(workOn: ImmediateScheduler(), observeOn: ImmediateScheduler())
-        XCTAssertEqual(array.elements.count, 0)
+        XCTAssertEqual(array.value.data!.count, 0)
         
         var changes: [RelationArrayProperty.Change] = []
-        let removal = array.signal.observe({ arrayChanges, _ in
-            changes.appendContentsOf(arrayChanges)
+        let removal = array.signal.observe({ stateChange, _ in
+            changes.appendContentsOf(stateChange.arrayChanges)
         })
         
         func addPage(pageID: Int64, name: String, previousID: Int64?) {

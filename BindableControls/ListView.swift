@@ -46,6 +46,10 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
     private let model: ListViewModel<E>
     private let outlineView: NSOutlineView
 
+    // TODO: This shadows the array from the model; would it be better to go back to referring directly
+    // to the current `state` of the ArrayProperty?
+    private var elements: [E]
+    
     private lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
         get: { [unowned self] in
             var itemIDs: [E.ID] = []
@@ -59,7 +63,7 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         set: { [unowned self] selectedIDs, _ in
             let indexes = NSMutableIndexSet()
             for id in selectedIDs {
-                if let element = self.model.data.elementForID(id) {
+                if let element = self.model.data.elementForID(id, self.elements) {
                     // TODO: This is inefficient
                     let index = self.outlineView.rowForItem(element)
                     if index >= 0 {
@@ -80,10 +84,13 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
     public init(model: ListViewModel<E>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
-        
+        self.elements = model.data.value.data ?? []
+
         super.init()
         
-        arrayObserverRemoval = model.data.signal.observe({ [weak self] changes, _ in self?.arrayChanged(changes) })
+        // TODO: We should have a stricter contract in place to ensure that these changes are
+        // sent via UIScheduler
+        arrayObserverRemoval = model.data.signal.observe({ [weak self] stateChange, _ in self?.arrayChanged(stateChange) })
         selection <~> model.selection
         
         outlineView.setDelegate(self)
@@ -101,11 +108,11 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
     // MARK: NSOutlineViewDataSource
 
     public func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
-        return model.data.elements.count
+        return elements.count
     }
     
     public func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
-        return model.data.elements[index]
+        return elements[index]
     }
     
     public func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
@@ -128,7 +135,7 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         
         if let idPlist = pboard.propertyListForType(PasteboardType) {
             let elementID = E.ID.fromPlist(idPlist)!
-            if let srcIndex = model.data.indexForID(elementID) {
+            if let srcIndex = model.data.indexForID(elementID, elements) {
                 if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
                     return NSDragOperation.Move
                 }
@@ -143,7 +150,7 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         
         if let idPlist = pboard.propertyListForType(PasteboardType), move = model.move {
             let elementID = E.ID.fromPlist(idPlist)!
-            if let srcIndex = model.data.indexForID(elementID) {
+            if let srcIndex = model.data.indexForID(elementID, elements) {
                 move(srcIndex: srcIndex, dstIndex: index)
                 return true
             }
@@ -200,14 +207,18 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
 //        selfInitiatedSelectionChange = false
     }
 
-    // MARK: Binding observers
+    // MARK: Property observers
 
-    private func arrayChanged(changes: [ArrayChange]) {
+    private func arrayChanged(stateChange: ArrayProperty<E>.SignalChange) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
         
         outlineView.beginUpdates()
+
+        // Update our shadow copy of the model's new array state
+        self.elements = stateChange.newState.data ?? []
         
-        for change in changes {
+        // Record changes that were made to the array relative to its previous state
+        for change in stateChange.arrayChanges {
             switch change {
             case let .Insert(index):
                 let rows = NSIndexSet(index: index)
