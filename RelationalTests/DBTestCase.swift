@@ -43,9 +43,9 @@ func AssertEqual<M1: Model, M2: Model, Seq: SequenceType where Seq.Generator.Ele
     })
 }
 
-func AssertEqual(a: AnyGenerator<Result<Row, RelationError>>, _ b: Relation?, file: StaticString = #file, line: UInt = #line) {
+func AssertEqual(a: AnyGenerator<Result<Set<Row>, RelationError>>, _ b: Relation?, file: StaticString = #file, line: UInt = #line) {
     let result = mapOk(a, { $0 })
-    guard let rows = result.ok else {
+    guard let rows = result.ok?.flatten() else {
         XCTFail("Got error iterating rows: \(result.err)", file: file, line: line)
         return
     }

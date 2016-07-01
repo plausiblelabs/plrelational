@@ -342,6 +342,9 @@ class TransactionalDatabaseTests: DBTestCase {
         var done = false
         while !done {
             for row in intersection.rows() {
+                if case QueryRunner.Error.MutatedDuringEnumeration? = row.err {
+                    continue
+                }
                 XCTAssertFalse(done)
                 XCTAssertNil(row.err)
                 XCTAssertEqual(row.ok?["n"], 2)

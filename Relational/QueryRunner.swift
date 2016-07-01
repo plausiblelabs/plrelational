@@ -34,17 +34,17 @@ public class QueryRunner {
         computeTransactionalDatabases(planner.transactionalDatabases)
     }
     
-    func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        var buffer: [Result<Row, RelationError>] = []
+    func bulkRows() -> AnyGenerator<Result<Set<Row>, RelationError>> {
         return AnyGenerator(body: {
-            while !self.done {
-                if let row = buffer.popLast() {
-                    return row
-                } else {
-                    buffer = self.pump()
+            if !self.done {
+                let result = self.pump()
+                if result.err != nil {
+                    self.done = true
                 }
+                return result
+            } else {
+                return nil
             }
-            return nil
         })
     }
     
@@ -101,18 +101,18 @@ public class QueryRunner {
     /// Run a round of processing on the query. This will either process some intermediate nodes
     /// or generate some rows from initiator nodes. Any rows that are output from the graph during
     /// processing are returned to the caller.
-    private func pump() -> [Result<Row, RelationError>] {
+    private func pump() -> Result<Set<Row>, RelationError> {
         let pumped = pumpIntermediates()
         if !pumped {
             let result = pumpInitiator()
             if let err = result.err {
-                return [.Err(err)]
+                return .Err(err)
             }
         }
         
-        let output = collectedOutput.map({ Result<Row, RelationError>.Ok($0) })
+        let output = collectedOutput
         collectedOutput.removeAll(keepCapacity: true)
-        return output
+        return .Ok(output)
     }
     
     /// Process all pending intermediate nodes. If any intermediate nodes were processed, this method

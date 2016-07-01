@@ -13,7 +13,7 @@ class QueryRunnerTests: XCTestCase {
             ["one"])
         let planner = QueryPlanner(root: r)
         let runner = QueryRunner(planner: planner)
-        AssertEqual(runner.rows(), r)
+        AssertEqual(runner.bulkRows(), r)
     }
     
     func testUnion() {
@@ -26,7 +26,7 @@ class QueryRunnerTests: XCTestCase {
         let union = r.union(s)
         let planner = QueryPlanner(root: union)
         let runner = QueryRunner(planner: planner)
-        AssertEqual(runner.rows(), MakeRelation(
+        AssertEqual(runner.bulkRows(), MakeRelation(
             ["A"],
             ["one"],
             ["two"]))
@@ -44,7 +44,7 @@ class QueryRunnerTests: XCTestCase {
         let intersection = r.intersection(s)
         let planner = QueryPlanner(root: intersection)
         let runner = QueryRunner(planner: planner)
-        AssertEqual(runner.rows(), MakeRelation(
+        AssertEqual(runner.bulkRows(), MakeRelation(
             ["A"],
             ["three"]))
     }
@@ -61,7 +61,7 @@ class QueryRunnerTests: XCTestCase {
         let difference = r.difference(s)
         let planner = QueryPlanner(root: difference)
         let runner = QueryRunner(planner: planner)
-        AssertEqual(runner.rows(), MakeRelation(
+        AssertEqual(runner.bulkRows(), MakeRelation(
             ["A"],
             ["one"]))
     }
@@ -75,7 +75,7 @@ class QueryRunnerTests: XCTestCase {
         let projected = r.project(["A"])
         let planner = QueryPlanner(root: projected)
         let runner = QueryRunner(planner: planner)
-        AssertEqual(runner.rows(), MakeRelation(
+        AssertEqual(runner.bulkRows(), MakeRelation(
             ["A"],
             ["1"],
             ["2"]))
@@ -90,7 +90,7 @@ class QueryRunnerTests: XCTestCase {
         let selected = r.select(Attribute("A") *== "1")
         let planner = QueryPlanner(root: selected)
         let runner = QueryRunner(planner: planner)
-        AssertEqual(runner.rows(), MakeRelation(
+        AssertEqual(runner.bulkRows(), MakeRelation(
             ["A", "B"],
             ["1", "2"],
             ["1", "3"]))
@@ -111,7 +111,7 @@ class QueryRunnerTests: XCTestCase {
         let joined = a.join(b)
         let planner = QueryPlanner(root: joined)
         let runner = QueryRunner(planner: planner)
-        AssertEqual(runner.rows(), MakeRelation(
+        AssertEqual(runner.bulkRows(), MakeRelation(
             ["A", "B", "C"],
             ["X", "1", "T"]))
     }
@@ -125,7 +125,7 @@ class QueryRunnerTests: XCTestCase {
         let renamed = r.renameAttributes(["A": "ayy"])
         let planner = QueryPlanner(root: renamed)
         let runner = QueryRunner(planner: planner)
-        AssertEqual(runner.rows(), MakeRelation(
+        AssertEqual(runner.bulkRows(), MakeRelation(
             ["ayy", "B"],
             ["1", "2"],
             ["1", "3"],
@@ -141,7 +141,7 @@ class QueryRunnerTests: XCTestCase {
         let updated = r.withUpdate(["B": "5"])
         let planner = QueryPlanner(root: updated)
         let runner = QueryRunner(planner: planner)
-        AssertEqual(runner.rows(), MakeRelation(
+        AssertEqual(runner.bulkRows(), MakeRelation(
             ["A", "B"],
             ["1", "5"],
             ["2", "5"]))
@@ -156,7 +156,7 @@ class QueryRunnerTests: XCTestCase {
         let updated = r.count()
         let planner = QueryPlanner(root: updated)
         let runner = QueryRunner(planner: planner)
-        AssertEqual(runner.rows(), MakeRelation(
+        AssertEqual(runner.bulkRows(), MakeRelation(
             ["count"],
             [3]))
     }
