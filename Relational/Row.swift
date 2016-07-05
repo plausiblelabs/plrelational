@@ -7,7 +7,7 @@ import Foundation
 
 
 public struct Row: Hashable {
-    private var internedRow: InternedRow
+    var internedRow: InternedRow
     
     public var values: [Attribute: RelationValue] {
         get {
@@ -83,7 +83,7 @@ extension Row: CustomStringConvertible {
 }
 
 
-private class InternedRow: Hashable {
+class InternedRow: Hashable {
     let values: [Attribute: RelationValue]
     
     let hashValue: Int
@@ -96,7 +96,7 @@ private class InternedRow: Hashable {
     }
 }
 
-private func ==(a: InternedRow, b: InternedRow) -> Bool {
+func ==(a: InternedRow, b: InternedRow) -> Bool {
     return a.values == b.values
 }
 

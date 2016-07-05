@@ -192,7 +192,7 @@ public class QueryRunner {
         return generator.next()
     }
     
-    private func writeOutput(rows: Set<Row>, fromNode: Int) {
+    private func writeOutput<Seq: CollectionType where Seq.Generator.Element == Row>(rows: Seq, fromNode: Int) {
         guard !rows.isEmpty else { return }
         
         if fromNode == rootIndex {
@@ -296,8 +296,20 @@ public class QueryRunner {
         // Once it is complete, we can stream buffer[0] through.
         guard nodeStates[nodeIndex].inputBuffers[1].eof else { return }
         
-        let rows = Set(nodeStates[nodeIndex].inputBuffers[0].popAll())
-        let subtracted = rows.subtract(nodeStates[nodeIndex].inputBuffers[1].rows)
+        let rhsMap = nodeStates[nodeIndex].getExtraState({ () -> ObjectMap<()> in
+            // Note: we pull the rows here but we do *not* pop them. The map doesn't keep the rows
+            // alive, so we need to keep those objects alive by holding onto the rows elsewhere.
+            let rows = nodeStates[nodeIndex].inputBuffers[1].rows
+            let map = ObjectMap<()>(capacity: rows.count)
+            for row in rows {
+                map[row.internedRow] = ()
+            }
+            return map
+        })
+        
+        let lhsRows = nodeStates[nodeIndex].inputBuffers[0].popAll()
+        let subtracted = lhsRows.filter({ rhsMap[$0.internedRow] == nil })
+        
         writeOutput(subtracted, fromNode: nodeIndex)
     }
     
