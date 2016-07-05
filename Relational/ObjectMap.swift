@@ -20,9 +20,9 @@ class ObjectMap<Value> {
     
     var table: UnsafeMutablePointer<Bucket>
     
-    init() {
-        capacity = 16
-        table = ObjectMap.allocate(capacity)
+    init(capacity: Int = 16) {
+        self.capacity = max(capacity, 16)
+        table = ObjectMap.allocate(self.capacity)
     }
     
     deinit {
