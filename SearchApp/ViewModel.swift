@@ -12,7 +12,7 @@ class ViewModel {
 
     private var persons: MutableRelation
     private var selectedPersonID: MutableRelation
-    private var personResults: MutableSelectIntermediateRelation
+    private var personResults: MutableSelectRelation
     
     private let undoableDB: UndoableDatabase
 

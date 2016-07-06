@@ -488,8 +488,8 @@ extension IntermediateRelation {
     }
 }
 
-public class MutableSelectIntermediateRelation: IntermediateRelation {
-    public var selectExpression: SelectExpression {
+private class MutableSelectIntermediateRelation: IntermediateRelation, MutableSelectRelation {
+    private var selectExpression: SelectExpression {
         get {
             if case .MutableSelect(let expression) = op {
                 return expression
@@ -513,7 +513,7 @@ public class MutableSelectIntermediateRelation: IntermediateRelation {
 }
 
 extension Relation {
-    public func mutableSelect(expression: SelectExpression) -> MutableSelectIntermediateRelation {
+    public func mutableSelect(expression: SelectExpression) -> MutableSelectRelation {
         return MutableSelectIntermediateRelation(op: .MutableSelect(expression), operands: [self])
     }
 }

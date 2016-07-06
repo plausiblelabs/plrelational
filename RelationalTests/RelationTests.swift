@@ -1700,7 +1700,7 @@ class RelationTests: DBTestCase {
     
     func testObservationRemovalLeak() {
         let concrete = MakeRelation([])
-        weak var shouldDeallocate: IntermediateRelation?
+        weak var shouldDeallocate: MutableSelectRelation?
         
         do {
             let select = concrete.mutableSelect(true)
@@ -1713,8 +1713,8 @@ class RelationTests: DBTestCase {
     
     func testWeakObservationRemovalLeak() {
         let concrete = MakeRelation([])
-        weak var shouldDeallocate1: IntermediateRelation?
-        weak var shouldDeallocate2: IntermediateRelation?
+        weak var shouldDeallocate1: MutableSelectRelation?
+        weak var shouldDeallocate2: MutableSelectRelation?
         
         do {
             let select1 = concrete.mutableSelect(true)

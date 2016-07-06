@@ -7,3 +7,7 @@ public protocol MutableRelation: Relation {
     mutating func add(row: Row) -> Result<Int64, RelationError>
     mutating func delete(query: SelectExpression) -> Result<Void, RelationError>
 }
+
+public protocol MutableSelectRelation: class, Relation {
+    var selectExpression: SelectExpression { get set }
+}
