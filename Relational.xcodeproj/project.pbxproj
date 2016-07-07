@@ -124,6 +124,8 @@
 		37A4A2481D25C065005CAEA5 /* AsyncState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2471D25C065005CAEA5 /* AsyncState.swift */; };
 		37A4A24B1D25C94A005CAEA5 /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A24A1D25C94A005CAEA5 /* Scheduler.swift */; };
 		37A4A24D1D25CB13005CAEA5 /* Disposable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A24C1D25CB13005CAEA5 /* Disposable.swift */; };
+		37A4A2501D2EC81E005CAEA5 /* Pi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A24F1D2EC81E005CAEA5 /* Pi.swift */; };
+		37A4A2521D2ECCBF005CAEA5 /* PiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2511D2ECCBF005CAEA5 /* PiTests.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -552,6 +554,8 @@
 		37A4A2471D25C065005CAEA5 /* AsyncState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncState.swift; path = Binding/AsyncState.swift; sourceTree = "<group>"; };
 		37A4A24A1D25C94A005CAEA5 /* Scheduler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Scheduler.swift; path = Binding/Scheduler.swift; sourceTree = "<group>"; };
 		37A4A24C1D25CB13005CAEA5 /* Disposable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Disposable.swift; path = Binding/Disposable.swift; sourceTree = "<group>"; };
+		37A4A24F1D2EC81E005CAEA5 /* Pi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Pi.swift; path = Binding/Pi.swift; sourceTree = "<group>"; };
+		37A4A2511D2ECCBF005CAEA5 /* PiTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PiTests.swift; path = BindingTests/PiTests.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -870,6 +874,7 @@
 				37A1CEDF1D1469900067870D /* Signal */,
 				37A1CED71D1350C00067870D /* Property */,
 				37A4A2491D25C933005CAEA5 /* Scheduler */,
+				37A4A24E1D2EC809005CAEA5 /* Pi Calculus */,
 				37A1CEE11D147A970067870D /* Relation Extensions */,
 				372707BC1CFE24C600710C80 /* Utilities */,
 			);
@@ -1051,6 +1056,15 @@
 				37A4A24A1D25C94A005CAEA5 /* Scheduler.swift */,
 			);
 			name = Scheduler;
+			sourceTree = "<group>";
+		};
+		37A4A24E1D2EC809005CAEA5 /* Pi Calculus */ = {
+			isa = PBXGroup;
+			children = (
+				37A4A24F1D2EC81E005CAEA5 /* Pi.swift */,
+				37A4A2511D2ECCBF005CAEA5 /* PiTests.swift */,
+			);
+			name = "Pi Calculus";
 			sourceTree = "<group>";
 		};
 		37C610FE1CD7EFAE001DAF59 /* SampleApp */ = {
@@ -1941,6 +1955,7 @@
 				372707BB1CFE240E00710C80 /* RelationTreeProperty.swift in Sources */,
 				37A1CEE31D147ACA0067870D /* RelationAsTypedValue.swift in Sources */,
 				372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */,
+				37A4A2501D2EC81E005CAEA5 /* Pi.swift in Sources */,
 				372707B81CFE240E00710C80 /* ArrayProperty.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1949,6 +1964,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37A4A2521D2ECCBF005CAEA5 /* PiTests.swift in Sources */,
 				37A1CEE51D147B0E0067870D /* RelationAsTypedValueTests.swift in Sources */,
 				372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */,
 				372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */,
