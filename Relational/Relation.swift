@@ -13,8 +13,6 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     
     func contains(row: Row) -> Result<Bool, RelationError>
     
-    func forEach(@noescape f: (Row, Void -> Void) -> Void) -> Result<Void, RelationError>
-    
     mutating func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError>
     
     /// Add an observer which is notified when the content of the Relation
@@ -124,24 +122,46 @@ extension Relation {
 }
 
 extension Relation {
-    public func forEach(@noescape f: (Row, Void -> Void) -> Void) -> Result<Void, RelationError>{
-        for row in rows() {
-            var stop = false
-            
-            switch row {
-            case .Ok(let row):
-                f(row, { stop = true })
-            case .Err(let e):
-                return .Err(e)
-            }
-            
-            if stop {
-                break
+    /// Fetch rows and invoke a callback as they come in. Each call is passed one or more rows, or an error.
+    /// If no error occurs, the sequence of calls is terminated by a final call which passes zero rows.
+    /// Sometime in the glorious future, this will actually be asynchronous. Right now it's just an API stub
+    /// so there's something for callers to work with.
+    public func asyncBulkRows(callback: Result<Set<Row>, RelationError> -> Void) {
+        for result in bulkRows() {
+            switch result {
+            case .Ok(let rows):
+                if !rows.isEmpty {
+                    callback(result)
+                }
+            case .Err:
+                callback(result)
+                return
             }
         }
-        return .Ok()
+        callback(.Ok([]))
     }
     
+    /// Fetch all rows and invoke a callback when complete. Sometime in the glorious future, this too will
+    /// be asynchronous.
+    public func asyncAllRows(callback: Result<Set<Row>, RelationError> -> Void) {
+        var allRows: Set<Row> = []
+        asyncBulkRows({ result in
+            switch result {
+            case .Ok([]):
+                callback(.Ok(allRows))
+            case .Ok(let rows):
+                allRows.unionInPlace(rows)
+            
+            case .Err(QueryRunner.Error.MutatedDuringEnumeration):
+                self.asyncAllRows(callback)
+            case .Err:
+                callback(result)
+            }
+        })
+    }
+}
+
+extension Relation {
     public func union(other: Relation) -> Relation {
         return IntermediateRelation.union([self, other])
     }

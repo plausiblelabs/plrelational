@@ -575,7 +575,7 @@ class RelationTests: DBTestCase {
                 [3,    "pig",  "animal"]))
     }
     
-    func testForeach() {
+    func testAsyncRows() {
         let r1 = MakeRelation(
             ["first", "last", "pet"],
             ["Steve", "Smith", "cat"],
@@ -585,12 +585,18 @@ class RelationTests: DBTestCase {
         var r2 = MakeRelation(
             ["first", "last", "pet"])
         
-        XCTAssertNil(r1.forEach({ row, stop in r2.add(row) }).err)
-        AssertEqual(r1, r2)
+        let group = dispatch_group_create()
+        dispatch_group_enter(group)
+        r1.asyncAllRows({ result in
+            guard let rows = result.ok else { return XCTAssertNil(result.err) }
+            for row in rows {
+                r2.add(row)
+            }
+            dispatch_group_leave(group)
+        })
+        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
         
-        var callCount = 0
-        XCTAssertNil(r1.forEach({ row, stop in callCount += 1; stop() }).err)
-        XCTAssertEqual(callCount, 1)
+        AssertEqual(r1, r2)
     }
     
     func testNotSelect() {
