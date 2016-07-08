@@ -20,9 +20,9 @@ class ObjectMap<Value> {
     
     var table: UnsafeMutablePointer<Bucket>
     
-    init() {
-        capacity = 16
-        table = ObjectMap.allocate(capacity)
+    init(capacity: Int = 16) {
+        self.capacity = max(capacity, 16)
+        table = ObjectMap.allocate(self.capacity)
     }
     
     deinit {
@@ -149,3 +149,24 @@ private let EMPTY = 0
 /// an object but no longer do. They can be reused for new storage, but can't
 /// be used as a termination point when searching for a key.
 private let DEAD = -1
+
+extension ObjectMap: CustomDebugStringConvertible {
+    var debugDescription: String {
+        let initialLine = "count=\(count) deadCount=\(deadCount) capacity=\(capacity) table=\(table)"
+        let tableLines = (0 ..< capacity).map({ (i: Int) -> String in
+            let bucket = table[i]
+            let key = bucket.key
+            if key == EMPTY {
+                return String(format: "[%ld] EMPTY", i)
+            } else if key == DEAD {
+                return String(format: "[%ld] DEAD", i)
+            } else {
+                let bucketString = String(bucket.value) as NSString
+                let keyPtr = unsafeBitCast(key, UnsafePointer<Void>.self)
+                return String(format: "[%ld] %p = %@ (%@)", i, key, bucketString, keyPtr)
+            }
+        })
+        
+        return ([initialLine] + tableLines).joinWithSeparator("\n")
+    }
+}

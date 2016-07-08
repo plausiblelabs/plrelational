@@ -18,6 +18,8 @@ public class TransactionalDatabase {
     
     var currentTransactionThread: pthread_t = nil
     
+    var transactionCounter: UInt64 = 0
+    
     public init(_ db: ChangeLoggingDatabase) {
         self.changeLoggingDatabase = db
     }
@@ -82,6 +84,7 @@ public class TransactionalDatabase {
             
             inTransaction = false
             currentTransactionThread = nil
+            transactionCounter += 1
             transactionLock.unlock()
             
             return .Ok()

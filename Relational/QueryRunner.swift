@@ -3,11 +3,9 @@
 // All rights reserved.
 //
 
-class QueryRunner {
+public class QueryRunner {
     private var nodes: [QueryPlanner.Node]
     private let rootIndex: Int
-    
-    private let transactionalDatabases: [TransactionalDatabase]
     
     private var activeInitiatorIndexes: [Int]
     
@@ -25,7 +23,6 @@ class QueryRunner {
         let nodes = planner.nodes
         self.nodes = nodes
         
-        transactionalDatabases = Array(planner.transactionalDatabases)
         rootIndex = planner.rootIndex
         activeInitiatorIndexes = planner.initiatorIndexes
         nodeStates = Array()
@@ -34,36 +31,20 @@ class QueryRunner {
             nodeStates.append(NodeState(nodes: nodes, nodeIndex: index))
         }
         computeParentChildIndexes()
+        computeTransactionalDatabases(planner.transactionalDatabases)
     }
     
-    func rows() -> AnyGenerator<Result<Row, RelationError>> {
-        for db in transactionalDatabases {
-            db.lockReading()
-        }
-        
-        // We need to unlock the databases when we're done, which can be when the generator runs off
-        // the end, or when the generator is deallocated without running off the end. This value stores
-        // a function that unlocks the databases as the value, and calls its value as the destructor.
-        // When we run off the end of the generator, we call the value manually, and then set it to
-        // an empty function to prevent the destructor from doing anything.
-        let unlocker = ValueWithDestructor(value: {
-            for db in self.transactionalDatabases {
-                db.unlockReading()
-            }
-        }, destructor: { $0() })
-        
-        var buffer: [Result<Row, RelationError>] = []
+    func bulkRows() -> AnyGenerator<Result<Set<Row>, RelationError>> {
         return AnyGenerator(body: {
-            while !self.done {
-                if let row = buffer.popLast() {
-                    return row
-                } else {
-                    buffer = self.pump()
+            if !self.done {
+                let result = self.pump()
+                if result.err != nil {
+                    self.done = true
                 }
+                return result
+            } else {
+                return nil
             }
-            unlocker.value()
-            unlocker.value = {}
-            return nil
         })
     }
     
@@ -99,21 +80,39 @@ class QueryRunner {
         }
     }
     
+    /// For each node associated with a TransactionalDatabase, mark that node and all of its children
+    /// as associated with that database, and fetch the database's transaction counter into the node
+    /// state.
+    private func computeTransactionalDatabases(map: ObjectDictionary<TransactionalDatabase, Int>) {
+        for (db, topIndex) in map {
+            db.lockReading()
+            
+            var queue = [topIndex]
+            while let index = queue.popLast() {
+                nodeStates[index].transactionalDatabase = db
+                nodeStates[index].transactionalDatabaseTransactionID = db.transactionCounter
+                queue.appendContentsOf(nodes[index].childIndexes)
+            }
+            
+            db.unlockReading()
+        }
+    }
+    
     /// Run a round of processing on the query. This will either process some intermediate nodes
     /// or generate some rows from initiator nodes. Any rows that are output from the graph during
     /// processing are returned to the caller.
-    private func pump() -> [Result<Row, RelationError>] {
+    private func pump() -> Result<Set<Row>, RelationError> {
         let pumped = pumpIntermediates()
         if !pumped {
             let result = pumpInitiator()
             if let err = result.err {
-                return [.Err(err)]
+                return .Err(err)
             }
         }
         
-        let output = collectedOutput.map({ Result<Row, RelationError>.Ok($0) })
+        let output = collectedOutput
         collectedOutput.removeAll(keepCapacity: true)
-        return output
+        return .Ok(output)
     }
     
     /// Process all pending intermediate nodes. If any intermediate nodes were processed, this method
@@ -141,6 +140,17 @@ class QueryRunner {
         guard let nodeIndex = activeInitiatorIndexes.last else {
             done = true
             return .Ok()
+        }
+        
+        let db = nodeStates[nodeIndex].transactionalDatabase
+        db?.lockReading()
+        defer { db?.unlockReading() }
+        
+        // If the node is associated with a transactional database, it's now locked. Get the current transaction
+        // counter and compare with what's in the node state. If it's different, then a transaction has been
+        // committed since we started running, and the we're now in an invalid state. Return an error.
+        if let db = db where db.transactionCounter != nodeStates[nodeIndex].transactionalDatabaseTransactionID {
+            return .Err(Error.MutatedDuringEnumeration)
         }
         
         let op = nodes[nodeIndex].op
@@ -182,7 +192,7 @@ class QueryRunner {
         return generator.next()
     }
     
-    private func writeOutput(rows: Set<Row>, fromNode: Int) {
+    private func writeOutput<Seq: CollectionType where Seq.Generator.Element == Row>(rows: Seq, fromNode: Int) {
         guard !rows.isEmpty else { return }
         
         if fromNode == rootIndex {
@@ -286,8 +296,20 @@ class QueryRunner {
         // Once it is complete, we can stream buffer[0] through.
         guard nodeStates[nodeIndex].inputBuffers[1].eof else { return }
         
-        let rows = Set(nodeStates[nodeIndex].inputBuffers[0].popAll())
-        let subtracted = rows.subtract(nodeStates[nodeIndex].inputBuffers[1].rows)
+        let rhsMap = nodeStates[nodeIndex].getExtraState({ () -> ObjectMap<()> in
+            // Note: we pull the rows here but we do *not* pop them. The map doesn't keep the rows
+            // alive, so we need to keep those objects alive by holding onto the rows elsewhere.
+            let rows = nodeStates[nodeIndex].inputBuffers[1].rows
+            let map = ObjectMap<()>(capacity: rows.count)
+            for row in rows {
+                map[row.internedRow] = ()
+            }
+            return map
+        })
+        
+        let lhsRows = nodeStates[nodeIndex].inputBuffers[0].popAll()
+        let subtracted = lhsRows.filter({ rhsMap[$0.internedRow] == nil })
+        
         writeOutput(subtracted, fromNode: nodeIndex)
     }
     
@@ -456,6 +478,10 @@ extension QueryRunner {
         
         var activeBuffers: Int
         
+        var transactionalDatabase: TransactionalDatabase? = nil
+        
+        var transactionalDatabaseTransactionID: UInt64 = 0
+        
         var extraState: Any?
         
         init(nodes: [QueryPlanner.Node], nodeIndex: Int) {
@@ -539,4 +565,10 @@ extension QueryRunner {
 
 private func ==(a: QueryRunner.IntermediateToProcess, b: QueryRunner.IntermediateToProcess) -> Bool {
     return a.nodeIndex == b.nodeIndex && a.inputIndex == b.inputIndex
+}
+
+extension QueryRunner {
+    public enum Error: ErrorType {
+        case MutatedDuringEnumeration
+    }
 }

@@ -166,3 +166,35 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
     return generator
     #endif
 }
+
+@inline(__always) func LogRelationIterationReturn(data: RelationIterationLoggingData, _ generator: AnyGenerator<Result<Set<Row>, RelationError>>) -> AnyGenerator<Result<Set<Row>, RelationError>> {
+    #if LOG_RELATION_ACTIVITY
+        var rowCount = 0
+        let indentString = "".stringByPaddingToLength(data.indentLevel * 4, withString: " ", startingAtIndex: 0)
+        return AnyGenerator(body: {
+            let next = generator.next()
+            switch next {
+            case .Some(.Ok(let rows)):
+                if Flags.printIterations {
+                    print("\(indentString)\(data.callerDescription) returning rows \(rows)")
+                    rowCount += rows.count
+                }
+            case .Some(.Err(let err)):
+                if Flags.printIterations {
+                    print("\(indentString)\(data.callerDescription) returning error \(err)")
+                }
+            case .None:
+                let elapsedTime = NSProcessInfo().systemUptime - data.startTime
+                if Flags.printIterations {
+                    print("\(indentString)\(data.callerDescription) finished iteration, produced \(rowCount) rows in \(elapsedTimeString(elapsedTime)) seconds")
+                }
+                if data.indentLevel == 0 && Flags.printTopLevelRunningTimes {
+                    completedTopLevelRelations.append((data.callerDescription, elapsedTime))
+                }
+            }
+            return next
+        })
+    #else
+        return generator
+    #endif
+}
