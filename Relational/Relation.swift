@@ -80,11 +80,46 @@ extension Relation {
 }
 
 extension Relation {
-    public func rows() -> AnyGenerator<Result<Row, RelationError>> {
+    /// Return a generator which iterates over the contents of the Relation. It tries to perform incremental
+    /// work on each pass, although currently the amount of work is potentially unbounded (but should be
+    /// mostly small). On each iteration, the result may be an error (if one was encountered while building
+    /// the output data), or a set of output rows.
+    ///
+    /// Each iteration may produce many output rows (if the work done suddenly produces a bunch, as is the
+    ///case with many operations which need to buffer data), one output row (if you have a very
+    /// straightforward Relation, or the stars line up), or zero output rows (if the incremental work done
+    /// ended up just noticing the end of rows in some Relation, or if it produced some rows internally but
+    /// they all got buffered). There may still be more data coming if zero rows are returned, so code
+    /// accordingly.
+    public func bulkRows() -> AnyGenerator<Result<Set<Row>, RelationError>> {
         let data = LogRelationIterationBegin(self)
         let planner = QueryPlanner(root: self)
         let runner = QueryRunner(planner: planner)
-        return LogRelationIterationReturn(data, runner.rows())
+        return LogRelationIterationReturn(data, runner.bulkRows())
+    }
+    
+    /// A wrapper on bulkRows() which returns exactly one row (or error) per iteration. This can be more
+    /// convenient to work with, but gives you less control over how much work is done on each iteration.
+    public func rows() -> AnyGenerator<Result<Row, RelationError>> {
+        var buffer: Set<Row> = []
+        let bulkGenerator = bulkRows()
+        return AnyGenerator(body: {
+            while true {
+                if let bufferRow = buffer.popFirst() {
+                    return .Ok(bufferRow)
+                } else {
+                    let nextBulk = bulkGenerator.next()
+                    switch nextBulk {
+                    case .Some(.Ok(let rows)):
+                        buffer = rows
+                    case .Some(.Err(let err)):
+                        return .Err(err)
+                    case nil:
+                        return nil
+                    }
+                }
+            }
+        })
     }
 }
 

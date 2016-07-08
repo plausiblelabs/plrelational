@@ -8,7 +8,7 @@ class QueryPlanner {
     private var relationNodeIndexMap = ObjectMap<Int>()
     
     var nodes: [Node] = []
-    var transactionalDatabases: ObjectSet<TransactionalDatabase> = []
+    var transactionalDatabases = ObjectDictionary<TransactionalDatabase, Int>()
     
     init(root: Relation) {
         self.rootRelation = root
@@ -51,7 +51,7 @@ class QueryPlanner {
         // When visiting nodes, we get the underlying relations, so to catch the original root we have to do it here.
         // When iterating the children of a node, we get the originals, so we can call noteTransactionalDatabases
         // on those and it works. This is weird and should probably be revisited.
-        noteTransactionalDatabases(rootRelation)
+        noteTransactionalDatabases(rootRelation, nodeIndex: 0)
         visitRelationTree(rootRelation, { relation, isRoot in
             let children = relationChildren(relation)
             // Skip this whole thing for relations with no children. They'll have nodes created for them by their parents.
@@ -59,8 +59,8 @@ class QueryPlanner {
             if children.count > 0 || isRoot {
                 let parentNodeIndex = getOrCreateNodeIndex(relation)
                 for childRelation in children {
-                    noteTransactionalDatabases(childRelation)
                     let childNodeIndex = getOrCreateNodeIndex(childRelation.underlyingRelationForQueryExecution)
+                    noteTransactionalDatabases(childRelation, nodeIndex: childNodeIndex)
                     nodes[childNodeIndex].parentIndexes.append(parentNodeIndex)
                     nodes[parentNodeIndex].childIndexes.append(childNodeIndex)
                 }
@@ -156,11 +156,11 @@ class QueryPlanner {
         }
     }
     
-    private func noteTransactionalDatabases(r: Relation) {
+    private func noteTransactionalDatabases(r: Relation, nodeIndex: Int) {
         if let
             transactionalRelation = r as? TransactionalDatabase.TransactionalRelation,
             db = transactionalRelation.db {
-            transactionalDatabases.insert(db)
+            transactionalDatabases[db] = nodeIndex
         }
     }
 }
