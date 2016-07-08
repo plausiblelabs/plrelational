@@ -127,18 +127,7 @@ extension Relation {
     /// Sometime in the glorious future, this will actually be asynchronous. Right now it's just an API stub
     /// so there's something for callers to work with.
     public func asyncBulkRows(callback: Result<Set<Row>, RelationError> -> Void) {
-        for result in bulkRows() {
-            switch result {
-            case .Ok(let rows):
-                if !rows.isEmpty {
-                    callback(result)
-                }
-            case .Err:
-                callback(result)
-                return
-            }
-        }
-        callback(.Ok([]))
+        QueryManager.currentManager.registerQuery(self, callback: callback)
     }
     
     /// Fetch all rows and invoke a callback when complete. Sometime in the glorious future, this too will

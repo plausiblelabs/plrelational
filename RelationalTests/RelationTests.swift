@@ -585,6 +585,8 @@ class RelationTests: DBTestCase {
         var r2 = MakeRelation(
             ["first", "last", "pet"])
         
+        let runloop = CFRunLoopGetCurrent()
+        
         let group = dispatch_group_create()
         dispatch_group_enter(group)
         r1.asyncAllRows({ result in
@@ -593,9 +595,25 @@ class RelationTests: DBTestCase {
                 r2.add(row)
             }
             dispatch_group_leave(group)
+            CFRunLoopStop(runloop)
         })
+        CFRunLoopRun()
         dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+        AssertEqual(r1, r2)
         
+        r2 = MakeRelation(
+            ["first", "last", "pet"])
+        dispatch_group_enter(group)
+        r1.asyncAllRows({ result in
+            guard let rows = result.ok else { return XCTAssertNil(result.err) }
+            for row in rows {
+                r2.add(row)
+            }
+            dispatch_group_leave(group)
+            CFRunLoopStop(runloop)
+        })
+        CFRunLoopRun()
+        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
         AssertEqual(r1, r2)
     }
     
