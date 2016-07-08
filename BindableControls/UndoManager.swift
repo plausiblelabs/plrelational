@@ -5,15 +5,15 @@
 
 import Foundation
 
-class UndoManager {
+public class UndoManager {
     
     private let nsmanager: SPUndoManager
     
-    init() {
+    public init() {
         self.nsmanager = SPUndoManager()
     }
     
-    init(nsmanager: SPUndoManager) {
+    public init(nsmanager: SPUndoManager) {
         self.nsmanager = nsmanager
     }
     

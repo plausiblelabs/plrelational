@@ -7,17 +7,17 @@ import Foundation
 import libRelational
 import Binding
 
-class UndoableDatabase {
+public class UndoableDatabase {
     
     private let db: TransactionalDatabase
     private let undoManager: UndoManager
     
-    init(db: TransactionalDatabase, undoManager: UndoManager) {
+    public init(db: TransactionalDatabase, undoManager: UndoManager) {
         self.db = db
         self.undoManager = undoManager
     }
     
-    func performUndoableAction(name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: Void -> Void) {
+    public func performUndoableAction(name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: Void -> Void) {
         let before = before ?? db.takeSnapshot()
         db.transaction(transactionFunc)
         let after = db.takeSnapshot()
@@ -35,12 +35,12 @@ class UndoableDatabase {
     }
     
     /// Note: `set` will be called in the context of a database transaction.
-    func bidiProperty<T: Equatable>(relation: Relation, action: String, get: Relation -> T, set: T -> Void) -> ReadWriteProperty<T> {
+    public func bidiProperty<T: Equatable>(relation: Relation, action: String, get: Relation -> T, set: T -> Void) -> ReadWriteProperty<T> {
         return relation.property(mutationConfig(action, set), relationToValue: get)
     }
 
     /// Note: `set` will be called in the context of a database transaction.
-    func bidiProperty<T: Equatable>(relation: Relation, action: String, get: Relation -> T?, set: T? -> Void) -> ReadWriteProperty<T?> {
+    public func bidiProperty<T: Equatable>(relation: Relation, action: String, get: Relation -> T?, set: T? -> Void) -> ReadWriteProperty<T?> {
         return relation.property(mutationConfig(action, set), relationToValue: get)
     }
 
