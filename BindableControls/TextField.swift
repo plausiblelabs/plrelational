@@ -8,6 +8,11 @@ import Binding
 
 public class TextField: NSTextField, NSTextFieldDelegate {
 
+    private lazy var changeHandler: ChangeHandler = ChangeHandler(
+        onLock: { [unowned self] in self.enabled = false },
+        onUnlock: { [unowned self] in self.enabled = true }
+    )
+    
     private lazy var _string: ExternalValueProperty<String> = ExternalValueProperty(
         get: { [unowned self] in
             self.stringValue ?? ""

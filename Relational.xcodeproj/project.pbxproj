@@ -131,6 +131,8 @@
 		37A4A27C1D3026E1005CAEA5 /* libBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; };
 		37A4A27D1D302738005CAEA5 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
 		37A4A27E1D302738005CAEA5 /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
+		37A4A2831D307AD1005CAEA5 /* ChangeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A27F1D3073C7005CAEA5 /* ChangeHandler.swift */; };
+		37A4A2851D307AF3005CAEA5 /* ChangeHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2841D307AF3005CAEA5 /* ChangeHandlerTests.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -598,6 +600,8 @@
 		37A4A2691D30260F005CAEA5 /* AsyncExampleAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncExampleAppTests.swift; sourceTree = "<group>"; };
 		37A4A26B1D30260F005CAEA5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		37A4A2721D30265B005CAEA5 /* ViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		37A4A27F1D3073C7005CAEA5 /* ChangeHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeHandler.swift; path = ../Binding/ChangeHandler.swift; sourceTree = "<group>"; };
+		37A4A2841D307AF3005CAEA5 /* ChangeHandlerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeHandlerTests.swift; path = BindingTests/ChangeHandlerTests.swift; sourceTree = SOURCE_ROOT; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -935,6 +939,7 @@
 				37A1CED71D1350C00067870D /* Property */,
 				37A4A2491D25C933005CAEA5 /* Scheduler */,
 				37A4A24E1D2EC809005CAEA5 /* Pi Calculus */,
+				37A4A2811D307435005CAEA5 /* Change Handling */,
 				37A1CEE11D147A970067870D /* Relation Extensions */,
 				372707BC1CFE24C600710C80 /* Utilities */,
 			);
@@ -1147,6 +1152,16 @@
 				37A4A26B1D30260F005CAEA5 /* Info.plist */,
 			);
 			path = AsyncExampleAppTests;
+			sourceTree = "<group>";
+		};
+		37A4A2811D307435005CAEA5 /* Change Handling */ = {
+			isa = PBXGroup;
+			children = (
+				37A4A27F1D3073C7005CAEA5 /* ChangeHandler.swift */,
+				37A4A2841D307AF3005CAEA5 /* ChangeHandlerTests.swift */,
+			);
+			name = "Change Handling";
+			path = Binding;
 			sourceTree = "<group>";
 		};
 		37C610FE1CD7EFAE001DAF59 /* SampleApp */ = {
@@ -2090,6 +2105,7 @@
 			files = (
 				37A1CEE71D147BD80067870D /* RelationMutation.swift in Sources */,
 				37A4A24D1D25CB13005CAEA5 /* Disposable.swift in Sources */,
+				37A4A2831D307AD1005CAEA5 /* ChangeHandler.swift in Sources */,
 				372707BA1CFE240E00710C80 /* TreeProperty.swift in Sources */,
 				37A4A23E1D1F1677005CAEA5 /* RelationProperty.swift in Sources */,
 				372707B71CFE240E00710C80 /* CommonValue.swift in Sources */,
@@ -2117,6 +2133,7 @@
 				37A4A2521D2ECCBF005CAEA5 /* PiTests.swift in Sources */,
 				37A1CEE51D147B0E0067870D /* RelationAsTypedValueTests.swift in Sources */,
 				372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */,
+				37A4A2851D307AF3005CAEA5 /* ChangeHandlerTests.swift in Sources */,
 				372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */,
 				37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */,
 				37A4A2401D1F4FD9005CAEA5 /* RelationPropertyTests.swift in Sources */,
@@ -3186,6 +3203,7 @@
 				37A4A26E1D30260F005CAEA5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37A4A26F1D30260F005CAEA5 /* Build configuration list for PBXNativeTarget "AsyncExampleAppTests" */ = {
 			isa = XCConfigurationList;
@@ -3194,6 +3212,7 @@
 				37A4A2711D30260F005CAEA5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37C611281CD7EFAE001DAF59 /* Build configuration list for PBXNativeTarget "SampleApp" */ = {
 			isa = XCConfigurationList;

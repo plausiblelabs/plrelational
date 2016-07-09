@@ -12,7 +12,7 @@ class ViewModel {
     
     private var persons: MutableRelation
     private var selectedPersonID: MutableRelation
-    private var selectedPerson: Relation
+    private var selectedPersonName: Relation
     
     private let undoableDB: UndoableDatabase
     
@@ -41,7 +41,7 @@ class ViewModel {
         }
         persons = createRelation("person", ["id", "name", "sales", "order"])
         selectedPersonID = createRelation("selected_person", ["id"])
-        selectedPerson = persons.join(selectedPersonID)
+        selectedPersonName = persons.join(selectedPersonID).project(["name"])
         
         undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
         
@@ -82,5 +82,5 @@ class ViewModel {
         )
     }
     
-    lazy var string: ReadWriteProperty<String> = self.nameProperty(self.selectedPerson.project(["name"]))
+    lazy var string: ReadWriteProperty<String> = self.nameProperty(self.selectedPersonName)
 }
