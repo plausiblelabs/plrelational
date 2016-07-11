@@ -60,7 +60,7 @@ public class ArrayProperty<E: ArrayElement>: ReadablePropertyType {
     
     internal func notifyObservers(newState newState: AsyncState<[Element]>, arrayChanges: [ArrayChange]) {
         let metadata = ChangeMetadata(transient: false)
-        notify(change: (newState: newState, arrayChanges: arrayChanges), metadata: metadata)
+        notify.valueChanging(change: (newState: newState, arrayChanges: arrayChanges), metadata: metadata)
     }
     
     public func insert(row: E.Data, pos: Pos) {

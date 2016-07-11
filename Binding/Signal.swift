@@ -15,9 +15,25 @@ public struct ChangeMetadata {
     }
 }
 
+public struct SignalObserver<T> {
+    public let valueWillChange: () -> Void
+    public let valueChanging: (change: T, metadata: ChangeMetadata) -> Void
+    public let valueDidChange: () -> Void
+    
+    public init(
+        valueWillChange: () -> Void,
+        valueChanging: (change: T, metadata: ChangeMetadata) -> Void,
+        valueDidChange: () -> Void)
+    {
+        self.valueWillChange = valueWillChange
+        self.valueChanging = valueChanging
+        self.valueDidChange = valueDidChange
+    }
+}
+
 public class Signal<T> {
-    public typealias Observer = (T, ChangeMetadata) -> Void
-    public typealias Notify = (change: T, metadata: ChangeMetadata) -> Void
+    public typealias Observer = SignalObserver<T>
+    public typealias Notify = SignalObserver<T>
 
     private var observers: [UInt64: Observer] = [:]
     private var nextObserverID: UInt64 = 0
@@ -27,23 +43,49 @@ public class Signal<T> {
     
     public static func pipe() -> (Signal, Notify) {
         let signal = Signal()
-        let notify = signal.notifyObservers
+        let notify = SignalObserver(
+            valueWillChange: signal.notifyWillChange,
+            valueChanging: signal.notifyChanging,
+            valueDidChange: signal.notifyDidChange
+        )
         return (signal, notify)
     }
-    
+
     public func observe(observer: Observer) -> ObserverRemoval {
         let id = nextObserverID
         nextObserverID += 1
         observers[id] = observer
         return { self.observers.removeValueForKey(id) }
     }
-    
-    private func notifyObservers(newValue: T, metadata: ChangeMetadata) {
-        for (_, f) in observers {
-            f(newValue, metadata)
+
+    /// Convenience form of `observe` that builds an Observer whose `valueWillChange` and `valueDidChange`
+    /// handlers pass through to `notify`, but uses the given `valueChanging` handler.
+    public func observe<U>(notify: SignalObserver<U>, _ valueChanging: (change: T, metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
+        return self.observe(SignalObserver(
+            valueWillChange: notify.valueWillChange,
+            valueChanging: valueChanging,
+            valueDidChange: notify.valueDidChange
+        ))
+    }
+
+    private func notifyWillChange() {
+        for (_, observer) in observers {
+            observer.valueWillChange()
         }
     }
-    
+
+    private func notifyChanging(change: T, metadata: ChangeMetadata) {
+        for (_, observer) in observers {
+            observer.valueChanging(change: change, metadata: metadata)
+        }
+    }
+
+    private func notifyDidChange() {
+        for (_, observer) in observers {
+            observer.valueDidChange()
+        }
+    }
+
     // For testing purposes only.
     internal var observerCount: Int { return observers.count }
 }

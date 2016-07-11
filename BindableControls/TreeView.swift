@@ -89,7 +89,12 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         
         super.init()
         
-        treeObserverRemoval = model.data.signal.observe({ [weak self] changes, _ in self?.treeChanged(changes) })
+        // TODO: Handle will/didChange
+        treeObserverRemoval = model.data.signal.observe(SignalObserver(
+            valueWillChange: {},
+            valueChanging: { [weak self] changes, _ in self?.treeChanged(changes) },
+            valueDidChange: {}
+        ))
         selection <~> model.selection
         
         outlineView.setDelegate(self)

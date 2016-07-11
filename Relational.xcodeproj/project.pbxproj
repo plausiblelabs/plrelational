@@ -133,6 +133,7 @@
 		37A4A27E1D302738005CAEA5 /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
 		37A4A2831D307AD1005CAEA5 /* ChangeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A27F1D3073C7005CAEA5 /* ChangeHandler.swift */; };
 		37A4A2851D307AF3005CAEA5 /* ChangeHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2841D307AF3005CAEA5 /* ChangeHandlerTests.swift */; };
+		37A4A28C1D343322005CAEA5 /* libBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -419,6 +420,27 @@
 			remoteInfo = Binding;
 		};
 		37A4A2781D3026D2005CAEA5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37A1CE9D1D1081FC0067870D;
+			remoteInfo = BindableControls;
+		};
+		37A4A2861D34331D005CAEA5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C22921BA1CD12A7100518184;
+			remoteInfo = libRelational;
+		};
+		37A4A2881D34331D005CAEA5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 372707AD1CFE238700710C80;
+			remoteInfo = Binding;
+		};
+		37A4A28A1D34331D005CAEA5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
 			proxyType = 1;
@@ -834,8 +856,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				372707E01CFE293000710C80 /* libBinding.dylib in Frameworks */,
 				37C611591CE3F7C0001DAF59 /* liblibRelational.dylib in Frameworks */,
+				372707E01CFE293000710C80 /* libBinding.dylib in Frameworks */,
+				37A4A28C1D343322005CAEA5 /* libBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1755,6 +1778,9 @@
 			buildRules = (
 			);
 			dependencies = (
+				37A4A2871D34331D005CAEA5 /* PBXTargetDependency */,
+				37A4A2891D34331D005CAEA5 /* PBXTargetDependency */,
+				37A4A28B1D34331D005CAEA5 /* PBXTargetDependency */,
 				37C611121CD7EFAE001DAF59 /* PBXTargetDependency */,
 			);
 			name = SampleAppTests;
@@ -2493,6 +2519,21 @@
 			isa = PBXTargetDependency;
 			target = 37A1CE9D1D1081FC0067870D /* BindableControls */;
 			targetProxy = 37A4A2781D3026D2005CAEA5 /* PBXContainerItemProxy */;
+		};
+		37A4A2871D34331D005CAEA5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C22921BA1CD12A7100518184 /* libRelational */;
+			targetProxy = 37A4A2861D34331D005CAEA5 /* PBXContainerItemProxy */;
+		};
+		37A4A2891D34331D005CAEA5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 372707AD1CFE238700710C80 /* Binding */;
+			targetProxy = 37A4A2881D34331D005CAEA5 /* PBXContainerItemProxy */;
+		};
+		37A4A28B1D34331D005CAEA5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37A1CE9D1D1081FC0067870D /* BindableControls */;
+			targetProxy = 37A4A28A1D34331D005CAEA5 /* PBXContainerItemProxy */;
 		};
 		37C611121CD7EFAE001DAF59 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

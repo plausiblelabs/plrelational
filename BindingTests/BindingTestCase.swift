@@ -68,3 +68,15 @@ class BindingTestCase: XCTestCase {
         return TreePath(parent: parent, index: index)
     }
 }
+
+extension Signal {
+    /// Convenience form of `observe` that builds an Observer whose `valueWillChange` and `valueDidChange`
+    /// are no-ops, but uses the given `valueChanging` handler.
+    func observe(valueChanging: (change: T, metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
+        return self.observe(SignalObserver(
+            valueWillChange: {},
+            valueChanging: valueChanging,
+            valueDidChange: {}
+        ))
+    }
+}

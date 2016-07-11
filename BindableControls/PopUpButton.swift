@@ -8,7 +8,7 @@ import Binding
 
 public class PopUpButton<T: Equatable>: NSPopUpButton {
 
-    public lazy var items: BindableProperty<[MenuItem<T>]> = WriteOnlyProperty { [unowned self] value, _ in
+    public lazy var items: BindableProperty<[MenuItem<T>]> = WriteOnlyProperty(set: { [unowned self] value, _ in
         // Clear the menu
         self.removeAllItems()
 
@@ -25,7 +25,7 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
         
         // Set the selected item
         self.setSelectedItem(self.selectedObject.value)
-    }
+    })
 
     private lazy var _selectedObject: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
         self.setSelectedItem(value)

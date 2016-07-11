@@ -17,7 +17,7 @@ public class UndoManager {
         self.nsmanager = nsmanager
     }
     
-    func registerChange(name name: String, perform: Bool, forward: () -> Void, backward: () -> Void) {
+    public func registerChange(name name: String, perform: Bool, forward: () -> Void, backward: () -> Void) {
         // First register the change
         let f = nsmanager.registerChange(name, forwards: forward, backwards: backward)
         
@@ -27,11 +27,11 @@ public class UndoManager {
         }
     }
     
-    func undo() {
+    public func undo() {
         nsmanager.undo()
     }
     
-    func redo() {
+    public func redo() {
         nsmanager.redo()
     }
 }
