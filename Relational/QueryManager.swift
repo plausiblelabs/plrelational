@@ -36,19 +36,17 @@ public class QueryManager {
         let queries = pendingQueries
         pendingQueries = []
         
-        for (relation, callback) in queries {
-            for result in relation.bulkRows() {
-                switch result {
-                case .Ok(let rows):
-                    if !rows.isEmpty {
-                        callback(result)
-                    }
-                case .Err:
-                    callback(result)
-                    return
-                }
+        let planner = QueryPlanner(roots: queries)
+        let runner = QueryRunner(planner: planner)
+        
+        while !runner.done {
+            runner.pump()
+        }
+        
+        if !runner.didError {
+            for (_, callback) in queries {
+                callback(.Ok([]))
             }
-            callback(.Ok([]))
         }
     }
 }

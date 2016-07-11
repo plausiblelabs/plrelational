@@ -16,6 +16,7 @@ public class QueryRunner {
     private var nodeStates: [NodeState]
     
     public private(set) var done = false
+    public private(set) var didError = false
     
     init(planner: QueryPlanner) {
         let nodes = planner.nodes
@@ -91,6 +92,7 @@ public class QueryRunner {
             let result = pumpInitiator()
             if let err = result.err {
                 self.done = true
+                self.didError = true
                 for callback in outputCallbacks {
                     callback(.Err(err))
                 }
