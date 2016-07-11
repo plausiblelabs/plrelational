@@ -4,27 +4,20 @@
 //
 
 class QueryPlanner {
-    private let rootRelation: Relation
+    typealias OutputCallback = Result<Set<Row>, RelationError> -> Void
+    
+    private let rootRelations: [(Relation, OutputCallback)]
     private var relationNodeIndexMap = ObjectMap<Int>()
     
     var nodes: [Node] = []
     var transactionalDatabases = ObjectDictionary<TransactionalDatabase, Int>()
     
-    init(root: Relation) {
-        self.rootRelation = root
+    init(roots: [(Relation, OutputCallback)]) {
+        self.rootRelations = roots
         computeNodes()
         
         let optimizer = QueryOptimizer(nodes: nodes)
         nodes = optimizer.nodes
-    }
-    
-    var rootIndex: Int {
-        // If the root is not an object then we'll only have one node. If it is, we can look it up.
-        if rootRelation is AnyObject {
-            return getOrCreateNodeIndex(rootRelation.underlyingRelationForQueryExecution)
-        } else {
-            return 0
-        }
     }
     
     var initiatorIndexes: [Int] {
@@ -38,6 +31,10 @@ class QueryPlanner {
         })
     }
     
+    var allOutputCallbacks: [OutputCallback] {
+        return rootRelations.map({ $1 })
+    }
+    
     func initiatorRelation(initiator: QueryPlanner.Node) -> Relation {
         switch initiator.op {
         case .SQLiteTableScan(let relation):
@@ -48,33 +45,45 @@ class QueryPlanner {
     }
     
     private func computeNodes() {
-        // When visiting nodes, we get the underlying relations, so to catch the original root we have to do it here.
-        // When iterating the children of a node, we get the originals, so we can call noteTransactionalDatabases
-        // on those and it works. This is weird and should probably be revisited.
-        noteTransactionalDatabases(rootRelation, nodeIndex: 0)
-        visitRelationTree(rootRelation, { relation, isRoot in
-            let children = relationChildren(relation)
-            // Skip this whole thing for relations with no children. They'll have nodes created for them by their parents.
-            // Except if the root node has no children, we still need to hit that one if anything is to happen at all.
-            if children.count > 0 || isRoot {
-                let parentNodeIndex = getOrCreateNodeIndex(relation)
-                for childRelation in children {
-                    let childNodeIndex = getOrCreateNodeIndex(childRelation.underlyingRelationForQueryExecution)
-                    noteTransactionalDatabases(childRelation, nodeIndex: childNodeIndex)
-                    nodes[childNodeIndex].parentIndexes.append(parentNodeIndex)
-                    nodes[parentNodeIndex].childIndexes.append(childNodeIndex)
+        visitRelationTree(rootRelations, { relation, underlyingRelation, outputCallback in
+            noteTransactionalDatabases(relation, nodeIndex: 0)
+            let children = relationChildren(underlyingRelation)
+            let parentNodeIndex = getOrCreateNodeIndex(underlyingRelation)
+            
+            if let outputCallback = outputCallback {
+                if nodes[parentNodeIndex].outputCallbacks == nil {
+                    nodes[parentNodeIndex].outputCallbacks = [outputCallback]
+                } else {
+                    nodes[parentNodeIndex].outputCallbacks?.append(outputCallback)
                 }
+            }
+            for childRelation in children {
+                let childNodeIndex = getOrCreateNodeIndex(childRelation.underlyingRelationForQueryExecution)
+                nodes[childNodeIndex].parentIndexes.append(parentNodeIndex)
+                nodes[parentNodeIndex].childIndexes.append(childNodeIndex)
             }
         })
     }
     
-    private func visitRelationTree(root: Relation, @noescape _ f: (Relation, isRoot: Bool) -> Void) {
+    private func visitRelationTree(roots: [(Relation, OutputCallback)], @noescape _ f: (relation: Relation, underlyingRelation: Relation, outputCallback: OutputCallback?) -> Void) {
         let visited = ObjectMap<Int>()
-        var toVisit: [Relation] = [root]
-        var isRoot = true
+        var rootsToVisit = roots
+        var othersToVisit: [Relation] = []
         var iterationCount = 0
-        while let r = toVisit.popLast() {
-            let realR = r.underlyingRelationForQueryExecution
+        while true {
+            let relation: Relation
+            let outputCallback: OutputCallback?
+            if let (r, callback) = rootsToVisit.popLast() {
+                relation = r
+                outputCallback = callback
+            } else if let r = othersToVisit.popLast() {
+                relation = r
+                outputCallback = nil
+            } else {
+                break
+            }
+            
+            let realR = relation.underlyingRelationForQueryExecution
             iterationCount += 1
             if let obj = realR as? AnyObject {
                 let retrievedCount = visited.getOrCreate(obj, defaultValue: iterationCount)
@@ -82,9 +91,8 @@ class QueryPlanner {
                     continue
                 }
             }
-            f(realR, isRoot: isRoot)
-            isRoot = false
-            toVisit.appendContentsOf(relationChildren(realR))
+            f(relation: relation, underlyingRelation: realR, outputCallback: outputCallback)
+            othersToVisit.appendContentsOf(relationChildren(realR))
         }
     }
     
@@ -167,7 +175,8 @@ class QueryPlanner {
 
 extension QueryPlanner {
     struct Node {
-        let op: Operation
+        var op: Operation
+        var outputCallbacks: [OutputCallback]?
         
         var childCount: Int {
             return childIndexes.count

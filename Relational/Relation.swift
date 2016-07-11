@@ -90,10 +90,35 @@ extension Relation {
     /// they all got buffered). There may still be more data coming if zero rows are returned, so code
     /// accordingly.
     public func bulkRows() -> AnyGenerator<Result<Set<Row>, RelationError>> {
+        var collectedOutput: Set<Row> = []
+        var error: RelationError?
+        func outputCallback(result: Result<Set<Row>, RelationError>) {
+            switch result {
+            case .Ok(let rows):
+                collectedOutput.unionInPlace(rows)
+            case .Err(let err):
+                error = err
+            }
+        }
+        
         let data = LogRelationIterationBegin(self)
-        let planner = QueryPlanner(root: self)
+        let planner = QueryPlanner(roots: [(self, outputCallback)])
         let runner = QueryRunner(planner: planner)
-        return LogRelationIterationReturn(data, runner.bulkRows())
+        
+        let generator = AnyGenerator(body: { Void -> Result<Set<Row>, RelationError>? in
+            if runner.done { return nil }
+            
+            runner.pump()
+            
+            if let error = error {
+                return .Err(error)
+            } else {
+                let rows = collectedOutput
+                collectedOutput.removeAll(keepCapacity: true)
+                return .Ok(rows)
+            }
+        })
+        return LogRelationIterationReturn(data, generator)
     }
     
     /// A wrapper on bulkRows() which returns exactly one row (or error) per iteration. This can be more

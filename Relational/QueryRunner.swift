@@ -5,7 +5,7 @@
 
 public class QueryRunner {
     private var nodes: [QueryPlanner.Node]
-    private let rootIndex: Int
+    private var outputCallbacks: [QueryPlanner.OutputCallback]
     
     private var activeInitiatorIndexes: [Int]
     
@@ -15,15 +15,13 @@ public class QueryRunner {
     
     private var nodeStates: [NodeState]
     
-    private var collectedOutput: Set<Row> = []
-    
-    private var done = false
+    public private(set) var done = false
     
     init(planner: QueryPlanner) {
         let nodes = planner.nodes
         self.nodes = nodes
+        self.outputCallbacks = planner.allOutputCallbacks
         
-        rootIndex = planner.rootIndex
         activeInitiatorIndexes = planner.initiatorIndexes
         nodeStates = Array()
         nodeStates.reserveCapacity(nodes.count)
@@ -32,20 +30,6 @@ public class QueryRunner {
         }
         computeParentChildIndexes()
         computeTransactionalDatabases(planner.transactionalDatabases)
-    }
-    
-    func bulkRows() -> AnyGenerator<Result<Set<Row>, RelationError>> {
-        return AnyGenerator(body: {
-            if !self.done {
-                let result = self.pump()
-                if result.err != nil {
-                    self.done = true
-                }
-                return result
-            } else {
-                return nil
-            }
-        })
     }
     
     /// Fill out each NodeState's `parentChildIndexes` array by scanning their parents.
@@ -101,18 +85,17 @@ public class QueryRunner {
     /// Run a round of processing on the query. This will either process some intermediate nodes
     /// or generate some rows from initiator nodes. Any rows that are output from the graph during
     /// processing are returned to the caller.
-    private func pump() -> Result<Set<Row>, RelationError> {
+    func pump() -> Void {
         let pumped = pumpIntermediates()
         if !pumped {
             let result = pumpInitiator()
             if let err = result.err {
-                return .Err(err)
+                self.done = true
+                for callback in outputCallbacks {
+                    callback(.Err(err))
+                }
             }
         }
-        
-        let output = collectedOutput
-        collectedOutput.removeAll(keepCapacity: true)
-        return .Ok(output)
     }
     
     /// Process all pending intermediate nodes. If any intermediate nodes were processed, this method
@@ -195,12 +178,15 @@ public class QueryRunner {
     private func writeOutput<Seq: CollectionType where Seq.Generator.Element == Row>(rows: Seq, fromNode: Int) {
         guard !rows.isEmpty else { return }
         
-        if fromNode == rootIndex {
-            collectedOutput.unionInPlace(rows)
-        } else {
-            for (parentIndex, index) in zip(nodes[fromNode].parentIndexes, nodeStates[fromNode].parentChildIndexes) {
-                nodeStates[parentIndex].inputBuffers[index].add(rows)
-                intermediatesToProcess.append(IntermediateToProcess(nodeIndex: parentIndex, inputIndex: index))
+        for (parentIndex, index) in zip(nodes[fromNode].parentIndexes, nodeStates[fromNode].parentChildIndexes) {
+            nodeStates[parentIndex].inputBuffers[index].add(rows)
+            intermediatesToProcess.append(IntermediateToProcess(nodeIndex: parentIndex, inputIndex: index))
+        }
+        
+        if let callbacks = nodes[fromNode].outputCallbacks {
+            let rowsSet = Set(rows)
+            for callback in callbacks {
+                callback(.Ok(rowsSet))
             }
         }
     }

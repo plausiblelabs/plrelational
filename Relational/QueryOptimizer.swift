@@ -14,6 +14,9 @@ class QueryOptimizer {
     
     private func optimize() {
         for i in nodes.indices {
+            // Don't touch nodes with output callbacks, or we'll screw up outputs.
+            if nodes[i].outputCallbacks != nil { continue }
+            
             switch nodes[i].op {
                 
             case .Union where nodes[i].childCount == 1:

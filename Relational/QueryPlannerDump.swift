@@ -51,6 +51,6 @@ extension QueryPlanner {
 
 extension Relation {
     public func dumpQueryPlanAndOpen() {
-        QueryPlanner(root: self).graphvizDumpAndOpen()
+        QueryPlanner(roots: [(self, { _ in })]).graphvizDumpAndOpen()
     }
 }
