@@ -27,10 +27,15 @@ class PropertiesView: BackgroundView {
             
             validate(self)
             
-            self.observerRemoval = property.signal.observe({ [weak self] _ in
-                guard let weakSelf = self else { return }
-                validate(weakSelf)
-            })
+            // TODO: Handle will/didChange
+            self.observerRemoval = property.signal.observe(SignalObserver(
+                valueWillChange: {},
+                valueChanging: { [weak self] _ in
+                    guard let weakSelf = self else { return }
+                    validate(weakSelf)
+                },
+                valueDidChange: {}
+            ))
         }
     }
     

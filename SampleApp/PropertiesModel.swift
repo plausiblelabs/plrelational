@@ -6,6 +6,7 @@
 import Foundation
 import libRelational
 import Binding
+import BindableControls
 
 class PropertiesModel {
     

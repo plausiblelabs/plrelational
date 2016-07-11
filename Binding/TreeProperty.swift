@@ -84,7 +84,7 @@ public class TreeProperty<N: TreeNode>: ReadablePropertyType {
     
     internal func notifyChangeObservers(changes: [Change]) {
         let metadata = ChangeMetadata(transient: false)
-        notify(change: changes, metadata: metadata)
+        notify.valueChanging(change: changes, metadata: metadata)
     }
     
     // TODO: Move these to a MutableTreeProperty subclass?

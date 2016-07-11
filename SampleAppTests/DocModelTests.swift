@@ -6,6 +6,7 @@
 import XCTest
 import libRelational
 @testable import Binding
+import BindableControls
 @testable import SampleApp
 
 extension DocModel {

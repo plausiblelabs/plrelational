@@ -8,7 +8,7 @@ import Binding
 
 public class BackgroundView: NSView {
     
-    public lazy var visible: BindableProperty<Bool> = WriteOnlyProperty({ [weak self] value, _ in
+    public lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] value, _ in
         self?.hidden = !value
     })
 

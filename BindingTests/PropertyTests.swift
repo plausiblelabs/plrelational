@@ -33,7 +33,8 @@ class PropertyTests: XCTestCase {
         var value = false
         let property = ExternalValueProperty(
             get: { return value },
-            set: { newValue, _ in value = newValue }
+            set: { newValue, _ in value = newValue },
+            changeHandler: ChangeHandler()
         )
         
         var changeObserved = false
@@ -405,11 +406,11 @@ class PropertyTests: XCTestCase {
         XCTAssertEqual(changeCount, 0)
         XCTAssertEqual(signal.observerCount, 1)
         
-        notify(change: (), metadata: ChangeMetadata(transient: false))
+        notify.valueChanging(change: (), metadata: ChangeMetadata(transient: false))
         XCTAssertEqual(changeCount, 1)
         XCTAssertEqual(signal.observerCount, 1)
         
-        notify(change: (), metadata: ChangeMetadata(transient: false))
+        notify.valueChanging(change: (), metadata: ChangeMetadata(transient: false))
         XCTAssertEqual(changeCount, 2)
         XCTAssertEqual(signal.observerCount, 1)
         

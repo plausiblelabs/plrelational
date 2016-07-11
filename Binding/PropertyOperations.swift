@@ -126,7 +126,7 @@ private class MappedValueProperty<T>: ReadableProperty<T> {
         
         super.init(initialValue: transform(property.value), signal: signal, notify: notify, changing: valueChanging)
         
-        self.removal = property.signal.observe({ [weak self] _, metadata in
+        self.removal = property.signal.observe(notify, { [weak self] _, metadata in
             self?.setValue(transform(property.value), metadata)
         })
     }
@@ -145,10 +145,10 @@ private class BinaryOpValueProperty<T>: ReadableProperty<T> {
 
         super.init(initialValue: f(lhs.value, rhs.value), signal: signal, notify: notify, changing: valueChanging)
         
-        self.removal1 = lhs.signal.observe({ [weak self] _, metadata in
+        self.removal1 = lhs.signal.observe(notify, { [weak self] _, metadata in
             self?.setValue(f(lhs.value, rhs.value), metadata)
         })
-        self.removal2 = rhs.signal.observe({ [weak self] _, metadata in
+        self.removal2 = rhs.signal.observe(notify, { [weak self] _, metadata in
             self?.setValue(f(lhs.value, rhs.value), metadata)
         })
     }
@@ -177,7 +177,7 @@ private class AnyTrueValueProperty: ReadableProperty<Bool> {
         super.init(initialValue: anyTrue(), signal: signal, notify: notify, changing: valueChanging)
         
         for property in properties {
-            let removal = property.signal.observe({ [weak self] _, metadata in
+            let removal = property.signal.observe(notify, { [weak self] _, metadata in
                 let newValue = property.value
                 if newValue {
                     self?.setValue(true, metadata)
@@ -213,7 +213,7 @@ private class AllTrueValueProperty: ReadableProperty<Bool> {
         super.init(initialValue: allTrue(), signal: signal, notify: notify, changing: valueChanging)
         
         for property in properties {
-            let removal = property.signal.observe({ [weak self] _, metadata in
+            let removal = property.signal.observe(notify, { [weak self] _, metadata in
                 let newValue = property.value
                 if !newValue {
                     self?.setValue(false, metadata)
@@ -248,7 +248,7 @@ private class NoneTrueValueProperty: ReadableProperty<Bool> {
         super.init(initialValue: noneTrue(), signal: signal, notify: notify, changing: valueChanging)
         
         for property in properties {
-            let removal = property.signal.observe({ [weak self] _, metadata in
+            let removal = property.signal.observe(notify, { [weak self] _, metadata in
                 let newValue = property.value
                 if newValue {
                     self?.setValue(false, metadata)
@@ -285,7 +285,7 @@ private class CommonValueProperty<T: Hashable>: ReadableProperty<CommonValue<T>>
         
         super.init(initialValue: commonValue(), signal: signal, notify: notify, changing: valueChanging)
         
-        self.removal = property.signal.observe({ [weak self] _, metadata in
+        self.removal = property.signal.observe(notify, { [weak self] _, metadata in
             self?.setValue(commonValue(), metadata)
         })
     }

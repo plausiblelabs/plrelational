@@ -88,9 +88,14 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
 
         super.init()
         
-        // TODO: We should have a stricter contract in place to ensure that these changes are
-        // sent via UIScheduler
-        arrayObserverRemoval = model.data.signal.observe({ [weak self] stateChange, _ in self?.arrayChanged(stateChange) })
+        // TODO: Handle will/didChange
+        arrayObserverRemoval = model.data.signal.observe(SignalObserver(
+            valueWillChange: {},
+            // TODO: We should have a stricter contract in place to ensure that these changes are
+            // sent via UIScheduler
+            valueChanging: { [weak self] stateChange, _ in self?.arrayChanged(stateChange) },
+            valueDidChange: {}
+        ))
         selection <~> model.selection
         
         outlineView.setDelegate(self)

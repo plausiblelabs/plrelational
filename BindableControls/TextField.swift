@@ -19,17 +19,18 @@ public class TextField: NSTextField, NSTextFieldDelegate {
         },
         set: { [unowned self] value, _ in
             self.stringValue = value
-        }
+        },
+        changeHandler: self.changeHandler
     )
     public var string: ReadWriteProperty<String> { return _string }
     
-    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty { [unowned self] value, _ in
+    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.placeholderString = value
-    }
+    })
 
-    public lazy var visible: BindableProperty<Bool> = WriteOnlyProperty { [unowned self] value, _ in
+    public lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.hidden = !value
-    }
+    })
     
     private var previousCommittedValue: String?
     private var previousValue: String?

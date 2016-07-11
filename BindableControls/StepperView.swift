@@ -19,9 +19,9 @@ public class StepperView: NSControl, NSTextFieldDelegate {
     })
     public var value: ReadWriteProperty<Int?> { return _value }
 
-    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty { [unowned self] value, _ in
+    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.textField.placeholderString = value
-    }
+    })
 
     private let defaultValue: Int
     private var textField: NSTextField!

@@ -181,14 +181,16 @@ private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
                 }
             },
             signal: signal,
-            notify: notify
+            notify: notify,
+            // TODO
+            changeHandler: ChangeHandler()
         )
 
         self.removal = relation.addChangeObserver({ _ in
             let newValue = relationToValue(relation)
             if valueChanging(value, newValue) {
                 value = newValue
-                notify(change: newValue, metadata: ChangeMetadata(transient: false))
+                notify.valueChanging(change: newValue, metadata: ChangeMetadata(transient: false))
             }
         })
     }

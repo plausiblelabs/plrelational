@@ -8,9 +8,9 @@ import Binding
 
 public class Button: NSButton {
 
-    public lazy var disabled: BindableProperty<Bool> = WriteOnlyProperty { [unowned self] value, _ in
+    public lazy var disabled: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.enabled = !value
-    }
+    })
 
     public let clicks: Signal<()>
     private let clicksNotify: Signal<()>.Notify
@@ -30,6 +30,6 @@ public class Button: NSButton {
     }
     
     @objc func buttonClicked(sender: Button) {
-        clicksNotify(change: (), metadata: ChangeMetadata(transient: true))
+        clicksNotify.valueChanging(change: (), metadata: ChangeMetadata(transient: true))
     }
 }

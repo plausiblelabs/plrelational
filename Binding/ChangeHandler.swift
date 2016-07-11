@@ -12,7 +12,12 @@ public class ChangeHandler {
     private let onLock: () -> Void
     private let onUnlock: () -> Void
     private var changeCount: Int = 0
-    
+
+    public init() {
+        self.onLock = {}
+        self.onUnlock = {}
+    }
+
     public init(onLock: () -> Void, onUnlock: () -> Void) {
         self.onLock = onLock
         self.onUnlock = onUnlock

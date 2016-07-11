@@ -57,17 +57,17 @@ class NativeMenuItem<T> {
         }
     }
     
-    private lazy var visible: BindableProperty<Bool> = WriteOnlyProperty { [unowned self] value, _ in
+    private lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.nsitem.hidden = !value
-    }
+    })
 
-    private lazy var title: BindableProperty<String> = WriteOnlyProperty { [unowned self] value, _ in
+    private lazy var title: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.nsitem.title = value
-    }
+    })
 
-    private lazy var image: BindableProperty<Image> = WriteOnlyProperty { [unowned self] value, _ in
+    private lazy var image: BindableProperty<Image> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.nsitem.image = value.nsimage
-    }
+    })
 
     private init(model: MenuItem<T>, nsitem: NSMenuItem) {
         self.model = model

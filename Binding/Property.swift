@@ -60,7 +60,7 @@ public class ReadableProperty<T>: ReadablePropertyType {
     internal func setValue(newValue: T, _ metadata: ChangeMetadata) {
         if changing(value, newValue) {
             value = newValue
-            notify(change: newValue, metadata: metadata)
+            notify.valueChanging(change: newValue, metadata: metadata)
         }
     }
 }
@@ -72,12 +72,14 @@ public class BindableProperty<T> {
 
     // Note: This is exposed as `internal` only for easier access by tests.
     internal let set: Setter
+    private let changeHandler: ChangeHandler
     
     private var bindings: [UInt64: Binding] = [:]
     private var nextBindingID: UInt64 = 0
 
-    internal init(set: Setter) {
+    internal init(set: Setter, changeHandler: ChangeHandler) {
         self.set = set
+        self.changeHandler = changeHandler
     }
     
     deinit {
@@ -101,10 +103,19 @@ public class BindableProperty<T> {
         }
         
         // Observe the given signal for changes
-        let signalObserverRemoval = signal.observe({ [weak self] value, metadata in
-            guard let weakSelf = self else { return }
-            weakSelf.set(value, metadata)
-        })
+        let signalObserverRemoval = signal.observe(SignalObserver(
+            // TODO: Is this the right place for the change handler stuff?
+            valueWillChange: { [weak self] in
+                self?.changeHandler.willChange()
+            },
+            valueChanging: { [weak self] value, metadata in
+                guard let weakSelf = self else { return }
+                weakSelf.set(value, metadata)
+            },
+            valueDidChange: { [weak self] in
+                self?.changeHandler.didChange()
+            }
+        ))
         
         // Save and return the binding
         let bindingID = nextBindingID
@@ -127,9 +138,10 @@ public class BindableProperty<T> {
 }
 
 public class WriteOnlyProperty<T>: BindableProperty<T> {
-    
-    public init(_ set: Setter) {
-        super.init(set: set)
+
+    // TODO: Drop the default value (to make sure all clients are properly migrated to the new system)
+    public override init(set: Setter, changeHandler: ChangeHandler = ChangeHandler()) {
+        super.init(set: set, changeHandler: changeHandler)
     }
 }
 
@@ -141,15 +153,15 @@ public class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         return get()
     }
     public let signal: Signal<T>
-    
-    private let get: Getter
     private let notify: Signal<T>.Notify
     
-    internal init(get: Getter, set: Setter, signal: Signal<T>, notify: Signal<T>.Notify) {
+    private let get: Getter
+    
+    internal init(get: Getter, set: Setter, signal: Signal<T>, notify: Signal<T>.Notify, changeHandler: ChangeHandler) {
         self.get = get
         self.signal = signal
         self.notify = notify
-        super.init(set: set)
+        super.init(set: set, changeHandler: changeHandler)
     }
 
     /// Establishes a bidirectional binding between this property and the given property.
@@ -188,24 +200,36 @@ public class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         var selfInitiatedChange = false
         
         // Observe the signal of the other property
-        let signalObserverRemoval1 = other.signal.observe({ [weak self] value, metadata in
-            if selfInitiatedChange { return }
-            if case .Change(let newValue) = reverse(value) {
-                selfInitiatedChange = true
-                self?.set(newValue, metadata)
-                selfInitiatedChange = false
-            }
-        })
+        let signalObserverRemoval1 = other.signal.observe(SignalObserver(
+            // TODO: How to deal with ChangeHandler here?
+            valueWillChange: {},
+            valueChanging: { [weak self] value, metadata in
+                if selfInitiatedChange { return }
+                if case .Change(let newValue) = reverse(value) {
+                    selfInitiatedChange = true
+                    self?.set(newValue, metadata)
+                    selfInitiatedChange = false
+                }
+            },
+            // TODO: How to deal with ChangeHandler here?
+            valueDidChange: {}
+        ))
         
         // Make the other property observe this property's signal
-        let signalObserverRemoval2 = signal.observe({ [weak other] value, metadata in
-            if selfInitiatedChange { return }
-            if case .Change(let newValue) = forward(value) {
-                selfInitiatedChange = true
-                other?.set(newValue, metadata)
-                selfInitiatedChange = false
-            }
-        })
+        let signalObserverRemoval2 = signal.observe(SignalObserver(
+            // TODO: How to deal with ChangeHandler here?
+            valueWillChange: {},
+            valueChanging: { [weak other] value, metadata in
+                if selfInitiatedChange { return }
+                if case .Change(let newValue) = forward(value) {
+                    selfInitiatedChange = true
+                    other?.set(newValue, metadata)
+                    selfInitiatedChange = false
+                }
+            },
+            // TODO: How to deal with ChangeHandler here?
+            valueDidChange: {}
+        ))
         
         // Make this property take on the initial value from the other property (or vice versa)
         selfInitiatedChange = true
@@ -243,15 +267,16 @@ public class MutableValueProperty<T>: ReadWriteProperty<T> {
     
     public let change: (T, metadata: ChangeMetadata) -> Void
     
-    private init(_ initialValue: T, valueChanging: (T, T) -> Bool, didSet: Setter?) {
+    private init(_ initialValue: T, changeHandler: ChangeHandler, valueChanging: (T, T) -> Bool, didSet: Setter?) {
         let (signal, notify) = Signal<T>.pipe()
         
         var value = initialValue
         
         change = { (newValue: T, metadata: ChangeMetadata) in
+            // TODO: Take ChangeHandler into account?
             if valueChanging(value, newValue) {
                 value = newValue
-                notify(change: newValue, metadata: metadata)
+                notify.valueChanging(change: newValue, metadata: metadata)
             }
         }
         
@@ -263,11 +288,12 @@ public class MutableValueProperty<T>: ReadWriteProperty<T> {
                 if valueChanging(value, newValue) {
                     value = newValue
                     didSet?(newValue, metadata)
-                    notify(change: newValue, metadata: metadata)
+                    notify.valueChanging(change: newValue, metadata: metadata)
                 }
             },
             signal: signal,
-            notify: notify
+            notify: notify,
+            changeHandler: changeHandler
         )
     }
     
@@ -277,36 +303,42 @@ public class MutableValueProperty<T>: ReadWriteProperty<T> {
 }
 
 public func mutableValueProperty<T>(initialValue: T, valueChanging: (T, T) -> Bool, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
-    return MutableValueProperty(initialValue, valueChanging: valueChanging, didSet: didSet)
+    // TODO: Drop the default changeHandler value (to make sure all clients are properly migrated to the new system)
+    return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
 public func mutableValueProperty<T: Equatable>(initialValue: T, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
-    return MutableValueProperty(initialValue, valueChanging: valueChanging, didSet: didSet)
+    // TODO: Drop the default changeHandler value (to make sure all clients are properly migrated to the new system)
+    return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
 public func mutableValueProperty<T: Equatable>(initialValue: T?, _ didSet: BindableProperty<T?>.Setter? = nil) -> MutableValueProperty<T?> {
-    return MutableValueProperty(initialValue, valueChanging: valueChanging, didSet: didSet)
+    // TODO: Drop the default changeHandler value (to make sure all clients are properly migrated to the new system)
+    return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
 public class ExternalValueProperty<T>: ReadWriteProperty<T> {
 
     public let changed: (transient: Bool) -> Void
 
-    public init(get: Getter, set: Setter) {
+    // TODO: Drop the default changeHandler value (to make sure all clients are properly migrated to the new system)
+    public init(get: Getter, set: Setter, changeHandler: ChangeHandler = ChangeHandler()) {
         let (signal, notify) = Signal<T>.pipe()
 
+        // TODO: Take ChangeHandler into account?
         changed = { (transient: Bool) in
-            notify(change: get(), metadata: ChangeMetadata(transient: transient))
+            notify.valueChanging(change: get(), metadata: ChangeMetadata(transient: transient))
         }
 
         super.init(
             get: get,
             set: { newValue, metadata in
                 set(newValue, metadata)
-                notify(change: newValue, metadata: metadata)
+                notify.valueChanging(change: newValue, metadata: metadata)
             },
             signal: signal,
-            notify: notify
+            notify: notify,
+            changeHandler: changeHandler
         )
     }
 }
@@ -314,7 +346,7 @@ public class ExternalValueProperty<T>: ReadWriteProperty<T> {
 public class ActionProperty: WriteOnlyProperty<()> {
 
     public init(_ action: () -> Void) {
-        super.init({ _ in
+        super.init(set: { _ in
             action()
         })
     }
