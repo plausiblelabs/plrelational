@@ -23,7 +23,7 @@ public class IntermediateRelation: Relation, RelationDefaultChangeObserverImplem
     
     var didRegisterObservers = false
     
-    init(op: Operator, operands: [Relation]) {
+    public init(op: Operator, operands: [Relation]) {
         self.op = op
         self.operands = operands
         
@@ -51,7 +51,7 @@ public class IntermediateRelation: Relation, RelationDefaultChangeObserverImplem
 }
 
 extension IntermediateRelation {
-    enum Operator {
+    public enum Operator {
         case Union
         case Intersection
         case Difference

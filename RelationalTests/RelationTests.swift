@@ -617,6 +617,58 @@ class RelationTests: DBTestCase {
         AssertEqual(r1, r2)
     }
     
+    func testAsyncWorkSharing() {
+        let r1 = MakeRelation(["n"], [1])
+        let r2 = MakeRelation(["n"], [2])
+        
+        var r1Count = 0
+        let r1Aggregate = IntermediateRelation(op: .Aggregate("n", nil, { (_, _) in
+            r1Count += 1
+            return .Ok(3)
+        }), operands: [r1])
+        
+        var r2Count = 0
+        let r2Aggregate = IntermediateRelation(op: .Aggregate("n", nil, { (_, _) in
+            r2Count += 1
+            return .Ok(4)
+        }), operands: [r2])
+        
+        let out1 = r1Aggregate.union(r2Aggregate)
+        let out2 = r1Aggregate.intersection(r2Aggregate)
+        let out3 = r1Aggregate.difference(r2Aggregate)
+        
+        let group = dispatch_group_create()
+        
+        dispatch_group_enter(group)
+        out1.asyncAllRows({ result in
+            defer { dispatch_group_leave(group) }
+            guard let rows = result.ok else { return XCTAssertNil(result.err) }
+            XCTAssertEqual(rows, [["n": 3], ["n": 4]])
+        })
+        
+        dispatch_group_enter(group)
+        out2.asyncAllRows({ result in
+            defer { dispatch_group_leave(group) }
+            guard let rows = result.ok else { return XCTAssertNil(result.err) }
+            XCTAssertEqual(rows, [])
+        })
+        
+        dispatch_group_enter(group)
+        out3.asyncAllRows({ result in
+            defer { dispatch_group_leave(group) }
+            guard let rows = result.ok else { return XCTAssertNil(result.err) }
+            XCTAssertEqual(rows, [["n": 3]])
+        })
+        
+        dispatch_group_notify(group, dispatch_get_main_queue(), {
+            CFRunLoopStop(CFRunLoopGetCurrent())
+        })
+        CFRunLoopRun()
+        
+        XCTAssertEqual(r1Count, 1)
+        XCTAssertEqual(r2Count, 1)
+    }
+    
     func testNotSelect() {
         let FLIGHTS = MakeRelation(
             ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
