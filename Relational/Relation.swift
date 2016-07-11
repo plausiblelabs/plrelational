@@ -149,14 +149,11 @@ extension Relation {
 extension Relation {
     /// Fetch rows and invoke a callback as they come in. Each call is passed one or more rows, or an error.
     /// If no error occurs, the sequence of calls is terminated by a final call which passes zero rows.
-    /// Sometime in the glorious future, this will actually be asynchronous. Right now it's just an API stub
-    /// so there's something for callers to work with.
     public func asyncBulkRows(callback: Result<Set<Row>, RelationError> -> Void) {
         QueryManager.currentManager.registerQuery(self, callback: callback)
     }
     
-    /// Fetch all rows and invoke a callback when complete. Sometime in the glorious future, this too will
-    /// be asynchronous.
+    /// Fetch all rows and invoke a callback when complete.
     public func asyncAllRows(callback: Result<Set<Row>, RelationError> -> Void) {
         var allRows: Set<Row> = []
         asyncBulkRows({ result in
