@@ -12,9 +12,10 @@ import BindableControls
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     @IBOutlet weak var window: NSWindow!
-    @IBOutlet var textField1: TextField!
-    @IBOutlet var textField2: TextField!
-    @IBOutlet var label: TextField!
+    @IBOutlet var nameField1: TextField!
+    @IBOutlet var nameField2: TextField!
+    @IBOutlet var nameLabel: TextField!
+    @IBOutlet var salesLabel: TextField!
     
     var nsUndoManager: SPUndoManager!
     var model: ViewModel!
@@ -28,9 +29,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         
         // Bind the views to the view model
         model = ViewModel(undoManager: undoManager)
-        textField1.string <~> model.string
-        textField2.string <~> model.string
-        label.string <~ model.string
+        nameField1.string <~> model.name
+        nameField2.string <~> model.name
+        nameLabel.string <~ model.name
+        salesLabel.string <~ model.sales
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {

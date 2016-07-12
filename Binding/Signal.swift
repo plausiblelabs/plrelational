@@ -29,16 +29,27 @@ public struct SignalObserver<T> {
         self.valueChanging = valueChanging
         self.valueDidChange = valueDidChange
     }
+    
+    public func valueChanging(change: T, transient: Bool = false) {
+        valueChanging(change: change, metadata: ChangeMetadata(transient: transient))
+    }
 }
 
-public class Signal<T> {
+public protocol SignalType: class {
+    associatedtype Value
+    
+    func observe(observer: SignalObserver<Value>) -> ObserverRemoval
+}
+
+public class Signal<T>: SignalType {
+    public typealias Value = T
     public typealias Observer = SignalObserver<T>
     public typealias Notify = SignalObserver<T>
 
     private var observers: [UInt64: Observer] = [:]
     private var nextObserverID: UInt64 = 0
     
-    private init() {
+    internal init() {
     }
     
     public static func pipe() -> (Signal, Notify) {
@@ -68,19 +79,19 @@ public class Signal<T> {
         ))
     }
 
-    private func notifyWillChange() {
+    internal func notifyWillChange() {
         for (_, observer) in observers {
             observer.valueWillChange()
         }
     }
 
-    private func notifyChanging(change: T, metadata: ChangeMetadata) {
+    internal func notifyChanging(change: T, metadata: ChangeMetadata) {
         for (_, observer) in observers {
             observer.valueChanging(change: change, metadata: metadata)
         }
     }
 
-    private func notifyDidChange() {
+    internal func notifyDidChange() {
         for (_, observer) in observers {
             observer.valueDidChange()
         }

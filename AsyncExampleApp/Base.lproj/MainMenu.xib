@@ -14,9 +14,10 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="AsyncExampleApp" customModuleProvider="target">
             <connections>
-                <outlet property="label" destination="Ar3-PH-vra" id="3uv-U6-WzL"/>
-                <outlet property="textField1" destination="tfk-kf-xd6" id="J1r-M3-784"/>
-                <outlet property="textField2" destination="XG2-jd-CAb" id="lBb-pm-ima"/>
+                <outlet property="nameField1" destination="tfk-kf-xd6" id="BZG-MQ-2kK"/>
+                <outlet property="nameField2" destination="XG2-jd-CAb" id="iPj-VT-CEj"/>
+                <outlet property="nameLabel" destination="Ar3-PH-vra" id="5jY-bm-v9D"/>
+                <outlet property="salesLabel" destination="Yue-cL-VmI" id="DGP-c2-uqX"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="gIp-Ho-8D9"/>
             </connections>
         </customObject>
@@ -687,6 +688,14 @@
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
+                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XG2-jd-CAb" customClass="TextField" customModule="BindableControls">
+                        <rect key="frame" x="20" y="286" width="440" height="22"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="urq-Ih-QGD">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ar3-PH-vra" customClass="TextField" customModule="BindableControls">
                         <rect key="frame" x="104" y="163" width="358" height="34"/>
                         <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" id="GwJ-Rh-usU">
@@ -697,18 +706,26 @@
                     </textField>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dXG-WF-vLl">
                         <rect key="frame" x="18" y="172" width="82" height="17"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="You typed:" id="0JG-2h-ccj">
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Person:" id="0JG-2h-ccj">
                             <font key="font" metaFont="system"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XG2-jd-CAb" customClass="TextField" customModule="BindableControls">
-                        <rect key="frame" x="20" y="286" width="440" height="22"/>
-                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="urq-Ih-QGD">
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Yue-cL-VmI" customClass="TextField" customModule="BindableControls">
+                        <rect key="frame" x="104" y="121" width="358" height="34"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" id="DbO-oE-A2y">
+                            <font key="font" metaFont="system" size="27"/>
+                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0Qq-Zw-HCV">
+                        <rect key="frame" x="18" y="130" width="82" height="17"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" alignment="right" title="Sales:" id="f6I-c4-VjT">
                             <font key="font" metaFont="system"/>
-                            <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
-                            <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
                 </subviews>
