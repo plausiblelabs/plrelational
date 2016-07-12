@@ -9,10 +9,12 @@ import Foundation
 /// A class which can manage an entire group of queries, to share work and perform them asynchronously.
 /// In order to keep every single Relation client from needing to be aware of this, we make it global-ish,
 /// with one per-thread instance (created when needed).
-public class QueryManager {
+public final class QueryManager: PerThreadInstance {
     private var pendingQueries: [(Relation, Result<Set<Row>, RelationError> -> Void)] = []
     
     private var executionTimer: CFRunLoopTimer?
+    
+    public init() {}
     
     /// Register a query to be run asynchronously. The callback will be invoked each time new rows are
     /// available, or when an error occurs. If no error occurs, the final callback is invoked with an
@@ -47,22 +49,6 @@ public class QueryManager {
             for (_, callback) in queries {
                 callback(.Ok([]))
             }
-        }
-    }
-}
-
-extension QueryManager {
-    public static var currentManager: QueryManager {
-        struct Static {
-            static let threadDictionaryKey = "\(QueryManager.self) \(NSUUID().UUIDString)"
-        }
-        
-        if let manager = NSThread.currentThread().threadDictionary[Static.threadDictionaryKey] as? QueryManager {
-            return manager
-        } else {
-            let manager = QueryManager()
-            NSThread.currentThread().threadDictionary[Static.threadDictionaryKey] = manager
-            return manager
         }
     }
 }
