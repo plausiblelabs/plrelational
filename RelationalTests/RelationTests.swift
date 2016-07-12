@@ -1808,4 +1808,39 @@ class RelationTests: DBTestCase {
         XCTAssertNil(shouldDeallocate1)
         XCTAssertNil(shouldDeallocate2)
     }
+    
+    func DISABLED_testAsyncUpdate() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        let u = r.union(r)
+        
+        class Observer: AsyncRelationObserver {
+            func relationWillChange(relation: Relation) {
+                print("will change")
+            }
+            
+            func relationAddedRows(relation: Relation, rows: Set<Row>) {
+                print("added \(rows)")
+            }
+            
+            func relationRemovedRows(relation: Relation, rows: Set<Row>) {
+                print("removed \(rows)")
+            }
+            
+            func relationDidChange(relation: Relation) {
+                print("did change")
+            }
+        }
+        
+        UpdateManager.currentInstance.observe(u, observer: Observer())
+        UpdateManager.currentInstance.registerAdd(r, row: ["n": 1])
+        UpdateManager.currentInstance.registerAdd(r, row: ["n": 2])
+        UpdateManager.currentInstance.registerAdd(r, row: ["n": 3])
+        UpdateManager.currentInstance.registerAdd(r, row: ["n": 4])
+        
+        CFRunLoopRun()
+    }
 }
