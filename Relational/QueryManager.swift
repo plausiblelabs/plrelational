@@ -21,13 +21,20 @@ public final class QueryManager: PerThreadInstance {
     /// empty set of rows to signal that execution has completed. The callback is invoked on the same
     /// thread, when the runloop is in a common mode.
     public func registerQuery(relation: Relation, callback: Result<Set<Row>, RelationError> -> Void) {
-        pendingQueries.append((relation, callback))
+        let runloop = CFRunLoopGetCurrent()
+        let wrappedCallback = { (result: Result<Set<Row>, RelationError>) -> Void in
+            CFRunLoopPerformBlock(runloop, kCFRunLoopCommonModes, {
+                callback(result)
+            })
+            CFRunLoopWakeUp(runloop)
+        }
+        pendingQueries.append((relation, wrappedCallback))
         
         if executionTimer == nil {
             executionTimer = CFRunLoopTimerCreateWithHandler(nil, 0, 0, 0, 0, { _ in
                 self.execute()
             })
-            CFRunLoopAddTimer(CFRunLoopGetCurrent(), executionTimer, kCFRunLoopCommonModes)
+            CFRunLoopAddTimer(runloop, executionTimer, kCFRunLoopCommonModes)
         }
     }
     
@@ -38,17 +45,19 @@ public final class QueryManager: PerThreadInstance {
         let queries = pendingQueries
         pendingQueries = []
         
-        let planner = QueryPlanner(roots: queries)
-        let runner = QueryRunner(planner: planner)
-        
-        while !runner.done {
-            runner.pump()
-        }
-        
-        if !runner.didError {
-            for (_, callback) in queries {
-                callback(.Ok([]))
+        dispatch_async(dispatch_get_global_queue(0, 0), {
+            let planner = QueryPlanner(roots: queries)
+            let runner = QueryRunner(planner: planner)
+            
+            while !runner.done {
+                runner.pump()
             }
-        }
+            
+            if !runner.didError {
+                for (_, callback) in queries {
+                    callback(.Ok([]))
+                }
+            }
+        })
     }
 }
