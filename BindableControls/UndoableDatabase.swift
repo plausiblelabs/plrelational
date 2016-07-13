@@ -63,4 +63,29 @@ public class UndoableDatabase {
             }
         )
     }
+    
+    /// Note: `set` will be called in the context of a database transaction.
+    public func asyncBidiProperty<T>(relation: Relation, action: String, get: Relation -> T, set: T -> Void) -> AsyncReadWriteProperty<T> {
+        return relation.asyncProperty(asyncMutationConfig(action, set), relationToValue: get)
+    }
+    
+    private func asyncMutationConfig<T>(action: String, _ set: T -> Void) -> RelationMutationConfig<T> {
+        return RelationMutationConfig(
+            snapshot: {
+                return self.db.takeSnapshot()
+            },
+            update: { newValue in
+                // TODO: We wrap this in a transaction to keep it atomic, but we don't actually
+                // need to log the changes anywhere
+                self.db.transaction{
+                    set(newValue)
+                }
+            },
+            commit: { before, newValue in
+                self.performUndoableAction(action, before: before, {
+                    set(newValue)
+                })
+            }
+        )
+    }
 }

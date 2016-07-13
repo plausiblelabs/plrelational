@@ -32,7 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         nameField1.string <~> model.name
         nameField2.string <~> model.name
         nameLabel.string <~ model.name
-        //salesLabel.string <~ model.sales
+        salesLabel.string <~ model.sales
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {

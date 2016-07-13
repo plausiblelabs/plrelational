@@ -76,8 +76,8 @@ class ViewModel {
         removals.forEach{ $0() }
     }
     
-    private func nameProperty(relation: Relation) -> ReadWriteProperty<String> {
-        return undoableDB.bidiProperty(
+    private func nameProperty(relation: Relation) -> AsyncReadWriteProperty<String> {
+        return undoableDB.asyncBidiProperty(
             relation,
             action: "Rename Person",
             get: { $0.oneString },
@@ -85,7 +85,7 @@ class ViewModel {
         )
     }
     
-    lazy var name: ReadWriteProperty<String> = self.nameProperty(self.selectedPersonName)
+    lazy var name: AsyncReadWriteProperty<String> = self.nameProperty(self.selectedPersonName)
     
     lazy var sales: AsyncReadableProperty<String> = self.selectedPersonSales
         .signal{ $0.oneInteger }

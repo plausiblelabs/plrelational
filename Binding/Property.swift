@@ -247,6 +247,75 @@ public class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         bindings[bindingID] = binding
         return binding
     }
+    
+    /// Establishes a bidirectional binding between this property and the given property.
+    /// When this property's value changes, the other property's value will be updated and
+    /// vice versa.  Note that calling `bindBidi` will cause this property to take on the
+    /// other property's value immedately (if the value is defined).
+    public func bindBidi(other: AsyncReadWriteProperty<T>) -> Binding {
+        return connectBidi(
+            other,
+            initial: {
+                if let otherValue = other.value {
+                    self.set(otherValue, ChangeMetadata(transient: true))
+                }
+            },
+            forward: { .Change($0) },
+            reverse: { .Change($0) }
+        )
+    }
+    
+    private func connectBidi<U>(other: AsyncReadWriteProperty<U>, initial: () -> Void, forward: T -> ChangeResult<U>, reverse: U -> ChangeResult<T>) -> Binding {
+        var selfInitiatedChange = false
+        
+        // Observe the signal of the other property
+        let signalObserverRemoval1 = other.signal.observe(SignalObserver(
+            // TODO: How to deal with ChangeHandler here?
+            valueWillChange: {},
+            valueChanging: { [weak self] value, metadata in
+                if selfInitiatedChange { return }
+                if case .Change(let newValue) = reverse(value) {
+                    selfInitiatedChange = true
+                    self?.set(newValue, metadata)
+                    selfInitiatedChange = false
+                }
+            },
+            // TODO: How to deal with ChangeHandler here?
+            valueDidChange: {}
+        ))
+        
+        // Make the other property observe this property's signal
+        let signalObserverRemoval2 = signal.observe(SignalObserver(
+            // TODO: How to deal with ChangeHandler here?
+            valueWillChange: {},
+            valueChanging: { [weak other] value, metadata in
+                if selfInitiatedChange { return }
+                if case .Change(let newValue) = forward(value) {
+                    selfInitiatedChange = true
+                    other?.set(newValue, metadata)
+                    selfInitiatedChange = false
+                }
+            },
+            // TODO: How to deal with ChangeHandler here?
+            valueDidChange: {}
+        ))
+        
+        // Make this property take on the initial value from the other property (or vice versa)
+        selfInitiatedChange = true
+        initial()
+        selfInitiatedChange = false
+        
+        // Save and return the binding
+        let bindingID = nextBindingID
+        let binding = Binding(signalOwner: other, removal: { [weak self] in
+            signalObserverRemoval1()
+            signalObserverRemoval2()
+            self?.bindings.removeValueForKey(bindingID)?.unbind()
+        })
+        nextBindingID += 1
+        bindings[bindingID] = binding
+        return binding
+    }
 }
 
 private class ConstantValueProperty<T>: ReadableProperty<T> {
@@ -362,6 +431,10 @@ public func <~ <T, RHS: ReadablePropertyType where RHS.Value == T, RHS.SignalCha
     return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
 }
 
+public func <~ <T, RHS: AsyncReadablePropertyType where RHS.Value == T>(lhs: BindableProperty<T>, rhs: RHS) -> Binding {
+    return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
+}
+
 // TODO: It seems that `~>` is defined somewhere already (not sure where exactly), so to avoid
 // conflicts we use `~~>` here instead
 infix operator ~~> {
@@ -380,6 +453,10 @@ infix operator <~> {
 }
 
 public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Binding {
+    return lhs.bindBidi(rhs)
+}
+
+public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: AsyncReadWriteProperty<T>) -> Binding {
     return lhs.bindBidi(rhs)
 }
 
