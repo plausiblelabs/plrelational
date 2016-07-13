@@ -10,6 +10,8 @@ public protocol AsyncReadablePropertyType: class {
     
     var value: Value? { get }
     var signal: Signal<Value> { get }
+    
+    func start()
 }
 
 /// A concrete readable property whose value is fetched asynchronously.
@@ -19,6 +21,7 @@ public class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     public internal(set) var value: T?
     public let signal: Signal<T>
     private var removal: ObserverRemoval!
+    private var started = false
     
     public init(_ signal: Signal<T>) {
         self.signal = signal
@@ -27,15 +30,17 @@ public class AsyncReadableProperty<T>: AsyncReadablePropertyType {
         })
     }
     
+    public func start() {
+        // TODO: Need to make a SignalProducer like thing that can create a unique signal
+        // each time start() is called; for now we'll assume it can be called only once
+        if !started {
+            signal.start()
+            started = true
+        }
+    }
+    
     deinit {
         removal()
-    }
-}
-
-extension SignalType {
-    /// Returns an AsyncReadableProperty whose value comes from this signal.
-    public var property: AsyncReadableProperty<Self.Value> {
-        return AsyncReadableProperty(self.signal)
     }
 }
 
@@ -126,6 +131,10 @@ public class AsyncReadWriteProperty<T>: AsyncBindableProperty<T>, AsyncReadableP
         self.get = get
         self.signal = signal
         super.init(set: set, changeHandler: changeHandler)
+    }
+    
+    public func start() {
+        signal.start()
     }
     
 //    /// Establishes a bidirectional binding between this property and the given property.

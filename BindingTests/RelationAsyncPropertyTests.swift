@@ -14,7 +14,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
         let r = ChangeLoggingRelation(baseRelation: sqlr)
         
-        let property = r.select(Attribute("id") *== 1).project(["name"]).asyncProperty{ $0.oneString }
+        let property = r.select(Attribute("id") *== 1).project(["name"]).asyncProperty{ $0.signal{ $0.oneString($1) } }
         var change: String?
         _ = property.signal.observe({ newValue, _ in change = newValue })
 

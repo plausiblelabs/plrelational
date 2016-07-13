@@ -6,14 +6,30 @@
 import libRelational
 
 private class RelationSignal<T>: Signal<T> {
+    private let relation: Relation
+    private let rowsToValue: (Relation, AnyGenerator<Row>) -> T
     private var removal: ObserverRemoval!
     
-    init(relation: Relation, relationToValue: Relation -> T) {
+    init(relation: Relation, rowsToValue: (Relation, AnyGenerator<Row>) -> T) {
+        self.relation = relation
+        self.rowsToValue = rowsToValue
+        
         super.init()
+        
         self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let strongSelf = self else { return }
-            let newValue = relationToValue(relation)
+            // TODO: This is synchronous
+            let newValue = rowsToValue(relation, relation.okRows)
             strongSelf.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+        })
+    }
+    
+    private override func start() {
+        relation.asyncAllRows({ result in
+            if let rows = result.ok {
+                let newValue = self.rowsToValue(self.relation, AnyGenerator(rows.generate()))
+                self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+            }
         })
     }
     
@@ -24,7 +40,7 @@ private class RelationSignal<T>: Signal<T> {
 
 extension Relation {
     /// Returns a Signal whose values are derived from this relation.
-    public func signal<T>(relationToValue: Relation -> T) -> Signal<T> {
-        return RelationSignal(relation: self, relationToValue: relationToValue)
+    public func signal<T>(rowsToValue: (Relation, AnyGenerator<Row>) -> T) -> Signal<T> {
+        return RelationSignal(relation: self, rowsToValue: rowsToValue)
     }
 }

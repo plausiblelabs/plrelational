@@ -14,7 +14,7 @@ class RelationSignalTests: BindingTestCase {
         let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
         let r = ChangeLoggingRelation(baseRelation: sqlr)
         
-        let signal = r.select(Attribute("id") *== 1).project(["name"]).signal{ $0.oneString }
+        let signal = r.select(Attribute("id") *== 1).project(["name"]).signal{ $0.oneString($1) }
         var change: String?
         _ = signal.observe({ newValue, _ in change = newValue })
         

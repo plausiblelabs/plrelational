@@ -7,17 +7,15 @@ import libRelational
 
 extension Relation {
     /// Returns an AsyncReadableProperty that gets its value from this relation.
-    public func asyncProperty<V>(relationToValue: Relation -> V) -> AsyncReadableProperty<V> {
-        return AsyncReadableProperty(self.signal(relationToValue))
+    public func asyncProperty<S: SignalType>(relationToSignal: Relation -> S) -> AsyncReadableProperty<S.Value> {
+        return AsyncReadableProperty(relationToSignal(self).signal)
     }
 }
 
 private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
     private var removal: ObserverRemoval!
     
-    init(relation: Relation, config: RelationMutationConfig<T>, relationToValue: Relation -> T) {
-        let (signal, _) = Signal<T>.pipe()
-        
+    init(config: RelationMutationConfig<T>, signal: Signal<T>) {
         var value: T?
         var before: ChangeLoggingDatabaseSnapshot?
         
@@ -42,10 +40,8 @@ private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
             changeHandler: ChangeHandler()
         )
         
-        self.removal = relation.addChangeObserver({ _ in
-            let newValue = relationToValue(relation)
+        self.removal = signal.observe({ newValue, _ in
             value = newValue
-            signal.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
         })
     }
     
@@ -57,7 +53,7 @@ private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
 extension Relation {
     /// Returns an AsyncReadWriteProperty that gets its value from this relation and writes values back to the relation
     /// according to the provided configuration.
-    public func asyncProperty<V>(config: RelationMutationConfig<V>, relationToValue: Relation -> V) -> AsyncReadWriteProperty<V> {
-        return RelationAsyncReadWriteProperty(relation: self, config: config, relationToValue: relationToValue)
+    public func asyncProperty<S: SignalType>(config: RelationMutationConfig<S.Value>, signal: S) -> AsyncReadWriteProperty<S.Value> {
+        return RelationAsyncReadWriteProperty(config: config, signal: signal.signal)
     }
 }

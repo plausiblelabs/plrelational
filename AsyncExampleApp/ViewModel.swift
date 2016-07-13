@@ -80,15 +80,16 @@ class ViewModel {
         return undoableDB.asyncBidiProperty(
             relation,
             action: "Rename Person",
-            get: { $0.oneString },
+            signal: relation.signal{ $0.oneString($1) },
             set: { relation.updateString($0) }
         )
     }
     
     lazy var name: AsyncReadWriteProperty<String> = self.nameProperty(self.selectedPersonName)
     
-    lazy var sales: AsyncReadableProperty<String> = self.selectedPersonSales
-        .signal{ $0.oneInteger }
-        .map{ String($0) }
-        .property
+    lazy var sales: AsyncReadableProperty<String> = self.selectedPersonSales.asyncProperty{ relation in
+        relation
+            .signal{ $0.oneInteger($1) }
+            .map{ String($0) }
+    }
 }
