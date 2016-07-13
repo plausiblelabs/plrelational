@@ -37,6 +37,14 @@ public extension MutableCollectionType where Generator.Element: Equatable {
     }
 }
 
+public extension MutableCollectionType {
+    mutating func mutatingForEach(f: (inout Generator.Element) -> Void) {
+        for i in indices {
+            f(&self[i])
+        }
+    }
+}
+
 public extension SequenceType {
     func all(@noescape predicate: Generator.Element -> Bool) -> Bool {
         for elt in self {
