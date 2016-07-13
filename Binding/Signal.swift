@@ -40,6 +40,7 @@ public protocol SignalType: class {
     
     var signal: Signal<Value> { get }
     
+    func start()
     func observe(observer: SignalObserver<Value>) -> ObserverRemoval
 }
 
@@ -66,6 +67,9 @@ public class Signal<T>: SignalType {
 
     public var signal: Signal<T> {
         return self
+    }
+    
+    public func start() {
     }
     
     public func observe(observer: Observer) -> ObserverRemoval {

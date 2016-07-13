@@ -18,9 +18,11 @@ public func zip<LHS: SignalType, RHS: SignalType>(lhs: LHS, _ rhs: RHS) -> Signa
 }
 
 private class MappedSignal<T>: Signal<T> {
+    private let startFunc: () -> Void
     private var removal: ObserverRemoval!
     
     init<S: SignalType>(underlying: S, transform: (S.Value) -> T) {
+        self.startFunc = { underlying.start() }
         super.init()
         self.removal = underlying.observe(SignalObserver(
             valueWillChange: self.notifyWillChange,
@@ -31,16 +33,26 @@ private class MappedSignal<T>: Signal<T> {
         ))
     }
     
+    private override func start() {
+        startFunc()
+    }
+    
     deinit {
         removal()
     }
 }
 
 private class BinaryOpSignal<T>: Signal<T> {
+    private let startFunc: () -> Void
     private var removal1: ObserverRemoval!
     private var removal2: ObserverRemoval!
     
     init<LHS: SignalType, RHS: SignalType>(_ lhs: LHS, _ rhs: RHS, _ f: (LHS.Value, RHS.Value) -> T) {
+        self.startFunc = {
+            lhs.start()
+            rhs.start()
+        }
+
         super.init()
         
         var lhsValue: LHS.Value?
@@ -67,6 +79,10 @@ private class BinaryOpSignal<T>: Signal<T> {
             },
             valueDidChange: self.notifyDidChange
         ))
+    }
+    
+    private override func start() {
+        startFunc()
     }
     
     deinit {

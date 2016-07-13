@@ -432,6 +432,7 @@ public func <~ <T, RHS: ReadablePropertyType where RHS.Value == T, RHS.SignalCha
 }
 
 public func <~ <T, RHS: AsyncReadablePropertyType where RHS.Value == T>(lhs: BindableProperty<T>, rhs: RHS) -> Binding {
+    rhs.start()
     return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
 }
 
@@ -457,6 +458,7 @@ public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Bin
 }
 
 public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: AsyncReadWriteProperty<T>) -> Binding {
+    rhs.start()
     return lhs.bindBidi(rhs)
 }
 
