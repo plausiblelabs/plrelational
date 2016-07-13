@@ -1809,7 +1809,7 @@ class RelationTests: DBTestCase {
         XCTAssertNil(shouldDeallocate2)
     }
     
-    func DISABLED_testAsyncUpdate() {
+    func testAsyncUpdate() {
         let sqliteDB = makeDB().db.sqliteDatabase
         sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
@@ -1817,30 +1817,50 @@ class RelationTests: DBTestCase {
         let r = db["n"]
         let u = r.union(r)
         
-        class Observer: AsyncRelationObserver {
-            func relationWillChange(relation: Relation) {
-                print("will change")
+        func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
+            class Observer: AsyncRelationObserver {
+                var willChangeCount = 0
+                var addedRows: Set<Row>?
+                var removedRows: Set<Row>?
+                var didChangeCount = 0
+                
+                func relationWillChange(relation: Relation) {
+                    willChangeCount += 1
+                }
+                
+                func relationAddedRows(relation: Relation, rows: Set<Row>) {
+                    XCTAssertNil(addedRows)
+                    addedRows = rows
+                }
+                
+                func relationRemovedRows(relation: Relation, rows: Set<Row>) {
+                    XCTAssertNil(removedRows)
+                    removedRows = rows
+                }
+                
+                func relationDidChange(relation: Relation) {
+                    didChangeCount += 1
+                    CFRunLoopStop(CFRunLoopGetCurrent())
+                }
             }
             
-            func relationAddedRows(relation: Relation, rows: Set<Row>) {
-                print("added \(rows)")
-            }
-            
-            func relationRemovedRows(relation: Relation, rows: Set<Row>) {
-                print("removed \(rows)")
-            }
-            
-            func relationDidChange(relation: Relation) {
-                print("did change")
-            }
+            let observer = Observer()
+            UpdateManager.currentInstance.observe(u, observer: observer)
+            change()
+            CFRunLoopRun()
+            XCTAssertEqual(observer.willChangeCount, 1)
+            XCTAssertEqual(observer.didChangeCount, 1)
+            XCTAssertEqual(observer.addedRows ?? [], expectedAdded)
+            XCTAssertEqual(observer.removedRows ?? [], expectedRemoved)
         }
         
-        UpdateManager.currentInstance.observe(u, observer: Observer())
-        UpdateManager.currentInstance.registerAdd(r, row: ["n": 1])
-        UpdateManager.currentInstance.registerAdd(r, row: ["n": 2])
-        UpdateManager.currentInstance.registerAdd(r, row: ["n": 3])
-        UpdateManager.currentInstance.registerAdd(r, row: ["n": 4])
-        
-        CFRunLoopRun()
+        assertChanges(u,
+                      change: {
+                        UpdateManager.currentInstance.registerAdd(r, row: ["n": 1])
+                        UpdateManager.currentInstance.registerAdd(r, row: ["n": 2])
+                        UpdateManager.currentInstance.registerAdd(r, row: ["n": 3])
+                        UpdateManager.currentInstance.registerAdd(r, row: ["n": 4]) },
+                      expectedAdded: [["n": 1], ["n": 2], ["n": 3], ["n": 4]],
+                      expectedRemoved: [])
     }
 }
