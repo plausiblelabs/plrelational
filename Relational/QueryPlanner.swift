@@ -45,9 +45,9 @@ class QueryPlanner {
     }
     
     private func computeNodes() {
-        visitRelationTree(rootRelations, { relation, underlyingRelation, outputCallback in
+        QueryPlanner.visitRelationTree(rootRelations, { relation, underlyingRelation, outputCallback in
             noteTransactionalDatabases(relation, nodeIndex: 0)
-            let children = relationChildren(underlyingRelation)
+            let children = QueryPlanner.relationChildren(underlyingRelation)
             let parentNodeIndex = getOrCreateNodeIndex(underlyingRelation)
             
             if let outputCallback = outputCallback {
@@ -63,37 +63,6 @@ class QueryPlanner {
                 nodes[parentNodeIndex].childIndexes.append(childNodeIndex)
             }
         })
-    }
-    
-    private func visitRelationTree<AuxiliaryData>(roots: [(Relation, AuxiliaryData)], @noescape _ f: (relation: Relation, underlyingRelation: Relation, auxiliaryData: AuxiliaryData?) -> Void) {
-        let visited = ObjectMap<Int>()
-        var rootsToVisit = roots
-        var othersToVisit: [Relation] = []
-        var iterationCount = 0
-        while true {
-            let relation: Relation
-            let auxiliaryData: AuxiliaryData?
-            if let (r, callback) = rootsToVisit.popLast() {
-                relation = r
-                auxiliaryData = callback
-            } else if let r = othersToVisit.popLast() {
-                relation = r
-                auxiliaryData = nil
-            } else {
-                break
-            }
-            
-            let realR = relation.underlyingRelationForQueryExecution
-            iterationCount += 1
-            if let obj = realR as? AnyObject {
-                let retrievedCount = visited.getOrCreate(obj, defaultValue: iterationCount)
-                if retrievedCount != iterationCount {
-                    continue
-                }
-            }
-            f(relation: relation, underlyingRelation: realR, auxiliaryData: auxiliaryData)
-            othersToVisit.appendContentsOf(relationChildren(realR))
-        }
     }
     
     private func getOrCreateNodeIndex(r: Relation) -> Int {
@@ -123,15 +92,6 @@ class QueryPlanner {
             return Node(op: .MemoryTableScan(r))
         default:
             fatalError("Don't know how to handle node type \(r.dynamicType)")
-        }
-    }
-    
-    private func relationChildren(r: Relation) -> [Relation] {
-        switch r {
-        case let r as IntermediateRelation:
-            return r.operands
-        default:
-            return []
         }
     }
     
@@ -215,5 +175,48 @@ extension QueryPlanner {
         
         case Otherwise
         case Unique(Attribute, RelationValue)
+    }
+}
+
+/// Tree walking utilities.
+extension QueryPlanner {
+    static func visitRelationTree<AuxiliaryData>(roots: [(Relation, AuxiliaryData)], @noescape _ f: (relation: Relation, underlyingRelation: Relation, auxiliaryData: AuxiliaryData?) -> Void) {
+        let visited = ObjectMap<Int>()
+        var rootsToVisit = roots
+        var othersToVisit: [Relation] = []
+        var iterationCount = 0
+        while true {
+            let relation: Relation
+            let auxiliaryData: AuxiliaryData?
+            if let (r, callback) = rootsToVisit.popLast() {
+                relation = r
+                auxiliaryData = callback
+            } else if let r = othersToVisit.popLast() {
+                relation = r
+                auxiliaryData = nil
+            } else {
+                break
+            }
+            
+            let realR = relation.underlyingRelationForQueryExecution
+            iterationCount += 1
+            if let obj = realR as? AnyObject {
+                let retrievedCount = visited.getOrCreate(obj, defaultValue: iterationCount)
+                if retrievedCount != iterationCount {
+                    continue
+                }
+            }
+            f(relation: relation, underlyingRelation: realR, auxiliaryData: auxiliaryData)
+            othersToVisit.appendContentsOf(relationChildren(realR))
+        }
+    }
+    
+    private static func relationChildren(r: Relation) -> [Relation] {
+        switch r {
+        case let r as IntermediateRelation:
+            return r.operands
+        default:
+            return []
+        }
     }
 }

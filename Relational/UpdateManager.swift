@@ -16,26 +16,45 @@ public final class UpdateManager: PerThreadInstance {
     
     public func registerUpdate(relation: Relation, query: SelectExpression, newValues: Row) {
         pendingUpdates.append(.Update(relation, query, newValues))
+        sendWillChange(relation)
         scheduleExecutionIfNeeded()
     }
     
     public func registerAdd(relation: TransactionalDatabase.TransactionalRelation, row: Row) {
-        // TODO: need to send will-change to observers
         pendingUpdates.append(.Add(relation, row))
+        sendWillChange(relation)
         scheduleExecutionIfNeeded()
     }
     
     public func registerDelete(relation: TransactionalDatabase.TransactionalRelation, query: SelectExpression) {
-        // TODO: need to send will-change to observers
         pendingUpdates.append(.Delete(relation, query))
+        sendWillChange(relation)
         scheduleExecutionIfNeeded()
     }
     
     public func observe(relation: Relation, observer: AsyncRelationObserver) {
-        // TODO: need to send will-change to observers
         guard let obj = relation as? AnyObject else { return }
         let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
-        info.observers.append(observer)
+        info.addObserver(observer)
+    }
+    
+    private func sendWillChange(relation: Relation) {
+        QueryPlanner.visitRelationTree([(relation, ())], { relation, _, _ in
+            guard let relationObject = relation as? AnyObject where !(relation is IntermediateRelation) else { return }
+            
+            for (observedRelation, info) in observedInfo {
+                for variable in info.derivative.allVariables {
+                    if relationObject === variable {
+                        info.observers.mutatingForEach({
+                            if !$0.didSendWillChange {
+                                $0.observer.relationWillChange(observedRelation as! Relation)
+                                $0.didSendWillChange = true
+                            }
+                        })
+                    }
+                }
+            }
+        })
     }
     
     private func scheduleExecutionIfNeeded() {
@@ -110,9 +129,10 @@ public final class UpdateManager: PerThreadInstance {
             var doneCount = 0
             func sendDidChangeIfNeeded() {
                 if doneCount == pendingCount {
-                    for observer in info.observers {
-                        observer.relationDidChange(relation)
-                    }
+                    info.observers.mutatingForEach({
+                        $0.observer.relationDidChange(relation)
+                        $0.didSendWillChange = false
+                    })
                 }
             }
             
@@ -123,8 +143,8 @@ public final class UpdateManager: PerThreadInstance {
                         doneCount += 1
                         sendDidChangeIfNeeded()
                     case .Ok(let rows):
-                        for observer in info.observers {
-                            observer.relationAddedRows(relation, rows: rows)
+                        for observerEntry in info.observers {
+                            observerEntry.observer.relationAddedRows(relation, rows: rows)
                         }
                     case .Err(let err):
                         fatalError("Don't know how to deal with errors yet. \(err)")
@@ -139,8 +159,8 @@ public final class UpdateManager: PerThreadInstance {
                         doneCount += 1
                         sendDidChangeIfNeeded()
                     case .Ok(let rows):
-                        for observer in info.observers {
-                            observer.relationAddedRows(relation, rows: rows)
+                        for observerEntry in info.observers {
+                            observerEntry.observer.relationAddedRows(relation, rows: rows)
                         }
                     case .Err(let err):
                         fatalError("Don't know how to deal with errors yet. \(err)")
@@ -160,11 +180,20 @@ extension UpdateManager {
     }
     
     private class ObservedRelationInfo {
+        struct ObserverEntry {
+            var observer: AsyncRelationObserver
+            var didSendWillChange: Bool
+        }
+        
         let derivative: RelationDerivative
-        var observers: [AsyncRelationObserver] = []
+        var observers: [ObserverEntry] = []
         
         init(derivative: RelationDerivative) {
             self.derivative = derivative
+        }
+        
+        func addObserver(observer: AsyncRelationObserver) {
+            observers.append(.init(observer: observer, didSendWillChange: false))
         }
     }
 }
