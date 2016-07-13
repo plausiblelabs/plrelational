@@ -87,7 +87,8 @@ class ViewModel {
     
     lazy var name: ReadWriteProperty<String> = self.nameProperty(self.selectedPersonName)
     
-    lazy var sales: ReadableProperty<String> = self.selectedPersonSales
-        .property{ $0.oneInteger }
+    lazy var sales: AsyncReadableProperty<String> = self.selectedPersonSales
+        .signal{ $0.oneInteger }
         .map{ String($0) }
+        .property
 }

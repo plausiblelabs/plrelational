@@ -16,18 +16,26 @@ public protocol AsyncReadablePropertyType: class {
 public class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
     
-    public private(set) var value: T?
+    public internal(set) var value: T?
     public let signal: Signal<T>
-    private let notify: Signal<T>.Notify
+    private var removal: ObserverRemoval!
     
-    public init(signal: Signal<T>, notify: Signal<T>.Notify) {
+    public init(_ signal: Signal<T>) {
         self.signal = signal
-        self.notify = notify
+        self.removal = signal.observe({ [weak self] newValue, _ in
+            self?.value = newValue
+        })
     }
     
-    internal func setValue(newValue: T, _ metadata: ChangeMetadata) {
-        value = newValue
-        notify.valueChanging(change: newValue, metadata: metadata)
+    deinit {
+        removal()
+    }
+}
+
+extension SignalType {
+    /// Returns an AsyncReadableProperty whose value comes from this signal.
+    public var property: AsyncReadableProperty<Self.Value> {
+        return AsyncReadableProperty(self.signal)
     }
 }
 

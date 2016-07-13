@@ -38,6 +38,8 @@ public struct SignalObserver<T> {
 public protocol SignalType: class {
     associatedtype Value
     
+    var signal: Signal<Value> { get }
+    
     func observe(observer: SignalObserver<Value>) -> ObserverRemoval
 }
 
@@ -62,6 +64,10 @@ public class Signal<T>: SignalType {
         return (signal, notify)
     }
 
+    public var signal: Signal<T> {
+        return self
+    }
+    
     public func observe(observer: Observer) -> ObserverRemoval {
         let id = nextObserverID
         nextObserverID += 1
@@ -76,6 +82,16 @@ public class Signal<T>: SignalType {
             valueWillChange: notify.valueWillChange,
             valueChanging: valueChanging,
             valueDidChange: notify.valueDidChange
+        ))
+    }
+    
+    /// Convenience form of `observe` that builds an Observer whose `valueWillChange` and `valueDidChange`
+    /// are no-ops, but uses the given `valueChanging` handler.
+    public func observe(valueChanging: (change: T, metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
+        return self.observe(SignalObserver(
+            valueWillChange: {},
+            valueChanging: valueChanging,
+            valueDidChange: {}
         ))
     }
 
