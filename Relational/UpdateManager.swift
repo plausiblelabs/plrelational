@@ -7,6 +7,8 @@ import Foundation
 
 
 public final class UpdateManager: PerThreadInstance {
+    public typealias ObservationRemover = Void -> Void
+    
     private var pendingUpdates: [Update] = []
     private var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
     
@@ -32,10 +34,18 @@ public final class UpdateManager: PerThreadInstance {
         scheduleExecutionIfNeeded()
     }
     
-    public func observe(relation: Relation, observer: AsyncRelationObserver) {
-        guard let obj = relation as? AnyObject else { return }
+    public func observe(relation: Relation, observer: AsyncRelationObserver) -> ObservationRemover {
+        guard let obj = relation as? AnyObject else { return {} }
+        
         let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
-        info.addObserver(observer)
+        let id = info.addObserver(observer)
+        
+        return {
+            info.observers[id] = nil
+            if info.observers.isEmpty {
+                self.observedInfo[obj] = nil
+            }
+        }
     }
     
     private func sendWillChange(relation: Relation) {
@@ -143,7 +153,7 @@ public final class UpdateManager: PerThreadInstance {
                         doneCount += 1
                         sendDidChangeIfNeeded()
                     case .Ok(let rows):
-                        for observerEntry in info.observers {
+                        for observerEntry in info.observers.values {
                             observerEntry.observer.relationAddedRows(relation, rows: rows)
                         }
                     case .Err(let err):
@@ -159,8 +169,8 @@ public final class UpdateManager: PerThreadInstance {
                         doneCount += 1
                         sendDidChangeIfNeeded()
                     case .Ok(let rows):
-                        for observerEntry in info.observers {
-                            observerEntry.observer.relationAddedRows(relation, rows: rows)
+                        for observerEntry in info.observers.values {
+                            observerEntry.observer.relationRemovedRows(relation, rows: rows)
                         }
                     case .Err(let err):
                         fatalError("Don't know how to deal with errors yet. \(err)")
@@ -186,14 +196,17 @@ extension UpdateManager {
         }
         
         let derivative: RelationDerivative
-        var observers: [ObserverEntry] = []
+        var observers: [UInt64: ObserverEntry] = [:]
+        var currentObserverID: UInt64 = 0
         
         init(derivative: RelationDerivative) {
             self.derivative = derivative
         }
         
-        func addObserver(observer: AsyncRelationObserver) {
-            observers.append(.init(observer: observer, didSendWillChange: false))
+        func addObserver(observer: AsyncRelationObserver) -> UInt64 {
+            currentObserverID += 1
+            observers[currentObserverID] = ObserverEntry(observer: observer, didSendWillChange: false)
+            return currentObserverID
         }
     }
 }

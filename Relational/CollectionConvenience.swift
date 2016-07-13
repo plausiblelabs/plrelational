@@ -45,6 +45,14 @@ public extension MutableCollectionType {
     }
 }
 
+public extension Dictionary {
+    mutating func mutatingForEach(f: (inout Value) -> Void) {
+        for k in keys {
+            f(&self[k]!)
+        }
+    }
+}
+
 public extension SequenceType {
     func all(@noescape predicate: Generator.Element -> Bool) -> Bool {
         for elt in self {

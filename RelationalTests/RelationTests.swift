@@ -1845,13 +1845,14 @@ class RelationTests: DBTestCase {
             }
             
             let observer = Observer()
-            UpdateManager.currentInstance.observe(u, observer: observer)
+            let remover = UpdateManager.currentInstance.observe(u, observer: observer)
             change()
             CFRunLoopRun()
             XCTAssertEqual(observer.willChangeCount, 1)
             XCTAssertEqual(observer.didChangeCount, 1)
             XCTAssertEqual(observer.addedRows ?? [], expectedAdded)
             XCTAssertEqual(observer.removedRows ?? [], expectedRemoved)
+            remover()
         }
         
         assertChanges(u,
@@ -1862,5 +1863,12 @@ class RelationTests: DBTestCase {
                         UpdateManager.currentInstance.registerAdd(r, row: ["n": 4]) },
                       expectedAdded: [["n": 1], ["n": 2], ["n": 3], ["n": 4]],
                       expectedRemoved: [])
+        assertChanges(u,
+                      change: {
+                        UpdateManager.currentInstance.registerUpdate(r, query: Attribute("n") *== 2, newValues: ["n": 10])
+                        UpdateManager.currentInstance.registerDelete(r, query: Attribute("n") *== 3)
+                        UpdateManager.currentInstance.registerAdd(r, row: ["n": 5]) },
+                      expectedAdded: [["n": 10], ["n": 5]],
+                      expectedRemoved: [["n": 2], ["n": 3]])
     }
 }
