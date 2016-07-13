@@ -65,20 +65,20 @@ class QueryPlanner {
         })
     }
     
-    private func visitRelationTree(roots: [(Relation, OutputCallback)], @noescape _ f: (relation: Relation, underlyingRelation: Relation, outputCallback: OutputCallback?) -> Void) {
+    private func visitRelationTree<AuxiliaryData>(roots: [(Relation, AuxiliaryData)], @noescape _ f: (relation: Relation, underlyingRelation: Relation, auxiliaryData: AuxiliaryData?) -> Void) {
         let visited = ObjectMap<Int>()
         var rootsToVisit = roots
         var othersToVisit: [Relation] = []
         var iterationCount = 0
         while true {
             let relation: Relation
-            let outputCallback: OutputCallback?
+            let auxiliaryData: AuxiliaryData?
             if let (r, callback) = rootsToVisit.popLast() {
                 relation = r
-                outputCallback = callback
+                auxiliaryData = callback
             } else if let r = othersToVisit.popLast() {
                 relation = r
-                outputCallback = nil
+                auxiliaryData = nil
             } else {
                 break
             }
@@ -91,7 +91,7 @@ class QueryPlanner {
                     continue
                 }
             }
-            f(relation: relation, underlyingRelation: realR, outputCallback: outputCallback)
+            f(relation: relation, underlyingRelation: realR, auxiliaryData: auxiliaryData)
             othersToVisit.appendContentsOf(relationChildren(realR))
         }
     }
