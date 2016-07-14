@@ -26,7 +26,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
             valueWillChange: {
                 willChangeCount += 1
             },
-            valueChanging: { newValue, _ in print("HELLO: \(newValue)"); change = newValue },
+            valueChanging: { newValue, _ in change = newValue },
             valueDidChange: {
                 didChangeCount += 1
                 dispatch_group_leave(group)

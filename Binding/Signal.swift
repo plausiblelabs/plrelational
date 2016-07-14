@@ -53,15 +53,16 @@ public class Signal<T>: SignalType {
     public typealias Observer = SignalObserver<T>
     public typealias Notify = SignalObserver<T>
 
-    public private(set) var changeCount = 0
+    public private(set) var changeCount: Int
     private var observers: [UInt64: Observer] = [:]
     private var nextObserverID: UInt64 = 0
     
-    internal init() {
+    internal init(changeCount: Int) {
+        self.changeCount = changeCount
     }
     
     public static func pipe() -> (Signal, Notify) {
-        let signal = Signal()
+        let signal = Signal(changeCount: 0)
         let notify = SignalObserver(
             valueWillChange: signal.notifyWillChange,
             valueChanging: signal.notifyChanging,

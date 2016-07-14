@@ -23,7 +23,7 @@ private class MappedSignal<T>: Signal<T> {
     
     init<S: SignalType>(underlying: S, transform: (S.Value) -> T) {
         self.startFunc = { underlying.start() }
-        super.init()
+        super.init(changeCount: underlying.changeCount)
         self.removal = underlying.observe(SignalObserver(
             valueWillChange: self.notifyWillChange,
             valueChanging: { [weak self] change, metadata in
@@ -53,7 +53,7 @@ private class BinaryOpSignal<T>: Signal<T> {
             rhs.start()
         }
 
-        super.init()
+        super.init(changeCount: lhs.changeCount + rhs.changeCount)
         
         var lhsValue: LHS.Value?
         var rhsValue: RHS.Value?

@@ -14,7 +14,7 @@ private class RelationSignal<T>: Signal<T> {
         self.relation = relation
         self.rowsToValue = rowsToValue
         
-        super.init()
+        super.init(changeCount: 0)
         
         self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let strongSelf = self else { return }
