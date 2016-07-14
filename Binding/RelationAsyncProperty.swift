@@ -35,9 +35,7 @@ private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
                     before = nil
                 }
             },
-            signal: signal,
-            // TODO
-            changeHandler: ChangeHandler()
+            signal: signal
         )
         
         self.removal = signal.observe({ newValue, _ in

@@ -9,7 +9,7 @@ import libRelational
 
 class RelationAsyncPropertyTests: BindingTestCase {
     
-    func testReadOnlyProperty() {
+    func testAsyncReadOnlyProperty() {
         let db = makeDB().db
         let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
         let r = ChangeLoggingRelation(baseRelation: sqlr)
@@ -73,7 +73,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         change = nil
     }
     
-    func testReadWriteProperty() {
+    func testAsyncReadWriteProperty() {
         let sqliteDB = makeDB().db
         let loggingDB = ChangeLoggingDatabase(sqliteDB)
         let db = TransactionalDatabase(loggingDB)
@@ -187,5 +187,76 @@ class RelationAsyncPropertyTests: BindingTestCase {
 //        XCTAssertEqual(commitCount, 2)
 //        XCTAssertEqual(changeObserved, true)
 //        changeObserved = false
+    }
+    
+    func testBindToAsyncReadOnlyProperty() {
+        let db = makeDB().db
+        let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
+        let r = ChangeLoggingRelation(baseRelation: sqlr)
+        
+        // Create an async property from the relation
+        let rhs = r.select(Attribute("id") *== 1).project(["name"]).asyncProperty{ $0.signal{ $0.oneString($1) } }
+
+        // Create a r/w property that will be bound to the async property
+        var lockCount = 0
+        var unlockCount = 0
+        let runloop = CFRunLoopGetCurrent()
+        let group = dispatch_group_create()
+        let changeHandler = ChangeHandler(
+            onLock: {
+                lockCount += 1
+            },
+            onUnlock: {
+                unlockCount += 1
+                dispatch_group_leave(group)
+                CFRunLoopStop(runloop)
+            }
+        )
+        
+        var lhsValues: [String] = []
+        var lhs: ReadWriteProperty<String>! = mutableValueProperty("initial lhs value", changeHandler, { newValue, _ in
+            lhsValues.append(newValue)
+        })
+
+        // Verify the initial state
+        XCTAssertEqual(lhs.value, "initial lhs value")
+        XCTAssertEqual(lhsValues, [])
+        XCTAssertEqual(lhs.signal.observerCount, 0)
+        XCTAssertEqual(rhs.signal.observerCount, 1)
+        XCTAssertEqual(lockCount, 0)
+        XCTAssertEqual(unlockCount, 0)
+        
+        // Bind lhs property to the async rhs property, verify that rhs property's value is loaded asynchronously
+        // and that lhs property's value is updated when the rhs value is ready
+        dispatch_group_enter(group)
+        _ = lhs <~ rhs
+        XCTAssertEqual(lhs.value, "initial lhs value")
+        XCTAssertEqual(lhsValues, [])
+        XCTAssertEqual(lhs.signal.observerCount, 0)
+        XCTAssertEqual(rhs.signal.observerCount, 2)
+        XCTAssertEqual(lockCount, 1)
+        XCTAssertEqual(unlockCount, 0)
+        
+        CFRunLoopRun()
+        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+        XCTAssertEqual(lhs.value, "")
+        XCTAssertEqual(lhsValues, [""])
+        XCTAssertEqual(lockCount, 1)
+        XCTAssertEqual(unlockCount, 1)
+        
+        // TODO: Verify async updates to rhs relation/property
+        
+        // Nil out the lhs property and verify that the rhs property is unbound
+        lhs = nil
+        XCTAssertEqual(lhsValues, [""])
+        XCTAssertEqual(rhs.signal.observerCount, 1)
+        XCTAssertEqual(lockCount, 1)
+        XCTAssertEqual(unlockCount, 1)
+        
+        // TODO: Change the rhs property's value and verify that lhs property's value is unaffected
+    }
+    
+    func testBindBidiToAsyncReadWriteProperty() {
+        // TODO
     }
 }
