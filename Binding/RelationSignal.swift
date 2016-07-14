@@ -25,11 +25,13 @@ private class RelationSignal<T>: Signal<T> {
     }
     
     private override func start() {
+        self.notifyWillChange()
         relation.asyncAllRows({ result in
             if let rows = result.ok {
                 let newValue = self.rowsToValue(self.relation, AnyGenerator(rows.generate()))
                 self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
             }
+            self.notifyDidChange()
         })
     }
     

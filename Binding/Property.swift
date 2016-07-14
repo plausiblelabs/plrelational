@@ -102,6 +102,9 @@ public class BindableProperty<T> {
             self.set(initialValue, ChangeMetadata(transient: true))
         }
         
+        // Take on the given signal's change count
+        changeHandler.incrementCount(signal.changeCount)
+        
         // Observe the given signal for changes
         let signalObserverRemoval = signal.observe(SignalObserver(
             // TODO: Is this the right place for the change handler stuff?
@@ -119,9 +122,16 @@ public class BindableProperty<T> {
         
         // Save and return the binding
         let bindingID = nextBindingID
-        let binding = Binding(signalOwner: owner, removal: { [weak self] in
+        let binding = Binding(signalOwner: owner, removal: { [weak self, weak signal] in
             signalObserverRemoval()
-            self?.bindings.removeValueForKey(bindingID)?.unbind()
+            if let strongSelf = self {
+                if let binding = strongSelf.bindings.removeValueForKey(bindingID) {
+                    binding.unbind()
+                }
+                if let signal = signal {
+                    strongSelf.changeHandler.decrementCount(signal.changeCount)
+                }
+            }
         })
         nextBindingID += 1
         bindings[bindingID] = binding

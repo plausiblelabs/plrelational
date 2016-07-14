@@ -13,17 +13,44 @@ class RelationAsyncPropertyTests: BindingTestCase {
         let db = makeDB().db
         let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
         let r = ChangeLoggingRelation(baseRelation: sqlr)
-        
-        let property = r.select(Attribute("id") *== 1).project(["name"]).asyncProperty{ $0.signal{ $0.oneString($1) } }
-        var change: String?
-        _ = property.signal.observe({ newValue, _ in change = newValue })
 
+        var willChangeCount = 0
+        var didChangeCount = 0
+        var change: String?
+
+        let runloop = CFRunLoopGetCurrent()
+        let group = dispatch_group_create()
+
+        let property = r.select(Attribute("id") *== 1).project(["name"]).asyncProperty{ $0.signal{ $0.oneString($1) } }
+        _ = property.signal.observe(SignalObserver(
+            valueWillChange: {
+                willChangeCount += 1
+            },
+            valueChanging: { newValue, _ in print("HELLO: \(newValue)"); change = newValue },
+            valueDidChange: {
+                didChangeCount += 1
+                dispatch_group_leave(group)
+                CFRunLoopStop(runloop)
+            }
+        ))
+
+        // Verify that property value remains nil until we actually trigger the query
         XCTAssertEqual(property.value, nil)
+        XCTAssertEqual(willChangeCount, 0)
+        XCTAssertEqual(didChangeCount, 0)
         XCTAssertEqual(change, nil)
 
-        // TODO: Trigger initial query
-//        XCTAssertEqual(property.value, "")
-//        XCTAssertEqual(change, nil)
+        // Trigger the async query and wait for it to complete
+        dispatch_group_enter(group)
+        property.start()
+        CFRunLoopRun()
+        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+
+        // Verify that value was fetched
+        XCTAssertEqual(property.value, "")
+        XCTAssertEqual(willChangeCount, 1)
+        XCTAssertEqual(didChangeCount, 1)
+        XCTAssertEqual(change, "")
 
         // TODO: Currently this is synchronous; need to change this test so that it verifies
         // behavior in an asynchronous environment
@@ -79,11 +106,12 @@ class RelationAsyncPropertyTests: BindingTestCase {
             }
         )
         
-        let relationProperty = r.select(Attribute("id") *== 1).project(["name"]).asyncProperty(config, relationToValue: { $0.oneString })
+        let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
+        let nameProperty = nameRelation.asyncProperty(config, signal: nameRelation.signal{ $0.oneString($1) })
         var changeObserved = false
-        _ = relationProperty.signal.observe({ _ in changeObserved = true })
+        _ = nameProperty.signal.observe({ _ in changeObserved = true })
         
-        XCTAssertEqual(relationProperty.value, nil)
+        XCTAssertEqual(nameProperty.value, nil)
         XCTAssertEqual(snapshotCount, 0)
         XCTAssertEqual(updateCount, 0)
         XCTAssertEqual(commitCount, 0)
@@ -96,7 +124,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         // behavior in an asynchronous environment
         r.add(["id": 1, "name": "cat"])
         
-        XCTAssertEqual(relationProperty.value, "cat")
+        XCTAssertEqual(nameProperty.value, "cat")
         XCTAssertEqual(snapshotCount, 0)
         XCTAssertEqual(updateCount, 0)
         XCTAssertEqual(commitCount, 0)
@@ -108,11 +136,11 @@ class RelationAsyncPropertyTests: BindingTestCase {
 //        // Possibly a better way to deal with all this would be to actually notify observers
 //        // in the the case where the value is not changing but the transient flag *is* changing.
 //        let otherProperty = mutableValueProperty("", valueChanging: { _ in true })
-//        otherProperty <~> relationProperty
+//        otherProperty <~> nameProperty
 //        
 //        otherProperty.change("dog", transient: true)
 //        
-//        XCTAssertEqual(relationProperty.value, "dog")
+//        XCTAssertEqual(nameProperty.value, "dog")
 //        XCTAssertEqual(snapshotCount, 1)
 //        XCTAssertEqual(updateCount, 1)
 //        XCTAssertEqual(commitCount, 0)
@@ -121,7 +149,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
 //        
 //        otherProperty.change("dogg", transient: true)
 //        
-//        XCTAssertEqual(relationProperty.value, "dogg")
+//        XCTAssertEqual(nameProperty.value, "dogg")
 //        XCTAssertEqual(snapshotCount, 1)
 //        XCTAssertEqual(updateCount, 2)
 //        XCTAssertEqual(commitCount, 0)
@@ -135,7 +163,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
 //        // underlying database (although observers will not be notified, since from
 //        // their perspective the value is not changing)
 //        // TODO: This only works because of the `valueChanging` hack for `otherProperty`, see TODO above.
-//        XCTAssertEqual(relationProperty.value, "dogg")
+//        XCTAssertEqual(nameProperty.value, "dogg")
 //        XCTAssertEqual(snapshotCount, 1)
 //        XCTAssertEqual(updateCount, 2)
 //        XCTAssertEqual(commitCount, 1)
@@ -144,7 +172,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
 //        
 //        otherProperty.change("ant", transient: false)
 //        
-//        XCTAssertEqual(relationProperty.value, "ant")
+//        XCTAssertEqual(nameProperty.value, "ant")
 //        XCTAssertEqual(snapshotCount, 2)
 //        XCTAssertEqual(updateCount, 2)
 //        XCTAssertEqual(commitCount, 2)
@@ -153,7 +181,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
 //        
 //        r.delete(true)
 //        
-//        XCTAssertEqual(relationProperty.value, "")
+//        XCTAssertEqual(nameProperty.value, "")
 //        XCTAssertEqual(snapshotCount, 2)
 //        XCTAssertEqual(updateCount, 2)
 //        XCTAssertEqual(commitCount, 2)

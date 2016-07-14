@@ -22,24 +22,42 @@ public class ChangeHandler {
         self.onLock = onLock
         self.onUnlock = onUnlock
     }
+    
+    /// Increments the change count by the given amount.  If the change count goes from 0 to >= 1, `onLock`
+    /// will be invoked.  Must be called on UI thread.
+    public func incrementCount(inc: Int) {
+        precondition(inc >= 0)
+        if inc == 0 { return }
+        
+        let wasZero = changeCount == 0
+        changeCount += inc
+        if wasZero {
+            onLock()
+        }
+    }
+
+    /// Decrements the change count by the given amount.  If the change count goes to 0, `onUnlock`
+    /// will be invoked.  Must be called on UI thread.
+    public func decrementCount(dec: Int) {
+        precondition(dec >= 0)
+        precondition(changeCount - dec >= 0)
+        if dec == 0 { return }
+        
+        changeCount -= dec
+        if changeCount == 0 {
+            onUnlock()
+        }
+    }
 
     /// Notes that a change is coming.  If the change count goes to 1, `onLock` will be invoked.
     /// Must be called on UI thread.
     public func willChange() {
-        changeCount += 1
-        if changeCount == 1 {
-            onLock()
-        }
+        incrementCount(1)
     }
     
     /// Notes that a change has occurred.  If the change count goes to 0, `onUnlock` will be invoked.
     /// Must be called on UI thread.
     public func didChange() {
-        precondition(changeCount > 0)
-        
-        changeCount -= 1
-        if changeCount == 0 {
-            onUnlock()
-        }
+        decrementCount(1)
     }
 }

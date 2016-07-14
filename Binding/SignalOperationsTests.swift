@@ -11,16 +11,44 @@ class SignalOperationsTests: BindingTestCase {
     func testMap() {
         let (signal, notify) = Signal<Bool>.pipe()
         let mapped = signal.map{ $0 ? 1 : 0 }
+        
         var mappedValue: Int?
+        var willChangeCount = 0
+        var changingCount = 0
+        var didChangeCount = 0
         
-        _ = mapped.observe({ newValue, _ in mappedValue = newValue })
-        XCTAssertEqual(mappedValue, nil)
+        _ = mapped.observe(SignalObserver(
+            valueWillChange: { willChangeCount += 1 },
+            valueChanging: { newValue, _ in
+                changingCount = mapped.changeCount
+                mappedValue = newValue
+            },
+            valueDidChange: { didChangeCount += 1 }
+        ))
 
+        XCTAssertEqual(mappedValue, nil)
+        XCTAssertEqual(willChangeCount, 0)
+        XCTAssertEqual(didChangeCount, 0)
+        XCTAssertEqual(changingCount, 0)
+        XCTAssertEqual(mapped.changeCount, 0)
+
+        notify.valueWillChange()
         notify.valueChanging(true)
+        notify.valueDidChange()
         XCTAssertEqual(mappedValue, 1)
+        XCTAssertEqual(willChangeCount, 1)
+        XCTAssertEqual(didChangeCount, 1)
+        XCTAssertEqual(changingCount, 1)
+        XCTAssertEqual(mapped.changeCount, 0)
         
+        notify.valueWillChange()
         notify.valueChanging(false)
+        notify.valueDidChange()
         XCTAssertEqual(mappedValue, 0)
+        XCTAssertEqual(willChangeCount, 2)
+        XCTAssertEqual(didChangeCount, 2)
+        XCTAssertEqual(changingCount, 1)
+        XCTAssertEqual(mapped.changeCount, 0)
     }
     
     func testZip() {

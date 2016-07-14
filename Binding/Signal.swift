@@ -38,7 +38,11 @@ public struct SignalObserver<T> {
 public protocol SignalType: class {
     associatedtype Value
     
+    /// Converts this instance into a concrete `Signal`.
     var signal: Signal<Value> { get }
+    
+    /// The current change count (incremented by will-change and decremented by did-change).
+    var changeCount: Int { get }
     
     func start()
     func observe(observer: SignalObserver<Value>) -> ObserverRemoval
@@ -49,6 +53,7 @@ public class Signal<T>: SignalType {
     public typealias Observer = SignalObserver<T>
     public typealias Notify = SignalObserver<T>
 
+    public private(set) var changeCount = 0
     private var observers: [UInt64: Observer] = [:]
     private var nextObserverID: UInt64 = 0
     
@@ -100,6 +105,7 @@ public class Signal<T>: SignalType {
     }
 
     internal func notifyWillChange() {
+        changeCount += 1
         for (_, observer) in observers {
             observer.valueWillChange()
         }
@@ -112,6 +118,8 @@ public class Signal<T>: SignalType {
     }
 
     internal func notifyDidChange() {
+        precondition(changeCount > 0)
+        changeCount -= 1
         for (_, observer) in observers {
             observer.valueDidChange()
         }

@@ -32,11 +32,15 @@ class ChangeHandlerTests: BindingTestCase {
         XCTAssertEqual(lockCount, 1)
         XCTAssertEqual(unlockCount, 1)
 
-        handler.willChange()
+        handler.incrementCount(3)
         XCTAssertEqual(lockCount, 2)
         XCTAssertEqual(unlockCount, 1)
         
         handler.didChange()
+        XCTAssertEqual(lockCount, 2)
+        XCTAssertEqual(unlockCount, 1)
+        
+        handler.decrementCount(2)
         XCTAssertEqual(lockCount, 2)
         XCTAssertEqual(unlockCount, 2)
     }
