@@ -122,8 +122,9 @@ public final class UpdateManager: PerThreadInstance {
                     })
                     removals.append(removal)
                     
-                    if let transactionalRelation = variable as? TransactionalDatabase.TransactionalRelation {
-                        databases.insert(transactionalRelation.db!)
+                    if let transactionalRelation = variable as? TransactionalDatabase.TransactionalRelation,
+                           db = transactionalRelation.db {
+                        databases.insert(db)
                     }
                 }
             }
