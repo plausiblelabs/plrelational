@@ -1876,7 +1876,7 @@ class RelationTests: DBTestCase {
         }
         let intersection = r.intersection(triggerRelation)
         
-        TestAsyncBulkObserver.assertChanges(intersection,
+        TestAsyncCoalescedObserver.assertChanges(intersection,
                                         change: {
                                             UpdateManager.currentInstance.registerAdd(r, row: ["n": 1])
                                             UpdateManager.currentInstance.registerAdd(r, row: ["n": 4]) },
@@ -1923,10 +1923,10 @@ private class TestAsyncObserver: AsyncRelationObserver {
     }
 }
 
-private class TestAsyncBulkObserver: AsyncBulkRelationObserver {
+private class TestAsyncCoalescedObserver: AsyncCoalescedRelationObserver {
     static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
-        let observer = TestAsyncBulkObserver()
-        let remover = UpdateManager.currentInstance.observeBulk(relation, observer: observer)
+        let observer = TestAsyncCoalescedObserver()
+        let remover = UpdateManager.currentInstance.observeCoalesced(relation, observer: observer)
         change()
         CFRunLoopRun()
         XCTAssertEqual(observer.willChangeCount, 1)

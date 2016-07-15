@@ -277,13 +277,13 @@ public protocol AsyncRelationObserver {
 }
 
 extension UpdateManager {
-    public func observeBulk(relation: Relation, observer: AsyncBulkRelationObserver) -> ObservationRemover {
+    public func observeCoalesced(relation: Relation, observer: AsyncCoalescedRelationObserver) -> ObservationRemover {
         class ShimObserver: AsyncRelationObserver {
-            let bulkObserver: AsyncBulkRelationObserver
+            let bulkObserver: AsyncCoalescedRelationObserver
             var added: Set<Row> = []
             var removed: Set<Row> = []
             
-            init(bulkObserver: AsyncBulkRelationObserver) {
+            init(bulkObserver: AsyncCoalescedRelationObserver) {
                 self.bulkObserver = bulkObserver
             }
             
@@ -312,7 +312,7 @@ extension UpdateManager {
     }
 }
 
-public protocol AsyncBulkRelationObserver {
+public protocol AsyncCoalescedRelationObserver {
     func relationWillChange(relation: Relation)
     func relationDidChange(relation: Relation, added: Set<Row>, removed: Set<Row>)
 }
