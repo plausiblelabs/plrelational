@@ -1817,58 +1817,139 @@ class RelationTests: DBTestCase {
         let r = db["n"]
         let u = r.union(r)
         
-        func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
-            class Observer: AsyncRelationObserver {
-                var willChangeCount = 0
-                var addedRows: Set<Row>?
-                var removedRows: Set<Row>?
-                var didChangeCount = 0
-                
-                func relationWillChange(relation: Relation) {
-                    willChangeCount += 1
-                }
-                
-                func relationAddedRows(relation: Relation, rows: Set<Row>) {
-                    XCTAssertNil(addedRows)
-                    addedRows = rows
-                }
-                
-                func relationRemovedRows(relation: Relation, rows: Set<Row>) {
-                    XCTAssertNil(removedRows)
-                    removedRows = rows
-                }
-                
-                func relationDidChange(relation: Relation) {
-                    didChangeCount += 1
-                    CFRunLoopStop(CFRunLoopGetCurrent())
-                }
+        TestAsyncObserver.assertChanges(u,
+                                        change: {
+                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 1])
+                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 2])
+                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 3])
+                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 4]) },
+                                        expectedAdded: [["n": 1], ["n": 2], ["n": 3], ["n": 4]],
+                                        expectedRemoved: [])
+        TestAsyncObserver.assertChanges(u,
+                                        change: {
+                                            UpdateManager.currentInstance.registerUpdate(r, query: Attribute("n") *== 2, newValues: ["n": 10])
+                                            UpdateManager.currentInstance.registerDelete(r, query: Attribute("n") *== 3)
+                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 5]) },
+                                        expectedAdded: [["n": 10], ["n": 5]],
+                                        expectedRemoved: [["n": 2], ["n": 3]])
+    }
+    
+    func testUpdateDuringAsyncUpdate() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        
+        class TriggerRelation: Relation {
+            var onUnderlyingRelationCallback: Void -> Void = {}
+            
+            var scheme: Scheme {
+                return ["n"]
             }
             
-            let observer = Observer()
-            let remover = UpdateManager.currentInstance.observe(u, observer: observer)
-            change()
-            CFRunLoopRun()
-            XCTAssertEqual(observer.willChangeCount, 1)
-            XCTAssertEqual(observer.didChangeCount, 1)
-            XCTAssertEqual(observer.addedRows ?? [], expectedAdded)
-            XCTAssertEqual(observer.removedRows ?? [], expectedRemoved)
-            remover()
+            var underlyingRelationForQueryExecution: Relation {
+                onUnderlyingRelationCallback()
+                return MakeRelation(["n"], [1], [2], [3])
+            }
+            
+            func contains(row: Row) -> Result<Bool, RelationError> {
+                fatalError("unimplemented")
+            }
+            
+            func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+                fatalError("unimplemented")
+            }
+            
+            func addChangeObserver(observer: RelationObserver, kinds: [RelationObservationKind]) -> (Void -> Void) {
+                return {}
+            }
         }
         
-        assertChanges(u,
-                      change: {
-                        UpdateManager.currentInstance.registerAdd(r, row: ["n": 1])
-                        UpdateManager.currentInstance.registerAdd(r, row: ["n": 2])
-                        UpdateManager.currentInstance.registerAdd(r, row: ["n": 3])
-                        UpdateManager.currentInstance.registerAdd(r, row: ["n": 4]) },
-                      expectedAdded: [["n": 1], ["n": 2], ["n": 3], ["n": 4]],
-                      expectedRemoved: [])
-        assertChanges(u,
-                      change: {
-                        UpdateManager.currentInstance.registerUpdate(r, query: Attribute("n") *== 2, newValues: ["n": 10])
-                        UpdateManager.currentInstance.registerDelete(r, query: Attribute("n") *== 3)
-                        UpdateManager.currentInstance.registerAdd(r, row: ["n": 5]) },
-                      expectedAdded: [["n": 10], ["n": 5]],
-                      expectedRemoved: [["n": 2], ["n": 3]])
+        let triggerRelation = TriggerRelation()
+        triggerRelation.onUnderlyingRelationCallback = {
+            dispatch_sync(dispatch_get_main_queue(), {
+                UpdateManager.currentInstance.registerAdd(r, row: ["n": 2])
+                UpdateManager.currentInstance.registerAdd(r, row: ["n": 5])
+            })
+            triggerRelation.onUnderlyingRelationCallback = {}
+        }
+        let intersection = r.intersection(triggerRelation)
+        
+        TestAsyncBulkObserver.assertChanges(intersection,
+                                        change: {
+                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 1])
+                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 4]) },
+                                        expectedAdded: [["n": 1], ["n": 2]],
+                                        expectedRemoved: [])
+    }
+}
+
+private class TestAsyncObserver: AsyncRelationObserver {
+    static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
+        let observer = TestAsyncObserver()
+        let remover = UpdateManager.currentInstance.observe(relation, observer: observer)
+        change()
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 1)
+        XCTAssertEqual(observer.didChangeCount, 1)
+        XCTAssertEqual(observer.addedRows ?? [], expectedAdded)
+        XCTAssertEqual(observer.removedRows ?? [], expectedRemoved)
+        remover()
+    }
+    
+    var willChangeCount = 0
+    var addedRows: Set<Row>?
+    var removedRows: Set<Row>?
+    var didChangeCount = 0
+    
+    func relationWillChange(relation: Relation) {
+        willChangeCount += 1
+    }
+    
+    func relationAddedRows(relation: Relation, rows: Set<Row>) {
+        XCTAssertNil(addedRows)
+        addedRows = rows
+    }
+    
+    func relationRemovedRows(relation: Relation, rows: Set<Row>) {
+        XCTAssertNil(removedRows)
+        removedRows = rows
+    }
+    
+    func relationDidChange(relation: Relation) {
+        didChangeCount += 1
+        CFRunLoopStop(CFRunLoopGetCurrent())
+    }
+}
+
+private class TestAsyncBulkObserver: AsyncBulkRelationObserver {
+    static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
+        let observer = TestAsyncBulkObserver()
+        let remover = UpdateManager.currentInstance.observeBulk(relation, observer: observer)
+        change()
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 1)
+        XCTAssertEqual(observer.addedRows ?? [], expectedAdded)
+        XCTAssertEqual(observer.removedRows ?? [], expectedRemoved)
+        remover()
+    }
+    
+    var willChangeCount = 0
+    var addedRows: Set<Row>?
+    var removedRows: Set<Row>?
+    
+    func relationWillChange(relation: Relation) {
+        willChangeCount += 1
+    }
+    
+    func relationDidChange(relation: Relation, added: Set<Row>, removed: Set<Row>) {
+        XCTAssertNil(addedRows)
+        XCTAssertNil(removedRows)
+        
+        addedRows = added
+        removedRows = removed
+        
+        CFRunLoopStop(CFRunLoopGetCurrent())
     }
 }
