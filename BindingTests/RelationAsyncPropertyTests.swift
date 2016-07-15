@@ -10,23 +10,31 @@ import libRelational
 class RelationAsyncPropertyTests: BindingTestCase {
     
     func testAsyncReadOnlyProperty() {
-        let db = makeDB().db
-        let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
-        let r = ChangeLoggingRelation(baseRelation: sqlr)
+        let sqliteDB = makeDB().db
+        let sqlr = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["animal"]
 
         var willChangeCount = 0
         var didChangeCount = 0
-        var change: String?
+        var changes: [String] = []
 
         let runloop = CFRunLoopGetCurrent()
         let group = dispatch_group_create()
+
+        func awaitCompletion(f: () -> Void) {
+            dispatch_group_enter(group)
+            f()
+            CFRunLoopRun()
+            dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+        }
 
         let property = r.select(Attribute("id") *== 1).project(["name"]).asyncProperty{ $0.signal{ $0.oneString($1) } }
         _ = property.signal.observe(SignalObserver(
             valueWillChange: {
                 willChangeCount += 1
             },
-            valueChanging: { newValue, _ in change = newValue },
+            valueChanging: { newValue, _ in changes.append(newValue) },
             valueDidChange: {
                 didChangeCount += 1
                 dispatch_group_leave(group)
@@ -38,53 +46,62 @@ class RelationAsyncPropertyTests: BindingTestCase {
         XCTAssertEqual(property.value, nil)
         XCTAssertEqual(willChangeCount, 0)
         XCTAssertEqual(didChangeCount, 0)
-        XCTAssertEqual(change, nil)
+        XCTAssertEqual(changes, [])
 
-        // Trigger the async query and wait for it to complete
-        dispatch_group_enter(group)
-        property.start()
-        CFRunLoopRun()
-        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
-
-        // Verify that value was fetched
+        // Trigger the async query and wait for it to complete, then verify that value was updated
+        awaitCompletion{ property.start() }
         XCTAssertEqual(property.value, "")
         XCTAssertEqual(willChangeCount, 1)
         XCTAssertEqual(didChangeCount, 1)
-        XCTAssertEqual(change, "")
+        XCTAssertEqual(changes, [""])
 
-        // TODO: Currently this is synchronous; need to change this test so that it verifies
-        // behavior in an asynchronous environment
-        r.add(["id": 1, "name": "cat"])
-        
-        XCTAssertEqual(property.value, "cat")
-        XCTAssertEqual(change, "cat")
-        change = nil
-
-        r.add(["id": 2, "name": "dog"])
-        
-        XCTAssertEqual(property.value, "cat")
-        XCTAssertEqual(change, nil)
-        change = nil
-
-        r.delete(true)
-        
-        XCTAssertEqual(property.value, "")
-        XCTAssertEqual(change, "")
-        change = nil
+//        // Perform an async update to the underlying relation
+//        awaitCompletion{ r.asyncAdd(["id": 1, "name": "cat"]) }
+//        XCTAssertEqual(property.value, "cat")
+//        XCTAssertEqual(willChangeCount, 2)
+//        XCTAssertEqual(didChangeCount, 2)
+//        XCTAssertEqual(changes, ["", "cat"])
+//        
+//        // Perform another async update to the underlying relation (except this one isn't relevant to the
+//        // `select` that our signal is built on, so the signal shouldn't deliver a change)
+//        awaitCompletion{ r.asyncAdd(["id": 2, "name": "dog"]) }
+//        XCTAssertEqual(property.value, "cat")
+//        XCTAssertEqual(willChangeCount, 3)
+//        XCTAssertEqual(didChangeCount, 3)
+//        XCTAssertEqual(changes, ["", "cat"])
+//        
+//        // Perform an async delete-all-rows on the underlying relation
+//        awaitCompletion{ r.asyncDelete(true) }
+//        XCTAssertEqual(property.value, "")
+//        XCTAssertEqual(willChangeCount, 4)
+//        XCTAssertEqual(didChangeCount, 4)
+//        XCTAssertEqual(changes, ["", "cat", ""])
     }
     
     func testAsyncReadWriteProperty() {
         let sqliteDB = makeDB().db
-        let loggingDB = ChangeLoggingDatabase(sqliteDB)
-        let db = TransactionalDatabase(loggingDB)
-        
-        XCTAssertNil(sqliteDB.createRelation("animal", scheme: ["id", "name"]).err)
+        let sqlr = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
+        let db = TransactionalDatabase(sqliteDB)
         let r = db["animal"]
         
+        var willChangeCount = 0
+        var didChangeCount = 0
+        var changes: [String] = []
+        
+        let runloop = CFRunLoopGetCurrent()
+        let group = dispatch_group_create()
+
         func updateName(newValue: String) {
             db.transaction{
                 r.update(Attribute("id") *== 1, newValues: ["name": RelationValue(newValue)])
             }
+        }
+        
+        func awaitCompletion(f: () -> Void) {
+            dispatch_group_enter(group)
+            f()
+            CFRunLoopRun()
+            dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
         }
         
         var snapshotCount = 0
@@ -108,28 +125,51 @@ class RelationAsyncPropertyTests: BindingTestCase {
         
         let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
         let nameProperty = nameRelation.asyncProperty(config, signal: nameRelation.signal{ $0.oneString($1) })
-        var changeObserved = false
-        _ = nameProperty.signal.observe({ _ in changeObserved = true })
-        
+
+        _ = nameProperty.signal.observe(SignalObserver(
+            valueWillChange: {
+                willChangeCount += 1
+            },
+            valueChanging: { newValue, _ in changes.append(newValue) },
+            valueDidChange: {
+                didChangeCount += 1
+                dispatch_group_leave(group)
+                CFRunLoopStop(runloop)
+            }
+        ))
+
+        // Verify that property value remains nil until we actually trigger the query
         XCTAssertEqual(nameProperty.value, nil)
+        XCTAssertEqual(willChangeCount, 0)
+        XCTAssertEqual(didChangeCount, 0)
+        XCTAssertEqual(changes, [])
         XCTAssertEqual(snapshotCount, 0)
         XCTAssertEqual(updateCount, 0)
         XCTAssertEqual(commitCount, 0)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
         
-        // TODO: Trigger initial query
-        
-        // TODO: Currently this is synchronous; need to change this test so that it verifies
-        // behavior in an asynchronous environment
-        r.add(["id": 1, "name": "cat"])
-        
-        XCTAssertEqual(nameProperty.value, "cat")
+        // Trigger the async query and wait for it to complete, then verify that value was updated
+        awaitCompletion{ nameProperty.start() }
+        XCTAssertEqual(nameProperty.value, "")
+        XCTAssertEqual(willChangeCount, 1)
+        XCTAssertEqual(didChangeCount, 1)
+        XCTAssertEqual(changes, [""])
         XCTAssertEqual(snapshotCount, 0)
         XCTAssertEqual(updateCount, 0)
         XCTAssertEqual(commitCount, 0)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
+
+//        // Perform an async update to the underlying relation
+//        awaitCompletion{ r.asyncAdd(["id": 1, "name": "cat"]) }
+//        XCTAssertEqual(nameProperty.value, "cat")
+//
+//        // TODO: Currently this is synchronous; need to change this test so that it verifies
+//        // behavior in an asynchronous environment
+//        r.add(["id": 1, "name": "cat"])
+//        XCTAssertEqual(willChangeCount, 2)
+//        XCTAssertEqual(didChangeCount, 2)
+//        XCTAssertEqual(changes, ["", "cat"])
+//        XCTAssertEqual(snapshotCount, 0)
+//        XCTAssertEqual(updateCount, 0)
+//        XCTAssertEqual(commitCount, 0)
         
 //        // TODO: We use `valueChanging: { true }` here to simulate how TextField.string works
 //        // (since that one is an ExternalValueProperty) relative to the "Note" comment below.
