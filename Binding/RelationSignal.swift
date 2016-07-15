@@ -16,12 +16,7 @@ private class RelationSignal<T>: Signal<T> {
         
         super.init(changeCount: 0, startFunc: {})
         
-        self.removal = relation.addChangeObserver({ [weak self] _ in
-            guard let strongSelf = self else { return }
-            // TODO: This is synchronous
-            let newValue = rowsToValue(relation, relation.okRows)
-            strongSelf.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
-        })
+        self.removal = relation.addAsyncCoalescedObserver(self)
     }
     
     private override func startImpl() {
@@ -37,6 +32,19 @@ private class RelationSignal<T>: Signal<T> {
     
     deinit {
         removal()
+    }
+}
+
+extension RelationSignal: AsyncCoalescedRelationObserver {
+    func relationWillChange(relation: Relation) {
+        self.notifyWillChange()
+    }
+    
+    func relationDidChange(relation: Relation, added: Set<Row>, removed: Set<Row>) {
+        // TODO: Need to look at both added and removed (and compute updates)
+        let newValue = self.rowsToValue(self.relation, AnyGenerator(added.generate()))
+        self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+        self.notifyDidChange()
     }
 }
 

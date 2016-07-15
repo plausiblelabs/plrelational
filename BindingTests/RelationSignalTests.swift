@@ -10,9 +10,10 @@ import libRelational
 class RelationSignalTests: BindingTestCase {
     
     func testSignal() {
-        let db = makeDB().db
-        let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
-        let r = ChangeLoggingRelation(baseRelation: sqlr)
+        let sqliteDB = makeDB().db
+        let sqlr = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["animal"]
 
         var willChangeCount = 0
         var didChangeCount = 0
@@ -20,6 +21,13 @@ class RelationSignalTests: BindingTestCase {
         
         let runloop = CFRunLoopGetCurrent()
         let group = dispatch_group_create()
+
+        func awaitCompletion(f: () -> Void) {
+            dispatch_group_enter(group)
+            f()
+            CFRunLoopRun()
+            dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+        }
         
         let signal = r.select(Attribute("id") *== 1).project(["name"]).signal{ $0.oneString($1) }
         _ = signal.observe(SignalObserver(
@@ -40,25 +48,28 @@ class RelationSignalTests: BindingTestCase {
         XCTAssertEqual(didChangeCount, 0)
 
         // Start the signal to trigger the async query and wait for it to complete
-        dispatch_group_enter(group)
-        signal.start()
-        CFRunLoopRun()
-        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
-        
-        // Verify that a single value was delivered
+        awaitCompletion{ signal.start() }
         XCTAssertEqual(changes, [""])
         XCTAssertEqual(willChangeCount, 1)
         XCTAssertEqual(didChangeCount, 1)
 
-        // TODO: Currently this is synchronous; need to change this test so that it verifies
-        // behavior in an asynchronous environment
-        r.add(["id": 1, "name": "cat"])
+        // Perform an async update to the underlying relation
+        awaitCompletion{ r.asyncAdd(["id": 1, "name": "cat"]) }
         XCTAssertEqual(changes, ["", "cat"])
-        
-        r.add(["id": 2, "name": "dog"])
+        XCTAssertEqual(willChangeCount, 2)
+        XCTAssertEqual(didChangeCount, 2)
+
+        // Perform another async update to the underlying relation (except this one isn't relevant to the
+        // `select` that our signal is built on, so the signal shouldn't deliver a change)
+        awaitCompletion{ r.asyncAdd(["id": 2, "name": "dog"]) }
         XCTAssertEqual(changes, ["", "cat"])
-        
-        r.delete(true)
+        XCTAssertEqual(willChangeCount, 3)
+        XCTAssertEqual(didChangeCount, 3)
+
+        // Perform an async delete-all-rows on the underlying relation
+        awaitCompletion{ r.asyncDelete(true) }
         XCTAssertEqual(changes, ["", "cat", ""])
+        XCTAssertEqual(willChangeCount, 4)
+        XCTAssertEqual(didChangeCount, 4)
     }
 }
