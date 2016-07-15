@@ -1883,6 +1883,27 @@ class RelationTests: DBTestCase {
                                         expectedAdded: [["n": 1], ["n": 2]],
                                         expectedRemoved: [])
     }
+    
+    func testLimitedUpdateNotificationScope() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("1", scheme: ["n"]).ok!
+        sqliteDB.getOrCreateRelation("2", scheme: ["n"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r1 = db["1"]
+        let r2 = db["2"]
+        
+        let count1 = r1.count()
+        let count2 = r2.count()
+        
+        TestAsyncObserver.assertNoChanges(to: count1,
+                                          changingRelation: r2,
+                                          change: { r2.asyncAdd(["n": 1]) })
+        TestAsyncObserver.assertNoChanges(to: count2,
+                                          changingRelation: r1,
+                                          change: { r1.asyncAdd(["n": 1]) })
+        
+    }
 }
 
 private class TestAsyncObserver: AsyncRelationObserver {
@@ -1896,6 +1917,20 @@ private class TestAsyncObserver: AsyncRelationObserver {
         XCTAssertEqual(observer.addedRows ?? [], expectedAdded)
         XCTAssertEqual(observer.removedRows ?? [], expectedRemoved)
         remover()
+    }
+    
+    static func assertNoChanges(to to: Relation, changingRelation: Relation, change: Void -> Void) {
+        let observer = TestAsyncObserver()
+        let remover1 = to.addAsyncObserver(observer)
+        let remover2 = changingRelation.addAsyncObserver(TestAsyncObserver()) // Just for the CFRunLoopStop it will do
+        change()
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 0)
+        XCTAssertEqual(observer.didChangeCount, 0)
+        XCTAssertNil(observer.addedRows)
+        XCTAssertNil(observer.removedRows)
+        remover1()
+        remover2()
     }
     
     var willChangeCount = 0

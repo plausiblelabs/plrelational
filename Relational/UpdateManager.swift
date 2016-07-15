@@ -227,11 +227,15 @@ public final class UpdateManager: PerThreadInstance {
                         self.isExecuting = false
                         for (observedRelationObj, info) in observedInfo {
                             let relation = observedRelationObj as! Relation
+                            var observersWithWillChange: [AsyncRelationObserver] = []
                             info.observers.mutatingForEach({
-                                $0.didSendWillChange = false
+                                if $0.didSendWillChange {
+                                    $0.didSendWillChange = false
+                                    observersWithWillChange.append($0.observer)
+                                }
                             })
-                            for observerEntry in info.observers.values {
-                                observerEntry.observer.relationDidChange(relation)
+                            for observer in observersWithWillChange {
+                                observer.relationDidChange(relation)
                             }
                         }
                     }
