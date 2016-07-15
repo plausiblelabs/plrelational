@@ -17,19 +17,134 @@ public func zip<LHS: SignalType, RHS: SignalType>(lhs: LHS, _ rhs: RHS) -> Signa
     return BinaryOpSignal(lhs, rhs, { ($0, $1) })
 }
 
+/// Returns a Signal whose value is the negation of the given boolean signal.
+public func not<S: SignalType where S.Value: BooleanType>(signal: S) -> Signal<Bool> {
+    return signal.map{ !$0.boolValue }
+}
+
+extension SignalType where Value: BooleanType {
+    /// Returns a Signal whose value resolves to the logical OR of this signal and the other input signal.
+    public func or(other: Self) -> Signal<Bool> {
+        return BinaryOpSignal(self, other, { $0.boolValue || $1.boolValue })
+    }
+    
+    /// Returns a Signal whose value resolves to the logical AND of the values delivered on this signal
+    /// and the other input signal.
+    public func and(other: Self) -> Signal<Bool> {
+        return BinaryOpSignal(self, other, { $0.boolValue && $1.boolValue })
+    }
+    
+    /// Returns a Signal that invokes the given function whenever this signal's value resolves to `true`.
+    public func then(f: () -> Void) -> Signal<()> {
+        return self.map{ if $0.boolValue { f() } }
+    }
+}
+
+// TODO: This syntax is same as SelectExpression operators; maybe we should use something different
+infix operator *|| {
+associativity left
+precedence 110
+}
+
+infix operator *&& {
+associativity left
+precedence 120
+}
+
+public func *||<S: SignalType where S.Value: BooleanType>(lhs: S, rhs: S) -> Signal<Bool> {
+    return lhs.or(rhs)
+}
+
+public func *&&<S: SignalType where S.Value: BooleanType>(lhs: S, rhs: S) -> Signal<Bool> {
+    return lhs.and(rhs)
+}
+
+infix operator *== {
+associativity none
+precedence 130
+}
+
+public func *==<S: SignalType where S.Value: Equatable>(lhs: S, rhs: S) -> Signal<Bool> {
+    return BinaryOpSignal(lhs, rhs, { $0 == $1 })
+}
+
+extension SequenceType where Generator.Element: SignalType, Generator.Element.Value: BooleanType {
+    /// Returns a Signal whose value resolves to `true` if *any* of the signals
+    /// in this sequence resolve to `true`.
+    public func anyTrue() -> Signal<Bool> {
+        // TODO: Currently we require all captured values to be non-nil before we make the any-true
+        // determination; should we instead resolve to true as soon as we see any signal go to true?
+        return BoolSeqSignal(signals: self, { values in
+            var anyTrue = false
+            for value in values {
+                if let v = value {
+                    if v {
+                        anyTrue = true
+                    }
+                } else {
+                    return nil
+                }
+            }
+            return anyTrue
+        })
+    }
+    
+    /// Returns a Signal whose value resolves to `true` if *all* of the signals
+    /// in this sequence resolve to `true`.
+    public func allTrue() -> Signal<Bool> {
+        return BoolSeqSignal(signals: self, { values in
+            var allTrue = true
+            for value in values {
+                if let v = value {
+                    if !v {
+                        allTrue = false
+                    }
+                } else {
+                    return nil
+                }
+            }
+            return allTrue
+        })
+    }
+    
+    /// Returns a Signal whose value resolves to `true` if *none* of the signals
+    /// in this sequence resolve to `true`.
+    public func noneTrue() -> Signal<Bool> {
+        return BoolSeqSignal(signals: self, { values in
+            var noneTrue = true
+            for value in values {
+                if let v = value {
+                    if v {
+                        noneTrue = false
+                    }
+                } else {
+                    return nil
+                }
+            }
+            return noneTrue
+        })
+    }
+}
+
 private class MappedSignal<T>: Signal<T> {
     private let startFunc: () -> Void
     private var removal: ObserverRemoval!
     
     init<S: SignalType>(underlying: S, transform: (S.Value) -> T) {
         self.startFunc = { underlying.start() }
+        
         super.init(changeCount: underlying.changeCount)
+        
         self.removal = underlying.observe(SignalObserver(
-            valueWillChange: self.notifyWillChange,
+            valueWillChange: { [weak self] in
+                self?.notifyWillChange()
+            },
             valueChanging: { [weak self] change, metadata in
                 self?.notifyChanging(transform(change), metadata: metadata)
             },
-            valueDidChange: self.notifyDidChange
+            valueDidChange: { [weak self] in
+                self?.notifyDidChange()
+            }
         ))
     }
     
@@ -64,20 +179,28 @@ private class BinaryOpSignal<T>: Signal<T> {
         }
         
         self.removal1 = lhs.observe(SignalObserver(
-            valueWillChange: self.notifyWillChange,
+            valueWillChange: { [weak self] in
+                self?.notifyWillChange()
+            },
             valueChanging: { [weak self] change, metadata in
                 lhsValue = change
                 notify(self, metadata)
             },
-            valueDidChange: self.notifyDidChange
+            valueDidChange: { [weak self] in
+                self?.notifyDidChange()
+            }
         ))
         self.removal2 = rhs.observe(SignalObserver(
-            valueWillChange: self.notifyWillChange,
+            valueWillChange: { [weak self] in
+                self?.notifyWillChange()
+            },
             valueChanging: { [weak self] change, metadata in
                 rhsValue = change
                 notify(self, metadata)
             },
-            valueDidChange: self.notifyDidChange
+            valueDidChange: { [weak self] in
+                self?.notifyDidChange()
+            }
         ))
     }
     
@@ -88,5 +211,50 @@ private class BinaryOpSignal<T>: Signal<T> {
     deinit {
         removal1()
         removal2()
+    }
+}
+
+// TODO: Merge this with BinaryOpSignal?
+private class BoolSeqSignal: Signal<Bool> {
+    private let startFunc: () -> Void
+    private var removals: [ObserverRemoval] = []
+    
+    init<S: SequenceType where S.Generator.Element: SignalType, S.Generator.Element.Value: BooleanType>(signals: S, _ f: [Bool?] -> Bool?) {
+        self.startFunc = {
+            signals.forEach{ $0.start() }
+        }
+
+        var count = 0
+        signals.forEach({ _ in count += 1 })
+        
+        var values = [Bool?](count: count, repeatedValue: nil)
+        
+        super.init(changeCount: signals.map{ $0.changeCount }.reduce(0, combine: +))
+        
+        for (index, signal) in signals.enumerate() {
+            let removal = signal.observe(SignalObserver(
+                valueWillChange: { [weak self] in
+                    self?.notifyWillChange()
+                },
+                valueChanging: { [weak self] newValue, metadata in
+                    values[index] = newValue.boolValue
+                    if let boolValue = f(values) {
+                        self?.notifyChanging(boolValue, metadata: metadata)
+                    }
+                },
+                valueDidChange: { [weak self] in
+                    self?.notifyDidChange()
+                }
+            ))
+            removals.append(removal)
+        }
+    }
+    
+    private override func start() {
+        startFunc()
+    }
+    
+    deinit {
+        removals.forEach{ $0() }
     }
 }
