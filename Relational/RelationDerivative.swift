@@ -39,6 +39,19 @@ class RelationDerivative {
         setChange(change.removed, forPlaceholder: removed)
     }
     
+    func addChange(change: RelationChange, toVariable variable: Variable) {
+        let currentChange = changeForVariable(variable)
+        
+        let new = change.added - currentChange.removed
+        let gone = change.removed - currentChange.added
+        
+        let newAdded = currentChange.added + new - change.removed
+        let newRemoved = currentChange.removed + gone - change.added
+        
+        let newChange = RelationChange(added: newAdded, removed: newRemoved)
+        setChange(newChange, forVariable: variable)
+    }
+    
     var change: RelationChange {
         return underlyingDerivative!
     }
@@ -50,5 +63,15 @@ class RelationDerivative {
     private func setChange(change: Relation?, forPlaceholder placeholder: IntermediateRelation) {
         let realChange = change ?? ConcreteRelation(scheme: placeholder.scheme)
         placeholder.operands = [realChange]
+    }
+    
+    private func changeForVariable(variable: Variable) -> RelationChange {
+        let (added, removed) = placeholders[variable]!
+        return RelationChange(added: changeForPlaceholder(added),
+                              removed: changeForPlaceholder(removed))
+    }
+    
+    private func changeForPlaceholder(placeholder: IntermediateRelation) -> Relation? {
+        return placeholder.operands.first
     }
 }

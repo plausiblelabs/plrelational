@@ -127,6 +127,10 @@ public class TransactionalDatabase {
         changeLoggingDatabase.restoreSnapshot(snapshot)
     }
     
+    public func asyncRestoreSnapshot(snapshot: ChangeLoggingDatabaseSnapshot) {
+        UpdateManager.currentInstance.registerRestoreSnapshot(self, snapshot: snapshot)
+    }
+    
     public func transaction(transactionFunction: Void -> Void) {
         beginTransaction()
         transactionFunction()

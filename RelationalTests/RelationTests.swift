@@ -1902,7 +1902,51 @@ class RelationTests: DBTestCase {
         TestAsyncObserver.assertNoChanges(to: count2,
                                           changingRelation: r1,
                                           change: { r1.asyncAdd(["n": 1]) })
+    }
+    
+    func testAsyncSnapshotRestore() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        
+        r.add(["n": 1])
+        r.add(["n": 2])
+        
+        let snapshot = db.takeSnapshot()
+        
+        r.delete(Attribute("n") *== 2)
+        r.add(["n": 3])
+        
+        TestAsyncObserver.assertChanges(r,
+                                        change: { db.asyncRestoreSnapshot(snapshot) },
+                                        expectedAdded: [["n": 2]],
+                                        expectedRemoved: [["n": 3]])
+    }
+    
+    func testAsyncSnapshotRestoreWithOtherChanges() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        
+        r.add(["n": 1])
+        r.add(["n": 2])
+        
+        let snapshot = db.takeSnapshot()
+        
+        r.delete(Attribute("n") *== 2)
+        r.add(["n": 3])
+        
+        TestAsyncCoalescedObserver.assertChanges(r,
+                                                 change: {
+                                                    r.asyncAdd(["n": 10])
+                                                    db.asyncRestoreSnapshot(snapshot)
+                                                    r.asyncAdd(["n": 11]) },
+                                                 expectedAdded: [["n": 2], ["n": 11]],
+                                                 expectedRemoved: [["n": 3]])
     }
 }
 

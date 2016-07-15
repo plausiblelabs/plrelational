@@ -32,6 +32,13 @@ public final class UpdateManager: PerThreadInstance {
         registerChange(relation)
     }
     
+    public func registerRestoreSnapshot(database: TransactionalDatabase, snapshot: ChangeLoggingDatabaseSnapshot) {
+        pendingUpdates.append(.RestoreSnapshot(database, snapshot))
+        for (_, relation) in database.relations {
+            registerChange(relation)
+        }
+    }
+    
     public func observe(relation: Relation, observer: AsyncRelationObserver) -> ObservationRemover {
         guard let obj = relation as? AnyObject else { return {} }
         
@@ -118,7 +125,15 @@ public final class UpdateManager: PerThreadInstance {
                 let derivative = info.derivative
                 for variable in derivative.allVariables {
                     let removal = variable.addChangeObserver({
-                        derivative.setChange($0, forVariable: variable)
+                        let copiedAddResult = $0.added.map(ConcreteRelation.copyRelation)
+                        let copiedRemoveResult = $0.removed.map(ConcreteRelation.copyRelation)
+                        
+                        if let err = copiedAddResult?.err ?? copiedRemoveResult?.err {
+                            fatalError("Error copying changes, don't know how to handle that yet: \(err)")
+                        }
+                        
+                        let copiedChange = RelationChange(added: copiedAddResult?.ok, removed: copiedRemoveResult?.ok)
+                        derivative.addChange(copiedChange, toVariable: variable)
                     })
                     removals.append(removal)
                     
@@ -150,6 +165,15 @@ public final class UpdateManager: PerThreadInstance {
                 case .Delete(let relation, let query):
                     let result = relation.delete(query)
                     error = result.err
+                case .RestoreSnapshot(let database, let snapshot):
+                    if databases.contains(database) {
+                        database.endTransaction()
+                        database.restoreSnapshot(snapshot)
+                        database.beginTransaction()
+                    } else {
+                        database.restoreSnapshot(snapshot)
+                    }
+                    error = nil
                 }
                 
                 if let error = error {
@@ -226,6 +250,8 @@ public final class UpdateManager: PerThreadInstance {
                         // Otherwise, terminate the execution. Reset observers and send didChange to them.
                         self.isExecuting = false
                         for (observedRelationObj, info) in observedInfo {
+                            info.derivative.clearVariables()
+                            
                             let relation = observedRelationObj as! Relation
                             var observersWithWillChange: [AsyncRelationObserver] = []
                             info.observers.mutatingForEach({
@@ -250,6 +276,7 @@ extension UpdateManager {
         case Update(Relation, SelectExpression, Row)
         case Add(TransactionalDatabase.TransactionalRelation, Row)
         case Delete(TransactionalDatabase.TransactionalRelation, SelectExpression)
+        case RestoreSnapshot(TransactionalDatabase, ChangeLoggingDatabaseSnapshot)
     }
     
     private class ObservedRelationInfo {
