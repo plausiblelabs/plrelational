@@ -1888,7 +1888,7 @@ class RelationTests: DBTestCase {
 private class TestAsyncObserver: AsyncRelationObserver {
     static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
         let observer = TestAsyncObserver()
-        let remover = UpdateManager.currentInstance.observe(relation, observer: observer)
+        let remover = relation.addAsyncObserver(observer)
         change()
         CFRunLoopRun()
         XCTAssertEqual(observer.willChangeCount, 1)
@@ -1926,7 +1926,7 @@ private class TestAsyncObserver: AsyncRelationObserver {
 private class TestAsyncCoalescedObserver: AsyncCoalescedRelationObserver {
     static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
         let observer = TestAsyncCoalescedObserver()
-        let remover = UpdateManager.currentInstance.observeCoalesced(relation, observer: observer)
+        let remover = relation.addAsyncCoalescedObserver(observer)
         change()
         CFRunLoopRun()
         XCTAssertEqual(observer.willChangeCount, 1)

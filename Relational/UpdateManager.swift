@@ -316,3 +316,13 @@ public protocol AsyncCoalescedRelationObserver {
     func relationWillChange(relation: Relation)
     func relationDidChange(relation: Relation, added: Set<Row>, removed: Set<Row>)
 }
+
+public extension Relation {
+    func addAsyncObserver(observer: AsyncRelationObserver) -> UpdateManager.ObservationRemover {
+        return UpdateManager.currentInstance.observe(self, observer: observer)
+    }
+    
+    func addAsyncCoalescedObserver(observer: AsyncCoalescedRelationObserver) -> UpdateManager.ObservationRemover {
+        return UpdateManager.currentInstance.observeCoalesced(self, observer: observer)
+    }
+}
