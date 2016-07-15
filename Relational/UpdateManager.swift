@@ -93,18 +93,25 @@ public final class UpdateManager: PerThreadInstance {
     }
     
     private func executeBody() {
+        // Apply all pending updates asynchronously. Update work is done in the background, with callbacks onto
+        // this runloop for synchronization and notifying observers.
         let updates = pendingUpdates
         pendingUpdates = []
         
         let observedInfo = self.observedInfo
         
+        // Wrap up the work needed to call back into the originating runloop.
         let runloop = CFRunLoopGetCurrent()
         func callback(f: Void -> Void) {
             CFRunLoopPerformBlock(runloop, kCFRunLoopCommonModes, f)
             CFRunLoopWakeUp(runloop)
         }
         
+        // Run updates in the background.
         dispatch_async(dispatch_get_global_queue(0, 0), {
+            // Walk through all the observers. Observe changes on all relevant variables and update
+            // observer derivatives with those changes as they come in. Also locate all
+            // TransactionalDatabases referenced within so we can begin and end transactions.
             var databases: ObjectSet<TransactionalDatabase> = []
             var removals: [Void -> Void] = []
             for (_, info) in observedInfo {
@@ -121,10 +128,14 @@ public final class UpdateManager: PerThreadInstance {
                 }
             }
             
+            // Wrap everything up in a transaction.
+            // TODO: this doesn't really work when there's more than one database, even though we sort of
+            // pretend like it does. Fix that? Explicitly limit it to one database?
             for db in databases {
                 db.beginTransaction()
             }
             
+            // Apply the actual updates to the relations.
             for update in updates {
                 let error: RelationError?
                 switch update {
@@ -145,20 +156,26 @@ public final class UpdateManager: PerThreadInstance {
                 }
             }
             
+            // And end the transaction.
             for db in databases {
                 db.endTransaction()
             }
             
+            // All changes are done, so remove the observations registered above.
             for removal in removals {
                 removal()
             }
             
+            // We'll be doing a bunch of async work to notify observers. Use a dispatch group to figure out when it's all done.
             let doneGroup = dispatch_group_create()
             
+            // Go through all the observers and notify them.
             for (observedRelationObj, info) in observedInfo {
                 let relation = observedRelationObj as! Relation
                 let change = info.derivative.change
                 
+                // If there are additions, then iterate over them and send them to the observer. Iteration is started in the
+                // original runloop, which ensures that the callbacks happen there too.
                 if let added = change.added {
                     dispatch_group_enter(doneGroup)
                     callback({
@@ -176,6 +193,7 @@ public final class UpdateManager: PerThreadInstance {
                         })
                     })
                 }
+                // Do the same if there are removals.
                 if let removed = change.removed {
                     dispatch_group_enter(doneGroup)
                     callback({
@@ -195,11 +213,16 @@ public final class UpdateManager: PerThreadInstance {
                 }
             }
             
+            // Wait until done. If there are no changes then this will execute immediately. Otherwise it will execute
+            // when all the iteration above is complete.
             dispatch_group_notify(doneGroup, dispatch_get_global_queue(0, 0), {
                 callback({
+                    // If new pending updates came in while we were doing our thing, then go back to the top
+                    // and start over, applying those updates too.
                     if !self.pendingUpdates.isEmpty {
                         self.executeBody()
                     } else {
+                        // Otherwise, terminate the execution. Reset observers and send didChange to them.
                         self.isExecuting = false
                         for (observedRelationObj, info) in observedInfo {
                             let relation = observedRelationObj as! Relation
