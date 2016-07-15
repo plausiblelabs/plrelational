@@ -14,7 +14,7 @@ private class RelationSignal<T>: Signal<T> {
         self.relation = relation
         self.rowsToValue = rowsToValue
         
-        super.init(changeCount: 0)
+        super.init(changeCount: 0, startFunc: {})
         
         self.removal = relation.addChangeObserver({ [weak self] _ in
             guard let strongSelf = self else { return }
@@ -24,7 +24,7 @@ private class RelationSignal<T>: Signal<T> {
         })
     }
     
-    private override func start() {
+    private override func startImpl() {
         self.notifyWillChange()
         relation.asyncAllRows({ result in
             if let rows = result.ok {
