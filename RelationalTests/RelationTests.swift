@@ -1819,17 +1819,17 @@ class RelationTests: DBTestCase {
         
         TestAsyncObserver.assertChanges(u,
                                         change: {
-                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 1])
-                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 2])
-                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 3])
-                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 4]) },
+                                            r.asyncAdd(["n": 1])
+                                            r.asyncAdd(["n": 2])
+                                            r.asyncAdd(["n": 3])
+                                            r.asyncAdd(["n": 4]) },
                                         expectedAdded: [["n": 1], ["n": 2], ["n": 3], ["n": 4]],
                                         expectedRemoved: [])
         TestAsyncObserver.assertChanges(u,
                                         change: {
-                                            UpdateManager.currentInstance.registerUpdate(r, query: Attribute("n") *== 2, newValues: ["n": 10])
-                                            UpdateManager.currentInstance.registerDelete(r, query: Attribute("n") *== 3)
-                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 5]) },
+                                            r.asyncUpdate(Attribute("n") *== 2, newValues: ["n": 10])
+                                            r.asyncDelete(Attribute("n") *== 3)
+                                            r.asyncAdd(["n": 5]) },
                                         expectedAdded: [["n": 10], ["n": 5]],
                                         expectedRemoved: [["n": 2], ["n": 3]])
     }
@@ -1878,8 +1878,8 @@ class RelationTests: DBTestCase {
         
         TestAsyncCoalescedObserver.assertChanges(intersection,
                                         change: {
-                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 1])
-                                            UpdateManager.currentInstance.registerAdd(r, row: ["n": 4]) },
+                                            r.asyncAdd(["n": 1])
+                                            r.asyncAdd(["n": 4]) },
                                         expectedAdded: [["n": 1], ["n": 2]],
                                         expectedRemoved: [])
     }

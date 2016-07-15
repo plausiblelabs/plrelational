@@ -326,3 +326,9 @@ public extension Relation {
         return UpdateManager.currentInstance.observeCoalesced(self, observer: observer)
     }
 }
+
+public extension Relation {
+    func asyncUpdate(query: SelectExpression, newValues: Row) {
+        UpdateManager.currentInstance.registerUpdate(self, query: query, newValues: newValues)
+    }
+}

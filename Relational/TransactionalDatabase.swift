@@ -145,7 +145,7 @@ public class TransactionalDatabase {
     }
 }
 
-extension TransactionalDatabase {
+public extension TransactionalDatabase {
     public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
         weak var db: TransactionalDatabase?
         var underlyingRelation: ChangeLoggingRelation<SQLiteTableRelation>
@@ -209,3 +209,13 @@ extension TransactionalDatabase {
     }
 }
 
+// This ought to go in UpdateManager.swift but the compiler barfs on it there for some reason.
+public extension TransactionalDatabase.TransactionalRelation {
+    func asyncAdd(row: Row) {
+        UpdateManager.currentInstance.registerAdd(self, row: row)
+    }
+    
+    func asyncDelete(query: SelectExpression) {
+        UpdateManager.currentInstance.registerDelete(self, query: query)
+    }
+}
