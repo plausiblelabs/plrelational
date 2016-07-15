@@ -44,7 +44,10 @@ public protocol SignalType: class {
     /// The current change count (incremented by will-change and decremented by did-change).
     var changeCount: Int { get }
     
+    /// Causes the underlying signal to start delivering values.
     func start()
+    
+    /// Registers the given observer, which will be notified when the signal delivers new values.
     func observe(observer: SignalObserver<Value>) -> ObserverRemoval
 }
 
@@ -54,15 +57,19 @@ public class Signal<T>: SignalType {
     public typealias Notify = SignalObserver<T>
 
     public private(set) var changeCount: Int
+    private let startFunc: () -> Void
+    private var started = false
+    
     private var observers: [UInt64: Observer] = [:]
     private var nextObserverID: UInt64 = 0
     
-    internal init(changeCount: Int) {
+    internal init(changeCount: Int, startFunc: () -> Void) {
         self.changeCount = changeCount
+        self.startFunc = startFunc
     }
     
     public static func pipe() -> (Signal, Notify) {
-        let signal = Signal(changeCount: 0)
+        let signal = Signal(changeCount: 0, startFunc: {})
         let notify = SignalObserver(
             valueWillChange: signal.notifyWillChange,
             valueChanging: signal.notifyChanging,
@@ -74,8 +81,17 @@ public class Signal<T>: SignalType {
     public var signal: Signal<T> {
         return self
     }
+
+    public final func start() {
+        if !started {
+            started = true
+            startImpl()
+        }
+    }
     
-    public func start() {
+    /// Invokes the provided startFunc by default, but subclasses can override for custom start behavior.
+    internal func startImpl() {
+        startFunc()
     }
     
     public func observe(observer: Observer) -> ObserverRemoval {

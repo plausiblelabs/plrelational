@@ -127,13 +127,12 @@ extension SequenceType where Generator.Element: SignalType, Generator.Element.Va
 }
 
 private class MappedSignal<T>: Signal<T> {
-    private let startFunc: () -> Void
     private var removal: ObserverRemoval!
     
     init<S: SignalType>(underlying: S, transform: (S.Value) -> T) {
-        self.startFunc = { underlying.start() }
-        
-        super.init(changeCount: underlying.changeCount)
+        super.init(changeCount: underlying.changeCount, startFunc: {
+            underlying.start()
+        })
         
         self.removal = underlying.observe(SignalObserver(
             valueWillChange: { [weak self] in
@@ -148,27 +147,20 @@ private class MappedSignal<T>: Signal<T> {
         ))
     }
     
-    private override func start() {
-        startFunc()
-    }
-    
     deinit {
         removal()
     }
 }
 
 private class BinaryOpSignal<T>: Signal<T> {
-    private let startFunc: () -> Void
     private var removal1: ObserverRemoval!
     private var removal2: ObserverRemoval!
     
     init<LHS: SignalType, RHS: SignalType>(_ lhs: LHS, _ rhs: RHS, _ f: (LHS.Value, RHS.Value) -> T) {
-        self.startFunc = {
+        super.init(changeCount: lhs.changeCount + rhs.changeCount, startFunc: {
             lhs.start()
             rhs.start()
-        }
-
-        super.init(changeCount: lhs.changeCount + rhs.changeCount)
+        })
         
         var lhsValue: LHS.Value?
         var rhsValue: RHS.Value?
@@ -204,10 +196,6 @@ private class BinaryOpSignal<T>: Signal<T> {
         ))
     }
     
-    private override func start() {
-        startFunc()
-    }
-    
     deinit {
         removal1()
         removal2()
@@ -216,20 +204,17 @@ private class BinaryOpSignal<T>: Signal<T> {
 
 // TODO: Merge this with BinaryOpSignal?
 private class BoolSeqSignal: Signal<Bool> {
-    private let startFunc: () -> Void
     private var removals: [ObserverRemoval] = []
     
     init<S: SequenceType where S.Generator.Element: SignalType, S.Generator.Element.Value: BooleanType>(signals: S, _ f: [Bool?] -> Bool?) {
-        self.startFunc = {
-            signals.forEach{ $0.start() }
-        }
-
         var count = 0
         signals.forEach({ _ in count += 1 })
-        
         var values = [Bool?](count: count, repeatedValue: nil)
         
-        super.init(changeCount: signals.map{ $0.changeCount }.reduce(0, combine: +))
+        let changeCount = signals.map{ $0.changeCount }.reduce(0, combine: +)
+        super.init(changeCount: changeCount, startFunc: {
+            signals.forEach{ $0.start() }
+        })
         
         for (index, signal) in signals.enumerate() {
             let removal = signal.observe(SignalObserver(
@@ -248,10 +233,6 @@ private class BoolSeqSignal: Signal<Bool> {
             ))
             removals.append(removal)
         }
-    }
-    
-    private override func start() {
-        startFunc()
     }
     
     deinit {
