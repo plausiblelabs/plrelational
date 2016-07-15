@@ -285,8 +285,7 @@ extension UpdateManager {
     public func observeCoalesced(relation: Relation, observer: AsyncCoalescedRelationObserver) -> ObservationRemover {
         class ShimObserver: AsyncRelationObserver {
             let bulkObserver: AsyncCoalescedRelationObserver
-            var added: Set<Row> = []
-            var removed: Set<Row> = []
+            var coalescedChanges = NegativeSet<Row>()
             
             init(bulkObserver: AsyncCoalescedRelationObserver) {
                 self.bulkObserver = bulkObserver
@@ -297,19 +296,15 @@ extension UpdateManager {
             }
             
             func relationAddedRows(relation: Relation, rows: Set<Row>) {
-                let new = rows.subtract(removed)
-                added.unionInPlace(new)
-                removed.subtractInPlace(rows)
+                coalescedChanges.unionInPlace(rows)
             }
             
             func relationRemovedRows(relation: Relation, rows: Set<Row>) {
-                let gone = rows.subtract(added)
-                removed.unionInPlace(gone)
-                added.subtractInPlace(rows)
+                coalescedChanges.subtractInPlace(rows)
             }
             
             func relationDidChange(relation: Relation) {
-                bulkObserver.relationDidChange(relation, added: added, removed: removed)
+                bulkObserver.relationDidChange(relation, added: coalescedChanges.added, removed: coalescedChanges.removed)
             }
         }
         

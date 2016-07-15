@@ -207,6 +207,7 @@
 		C277E80E1CE25E8F00B7B8F6 /* ModelDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E80D1CE25E8F00B7B8F6 /* ModelDatabaseTests.swift */; };
 		C277E8101CE4EF5400B7B8F6 /* SelectExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */; };
 		C277E8121CE4FAD400B7B8F6 /* SelectExpressionOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */; };
+		C2AC82641D3980E2005D39C9 /* NegativeSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2AC82631D3980E2005D39C9 /* NegativeSet.swift */; };
 		C2B339DE1CEA54E7008568E9 /* RelationDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B339DD1CEA54E7008568E9 /* RelationDump.swift */; };
 		C2B53CB51D1862ED006B6278 /* Mutex.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CB41D1862ED006B6278 /* Mutex.swift */; };
 		C2B53CBB1D197814006B6278 /* RWLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CBA1D197814006B6278 /* RWLock.swift */; };
@@ -728,6 +729,7 @@
 		C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpression.swift; sourceTree = "<group>"; };
 		C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpressionOperators.swift; sourceTree = "<group>"; };
 		C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConcreteRelation.swift; sourceTree = "<group>"; };
+		C2AC82631D3980E2005D39C9 /* NegativeSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NegativeSet.swift; path = Relational/NegativeSet.swift; sourceTree = "<group>"; };
 		C2B339DD1CEA54E7008568E9 /* RelationDump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDump.swift; sourceTree = "<group>"; };
 		C2B53CB41D1862ED006B6278 /* Mutex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Mutex.swift; path = Relational/Mutex.swift; sourceTree = "<group>"; };
 		C2B53CBA1D197814006B6278 /* RWLock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RWLock.swift; path = Relational/RWLock.swift; sourceTree = "<group>"; };
@@ -1490,6 +1492,7 @@
 				C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */,
 				C23AAF411CF61890009E28E0 /* MirrorChildren.swift */,
 				C2B53CB41D1862ED006B6278 /* Mutex.swift */,
+				C2AC82631D3980E2005D39C9 /* NegativeSet.swift */,
 				C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */,
 				C204A1531D088B6300DF297F /* ObjectMap.swift */,
 				C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */,
@@ -2398,6 +2401,7 @@
 				C277E8071CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift in Sources */,
 				C22921D91CD12A9E00518184 /* ModelHelpers.swift in Sources */,
 				C2B53CBF1D1C2B0A006B6278 /* MemoryTableRelation.swift in Sources */,
+				C2AC82641D3980E2005D39C9 /* NegativeSet.swift in Sources */,
 				C22921DA1CD12AA200518184 /* ModelDatabase.swift in Sources */,
 				C2B339DE1CEA54E7008568E9 /* RelationDump.swift in Sources */,
 				C22921DB1CD12AA200518184 /* ModelRelation.swift in Sources */,
