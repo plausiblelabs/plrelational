@@ -1963,6 +1963,21 @@ class RelationTests: DBTestCase {
                                               change: { r.asyncAdd(["n": 2]) },
                                               expectedContents: [["n": 1], ["n": 2]])
     }
+    
+    func testAsyncCoalescedUpdateObservation() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        
+        TestAsyncCoalescedUpdateObserver.assertChanges(r,
+                                                       change: { r.asyncAdd(["n": 1]) },
+                                                       expectedContents: [["n": 1]])
+        TestAsyncCoalescedUpdateObserver.assertChanges(r,
+                                                       change: { r.asyncAdd(["n": 2]) },
+                                                       expectedContents: [["n": 1], ["n": 2]])
+    }
 }
 
 private class TestAsyncObserver: AsyncRelationObserver {
@@ -2071,6 +2086,30 @@ private class TestAsyncUpdateObserver: AsyncUpdateRelationObserver {
     }
     
     func relationDidChange(relation: Relation) {
+        CFRunLoopStop(CFRunLoopGetCurrent())
+    }
+}
+
+private class TestAsyncCoalescedUpdateObserver: AsyncCoalescedUpdateRelationObserver {
+    static func assertChanges(relation: Relation, change: Void -> Void, expectedContents: Set<Row>) {
+        let observer = TestAsyncCoalescedUpdateObserver()
+        let remover = relation.addAsyncCoalescedObserver(observer)
+        change()
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 1)
+        XCTAssertEqual(observer.rows, expectedContents)
+        remover()
+    }
+    
+    var willChangeCount = 0
+    var rows: Set<Row> = []
+    
+    func relationWillChange(relation: Relation) {
+        willChangeCount += 1
+    }
+    
+    func relationDidChange(relation: Relation, rows: Set<Row>) {
+        self.rows.unionInPlace(rows)
         CFRunLoopStop(CFRunLoopGetCurrent())
     }
 }

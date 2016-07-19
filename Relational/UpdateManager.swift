@@ -414,9 +414,45 @@ public protocol AsyncUpdateRelationObserver {
     func relationDidChange(relation: Relation)
 }
 
+extension UpdateManager {
+    public func observeCoalesced(relation: Relation, observer: AsyncCoalescedUpdateRelationObserver) -> ObservationRemover {
+        class ShimObserver: AsyncUpdateRelationObserver {
+            let coalescedObserver: AsyncCoalescedUpdateRelationObserver
+            var coalescedRows: Set<Row> = []
+            
+            init(coalescedObserver: AsyncCoalescedUpdateRelationObserver) {
+                self.coalescedObserver = coalescedObserver
+            }
+            
+            func relationWillChange(relation: Relation) {
+                coalescedObserver.relationWillChange(relation)
+            }
+            
+            func relationNewContents(relation: Relation, rows: Set<Row>) {
+                coalescedRows.unionInPlace(rows)
+            }
+            
+            func relationDidChange(relation: Relation) {
+                coalescedObserver.relationDidChange(relation, rows: coalescedRows)
+            }
+        }
+        
+        return self.observe(relation, observer: ShimObserver(coalescedObserver: observer))
+    }
+}
+
+public protocol AsyncCoalescedUpdateRelationObserver {
+    func relationWillChange(relation: Relation)
+    func relationDidChange(relation: Relation, rows: Set<Row>)
+}
+
 public extension Relation {
     func addAsyncObserver(observer: AsyncUpdateRelationObserver) -> UpdateManager.ObservationRemover {
         return UpdateManager.currentInstance.observe(self, observer: observer)
+    }
+    
+    func addAsyncCoalescedObserver(observer: AsyncCoalescedUpdateRelationObserver) -> UpdateManager.ObservationRemover {
+        return UpdateManager.currentInstance.observeCoalesced(self, observer: observer)
     }
 }
 
