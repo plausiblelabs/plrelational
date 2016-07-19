@@ -365,15 +365,15 @@ public protocol AsyncRelationObserver {
 extension UpdateManager {
     public func observeCoalesced(relation: Relation, observer: AsyncCoalescedRelationObserver) -> ObservationRemover {
         class ShimObserver: AsyncRelationObserver {
-            let bulkObserver: AsyncCoalescedRelationObserver
+            let coalescedObserver: AsyncCoalescedRelationObserver
             var coalescedChanges = NegativeSet<Row>()
             
-            init(bulkObserver: AsyncCoalescedRelationObserver) {
-                self.bulkObserver = bulkObserver
+            init(coalescedObserver: AsyncCoalescedRelationObserver) {
+                self.coalescedObserver = coalescedObserver
             }
             
             func relationWillChange(relation: Relation) {
-                bulkObserver.relationWillChange(relation)
+                coalescedObserver.relationWillChange(relation)
             }
             
             func relationAddedRows(relation: Relation, rows: Set<Row>) {
@@ -385,11 +385,11 @@ extension UpdateManager {
             }
             
             func relationDidChange(relation: Relation) {
-                bulkObserver.relationDidChange(relation, added: coalescedChanges.added, removed: coalescedChanges.removed)
+                coalescedObserver.relationDidChange(relation, added: coalescedChanges.added, removed: coalescedChanges.removed)
             }
         }
         
-        return self.observe(relation, observer: ShimObserver(bulkObserver: observer))
+        return self.observe(relation, observer: ShimObserver(coalescedObserver: observer))
     }
 }
 
