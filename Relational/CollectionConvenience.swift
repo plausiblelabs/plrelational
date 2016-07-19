@@ -19,6 +19,13 @@ public extension RangeReplaceableCollectionType {
             removeAtIndex(index)
         }
     }
+    
+    /// Append the element if it's non-nil, and ignore the call if it's nil.
+    mutating func appendNonNil(element: Generator.Element?) {
+        if let element = element {
+            self.append(element)
+        }
+    }
 }
 
 public extension CollectionType where Generator.Element: Equatable {
