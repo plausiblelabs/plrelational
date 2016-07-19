@@ -39,7 +39,25 @@ public final class UpdateManager: PerThreadInstance {
         }
     }
     
+    /// Register an observer for a Relation. The observer will receive all changes made to the relation
+    /// through the UpdateManager.
     public func observe(relation: Relation, observer: AsyncRelationObserver) -> ObservationRemover {
+        guard let obj = relation as? AnyObject else { return {} }
+        
+        let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
+        let id = info.addObserver(observer)
+        
+        return {
+            info.observers[id] = nil
+            if info.observers.isEmpty {
+                self.observedInfo[obj] = nil
+            }
+        }
+    }
+    
+    /// Register an observer for a Relation. When the Relation is changed through the UpdateManager,
+    /// the observer receives the Relation's new contents.
+    public func observe(relation: Relation, observer: AsyncUpdateRelationObserver) -> ObservationRemover {
         guard let obj = relation as? AnyObject else { return {} }
         
         let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
@@ -67,14 +85,19 @@ public final class UpdateManager: PerThreadInstance {
             for (observedRelation, info) in observedInfo {
                 for variable in info.derivative.allVariables {
                     if relationObject === variable {
-                        var willChangeObservers: [AsyncRelationObserver] = []
+                        var willChangeRelationObservers: [AsyncRelationObserver] = []
+                        var willChangeUpdateObservers: [AsyncUpdateRelationObserver] = []
                         info.observers.mutatingForEach({
                             if !$0.didSendWillChange {
                                 $0.didSendWillChange = true
-                                willChangeObservers.append($0.observer)
+                                willChangeRelationObservers.appendNonNil($0.relationObserver)
+                                willChangeUpdateObservers.appendNonNil($0.updateObserver)
                             }
                         })
-                        for observer in willChangeObservers {
+                        for observer in willChangeRelationObservers {
+                            observer.relationWillChange(observedRelation as! Relation)
+                        }
+                        for observer in willChangeUpdateObservers {
                             observer.relationWillChange(observedRelation as! Relation)
                         }
                     }
@@ -199,36 +222,59 @@ public final class UpdateManager: PerThreadInstance {
                 let relation = observedRelationObj as! Relation
                 let change = info.derivative.change
                 
-                // If there are additions, then iterate over them and send them to the observer. Iteration is started in the
-                // original runloop, which ensures that the callbacks happen there too.
-                if let added = change.added {
-                    dispatch_group_enter(doneGroup)
-                    callback({
-                        added.asyncBulkRows({ result in
-                            switch result {
-                            case .Ok(let rows) where rows.isEmpty:
-                                dispatch_group_leave(doneGroup)
-                            case .Ok(let rows):
-                                for observerEntry in info.observers.values {
-                                    observerEntry.observer.relationAddedRows(relation, rows: rows)
+                let relationObservers = info.observers.values.flatMap({ $0.relationObserver })
+                let updateObservers = info.observers.values.flatMap({ $0.updateObserver })
+                
+                if !relationObservers.isEmpty {
+                    // If there are additions, then iterate over them and send them to the observer. Iteration is started in the
+                    // original runloop, which ensures that the callbacks happen there too.
+                    if let added = change.added {
+                        dispatch_group_enter(doneGroup)
+                        callback({
+                            added.asyncBulkRows({ result in
+                                switch result {
+                                case .Ok(let rows) where rows.isEmpty:
+                                    dispatch_group_leave(doneGroup)
+                                case .Ok(let rows):
+                                    for observer in relationObservers {
+                                        observer.relationAddedRows(relation, rows: rows)
+                                    }
+                                case .Err(let err):
+                                    fatalError("Don't know how to deal with errors yet. \(err)")
                                 }
-                            case .Err(let err):
-                                fatalError("Don't know how to deal with errors yet. \(err)")
-                            }
+                            })
                         })
-                    })
+                    }
+                    // Do the same if there are removals.
+                    if let removed = change.removed {
+                        dispatch_group_enter(doneGroup)
+                        callback({
+                            removed.asyncBulkRows({ result in
+                                switch result {
+                                case .Ok(let rows) where rows.isEmpty:
+                                    dispatch_group_leave(doneGroup)
+                                case .Ok(let rows):
+                                    for observer in relationObservers {
+                                        observer.relationRemovedRows(relation, rows: rows)
+                                    }
+                                case .Err(let err):
+                                    fatalError("Don't know how to deal with errors yet. \(err)")
+                                }
+                            })
+                        })
+                    }
                 }
-                // Do the same if there are removals.
-                if let removed = change.removed {
+                
+                if !updateObservers.isEmpty {
                     dispatch_group_enter(doneGroup)
                     callback({
-                        removed.asyncBulkRows({ result in
+                        relation.asyncBulkRows({ result in
                             switch result {
                             case .Ok(let rows) where rows.isEmpty:
                                 dispatch_group_leave(doneGroup)
                             case .Ok(let rows):
-                                for observerEntry in info.observers.values {
-                                    observerEntry.observer.relationRemovedRows(relation, rows: rows)
+                                for observer in updateObservers {
+                                    observer.relationNewContents(relation, rows: rows)
                                 }
                             case .Err(let err):
                                 fatalError("Don't know how to deal with errors yet. \(err)")
@@ -253,15 +299,16 @@ public final class UpdateManager: PerThreadInstance {
                             info.derivative.clearVariables()
                             
                             let relation = observedRelationObj as! Relation
-                            var observersWithWillChange: [AsyncRelationObserver] = []
+                            var entriesWithWillChange: [ObservedRelationInfo.ObserverEntry] = []
                             info.observers.mutatingForEach({
                                 if $0.didSendWillChange {
                                     $0.didSendWillChange = false
-                                    observersWithWillChange.append($0.observer)
+                                    entriesWithWillChange.append($0)
                                 }
                             })
-                            for observer in observersWithWillChange {
-                                observer.relationDidChange(relation)
+                            for entry in entriesWithWillChange {
+                                entry.relationObserver?.relationDidChange(relation)
+                                entry.updateObserver?.relationDidChange(relation)
                             }
                         }
                     }
@@ -281,7 +328,8 @@ extension UpdateManager {
     
     private class ObservedRelationInfo {
         struct ObserverEntry {
-            var observer: AsyncRelationObserver
+            var relationObserver: AsyncRelationObserver?
+            var updateObserver: AsyncUpdateRelationObserver?
             var didSendWillChange: Bool
         }
         
@@ -295,7 +343,13 @@ extension UpdateManager {
         
         func addObserver(observer: AsyncRelationObserver) -> UInt64 {
             currentObserverID += 1
-            observers[currentObserverID] = ObserverEntry(observer: observer, didSendWillChange: false)
+            observers[currentObserverID] = ObserverEntry(relationObserver: observer, updateObserver: nil, didSendWillChange: false)
+            return currentObserverID
+        }
+        
+        func addObserver(observer: AsyncUpdateRelationObserver) -> UInt64 {
+            currentObserverID += 1
+            observers[currentObserverID] = ObserverEntry(relationObserver: nil, updateObserver: observer, didSendWillChange: false)
             return currentObserverID
         }
     }
@@ -351,6 +405,18 @@ public extension Relation {
     
     func addAsyncCoalescedObserver(observer: AsyncCoalescedRelationObserver) -> UpdateManager.ObservationRemover {
         return UpdateManager.currentInstance.observeCoalesced(self, observer: observer)
+    }
+}
+
+public protocol AsyncUpdateRelationObserver {
+    func relationWillChange(relation: Relation)
+    func relationNewContents(relation: Relation, rows: Set<Row>)
+    func relationDidChange(relation: Relation)
+}
+
+public extension Relation {
+    func addAsyncObserver(observer: AsyncUpdateRelationObserver) -> UpdateManager.ObservationRemover {
+        return UpdateManager.currentInstance.observe(self, observer: observer)
     }
 }
 

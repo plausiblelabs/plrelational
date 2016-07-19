@@ -1948,6 +1948,21 @@ class RelationTests: DBTestCase {
                                                  expectedAdded: [["n": 2], ["n": 11]],
                                                  expectedRemoved: [["n": 3]])
     }
+    
+    func testAsyncUpdateObservation() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        
+        TestAsyncUpdateObserver.assertChanges(r,
+                                              change: { r.asyncAdd(["n": 1]) },
+                                              expectedContents: [["n": 1]])
+        TestAsyncUpdateObserver.assertChanges(r,
+                                              change: { r.asyncAdd(["n": 2]) },
+                                              expectedContents: [["n": 1], ["n": 2]])
+    }
 }
 
 private class TestAsyncObserver: AsyncRelationObserver {
@@ -2029,6 +2044,33 @@ private class TestAsyncCoalescedObserver: AsyncCoalescedRelationObserver {
         addedRows = added
         removedRows = removed
         
+        CFRunLoopStop(CFRunLoopGetCurrent())
+    }
+}
+
+private class TestAsyncUpdateObserver: AsyncUpdateRelationObserver {
+    static func assertChanges(relation: Relation, change: Void -> Void, expectedContents: Set<Row>) {
+        let observer = TestAsyncUpdateObserver()
+        let remover = relation.addAsyncObserver(observer)
+        change()
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 1)
+        XCTAssertEqual(observer.rows, expectedContents)
+        remover()
+    }
+    
+    var willChangeCount = 0
+    var rows: Set<Row> = []
+    
+    func relationWillChange(relation: Relation) {
+        willChangeCount += 1
+    }
+    
+    func relationNewContents(relation: Relation, rows: Set<Row>) {
+        self.rows.unionInPlace(rows)
+    }
+    
+    func relationDidChange(relation: Relation) {
         CFRunLoopStop(CFRunLoopGetCurrent())
     }
 }
