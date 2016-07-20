@@ -216,6 +216,8 @@
 		C2B53CDC1D1C7BA0006B6278 /* QueryPlannerDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */; };
 		C2B53CDE1D1DBC3F006B6278 /* ObjectMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */; };
 		C2B53CE01D1DBCAE006B6278 /* ConsistentPRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */; };
+		C2BA22981D3FD65F00DCCE72 /* UpdateManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */; };
+		C2BA229A1D3FD70200DCCE72 /* RelationObservationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */; };
 		C2BD29921CD251870081FD05 /* Flight.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
 		C2BD29931CD251870081FD05 /* Store.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
@@ -738,6 +740,8 @@
 		C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryPlannerDump.swift; sourceTree = "<group>"; };
 		C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectMapTests.swift; path = Relational/ObjectMapTests.swift; sourceTree = "<group>"; };
 		C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ConsistentPRNG.swift; path = Relational/ConsistentPRNG.swift; sourceTree = "<group>"; };
+		C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateManagerTests.swift; sourceTree = "<group>"; };
+		C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObservationTests.swift; sourceTree = "<group>"; };
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
 		C2BD29911CD251870081FD05 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 		C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteBinding.swift; sourceTree = "<group>"; };
@@ -1441,6 +1445,7 @@
 				C204A14F1D071A9200DF297F /* RelationDerivative.swift */,
 				C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */,
 				C2B339DD1CEA54E7008568E9 /* RelationDump.swift */,
+				C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */,
 				C204A1511D073E6100DF297F /* RelationObserver.swift */,
 				C2C258691D0203CC0066EB82 /* RelationOperators.swift */,
 				C22921E71CD12CF100518184 /* RelationTests.swift */,
@@ -1452,6 +1457,7 @@
 				C257C7531CC017EB00234A89 /* SimpleDatabase.swift */,
 				C263BBF21CE51B51006B7662 /* UnaryOperator.swift */,
 				C2C6308A1D35553F00AD44C1 /* UpdateManager.swift */,
+				C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */,
 			);
 			path = Relational;
 			sourceTree = "<group>";
@@ -2422,6 +2428,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C2BD29941CD251A20081FD05 /* Flight.model in Sources */,
+				C2BA22981D3FD65F00DCCE72 /* UpdateManagerTests.swift in Sources */,
+				C2BA229A1D3FD70200DCCE72 /* RelationObservationTests.swift in Sources */,
 				C277E80E1CE25E8F00B7B8F6 /* ModelDatabaseTests.swift in Sources */,
 				C2BD29951CD251A20081FD05 /* Store.model in Sources */,
 				C2DF2BA01CFDE2B100ED8695 /* QueryRunnerTests.swift in Sources */,
