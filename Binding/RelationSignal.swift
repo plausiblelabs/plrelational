@@ -35,7 +35,7 @@ private class RelationSignal<T>: Signal<T> {
     }
 }
 
-extension RelationSignal: AsyncCoalescedRelationObserver {
+extension RelationSignal: AsyncRelationChangeCoalescedObserver {
     func relationWillChange(relation: Relation) {
         self.notifyWillChange()
     }

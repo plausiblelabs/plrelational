@@ -4,7 +4,32 @@
 //
 
 
-public protocol AsyncRelationObserver {
+/// There are two fundamenal ways to asynchronously observe relations: change observation and content observation.
+///
+/// Change observation provides the deltas for each change. This is useful for things that need to know exactly
+/// what changed, perhaps so they can efficiently update some other thing derived from the Relation content.
+///
+/// Content observation provides the entire Relation content after each change. This is useful for things that don't
+/// care about the details of which bits changed, just what the data looks like after the change.
+///
+/// Change observation is done by implementing AsyncRelationChangeObserver. The observer receives a willChange call
+/// any time an asynchronous update is scheduled for a Relation that the target Relation depends on. This happens
+/// regardless of whether the scheduled change actually alters the content of the target Relation, because figuring
+/// that out is expensive. The addedRows and removedRows methods are called zero or more times each to indicate
+/// new or deleted rows. If additional updates are made while this is in progress, the observer may receive redundant
+/// additions and removals (e.g. a row is shown as added, then as removed) during the same sequence of calls. When
+/// an update cycle is completed, didChange is called, if willChange was previously called.
+///
+/// Content observation is done by implementing AsyncRelationContentObserver. Like change observers, the observer
+/// receives a willChange call for any scheduled change to a dependent Relation. The newContents method is called
+/// zero or more times to report the new contents of the target Relation, and finally didChange is called.
+///
+/// Each type of observer also has a Coalesced variant. In this version, there's only willChange and didChange,
+/// where didChange also reports the entire set of deltas (for change observers) or the entire new content of the
+/// target Relation (for content observers). This saves observers from buffering everything manually, for observers
+/// which need to have everything before they can take any action.
+
+public protocol AsyncRelationChangeObserver {
     func relationWillChange(relation: Relation)
     func relationAddedRows(relation: Relation, rows: Set<Row>)
     func relationRemovedRows(relation: Relation, rows: Set<Row>)
@@ -12,12 +37,12 @@ public protocol AsyncRelationObserver {
 }
 
 extension UpdateManager {
-    public func observeCoalesced(relation: Relation, observer: AsyncCoalescedRelationObserver) -> ObservationRemover {
-        class ShimObserver: AsyncRelationObserver {
-            let coalescedObserver: AsyncCoalescedRelationObserver
+    public func observe(relation: Relation, observer: AsyncRelationChangeCoalescedObserver) -> ObservationRemover {
+        class ShimObserver: AsyncRelationChangeObserver {
+            let coalescedObserver: AsyncRelationChangeCoalescedObserver
             var coalescedChanges = NegativeSet<Row>()
             
-            init(coalescedObserver: AsyncCoalescedRelationObserver) {
+            init(coalescedObserver: AsyncRelationChangeCoalescedObserver) {
                 self.coalescedObserver = coalescedObserver
             }
             
@@ -42,34 +67,34 @@ extension UpdateManager {
     }
 }
 
-public protocol AsyncCoalescedRelationObserver {
+public protocol AsyncRelationChangeCoalescedObserver {
     func relationWillChange(relation: Relation)
     func relationDidChange(relation: Relation, added: Set<Row>, removed: Set<Row>)
 }
 
 public extension Relation {
-    func addAsyncObserver(observer: AsyncRelationObserver) -> UpdateManager.ObservationRemover {
+    func addAsyncObserver(observer: AsyncRelationChangeObserver) -> UpdateManager.ObservationRemover {
         return UpdateManager.currentInstance.observe(self, observer: observer)
     }
     
-    func addAsyncCoalescedObserver(observer: AsyncCoalescedRelationObserver) -> UpdateManager.ObservationRemover {
-        return UpdateManager.currentInstance.observeCoalesced(self, observer: observer)
+    func addAsyncObserver(observer: AsyncRelationChangeCoalescedObserver) -> UpdateManager.ObservationRemover {
+        return UpdateManager.currentInstance.observe(self, observer: observer)
     }
 }
 
-public protocol AsyncUpdateRelationObserver {
+public protocol AsyncRelationContentObserver {
     func relationWillChange(relation: Relation)
     func relationNewContents(relation: Relation, rows: Set<Row>)
     func relationDidChange(relation: Relation)
 }
 
 extension UpdateManager {
-    public func observeCoalesced(relation: Relation, observer: AsyncCoalescedUpdateRelationObserver) -> ObservationRemover {
-        class ShimObserver: AsyncUpdateRelationObserver {
-            let coalescedObserver: AsyncCoalescedUpdateRelationObserver
+    public func observe(relation: Relation, observer: AsyncRelationContentCoalescedObserver) -> ObservationRemover {
+        class ShimObserver: AsyncRelationContentObserver {
+            let coalescedObserver: AsyncRelationContentCoalescedObserver
             var coalescedRows: Set<Row> = []
             
-            init(coalescedObserver: AsyncCoalescedUpdateRelationObserver) {
+            init(coalescedObserver: AsyncRelationContentCoalescedObserver) {
                 self.coalescedObserver = coalescedObserver
             }
             
@@ -90,18 +115,18 @@ extension UpdateManager {
     }
 }
 
-public protocol AsyncCoalescedUpdateRelationObserver {
+public protocol AsyncRelationContentCoalescedObserver {
     func relationWillChange(relation: Relation)
     func relationDidChange(relation: Relation, rows: Set<Row>)
 }
 
 public extension Relation {
-    func addAsyncObserver(observer: AsyncUpdateRelationObserver) -> UpdateManager.ObservationRemover {
+    func addAsyncObserver(observer: AsyncRelationContentObserver) -> UpdateManager.ObservationRemover {
         return UpdateManager.currentInstance.observe(self, observer: observer)
     }
     
-    func addAsyncCoalescedObserver(observer: AsyncCoalescedUpdateRelationObserver) -> UpdateManager.ObservationRemover {
-        return UpdateManager.currentInstance.observeCoalesced(self, observer: observer)
+    func addAsyncObserver(observer: AsyncRelationContentCoalescedObserver) -> UpdateManager.ObservationRemover {
+        return UpdateManager.currentInstance.observe(self, observer: observer)
     }
 }
 

@@ -179,7 +179,7 @@ class UpdateManagerTests: DBTestCase {
     }
 }
 
-private class TestAsyncObserver: AsyncRelationObserver {
+private class TestAsyncObserver: AsyncRelationChangeObserver {
     static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
         let observer = TestAsyncObserver()
         let remover = relation.addAsyncObserver(observer)
@@ -231,10 +231,10 @@ private class TestAsyncObserver: AsyncRelationObserver {
     }
 }
 
-private class TestAsyncCoalescedObserver: AsyncCoalescedRelationObserver {
+private class TestAsyncCoalescedObserver: AsyncRelationChangeCoalescedObserver {
     static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
         let observer = TestAsyncCoalescedObserver()
-        let remover = relation.addAsyncCoalescedObserver(observer)
+        let remover = relation.addAsyncObserver(observer)
         change()
         CFRunLoopRun()
         XCTAssertEqual(observer.willChangeCount, 1)
@@ -262,7 +262,7 @@ private class TestAsyncCoalescedObserver: AsyncCoalescedRelationObserver {
     }
 }
 
-private class TestAsyncUpdateObserver: AsyncUpdateRelationObserver {
+private class TestAsyncUpdateObserver: AsyncRelationContentObserver {
     static func assertChanges(relation: Relation, change: Void -> Void, expectedContents: Set<Row>) {
         let observer = TestAsyncUpdateObserver()
         let remover = relation.addAsyncObserver(observer)
@@ -289,10 +289,10 @@ private class TestAsyncUpdateObserver: AsyncUpdateRelationObserver {
     }
 }
 
-private class TestAsyncCoalescedUpdateObserver: AsyncCoalescedUpdateRelationObserver {
+private class TestAsyncCoalescedUpdateObserver: AsyncRelationContentCoalescedObserver {
     static func assertChanges(relation: Relation, change: Void -> Void, expectedContents: Set<Row>) {
         let observer = TestAsyncCoalescedUpdateObserver()
-        let remover = relation.addAsyncCoalescedObserver(observer)
+        let remover = relation.addAsyncObserver(observer)
         change()
         CFRunLoopRun()
         XCTAssertEqual(observer.willChangeCount, 1)

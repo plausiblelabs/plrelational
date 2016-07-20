@@ -41,7 +41,7 @@ public final class UpdateManager: PerThreadInstance {
     
     /// Register an observer for a Relation. The observer will receive all changes made to the relation
     /// through the UpdateManager.
-    public func observe(relation: Relation, observer: AsyncRelationObserver) -> ObservationRemover {
+    public func observe(relation: Relation, observer: AsyncRelationChangeObserver) -> ObservationRemover {
         guard let obj = relation as? AnyObject else { return {} }
         
         let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
@@ -57,7 +57,7 @@ public final class UpdateManager: PerThreadInstance {
     
     /// Register an observer for a Relation. When the Relation is changed through the UpdateManager,
     /// the observer receives the Relation's new contents.
-    public func observe(relation: Relation, observer: AsyncUpdateRelationObserver) -> ObservationRemover {
+    public func observe(relation: Relation, observer: AsyncRelationContentObserver) -> ObservationRemover {
         guard let obj = relation as? AnyObject else { return {} }
         
         let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
@@ -85,8 +85,8 @@ public final class UpdateManager: PerThreadInstance {
             for (observedRelation, info) in observedInfo {
                 for variable in info.derivative.allVariables {
                     if relationObject === variable {
-                        var willChangeRelationObservers: [AsyncRelationObserver] = []
-                        var willChangeUpdateObservers: [AsyncUpdateRelationObserver] = []
+                        var willChangeRelationObservers: [AsyncRelationChangeObserver] = []
+                        var willChangeUpdateObservers: [AsyncRelationContentObserver] = []
                         info.observers.mutatingForEach({
                             if !$0.didSendWillChange {
                                 $0.didSendWillChange = true
@@ -328,8 +328,8 @@ extension UpdateManager {
     
     private class ObservedRelationInfo {
         struct ObserverEntry {
-            var relationObserver: AsyncRelationObserver?
-            var updateObserver: AsyncUpdateRelationObserver?
+            var relationObserver: AsyncRelationChangeObserver?
+            var updateObserver: AsyncRelationContentObserver?
             var didSendWillChange: Bool
         }
         
@@ -341,13 +341,13 @@ extension UpdateManager {
             self.derivative = derivative
         }
         
-        func addObserver(observer: AsyncRelationObserver) -> UInt64 {
+        func addObserver(observer: AsyncRelationChangeObserver) -> UInt64 {
             currentObserverID += 1
             observers[currentObserverID] = ObserverEntry(relationObserver: observer, updateObserver: nil, didSendWillChange: false)
             return currentObserverID
         }
         
-        func addObserver(observer: AsyncUpdateRelationObserver) -> UInt64 {
+        func addObserver(observer: AsyncRelationContentObserver) -> UInt64 {
             currentObserverID += 1
             observers[currentObserverID] = ObserverEntry(relationObserver: nil, updateObserver: observer, didSendWillChange: false)
             return currentObserverID
