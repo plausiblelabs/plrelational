@@ -18,6 +18,10 @@ public class MemoryTableRelation: Relation, RelationDefaultChangeObserverImpleme
         self.scheme = scheme
     }
     
+    public var contentProvider: RelationContentProvider {
+        return .Set({ self.values })
+    }
+    
     public func contains(row: Row) -> Result<Bool, RelationError> {
         return .Ok(values.contains(row))
     }

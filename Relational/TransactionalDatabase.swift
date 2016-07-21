@@ -167,11 +167,15 @@ public extension TransactionalDatabase {
             return underlyingRelation.scheme
         }
         
+        public var contentProvider: RelationContentProvider {
+            return .Underlying(underlyingRelationForQueryExecution)
+        }
+        
         public var underlyingRelationForQueryExecution: Relation {
             if let db = db where !db.inTransactionThread {
-                return underlyingRelation.underlyingRelationForQueryExecution
+                return underlyingRelation
             } else {
-                return (transactionRelation ?? underlyingRelation).underlyingRelationForQueryExecution
+                return (transactionRelation ?? underlyingRelation)
             }
         }
         

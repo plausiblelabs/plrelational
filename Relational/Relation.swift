@@ -9,7 +9,7 @@ public typealias RelationError = ErrorType
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     
-    var underlyingRelationForQueryExecution: Relation { get }
+    var contentProvider: RelationContentProvider { get }
     
     func contains(row: Row) -> Result<Bool, RelationError>
     
@@ -56,6 +56,13 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     func renameAttributes(renames: [Attribute: Attribute]) -> Relation
 }
 
+public enum RelationContentProvider {
+    case Generator(Void -> AnyGenerator<Result<Row, RelationError>>)
+    case Set(Void -> Swift.Set<Row>)
+    case Intermediate(IntermediateRelation.Operator, [Relation])
+    case Underlying(Relation)
+}
+
 public enum RelationObservationKind {
     /// A change due to something in the Relation itself.
     case DirectChange
@@ -68,12 +75,6 @@ extension Relation {
     /// A shortcut that adds a change observer for all kinds.
     public func addChangeObserver(observer: RelationObserver) -> (Void -> Void) {
         return addChangeObserver(observer, kinds: [.DirectChange, .DependentChange])
-    }
-}
-
-extension Relation {
-    public var underlyingRelationForQueryExecution: Relation {
-        return self
     }
 }
 

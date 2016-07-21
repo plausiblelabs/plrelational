@@ -41,15 +41,17 @@ class UpdateManagerTests: DBTestCase {
         let r = db["n"]
         
         class TriggerRelation: Relation {
-            var onUnderlyingRelationCallback: Void -> Void = {}
+            var onGetRowsCallback: Void -> Void = {}
             
             var scheme: Scheme {
                 return ["n"]
             }
             
-            var underlyingRelationForQueryExecution: Relation {
-                onUnderlyingRelationCallback()
-                return MakeRelation(["n"], [1], [2], [3])
+            var contentProvider: RelationContentProvider {
+                return .Set({
+                    self.onGetRowsCallback()
+                    return [["n": 1], ["n": 2], ["n": 3]]
+                })
             }
             
             func contains(row: Row) -> Result<Bool, RelationError> {
@@ -66,12 +68,12 @@ class UpdateManagerTests: DBTestCase {
         }
         
         let triggerRelation = TriggerRelation()
-        triggerRelation.onUnderlyingRelationCallback = {
+        triggerRelation.onGetRowsCallback = {
             dispatch_sync(dispatch_get_main_queue(), {
                 UpdateManager.currentInstance.registerAdd(r, row: ["n": 2])
                 UpdateManager.currentInstance.registerAdd(r, row: ["n": 5])
             })
-            triggerRelation.onUnderlyingRelationCallback = {}
+            triggerRelation.onGetRowsCallback = {}
         }
         let intersection = r.intersection(triggerRelation)
         

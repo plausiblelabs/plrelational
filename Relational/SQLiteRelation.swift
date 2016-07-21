@@ -31,7 +31,7 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
         precondition(queryToSQL(query) != nil, "Query terms must be SQL compatible!")
     }
     
-    public func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {
+    private func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {
         let data = LogRelationIterationBegin(self)
         var queryGenerator: AnyGenerator<Result<Row, RelationError>>? = nil
         return LogRelationIterationReturn(data, AnyGenerator(body: {
@@ -49,6 +49,10 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
                 }
             }
         }))
+    }
+    
+    public var contentProvider: RelationContentProvider {
+        return .Generator({ self.rawGenerateRows() })
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {

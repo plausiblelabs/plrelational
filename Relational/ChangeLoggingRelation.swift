@@ -87,8 +87,8 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
         return baseRelation.scheme
     }
     
-    public var underlyingRelationForQueryExecution: Relation {
-        return fullUnderlyingRelation.underlyingRelationForQueryExecution
+    public var contentProvider: RelationContentProvider {
+        return .Underlying(fullUnderlyingRelation)
     }
 
     public func contains(row: Row) -> Result<Bool, RelationError> {

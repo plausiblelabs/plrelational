@@ -47,6 +47,10 @@ public struct ConcreteRelation: MutableRelation {
         }
     }
     
+    public var contentProvider: RelationContentProvider {
+        return .Set({ self.values })
+    }
+    
     public mutating func add(row: Row) -> Result<Int64, RelationError> {
         precondition(rowMatchesScheme(row))
         values.insert(row)

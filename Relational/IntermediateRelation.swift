@@ -48,6 +48,10 @@ public class IntermediateRelation: Relation, RelationDefaultChangeObserverImplem
         }
         LogRelationCreation(self)
     }
+    
+    public var contentProvider: RelationContentProvider {
+        return .Intermediate(op, operands)
+    }
 }
 
 extension IntermediateRelation {

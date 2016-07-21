@@ -23,7 +23,7 @@ class QueryPlanner {
     var initiatorIndexes: [Int] {
         return (nodes.indices).filter({
             switch nodes[$0].op {
-            case .SQLiteTableScan, .ConcreteRows, .MemoryTableScan:
+            case .RowGenerator, .RowSet:
                 return true
             default:
                 return false
@@ -33,15 +33,6 @@ class QueryPlanner {
     
     var allOutputCallbacks: [OutputCallback] {
         return rootRelations.map({ $1 })
-    }
-    
-    func initiatorRelation(initiator: QueryPlanner.Node) -> Relation {
-        switch initiator.op {
-        case .SQLiteTableScan(let relation):
-            return relation
-        default:
-            fatalError("Node operation \(initiator.op) is not a known initiator operation")
-        }
     }
     
     private func computeNodes() {
@@ -58,7 +49,7 @@ class QueryPlanner {
                 }
             }
             for childRelation in children {
-                let childNodeIndex = getOrCreateNodeIndex(childRelation.underlyingRelationForQueryExecution)
+                let childNodeIndex = getOrCreateNodeIndex(QueryPlanner.underlyingRelation(childRelation))
                 nodes[childNodeIndex].parentIndexes.append(parentNodeIndex)
                 nodes[parentNodeIndex].childIndexes.append(childNodeIndex)
             }
@@ -81,22 +72,20 @@ class QueryPlanner {
     }
     
     private func relationToNode(r: Relation) -> Node {
-        switch r {
-        case let r as IntermediateRelation:
-            return intermediateRelationToNode(r)
-        case let r as ConcreteRelation:
-            return Node(op: .ConcreteRows(r.values))
-        case let r as SQLiteRelation:
-            return Node(op: .SQLiteTableScan(r))
-        case let r as MemoryTableRelation:
-            return Node(op: .MemoryTableScan(r))
-        default:
-            fatalError("Don't know how to handle node type \(r.dynamicType)")
+        switch r.contentProvider {
+        case .Generator(let generatorGetter):
+            return Node(op: .RowGenerator(generatorGetter))
+        case .Set(let setGetter):
+            return Node(op: .RowSet(setGetter))
+        case .Intermediate(let op, let operands):
+            return intermediateRelationToNode(op, operands)
+        case .Underlying:
+            fatalError("Underlying should never show up in QueryPlanner")
         }
     }
     
-    private func intermediateRelationToNode(r: IntermediateRelation) -> Node {
-        switch r.op {
+    private func intermediateRelationToNode(op: IntermediateRelation.Operator, _ operands: [Relation]) -> Node {
+        switch op {
         case .Union:
             return Node(op: .Union)
         case .Intersection:
@@ -131,6 +120,16 @@ class QueryPlanner {
             transactionalDatabases[db] = nodeIndex
         }
     }
+    
+    private static func underlyingRelation(r: Relation) -> Relation {
+        switch r.contentProvider {
+        case .Underlying(let underlying):
+            // We may have to peel back multiple layers, so recurse in this case.
+            return underlyingRelation(underlying)
+        default:
+            return r
+        }
+    }
 }
 
 extension QueryPlanner {
@@ -159,9 +158,8 @@ extension QueryPlanner {
     }
     
     enum Operation {
-        case SQLiteTableScan(SQLiteRelation)
-        case ConcreteRows(Set<Row>)
-        case MemoryTableScan(MemoryTableRelation)
+        case RowGenerator(Void -> AnyGenerator<Result<Row, RelationError>>)
+        case RowSet(Void -> Set<Row>)
         
         case Union
         case Intersection
@@ -198,7 +196,7 @@ extension QueryPlanner {
                 break
             }
             
-            let realR = relation.underlyingRelationForQueryExecution
+            let realR = underlyingRelation(relation)
             iterationCount += 1
             if let obj = realR as? AnyObject {
                 let retrievedCount = visited.getOrCreate(obj, defaultValue: iterationCount)

@@ -140,8 +140,8 @@ public class QueryRunner {
         
         let op = nodes[nodeIndex].op
         switch op {
-        case .SQLiteTableScan(let relation):
-            let row = getSQLiteTableScanRow(nodeIndex, relation: relation)
+        case .RowGenerator(let generatorGetter):
+            let row = getSQLiteTableScanRow(nodeIndex, generatorGetter)
             switch row {
             case .Some(.Err(let err)):
                 return .Err(err)
@@ -151,12 +151,8 @@ public class QueryRunner {
                 activeInitiatorIndexes.removeLast()
                 markDone(nodeIndex)
             }
-        case .ConcreteRows(let rows):
-            writeOutput(rows, fromNode: nodeIndex)
-            activeInitiatorIndexes.removeLast()
-            markDone(nodeIndex)
-        case .MemoryTableScan(let relation):
-            writeOutput(relation.values, fromNode: nodeIndex)
+        case .RowSet(let rowGetter):
+            writeOutput(rowGetter(), fromNode: nodeIndex)
             activeInitiatorIndexes.removeLast()
             markDone(nodeIndex)
         default:
@@ -172,8 +168,8 @@ public class QueryRunner {
         return .Ok()
     }
     
-    private func getSQLiteTableScanRow(initiatorIndex: Int, relation: SQLiteRelation) -> Result<Row, RelationError>? {
-        let generator = initiatorGenerators.getOrCreate(initiatorIndex, defaultValue: relation.rawGenerateRows())
+    private func getSQLiteTableScanRow(initiatorIndex: Int, _ generatorGetter: Void -> AnyGenerator<Result<Row, RelationError>>) -> Result<Row, RelationError>? {
+        let generator = initiatorGenerators.getOrCreate(initiatorIndex, defaultValue: generatorGetter())
         return generator.next()
     }
     
