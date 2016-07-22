@@ -240,7 +240,10 @@ public final class UpdateManager: PerThreadInstance {
                                         observer.relationAddedRows(relation, rows: rows)
                                     }
                                 case .Err(let err):
-                                    fatalError("Don't know how to deal with errors yet. \(err)")
+                                    for observer in relationObservers {
+                                        observer.relationError(relation, error: err)
+                                    }
+                                    dispatch_group_leave(doneGroup)
                                 }
                             })
                         })
@@ -258,7 +261,10 @@ public final class UpdateManager: PerThreadInstance {
                                         observer.relationRemovedRows(relation, rows: rows)
                                     }
                                 case .Err(let err):
-                                    fatalError("Don't know how to deal with errors yet. \(err)")
+                                    for observer in relationObservers {
+                                        observer.relationError(relation, error: err)
+                                    }
+                                    dispatch_group_leave(doneGroup)
                                 }
                             })
                         })
@@ -277,7 +283,10 @@ public final class UpdateManager: PerThreadInstance {
                                     observer.relationNewContents(relation, rows: rows)
                                 }
                             case .Err(let err):
-                                fatalError("Don't know how to deal with errors yet. \(err)")
+                                for observer in updateObservers {
+                                    observer.relationError(relation, error: err)
+                                }
+                                dispatch_group_leave(doneGroup)
                             }
                         })
                     })

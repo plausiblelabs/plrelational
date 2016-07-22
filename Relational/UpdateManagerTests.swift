@@ -179,6 +179,71 @@ class UpdateManagerTests: DBTestCase {
                                                        change: { r.asyncAdd(["n": 2]) },
                                                        expectedContents: [["n": 1], ["n": 2]])
     }
+    
+    func testErrorFromRelation() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r1 = db["n"]
+        
+        struct DummyError: ErrorType {}
+        class ErroringRelation: Relation {
+            var scheme: Scheme { return ["n"] }
+            
+            var contentProvider: RelationContentProvider {
+                let results: [Result<Row, RelationError>] = [
+                    .Ok(["n": 1]),
+                    .Ok(["n": 2]),
+                    .Ok(["n": 3]),
+                    .Err(DummyError())
+                ]
+                return .Generator({ AnyGenerator(results.generate()) })
+            }
+            
+            func contains(row: Row) -> Result<Bool, RelationError> {
+                switch row["n"] {
+                case 1, 2, 3 where row.values.count == 1: return .Ok(true)
+                default: return .Ok(false)
+                }
+            }
+            
+            func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+                fatalError("We don't do updates here")
+            }
+            
+            func addChangeObserver(observer: RelationObserver, kinds: [RelationObservationKind]) -> (Void -> Void) {
+                return {}
+            }
+        }
+        
+        let r2 = ErroringRelation()
+        let union = r1.union(r2)
+        
+        let changeObserver = TestAsyncObserver()
+        let changeRemover = union.addAsyncObserver(changeObserver)
+        let coalescedChangeObserver = TestAsyncCoalescedObserver()
+        let coalescedChangeRemover = union.addAsyncObserver(coalescedChangeObserver)
+        let contentObserver = TestAsyncUpdateObserver()
+        let contentRemover = union.addAsyncObserver(contentObserver)
+        let contentCoalescedObserver = TestAsyncCoalescedUpdateObserver()
+        let contentCoalescedRemover = union.addAsyncObserver(contentCoalescedObserver)
+        
+        r1.asyncAdd(["n": 4])
+        r1.asyncAdd(["n": 5])
+        
+        CFRunLoopRun()
+        
+        changeRemover()
+        coalescedChangeRemover()
+        contentRemover()
+        contentCoalescedRemover()
+        
+        XCTAssertTrue(changeObserver.error is DummyError)
+        XCTAssertTrue(coalescedChangeObserver.result?.err is DummyError)
+        XCTAssertTrue(contentObserver.error is DummyError)
+        XCTAssertTrue(contentCoalescedObserver.result?.err is DummyError)
+    }
 }
 
 private class TestAsyncObserver: AsyncRelationChangeObserver {
@@ -211,6 +276,7 @@ private class TestAsyncObserver: AsyncRelationChangeObserver {
     var willChangeCount = 0
     var addedRows: Set<Row>?
     var removedRows: Set<Row>?
+    var error: RelationError?
     var didChangeCount = 0
     
     func relationWillChange(relation: Relation) {
@@ -227,6 +293,10 @@ private class TestAsyncObserver: AsyncRelationChangeObserver {
         removedRows = rows
     }
     
+    func relationError(relation: Relation, error: RelationError) {
+        self.error = error
+    }
+    
     func relationDidChange(relation: Relation) {
         didChangeCount += 1
         CFRunLoopStop(CFRunLoopGetCurrent())
@@ -240,25 +310,22 @@ private class TestAsyncCoalescedObserver: AsyncRelationChangeCoalescedObserver {
         change()
         CFRunLoopRun()
         XCTAssertEqual(observer.willChangeCount, 1)
-        XCTAssertEqual(observer.addedRows ?? [], expectedAdded)
-        XCTAssertEqual(observer.removedRows ?? [], expectedRemoved)
+        XCTAssertNil(observer.result?.err)
+        XCTAssertEqual(observer.result?.ok?.added ?? [], expectedAdded)
+        XCTAssertEqual(observer.result?.ok?.removed ?? [], expectedRemoved)
         remover()
     }
     
     var willChangeCount = 0
-    var addedRows: Set<Row>?
-    var removedRows: Set<Row>?
+    var result: Result<NegativeSet<Row>, RelationError>?
     
     func relationWillChange(relation: Relation) {
         willChangeCount += 1
     }
     
-    func relationDidChange(relation: Relation, added: Set<Row>, removed: Set<Row>) {
-        XCTAssertNil(addedRows)
-        XCTAssertNil(removedRows)
-        
-        addedRows = added
-        removedRows = removed
+    func relationDidChange(relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+        XCTAssertNil(self.result)
+        self.result = result
         
         CFRunLoopStop(CFRunLoopGetCurrent())
     }
@@ -277,6 +344,7 @@ private class TestAsyncUpdateObserver: AsyncRelationContentObserver {
     
     var willChangeCount = 0
     var rows: Set<Row> = []
+    var error: RelationError?
     
     func relationWillChange(relation: Relation) {
         willChangeCount += 1
@@ -284,6 +352,10 @@ private class TestAsyncUpdateObserver: AsyncRelationContentObserver {
     
     func relationNewContents(relation: Relation, rows: Set<Row>) {
         self.rows.unionInPlace(rows)
+    }
+    
+    func relationError(relation: Relation, error: RelationError) {
+        self.error = error
     }
     
     func relationDidChange(relation: Relation) {
@@ -298,19 +370,19 @@ private class TestAsyncCoalescedUpdateObserver: AsyncRelationContentCoalescedObs
         change()
         CFRunLoopRun()
         XCTAssertEqual(observer.willChangeCount, 1)
-        XCTAssertEqual(observer.rows, expectedContents)
+        XCTAssertEqual(observer.result?.ok, expectedContents)
         remover()
     }
     
     var willChangeCount = 0
-    var rows: Set<Row> = []
+    var result: Result<Set<Row>, RelationError>?
     
     func relationWillChange(relation: Relation) {
         willChangeCount += 1
     }
     
-    func relationDidChange(relation: Relation, rows: Set<Row>) {
-        self.rows.unionInPlace(rows)
+    func relationDidChange(relation: Relation, result: Result<Set<Row>, RelationError>) {
+        self.result = result
         CFRunLoopStop(CFRunLoopGetCurrent())
     }
 }

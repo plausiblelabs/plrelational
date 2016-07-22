@@ -33,6 +33,7 @@ public protocol AsyncRelationChangeObserver {
     func relationWillChange(relation: Relation)
     func relationAddedRows(relation: Relation, rows: Set<Row>)
     func relationRemovedRows(relation: Relation, rows: Set<Row>)
+    func relationError(relation: Relation, error: RelationError)
     func relationDidChange(relation: Relation)
 }
 
@@ -41,6 +42,7 @@ extension UpdateManager {
         class ShimObserver: AsyncRelationChangeObserver {
             let coalescedObserver: AsyncRelationChangeCoalescedObserver
             var coalescedChanges = NegativeSet<Row>()
+            var error: RelationError?
             
             init(coalescedObserver: AsyncRelationChangeCoalescedObserver) {
                 self.coalescedObserver = coalescedObserver
@@ -58,8 +60,13 @@ extension UpdateManager {
                 coalescedChanges.subtractInPlace(rows)
             }
             
+            func relationError(relation: Relation, error: RelationError) {
+                self.error = error
+            }
+            
             func relationDidChange(relation: Relation) {
-                coalescedObserver.relationDidChange(relation, added: coalescedChanges.added, removed: coalescedChanges.removed)
+                let result = error.map(Result.Err) ?? .Ok(NegativeSet(added: coalescedChanges.added, removed: coalescedChanges.removed))
+                coalescedObserver.relationDidChange(relation, result: result)
             }
         }
         
@@ -69,7 +76,7 @@ extension UpdateManager {
 
 public protocol AsyncRelationChangeCoalescedObserver {
     func relationWillChange(relation: Relation)
-    func relationDidChange(relation: Relation, added: Set<Row>, removed: Set<Row>)
+    func relationDidChange(relation: Relation, result: Result<NegativeSet<Row>, RelationError>)
 }
 
 public extension Relation {
@@ -85,6 +92,7 @@ public extension Relation {
 public protocol AsyncRelationContentObserver {
     func relationWillChange(relation: Relation)
     func relationNewContents(relation: Relation, rows: Set<Row>)
+    func relationError(relation: Relation, error: RelationError)
     func relationDidChange(relation: Relation)
 }
 
@@ -93,6 +101,7 @@ extension UpdateManager {
         class ShimObserver: AsyncRelationContentObserver {
             let coalescedObserver: AsyncRelationContentCoalescedObserver
             var coalescedRows: Set<Row> = []
+            var error: RelationError?
             
             init(coalescedObserver: AsyncRelationContentCoalescedObserver) {
                 self.coalescedObserver = coalescedObserver
@@ -106,8 +115,13 @@ extension UpdateManager {
                 coalescedRows.unionInPlace(rows)
             }
             
+            func relationError(relation: Relation, error: RelationError) {
+                self.error = error
+            }
+            
             func relationDidChange(relation: Relation) {
-                coalescedObserver.relationDidChange(relation, rows: coalescedRows)
+                let result = error.map(Result.Err) ?? .Ok(coalescedRows)
+                coalescedObserver.relationDidChange(relation, result: result)
             }
         }
         
@@ -117,7 +131,7 @@ extension UpdateManager {
 
 public protocol AsyncRelationContentCoalescedObserver {
     func relationWillChange(relation: Relation)
-    func relationDidChange(relation: Relation, rows: Set<Row>)
+    func relationDidChange(relation: Relation, result: Result<Set<Row>, RelationError>)
 }
 
 public extension Relation {
