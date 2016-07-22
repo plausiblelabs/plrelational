@@ -16,7 +16,7 @@ class UpdateManagerTests: DBTestCase {
         let r = db["n"]
         let u = r.union(r)
         
-        TestAsyncObserver.assertChanges(u,
+        TestAsyncChangeObserver.assertChanges(u,
                                         change: {
                                             r.asyncAdd(["n": 1])
                                             r.asyncAdd(["n": 2])
@@ -24,7 +24,7 @@ class UpdateManagerTests: DBTestCase {
                                             r.asyncAdd(["n": 4]) },
                                         expectedAdded: [["n": 1], ["n": 2], ["n": 3], ["n": 4]],
                                         expectedRemoved: [])
-        TestAsyncObserver.assertChanges(u,
+        TestAsyncChangeObserver.assertChanges(u,
                                         change: {
                                             r.asyncUpdate(Attribute("n") *== 2, newValues: ["n": 10])
                                             r.asyncDelete(Attribute("n") *== 3)
@@ -77,7 +77,7 @@ class UpdateManagerTests: DBTestCase {
         }
         let intersection = r.intersection(triggerRelation)
         
-        TestAsyncCoalescedObserver.assertChanges(intersection,
+        TestAsyncChangeCoalescedObserver.assertChanges(intersection,
                                                  change: {
                                                     r.asyncAdd(["n": 1])
                                                     r.asyncAdd(["n": 4]) },
@@ -97,10 +97,10 @@ class UpdateManagerTests: DBTestCase {
         let count1 = r1.count()
         let count2 = r2.count()
         
-        TestAsyncObserver.assertNoChanges(to: count1,
+        TestAsyncChangeObserver.assertNoChanges(to: count1,
                                           changingRelation: r2,
                                           change: { r2.asyncAdd(["n": 1]) })
-        TestAsyncObserver.assertNoChanges(to: count2,
+        TestAsyncChangeObserver.assertNoChanges(to: count2,
                                           changingRelation: r1,
                                           change: { r1.asyncAdd(["n": 1]) })
     }
@@ -120,7 +120,7 @@ class UpdateManagerTests: DBTestCase {
         r.delete(Attribute("n") *== 2)
         r.add(["n": 3])
         
-        TestAsyncObserver.assertChanges(r,
+        TestAsyncChangeObserver.assertChanges(r,
                                         change: { db.asyncRestoreSnapshot(snapshot) },
                                         expectedAdded: [["n": 2]],
                                         expectedRemoved: [["n": 3]])
@@ -141,7 +141,7 @@ class UpdateManagerTests: DBTestCase {
         r.delete(Attribute("n") *== 2)
         r.add(["n": 3])
         
-        TestAsyncCoalescedObserver.assertChanges(r,
+        TestAsyncChangeCoalescedObserver.assertChanges(r,
                                                  change: {
                                                     r.asyncAdd(["n": 10])
                                                     db.asyncRestoreSnapshot(snapshot)
@@ -157,10 +157,10 @@ class UpdateManagerTests: DBTestCase {
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
         
-        TestAsyncUpdateObserver.assertChanges(r,
+        TestAsyncContentObserver.assertChanges(r,
                                               change: { r.asyncAdd(["n": 1]) },
                                               expectedContents: [["n": 1]])
-        TestAsyncUpdateObserver.assertChanges(r,
+        TestAsyncContentObserver.assertChanges(r,
                                               change: { r.asyncAdd(["n": 2]) },
                                               expectedContents: [["n": 1], ["n": 2]])
     }
@@ -172,10 +172,10 @@ class UpdateManagerTests: DBTestCase {
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
         
-        TestAsyncCoalescedUpdateObserver.assertChanges(r,
+        TestAsyncContentCoalescedObserver.assertChanges(r,
                                                        change: { r.asyncAdd(["n": 1]) },
                                                        expectedContents: [["n": 1]])
-        TestAsyncCoalescedUpdateObserver.assertChanges(r,
+        TestAsyncContentCoalescedObserver.assertChanges(r,
                                                        change: { r.asyncAdd(["n": 2]) },
                                                        expectedContents: [["n": 1], ["n": 2]])
     }
@@ -220,13 +220,13 @@ class UpdateManagerTests: DBTestCase {
         let r2 = ErroringRelation()
         let union = r1.union(r2)
         
-        let changeObserver = TestAsyncObserver()
+        let changeObserver = TestAsyncChangeObserver()
         let changeRemover = union.addAsyncObserver(changeObserver)
-        let coalescedChangeObserver = TestAsyncCoalescedObserver()
+        let coalescedChangeObserver = TestAsyncChangeCoalescedObserver()
         let coalescedChangeRemover = union.addAsyncObserver(coalescedChangeObserver)
-        let contentObserver = TestAsyncUpdateObserver()
+        let contentObserver = TestAsyncContentObserver()
         let contentRemover = union.addAsyncObserver(contentObserver)
-        let contentCoalescedObserver = TestAsyncCoalescedUpdateObserver()
+        let contentCoalescedObserver = TestAsyncContentCoalescedObserver()
         let contentCoalescedRemover = union.addAsyncObserver(contentCoalescedObserver)
         
         r1.asyncAdd(["n": 4])
@@ -246,9 +246,9 @@ class UpdateManagerTests: DBTestCase {
     }
 }
 
-private class TestAsyncObserver: AsyncRelationChangeObserver {
+private class TestAsyncChangeObserver: AsyncRelationChangeObserver {
     static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
-        let observer = TestAsyncObserver()
+        let observer = TestAsyncChangeObserver()
         let remover = relation.addAsyncObserver(observer)
         change()
         CFRunLoopRun()
@@ -260,9 +260,9 @@ private class TestAsyncObserver: AsyncRelationChangeObserver {
     }
     
     static func assertNoChanges(to to: Relation, changingRelation: Relation, change: Void -> Void) {
-        let observer = TestAsyncObserver()
+        let observer = TestAsyncChangeObserver()
         let remover1 = to.addAsyncObserver(observer)
-        let remover2 = changingRelation.addAsyncObserver(TestAsyncObserver()) // Just for the CFRunLoopStop it will do
+        let remover2 = changingRelation.addAsyncObserver(TestAsyncChangeObserver()) // Just for the CFRunLoopStop it will do
         change()
         CFRunLoopRun()
         XCTAssertEqual(observer.willChangeCount, 0)
@@ -303,9 +303,9 @@ private class TestAsyncObserver: AsyncRelationChangeObserver {
     }
 }
 
-private class TestAsyncCoalescedObserver: AsyncRelationChangeCoalescedObserver {
+private class TestAsyncChangeCoalescedObserver: AsyncRelationChangeCoalescedObserver {
     static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
-        let observer = TestAsyncCoalescedObserver()
+        let observer = TestAsyncChangeCoalescedObserver()
         let remover = relation.addAsyncObserver(observer)
         change()
         CFRunLoopRun()
@@ -331,9 +331,9 @@ private class TestAsyncCoalescedObserver: AsyncRelationChangeCoalescedObserver {
     }
 }
 
-private class TestAsyncUpdateObserver: AsyncRelationContentObserver {
+private class TestAsyncContentObserver: AsyncRelationContentObserver {
     static func assertChanges(relation: Relation, change: Void -> Void, expectedContents: Set<Row>) {
-        let observer = TestAsyncUpdateObserver()
+        let observer = TestAsyncContentObserver()
         let remover = relation.addAsyncObserver(observer)
         change()
         CFRunLoopRun()
@@ -363,9 +363,9 @@ private class TestAsyncUpdateObserver: AsyncRelationContentObserver {
     }
 }
 
-private class TestAsyncCoalescedUpdateObserver: AsyncRelationContentCoalescedObserver {
+private class TestAsyncContentCoalescedObserver: AsyncRelationContentCoalescedObserver {
     static func assertChanges(relation: Relation, change: Void -> Void, expectedContents: Set<Row>) {
-        let observer = TestAsyncCoalescedUpdateObserver()
+        let observer = TestAsyncContentCoalescedObserver()
         let remover = relation.addAsyncObserver(observer)
         change()
         CFRunLoopRun()
