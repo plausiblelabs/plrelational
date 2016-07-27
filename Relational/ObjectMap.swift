@@ -75,7 +75,8 @@ class ObjectMap<Value> {
         }
     }
     
-    private func reallocateToSize(newCapacity: Int) {
+    // This one also causes a duplicate symbol error somehow.
+    private final func reallocateToSize(newCapacity: Int) {
         let newTable = ObjectMap.allocate(newCapacity)
         for index in 0..<capacity {
             let key = table[index].key

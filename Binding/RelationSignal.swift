@@ -16,7 +16,7 @@ private class RelationSignal<T>: Signal<T> {
         
         super.init(changeCount: 0, startFunc: {})
         
-        self.removal = relation.addAsyncCoalescedObserver(self)
+        self.removal = relation.addAsyncObserver(self)
     }
     
     private override func startImpl() {
@@ -40,11 +40,17 @@ extension RelationSignal: AsyncRelationChangeCoalescedObserver {
         self.notifyWillChange()
     }
     
-    func relationDidChange(relation: Relation, added: Set<Row>, removed: Set<Row>) {
-        // TODO: Need to look at both added and removed (and compute updates)
-        let newValue = self.rowsToValue(self.relation, AnyGenerator(added.generate()))
-        self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
-        self.notifyDidChange()
+    func relationDidChange(relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+        switch result {
+        case .Ok(let change):
+            // TODO: Need to look at both added and removed (and compute updates)
+            let newValue = self.rowsToValue(self.relation, AnyGenerator(change.added.generate()))
+            self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+            self.notifyDidChange()
+        case .Err(let err):
+            // TODO: actual handling
+            fatalError("Got error for relation change: \(err)")
+        }
     }
 }
 
