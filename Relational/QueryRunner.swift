@@ -286,13 +286,13 @@ public class QueryRunner {
             let rows = nodeStates[nodeIndex].inputBuffers[1].rows
             let map = ObjectMap<()>(capacity: rows.count)
             for row in rows {
-                map[row.internedRow] = ()
+                map[row.inlineRow] = ()
             }
             return map
         })
         
         let lhsRows = nodeStates[nodeIndex].inputBuffers[0].popAll()
-        let subtracted = lhsRows.filter({ rhsMap[$0.internedRow] == nil })
+        let subtracted = lhsRows.filter({ rhsMap[$0.inlineRow] == nil })
         
         writeOutput(subtracted, fromNode: nodeIndex)
     }
@@ -366,7 +366,7 @@ public class QueryRunner {
         let joined = nodeStates[nodeIndex].inputBuffers[extraState.largerIndex].popAll().flatMap({ row -> [Row] in
             let joinKey = row.rowWithAttributes(extraState.largerAttributes).renameAttributes(extraState.largerToSmallerRenaming)
             guard let smallerRows = extraState.keyed[joinKey] else { return [] }
-            return smallerRows.map({ Row(values: $0.values + row.values) })
+            return smallerRows.map({ $0 + row })
         })
         writeOutput(Set(joined), fromNode: nodeIndex)
     }
@@ -379,7 +379,7 @@ public class QueryRunner {
     
     func processUpdate(nodeIndex: Int, _ inputIndex: Int, _ newValues: Row) {
         let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
-        let updated = rows.map({ Row(values: $0.values + newValues.values) })
+        let updated = rows.map({ $0 + newValues })
         writeOutput(nodeStates[nodeIndex].uniq(Set(updated)), fromNode: nodeIndex)
     }
     

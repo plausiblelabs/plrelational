@@ -73,7 +73,7 @@ public struct SelectExpressionUnaryOperator: SelectExpression {
 /// in the row will generate an EqualityComparator matching that attribute and
 /// that value, and the whole mess will be ANDed together.
 func SelectExpressionFromRow(row: Row) -> SelectExpression {
-    let equalityExpressions = row.values.map({ $0 *== $1 })
+    let equalityExpressions = row.map({ $0 *== $1 })
     if equalityExpressions.isEmpty {
         return RelationValue.Integer(1)
     } else if equalityExpressions.count == 1 {

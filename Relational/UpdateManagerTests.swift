@@ -203,7 +203,7 @@ class UpdateManagerTests: DBTestCase {
             
             func contains(row: Row) -> Result<Bool, RelationError> {
                 switch row["n"] {
-                case 1, 2, 3 where row.values.count == 1: return .Ok(true)
+                case 1, 2, 3 where row.count == 1: return .Ok(true)
                 default: return .Ok(false)
                 }
             }

@@ -17,7 +17,7 @@ public struct ConcreteRelation: MutableRelation {
     }
     
     public init(_ row: Row) {
-        let scheme = Scheme(attributes: Set(row.values.keys))
+        let scheme = Scheme(attributes: Set(row.attributes))
         self.init(scheme: scheme, values: [row])
     }
     
@@ -26,11 +26,11 @@ public struct ConcreteRelation: MutableRelation {
     }
     
     private func rowMatchesScheme(row: Row) -> Bool {
-        return Set(row.values.keys) == scheme.attributes
+        return Set(row.attributes) == scheme.attributes
     }
     
     private func rowIsCompatible(row: Row) -> Bool {
-        return Set(row.values.keys).isSubsetOf(scheme.attributes)
+        return Set(row.attributes).isSubsetOf(scheme.attributes)
     }
     
     public func setDefaultSort(attribute: Attribute?) -> Relation {
@@ -80,7 +80,7 @@ public struct ConcreteRelation: MutableRelation {
         for rowToUpdate in rowsToUpdate.rows() {
             // We know that rows never fail, because this is ultimately our own implementation.
             var rowToAdd = rowToUpdate.ok!
-            for (attribute, value) in newValues.values {
+            for (attribute, value) in newValues {
                 rowToAdd[attribute] = value
             }
             self.add(rowToAdd)
@@ -93,7 +93,7 @@ public struct ConcreteRelation: MutableRelation {
         for rowToUpdate in rowsToUpdate.rows() {
             // We know that rows never fail, because this is ultimately our own implementation.
             var rowToAdd = rowToUpdate.ok!
-            for (attribute, value) in newValues.values {
+            for (attribute, value) in newValues {
                 rowToAdd[attribute] = value
             }
             self.add(rowToAdd)

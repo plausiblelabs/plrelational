@@ -21,9 +21,9 @@ extension Dictionary {
     }
 }
 
-/// Combine two dictionaries. Any keys that exist in both dictionaries will
-/// have the value from the second dictionary in the result.
-func +<K: Hashable, V>(a: [K: V], b: [K: V]) -> [K: V] {
+/// Combine a dictionary and some collection of key/value pairs, which may be a second dictionary.
+/// Any keys that exist in both will have the value from the second parameter in the result.
+func +<K: Hashable, V, Seq: SequenceType where Seq.Generator.Element == (K, V)>(a: [K: V], b: Seq) -> [K: V] {
     var result = a
     for (k, v) in b {
         result[k] = v

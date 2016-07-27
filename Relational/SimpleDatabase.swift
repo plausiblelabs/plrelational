@@ -71,7 +71,7 @@ extension SimpleDatabase {
             
             let values = relation.rows().map({ row in
                 // We know that ConcreteRelations never produce errors when iterating.
-                Dictionary(row.ok!.values.map({ ($0.name, self.valueToPlist($1)) }))
+                Dictionary(row.ok!.map({ ($0.name, self.valueToPlist($1)) }))
             })
             return (name, ["scheme": scheme, "values": values])
         }))

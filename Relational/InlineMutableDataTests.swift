@@ -31,24 +31,24 @@ class InlineMutableDataTests: XCTestCase {
         }
         
         var a = InlineMutableData.make(10)
-        InlineMutableData.append(&a, pointer: bigArray, length: bigArray.count)
+        a = InlineMutableData.append(a, pointer: bigArray, length: bigArray.count)
         assertContents(a)
         
         var b = InlineMutableData.make(bigArray.count)
-        InlineMutableData.append(&b, pointer: bigArray, length: bigArray.count)
+        b = InlineMutableData.append(b, pointer: bigArray, length: bigArray.count)
         assertContents(b)
         
         var c = InlineMutableData.make(10)
         for elt in bigArray {
             var elt = elt
-            InlineMutableData.append(&c, pointer: &elt, length: 1)
+            c = InlineMutableData.append(c, pointer: &elt, length: 1)
         }
         assertContents(c)
         
         var d = InlineMutableData.make(10)
         for elt in bigArray {
             var elt = elt
-            InlineMutableData.append(&d, pointer: &elt, length: 1)
+            d = InlineMutableData.append(d, pointer: &elt, length: 1)
         }
         assertContents(d)
         

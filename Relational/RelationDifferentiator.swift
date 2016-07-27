@@ -310,7 +310,7 @@ extension RelationDifferentiator {
     private func updateDerivative(r: IntermediateRelation, newValues: Row) -> RelationChange {
         // Our updates are equal to the projected updates joined with our newValues.
         // (update A newValues)' = (projected A') join newValues
-        let untouchedScheme = Scheme(attributes: Set(r.operands[0].scheme.attributes.subtract(newValues.values.keys)))
+        let untouchedScheme = Scheme(attributes: Set(r.operands[0].scheme.attributes.subtract(newValues.attributes)))
         let projectionDerivative = self.projectionDerivative(r, scheme: untouchedScheme)
         return RelationChange(added: projectionDerivative.added?.join(ConcreteRelation(newValues)),
                                   removed: projectionDerivative.removed?.join(ConcreteRelation(newValues)))

@@ -165,7 +165,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                 for toUpdate in baseRelation.select(query).difference(currentChange.removed).rows() {
                     switch toUpdate {
                     case .Ok(let row):
-                        currentChange.added.add(Row(values: row.values + newValues.values))
+                        currentChange.added.add(row + newValues)
                         currentChange.removed.add(row)
                     case .Err(let err):
                         return .Err(err)

@@ -51,7 +51,7 @@ func AssertEqual(a: AnyGenerator<Result<Set<Row>, RelationError>>, _ b: Relation
     }
     
     if let first = rows.first {
-        let scheme = Scheme(attributes: Set(first.values.keys))
+        let scheme = Scheme(attributes: Set(first.attributes))
         let rowsSet = Set(rows)
         XCTAssertEqual(rows.count, rowsSet.count, "Row generator returned duplicate values, all provided rows should be unique")
         let relation = ConcreteRelation(scheme: scheme, values: rowsSet)

@@ -251,7 +251,7 @@ extension Relation {
 
 extension Relation {
     public func select(rowToFind: Row) -> Relation {
-        let rowScheme = Set(rowToFind.values.map({ $0.0 }))
+        let rowScheme = Set(rowToFind.map({ $0.0 }))
         precondition(rowScheme.isSubsetOf(scheme.attributes))
         return select(SelectExpressionFromRow(rowToFind))
     }

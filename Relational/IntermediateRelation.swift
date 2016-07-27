@@ -281,13 +281,13 @@ extension IntermediateRelation {
     }
     
     func updateContains(row: Row, newValues: Row) -> Result<Bool, RelationError> {
-        let newValuesScheme = Set(newValues.values.keys)
+        let newValuesScheme = Set(newValues.attributes)
         let newValueParts = row.rowWithAttributes(newValuesScheme)
         if newValueParts != newValues {
             return .Ok(false)
         }
         
-        let untouchedAttributes = Set(operands[0].scheme.attributes.subtract(newValues.values.keys))
+        let untouchedAttributes = Set(operands[0].scheme.attributes.subtract(newValues.attributes))
         let projected = operands[0].project(Scheme(attributes: untouchedAttributes))
         
         let remainingParts = row.rowWithAttributes(projected.scheme.attributes)
@@ -423,7 +423,7 @@ extension IntermediateRelation {
                         let operandAttributes = operands[i].scheme.attributes
                         let operandRow = row.rowWithAttributes(operandAttributes)
                         let operandNewValues = newValues.rowWithAttributes(operandAttributes)
-                        if !operandNewValues.values.isEmpty {
+                        if !operandNewValues.isEmpty {
                             let rowQuery = SelectExpressionFromRow(operandRow)
                             let result = operands[i].update(rowQuery, newValues: operandNewValues)
                             if result.err != nil {

@@ -165,7 +165,7 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
     }
     
     public func add(row: Row) -> Result<Int64, RelationError> {
-        let orderedAttributes = Array(row.values)
+        let orderedAttributes = Array(row)
         let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.0.name) }).joinWithSeparator(", ")
         let parameters = orderedAttributes.map({ $0.1 })
         let valuesSQL = Array(count: orderedAttributes.count, repeatedValue: "?").joinWithSeparator(", ")
@@ -202,7 +202,7 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
         if let (whereSQL, whereParameters) = queryToSQL(self.queryAndedWithOtherQuery(query)) {
             let willUpdate = ConcreteRelation.copyRelation(self.select(query))
             return willUpdate.then({ willUpdate in
-                let orderedAttributes = Array(newValues.values)
+                let orderedAttributes = Array(newValues)
                 let setParts = orderedAttributes.map({ db.escapeIdentifier($0.0.name) + " = ?" })
                 let setSQL = setParts.joinWithSeparator(", ")
                 let setParameters = orderedAttributes.map({ $0.1 })
