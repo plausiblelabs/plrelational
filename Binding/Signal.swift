@@ -145,3 +145,19 @@ public class Signal<T>: SignalType {
     // For testing purposes only.
     internal var observerCount: Int { return observers.count }
 }
+
+internal func isRepeat<T>(v0: T, v1: T) -> Bool {
+    return false
+}
+
+internal func isRepeat<T: Equatable>(v0: T, v1: T) -> Bool {
+    return v0 == v1
+}
+
+internal func isRepeat<T>(v0: T?, v1: T?) -> Bool {
+    return false
+}
+
+internal func isRepeat<T: Equatable>(v0: T?, v1: T?) -> Bool {
+    return v0 == v1
+}

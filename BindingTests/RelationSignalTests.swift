@@ -59,12 +59,12 @@ class RelationSignalTests: BindingTestCase {
         XCTAssertEqual(willChangeCount, 2)
         XCTAssertEqual(didChangeCount, 2)
 
-//        // Perform another async update to the underlying relation (except this one isn't relevant to the
-//        // `select` that our signal is built on, so the signal shouldn't deliver a change)
-//        awaitCompletion{ r.asyncAdd(["id": 2, "name": "dog"]) }
-//        XCTAssertEqual(changes, ["", "cat"])
-//        XCTAssertEqual(willChangeCount, 3)
-//        XCTAssertEqual(didChangeCount, 3)
+        // Perform another async update to the underlying relation (except this one isn't relevant to the
+        // `select` that our signal is built on, so the signal shouldn't deliver a change)
+        awaitCompletion{ r.asyncAdd(["id": 2, "name": "dog"]) }
+        XCTAssertEqual(changes, ["", "cat"])
+        XCTAssertEqual(willChangeCount, 3)
+        XCTAssertEqual(didChangeCount, 3)
 //
 //        // Perform an async delete-all-rows on the underlying relation
 //        awaitCompletion{ r.asyncDelete(true) }

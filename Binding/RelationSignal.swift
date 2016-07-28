@@ -8,11 +8,14 @@ import libRelational
 private class RelationSignal<T>: Signal<T> {
     private let relation: Relation
     private let rowsToValue: (Relation, AnyGenerator<Row>) -> T
+    private let isRepeat: (T, T) -> Bool
+    private var latestValue: T?
     private var removal: ObserverRemoval!
     
-    init(relation: Relation, rowsToValue: (Relation, AnyGenerator<Row>) -> T) {
+    init(relation: Relation, rowsToValue: (Relation, AnyGenerator<Row>) -> T, isRepeat: (T, T) -> Bool) {
         self.relation = relation
         self.rowsToValue = rowsToValue
+        self.isRepeat = isRepeat
         
         super.init(changeCount: 0, startFunc: {})
         
@@ -24,10 +27,19 @@ private class RelationSignal<T>: Signal<T> {
         relation.asyncAllRows({ result in
             if let rows = result.ok {
                 let newValue = self.rowsToValue(self.relation, AnyGenerator(rows.generate()))
+                self.latestValue = newValue
                 self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
             }
             self.notifyDidChange()
         })
+    }
+
+    private func isRepeat(newValue: T) -> Bool {
+        if let latest = latestValue {
+            return isRepeat(newValue, latest)
+        } else {
+            return false
+        }
     }
     
     deinit {
@@ -44,7 +56,10 @@ extension RelationSignal: AsyncRelationContentCoalescedObserver {
         switch result {
         case .Ok(let rows):
             let newValue = self.rowsToValue(self.relation, AnyGenerator(rows.generate()))
-            self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+            if !isRepeat(newValue) {
+                self.latestValue = newValue
+                self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+            }
             self.notifyDidChange()
         case .Err(let err):
             // TODO: actual handling
@@ -56,6 +71,21 @@ extension RelationSignal: AsyncRelationContentCoalescedObserver {
 extension Relation {
     /// Returns a Signal whose values are derived from this relation.
     public func signal<T>(rowsToValue: (Relation, AnyGenerator<Row>) -> T) -> Signal<T> {
-        return RelationSignal(relation: self, rowsToValue: rowsToValue)
+        return RelationSignal(relation: self, rowsToValue: rowsToValue, isRepeat: isRepeat)
+    }
+    
+    /// Returns a Signal whose values are derived from this relation.
+    public func signal<T: Equatable>(rowsToValue: (Relation, AnyGenerator<Row>) -> T) -> Signal<T> {
+        return RelationSignal(relation: self, rowsToValue: rowsToValue, isRepeat: isRepeat)
+    }
+    
+    /// Returns a Signal whose values are derived from this relation.
+    public func signal<T>(rowsToValue: (Relation, AnyGenerator<Row>) -> T?) -> Signal<T?> {
+        return RelationSignal(relation: self, rowsToValue: rowsToValue, isRepeat: isRepeat)
+    }
+    
+    /// Returns a Signal whose values are derived from this relation.
+    public func signal<T: Equatable>(rowsToValue: (Relation, AnyGenerator<Row>) -> T?) -> Signal<T?> {
+        return RelationSignal(relation: self, rowsToValue: rowsToValue, isRepeat: isRepeat)
     }
 }
