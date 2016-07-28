@@ -65,11 +65,11 @@ class RelationSignalTests: BindingTestCase {
         XCTAssertEqual(changes, ["", "cat"])
         XCTAssertEqual(willChangeCount, 3)
         XCTAssertEqual(didChangeCount, 3)
-//
-//        // Perform an async delete-all-rows on the underlying relation
-//        awaitCompletion{ r.asyncDelete(true) }
-//        XCTAssertEqual(changes, ["", "cat", ""])
-//        XCTAssertEqual(willChangeCount, 4)
-//        XCTAssertEqual(didChangeCount, 4)
+
+        // Perform an async delete-all-rows on the underlying relation
+        awaitCompletion{ r.asyncDelete(true) }
+        XCTAssertEqual(changes, ["", "cat", ""])
+        XCTAssertEqual(willChangeCount, 4)
+        XCTAssertEqual(didChangeCount, 4)
     }
 }
