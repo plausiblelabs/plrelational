@@ -171,15 +171,18 @@ class UpdateManagerTests: DBTestCase {
         
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
-        
-        TestAsyncContentCoalescedObserver.assertChanges(r,
-                                                       change: { r.asyncAdd(["n": 1]) },
-                                                       expectedContents: [["n": 1]])
-        TestAsyncContentCoalescedObserver.assertChanges(r,
-                                                       change: { r.asyncAdd(["n": 2]) },
-                                                       expectedContents: [["n": 1], ["n": 2]])
+
+        let observer = TestAsyncContentCoalescedObserver()
+        let remover = r.addAsyncObserver(observer)
+        observer.assertChanges({ r.asyncAdd(["n": 1]) },
+                               expectedContents: [["n": 1]])
+        observer.assertChanges({ r.asyncAdd(["n": 2]) },
+                               expectedContents: [["n": 1], ["n": 2]])
+        observer.assertChanges({ r.asyncDelete(true) },
+                               expectedContents: [])
+        remover()
     }
-    
+
     func testErrorFromRelation() {
         let sqliteDB = makeDB().db.sqliteDatabase
         sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
@@ -367,15 +370,23 @@ private class TestAsyncContentCoalescedObserver: AsyncRelationContentCoalescedOb
     static func assertChanges(relation: Relation, change: Void -> Void, expectedContents: Set<Row>) {
         let observer = TestAsyncContentCoalescedObserver()
         let remover = relation.addAsyncObserver(observer)
-        change()
-        CFRunLoopRun()
-        XCTAssertEqual(observer.willChangeCount, 1)
-        XCTAssertEqual(observer.result?.ok, expectedContents)
+        observer.assertChanges(change, expectedContents: expectedContents)
         remover()
     }
-    
+
     var willChangeCount = 0
     var result: Result<Set<Row>, RelationError>?
+    
+    func assertChanges(change: Void -> Void, expectedContents: Set<Row>) {
+        change()
+        CFRunLoopRun()
+        
+        XCTAssertEqual(willChangeCount, 1)
+        XCTAssertEqual(result?.ok, expectedContents)
+        
+        willChangeCount = 0
+        result = nil
+    }
     
     func relationWillChange(relation: Relation) {
         willChangeCount += 1
