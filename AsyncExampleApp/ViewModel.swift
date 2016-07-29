@@ -81,7 +81,7 @@ class ViewModel {
             relation,
             action: "Rename Person",
             signal: relation.signal{ $0.oneString($1) },
-            set: { relation.updateString($0) }
+            update: { relation.asyncUpdateString($0) }
         )
     }
     

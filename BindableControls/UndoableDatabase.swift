@@ -64,26 +64,41 @@ public class UndoableDatabase {
         )
     }
     
-    /// Note: `set` will be called in the context of a database transaction.
-    public func asyncBidiProperty<T>(relation: Relation, action: String, signal: Signal<T>, set: T -> Void) -> AsyncReadWriteProperty<T> {
-        return relation.asyncProperty(asyncMutationConfig(action, set), signal: signal)
+    public func performUndoableAsyncAction(name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: Void -> Void) {
+        let before = before ?? db.takeSnapshot()
+        // TODO: Need explicit transaction here
+        //db.transaction(transactionFunc)
+        transactionFunc()
+        let after = db.takeSnapshot()
+        
+        undoManager.registerChange(
+            name: name,
+            perform: false,
+            forward: {
+                self.db.asyncRestoreSnapshot(after)
+            },
+            backward: {
+                self.db.asyncRestoreSnapshot(before)
+            }
+        )
     }
     
-    private func asyncMutationConfig<T>(action: String, _ set: T -> Void) -> RelationMutationConfig<T> {
+    public func asyncBidiProperty<T>(relation: Relation, action: String, signal: Signal<T>, update: T -> Void) -> AsyncReadWriteProperty<T> {
+        return relation.asyncProperty(asyncMutationConfig(action, update), signal: signal)
+    }
+    
+    private func asyncMutationConfig<T>(action: String, _ update: T -> Void) -> RelationMutationConfig<T> {
         return RelationMutationConfig(
             snapshot: {
                 return self.db.takeSnapshot()
             },
             update: { newValue in
-                // TODO: We wrap this in a transaction to keep it atomic, but we don't actually
-                // need to log the changes anywhere
-                self.db.transaction{
-                    set(newValue)
-                }
+                // TODO: Need explicit transaction here
+                update(newValue)
             },
             commit: { before, newValue in
-                self.performUndoableAction(action, before: before, {
-                    set(newValue)
+                self.performUndoableAsyncAction(action, before: before, {
+                    update(newValue)
                 })
             }
         )

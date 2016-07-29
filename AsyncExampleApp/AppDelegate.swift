@@ -29,8 +29,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         
         // Bind the views to the view model
         model = ViewModel(undoManager: undoManager)
-        //nameField1.string <~> model.name
-        //nameField2.string <~> model.name
+        nameField1.string <~> model.name
+        nameField2.string <~> model.name
         nameLabel.string <~ model.name
         salesLabel.string <~ model.sales
     }
