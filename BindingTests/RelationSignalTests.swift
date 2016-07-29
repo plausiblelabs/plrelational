@@ -11,7 +11,7 @@ class RelationSignalTests: BindingTestCase {
     
     func testSignal() {
         let sqliteDB = makeDB().db
-        let sqlr = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
+        _ = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
         let db = TransactionalDatabase(sqliteDB)
         let r = db["animal"]
 
