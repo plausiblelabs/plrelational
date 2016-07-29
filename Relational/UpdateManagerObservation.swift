@@ -65,7 +65,8 @@ extension UpdateManager {
             }
             
             func relationDidChange(relation: Relation) {
-                let result = error.map(Result.Err) ?? .Ok(NegativeSet(added: coalescedChanges.added, removed: coalescedChanges.removed))
+                let result = error.map(Result.Err) ?? .Ok(coalescedChanges)
+                coalescedChanges.removeAll()
                 coalescedObserver.relationDidChange(relation, result: result)
             }
         }
@@ -121,6 +122,7 @@ extension UpdateManager {
             
             func relationDidChange(relation: Relation) {
                 let result = error.map(Result.Err) ?? .Ok(coalescedRows)
+                coalescedRows.removeAll()
                 coalescedObserver.relationDidChange(relation, result: result)
             }
         }

@@ -23,4 +23,9 @@ public struct NegativeSet<T: Hashable> {
         removed.unionInPlace(gone)
         added.subtractInPlace(set)
     }
+    
+    mutating func removeAll() {
+        added.removeAll()
+        removed.removeAll()
+    }
 }

@@ -247,6 +247,92 @@ class UpdateManagerTests: DBTestCase {
         XCTAssertTrue(contentObserver.error is DummyError)
         XCTAssertTrue(contentCoalescedObserver.result?.err is DummyError)
     }
+    
+    func testMultipleCoalescedChangeObservations() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        
+        let observer = TestAsyncChangeCoalescedObserver()
+        let remover = r.addAsyncObserver(observer)
+        
+        r.asyncAdd(["n": 1])
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 1)
+        XCTAssertNil(observer.result?.err)
+        XCTAssertEqual(observer.result?.ok?.added, [["n": 1]])
+        XCTAssertEqual(observer.result?.ok?.removed, [])
+        observer.result = nil
+        
+        r.asyncAdd(["n": 2])
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 2)
+        XCTAssertNil(observer.result?.err)
+        XCTAssertEqual(observer.result?.ok?.added, [["n": 2]])
+        XCTAssertEqual(observer.result?.ok?.removed, [])
+        observer.result = nil
+        
+        r.asyncDelete(Attribute("n") *== 1)
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 3)
+        XCTAssertNil(observer.result?.err)
+        XCTAssertEqual(observer.result?.ok?.added, [])
+        XCTAssertEqual(observer.result?.ok?.removed, [["n": 1]])
+        observer.result = nil
+        
+        r.asyncDelete(Attribute("n") *== 2)
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 4)
+        XCTAssertNil(observer.result?.err)
+        XCTAssertEqual(observer.result?.ok?.added, [])
+        XCTAssertEqual(observer.result?.ok?.removed, [["n": 2]])
+        observer.result = nil
+        
+        remover()
+    }
+    
+    func testMultipleCoalescedContentObservations() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        
+        let observer = TestAsyncContentCoalescedObserver()
+        let remover = r.addAsyncObserver(observer)
+        
+        r.asyncAdd(["n": 1])
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 1)
+        XCTAssertNil(observer.result?.err)
+        XCTAssertEqual(observer.result?.ok, [["n": 1]])
+        observer.result = nil
+        
+        r.asyncAdd(["n": 2])
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 2)
+        XCTAssertNil(observer.result?.err)
+        XCTAssertEqual(observer.result?.ok, [["n": 1], ["n": 2]])
+        observer.result = nil
+        
+        r.asyncDelete(Attribute("n") *== 1)
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 3)
+        XCTAssertNil(observer.result?.err)
+        XCTAssertEqual(observer.result?.ok, [["n": 2]])
+        observer.result = nil
+        
+        r.asyncDelete(Attribute("n") *== 2)
+        CFRunLoopRun()
+        XCTAssertEqual(observer.willChangeCount, 4)
+        XCTAssertNil(observer.result?.err)
+        XCTAssertEqual(observer.result?.ok, [])
+        observer.result = nil
+        
+        remover()
+    }
 }
 
 private class TestAsyncChangeObserver: AsyncRelationChangeObserver {
