@@ -60,6 +60,7 @@ public class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
     
     private let get: Getter
     // Note: This is exposed as `internal` only for easier access by tests.
+    // TODO: Actually, it's called directly by ReadWriteProperty.connectBidi(); smells like a smell
     internal let set: Setter
 
     public let signal: Signal<T>

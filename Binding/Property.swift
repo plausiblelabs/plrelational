@@ -107,7 +107,6 @@ public class BindableProperty<T> {
         
         // Observe the given signal for changes
         let signalObserverRemoval = signal.observe(SignalObserver(
-            // TODO: Is this the right place for the change handler stuff?
             valueWillChange: { [weak self] in
                 self?.changeHandler.willChange()
             },
@@ -280,8 +279,11 @@ public class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         
         // Observe the signal of the other property
         let signalObserverRemoval1 = other.signal.observe(SignalObserver(
-            // TODO: How to deal with ChangeHandler here?
-            valueWillChange: {},
+            valueWillChange: { [weak self] in
+                // TODO: Do we really want to increment change count here when other property's value
+                // was changing due to a self-initiated change?
+                self?.changeHandler.willChange()
+            },
             valueChanging: { [weak self] value, metadata in
                 if selfInitiatedChange { return }
                 if case .Change(let newValue) = reverse(value) {
@@ -290,8 +292,9 @@ public class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
                     selfInitiatedChange = false
                 }
             },
-            // TODO: How to deal with ChangeHandler here?
-            valueDidChange: {}
+            valueDidChange: { [weak self] in
+                self?.changeHandler.didChange()
+            }
         ))
         
         // Make the other property observe this property's signal
@@ -315,6 +318,9 @@ public class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         initial()
         selfInitiatedChange = false
         
+        // Take on the given signal's change count
+        changeHandler.incrementCount(other.signal.changeCount)
+
         // Save and return the binding
         let bindingID = nextBindingID
         let binding = Binding(signalOwner: other, removal: { [weak self] in

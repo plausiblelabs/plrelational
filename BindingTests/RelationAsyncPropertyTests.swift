@@ -20,18 +20,15 @@ class RelationAsyncPropertyTests: BindingTestCase {
         var changes: [String] = []
 
         let runloop = CFRunLoopGetCurrent()
-        let group = dispatch_group_create()
 
         func awaitCompletion(f: () -> Void) {
-            dispatch_group_enter(group)
             f()
             CFRunLoopRun()
-            dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
         }
 
         let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
         let property = nameRelation.asyncProperty{ $0.signal{ $0.oneString($1) } }
-        _ = property.signal.observe(SignalObserver(
+        let removal = property.signal.observe(SignalObserver(
             valueWillChange: {
                 willChangeCount += 1
             },
@@ -40,7 +37,6 @@ class RelationAsyncPropertyTests: BindingTestCase {
             },
             valueDidChange: {
                 didChangeCount += 1
-                dispatch_group_leave(group)
                 CFRunLoopStop(runloop)
             }
         ))
@@ -79,6 +75,8 @@ class RelationAsyncPropertyTests: BindingTestCase {
         XCTAssertEqual(willChangeCount, 4)
         XCTAssertEqual(didChangeCount, 4)
         XCTAssertEqual(changes, ["", "cat", ""])
+        
+        removal()
     }
     
     func testAsyncReadWriteProperty() {
@@ -87,219 +85,192 @@ class RelationAsyncPropertyTests: BindingTestCase {
         let db = TransactionalDatabase(sqliteDB)
         let r = db["animal"]
         
-        var willChangeCount = 0
-        var didChangeCount = 0
-        var changes: [String] = []
+        var nameWillChangeCount = 0
+        var nameDidChangeCount = 0
+        var nameChanges: [String] = []
         
         let runloop = CFRunLoopGetCurrent()
-        let group = dispatch_group_create()
 
         func updateName(newValue: String) {
-            db.transaction{
-                r.update(Attribute("id") *== 1, newValues: ["name": RelationValue(newValue)])
-            }
+            r.asyncUpdate(Attribute("id") *== 1, newValues: ["name": RelationValue(newValue)])
         }
         
-        func awaitCompletion(f: () -> Void) {
-            dispatch_group_enter(group)
-            f()
-            CFRunLoopRun()
-            dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
-        }
+        var nameSnapshotCount = 0
+        var nameUpdateCount = 0
+        var nameCommitCount = 0
         
-        var snapshotCount = 0
-        var updateCount = 0
-        var commitCount = 0
-        
-        let config: RelationMutationConfig<String> = RelationMutationConfig(
+        let nameConfig: RelationMutationConfig<String> = RelationMutationConfig(
             snapshot: {
-                snapshotCount += 1
+                nameSnapshotCount += 1
                 return db.takeSnapshot()
             },
             update: { newValue in
-                updateCount += 1
+                nameUpdateCount += 1
                 updateName(newValue)
             },
             commit: { _, newValue in
-                commitCount += 1
+                nameCommitCount += 1
                 updateName(newValue)
             }
         )
         
-//        let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
-//        let nameProperty = nameRelation.asyncProperty(config, signal: nameRelation.signal{ $0.oneString($1) })
-//
-//        _ = nameProperty.signal.observe(SignalObserver(
-//            valueWillChange: {
-//                willChangeCount += 1
-//            },
-//            valueChanging: { newValue, _ in changes.append(newValue) },
-//            valueDidChange: {
-//                didChangeCount += 1
-//                dispatch_group_leave(group)
-//                CFRunLoopStop(runloop)
-//            }
-//        ))
-//
-//        // Verify that property value remains nil until we actually trigger the query
-//        XCTAssertEqual(nameProperty.value, nil)
-//        XCTAssertEqual(willChangeCount, 0)
-//        XCTAssertEqual(didChangeCount, 0)
-//        XCTAssertEqual(changes, [])
-//        XCTAssertEqual(snapshotCount, 0)
-//        XCTAssertEqual(updateCount, 0)
-//        XCTAssertEqual(commitCount, 0)
-//        
-//        // Trigger the async query and wait for it to complete, then verify that value was updated
-//        awaitCompletion{ nameProperty.start() }
-//        XCTAssertEqual(nameProperty.value, "")
-//        XCTAssertEqual(willChangeCount, 1)
-//        XCTAssertEqual(didChangeCount, 1)
-//        XCTAssertEqual(changes, [""])
-//        XCTAssertEqual(snapshotCount, 0)
-//        XCTAssertEqual(updateCount, 0)
-//        XCTAssertEqual(commitCount, 0)
+        // Create an async r/w property from the relation
+        let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
+        let nameProperty = nameRelation.asyncProperty(nameConfig, { $0.signal{ $0.oneString($1) } })
+        let nameObserverRemoval = nameProperty.signal.observe(SignalObserver(
+            valueWillChange: {
+                nameWillChangeCount += 1
+            },
+            valueChanging: { newValue, _ in
+                nameChanges.append(newValue)
+            },
+            valueDidChange: {
+                nameDidChangeCount += 1
+                CFRunLoopStop(runloop)
+            }
+        ))
 
-//        // Perform an async update to the underlying relation
-//        awaitCompletion{ r.asyncAdd(["id": 1, "name": "cat"]) }
-//        XCTAssertEqual(nameProperty.value, "cat")
-//
-//        // TODO: Currently this is synchronous; need to change this test so that it verifies
-//        // behavior in an asynchronous environment
-//        r.add(["id": 1, "name": "cat"])
-//        XCTAssertEqual(willChangeCount, 2)
-//        XCTAssertEqual(didChangeCount, 2)
-//        XCTAssertEqual(changes, ["", "cat"])
-//        XCTAssertEqual(snapshotCount, 0)
-//        XCTAssertEqual(updateCount, 0)
-//        XCTAssertEqual(commitCount, 0)
+        // Create a r/w property that will be bound to the async property
+        var lhsLockCount = 0
+        var lhsUnlockCount = 0
+        let lhsChangeHandler = ChangeHandler(
+            onLock: {
+                lhsLockCount += 1
+            },
+            onUnlock: {
+                lhsUnlockCount += 1
+                CFRunLoopStop(runloop)
+            }
+        )
+        var lhsDidSetValues: [String] = []
+        var lhsProperty: MutableValueProperty<String>! = mutableValueProperty("initial lhs value", lhsChangeHandler, { newValue, _ in
+            lhsDidSetValues.append(newValue)
+        })
+        let lhsObserverRemoval = lhsProperty.signal.observe(SignalObserver(
+            valueWillChange: {},
+            valueChanging: { newValue, _ in
+                print("LHS VALUE CHANGING: \(newValue)")
+                //lhsChanges.append(newValue)
+            },
+            valueDidChange: {}
+        ))
+
+        // Verify that name property value remains nil until it is bound
+        XCTAssertEqual(nameProperty.value, nil)
+        XCTAssertEqual(nameWillChangeCount, 0)
+        XCTAssertEqual(nameDidChangeCount, 0)
+        XCTAssertEqual(nameChanges, [])
+        XCTAssertEqual(nameSnapshotCount, 0)
+        XCTAssertEqual(nameUpdateCount, 0)
+        XCTAssertEqual(nameCommitCount, 0)
+
+        // Verify the initial state of the lhs property
+        XCTAssertEqual(lhsProperty.value, "initial lhs value")
+        XCTAssertEqual(lhsDidSetValues, [])
+        XCTAssertEqual(lhsLockCount, 0)
+        XCTAssertEqual(lhsUnlockCount, 0)
+        XCTAssertEqual(lhsProperty.signal.observerCount, 1)
+        XCTAssertEqual(nameProperty.signal.observerCount, 2)
+
+        // Bind lhs property to the async name property, verify that name property's value is loaded asynchronously
+        // and that lhs property's value is updated when the rhs value is ready
+        _ = lhsProperty <~> nameProperty
+        XCTAssertEqual(nameProperty.value, nil)
+        XCTAssertEqual(nameWillChangeCount, 1)
+        XCTAssertEqual(nameDidChangeCount, 0)
+        XCTAssertEqual(nameChanges, [])
+        XCTAssertEqual(nameSnapshotCount, 0)
+        XCTAssertEqual(nameUpdateCount, 0)
+        XCTAssertEqual(nameCommitCount, 0)
+        XCTAssertEqual(nameProperty.signal.observerCount, 3)
+        XCTAssertEqual(lhsProperty.value, "initial lhs value")
+        XCTAssertEqual(lhsDidSetValues, [])
+        XCTAssertEqual(lhsLockCount, 1)
+        XCTAssertEqual(lhsUnlockCount, 0)
+        XCTAssertEqual(lhsProperty.signal.observerCount, 2)
         
-//        // TODO: We use `valueChanging: { true }` here to simulate how TextField.string works
-//        // (since that one is an ExternalValueProperty) relative to the "Note" comment below.
-//        // Possibly a better way to deal with all this would be to actually notify observers
-//        // in the the case where the value is not changing but the transient flag *is* changing.
-//        let otherProperty = mutableValueProperty("", valueChanging: { _ in true })
-//        otherProperty <~> nameProperty
-//        
-//        otherProperty.change("dog", transient: true)
-//        
-//        XCTAssertEqual(nameProperty.value, "dog")
-//        XCTAssertEqual(snapshotCount, 1)
-//        XCTAssertEqual(updateCount, 1)
-//        XCTAssertEqual(commitCount, 0)
-//        XCTAssertEqual(changeObserved, true)
-//        changeObserved = false
-//        
-//        otherProperty.change("dogg", transient: true)
-//        
-//        XCTAssertEqual(nameProperty.value, "dogg")
-//        XCTAssertEqual(snapshotCount, 1)
-//        XCTAssertEqual(updateCount, 2)
-//        XCTAssertEqual(commitCount, 0)
-//        XCTAssertEqual(changeObserved, true)
-//        changeObserved = false
-//        
-//        otherProperty.change("dogg", transient: false)
-//        
-//        // Note: Even when the value to be committed is not actually changing from the
-//        // previous transient value, the value still needs to be committed to the
-//        // underlying database (although observers will not be notified, since from
-//        // their perspective the value is not changing)
-//        // TODO: This only works because of the `valueChanging` hack for `otherProperty`, see TODO above.
-//        XCTAssertEqual(nameProperty.value, "dogg")
-//        XCTAssertEqual(snapshotCount, 1)
-//        XCTAssertEqual(updateCount, 2)
-//        XCTAssertEqual(commitCount, 1)
-//        XCTAssertEqual(changeObserved, false)
-//        changeObserved = false
-//        
-//        otherProperty.change("ant", transient: false)
-//        
-//        XCTAssertEqual(nameProperty.value, "ant")
-//        XCTAssertEqual(snapshotCount, 2)
-//        XCTAssertEqual(updateCount, 2)
-//        XCTAssertEqual(commitCount, 2)
-//        XCTAssertEqual(changeObserved, true)
-//        changeObserved = false
-//        
-//        r.delete(true)
-//        
-//        XCTAssertEqual(nameProperty.value, "")
-//        XCTAssertEqual(snapshotCount, 2)
-//        XCTAssertEqual(updateCount, 2)
-//        XCTAssertEqual(commitCount, 2)
-//        XCTAssertEqual(changeObserved, true)
-//        changeObserved = false
-    }
-    
-    func testBindToAsyncReadOnlyProperty() {
-//        let db = makeDB().db
-//        let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
-//        let r = ChangeLoggingRelation(baseRelation: sqlr)
-//        
-//        // Create an async property from the relation
-//        let rhs = r.select(Attribute("id") *== 1).project(["name"]).asyncProperty{ $0.signal{ $0.oneString($1) } }
-//
-//        // Create a r/w property that will be bound to the async property
-//        var lockCount = 0
-//        var unlockCount = 0
-//        let runloop = CFRunLoopGetCurrent()
-//        let group = dispatch_group_create()
-//        let changeHandler = ChangeHandler(
-//            onLock: {
-//                lockCount += 1
-//            },
-//            onUnlock: {
-//                unlockCount += 1
-//                dispatch_group_leave(group)
-//                CFRunLoopStop(runloop)
-//            }
-//        )
-//        
-//        var lhsValues: [String] = []
-//        var lhs: ReadWriteProperty<String>! = mutableValueProperty("initial lhs value", changeHandler, { newValue, _ in
-//            lhsValues.append(newValue)
-//        })
-//
-//        // Verify the initial state
-//        XCTAssertEqual(lhs.value, "initial lhs value")
-//        XCTAssertEqual(lhsValues, [])
-//        XCTAssertEqual(lhs.signal.observerCount, 0)
-//        XCTAssertEqual(rhs.signal.observerCount, 1)
-//        XCTAssertEqual(lockCount, 0)
-//        XCTAssertEqual(unlockCount, 0)
-//        
-//        // Bind lhs property to the async rhs property, verify that rhs property's value is loaded asynchronously
-//        // and that lhs property's value is updated when the rhs value is ready
-//        dispatch_group_enter(group)
-//        _ = lhs <~ rhs
-//        XCTAssertEqual(lhs.value, "initial lhs value")
-//        XCTAssertEqual(lhsValues, [])
-//        XCTAssertEqual(lhs.signal.observerCount, 0)
-//        XCTAssertEqual(rhs.signal.observerCount, 2)
-//        XCTAssertEqual(lockCount, 1)
-//        XCTAssertEqual(unlockCount, 0)
-//        
-//        CFRunLoopRun()
-//        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
-//        XCTAssertEqual(lhs.value, "")
-//        XCTAssertEqual(lhsValues, [""])
-//        XCTAssertEqual(lockCount, 1)
-//        XCTAssertEqual(unlockCount, 1)
-//        
-//        // TODO: Verify async updates to rhs relation/property
-//        
-//        // Nil out the lhs property and verify that the rhs property is unbound
-//        lhs = nil
-//        XCTAssertEqual(lhsValues, [""])
-//        XCTAssertEqual(rhs.signal.observerCount, 1)
-//        XCTAssertEqual(lockCount, 1)
-//        XCTAssertEqual(unlockCount, 1)
-//        
-//        // TODO: Change the rhs property's value and verify that lhs property's value is unaffected
-    }
-    
-    func testBindBidiToAsyncReadWriteProperty() {
-        // TODO
+        CFRunLoopRun()
+        XCTAssertEqual(nameProperty.value, "")
+        XCTAssertEqual(nameWillChangeCount, 1)
+        XCTAssertEqual(nameDidChangeCount, 1)
+        XCTAssertEqual(nameChanges, [""])
+        XCTAssertEqual(nameSnapshotCount, 0)
+        XCTAssertEqual(nameUpdateCount, 0)
+        XCTAssertEqual(nameCommitCount, 0)
+        XCTAssertEqual(lhsProperty.value, "")
+        XCTAssertEqual(lhsDidSetValues, [""])
+        XCTAssertEqual(lhsLockCount, 1)
+        XCTAssertEqual(lhsUnlockCount, 1)
+
+        // Update the underlying name relation and verify that changes are reflected in lhs property
+        r.asyncAdd(["id": 1, "name": "cat"])
+        XCTAssertEqual(nameProperty.value, "")
+        XCTAssertEqual(nameWillChangeCount, 2)
+        XCTAssertEqual(nameDidChangeCount, 1)
+        XCTAssertEqual(nameChanges, [""])
+        XCTAssertEqual(nameSnapshotCount, 0)
+        XCTAssertEqual(nameUpdateCount, 0)
+        XCTAssertEqual(nameCommitCount, 0)
+        XCTAssertEqual(lhsProperty.value, "")
+        XCTAssertEqual(lhsDidSetValues, [""])
+        XCTAssertEqual(lhsLockCount, 2)
+        XCTAssertEqual(lhsUnlockCount, 1)
+        
+        CFRunLoopRun()
+        XCTAssertEqual(nameProperty.value, "cat")
+        XCTAssertEqual(nameWillChangeCount, 2)
+        XCTAssertEqual(nameDidChangeCount, 2)
+        XCTAssertEqual(nameChanges, ["", "cat"])
+        XCTAssertEqual(nameSnapshotCount, 0)
+        XCTAssertEqual(nameUpdateCount, 0)
+        XCTAssertEqual(nameCommitCount, 0)
+        XCTAssertEqual(lhsProperty.value, "cat")
+        XCTAssertEqual(lhsDidSetValues, ["", "cat"])
+        XCTAssertEqual(lhsLockCount, 2)
+        XCTAssertEqual(lhsUnlockCount, 2)
+        
+        // Update the lhs property value and verify that async property value is updated
+        lhsProperty.change("lhs cat", transient: true)
+        XCTAssertEqual(nameProperty.value, "cat")
+        XCTAssertEqual(nameWillChangeCount, 3)
+        XCTAssertEqual(nameDidChangeCount, 2)
+        XCTAssertEqual(nameChanges, ["", "cat"])
+        XCTAssertEqual(nameSnapshotCount, 1)
+        XCTAssertEqual(nameUpdateCount, 1)
+        XCTAssertEqual(nameCommitCount, 0)
+        XCTAssertEqual(lhsProperty.value, "lhs cat")
+        // Note: lhsValues isn't updated here because that only happens when didSet is invoked after
+        // the bound name property has updated its value; not sure that really makes sense but that's
+        // how it works for now
+        XCTAssertEqual(lhsDidSetValues, ["", "cat"])
+        // TODO: Not sure it makes sense to lock the lhs property (and its associated control) since it
+        // was the one that initiated the change
+        XCTAssertEqual(lhsLockCount, 3)
+        XCTAssertEqual(lhsUnlockCount, 2)
+        
+        CFRunLoopRun()
+        XCTAssertEqual(nameProperty.value, "lhs cat")
+        XCTAssertEqual(nameWillChangeCount, 3)
+        XCTAssertEqual(nameDidChangeCount, 3)
+        XCTAssertEqual(nameChanges, ["", "cat", "lhs cat"])
+        XCTAssertEqual(nameSnapshotCount, 1)
+        XCTAssertEqual(nameUpdateCount, 1)
+        XCTAssertEqual(nameCommitCount, 0)
+        XCTAssertEqual(lhsProperty.value, "lhs cat")
+        XCTAssertEqual(lhsDidSetValues, ["", "cat"])
+        XCTAssertEqual(lhsLockCount, 3)
+        XCTAssertEqual(lhsUnlockCount, 3)
+
+        // TODO: Commit the lhs property value and verify that async property value is updated
+
+        // Nil out the lhs property and verify that the async property is unbound
+        lhsProperty = nil
+        XCTAssertEqual(lhsDidSetValues, ["", "cat"])
+        XCTAssertEqual(nameProperty.signal.observerCount, 2)
+        XCTAssertEqual(lhsLockCount, 3)
+        XCTAssertEqual(lhsUnlockCount, 3)
+
+        nameObserverRemoval()
+        lhsObserverRemoval()
     }
 }
