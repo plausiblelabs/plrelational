@@ -29,12 +29,15 @@ class RelationAsyncPropertyTests: BindingTestCase {
             dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
         }
 
-        let property = r.select(Attribute("id") *== 1).project(["name"]).asyncProperty{ $0.signal{ $0.oneString($1) } }
+        let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
+        let property = nameRelation.asyncProperty{ $0.signal{ $0.oneString($1) } }
         _ = property.signal.observe(SignalObserver(
             valueWillChange: {
                 willChangeCount += 1
             },
-            valueChanging: { newValue, _ in changes.append(newValue) },
+            valueChanging: { newValue, _ in
+                changes.append(newValue)
+            },
             valueDidChange: {
                 didChangeCount += 1
                 dispatch_group_leave(group)
@@ -62,20 +65,20 @@ class RelationAsyncPropertyTests: BindingTestCase {
         XCTAssertEqual(didChangeCount, 2)
         XCTAssertEqual(changes, ["", "cat"])
         
-//        // Perform another async update to the underlying relation (except this one isn't relevant to the
-//        // `select` that our signal is built on, so the signal shouldn't deliver a change)
-//        awaitCompletion{ r.asyncAdd(["id": 2, "name": "dog"]) }
-//        XCTAssertEqual(property.value, "cat")
-//        XCTAssertEqual(willChangeCount, 3)
-//        XCTAssertEqual(didChangeCount, 3)
-//        XCTAssertEqual(changes, ["", "cat"])
-//        
-//        // Perform an async delete-all-rows on the underlying relation
-//        awaitCompletion{ r.asyncDelete(true) }
-//        XCTAssertEqual(property.value, "")
-//        XCTAssertEqual(willChangeCount, 4)
-//        XCTAssertEqual(didChangeCount, 4)
-//        XCTAssertEqual(changes, ["", "cat", ""])
+        // Perform another async update to the underlying relation (except this one isn't relevant to the
+        // `select` that our signal is built on, so the signal shouldn't deliver a change)
+        awaitCompletion{ r.asyncAdd(["id": 2, "name": "dog"]) }
+        XCTAssertEqual(property.value, "cat")
+        XCTAssertEqual(willChangeCount, 3)
+        XCTAssertEqual(didChangeCount, 3)
+        XCTAssertEqual(changes, ["", "cat"])
+
+        // Perform an async delete-all-rows on the underlying relation
+        awaitCompletion{ r.asyncDelete(true) }
+        XCTAssertEqual(property.value, "")
+        XCTAssertEqual(willChangeCount, 4)
+        XCTAssertEqual(didChangeCount, 4)
+        XCTAssertEqual(changes, ["", "cat", ""])
     }
     
     func testAsyncReadWriteProperty() {
