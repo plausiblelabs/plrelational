@@ -159,47 +159,45 @@ class RelationMutationTests: BindingTestCase {
             ["name"]))
     }
     
-    // TODO: `asyncReplaceValues` is a two-part operation (delete followed by add), so this test is
-    // disabled until we have support for explicit transactions at the UpdateManager level
-//    func testAsyncReplaceValues() {
-//        let sqliteDB = makeDB().db
-//        _ = sqliteDB.createRelation("animal", scheme: ["name"]).ok!
-//        let db = TransactionalDatabase(sqliteDB)
-//        let r = db["animal"]
-//        
-//        func awaitCompletion(f: () -> Void) {
-//            f()
-//            CFRunLoopRun()
-//        }
-//        
-//        class Observer: AsyncRelationContentCoalescedObserver {
-//            func relationWillChange(relation: Relation) {
-//            }
-//            
-//            func relationDidChange(relation: Relation, result: Result<Set<Row>, RelationError>) {
-//                CFRunLoopStop(CFRunLoopGetCurrent())
-//            }
-//        }
-//        
-//        let observer = Observer()
-//        let remover = r.addAsyncObserver(observer)
-//        
-//        awaitCompletion{ r.asyncReplaceValues(["cat", "dog"]) }
-//        AssertEqual(r, MakeRelation(
-//            ["name"],
-//            ["cat"],
-//            ["dog"]))
-//        
-//        awaitCompletion{ r.replaceValues(["dog", "fish"]) }
-//        AssertEqual(r, MakeRelation(
-//            ["name"],
-//            ["dog"],
-//            ["fish"]))
-//        
-//        awaitCompletion{ r.replaceValues([]) }
-//        AssertEqual(r, MakeRelation(
-//            ["name"]))
-//        
-//        remover()
-//    }
+    func testAsyncReplaceValues() {
+        let sqliteDB = makeDB().db
+        _ = sqliteDB.createRelation("animal", scheme: ["name"]).ok!
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["animal"]
+        
+        func awaitCompletion(f: () -> Void) {
+            f()
+            CFRunLoopRun()
+        }
+        
+        class Observer: AsyncRelationContentCoalescedObserver {
+            func relationWillChange(relation: Relation) {
+            }
+            
+            func relationDidChange(relation: Relation, result: Result<Set<Row>, RelationError>) {
+                CFRunLoopStop(CFRunLoopGetCurrent())
+            }
+        }
+        
+        let observer = Observer()
+        let remover = r.addAsyncObserver(observer)
+        
+        awaitCompletion{ r.asyncReplaceValues(["cat", "dog"]) }
+        AssertEqual(r, MakeRelation(
+            ["name"],
+            ["cat"],
+            ["dog"]))
+
+        awaitCompletion{ r.asyncReplaceValues(["dog", "fish"]) }
+        AssertEqual(r, MakeRelation(
+            ["name"],
+            ["dog"],
+            ["fish"]))
+
+        awaitCompletion{ r.asyncReplaceValues([]) }
+        AssertEqual(r, MakeRelation(
+            ["name"]))
+        
+        remover()
+    }
 }

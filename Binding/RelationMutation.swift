@@ -97,7 +97,6 @@ extension TransactionalDatabase.TransactionalRelation {
     public func asyncReplaceValues(values: [RelationValue]) {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!
-        // TODO: This requires an explicit transaction
         self.asyncDelete(true)
         for id in values {
             self.asyncAdd([attr: id])
