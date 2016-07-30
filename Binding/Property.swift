@@ -452,7 +452,7 @@ public func <~ <T, RHS: ReadablePropertyType where RHS.Value == T, RHS.SignalCha
     return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
 }
 
-public func <~ <T, RHS: AsyncReadablePropertyType where RHS.Value == T>(lhs: BindableProperty<T>, rhs: RHS) -> Binding {
+public func <~ <T, RHS: AsyncReadablePropertyType where RHS.Value == T, RHS.SignalChange == T>(lhs: BindableProperty<T>, rhs: RHS) -> Binding {
     rhs.start()
     return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
 }
