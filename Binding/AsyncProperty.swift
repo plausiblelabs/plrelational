@@ -7,9 +7,10 @@ import Foundation
 
 public protocol AsyncReadablePropertyType: class {
     associatedtype Value
+    associatedtype SignalChange
     
     var value: Value? { get }
-    var signal: Signal<Value> { get }
+    var signal: Signal<SignalChange> { get }
     
     func start()
 }
@@ -17,6 +18,7 @@ public protocol AsyncReadablePropertyType: class {
 /// A concrete readable property whose value is fetched asynchronously.
 public class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
+    public typealias SignalChange = T
     
     public internal(set) var value: T?
     public let signal: Signal<T>
@@ -47,6 +49,8 @@ public class AsyncReadableProperty<T>: AsyncReadablePropertyType {
 /// A concrete readable property whose value can be updated and fetched asynchronously.
 public class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
+    public typealias SignalChange = T
+
     public typealias Getter = () -> T?
     public typealias Setter = (T, ChangeMetadata) -> Void
 
