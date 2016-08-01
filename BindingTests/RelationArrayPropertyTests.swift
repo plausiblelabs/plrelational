@@ -175,43 +175,45 @@ class RelationArrayPropertyTests: BindingTestCase {
             [4,    "Page4", 8.5]
         ))
 
-        // TODO: The following tests are temporarily disabled while we make `move` async-safe
-        
-//        // Re-order a page
-//        movePage(srcIndex: 2, dstIndex: 0)
-//        verifyArray(array, [
-//            "Page3",
-//            "Page1",
-//            "Page2",
-//            "Page4"
-//        ])
-//        verifyChanges([
-//            .Move(srcIndex: 2, dstIndex: 0)
-//        ])
-//        verifySQLite(MakeRelation(
-//            ["id", "name",  "order"],
-//            [1,    "Page1", 5.0],
-//            [2,    "Page2", 7.0],
-//            [3,    "Page3", 3.0],
-//            [4,    "Page4", 8.5]
-//        ))
-//
-//        // Delete a page
-//        deletePage(1)
-//        verifyArray(array, [
-//            "Page3",
-//            "Page2",
-//            "Page4"
-//        ])
-//        verifyChanges([
-//            .Delete(1)
-//        ])
-//        verifySQLite(MakeRelation(
-//            ["id", "name",  "order"],
-//            [2,    "Page2", 7.0],
-//            [3,    "Page3", 3.0],
-//            [4,    "Page4", 8.5]
-//        ))
+        // Re-order a page
+        awaitCompletion{ movePage(srcIndex: 2, dstIndex: 0) }
+        XCTAssertEqual(willChangeCount, 6)
+        XCTAssertEqual(didChangeCount, 6)
+        verifyArray(property, [
+            "Page3",
+            "Page1",
+            "Page2",
+            "Page4"
+        ])
+        verifyChanges([
+            .Move(srcIndex: 2, dstIndex: 0)
+        ])
+        verifySQLite(MakeRelation(
+            ["id", "name",  "order"],
+            [1,    "Page1", 5.0],
+            [2,    "Page2", 7.0],
+            [3,    "Page3", 3.0],
+            [4,    "Page4", 8.5]
+        ))
+
+        // Delete a page
+        awaitCompletion{ deletePage(1) }
+        XCTAssertEqual(willChangeCount, 7)
+        XCTAssertEqual(didChangeCount, 7)
+        verifyArray(property, [
+            "Page3",
+            "Page2",
+            "Page4"
+        ])
+        verifyChanges([
+            .Delete(1)
+        ])
+        verifySQLite(MakeRelation(
+            ["id", "name",  "order"],
+            [2,    "Page2", 7.0],
+            [3,    "Page3", 3.0],
+            [4,    "Page4", 8.5]
+        ))
         
         removal()
     }

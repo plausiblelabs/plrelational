@@ -110,25 +110,16 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
 
     /// Note: dstIndex is relative to the state of the array *after* the item is removed.
     override func move(srcIndex srcIndex: Int, dstIndex: Int) {
-//        var elemID: RelationValue!
-//        var newOrder: RelationValue!
-//
-//        // Determine the order of the element in its new position (relative to the current array state)
-//        // TODO: Shouldn't we be doing this in the `workOn` context?
-//        self.state.withValue{
-//            let elems = $0.data ?? []
-//            let element = elems[srcIndex]
-//            elemID = element.id
-//        
-//            let (previous, next) = self.adjacentElementsForIndex(dstIndex, notMatching: element, inElements: elems)
-//            newOrder = self.orderForElementBetween(previous, next, elems: elems)
-//        }
-//
-//        // Update the relation
-//        workOn.schedule{
-//            var mutableRelation = self.relation
-//            mutableRelation.update(self.idAttr *== elemID, newValues: [self.orderAttr: newOrder])
-//        }
+        // Determine the order of the element in its new position (relative to the current array state)
+        let elems = elements ?? []
+        let element = elems[srcIndex]
+        let elemID = element.id
+        
+        let (previous, next) = self.adjacentElementsForIndex(dstIndex, notMatching: element, inElements: elems)
+        let newOrder = self.orderForElementBetween(previous, next, elems: elems)
+
+        // Update the relation
+        relation.asyncUpdate(idAttr *== elemID, newValues: [orderAttr: newOrder])
     }
     
     private func onUpdate(rows: [Row], inout elems: [Element], inout changes: [Change]) {
@@ -137,7 +128,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
             if newOrder != .NotFound {
                 let id = row[idAttr]
                 let element = elementForID(id, elems)!
-                changes.append(self.onMove(element, dstOrder: newOrder, elems: &elems))
+                changes.append(onMove(element, dstOrder: newOrder, elems: &elems))
             }
         }
     }
