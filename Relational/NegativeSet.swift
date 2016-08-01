@@ -12,19 +12,22 @@ public struct NegativeSet<T: Hashable> {
     public private(set) var added: Set<T> = []
     public private(set) var removed: Set<T> = []
     
-    mutating func unionInPlace(set: Set<T>) {
+    public init() {
+    }
+    
+    public mutating func unionInPlace(set: Set<T>) {
         let new = set.subtract(removed)
         added.unionInPlace(new)
         removed.subtractInPlace(set)
     }
     
-    mutating func subtractInPlace(set: Set<T>) {
+    public mutating func subtractInPlace(set: Set<T>) {
         let gone = set.subtract(added)
         removed.unionInPlace(gone)
         added.subtractInPlace(set)
     }
     
-    mutating func removeAll() {
+    public mutating func removeAll() {
         added.removeAll()
         removed.removeAll()
     }
