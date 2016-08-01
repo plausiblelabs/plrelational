@@ -68,8 +68,8 @@ class RelationChangePartsTests: BindingTestCase {
             4
         ]
         
-//        XCTAssertEqual(Set(parts.addedRows), addedRows)
-//        XCTAssertEqual(Set(parts.updatedRows), updatedRows)
-//        XCTAssertEqual(Set(parts.deletedIDs), deletedIDs)
+        XCTAssertEqual(Set(parts.addedRows), addedRows)
+        XCTAssertEqual(Set(parts.updatedRows), updatedRows)
+        XCTAssertEqual(Set(parts.deletedIDs), deletedIDs)
     }
 }

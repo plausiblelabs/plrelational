@@ -58,10 +58,25 @@ extension RelationChange {
 
 /// Extracts the added, updated, and removed rows from the given NegativeSet.
 func partsOf(set: NegativeSet<Row>, idAttr: Attribute) -> RelationChangeParts {
-    // TODO: Compute differences to determine actual added/updated/removed
-    let addedRows: [Row] = Array(set.added)
-    let updatedRows: [Row] = []
-    let deletedIDs: [RelationValue] = []
+    // First gather the identifiers of the rows that are being deleted (or updated)
+    var deletedIDs: [RelationValue] = set.removed.map{ $0[idAttr] }
+
+    var addedRows: [Row] = []
+    var updatedRows: [Row] = []
+    for row in set.added {
+        let id = row[idAttr]
+        if set.removed.contains({ $0[idAttr] == id }) {
+            // A row with this identifier appears in both sets, so it must've been updated; the added set
+            // will contain the new row contents
+            updatedRows.append(row)
+        } else {
+            // This is a newly added row
+            addedRows.append(row)
+        }
+        
+        // We can be sure this item isn't being removed, so remove it from the set of deleted items
+        deletedIDs.remove(id)
+    }
 
     return RelationChangeParts(addedRows: addedRows, updatedRows: updatedRows, deletedIDs: deletedIDs)
 }
