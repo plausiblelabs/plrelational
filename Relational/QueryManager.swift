@@ -7,12 +7,8 @@ import Foundation
 
 
 /// A class which can manage an entire group of queries, to share work and perform them asynchronously.
-/// In order to keep every single Relation client from needing to be aware of this, we make it global-ish,
-/// with one per-thread instance (created when needed).
-public final class QueryManager: PerThreadInstance {
+public class QueryManager {
     private var pendingQueries: [(Relation, Result<Set<Row>, RelationError> -> Void)] = []
-    
-    private var executionTimer: CFRunLoopTimer?
     
     public init() {}
     
@@ -21,27 +17,10 @@ public final class QueryManager: PerThreadInstance {
     /// empty set of rows to signal that execution has completed. The callback is invoked on the same
     /// thread, when the runloop is in a common mode.
     public func registerQuery(relation: Relation, callback: Result<Set<Row>, RelationError> -> Void) {
-        let runloop = CFRunLoopGetCurrent()
-        let wrappedCallback = { (result: Result<Set<Row>, RelationError>) -> Void in
-            CFRunLoopPerformBlock(runloop, kCFRunLoopCommonModes, {
-                callback(result)
-            })
-            CFRunLoopWakeUp(runloop)
-        }
-        pendingQueries.append((relation, wrappedCallback))
-        
-        if executionTimer == nil {
-            executionTimer = CFRunLoopTimerCreateWithHandler(nil, 0, 0, 0, 0, { _ in
-                self.execute()
-            })
-            CFRunLoopAddTimer(runloop, executionTimer, kCFRunLoopCommonModes)
-        }
+        pendingQueries.append((relation, callback))
     }
     
-    private func execute() {
-        CFRunLoopTimerInvalidate(executionTimer)
-        executionTimer = nil
-        
+    public func execute() {
         let queries = pendingQueries
         pendingQueries = []
         
@@ -59,5 +38,36 @@ public final class QueryManager: PerThreadInstance {
                 }
             }
         })
+    }
+}
+
+/// A per-thread version of QueryManager which automatically executes registered queries on the next runloop cycle.
+public final class RunloopQueryManager: QueryManager, PerThreadInstance {
+    private var executionTimer: CFRunLoopTimer?
+    
+    public override func registerQuery(relation: Relation, callback: Result<Set<Row>, RelationError> -> Void) {
+        let runloop = CFRunLoopGetCurrent()
+        let wrappedCallback = { (result: Result<Set<Row>, RelationError>) -> Void in
+            CFRunLoopPerformBlock(runloop, kCFRunLoopCommonModes, {
+                callback(result)
+            })
+            CFRunLoopWakeUp(runloop)
+        }
+        
+        super.registerQuery(relation, callback: wrappedCallback)
+        
+        if executionTimer == nil {
+            executionTimer = CFRunLoopTimerCreateWithHandler(nil, 0, 0, 0, 0, { _ in
+                self.execute()
+            })
+            CFRunLoopAddTimer(runloop, executionTimer, kCFRunLoopCommonModes)
+        }
+    }
+    
+    public override func execute() {
+        CFRunLoopTimerInvalidate(executionTimer)
+        executionTimer = nil
+        
+        super.execute()
     }
 }

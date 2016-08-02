@@ -38,7 +38,7 @@ public protocol AsyncRelationChangeObserver {
 }
 
 extension UpdateManager {
-    public func observe(relation: Relation, observer: AsyncRelationChangeCoalescedObserver) -> ObservationRemover {
+    public func observe(relation: Relation, observer: AsyncRelationChangeCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
         class ShimObserver: AsyncRelationChangeObserver {
             let coalescedObserver: AsyncRelationChangeCoalescedObserver
             var coalescedChanges = NegativeSet<Row>()
@@ -71,7 +71,7 @@ extension UpdateManager {
             }
         }
         
-        return self.observe(relation, observer: ShimObserver(coalescedObserver: observer))
+        return self.observe(relation, observer: ShimObserver(coalescedObserver: observer), context: context)
     }
 }
 
@@ -98,7 +98,7 @@ public protocol AsyncRelationContentObserver {
 }
 
 extension UpdateManager {
-    public func observe(relation: Relation, observer: AsyncRelationContentCoalescedObserver) -> ObservationRemover {
+    public func observe(relation: Relation, observer: AsyncRelationContentCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
         class ShimObserver: AsyncRelationContentObserver {
             let coalescedObserver: AsyncRelationContentCoalescedObserver
             var coalescedRows: Set<Row> = []
@@ -127,7 +127,7 @@ extension UpdateManager {
             }
         }
         
-        return self.observe(relation, observer: ShimObserver(coalescedObserver: observer))
+        return self.observe(relation, observer: ShimObserver(coalescedObserver: observer), context: context)
     }
 }
 

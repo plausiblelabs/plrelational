@@ -151,7 +151,7 @@ extension Relation {
     /// Fetch rows and invoke a callback as they come in. Each call is passed one or more rows, or an error.
     /// If no error occurs, the sequence of calls is terminated by a final call which passes zero rows.
     public func asyncBulkRows(callback: Result<Set<Row>, RelationError> -> Void) {
-        QueryManager.currentInstance.registerQuery(self, callback: callback)
+        RunloopQueryManager.currentInstance.registerQuery(self, callback: callback)
     }
     
     /// Fetch all rows and invoke a callback when complete.
