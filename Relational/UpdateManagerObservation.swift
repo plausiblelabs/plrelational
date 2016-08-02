@@ -3,6 +3,8 @@
 // All rights reserved.
 //
 
+import Foundation
+
 
 /// There are two fundamenal ways to asynchronously observe relations: change observation and content observation.
 ///
@@ -100,16 +102,18 @@ public protocol AsyncRelationContentObserver {
 extension UpdateManager {
     public func observe(relation: Relation, observer: AsyncRelationContentCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
         class ShimObserver: AsyncRelationContentObserver {
-            let coalescedObserver: AsyncRelationContentCoalescedObserver
+            static let queueName = "\(ShimObserver.self)"
+            
+            let coalescedObserver: DispatchContextWrapped<AsyncRelationContentCoalescedObserver>
             var coalescedRows: Set<Row> = []
             var error: RelationError?
             
-            init(coalescedObserver: AsyncRelationContentCoalescedObserver) {
+            init(coalescedObserver: DispatchContextWrapped<AsyncRelationContentCoalescedObserver>) {
                 self.coalescedObserver = coalescedObserver
             }
             
             func relationWillChange(relation: Relation) {
-                coalescedObserver.relationWillChange(relation)
+                coalescedObserver.withWrapped({ $0.relationWillChange(relation) })
             }
             
             func relationNewContents(relation: Relation, rows: Set<Row>) {
@@ -123,11 +127,14 @@ extension UpdateManager {
             func relationDidChange(relation: Relation) {
                 let result = error.map(Result.Err) ?? .Ok(coalescedRows)
                 coalescedRows.removeAll()
-                coalescedObserver.relationDidChange(relation, result: result)
+                coalescedObserver.withWrapped({ $0.relationDidChange(relation, result: result) })
             }
         }
         
-        return self.observe(relation, observer: ShimObserver(coalescedObserver: observer), context: context)
+        let wrappedObserver = DispatchContextWrapped(context: context ?? CFRunLoopGetCurrent(), wrapped: observer)
+        let shimObserver = ShimObserver(coalescedObserver: wrappedObserver)
+        let queue = DispatchQueueContext(newSerialQueueNamed: ShimObserver.queueName)
+        return self.observe(relation, observer: shimObserver, context: queue)
     }
 }
 
