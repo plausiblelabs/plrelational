@@ -24,6 +24,10 @@ public struct DispatchQueueContext: DispatchContext {
         self.queue = queue
     }
     
+    public init(newSerialQueueNamed label: String) {
+        self.init(queue: dispatch_queue_create(label, nil))
+    }
+    
     public func async(f: Void -> Void) {
         dispatch_async(queue, f)
     }
