@@ -12,12 +12,8 @@ public protocol DispatchContext {
 
 extension CFRunLoopRef: DispatchContext {
     public func async(f: Void -> Void) {
-        if CFRunLoopGetCurrent() === self {
-            f()
-        } else {
-            CFRunLoopPerformBlock(self, kCFRunLoopCommonModes, f)
-            CFRunLoopWakeUp(self)
-        }
+        CFRunLoopPerformBlock(self, kCFRunLoopCommonModes, f)
+        CFRunLoopWakeUp(self)
     }
 }
 
