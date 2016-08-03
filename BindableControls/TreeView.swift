@@ -224,6 +224,10 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
                 textField.string <~ text
             case .ReadWrite(let text):
                 textField.string <~> text
+            case .AsyncReadOnly(let text):
+                textField.string <~ text
+            case .AsyncReadWrite(let text):
+                textField.string <~> text
             }
         }
         if let imageView = view.imageView as? ImageView {

@@ -15,7 +15,7 @@ public struct ListViewModel<E: ArrayElement> {
     public let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     public let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
-    public let selection: ReadWriteProperty<Set<E.ID>>
+    public let selection: AsyncReadWriteProperty<Set<E.ID>>
     public let cellIdentifier: (E.Data) -> String
     public let cellText: (E.Data) -> CellTextProperty
     public let cellImage: ((E.Data) -> ReadableProperty<Image>)?
@@ -24,7 +24,7 @@ public struct ListViewModel<E: ArrayElement> {
         data: ArrayProperty<E>,
         contextMenu: ((E.Data) -> ContextMenu?)?,
         move: ((srcIndex: Int, dstIndex: Int) -> Void)?,
-        selection: ReadWriteProperty<Set<E.ID>>,
+        selection: AsyncReadWriteProperty<Set<E.ID>>,
         cellIdentifier: (E.Data) -> String,
         cellText: (E.Data) -> CellTextProperty,
         cellImage: ((E.Data) -> ReadableProperty<Image>)?)
@@ -101,6 +101,9 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         // Enable drag-and-drop
         outlineView.registerForDraggedTypes([PasteboardType])
         outlineView.verticalMotionCanBeginDrag = true
+        
+        // Load the initial data
+        model.data.start()
     }
 
     deinit {
@@ -174,6 +177,10 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
                 textField.string <~ text
             case .ReadWrite(let text):
                 textField.string <~> text
+            case .AsyncReadOnly(let text):
+                textField.string <~ text
+            case .AsyncReadWrite(let text):
+                textField.string <~> text
             }
         }
         if let imageView = view.imageView as? ImageView {
@@ -220,8 +227,7 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         for change in arrayChanges {
             switch change {
             case .Initial(_):
-                // TODO
-                break
+                outlineView.reloadData()
                 
             case let .Insert(index):
                 let rows = NSIndexSet(index: index)

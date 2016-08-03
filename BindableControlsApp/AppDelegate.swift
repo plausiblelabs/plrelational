@@ -48,7 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Prepare the stored relations
         let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
-        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+        func createRelation(name: String, _ scheme: Scheme) -> TransactionalDatabase.TransactionalRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
             return db[name]
@@ -105,21 +105,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         addObject("Fred", editable: false, day: nil, color: nil, rocks: 17)
         addObject("Wilma", editable: true, day: "Friday", color: Color.blue, rocks: 42)
 
-        func nameProperty(relation: Relation) -> ReadWriteProperty<String> {
-            return undoableDB.bidiProperty(
+        func nameProperty(relation: Relation) -> AsyncReadWriteProperty<String> {
+            return undoableDB.asyncBidiProperty(
                 relation,
-                action: "Rename Object",
-                get: { $0.oneString },
-                set: { relation.updateString($0) }
+                action: "Rename Person",
+                signal: relation.signal{ $0.oneString($1) },
+                update: { relation.asyncUpdateString($0) }
             )
         }
         
-        func listSelectionProperty(relation: MutableRelation) -> ReadWriteProperty<Set<RelationValue>> {
-            return undoableDB.bidiProperty(
+        func listSelectionProperty(relation: TransactionalDatabase.TransactionalRelation) -> AsyncReadWriteProperty<Set<RelationValue>> {
+            return undoableDB.asyncBidiProperty(
                 relation,
                 action: "Change Selection",
-                get: { $0.allValues },
-                set: { relation.replaceValues(Array($0)) }
+                signal: relation.signal{ $0.allValues($1) },
+                update: { relation.asyncReplaceValues(Array($0)) }
             )
         }
         
@@ -133,7 +133,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             cellText: { row in
                 let rowID = row["id"]
                 let nameRelation = objects.select(Attribute("id") *== rowID).project(["name"])
-                return .ReadWrite(nameProperty(nameRelation))
+                return .AsyncReadWrite(nameProperty(nameRelation))
             },
             cellImage: nil
         )
@@ -163,58 +163,58 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         textField.string <~> nameProperty(selectedObjectsName)
         textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
 
-        checkbox.checked <~> undoableDB.bidiProperty(
-            selectedObjectsEditable,
-            action: "Change Editable",
-            get: { CheckState($0.oneBoolOrNil) },
-            set: { selectedObjectsEditable.updateBoolean($0.boolValue) }
-        )
-        
-        let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-        let popupItems = days.map{ titledMenuItem($0) }
-        popupButton.items <~ constantValueProperty(popupItems)
-        popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
-        popupButton.selectedObject <~> undoableDB.bidiProperty(
-            selectedObjectsDay,
-            action: "Change Favorite Day",
-            get: { $0.oneStringOrNil },
-            set: { selectedObjectsDay.updateNullableString($0) }
-        )
-        
-        stepper.value <~> undoableDB.bidiProperty(
-            selectedObjectsRocks,
-            action: "Change Rocks",
-            get: { $0.oneIntegerOrNil.map{ Int($0) } },
-            set: { selectedObjectsRocks.updateInteger(Int64($0!)) }
-        )
-        stepper.placeholder <~ selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
-        
-        comboBox.items <~ constantValueProperty(["Alice", "Bob", "Carlos"])
-        comboBox.value <~> undoableDB.bidiProperty(
-            selectedObjectsFriend,
-            action: "Change Best Friend",
-            get: { $0.oneStringOrNil },
-            set: { selectedObjectsFriend.updateNullableString($0) }
-        )
-        comboBox.placeholder <~ selectedObjectsFriend.stringWhenMulti("Multiple", otherwise: "Default")
-        
-        colorPicker.color <~> undoableDB.bidiProperty(
-            selectedObjectsColor,
-            action: "Change Favorite Color",
-            get: {
-                $0.commonValue{ rv -> Color? in
-                    if let s: String = rv.get() {
-                        return Color(string: s)
-                    } else {
-                        return nil
-                    }
-                }
-            },
-            set: { (commonValue: CommonValue<Color>) in
-                guard let color = commonValue.orNil() else { preconditionFailure("Expected a single color value") }
-                selectedObjectsColor.updateString(color.stringValue)
-            }
-        )
+//        checkbox.checked <~> undoableDB.bidiProperty(
+//            selectedObjectsEditable,
+//            action: "Change Editable",
+//            get: { CheckState($0.oneBoolOrNil) },
+//            set: { selectedObjectsEditable.updateBoolean($0.boolValue) }
+//        )
+//        
+//        let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+//        let popupItems = days.map{ titledMenuItem($0) }
+//        popupButton.items <~ constantValueProperty(popupItems)
+//        popupButton.defaultItemContent = MenuItemContent(object: "Default", title: selectedObjectsColor.stringWhenMulti("Multiple", otherwise: "Default"))
+//        popupButton.selectedObject <~> undoableDB.bidiProperty(
+//            selectedObjectsDay,
+//            action: "Change Favorite Day",
+//            get: { $0.oneStringOrNil },
+//            set: { selectedObjectsDay.updateNullableString($0) }
+//        )
+//        
+//        stepper.value <~> undoableDB.bidiProperty(
+//            selectedObjectsRocks,
+//            action: "Change Rocks",
+//            get: { $0.oneIntegerOrNil.map{ Int($0) } },
+//            set: { selectedObjectsRocks.updateInteger(Int64($0!)) }
+//        )
+//        stepper.placeholder <~ selectedObjectsRocks.stringWhenMulti("Multiple", otherwise: "Default")
+//        
+//        comboBox.items <~ constantValueProperty(["Alice", "Bob", "Carlos"])
+//        comboBox.value <~> undoableDB.bidiProperty(
+//            selectedObjectsFriend,
+//            action: "Change Best Friend",
+//            get: { $0.oneStringOrNil },
+//            set: { selectedObjectsFriend.updateNullableString($0) }
+//        )
+//        comboBox.placeholder <~ selectedObjectsFriend.stringWhenMulti("Multiple", otherwise: "Default")
+//        
+//        colorPicker.color <~> undoableDB.bidiProperty(
+//            selectedObjectsColor,
+//            action: "Change Favorite Color",
+//            get: {
+//                $0.commonValue{ rv -> Color? in
+//                    if let s: String = rv.get() {
+//                        return Color(string: s)
+//                    } else {
+//                        return nil
+//                    }
+//                }
+//            },
+//            set: { (commonValue: CommonValue<Color>) in
+//                guard let color = commonValue.orNil() else { preconditionFailure("Expected a single color value") }
+//                selectedObjectsColor.updateString(color.stringValue)
+//            }
+//        )
     }
     
     func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {
