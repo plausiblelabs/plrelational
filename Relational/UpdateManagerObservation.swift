@@ -102,58 +102,81 @@ public protocol AsyncRelationContentObserver {
 }
 
 extension UpdateManager {
-    public func observe(relation: Relation, observer: AsyncRelationContentCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
-        class ShimObserver: AsyncRelationContentObserver {
-            let coalescedObserver: DispatchContextWrapped<AsyncRelationContentCoalescedObserver>
-            var coalescedRows: Set<Row> = []
-            var error: RelationError?
-            
-            init(coalescedObserver: DispatchContextWrapped<AsyncRelationContentCoalescedObserver>) {
-                self.coalescedObserver = coalescedObserver
-            }
-            
-            func relationWillChange(relation: Relation) {
-                coalescedObserver.withWrapped({ $0.relationWillChange(relation) })
-            }
-            
-            func relationNewContents(relation: Relation, rows: Set<Row>) {
-                coalescedRows.unionInPlace(rows)
-            }
-            
-            func relationError(relation: Relation, error: RelationError) {
-                self.error = error
-            }
-            
-            func relationDidChange(relation: Relation) {
-                let result = error.map(Result.Err) ?? .Ok(coalescedRows)
-                coalescedRows.removeAll()
-                coalescedObserver.withWrapped({ $0.relationDidChange(relation, result: result) })
-            }
-        }
+    public func observe<T: AsyncRelationContentCoalescedObserver>(relation: Relation, observer: T, context: DispatchContext? = nil, postprocessor: Set<Row> -> T.PostprocessingOutput) -> ObservationRemover {
         
         let wrappedObserver = DispatchContextWrapped(context: context ?? defaultObserverDispatchContext(), wrapped: observer)
-        let shimObserver = ShimObserver(coalescedObserver: wrappedObserver)
+        let shimObserver = ShimContentObserver(coalescedObserver: wrappedObserver, postprocessor: postprocessor)
         return self.observe(relation, observer: shimObserver, context: DirectDispatchContext())
     }
 }
 
 public protocol AsyncRelationContentCoalescedObserver {
+    associatedtype PostprocessingOutput
+    
     func relationWillChange(relation: Relation)
-    func relationDidChange(relation: Relation, result: Result<Set<Row>, RelationError>)
+    func relationDidChange(relation: Relation, result: Result<PostprocessingOutput, RelationError>)
 }
+
 
 public extension Relation {
     func addAsyncObserver(observer: AsyncRelationContentObserver) -> UpdateManager.ObservationRemover {
         return UpdateManager.currentInstance.observe(self, observer: observer)
     }
     
-    func addAsyncObserver(observer: AsyncRelationContentCoalescedObserver) -> UpdateManager.ObservationRemover {
-        return UpdateManager.currentInstance.observe(self, observer: observer)
+    /// If desired, this method can be used to supply a postprocessor function which runs in the background after the rows
+    /// are accumulated but before results are sent to the observer. This postprocessor can, for example, sort the rows and
+    /// produce an array which is then passed to the observer.
+    func addAsyncObserver<T: AsyncRelationContentCoalescedObserver>(observer: T, postprocessor: Set<Row> -> T.PostprocessingOutput) -> UpdateManager.ObservationRemover {
+        return UpdateManager.currentInstance.observe(self, observer: observer, postprocessor: postprocessor)
+    }
+    
+    /// This method may be used when the observer just wants a raw set of rows to be delivered, without any postprocessing.
+    func addAsyncObserver<T: AsyncRelationContentCoalescedObserver where T.PostprocessingOutput == Set<Row>>(observer: T) -> UpdateManager.ObservationRemover {
+        return UpdateManager.currentInstance.observe(self, observer: observer, postprocessor: { $0 })
     }
 }
 
 public extension Relation {
     func asyncUpdate(query: SelectExpression, newValues: Row) {
         UpdateManager.currentInstance.registerUpdate(self, query: query, newValues: newValues)
+    }
+}
+
+/// Returns a postprocessing function which sorts the rows in ascending order based on the value each row has for `attribute`.
+public func sortByAttribute(attribute: Attribute) -> (Set<Row> -> [Row]) {
+    return {
+        $0.sort({ $0[attribute] < $1[attribute] })
+    }
+}
+
+private class ShimContentObserver<T: AsyncRelationContentCoalescedObserver>: AsyncRelationContentObserver {
+    let coalescedObserver: DispatchContextWrapped<T>
+    let postprocess: Set<Row> -> T.PostprocessingOutput
+    var coalescedRows: Set<Row> = []
+    var error: RelationError?
+    
+    init(coalescedObserver: DispatchContextWrapped<T>, postprocessor: Set<Row> -> T.PostprocessingOutput) {
+        self.coalescedObserver = coalescedObserver
+        self.postprocess = postprocessor
+    }
+    
+    func relationWillChange(relation: Relation) {
+        coalescedObserver.withWrapped({ $0.relationWillChange(relation) })
+    }
+    
+    func relationNewContents(relation: Relation, rows: Set<Row>) {
+        coalescedRows.unionInPlace(rows)
+    }
+    
+    func relationError(relation: Relation, error: RelationError) {
+        self.error = error
+    }
+    
+    func relationDidChange(relation: Relation) {
+        let result = error.map(Result.Err) ?? .Ok(coalescedRows)
+        coalescedRows.removeAll()
+        
+        let postprocessedResult = result.map(postprocess)
+        coalescedObserver.withWrapped({ $0.relationDidChange(relation, result: postprocessedResult) })
     }
 }

@@ -171,7 +171,7 @@ class UpdateManagerTests: DBTestCase {
         
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
-
+        
         let observer = TestAsyncContentCoalescedObserver()
         let remover = r.addAsyncObserver(observer)
         observer.assertChanges({ r.asyncAdd(["n": 1]) },
@@ -182,7 +182,25 @@ class UpdateManagerTests: DBTestCase {
                                expectedContents: [])
         remover()
     }
-
+    
+    func testAsyncCoalescedUpdateObservationWithSorting() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        
+        let observer = TestAsyncContentCoalescedArrayObserver()
+        let remover = r.addAsyncObserver(observer, postprocessor: sortByAttribute("n"))
+        observer.assertChanges({ r.asyncAdd(["n": 1]) },
+                               expectedContents: [["n": 1]])
+        observer.assertChanges({ for i: Int64 in 2..<20 { r.asyncAdd(["n": .Integer(i)]) } },
+                               expectedContents: (1..<20).map({ ["n": .Integer($0)] }))
+        observer.assertChanges({ r.asyncDelete(true) },
+                               expectedContents: [])
+        remover()
+    }
+    
     func testErrorFromRelation() {
         let sqliteDB = makeDB().db.sqliteDatabase
         sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
@@ -459,7 +477,7 @@ private class TestAsyncContentCoalescedObserver: AsyncRelationContentCoalescedOb
         observer.assertChanges(change, expectedContents: expectedContents)
         remover()
     }
-
+    
     var willChangeCount = 0
     var result: Result<Set<Row>, RelationError>?
     
@@ -479,6 +497,41 @@ private class TestAsyncContentCoalescedObserver: AsyncRelationContentCoalescedOb
     }
     
     func relationDidChange(relation: Relation, result: Result<Set<Row>, RelationError>) {
+        self.result = result
+        CFRunLoopStop(CFRunLoopGetCurrent())
+    }
+}
+
+private class TestAsyncContentCoalescedArrayObserver: AsyncRelationContentCoalescedObserver {
+    static func assertChanges(relation: Relation, change: Void -> Void, postprocessor: Set<Row> -> [Row], expectedContents: [Row]) {
+        let observer = TestAsyncContentCoalescedArrayObserver()
+        let remover = relation.addAsyncObserver(observer, postprocessor: postprocessor)
+        observer.assertChanges(change, expectedContents: expectedContents)
+        remover()
+    }
+    
+    var willChangeCount = 0
+    var result: Result<[Row], RelationError>?
+    
+    func assertChanges(change: Void -> Void, expectedContents: [Row]) {
+        change()
+        CFRunLoopRun()
+        
+        XCTAssertEqual(willChangeCount, 1)
+        XCTAssertNotNil(result?.ok)
+        if let contents = result?.ok {
+            XCTAssertEqual(contents, expectedContents)
+        }
+        
+        willChangeCount = 0
+        result = nil
+    }
+    
+    func relationWillChange(relation: Relation) {
+        willChangeCount += 1
+    }
+    
+    func relationDidChange(relation: Relation, result: Result<[Row], RelationError>) {
         self.result = result
         CFRunLoopStop(CFRunLoopGetCurrent())
     }
