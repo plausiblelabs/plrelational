@@ -17,6 +17,38 @@ extension CFRunLoopRef: DispatchContext {
     }
 }
 
+
+public struct RunLoopDispatchContext: DispatchContext {
+    var runloop: CFRunLoopRef
+    
+    /// When this is true, calls to `async` on the thread belonging to `runloop` are executed
+    /// immediately inline, rather than being delayed to the next runloop cycle. Sorry, I
+    /// couldn't come up with a good name. It's not really async when that happens, but it's
+    /// sometimes useful.
+    var executeReentrantImmediately: Bool
+    
+    public init(runloop: CFRunLoopRef = CFRunLoopGetCurrent(), executeReentrantImmediately: Bool = true) {
+        self.runloop = runloop
+        self.executeReentrantImmediately = executeReentrantImmediately
+    }
+    
+    public func async(f: Void -> Void) {
+        if executeReentrantImmediately && CFRunLoopGetCurrent() === runloop {
+            f()
+        } else {
+            runloop.async(f)
+        }
+    }
+}
+
+/// A simple dispatch context that just makes the calls immediately inline. This is not really
+/// "async" but it's sometimes useful.
+public struct DirectDispatchContext: DispatchContext {
+    public func async(f: Void -> Void) {
+        f()
+    }
+}
+
 public struct DispatchQueueContext: DispatchContext {
     var queue: dispatch_queue_t
     
