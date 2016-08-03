@@ -42,8 +42,6 @@ public protocol AsyncRelationChangeObserver {
 extension UpdateManager {
     public func observe(relation: Relation, observer: AsyncRelationChangeCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
         class ShimObserver: AsyncRelationChangeObserver {
-            static let queueName = "\(ShimObserver.self)"
-            
             let coalescedObserver: DispatchContextWrapped<AsyncRelationChangeCoalescedObserver>
             var coalescedChanges = NegativeSet<Row>()
             var error: RelationError?
@@ -75,10 +73,9 @@ extension UpdateManager {
             }
         }
         
-        let wrappedObserver = DispatchContextWrapped(context: context ?? CFRunLoopGetCurrent(), wrapped: observer)
+        let wrappedObserver = DispatchContextWrapped(context: context ?? defaultObserverDispatchContext(), wrapped: observer)
         let shimObserver = ShimObserver(coalescedObserver: wrappedObserver)
-        let queue = DispatchQueueContext(newSerialQueueNamed: ShimObserver.queueName)
-        return self.observe(relation, observer: shimObserver, context: queue)
+        return self.observe(relation, observer: shimObserver, context: DirectDispatchContext())
     }
 }
 
@@ -107,8 +104,6 @@ public protocol AsyncRelationContentObserver {
 extension UpdateManager {
     public func observe(relation: Relation, observer: AsyncRelationContentCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
         class ShimObserver: AsyncRelationContentObserver {
-            static let queueName = "\(ShimObserver.self)"
-            
             let coalescedObserver: DispatchContextWrapped<AsyncRelationContentCoalescedObserver>
             var coalescedRows: Set<Row> = []
             var error: RelationError?
@@ -136,10 +131,9 @@ extension UpdateManager {
             }
         }
         
-        let wrappedObserver = DispatchContextWrapped(context: context ?? CFRunLoopGetCurrent(), wrapped: observer)
+        let wrappedObserver = DispatchContextWrapped(context: context ?? defaultObserverDispatchContext(), wrapped: observer)
         let shimObserver = ShimObserver(coalescedObserver: wrappedObserver)
-        let queue = DispatchQueueContext(newSerialQueueNamed: ShimObserver.queueName)
-        return self.observe(relation, observer: shimObserver, context: queue)
+        return self.observe(relation, observer: shimObserver, context: DirectDispatchContext())
     }
 }
 

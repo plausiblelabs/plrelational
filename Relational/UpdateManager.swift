@@ -49,7 +49,7 @@ public final class UpdateManager: PerThreadInstance {
         guard let obj = relation as? AnyObject else { return {} }
         
         let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
-        let id = info.addObserver(observer, context: context ?? CFRunLoopGetCurrent())
+        let id = info.addObserver(observer, context: context ?? defaultObserverDispatchContext())
         
         return {
             info.observers[id] = nil
@@ -65,7 +65,7 @@ public final class UpdateManager: PerThreadInstance {
         guard let obj = relation as? AnyObject else { return {} }
         
         let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
-        let id = info.addObserver(observer, context: context ?? CFRunLoopGetCurrent())
+        let id = info.addObserver(observer, context: context ?? defaultObserverDispatchContext())
         
         return {
             info.observers[id] = nil
@@ -115,7 +115,7 @@ public final class UpdateManager: PerThreadInstance {
             executionTimer = CFRunLoopTimerCreateWithHandler(nil, 0, 0, 0, 0, { _ in
                 self.execute()
             })
-            CFRunLoopAddTimer(CFRunLoopGetCurrent(), executionTimer, kCFRunLoopCommonModes)
+            CFRunLoopAddTimer(runloop, executionTimer, kCFRunLoopCommonModes)
         }
     }
     
@@ -320,6 +320,10 @@ public final class UpdateManager: PerThreadInstance {
                 })
             })
         })
+    }
+    
+    func defaultObserverDispatchContext() -> DispatchContext {
+        return RunLoopDispatchContext(runloop: self.runloop, executeReentrantImmediately: true)
     }
 }
 
