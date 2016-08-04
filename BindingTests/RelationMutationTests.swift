@@ -77,16 +77,7 @@ class RelationMutationTests: BindingTestCase {
             CFRunLoopRun()
         }
         
-        class Observer: AsyncRelationContentCoalescedObserver {
-            func relationWillChange(relation: Relation) {
-            }
-            
-            func relationDidChange(relation: Relation, result: Result<Set<Row>, RelationError>) {
-                CFRunLoopStop(CFRunLoopGetCurrent())
-            }
-        }
-        
-        let observer = Observer()
+        let observer = ContentCoalescedRunLoopStoppingObserver()
         let remover = r.addAsyncObserver(observer)
 
         let name = r.project(["name"])
@@ -170,16 +161,7 @@ class RelationMutationTests: BindingTestCase {
             CFRunLoopRun()
         }
         
-        class Observer: AsyncRelationContentCoalescedObserver {
-            func relationWillChange(relation: Relation) {
-            }
-            
-            func relationDidChange(relation: Relation, result: Result<Set<Row>, RelationError>) {
-                CFRunLoopStop(CFRunLoopGetCurrent())
-            }
-        }
-        
-        let observer = Observer()
+        let observer = ContentCoalescedRunLoopStoppingObserver()
         let remover = r.addAsyncObserver(observer)
         
         awaitCompletion{ r.asyncReplaceValues(["cat", "dog"]) }
@@ -199,5 +181,14 @@ class RelationMutationTests: BindingTestCase {
             ["name"]))
         
         remover()
+    }
+}
+
+private class ContentCoalescedRunLoopStoppingObserver: AsyncRelationContentCoalescedObserver {
+    func relationWillChange(relation: Relation) {
+    }
+    
+    func relationDidChange(relation: Relation, result: Result<Set<Row>, RelationError>) {
+        CFRunLoopStop(CFRunLoopGetCurrent())
     }
 }
