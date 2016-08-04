@@ -9,7 +9,7 @@ import libRelational
 
 class RelationChangePartsTests: BindingTestCase {
     
-    func testParts() {
+    func testRelationChangeParts() {
         let added = MakeRelation(
             ["id", "name"],
             [1, "alice"],
@@ -35,6 +35,39 @@ class RelationChangePartsTests: BindingTestCase {
             4
         ]
 
+        XCTAssertEqual(Set(parts.addedRows), addedRows)
+        XCTAssertEqual(Set(parts.updatedRows), updatedRows)
+        XCTAssertEqual(Set(parts.deletedIDs), deletedIDs)
+    }
+    
+    func testNegativeSetParts() {
+        let added: [Row] = [
+            ["id": 1, "name": "alice"],
+            ["id": 2, "name": "bob"],
+            ["id": 3, "name": "carlos"]
+        ]
+        
+        let removed: [Row] = [
+            ["id": 3, "name": "charles"],
+            ["id": 4, "name": "donald"]
+        ]
+        
+        var set = NegativeSet<Row>()
+        set.unionInPlace(Set(added))
+        set.subtractInPlace(Set(removed))
+        let parts = partsOf(set, idAttr: "id")
+        
+        let addedRows: Set<Row> = [
+            ["id": 1, "name": "alice"],
+            ["id": 2, "name": "bob"]
+        ]
+        let updatedRows: Set<Row> = [
+            ["id": 3, "name": "carlos"]
+        ]
+        let deletedIDs: Set<RelationValue> = [
+            4
+        ]
+        
         XCTAssertEqual(Set(parts.addedRows), addedRows)
         XCTAssertEqual(Set(parts.updatedRows), updatedRows)
         XCTAssertEqual(Set(parts.deletedIDs), deletedIDs)

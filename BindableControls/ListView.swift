@@ -15,7 +15,7 @@ public struct ListViewModel<E: ArrayElement> {
     public let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     public let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
-    public let selection: ReadWriteProperty<Set<E.ID>>
+    public let selection: AsyncReadWriteProperty<Set<E.ID>>
     public let cellIdentifier: (E.Data) -> String
     public let cellText: (E.Data) -> CellTextProperty
     public let cellImage: ((E.Data) -> ReadableProperty<Image>)?
@@ -24,7 +24,7 @@ public struct ListViewModel<E: ArrayElement> {
         data: ArrayProperty<E>,
         contextMenu: ((E.Data) -> ContextMenu?)?,
         move: ((srcIndex: Int, dstIndex: Int) -> Void)?,
-        selection: ReadWriteProperty<Set<E.ID>>,
+        selection: AsyncReadWriteProperty<Set<E.ID>>,
         cellIdentifier: (E.Data) -> String,
         cellText: (E.Data) -> CellTextProperty,
         cellImage: ((E.Data) -> ReadableProperty<Image>)?)
@@ -46,9 +46,9 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
     private let model: ListViewModel<E>
     private let outlineView: NSOutlineView
 
-    // TODO: This shadows the array from the model; would it be better to go back to referring directly
-    // to the current `state` of the ArrayProperty?
-    private var elements: [E]
+    private var elements: [E] {
+        return model.data.value ?? []
+    }
     
     private lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
         get: { [unowned self] in
@@ -84,15 +84,12 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
     public init(model: ListViewModel<E>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
-        self.elements = model.data.value.data ?? []
 
         super.init()
         
         // TODO: Handle will/didChange
         arrayObserverRemoval = model.data.signal.observe(SignalObserver(
             valueWillChange: {},
-            // TODO: We should have a stricter contract in place to ensure that these changes are
-            // sent via UIScheduler
             valueChanging: { [weak self] stateChange, _ in self?.arrayChanged(stateChange) },
             valueDidChange: {}
         ))
@@ -104,6 +101,9 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
         // Enable drag-and-drop
         outlineView.registerForDraggedTypes([PasteboardType])
         outlineView.verticalMotionCanBeginDrag = true
+        
+        // Load the initial data
+        model.data.start()
     }
 
     deinit {
@@ -177,6 +177,10 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
                 textField.string <~ text
             case .ReadWrite(let text):
                 textField.string <~> text
+            case .AsyncReadOnly(let text):
+                textField.string <~ text
+            case .AsyncReadWrite(let text):
+                textField.string <~> text
             }
         }
         if let imageView = view.imageView as? ImageView {
@@ -214,17 +218,17 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
 
     // MARK: Property observers
 
-    private func arrayChanged(stateChange: ArrayProperty<E>.SignalChange) {
+    private func arrayChanged(arrayChanges: [ArrayChange<E>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
         
         outlineView.beginUpdates()
 
-        // Update our shadow copy of the model's new array state
-        self.elements = stateChange.newState.data ?? []
-        
         // Record changes that were made to the array relative to its previous state
-        for change in stateChange.arrayChanges {
+        for change in arrayChanges {
             switch change {
+            case .Initial(_):
+                outlineView.reloadData()
+                
             case let .Insert(index):
                 let rows = NSIndexSet(index: index)
                 outlineView.insertItemsAtIndexes(rows, inParent: nil, withAnimation: animation)

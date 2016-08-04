@@ -149,7 +149,6 @@ class RelationAsyncPropertyTests: BindingTestCase {
         let lhsObserverRemoval = lhsProperty.signal.observe(SignalObserver(
             valueWillChange: {},
             valueChanging: { newValue, _ in
-                print("LHS VALUE CHANGING: \(newValue)")
                 //lhsChanges.append(newValue)
             },
             valueDidChange: {}
