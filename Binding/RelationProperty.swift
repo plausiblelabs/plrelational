@@ -156,40 +156,29 @@ public struct RelationMutationConfig<T> {
 }
 
 private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
+    private let config: RelationMutationConfig<T>
+    private var mutableValue: T
     private var removal: ObserverRemoval!
+    private var before: ChangeLoggingDatabaseSnapshot?
 
     init(relation: Relation, config: RelationMutationConfig<T>, relationToValue: Relation -> T, valueChanging: (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
-
-        var value = relationToValue(relation)
-        var before: ChangeLoggingDatabaseSnapshot?
+        
+        self.config = config
+        self.mutableValue = relationToValue(relation)
 
         super.init(
-            get: { value },
-            set: { newValue, metadata in
-                if before == nil {
-                    before = config.snapshot()
-                }
-
-                // Note: We don't set `value` here; instead we wait to receive the change from the
-                // relation in our change observer and then update `value` there
-                if metadata.transient {
-                    config.update(newValue: newValue)
-                } else {
-                    config.commit(before: before!, newValue: newValue)
-                    before = nil
-                }
-            },
             signal: signal,
             notify: notify,
             // TODO
             changeHandler: ChangeHandler()
         )
 
-        self.removal = relation.addChangeObserver({ _ in
+        self.removal = relation.addChangeObserver({ [weak self] _ in
+            guard let strongSelf = self else { return }
             let newValue = relationToValue(relation)
-            if valueChanging(value, newValue) {
-                value = newValue
+            if valueChanging(strongSelf.mutableValue, newValue) {
+                strongSelf.mutableValue = newValue
                 notify.valueChanging(change: newValue, metadata: ChangeMetadata(transient: false))
             }
         })
@@ -197,6 +186,25 @@ private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
 
     deinit {
         removal()
+    }
+    
+    private override func getValue() -> T {
+        return mutableValue
+    }
+    
+    private override func setValue(value: T, _ metadata: ChangeMetadata) {
+        if before == nil {
+            before = config.snapshot()
+        }
+        
+        // Note: We don't set `mutableValue` here; instead we wait to receive the change from the
+        // relation in our change observer and then update `mutableValue` there
+        if metadata.transient {
+            config.update(newValue: value)
+        } else {
+            config.commit(before: before!, newValue: value)
+            before = nil
+        }
     }
 }
 

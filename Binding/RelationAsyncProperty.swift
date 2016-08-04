@@ -13,38 +13,42 @@ extension Relation {
 }
 
 private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
+    private let config: RelationMutationConfig<T>
+    private var mutableValue: T?
     private var removal: ObserverRemoval!
-    
+    private var before: ChangeLoggingDatabaseSnapshot?
+
     init(config: RelationMutationConfig<T>, signal: Signal<T>) {
-        var value: T?
-        var before: ChangeLoggingDatabaseSnapshot?
+        self.config = config
         
-        super.init(
-            get: { value },
-            set: { newValue, metadata in
-                if before == nil {
-                    before = config.snapshot()
-                }
-                
-                // Note: We don't set `value` here; instead we wait to receive the change from the
-                // relation in our change observer and then update `value` there
-                if metadata.transient {
-                    config.update(newValue: newValue)
-                } else {
-                    config.commit(before: before!, newValue: newValue)
-                    before = nil
-                }
-            },
-            signal: signal
-        )
+        super.init(signal: signal)
         
         self.removal = signal.observe({ newValue, _ in
-            value = newValue
+            self.mutableValue = newValue
         })
     }
     
     deinit {
         removal()
+    }
+    
+    private override func getValue() -> T? {
+        return mutableValue
+    }
+    
+    private override func setValue(value: T, _ metadata: ChangeMetadata) {
+        if before == nil {
+            before = config.snapshot()
+        }
+        
+        // Note: We don't set `mutableValue` here; instead we wait to receive the change from the
+        // relation in our change observer and then update `mutableValue` there
+        if metadata.transient {
+            config.update(newValue: value)
+        } else {
+            config.commit(before: before!, newValue: value)
+            before = nil
+        }
     }
 }
 
