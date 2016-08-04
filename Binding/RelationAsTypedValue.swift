@@ -34,6 +34,12 @@ extension Relation {
             .flatMap{transform($0[attr])})
     }
 
+    /// Resolves to a set of all values for the single attribute, built from one RelationValue for each non-error row
+    /// in the given set.
+    public func allValues(rows: AnyGenerator<Row>) -> Set<RelationValue> {
+        return allValues(rows, { $0 })
+    }
+
     /// Resolves to a set of all values for the single attribute, built from one transformed value for each non-error row
     /// in the relation.
     public func allValues<V: Hashable>(transform: RelationValue -> V?) -> Set<V> {

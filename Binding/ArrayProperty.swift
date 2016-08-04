@@ -6,7 +6,7 @@
 import Foundation
 import libRelational
 
-public protocol ArrayElement: class {
+public protocol ArrayElement: class, Equatable {
     associatedtype ID: Hashable, Plistable
     associatedtype Data
     
@@ -14,20 +14,26 @@ public protocol ArrayElement: class {
     var data: Data { get set }
 }
 
+public func ==<E: ArrayElement>(a: E, b: E) -> Bool {
+    return a.id == b.id
+}
+
 public struct ArrayPos<E: ArrayElement> {
     let previousID: E.ID?
     let nextID: E.ID?
 }
 
-public enum ArrayChange { case
+public enum ArrayChange<E: ArrayElement> { case
+    Initial([E]),
     Insert(Int),
     Delete(Int),
     Move(srcIndex: Int, dstIndex: Int)
 }
 
 extension ArrayChange: Equatable {}
-public func ==(a: ArrayChange, b: ArrayChange) -> Bool {
+public func ==<E: ArrayElement>(a: ArrayChange<E>, b: ArrayChange<E>) -> Bool {
     switch (a, b) {
+    case let (.Initial(a), .Initial(b)): return a == b
     case let (.Insert(a), .Insert(b)): return a == b
     case let (.Delete(a), .Delete(b)): return a == b
     case let (.Move(asrc, adst), .Move(bsrc, bdst)): return asrc == bsrc && adst == bdst
@@ -35,32 +41,36 @@ public func ==(a: ArrayChange, b: ArrayChange) -> Bool {
     }
 }
 
-public class ArrayProperty<E: ArrayElement>: ReadablePropertyType {
-    public typealias Value = AsyncState<[E]>
-    public typealias SignalChange = (newState: AsyncState<[E]>, arrayChanges: [ArrayChange])
+public class ArrayProperty<E: ArrayElement>: AsyncReadablePropertyType {
+    public typealias Value = [E]
+    public typealias SignalChange = [ArrayChange<E>]
     
     public typealias ElementID = E.ID
     public typealias Element = E
     public typealias Pos = ArrayPos<E>
-    public typealias Change = ArrayChange
+    public typealias Change = ArrayChange<E>
 
-    internal var state: Mutexed<AsyncState<[Element]>>
+    internal var elements: [Element]?
 
-    public var value: AsyncState<[Element]> {
-        return state.get()
+    public var value: [Element]? {
+        return elements
     }
     
     public let signal: Signal<SignalChange>
-    private let notify: Signal<SignalChange>.Notify
+    internal let notify: Signal<SignalChange>.Notify
     
-    init(initialState: AsyncState<[Element]>) {
-        (self.signal, self.notify) = Signal<SignalChange>.pipe()
-        self.state = Mutexed(initialState)
+    init(signal: Signal<SignalChange>, notify: Signal<SignalChange>.Notify) {
+        self.elements = nil
+        self.signal = signal
+        self.notify = notify
     }
     
-    internal func notifyObservers(newState newState: AsyncState<[Element]>, arrayChanges: [ArrayChange]) {
+    public func start() {
+    }
+    
+    internal func notifyObservers(arrayChanges arrayChanges: [ArrayChange<E>]) {
         let metadata = ChangeMetadata(transient: false)
-        notify.valueChanging(change: (newState: newState, arrayChanges: arrayChanges), metadata: metadata)
+        notify.valueChanging(change: arrayChanges, metadata: metadata)
     }
     
     public func insert(row: E.Data, pos: Pos) {

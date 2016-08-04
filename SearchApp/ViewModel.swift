@@ -88,7 +88,7 @@ class ViewModel {
     })
     
     lazy var personResultsArray: ArrayProperty<RowArrayElement> = { [unowned self] in
-        return self.personResults.arrayProperty(workOn: self.queueScheduler)
+        return self.personResults.arrayProperty()
     }()
     
     lazy var listViewModel: ListViewModel<RowArrayElement> = { [unowned self] in
@@ -130,7 +130,9 @@ class ViewModel {
     // TODO: Hmm, background work actually begins when `queryString` updates the select expression,
     // but here we only show progress indicator once the changes make their way to `personResultsArray`
     lazy var progressVisible: ReadableProperty<Bool> = { [unowned self] in
-        return self.personResultsArray.map{ $0.isComputing }
+        // TODO
+        //return self.personResultsArray.map{ $0.isComputing }
+        return constantValueProperty(false)
     }()
     
     // ASYNC: Reads value on MAIN thread (since `selectedPersonID` relation is in-memory only)

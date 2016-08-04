@@ -9,5 +9,7 @@ import Binding
 /// binding a list/tree cell text property.
 public enum CellTextProperty { case
     ReadOnly(ReadableProperty<String>),
-    ReadWrite(ReadWriteProperty<String>)
+    ReadWrite(ReadWriteProperty<String>),
+    AsyncReadOnly(AsyncReadableProperty<String>),
+    AsyncReadWrite(AsyncReadWriteProperty<String>)
 }

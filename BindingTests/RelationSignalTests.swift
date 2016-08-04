@@ -20,13 +20,10 @@ class RelationSignalTests: BindingTestCase {
         var changes: [String] = []
         
         let runloop = CFRunLoopGetCurrent()
-        let group = dispatch_group_create()
 
         func awaitCompletion(f: () -> Void) {
-            dispatch_group_enter(group)
             f()
             CFRunLoopRun()
-            dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
         }
         
         let signal = r.select(Attribute("id") *== 1).project(["name"]).signal{ $0.oneString($1) }
@@ -37,7 +34,6 @@ class RelationSignalTests: BindingTestCase {
             valueChanging: { newValue, _ in changes.append(newValue) },
             valueDidChange: {
                 didChangeCount += 1
-                dispatch_group_leave(group)
                 CFRunLoopStop(runloop)
             }
         ))
