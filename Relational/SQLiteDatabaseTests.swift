@@ -5,6 +5,7 @@
 
 import XCTest
 import libRelational
+import sqlite3
 
 class SQLiteDatabaseTests: DBTestCase {
     func makeSQLRelation(name: String, _ attributes: [Attribute], _ rowValues: [RelationValue]...) -> SQLiteTableRelation {
@@ -444,5 +445,50 @@ class SQLiteDatabaseTests: DBTestCase {
                         ["109",    "Miami",  "Los Angeles", "9:50p",   "2:52a"],
                         ["213",    "Miami",  "Boston",      "11:43a",  "12:45p"],
                         ["214",    "Miami",  "O'Hare",      "2:20p",   "3:12p"]))
+    }
+    
+    func testTransactionConflict() {
+        let (path, modelDB) = makeDB()
+        let db1 = modelDB.sqliteDatabase
+        db1.createRelation("r", scheme: ["n"])
+        let r1 = db1["r"]!
+        
+        r1.add(["n": 1])
+        
+        let db2 = try! SQLiteDatabase(path)
+        let r2 = db2["r"]!
+        AssertEqual(r2, MakeRelation(["n"], [1]))
+        
+        let result = db1.transaction({
+            let result = db2.transaction({
+                let result = r2.update(Attribute("n") *== 1, newValues: ["n": 3])
+                XCTAssertNil(result.err)
+                
+                let result2 = r1.delete(Attribute("n") *== 1)
+                let err2 = result2.err as? SQLiteDatabase.Error
+                XCTAssertNotNil(err2)
+                XCTAssertEqual(err2?.code, SQLITE_BUSY)
+                
+                let result3 = r1.add(["n": 2])
+                let err3 = result3.err as? SQLiteDatabase.Error
+                XCTAssertNotNil(err3)
+                XCTAssertEqual(err3?.code, SQLITE_BUSY)
+                
+                let result4 = r1.update(Attribute("n") *== 1, newValues: ["n": 4])
+                let err4 = result4.err as? SQLiteDatabase.Error
+                XCTAssertNotNil(err4)
+                XCTAssertEqual(err4?.code, SQLITE_BUSY)
+                
+                return .Commit
+            })
+            let err = result.err as? SQLiteDatabase.Error
+            XCTAssertNotNil(err)
+            XCTAssertEqual(err?.code, SQLITE_BUSY)
+            
+            return .Commit
+        })
+        XCTAssertNil(result.err)
+        
+        AssertEqual(r2, MakeRelation(["n"], [3]))
     }
 }

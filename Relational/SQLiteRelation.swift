@@ -172,12 +172,16 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
         let sql = "INSERT INTO \(tableNameForQuery) (\(attributesSQL)) VALUES (\(valuesSQL))"
         
         let result = db.executeQuery(sql, parameters)
-        return result.map({ rows in
+        return result.then({ rows in
             let array = Array(rows)
+            if let error = array.first?.err {
+                return .Err(error)
+            }
+            
             precondition(array.isEmpty, "Unexpected results from INSERT INTO statement: \(array)")
             let rowid = sqlite3_last_insert_rowid(db.db)
             self.notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .DirectChange)
-            return rowid
+            return .Ok(rowid)
         })
     }
 
@@ -187,10 +191,16 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
             return willDelete.then({ willDelete in
                 let sql = "DELETE FROM \(tableNameForQuery) WHERE \(whereSQL)"
                 let result = db.executeQuery(sql, whereParameters)
-                return result.map({ rows in
+                return result.then({ rows in
                     let array = Array(rows)
+                    if let error = array.first?.err {
+                        return .Err(error)
+                    }
+                    
                     precondition(array.isEmpty, "Unexpected results from DELETE FROM statement: \(array)")
                     self.notifyChangeObservers(RelationChange(added: nil, removed: willDelete), kind: .DirectChange)
+                    
+                    return .Ok()
                 })
             })
         } else {
@@ -209,12 +219,17 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
                 
                 let sql = "UPDATE \(tableNameForQuery) SET \(setSQL) WHERE \(whereSQL)"
                 let result = db.executeQuery(sql, setParameters + whereParameters)
-                return result.map({ rows in
+                return result.then({ rows in
                     let array = Array(rows)
+                    if let error = array.first?.err {
+                        return .Err(error)
+                    }
+                    
                     precondition(array.isEmpty, "Unexpected results from UPDATE statement: \(array)")
                     
                     let updated = willUpdate.withUpdate(newValues)
                     self.notifyChangeObservers(RelationChange(added: updated, removed: willUpdate), kind: .DirectChange)
+                    return .Ok()
                 })
             })
         } else {

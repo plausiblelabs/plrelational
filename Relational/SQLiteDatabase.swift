@@ -63,9 +63,9 @@ public class SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    struct Error: ErrorType {
-        var code: Int32
-        var message: String
+    public struct Error: ErrorType {
+        public var code: Int32
+        public var message: String
     }
     
     func errwrap(callResult: Int32) -> Result<Int32, RelationError> {
@@ -127,8 +127,18 @@ extension SQLiteDatabase {
                 }
             }
             
+            var didError = false
+            
             return .Ok(AnyGenerator(body: {
+                if didError {
+                    return nil
+                }
+                
                 let result = self.errwrap(sqlite3_step(stmt.value))
+                if result.err != nil {
+                    didError = true
+                }
+                
                 return result.map({ (code: Int32) -> Row? in
                     if code == SQLITE_DONE { return nil }
                     if code != SQLITE_ROW {
@@ -151,9 +161,13 @@ extension SQLiteDatabase {
     }
     
     func executeQueryWithEmptyResults(sql: String, _ parameters: [RelationValue] = []) -> Result<Void, RelationError> {
-        return executeQuery(sql, parameters).map({
+        return executeQuery(sql, parameters).then({
             let rows = Array($0)
+            if let error = rows.first?.err {
+                return .Err(error)
+            }
             precondition(rows.isEmpty, "Unexpected result from \(sql) query: \(rows)")
+            return .Ok()
         })
     }
     
