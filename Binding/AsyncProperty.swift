@@ -51,24 +51,14 @@ public class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
     public typealias SignalChange = T
 
-    public typealias Getter = () -> T?
-    public typealias Setter = (T, ChangeMetadata) -> Void
-
     public var value: T? {
-        return get()
+        return getValue()
     }
     
-    private let get: Getter
-    // Note: This is exposed as `internal` only for easier access by tests.
-    // TODO: Actually, it's called directly by ReadWriteProperty.connectBidi(); smells like a smell
-    internal let set: Setter
-
     public let signal: Signal<T>
     private var started = false
 
-    internal init(get: Getter, set: Setter, signal: Signal<T>) {
-        self.get = get
-        self.set = set
+    internal init(signal: Signal<T>) {
         self.signal = signal
     }
     
@@ -78,5 +68,17 @@ public class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
             signal.start()
             started = true
         }
+    }
+    
+    /// Returns the current value.  This must be overridden by subclasses and is intended to be
+    /// called by the `bind` implementations only, not by external callers.
+    internal func getValue() -> T? {
+        fatalError("Must be implemented by subclasses")
+    }
+    
+    /// Sets the new value.  This must be overridden by subclasses and is intended to be
+    /// called by the `bind` implementations only, not by external callers.
+    internal func setValue(value: T, _ metadata: ChangeMetadata) {
+        fatalError("Must be implemented by subclasses")
     }
 }
