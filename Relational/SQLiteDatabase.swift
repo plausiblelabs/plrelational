@@ -10,6 +10,8 @@ typealias sqlite3_stmt = COpaquePointer
 
 let SQLITE_TRANSIENT = unsafeBitCast(-1, sqlite3_destructor_type.self)
 
+private let busyTimeout: Int32 = 10 // milliseconds
+
 private struct BLOBHeaders {
     static let length = 4
     static let NULL = Array("NULL".utf8)
@@ -29,6 +31,8 @@ public class SQLiteDatabase {
             throw Error(code: result, message: message ?? "")
         }
         self.db = localdb
+        
+        try errwrap(sqlite3_busy_timeout(self.db, busyTimeout)).orThrow()
         
         try tables.withMutableValue({ $0 = try self.queryTables().orThrow() })
     }
@@ -234,6 +238,7 @@ extension SQLiteDatabase {
     public enum TransactionResult {
         case Commit
         case Rollback
+        case Retry
     }
     
     public func transaction<Return>(@noescape transactionFunction: Void -> (Return, TransactionResult)) -> Result<Return, RelationError> {
@@ -241,15 +246,27 @@ extension SQLiteDatabase {
         // This will matter if the caller tries to access the original database during the transaction and expects it not to
         // reflect the new changes.
         // TODO TOO: we'd want to retry on failed commits in some cases, and give the callee the ability to rollback.
-        return executeQueryWithEmptyResults("BEGIN TRANSACTION").then({
-            let result = transactionFunction()
-            let sql: String
-            switch result.1 {
-            case .Commit: sql = "COMMIT TRANSACTION"
-            case .Rollback: sql = "ROLLBACK TRANSACTION"
-            }
-            return self.executeQueryWithEmptyResults(sql).map({ result.0 })
-        })
+        var result: Result<Return, RelationError>
+        var retry: Bool
+        
+        repeat {
+            retry = false
+            result = executeQueryWithEmptyResults("BEGIN TRANSACTION").then({
+                let result = transactionFunction()
+                let sql: String
+                switch result.1 {
+                case .Commit: sql = "COMMIT TRANSACTION"
+                case .Rollback: sql = "ROLLBACK TRANSACTION"
+                    
+                case .Retry:
+                    sql = "ROLLBACK TRANSACTION"
+                    retry = true
+                }
+                return self.executeQueryWithEmptyResults(sql).map({ result.0 })
+            })
+        } while retry
+        
+        return result
     }
     
     public func transaction(@noescape transactionFunction: Void -> TransactionResult) -> Result<Void, RelationError> {
@@ -257,5 +274,9 @@ extension SQLiteDatabase {
             let result = transactionFunction()
             return ((), result)
         })
+    }
+    
+    public func resultNeedsRetry<T>(result: Result<T, RelationError>) -> Bool {
+        return (result.err as? SQLiteDatabase.Error)?.code == SQLITE_BUSY
     }
 }

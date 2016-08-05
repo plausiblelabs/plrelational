@@ -491,4 +491,41 @@ class SQLiteDatabaseTests: DBTestCase {
         
         AssertEqual(r2, MakeRelation(["n"], [3]))
     }
+    
+    func testTransactionRetry() {
+        let (path, modelDB) = makeDB()
+        let db1 = modelDB.sqliteDatabase
+        db1.createRelation("r", scheme: ["n"])
+        let r1 = db1["r"]!
+        
+        r1.add(["n": 1])
+        
+        let db2 = try! SQLiteDatabase(path)
+        let r2 = db2["r"]!
+        AssertEqual(r2, MakeRelation(["n"], [1]))
+        
+        var runNumber = 1
+        let result = db1.transaction({
+            if runNumber == 1 {
+                db2.transaction({
+                    let result = r2.update(Attribute("n") *== 1, newValues: ["n": 3])
+                    XCTAssertNil(result.err)
+                    
+                    if runNumber == 1 {
+                        let result2 = r1.delete(Attribute("n") *== 1)
+                        if db1.resultNeedsRetry(result2) {
+                            runNumber += 1
+                            return .Retry
+                        }
+                    }
+                    
+                    return .Commit
+                })
+            }
+            return .Commit
+        })
+        XCTAssertNil(result.err)
+        XCTAssertEqual(runNumber, 2)
+        AssertEqual(r2, MakeRelation(["n"], [3]))
+    }
 }

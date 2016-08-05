@@ -24,6 +24,9 @@ public class ChangeLoggingDatabase {
         return sqliteDatabase.transaction({
             for (_, relation) in changeLoggingRelations {
                 let result = relation.save()
+                if sqliteDatabase.resultNeedsRetry(result) {
+                    return (.Ok(), .Retry)
+                }
                 if let err = result.err {
                     return (.Err(err), .Rollback)
                 }
