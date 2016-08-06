@@ -294,6 +294,13 @@ public class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         
         // This is the number of async changes pending by the `other` property in response to a change
         // by the `self` property
+        // TODO: This system isn't quite sufficient, as it's possible for the `self` property to
+        // initiate a number of changes, and while it is in "exclusive" mode (otherChangeCount > 0),
+        // the `other` signal's value could have been changed externally (like the underlying relation
+        // could have been updated), in which case `self` will end up ignoring those changes.  A more
+        // robust system would probably involve giving an identifier to each change as it winds its
+        // way through the signal/relation, and providing options to allow the developer to control
+        // how conflicts are handled should they arise.
         var otherChangeCount = 0
         
         // Observe the signal of the other property
