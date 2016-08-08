@@ -253,7 +253,7 @@ class UpdateManagerTests: DBTestCase {
         r1.asyncAdd(["n": 4])
         r1.asyncAdd(["n": 5])
         
-        CFRunLoopRun()
+        CFRunLoopRunOrFail()
         
         changeRemover()
         coalescedChangeRemover()
@@ -277,7 +277,7 @@ class UpdateManagerTests: DBTestCase {
         let remover = r.addAsyncObserver(observer)
         
         r.asyncAdd(["n": 1])
-        CFRunLoopRun()
+        CFRunLoopRunOrFail()
         XCTAssertEqual(observer.willChangeCount, 1)
         XCTAssertNil(observer.result?.err)
         XCTAssertEqual(observer.result?.ok?.added, [["n": 1]])
@@ -285,7 +285,7 @@ class UpdateManagerTests: DBTestCase {
         observer.result = nil
         
         r.asyncAdd(["n": 2])
-        CFRunLoopRun()
+        CFRunLoopRunOrFail()
         XCTAssertEqual(observer.willChangeCount, 2)
         XCTAssertNil(observer.result?.err)
         XCTAssertEqual(observer.result?.ok?.added, [["n": 2]])
@@ -293,7 +293,7 @@ class UpdateManagerTests: DBTestCase {
         observer.result = nil
         
         r.asyncDelete(Attribute("n") *== 1)
-        CFRunLoopRun()
+        CFRunLoopRunOrFail()
         XCTAssertEqual(observer.willChangeCount, 3)
         XCTAssertNil(observer.result?.err)
         XCTAssertEqual(observer.result?.ok?.added, [])
@@ -301,7 +301,7 @@ class UpdateManagerTests: DBTestCase {
         observer.result = nil
         
         r.asyncDelete(Attribute("n") *== 2)
-        CFRunLoopRun()
+        CFRunLoopRunOrFail()
         XCTAssertEqual(observer.willChangeCount, 4)
         XCTAssertNil(observer.result?.err)
         XCTAssertEqual(observer.result?.ok?.added, [])
@@ -322,28 +322,28 @@ class UpdateManagerTests: DBTestCase {
         let remover = r.addAsyncObserver(observer)
         
         r.asyncAdd(["n": 1])
-        CFRunLoopRun()
+        CFRunLoopRunOrFail()
         XCTAssertEqual(observer.willChangeCount, 1)
         XCTAssertNil(observer.result?.err)
         XCTAssertEqual(observer.result?.ok, [["n": 1]])
         observer.result = nil
         
         r.asyncAdd(["n": 2])
-        CFRunLoopRun()
+        CFRunLoopRunOrFail()
         XCTAssertEqual(observer.willChangeCount, 2)
         XCTAssertNil(observer.result?.err)
         XCTAssertEqual(observer.result?.ok, [["n": 1], ["n": 2]])
         observer.result = nil
         
         r.asyncDelete(Attribute("n") *== 1)
-        CFRunLoopRun()
+        CFRunLoopRunOrFail()
         XCTAssertEqual(observer.willChangeCount, 3)
         XCTAssertNil(observer.result?.err)
         XCTAssertEqual(observer.result?.ok, [["n": 2]])
         observer.result = nil
         
         r.asyncDelete(Attribute("n") *== 2)
-        CFRunLoopRun()
+        CFRunLoopRunOrFail()
         XCTAssertEqual(observer.willChangeCount, 4)
         XCTAssertNil(observer.result?.err)
         XCTAssertEqual(observer.result?.ok, [])
@@ -354,28 +354,28 @@ class UpdateManagerTests: DBTestCase {
 }
 
 private class TestAsyncChangeObserver: AsyncRelationChangeObserver {
-    static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
+    static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>, file: StaticString = #file, line: UInt = #line) {
         let observer = TestAsyncChangeObserver()
         let remover = relation.addAsyncObserver(observer)
         change()
-        CFRunLoopRun()
-        XCTAssertEqual(observer.willChangeCount, 1)
-        XCTAssertEqual(observer.didChangeCount, 1)
-        XCTAssertEqual(observer.addedRows ?? [], expectedAdded)
-        XCTAssertEqual(observer.removedRows ?? [], expectedRemoved)
+        CFRunLoopRunOrFail(file: file, line: line)
+        XCTAssertEqual(observer.willChangeCount, 1, file: file, line: line)
+        XCTAssertEqual(observer.didChangeCount, 1, file: file, line: line)
+        XCTAssertEqual(observer.addedRows ?? [], expectedAdded, file: file, line: line)
+        XCTAssertEqual(observer.removedRows ?? [], expectedRemoved, file: file, line: line)
         remover()
     }
     
-    static func assertNoChanges(to to: Relation, changingRelation: Relation, change: Void -> Void) {
+    static func assertNoChanges(to to: Relation, changingRelation: Relation, file: StaticString = #file, line: UInt = #line, change: Void -> Void) {
         let observer = TestAsyncChangeObserver()
         let remover1 = to.addAsyncObserver(observer)
         let remover2 = changingRelation.addAsyncObserver(TestAsyncChangeObserver()) // Just for the CFRunLoopStop it will do
         change()
-        CFRunLoopRun()
-        XCTAssertEqual(observer.willChangeCount, 0)
-        XCTAssertEqual(observer.didChangeCount, 0)
-        XCTAssertNil(observer.addedRows)
-        XCTAssertNil(observer.removedRows)
+        CFRunLoopRunOrFail(file: file, line: line)
+        XCTAssertEqual(observer.willChangeCount, 0, file: file, line: line)
+        XCTAssertEqual(observer.didChangeCount, 0, file: file, line: line)
+        XCTAssertNil(observer.addedRows, file: file, line: line)
+        XCTAssertNil(observer.removedRows, file: file, line: line)
         remover1()
         remover2()
     }
@@ -411,15 +411,15 @@ private class TestAsyncChangeObserver: AsyncRelationChangeObserver {
 }
 
 private class TestAsyncChangeCoalescedObserver: AsyncRelationChangeCoalescedObserver {
-    static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>) {
+    static func assertChanges(relation: Relation, change: Void -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>, file: StaticString = #file, line: UInt = #line) {
         let observer = TestAsyncChangeCoalescedObserver()
         let remover = relation.addAsyncObserver(observer)
         change()
-        CFRunLoopRun()
-        XCTAssertEqual(observer.willChangeCount, 1)
-        XCTAssertNil(observer.result?.err)
-        XCTAssertEqual(observer.result?.ok?.added ?? [], expectedAdded)
-        XCTAssertEqual(observer.result?.ok?.removed ?? [], expectedRemoved)
+        CFRunLoopRunOrFail(file: file, line: line)
+        XCTAssertEqual(observer.willChangeCount, 1, file: file, line: line)
+        XCTAssertNil(observer.result?.err, file: file, line: line)
+        XCTAssertEqual(observer.result?.ok?.added ?? [], expectedAdded, file: file, line: line)
+        XCTAssertEqual(observer.result?.ok?.removed ?? [], expectedRemoved, file: file, line: line)
         remover()
     }
     
@@ -439,13 +439,13 @@ private class TestAsyncChangeCoalescedObserver: AsyncRelationChangeCoalescedObse
 }
 
 private class TestAsyncContentObserver: AsyncRelationContentObserver {
-    static func assertChanges(relation: Relation, change: Void -> Void, expectedContents: Set<Row>) {
+    static func assertChanges(relation: Relation, change: Void -> Void, expectedContents: Set<Row>, file: StaticString = #file, line: UInt = #line) {
         let observer = TestAsyncContentObserver()
         let remover = relation.addAsyncObserver(observer)
         change()
-        CFRunLoopRun()
-        XCTAssertEqual(observer.willChangeCount, 1)
-        XCTAssertEqual(observer.rows, expectedContents)
+        CFRunLoopRunOrFail(file: file, line: line)
+        XCTAssertEqual(observer.willChangeCount, 1, file: file, line: line)
+        XCTAssertEqual(observer.rows, expectedContents, file: file, line: line)
         remover()
     }
     
@@ -481,12 +481,12 @@ private class TestAsyncContentCoalescedObserver: AsyncRelationContentCoalescedOb
     var willChangeCount = 0
     var result: Result<Set<Row>, RelationError>?
     
-    func assertChanges(change: Void -> Void, expectedContents: Set<Row>) {
+    func assertChanges(change: Void -> Void, expectedContents: Set<Row>, file: StaticString = #file, line: UInt = #line) {
         change()
-        CFRunLoopRun()
+        CFRunLoopRunOrFail(file: file, line: line)
         
-        XCTAssertEqual(willChangeCount, 1)
-        XCTAssertEqual(result?.ok, expectedContents)
+        XCTAssertEqual(willChangeCount, 1, file: file, line: line)
+        XCTAssertEqual(result?.ok, expectedContents, file: file, line: line)
         
         willChangeCount = 0
         result = nil
@@ -503,24 +503,24 @@ private class TestAsyncContentCoalescedObserver: AsyncRelationContentCoalescedOb
 }
 
 private class TestAsyncContentCoalescedArrayObserver: AsyncRelationContentCoalescedObserver {
-    static func assertChanges(relation: Relation, change: Void -> Void, postprocessor: Set<Row> -> [Row], expectedContents: [Row]) {
+    static func assertChanges(relation: Relation, change: Void -> Void, postprocessor: Set<Row> -> [Row], expectedContents: [Row], file: StaticString = #file, line: UInt = #line) {
         let observer = TestAsyncContentCoalescedArrayObserver()
         let remover = relation.addAsyncObserver(observer, postprocessor: postprocessor)
-        observer.assertChanges(change, expectedContents: expectedContents)
+        observer.assertChanges(change, expectedContents: expectedContents, file: file, line: line)
         remover()
     }
     
     var willChangeCount = 0
     var result: Result<[Row], RelationError>?
     
-    func assertChanges(change: Void -> Void, expectedContents: [Row]) {
+    func assertChanges(change: Void -> Void, expectedContents: [Row], file: StaticString = #file, line: UInt = #line) {
         change()
-        CFRunLoopRun()
+        CFRunLoopRunOrFail(file: file, line: line)
         
-        XCTAssertEqual(willChangeCount, 1)
-        XCTAssertNotNil(result?.ok)
+        XCTAssertEqual(willChangeCount, 1, file: file, line: line)
+        XCTAssertNotNil(result?.ok, file: file, line: line)
         if let contents = result?.ok {
-            XCTAssertEqual(contents, expectedContents)
+            XCTAssertEqual(contents, expectedContents, file: file, line: line)
         }
         
         willChangeCount = 0
@@ -535,4 +535,16 @@ private class TestAsyncContentCoalescedArrayObserver: AsyncRelationContentCoales
         self.result = result
         CFRunLoopStop(CFRunLoopGetCurrent())
     }
+}
+
+/// Do a CFRunLoopRun, but with a timer so that if the runloop doesn't stop after ten seconds,
+/// we kill it so tests don't get hung up forever.
+func CFRunLoopRunOrFail(file file: StaticString = #file, line: UInt = #line) {
+    let timer = CFRunLoopTimerCreateWithHandler(nil, CFAbsoluteTimeGetCurrent() + 10, 0, 0, 0, { _ in
+        XCTFail("CFRunLoopRun was not stopped by the tests, but it should have been", file: file, line: line)
+        CFRunLoopStop(CFRunLoopGetCurrent())
+    })
+    CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer, kCFRunLoopCommonModes)
+    CFRunLoopRun()
+    CFRunLoopTimerInvalidate(timer)
 }
