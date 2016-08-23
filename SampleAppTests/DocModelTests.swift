@@ -11,21 +11,21 @@ import BindableControls
 
 extension DocModel {
     func selectDocOutlineItem(id: RelationValue, _ metadata: ChangeMetadata = ChangeMetadata(transient: false)) {
-        docOutlineTreeViewModel.selection.set([id], metadata)
+        docOutlineTreeViewModel.selection.setValue([id], metadata)
     }
 
     func selectDocOutlineItem(ids: Set<RelationValue>, _ metadata: ChangeMetadata = ChangeMetadata(transient: false)) {
-        docOutlineTreeViewModel.selection.set(ids, metadata)
+        docOutlineTreeViewModel.selection.setValue(ids, metadata)
     }
 
     func selectInspectorItems(ids: Set<RelationValue>, _ metadata: ChangeMetadata = ChangeMetadata(transient: false)) {
-        inspectorTreeViewModel.selection.set(ids, metadata)
+        inspectorTreeViewModel.selection.setValue(ids, metadata)
     }
 }
 
 extension PropertiesModel {
     func updateSelectedItemName(name: String, _ metadata: ChangeMetadata) {
-        selectedItemNames.set(name, metadata)
+        selectedItemNames.setValue(name, metadata)
     }
 }
 
