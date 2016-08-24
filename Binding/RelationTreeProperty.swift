@@ -94,16 +94,19 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
             fatalError("insert() is only supported when the underlying relation is mutable")
         }
         
-        let parentIDValue = pos.parentID ?? .NULL
-        let order: RelationValue = orderForPos(pos)
-        
         var mutableRow = row
-        mutableRow[parentAttr] = parentIDValue
-        mutableRow[orderAttr] = order
-
+        computeOrderForInsert(&mutableRow, pos: pos)
         relation.add(mutableRow)
     }
     
+    override func computeOrderForInsert(inout row: Row, pos: Pos) {
+        let parentIDValue = pos.parentID ?? .NULL
+        let order: RelationValue = orderForPos(pos)
+        
+        row[parentAttr] = parentIDValue
+        row[orderAttr] = order
+    }
+
     private func onInsert(rows: [Row]) -> [Change] {
         
         func insertNode(node: Node, parent: Node) -> Int {
