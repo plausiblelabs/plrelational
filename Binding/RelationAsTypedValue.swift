@@ -91,19 +91,18 @@ extension Relation {
     
     /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
     /// to nil.
-    public func oneValue<V>(transform: Row -> V?) -> V? {
+    public func oneValueFromRow<V>(transform: Row -> V?) -> V? {
         return oneRow.flatMap{ transform($0) }
     }
     
     /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
     /// to the given default value.
-    public func oneValue<V>(transform: Row -> V?, orDefault defaultValue: V) -> V {
-        return oneValue{ transform($0) } ?? defaultValue
+    public func oneValueFromRow<V>(transform: Row -> V?, orDefault defaultValue: V) -> V {
+        return oneValueFromRow{ transform($0) } ?? defaultValue
     }
 
     /// Resolves to a single transformed value if there is exactly one row in the given set, otherwise resolves
     /// to nil.
-    //public func oneValue<V, S: SequenceType where S.Generator.Element == Row>(rows: S, _ transform: RelationValue -> V?) -> V? {
     public func oneValue<V>(rows: AnyGenerator<Row>, _ transform: RelationValue -> V?) -> V? {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!
