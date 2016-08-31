@@ -124,7 +124,16 @@ public class TransactionalDatabase {
     
     public func restoreSnapshot(snapshot: ChangeLoggingDatabaseSnapshot) {
         precondition(!inTransaction, "Can't restore a snapshot while in a transaction")
+        
+        for (_, r) in relations {
+            r.notifyObserversTransactionBegan(.DirectChange)
+        }
+        
         changeLoggingDatabase.restoreSnapshot(snapshot)
+        
+        for (_, r) in relations {
+            r.notifyObserversTransactionEnded(.DirectChange)
+        }
     }
     
     public func asyncRestoreSnapshot(snapshot: ChangeLoggingDatabaseSnapshot) {
