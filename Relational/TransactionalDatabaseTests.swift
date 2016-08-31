@@ -166,6 +166,69 @@ class TransactionalDatabaseTests: DBTestCase {
                         ["Johnson", "Seattle"]))
     }
     
+    func testRestoreSnapshotAfterDeletesOnMultipleRelations() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let db = TransactionalDatabase(sqliteDB)
+        
+        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+            let createResult = sqliteDB.createRelation(name, scheme: scheme)
+            precondition(createResult.ok != nil)
+            return db[name]
+        }
+
+        var objects = createRelation("object", ["id", "name", "type"])
+        var docItems = createRelation("doc_item", ["id"])
+        let docObjects = docItems.join(objects).project(["id", "name"])
+
+        var changes: [RelationChange] = []
+        let removal = docObjects.addChangeObserver({ change in
+            changes.append(change)
+        })
+        
+        db.transaction{
+            objects.add(["id": 1, "name": "One", "type": 0])
+            docItems.add(["id": 1])
+            objects.add(["id": 2, "name": "Two", "type": 0])
+            docItems.add(["id": 2])
+        }
+        
+        XCTAssertEqual(changes.count, 1)
+        AssertEqual(changes[0].added,
+                    MakeRelation(
+                        ["id", "name"],
+                        [1, "One"],
+                        [2, "Two"]))
+        AssertEqual(changes[0].removed, nil)
+        changes.removeAll()
+
+        let preDelete = db.takeSnapshot()
+        
+        db.transaction{
+            objects.delete(Attribute("id") *== 1)
+            docItems.delete(Attribute("id") *== 1)
+        }
+        
+        XCTAssertEqual(changes.count, 1)
+        AssertEqual(changes[0].added, nil)
+        AssertEqual(changes[0].removed,
+                    MakeRelation(
+                        ["id", "name"],
+                        [1, "One"]))
+        changes.removeAll()
+
+        db.restoreSnapshot(preDelete)
+
+        XCTAssertEqual(changes.count, 1)
+        AssertEqual(changes[0].added,
+                    MakeRelation(
+                        ["id", "name"],
+                        [1, "One"]))
+        AssertEqual(changes[0].removed, nil)
+        changes.removeAll()
+
+        removal()
+    }
+    
     func testAddNotify() {
         let sqliteDB = makeDB().db.sqliteDatabase
         let db = TransactionalDatabase(sqliteDB)
