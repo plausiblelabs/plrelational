@@ -788,6 +788,41 @@ class RelationTests: DBTestCase {
                         [1]))
     }
     
+    func testDeleteWithJoin() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        let db = TransactionalDatabase(sqliteDB)
+        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+            let createResult = sqliteDB.createRelation(name, scheme: scheme)
+            precondition(createResult.ok != nil)
+            return db[name]
+        }
+        
+        var objects = createRelation("object", ["id", "name"])
+        var selectedObjectID = createRelation("selected_object", ["id"])
+        
+        let selectedObject = selectedObjectID.join(objects)
+        
+        objects.add(["id": 1, "name": "One"])
+        objects.add(["id": 2, "name": "Two"])
+        
+        AssertEqual(selectedObject,
+                    MakeRelation(
+                        ["id", "name"]))
+
+        selectedObjectID.add(["id": 1])
+        
+        AssertEqual(selectedObject,
+                    MakeRelation(
+                        ["id", "name"],
+                        [1, "One"]))
+        
+        objects.delete(Attribute("id") *== 1)
+        
+        AssertEqual(selectedObject,
+                    MakeRelation(
+                        ["id", "name"]))
+    }
+    
     func testHugeRelationGraphPerformance() {
         let base = MakeRelation(["A"])
         
