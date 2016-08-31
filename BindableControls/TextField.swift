@@ -8,9 +8,22 @@ import Binding
 
 public class TextField: NSTextField, NSTextFieldDelegate {
 
+    private var timer: NSTimer?
+
     private lazy var changeHandler: ChangeHandler = ChangeHandler(
-        onLock: { [unowned self] in self.enabled = false },
-        onUnlock: { [unowned self] in self.enabled = true }
+        onLock: { [weak self] in
+            guard let strongSelf = self else { return }
+            strongSelf.timer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: strongSelf, selector: #selector(timerFired), userInfo: nil, repeats: false)
+        },
+        onUnlock: { [weak self] in
+            guard let strongSelf = self else { return }
+            if let timer = strongSelf.timer {
+                timer.invalidate()
+                strongSelf.timer = nil
+            } else {
+                strongSelf.enabled = true
+            }
+        }
     )
     
     private lazy var _string: ExternalValueProperty<String> = ExternalValueProperty(
@@ -72,5 +85,9 @@ public class TextField: NSTextField, NSTextFieldDelegate {
         }
         previousCommittedValue = nil
         previousValue = nil
+    }
+    
+    @objc private func timerFired() {
+        self.enabled = false
     }
 }
