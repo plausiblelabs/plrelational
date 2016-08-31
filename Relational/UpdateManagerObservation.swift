@@ -154,6 +154,7 @@ private class ShimContentObserver<T: AsyncRelationContentCoalescedObserver>: Asy
     let postprocess: Set<Row> -> T.PostprocessingOutput
     var coalescedRows: Set<Row> = []
     var error: RelationError?
+    var changing = false
     
     init(coalescedObserver: DispatchContextWrapped<T>, postprocessor: Set<Row> -> T.PostprocessingOutput) {
         self.coalescedObserver = coalescedObserver
@@ -161,18 +162,28 @@ private class ShimContentObserver<T: AsyncRelationContentCoalescedObserver>: Asy
     }
     
     func relationWillChange(relation: Relation) {
+        precondition(!changing)
+        changing = true
+        
         coalescedObserver.withWrapped({ $0.relationWillChange(relation) })
     }
     
     func relationNewContents(relation: Relation, rows: Set<Row>) {
+        precondition(changing)
+        
         coalescedRows.unionInPlace(rows)
     }
     
     func relationError(relation: Relation, error: RelationError) {
+        precondition(changing)
+        
         self.error = error
     }
     
     func relationDidChange(relation: Relation) {
+        precondition(changing)
+        changing = false
+        
         let result = error.map(Result.Err) ?? .Ok(coalescedRows)
         coalescedRows.removeAll()
         

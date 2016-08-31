@@ -222,8 +222,9 @@ public final class UpdateManager: PerThreadInstance {
                 let relation = observedRelationObj as! Relation
                 let change = info.derivative.change
                 
-                let relationObservers = info.observers.values.flatMap({ $0.relationObserver })
-                let updateObservers = info.observers.values.flatMap({ $0.updateObserver })
+                let observersWithWillChange = info.observers.values.filter({ $0.didSendWillChange == true })
+                let relationObservers = observersWithWillChange.flatMap({ $0.relationObserver })
+                let updateObservers = observersWithWillChange.flatMap({ $0.updateObserver })
                 
                 if !relationObservers.isEmpty {
                     // If there are additions, then iterate over them and send them to the observer. Iteration is started in the
