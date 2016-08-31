@@ -43,6 +43,7 @@ public struct TreePos<N: TreeNode> {
 }
 
 public enum TreeChange<N: TreeNode> { case
+    Initial(N),
     Insert(TreePath<N>),
     Delete(TreePath<N>),
     Move(src: TreePath<N>, dst: TreePath<N>)
@@ -51,6 +52,8 @@ public enum TreeChange<N: TreeNode> { case
 extension TreeChange: Equatable {}
 public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     switch (a, b) {
+    // TODO: Compare node structures for the .Initial case?
+    case let (.Initial(a), .Initial(b)): return a.id == b.id
     case let (.Insert(a), .Insert(b)): return a == b
     case let (.Delete(a), .Delete(b)): return a == b
     case let (.Move(asrc, adst), .Move(bsrc, bdst)): return asrc == bsrc && adst == bdst
@@ -58,7 +61,7 @@ public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     }
 }
 
-public class TreeProperty<N: TreeNode>: ReadablePropertyType {
+public class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
     public typealias Value = N
     public typealias SignalChange = [TreeChange<N>]
 
@@ -68,26 +71,29 @@ public class TreeProperty<N: TreeNode>: ReadablePropertyType {
     public typealias Pos = TreePos<N>
     public typealias Change = TreeChange<N>
     
-    public let root: Node
+    internal var root: Node
     
-    public var value: Node {
+    public var value: Node? {
         return root
     }
     
-    public let signal: Signal<[Change]>
-    private let notify: Signal<[Change]>.Notify
+    public let signal: Signal<SignalChange>
+    internal let notify: Signal<SignalChange>.Notify
     
-    init(root: Node) {
-        (self.signal, self.notify) = Signal<[Change]>.pipe()
+    init(root: Node, signal: Signal<SignalChange>, notify: Signal<SignalChange>.Notify) {
         self.root = root
+        self.signal = signal
+        self.notify = notify
     }
     
-    internal func notifyChangeObservers(changes: [Change]) {
+    public func start() {
+    }
+    
+    internal func notifyObservers(treeChanges treeChanges: [TreeChange<N>]) {
         let metadata = ChangeMetadata(transient: false)
-        notify.valueChanging(change: changes, metadata: metadata)
+        notify.valueChanging(change: treeChanges, metadata: metadata)
     }
     
-    // TODO: Move these to a MutableTreeProperty subclass?
     public func insert(data: N.Data, pos: Pos) {
     }
     

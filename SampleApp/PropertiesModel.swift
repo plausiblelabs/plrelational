@@ -65,14 +65,14 @@ class PropertiesModel {
         }
     }()
 
-    lazy var selectedItemNames: ReadWriteProperty<String> = { [unowned self] in
+    lazy var selectedItemNames: AsyncReadWriteProperty<String> = { [unowned self] in
         // TODO: s/Item/type.name/
         let relation = self.selectedItemNamesRelation
-        return self.db.bidiProperty(
+        return self.db.asyncBidiProperty(
             relation,
             action: "Rename Item",
-            get: { $0.oneString },
-            set: { relation.updateString($0) }
+            signal: relation.signal{ $0.oneString($1) },
+            update: { relation.asyncUpdateString($0) }
         )
     }()
     
