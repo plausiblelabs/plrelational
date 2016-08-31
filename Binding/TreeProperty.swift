@@ -91,6 +91,9 @@ public class TreeProperty<N: TreeNode>: ReadablePropertyType {
     public func insert(data: N.Data, pos: Pos) {
     }
     
+    public func computeOrderForInsert(inout data: N.Data, pos: Pos) {
+    }
+    
     public func delete(id: N.ID) {
     }
     

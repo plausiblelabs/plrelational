@@ -70,13 +70,13 @@ class RelationAsTypedValueTests: BindingTestCase {
         
         let expr: SelectExpression = Attribute("id") *== 1
         let transform = { (row: Row) -> String? in "\(row["name"]):\(row["age"])" }
-        XCTAssertNil(empty.oneValue(transform))
-        XCTAssertEqual(one.select(expr).oneValue(transform), "cat:5")
-        XCTAssertNil(multi.oneValue(transform))
+        XCTAssertNil(empty.oneValueFromRow(transform))
+        XCTAssertEqual(one.select(expr).oneValueFromRow(transform), "cat:5")
+        XCTAssertNil(multi.oneValueFromRow(transform))
         
-        XCTAssertEqual(empty.oneValue(transform, orDefault: "default"), "default")
-        XCTAssertEqual(one.select(expr).oneValue(transform, orDefault: "default"), "cat:5")
-        XCTAssertEqual(multi.oneValue(transform, orDefault: "default"), "default")
+        XCTAssertEqual(empty.oneValueFromRow(transform, orDefault: "default"), "default")
+        XCTAssertEqual(one.select(expr).oneValueFromRow(transform, orDefault: "default"), "cat:5")
+        XCTAssertEqual(multi.oneValueFromRow(transform, orDefault: "default"), "default")
         
         XCTAssertNil(empty.project(["name"]).oneValue)
         XCTAssertEqual(one.project(["name"]).oneValue, RelationValue("cat"))

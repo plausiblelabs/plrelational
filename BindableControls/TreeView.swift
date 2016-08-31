@@ -49,30 +49,9 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     private let model: TreeViewModel<N>
     private let outlineView: NSOutlineView
     
-    private lazy var selection: ExternalValueProperty<Set<N.ID>> = ExternalValueProperty(
-        get: { [unowned self] in
-            var itemIDs: [N.ID] = []
-            self.outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
-                if let node = self.outlineView.itemAtRow(index) as? N {
-                    itemIDs.append(node.id)
-                }
-            }
-            return Set(itemIDs)
-        },
-        set: { [unowned self] selectedIDs, _ in
-            let indexes = NSMutableIndexSet()
-            for id in selectedIDs {
-                if let node = self.model.data.nodeForID(id) {
-                    // TODO: This is inefficient
-                    let index = self.outlineView.rowForItem(node)
-                    if index >= 0 {
-                        indexes.addIndex(index)
-                    }
-                }
-            }
-            self.outlineView.selectRowIndexes(indexes, byExtendingSelection: false)
-        }
-    )
+    private lazy var selection: MutableValueProperty<Set<N.ID>> = mutableValueProperty(Set(), { [unowned self] selectedIDs, _ in
+        self.selectItems(selectedIDs)
+    })
 
     private var treeObserverRemoval: ObserverRemoval?
     private var selfInitiatedSelectionChange = false
@@ -253,20 +232,52 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     }
     
     public func outlineViewSelectionDidChange(notification: NSNotification) {
-        // TODO: Do we need this flag anymore?
-//        if selfInitiatedSelectionChange {
-//            return
-//        }
+        if selfInitiatedSelectionChange {
+            return
+        }
         
-//        selfInitiatedSelectionChange = true
-        selection.changed(transient: false)
-//        selfInitiatedSelectionChange = false
+        selfInitiatedSelectionChange = true
+        selection.change(selectedItemIDs(), transient: false)
+        selfInitiatedSelectionChange = false
+    }
+    
+    /// Returns the set of node IDs corresponding to the view's current selection state.
+    private func selectedItemIDs() -> Set<N.ID> {
+        var itemIDs: [N.ID] = []
+        self.outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
+            if let node = self.outlineView.itemAtRow(index) as? N {
+                itemIDs.append(node.id)
+            }
+        }
+        return Set(itemIDs)
+    }
+    
+    /// Selects the rows corresponding to the given set of node IDs.
+    private func selectItems(ids: Set<N.ID>) {
+        let indexes = NSMutableIndexSet()
+        for id in ids {
+            if let node = self.model.data.nodeForID(id) {
+                // TODO: This is inefficient
+                let index = self.outlineView.rowForItem(node)
+                if index >= 0 {
+                    indexes.addIndex(index)
+                }
+            }
+        }
+        selfInitiatedSelectionChange = true
+        self.outlineView.selectRowIndexes(indexes, byExtendingSelection: false)
+        selfInitiatedSelectionChange = false
     }
 
     // MARK: Property observers
 
     private func treeChanged(changes: [TreeChange<N>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
+
+        // Get the current set of IDs from the `selection` property and then use those to restore
+        // the selection state after the changes are processed; this ensures that we select items
+        // that were both inserted and marked for selection in a single (relational) transaction
+        let itemsToSelect = selection.value
         
         outlineView.beginUpdates()
 
@@ -310,11 +321,12 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         itemsToReload.forEach(outlineView.reloadItem)
         itemsToExpand.forEach(outlineView.expandItem)
 
-        // XXX: This prevents a call to selection.set(); we need to figure out a better way, so that
-        // if the selection changes as a result of e.g. deleting an item, we update our selection
-        // state, but do it in a way that doesn't go through the undo manager
-        //selfInitiatedSelectionChange = true
+        selectItems(itemsToSelect)
+
+        // TODO: We put a guard here as well so that no further selection changes are made when the
+        // updates are committed
+        selfInitiatedSelectionChange = true
         outlineView.endUpdates()
-        //selfInitiatedSelectionChange = false
+        selfInitiatedSelectionChange = false
     }
 }

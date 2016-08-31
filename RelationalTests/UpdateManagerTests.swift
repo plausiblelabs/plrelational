@@ -351,6 +351,50 @@ class UpdateManagerTests: DBTestCase {
         
         remover()
     }
+    
+    func testCoalescedContentObservationsWithJoin() {
+        let sqliteDB = makeDB().db.sqliteDatabase
+        sqliteDB.getOrCreateRelation("person", scheme: ["id", "name"]).ok!
+        sqliteDB.getOrCreateRelation("selected_person", scheme: ["id"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let persons = db["person"]
+        let selectedPersonID = db["selected_person"]
+        let selectedPerson = persons.join(selectedPersonID)
+        let selectedPersonName = selectedPerson.project(["name"])
+        let person1Name = persons.select(Attribute("id") *== 1).project(["name"])
+
+        func addPerson(id: Int64, _ name: String) {
+            let row: Row = [
+                "id": RelationValue(id),
+                "name": RelationValue(name)
+            ]
+            persons.add(row)
+        }
+        
+        addPerson(1, "Alice")
+        addPerson(2, "Bob")
+        
+        let selectedPersonNameObserver = TestAsyncContentCoalescedObserver()
+        let selectedPersonNameRemover = selectedPersonName.addAsyncObserver(selectedPersonNameObserver)
+        let person1NameObserver = TestAsyncContentCoalescedObserver()
+        let person1NameRemover = person1Name.addAsyncObserver(person1NameObserver)
+        
+        selectedPersonID.asyncAdd(["id": 1])
+        CFRunLoopRun()
+        XCTAssertEqual(selectedPersonNameObserver.result?.ok, [["name": "Alice"]])
+        selectedPersonNameObserver.result = nil
+        person1NameObserver.result = nil
+
+        selectedPerson.asyncUpdate(true, newValues: ["name": "Alex"])
+        CFRunLoopRun()
+        XCTAssertEqual(person1NameObserver.result?.ok, [["name": "Alex"]])
+        selectedPersonNameObserver.result = nil
+        person1NameObserver.result = nil
+
+        selectedPersonNameRemover()
+        person1NameRemover()
+    }
 }
 
 private class TestAsyncChangeObserver: AsyncRelationChangeObserver {

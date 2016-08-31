@@ -42,6 +42,64 @@ class RelationPropertyTests: BindingTestCase {
         changeObserved = false
     }
     
+    func testReadOnlyPropertyWithJoinAndDelete() {
+        let sqliteDB = makeDB().db
+        let db = TransactionalDatabase(sqliteDB)
+        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+            let createResult = sqliteDB.createRelation(name, scheme: scheme)
+            precondition(createResult.ok != nil)
+            return db[name]
+        }
+        
+        var objects = createRelation("object", ["id", "name", "type"])
+        var docItems = createRelation("doc_item", ["id"])
+        var selectedDocItemID = createRelation("selected_doc_item", ["id"])
+        
+        let selectedDocItem = selectedDocItemID.join(objects).project(["id", "name"])
+
+        struct DocItem {
+            let id: Int64
+            let name: String
+        }
+        
+        let property = selectedDocItem.property{ relation in
+            return relation.oneValueFromRow{ row in
+                return DocItem(id: row["id"].get()!, name: row["name"].get()!)
+            }
+        }
+
+        db.transaction{
+            objects.add(["id": 1, "name": "One", "type": 0])
+            docItems.add(["id": 1])
+            objects.add(["id": 2, "name": "Two", "type": 0])
+            docItems.add(["id": 2])
+        }
+        
+        var changeObserved = false
+        _ = property.signal.observe({ _ in changeObserved = true })
+
+        XCTAssertEqual(property.value?.name, nil)
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+
+        db.transaction{
+            selectedDocItemID.add(["id": 1])
+        }
+        
+        XCTAssertEqual(property.value?.name, "One")
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        db.transaction{
+            objects.delete(Attribute("id") *== 1)
+            docItems.delete(Attribute("id") *== 1)
+        }
+
+        XCTAssertEqual(property.value?.name, nil)
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+    }
+    
     func testEmpty() {
         let db = makeDB().db
         let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
