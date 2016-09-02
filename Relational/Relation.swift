@@ -189,7 +189,11 @@ extension Relation {
     public func project(scheme: Scheme) -> Relation {
         return IntermediateRelation(op: .Project(scheme), operands: [self])
     }
-    
+
+    public func project(attribute: Attribute) -> Relation {
+        return project([attribute])
+    }
+
     public func join(other: Relation) -> Relation {
         let intersectedScheme = Scheme(attributes: self.scheme.attributes.intersect(other.scheme.attributes))
         let matching = Dictionary(intersectedScheme.attributes.map({ ($0, $0) }))
