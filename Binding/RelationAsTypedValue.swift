@@ -157,6 +157,24 @@ extension Relation {
         return oneValue{ $0.get() }
     }
     
+    /// Resolves to a single double value if there is exactly one row in the given set, otherwise resolves
+    /// to zero.
+    public func oneDouble(rows: AnyGenerator<Row>) -> Double {
+        return oneValue(rows, { $0.get() }) ?? 0.0
+    }
+    
+    /// Resolves to a single double value if there is exactly one row in the relation, otherwise resolves
+    /// to zero.
+    public var oneDouble: Double {
+        return oneValue{ $0.get() } ?? 0.0
+    }
+    
+    /// Resolves to a single double value if there is exactly one row in the relation, otherwise resolves
+    /// to nil.
+    public var oneDoubleOrNil: Double? {
+        return oneValue{ $0.get() }
+    }
+
     /// Resolves to a single boolean value if there is exactly one row in the relation, otherwise resolves
     /// to false.
     public var oneBool: Bool {
