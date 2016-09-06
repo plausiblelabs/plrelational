@@ -230,6 +230,9 @@
 		C2CA46191D3FF1870082E2D2 /* UpdateManagerObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CA46181D3FF1870082E2D2 /* UpdateManagerObservation.swift */; };
 		C2CE513C1D4693DC0011C554 /* InlineMutableData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CE513B1D4693DC0011C554 /* InlineMutableData.swift */; };
 		C2CE513E1D469EF10011C554 /* InlineMutableDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CE513D1D469EF10011C554 /* InlineMutableDataTests.swift */; };
+		C2CFC3591D7F336F00389373 /* PlistFileRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */; };
+		C2CFC35B1D7F36DE00389373 /* RowPlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CFC35A1D7F36DE00389373 /* RowPlist.swift */; };
+		C2CFC35D1D7F49D800389373 /* PlistFileRelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */; };
 		C2DF2B9E1CFDD81100ED8695 /* ObjectDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */; };
 		C2DF2BA01CFDE2B100ED8695 /* QueryRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */; };
 		C2DF2BA21D006E1C00ED8695 /* RelationDifferentiator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */; };
@@ -757,6 +760,9 @@
 		C2CA46181D3FF1870082E2D2 /* UpdateManagerObservation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateManagerObservation.swift; sourceTree = "<group>"; };
 		C2CE513B1D4693DC0011C554 /* InlineMutableData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = InlineMutableData.swift; path = Relational/InlineMutableData.swift; sourceTree = "<group>"; };
 		C2CE513D1D469EF10011C554 /* InlineMutableDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = InlineMutableDataTests.swift; path = RelationalTests/InlineMutableDataTests.swift; sourceTree = SOURCE_ROOT; };
+		C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistFileRelation.swift; sourceTree = "<group>"; };
+		C2CFC35A1D7F36DE00389373 /* RowPlist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RowPlist.swift; sourceTree = "<group>"; };
+		C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistFileRelationTests.swift; sourceTree = "<group>"; };
 		C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectDictionary.swift; path = Relational/ObjectDictionary.swift; sourceTree = "<group>"; };
 		C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QueryRunnerTests.swift; path = RelationalTests/QueryRunnerTests.swift; sourceTree = SOURCE_ROOT; };
 		C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiator.swift; sourceTree = "<group>"; };
@@ -1385,6 +1391,7 @@
 				C257C7551CC01BCD00234A89 /* Model */,
 				C22921901CC6CD9500518184 /* SQLite */,
 				C277E7FB1CDA908E00B7B8F6 /* Change Logging */,
+				C2CFC3571D7F332900389373 /* PlistRelations */,
 				C2BD298F1CD250B30081FD05 /* Utilities */,
 				C22921951CC6D25100518184 /* Custom Module Map */,
 				C22921E61CD12CF100518184 /* RelationalTests */,
@@ -1531,6 +1538,17 @@
 				C22921AF1CCFEB6D00518184 /* ValueWithDestructor.swift */,
 			);
 			name = Utilities;
+			sourceTree = "<group>";
+		};
+		C2CFC3571D7F332900389373 /* PlistRelations */ = {
+			isa = PBXGroup;
+			children = (
+				C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */,
+				C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */,
+				C2CFC35A1D7F36DE00389373 /* RowPlist.swift */,
+			);
+			name = PlistRelations;
+			path = Relational;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -2388,6 +2406,7 @@
 				C23BC0501D21AEDF00188F86 /* QueryOptimizer.swift in Sources */,
 				C23AAF4A1CF8D651009E28E0 /* ObjectSet.swift in Sources */,
 				C23AAF421CF61890009E28E0 /* MirrorChildren.swift in Sources */,
+				C2CFC3591D7F336F00389373 /* PlistFileRelation.swift in Sources */,
 				C2DF2B9E1CFDD81100ED8695 /* ObjectDictionary.swift in Sources */,
 				C23AAF401CF49AFE009E28E0 /* RelationActivityLogging.swift in Sources */,
 				C22921C71CD12A8700518184 /* ConcreteRelation.swift in Sources */,
@@ -2400,6 +2419,7 @@
 				C277E8121CE4FAD400B7B8F6 /* SelectExpressionOperators.swift in Sources */,
 				C2CA46191D3FF1870082E2D2 /* UpdateManagerObservation.swift in Sources */,
 				C22921CA1CD12A8700518184 /* FunctionalDependency.swift in Sources */,
+				C2CFC35B1D7F36DE00389373 /* RowPlist.swift in Sources */,
 				C23AAF481CF8CD89009E28E0 /* QueryPlanner.swift in Sources */,
 				C22921CB1CD12A8700518184 /* ObserverSet.swift in Sources */,
 				C204A1521D073E6100DF297F /* RelationObserver.swift in Sources */,
@@ -2456,6 +2476,7 @@
 				C277E80C1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift in Sources */,
 				C2B53CDE1D1DBC3F006B6278 /* ObjectMapTests.swift in Sources */,
 				C2FE9B9B1CEE3A810004E635 /* TransactionalDatabaseTests.swift in Sources */,
+				C2CFC35D1D7F49D800389373 /* PlistFileRelationTests.swift in Sources */,
 				C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */,
 				C277E8051CDBD2A000B7B8F6 /* DBTestCase.swift in Sources */,
 				C22921E81CD12CF100518184 /* RelationTests.swift in Sources */,
