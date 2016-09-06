@@ -39,6 +39,13 @@ extension Result {
         }
     }
     
+    public func mapErr<NewE>(@noescape f: E -> NewE) -> Result<T, NewE> {
+        switch self {
+        case .Ok(let t): return .Ok(t)
+        case .Err(let e): return .Err(f(e))
+        }
+    }
+    
     public func then<NewT>(@noescape f: T -> Result<NewT, E>) -> Result<NewT, E> {
         switch self {
         case .Ok(let t): return f(t)
