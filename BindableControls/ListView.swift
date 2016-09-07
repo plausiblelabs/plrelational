@@ -15,7 +15,7 @@ public struct ListViewModel<E: ArrayElement> {
     public let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     public let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
-    public let selection: AsyncReadWriteProperty<Set<E.ID>>
+    public let selection: AsyncReadWriteProperty<Set<E.ID>>?
     public let cellIdentifier: (E.Data) -> String
     public let cellText: (E.Data) -> CellTextProperty
     public let cellImage: ((E.Data) -> ReadableProperty<Image>)?
@@ -24,7 +24,7 @@ public struct ListViewModel<E: ArrayElement> {
         data: ArrayProperty<E>,
         contextMenu: ((E.Data) -> ContextMenu?)?,
         move: ((srcIndex: Int, dstIndex: Int) -> Void)?,
-        selection: AsyncReadWriteProperty<Set<E.ID>>,
+        selection: AsyncReadWriteProperty<Set<E.ID>>?,
         cellIdentifier: (E.Data) -> String,
         cellText: (E.Data) -> CellTextProperty,
         cellImage: ((E.Data) -> ReadableProperty<Image>)?)
@@ -93,7 +93,9 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
             valueChanging: { [weak self] stateChange, _ in self?.arrayChanged(stateChange) },
             valueDidChange: {}
         ))
-        selection <~> model.selection
+        if let selectionProp = model.selection {
+            selection <~> selectionProp
+        }
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
