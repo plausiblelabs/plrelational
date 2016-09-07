@@ -13,25 +13,28 @@ private let PasteboardType = "coop.plausible.vp.pasteboard.TreeViewItem"
 public struct TreeViewModel<N: TreeNode> {
     public let data: TreeProperty<N>
     public let allowsChildren: (N.Data) -> Bool
+    public let isSection: (N.Data) -> Bool
     public let contextMenu: ((N.Data) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
     public let move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?
     public let selection: ReadWriteProperty<Set<N.ID>>
     public let cellIdentifier: (N.Data) -> String
     public let cellText: (N.Data) -> CellTextProperty
-    public let cellImage: ((N.Data) -> ReadableProperty<Image>)?
+    public let cellImage: ((N.Data) -> ReadableProperty<Image>?)?
     
     public init(
         data: TreeProperty<N>,
         allowsChildren: (N.Data) -> Bool,
+        isSection: (N.Data) -> Bool,
         contextMenu: ((N.Data) -> ContextMenu?)?,
         move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?,
         selection: ReadWriteProperty<Set<N.ID>>,
         cellIdentifier: (N.Data) -> String,
         cellText: (N.Data) -> CellTextProperty,
-        cellImage: ((N.Data) -> ReadableProperty<Image>)?)
+        cellImage: ((N.Data) -> ReadableProperty<Image>?)?)
     {
         self.data = data
+        self.isSection = isSection
         self.allowsChildren = allowsChildren
         self.contextMenu = contextMenu
         self.move = move
@@ -219,7 +222,15 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     }
     
     public func outlineView(outlineView: NSOutlineView, isGroupItem item: AnyObject) -> Bool {
-        return false
+        let node = item as! N
+        return model.isSection(node.data)
+    }
+    
+    // TODO: This is one of those methods that incurs a performance penalty just by implementing it here,
+    // but it's not needed by all TreeViews; we implement it just to allow for TreeView subclasses to
+    // override it.  We should make a separate delegate class that can be overridden on an as needed basis.
+    public func outlineView(outlineView: NSOutlineView, heightOfRowByItem item: AnyObject) -> CGFloat {
+        return outlineView.rowHeight
     }
     
     public func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
@@ -229,6 +240,11 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     
     public func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
         return true
+    }
+    
+    public func outlineView(outlineView: NSOutlineView, rowViewForItem item: AnyObject) -> NSTableRowView? {
+        // TODO: Make this configurable
+        return outlineView.makeViewWithIdentifier("RowView", owner: self) as? NSTableRowView
     }
     
     public func outlineViewSelectionDidChange(notification: NSNotification) {

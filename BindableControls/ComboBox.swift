@@ -10,6 +10,7 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
 
     public lazy var items: BindableProperty<[T]> = WriteOnlyProperty(set: { [unowned self] value, _ in
         let objects = value.map{ $0 as! AnyObject }
+        self.removeAllItems()
         self.addItemsWithObjectValues(objects)
     })
     
