@@ -216,6 +216,7 @@
 		C2B53CDC1D1C7BA0006B6278 /* QueryPlannerDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */; };
 		C2B53CDE1D1DBC3F006B6278 /* ObjectMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */; };
 		C2B53CE01D1DBCAE006B6278 /* ConsistentPRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */; };
+		C2B6E26C1D805E230039923C /* Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E26B1D805E230039923C /* Crypto.swift */; };
 		C2BA22981D3FD65F00DCCE72 /* UpdateManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */; };
 		C2BA229A1D3FD70200DCCE72 /* RelationObservationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */; };
 		C2BD29921CD251870081FD05 /* Flight.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
@@ -748,6 +749,8 @@
 		C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryPlannerDump.swift; sourceTree = "<group>"; };
 		C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectMapTests.swift; path = RelationalTests/ObjectMapTests.swift; sourceTree = SOURCE_ROOT; };
 		C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ConsistentPRNG.swift; path = Relational/ConsistentPRNG.swift; sourceTree = "<group>"; };
+		C2B6E26A1D805CD80039923C /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = modules/module.modulemap; sourceTree = SOURCE_ROOT; };
+		C2B6E26B1D805E230039923C /* Crypto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Crypto.swift; path = Relational/Crypto.swift; sourceTree = "<group>"; };
 		C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UpdateManagerTests.swift; path = RelationalTests/UpdateManagerTests.swift; sourceTree = SOURCE_ROOT; };
 		C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationObservationTests.swift; path = RelationalTests/RelationObservationTests.swift; sourceTree = SOURCE_ROOT; };
 		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
@@ -1337,6 +1340,7 @@
 			isa = PBXGroup;
 			children = (
 				C22921911CC6CDCC00518184 /* makemodule.sh */,
+				C2B6E26A1D805CD80039923C /* module.modulemap */,
 			);
 			name = "Custom Module Map";
 			path = Relational;
@@ -1510,6 +1514,7 @@
 				C22921A91CCE605D00518184 /* ArrayHashing.swift */,
 				C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */,
 				C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */,
+				C2B6E26B1D805E230039923C /* Crypto.swift */,
 				C2B53CBC1D1AF4FC006B6278 /* DeallocObservation.swift */,
 				C2EC76FC1D4BAEFB00A374B1 /* Debug.swift */,
 				C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */,
@@ -2418,6 +2423,7 @@
 				C22AC5241D1061FB00224091 /* Row.swift in Sources */,
 				C277E8121CE4FAD400B7B8F6 /* SelectExpressionOperators.swift in Sources */,
 				C2CA46191D3FF1870082E2D2 /* UpdateManagerObservation.swift in Sources */,
+				C2B6E26C1D805E230039923C /* Crypto.swift in Sources */,
 				C22921CA1CD12A8700518184 /* FunctionalDependency.swift in Sources */,
 				C2CFC35B1D7F36DE00389373 /* RowPlist.swift in Sources */,
 				C23AAF481CF8CD89009E28E0 /* QueryPlanner.swift in Sources */,
@@ -3115,6 +3121,7 @@
 				EXECUTABLE_PREFIX = lib;
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INCLUDE_PATHS = "$(TARGET_BUILD_DIR)/modules modules";
 			};
 			name = Debug;
 		};
@@ -3127,6 +3134,7 @@
 				EXECUTABLE_PREFIX = lib;
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INCLUDE_PATHS = "$(TARGET_BUILD_DIR)/modules modules";
 			};
 			name = Release;
 		};
