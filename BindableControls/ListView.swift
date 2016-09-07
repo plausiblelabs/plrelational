@@ -43,7 +43,7 @@ public struct ListViewModel<E: ArrayElement> {
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
 public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
 
-    private let model: ListViewModel<E>
+    public let model: ListViewModel<E>
     private let outlineView: NSOutlineView
 
     private var elements: [E] {
@@ -205,6 +205,11 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
     
     public func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
         return true
+    }
+    
+    public func outlineView(outlineView: NSOutlineView, rowViewForItem item: AnyObject) -> NSTableRowView? {
+        // TODO: Make this configurable
+        return outlineView.makeViewWithIdentifier("RowView", owner: self) as? NSTableRowView
     }
     
     public func outlineViewSelectionDidChange(notification: NSNotification) {
