@@ -85,6 +85,24 @@ public func mapOk<Seq, InnerT, NewT, E where Seq: SequenceType, Seq.Generator.El
     return .Ok(results)
 }
 
+/// Iterate over a sequence of Results, invoking the given function for each Ok value and returning a Result for the
+/// array it produces. If any sequence elements are Err, then return the first Err encountered. If the function returns
+/// nil, then that entry is omitted from the result
+public func flatmapOk<Seq, InnerT, NewT, E where Seq: SequenceType, Seq.Generator.Element == Result<InnerT, E>>(seq: Seq, @noescape _ f: InnerT -> NewT?) -> Result<[NewT], E> {
+    var results: [NewT] = []
+    for elt in seq {
+        switch elt {
+        case .Ok(let t):
+            if let mapped = f(t) {
+                results.append(mapped)
+            }
+        case .Err(let e):
+            return .Err(e)
+        }
+    }
+    return .Ok(results)
+}
+
 public func containsOk<Seq, T, E where Seq: SequenceType, Seq.Generator.Element == Result<T, E>>(seq: Seq, _ predicate: T -> Bool) -> Result<Bool, E> {
     for elt in seq {
         switch elt {
