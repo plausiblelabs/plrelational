@@ -45,7 +45,13 @@ public class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObser
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {
-        fatalError()
+        let keyValue = row[primaryKey]
+        if case .NotFound = keyValue {
+            return .Ok(false)
+        }
+        
+        let ourRow = readRow(primaryKey: keyValue)
+        return ourRow.map({ $0 == row })
     }
     
     public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {

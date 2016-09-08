@@ -73,4 +73,49 @@ class PlistDirectoryRelationTests: XCTestCase {
         
         AssertEqual(r1, r2)
     }
+    
+    func testContains() {
+        let url = tmpURL()
+        
+        let schemeAttributes: [Attribute] = ["first", "last", "job"]
+        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", createIfDoesntExist: true)
+        XCTAssertNil(r1Result.err)
+        let r1 = r1Result.ok!
+        
+        let testRowValues: [[RelationValue]] = [
+            ["Steve", "Jobs", "CEO"],
+            ["Bob", "Dole", "Senator"],
+            ["Tim", "Allen", "Pharmacist"],
+            ["Steven", "Tyler", "Musician"],
+            [.NULL, 42, 666.0],
+            [0, 0, .Blob([1, 2, 3, 4, 5])],
+            [0.0, 0, 0],
+            [.Blob([1, 2, 3, 4, 5]), 0, 0]
+        ]
+        
+        for rowValues in testRowValues {
+            let row = Row(values: Dictionary(zip(schemeAttributes, rowValues)))
+            XCTAssertNil(r1.add(row).err)
+        }
+        
+        XCTAssertEqual(r1.contains(["first": "Steve", "last": "Jobs", "job": "CEO"]).ok, true)
+        XCTAssertEqual(r1.contains(["first": "Bob", "last": "Dole", "job": "Senator"]).ok, true)
+        XCTAssertEqual(r1.contains(["first": "Steve", "last": "Jobs", "job": "Senator"]).ok, false)
+        XCTAssertEqual(r1.contains(["first": "Billybob", "last": "Jobs", "job": "CEO"]).ok, false)
+        
+        XCTAssertEqual(r1.contains(["first": .NULL, "last": 42, "job": 666.0]).ok, true)
+        XCTAssertEqual(r1.contains(["first": .NULL, "last": "Jobs", "job": "CEO"]).ok, false)
+        
+        XCTAssertEqual(r1.contains(["first": 0, "last": 0, "job": .Blob([1, 2, 3, 4, 5])]).ok, true)
+        XCTAssertEqual(r1.contains(["first": 0, "last": 0, "job": .Blob([1, 2, 3, 4, 6])]).ok, false)
+        XCTAssertEqual(r1.contains(["first": 1, "last": 0, "job": .Blob([1, 2, 3, 4, 5])]).ok, false)
+        
+        XCTAssertEqual(r1.contains(["first": 0.0, "last": 0, "job": 0]).ok, true)
+        XCTAssertEqual(r1.contains(["first": 0.0, "last": 0, "job": 1]).ok, false)
+        XCTAssertEqual(r1.contains(["first": 0.1, "last": 0, "job": 0]).ok, false)
+        
+        XCTAssertEqual(r1.contains(["first": .Blob([1, 2, 3, 4, 5]), "last": 0, "job": 0]).ok, true)
+        XCTAssertEqual(r1.contains(["first": .Blob([1, 2, 3, 4, 5]), "last": 0, "job": 1]).ok, false)
+        XCTAssertEqual(r1.contains(["first": .Blob([1, 2, 3, 4, 6]), "last": 0, "job": 0]).ok, false)
+    }
 }
