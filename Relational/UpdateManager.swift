@@ -187,7 +187,8 @@ public final class UpdateManager: PerThreadInstance {
                     error = result.err
                 case .restoreSnapshot(let database, let snapshot):
                     if databases.contains(database) {
-                        database.endTransaction()
+                        // TODO: check for errors?
+                        _ = database.endTransaction()
                         database.restoreSnapshot(snapshot)
                         database.beginTransaction()
                     } else {
@@ -203,7 +204,8 @@ public final class UpdateManager: PerThreadInstance {
             
             // And end the transaction.
             for db in databases {
-                db.endTransaction()
+                // TODO: check for errors?
+                _ = db.endTransaction()
             }
             
             // All changes are done, so remove the observations registered above.
@@ -292,7 +294,7 @@ public final class UpdateManager: PerThreadInstance {
             
             // Wait until done. If there are no changes then this will execute immediately. Otherwise it will execute
             // when all the iteration above is complete.
-            doneGroup.notify(queue: DispatchQueue.global(priority: 0), execute: {
+            doneGroup.notify(queue: DispatchQueue.global(), execute: {
                 self.runloop.async({
                     // If new pending updates came in while we were doing our thing, then go back to the top
                     // and start over, applying those updates too.

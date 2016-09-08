@@ -137,7 +137,7 @@ extension RelationDifferentiator {
     }
     
     fileprivate func derivativeOf(_ relation: Relation) -> RelationChange {
-        if let obj = relation as? AnyObject {
+        if let obj = asObject(relation) {
             return derivativeMap.getOrCreate(obj, defaultValue: rawDerivativeOf(relation))
         } else {
             return rawDerivativeOf(relation)
@@ -316,7 +316,7 @@ extension RelationDifferentiator {
                                   removed: projectionDerivative.removed?.join(ConcreteRelation(newValues)))
     }
     
-    fileprivate func aggregateDerivative(_ r: IntermediateRelation, attribute: Attribute, initialValue: RelationValue?, aggregateFunction: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) -> RelationChange {
+    fileprivate func aggregateDerivative(_ r: IntermediateRelation, attribute: Attribute, initialValue: RelationValue?, aggregateFunction: @escaping (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) -> RelationChange {
         // Do a brute before/after difference.
         // A' = (new A) - (old A)
         // We called this approach "dumb and inefficient"; is there a better way here?

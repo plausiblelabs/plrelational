@@ -177,7 +177,7 @@ extension PlistDirectoryRelation {
         do {
             let primaryKeyValue = row[primaryKey]
             let url = plistURL(forKeyValue: primaryKeyValue)
-            let directory = url.deletingLastPathComponent()!
+            let directory = url.deletingLastPathComponent()
             
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
             
@@ -209,7 +209,7 @@ extension PlistDirectoryRelation {
             return false
         })
         
-        return AnyIterator(body: {
+        return AnyIterator({
             while true {
                 if returnedError {
                     return nil
@@ -237,7 +237,7 @@ extension PlistDirectoryRelation {
     
     fileprivate func rowGenerator() -> AnyIterator<Result<Row, RelationError>> {
         let urlGenerator = rowURLs()
-        return AnyIterator(body: {
+        return AnyIterator({
             return urlGenerator.next().map({ urlResult in
                 urlResult.mapErr({ $0 as RelationError }).then({
                     let result = self.readRow(url: $0)

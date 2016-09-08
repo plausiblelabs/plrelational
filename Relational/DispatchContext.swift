@@ -7,7 +7,7 @@ import Foundation
 
 
 public protocol DispatchContext {
-    func async(_ f: (Void) -> Void)
+    func async(_ f: @escaping (Void) -> Void)
 }
 
 extension CFRunLoop: DispatchContext {
@@ -44,7 +44,7 @@ public struct RunLoopDispatchContext: DispatchContext {
 /// A simple dispatch context that just makes the calls immediately inline. This is not really
 /// "async" but it's sometimes useful.
 public struct DirectDispatchContext: DispatchContext {
-    public func async(_ f: (Void) -> Void) {
+    public func async(_ f: @escaping (Void) -> Void) {
         f()
     }
 }

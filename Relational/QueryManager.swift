@@ -16,7 +16,7 @@ open class QueryManager {
     /// available, or when an error occurs. If no error occurs, the final callback is invoked with an
     /// empty set of rows to signal that execution has completed. The callback is invoked on the same
     /// thread, when the runloop is in a common mode.
-    open func registerQuery(_ relation: Relation, callback: (Result<Set<Row>, RelationError>) -> Void) {
+    open func registerQuery(_ relation: Relation, callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
         pendingQueries.append((relation, callback))
     }
     
@@ -24,7 +24,7 @@ open class QueryManager {
         let queries = pendingQueries
         pendingQueries = []
         
-        DispatchQueue.global(priority: 0).async(execute: {
+        DispatchQueue.global().async(execute: {
             let planner = QueryPlanner(roots: queries)
             let runner = QueryRunner(planner: planner)
             
@@ -45,10 +45,10 @@ open class QueryManager {
 public final class RunloopQueryManager: QueryManager, PerThreadInstance {
     fileprivate var executionTimer: CFRunLoopTimer?
     
-    public override func registerQuery(_ relation: Relation, callback: (Result<Set<Row>, RelationError>) -> Void) {
+    public override func registerQuery(_ relation: Relation, callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
         let runloop = CFRunLoopGetCurrent()
         let wrappedCallback = { (result: Result<Set<Row>, RelationError>) -> Void in
-            CFRunLoopPerformBlock(runloop, CFRunLoopMode.commonModes, {
+            CFRunLoopPerformBlock(runloop, CFRunLoopMode.commonModes.rawValue, {
                 callback(result)
             })
             CFRunLoopWakeUp(runloop)

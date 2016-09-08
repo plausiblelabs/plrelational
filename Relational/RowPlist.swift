@@ -7,7 +7,7 @@ import Foundation
 
 
 extension Row {
-    static func fromPlist(_ plist: AnyObject) -> Result<Row, RelationError> {
+    static func fromPlist(_ plist: Any) -> Result<Row, RelationError> {
         guard let dict = plist as? NSDictionary else { return .Err(RowPlistError.unknownRowObject(unknownObject: plist)) }
         
         var values: [Attribute: RelationValue] = [:]
@@ -20,7 +20,7 @@ extension Row {
         return .Ok(Row(values: values))
     }
     
-    func toPlist() -> AnyObject {
+    func toPlist() -> Any {
         let result = NSMutableDictionary()
         for (attribute, value) in self {
             result[attribute.name] = value.toPlist()
@@ -39,15 +39,15 @@ extension RelationValue {
     //     we put an Integer in, we have to do this.)
     // Strings are encoded as strings.
     // Blobs are encoded as data.
-    static func fromPlist(_ plist: AnyObject) -> Result<RelationValue, RelationError> {
+    static func fromPlist(_ plist: Any) -> Result<RelationValue, RelationError> {
         switch plist {
             
         case let array as NSArray where array.count == 0: return .Ok(.null)
             
         case let array as NSArray where array.count == 2:
             switch array[0] as? NSString {
-            case .some("integer"): return .Ok(.integer(array[1].int64Value))
-            case .some("real"): return .Ok(.real(array[1].doubleValue))
+            case .some("integer"): return .Ok(.integer((array[1] as AnyObject).int64Value))
+            case .some("real"): return .Ok(.real((array[1] as AnyObject).doubleValue))
             default: return .Err(RowPlistError.unknownNumericTag(unknownTag: array[0]))
             }
             
@@ -63,7 +63,7 @@ extension RelationValue {
         }
     }
     
-    func toPlist() -> AnyObject {
+    func toPlist() -> Any {
         switch self {
         case .null: return [] as NSArray
         case .integer(let value): return ["integer", NSNumber(value: value as Int64)] as NSArray
@@ -77,8 +77,8 @@ extension RelationValue {
 }
 
 enum RowPlistError: Error {
-    case unknownRowObject(unknownObject: AnyObject)
+    case unknownRowObject(unknownObject: Any)
     
-    case unknownNumericTag(unknownTag: AnyObject)
-    case unknownValueObject(unknownObject: AnyObject)
+    case unknownNumericTag(unknownTag: Any)
+    case unknownValueObject(unknownObject: Any)
 }

@@ -4,7 +4,7 @@
 //
 
 open class SQLiteBinding {
-    public enum Error: Error {
+    public enum Error: Swift.Error {
         case noRows
     }
     

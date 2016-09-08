@@ -61,10 +61,10 @@ open class PlistFileRelation: MutableRelation, RelationDefaultChangeObserverImpl
 }
 
 extension PlistFileRelation {
-    enum Error: Error {
-        case unknownTopLevelObject(unknownObject: AnyObject)
+    enum Error: Swift.Error {
+        case unknownTopLevelObject(unknownObject: Any)
         case missingValues
-        case unknownValuesObject(unknownObject: AnyObject)
+        case unknownValuesObject(unknownObject: Any)
     }
     
     public static func withFile(_ url: URL, scheme: Scheme, createIfDoesntExist: Bool) -> Result<PlistFileRelation, RelationError> {
