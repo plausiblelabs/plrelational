@@ -9,9 +9,8 @@ import Foundation
 extension URL {
     public var isDirectory: Result<Bool, NSError> {
         do {
-            var resourceValue: AnyObject?
-            try getResourceValue(&resourceValue, forKey: URLResourceKey.isDirectoryKey)
-            return .Ok(resourceValue?.boolValue ?? false)
+            let values = try resourceValues(forKeys: [.isDirectoryKey])
+            return .Ok(values.isDirectory ?? false)
         } catch let error as NSError {
             return .Err(error)
         }

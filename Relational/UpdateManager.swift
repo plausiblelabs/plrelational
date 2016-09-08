@@ -135,7 +135,7 @@ public final class UpdateManager: PerThreadInstance {
         let observedInfo = self.observedInfo
         
         // Run updates in the background.
-        DispatchQueue.global(priority: 0).async(execute: {
+        DispatchQueue.global().async(execute: {
             // Walk through all the observers. Observe changes on all relevant variables and update
             // observer derivatives with those changes as they come in. Also locate all
             // TransactionalDatabases referenced within so we can begin and end transactions.

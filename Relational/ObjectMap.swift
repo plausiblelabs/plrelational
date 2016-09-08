@@ -42,7 +42,7 @@ class ObjectMap<Value> {
     }
     
     fileprivate static func allocate(_ count: Int) -> UnsafeMutablePointer<Bucket> {
-        return UnsafeMutablePointer<Bucket>(calloc(count, strideof(Bucket.self)))
+        return calloc(count, MemoryLayout<Bucket>.stride).bindMemory(to: Bucket.self, capacity: count)
     }
     
     fileprivate func keyForObject(_ obj: AnyObject) -> Int {

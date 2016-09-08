@@ -14,6 +14,6 @@ extension Mirror {
     
     var childrenIncludingSupertypes: Children {
         let all = mirrorsIncludingSupertypes.flatMap({ $0.children })
-        return AnyForwardCollection(all)
+        return AnyCollection(all)
     }
 }
