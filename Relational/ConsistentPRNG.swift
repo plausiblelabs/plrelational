@@ -10,7 +10,7 @@ import Darwin
 /// where randomness is relevant to security. Intended for pseudorandom test cases that can be
 /// replicated on each run.
 public struct ConsistentPRNG {
-    fileprivate var state: [UInt16] = Array(repeating: 0, count: 3)
+    private var state: [UInt16] = Array(repeating: 0, count: 3)
     
     public mutating func next() -> Int {
         return nrand48(&state)
@@ -23,4 +23,12 @@ public struct ConsistentPRNG {
     var max: Int {
         return 0x7fffffff
     }
+}
+
+private let nrand48: @convention(c) (UnsafeMutablePointer<UInt16>) -> Int = loadFunc("nrand48")
+
+private func loadFunc<T>(_ name: String) -> T {
+    let RTLD_DEFAULT = UnsafeMutableRawPointer(bitPattern: -2)
+    let address = dlsym(RTLD_DEFAULT, name)
+    return unsafeBitCast(address, to: T.self)
 }
