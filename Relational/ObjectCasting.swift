@@ -5,7 +5,7 @@
 
 
 func asObject(_ value: Any) -> AnyObject? {
-    if value is AnyObject {
+    if type(of: value) is AnyObject.Type {
         return value as AnyObject
     } else {
         return nil
