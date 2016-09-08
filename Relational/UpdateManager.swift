@@ -46,7 +46,7 @@ public final class UpdateManager: PerThreadInstance {
     /// Register an observer for a Relation. The observer will receive all changes made to the relation
     /// through the UpdateManager.
     public func observe(_ relation: Relation, observer: AsyncRelationChangeObserver, context: DispatchContext? = nil) -> ObservationRemover {
-        guard let obj = relation as? AnyObject else { return {} }
+        guard let obj = asObject(relation) else { return {} }
         
         let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
         let id = info.addObserver(observer, context: context ?? defaultObserverDispatchContext())
@@ -62,7 +62,7 @@ public final class UpdateManager: PerThreadInstance {
     /// Register an observer for a Relation. When the Relation is changed through the UpdateManager,
     /// the observer receives the Relation's new contents.
     public func observe(_ relation: Relation, observer: AsyncRelationContentObserver, context: DispatchContext? = nil) -> ObservationRemover {
-        guard let obj = relation as? AnyObject else { return {} }
+        guard let obj = asObject(relation) else { return {} }
         
         let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
         let id = info.addObserver(observer, context: context ?? defaultObserverDispatchContext())
@@ -84,7 +84,7 @@ public final class UpdateManager: PerThreadInstance {
     
     fileprivate func sendWillChange(_ relation: Relation) {
         QueryPlanner.visitRelationTree([(relation, ())], { relation, _, _ in
-            guard let relationObject = relation as? AnyObject , !(relation is IntermediateRelation) else { return }
+            guard let relationObject = asObject(relation), !(relation is IntermediateRelation) else { return }
             
             for (observedRelation, info) in observedInfo {
                 for variable in info.derivative.allVariables {
