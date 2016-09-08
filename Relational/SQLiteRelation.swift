@@ -34,7 +34,7 @@ open class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementation
     fileprivate func rawGenerateRows() -> AnyIterator<Result<Row, RelationError>> {
         let data = LogRelationIterationBegin(self)
         var queryGenerator: AnyIterator<Result<Row, RelationError>>? = nil
-        return LogRelationIterationReturn(data, AnyIterator(body: {
+        return LogRelationIterationReturn(data, AnyIterator({
             if let queryGenerator = queryGenerator {
                 return queryGenerator.next()
             } else {

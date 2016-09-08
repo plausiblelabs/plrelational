@@ -60,7 +60,7 @@ struct WeakValueDictionary<Key: Hashable, Value: AnyObject> {
                 keysToEvict.append(key)
             }
             
-            index = <#T##Collection corresponding to `index`##Collection#>.index(after: index)
+            index = underlyingDictionary.index(after: index)
         }
         
         for key in keysToEvict {

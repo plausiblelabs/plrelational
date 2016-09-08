@@ -28,13 +28,13 @@ public extension RangeReplaceableCollection {
     }
 }
 
-public extension Collection where Iterator.Element: Equatable {
+public extension Collection where Iterator.Element: Equatable, Indices.Iterator.Element == Index {
     func indexesOf(_ element: Iterator.Element) -> [Index] {
         return indices.filter({ self[$0] == element })
     }
 }
 
-public extension MutableCollection where Iterator.Element: Equatable {
+public extension MutableCollection where Iterator.Element: Equatable, Indices.Iterator.Element == Index {
     mutating func replace(_ element: Iterator.Element, with: Iterator.Element) {
         for i in indices {
             if self[i] == element {
@@ -44,7 +44,7 @@ public extension MutableCollection where Iterator.Element: Equatable {
     }
 }
 
-public extension MutableCollection {
+public extension MutableCollection where Indices.Iterator.Element == Index{
     mutating func mutatingForEach(_ f: (inout Iterator.Element) -> Void) {
         for i in indices {
             f(&self[i])

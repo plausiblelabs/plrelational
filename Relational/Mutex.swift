@@ -11,7 +11,7 @@ public struct Mutex {
     fileprivate let lock = NSLock()
     
     /// Call the given function with the lock locked, automatically unlocking before returning or throwing.
-    public func locked<T>(f: (Void) throws -> T) rethrows -> T {
+    public func locked<T>(_ f: (Void) throws -> T) rethrows -> T {
         lock.lock()
         defer { lock.unlock() }
         return try f()
@@ -32,7 +32,7 @@ public struct Mutexed<T> {
     }
     
     /// Call the given function with the lock locked, passing in the value so it can be used while locked.
-    public func withValue<Result>(f: @escaping @escaping (T) throws -> Result) rethrows -> Result {
+    public func withValue<Result>(_ f: (T) throws -> Result) rethrows -> Result {
         return try mutex.locked({
             return try f(value)
         })
@@ -40,7 +40,7 @@ public struct Mutexed<T> {
     
     /// Call the given function with the lock locked, passing in the value as inout so it can be used or
     /// mutated while locked.
-    public mutating func withMutableValue<Result>(f: @escaping @escaping (inout T) throws -> Result) rethrows -> Result {
+    public mutating func withMutableValue<Result>(f: (inout T) throws -> Result) rethrows -> Result {
         return try mutex.locked({
             return try f(&value)
         })

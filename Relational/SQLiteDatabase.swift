@@ -241,7 +241,7 @@ extension SQLiteDatabase {
         case retry
     }
     
-    public func transaction<Return>(_ transactionFunction: @escaping @escaping (Void) -> (Return, TransactionResult)) -> Result<Return, RelationError> {
+    public func transaction<Return>(_ transactionFunction: (Void) -> (Return, TransactionResult)) -> Result<Return, RelationError> {
         // TODO: it might make sense to pass a new DB into the object, but in fact changes affect the original database object.
         // This will matter if the caller tries to access the original database during the transaction and expects it not to
         // reflect the new changes.
@@ -269,7 +269,7 @@ extension SQLiteDatabase {
         return result
     }
     
-    public func transaction(@noescape _ transactionFunction: (Void) -> TransactionResult) -> Result<Void, RelationError> {
+    public func transaction(_ transactionFunction: (Void) -> TransactionResult) -> Result<Void, RelationError> {
         return self.transaction({ Void -> ((), TransactionResult) in
             let result = transactionFunction()
             return ((), result)

@@ -27,7 +27,7 @@ public func ObserveDeallocation(_ target: AnyObject, _ f: @escaping (Void) -> Vo
         
         return { [weak callOnDeinit] in
             mutex.locked({
-                callOnDeinit?.calls.removeValue(forKey: counter)
+                _ = callOnDeinit?.calls.removeValue(forKey: counter)
             })
         }
     })
