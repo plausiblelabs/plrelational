@@ -3,8 +3,8 @@
 // All rights reserved.
 //
 
-public class ModelDatabase {
-    public let sqliteDatabase: SQLiteDatabase
+open class ModelDatabase {
+    open let sqliteDatabase: SQLiteDatabase
     
     /// A collection of all live model objects that came from this database. This lets multiple fetches
     /// for the same value return the same actual object instead of having to manage different objects
@@ -13,23 +13,23 @@ public class ModelDatabase {
     /// The dictionary keys here are the Model types themselves. The values in the WeakValueDictionary
     /// are Model instances, but Swift generics don't let us use Model as the generic type here, so
     /// the type is just AnyObject instead.
-    private var liveModelObjects: [ObjectIdentifier: WeakValueDictionary<ModelObjectID, AnyObject>] = [:]
+    fileprivate var liveModelObjects: [ObjectIdentifier: WeakValueDictionary<ModelObjectID, AnyObject>] = [:]
     
     public init(_ sqliteDatabase: SQLiteDatabase) {
         self.sqliteDatabase = sqliteDatabase
     }
     
-    public func contains<T: Model>(obj: T) -> Bool {
-        if sqliteDatabase[obj.dynamicType.name] == nil {
+    open func contains<T: Model>(_ obj: T) -> Bool {
+        if sqliteDatabase[type(of: obj).name] == nil {
             return false
         }
         
-        let search = fetchAll(obj.dynamicType).select(Attribute("objectID") *== RelationValue(obj.objectID.value))
-        return search.generate().next() != nil
+        let search = fetchAll(type(of: obj)).select(Attribute("objectID") *== RelationValue(obj.objectID.value))
+        return search.makeIterator().next() != nil
     }
     
-    public func add<T: Model>(obj: T) -> Result<Void, RelationError> {
-        let relation = relationForModel(obj.dynamicType)
+    open func add<T: Model>(_ obj: T) -> Result<Void, RelationError> {
+        let relation = relationForModel(type(of: obj))
         return relation.then({
             $0.add(obj.toRow()).map({ _ in
                 self.addLiveModelObject(obj)
@@ -37,12 +37,12 @@ public class ModelDatabase {
         })
     }
     
-    public func fetchAll<T: Model>(type: T.Type) -> ModelRelation<T> {
+    open func fetchAll<T: Model>(_ type: T.Type) -> ModelRelation<T> {
         let relation = sqliteDatabase[type.name]!
         return ModelRelation(owningDatabase: self, underlyingRelation: relation)
     }
     
-    public func fetch<T: Model, Parent: Model>(type: T.Type, ownedBy: Parent) -> Result<ModelToManyRelation<T>, RelationError> {
+    open func fetch<T: Model, Parent: Model>(_ type: T.Type, ownedBy: Parent) -> Result<ModelToManyRelation<T>, RelationError> {
         let targetRelation = self.relationForModel(type)
         let joinRelation = self.joinRelation(from: Parent.self, to: type)
         
@@ -54,7 +54,7 @@ public class ModelDatabase {
         })
     }
     
-    public func fetch<T: Model, Child: Model>(type: T.Type, owning child: Child) -> Result<ModelRelation<T>, RelationError> {
+    open func fetch<T: Model, Child: Model>(_ type: T.Type, owning child: Child) -> Result<ModelRelation<T>, RelationError> {
         let targetRelation = self.relationForModel(type)
         let joinRelation = self.joinRelation(from: type, to: Child.self)
         
@@ -68,11 +68,11 @@ public class ModelDatabase {
 }
 
 extension ModelDatabase {
-    func relationForModel<T: Model>(type: T.Type) -> Result<SQLiteTableRelation, RelationError> {
+    func relationForModel<T: Model>(_ type: T.Type) -> Result<SQLiteTableRelation, RelationError> {
         return sqliteDatabase.getOrCreateRelation(type.name, scheme: schemeForModel(type))
     }
     
-    func joinRelation(from from: Model.Type, to: Model.Type) -> Result<SQLiteTableRelation, RelationError> {
+    func joinRelation(from: Model.Type, to: Model.Type) -> Result<SQLiteTableRelation, RelationError> {
         let name = "\(from.name) to-many to \(to.name)"
         let scheme = Scheme(attributes: ["from ID", "to ID"])
         return sqliteDatabase.getOrCreateRelation(name, scheme: scheme)
@@ -80,19 +80,19 @@ extension ModelDatabase {
 }
 
 extension ModelDatabase {
-    private func schemeForModel<T: Model>(type: T.Type) -> Scheme {
+    fileprivate func schemeForModel<T: Model>(_ type: T.Type) -> Scheme {
         return Scheme(attributes: Set(type.attributes))
     }
 }
 
 extension ModelDatabase {
-    func getLiveModelObject<T: Model>(type: T.Type, _ objectID: ModelObjectID) -> T? {
+    func getLiveModelObject<T: Model>(_ type: T.Type, _ objectID: ModelObjectID) -> T? {
         let obj = liveModelObjects[ObjectIdentifier(type)]?[objectID]
         return obj as! T?
     }
     
-    func addLiveModelObject<T: Model>(obj: T) {
-        let key = ObjectIdentifier(obj.dynamicType)
+    func addLiveModelObject<T: Model>(_ obj: T) {
+        let key = ObjectIdentifier(type(of: obj))
         if liveModelObjects[key] == nil {
             liveModelObjects[key] = WeakValueDictionary()
         }
@@ -101,7 +101,7 @@ extension ModelDatabase {
         obj.changeObservers.add({ self.modelChanged($0 as! T) })
     }
     
-    func getOrMakeModelObject<T: Model>(type: T.Type, _ objectID: ModelObjectID, _ creatorFunction: Void -> Result<T, RelationError>) -> Result<T, RelationError> {
+    func getOrMakeModelObject<T: Model>(_ type: T.Type, _ objectID: ModelObjectID, _ creatorFunction: (Void) -> Result<T, RelationError>) -> Result<T, RelationError> {
         if let obj = getLiveModelObject(type, objectID) {
             return .Ok(obj)
         }
@@ -115,7 +115,7 @@ extension ModelDatabase {
 }
 
 extension ModelDatabase {
-    private func modelChanged<T: Model>(obj: T) {
-        relationForModel(obj.dynamicType).map({ $0.update(Attribute("objectID") *== RelationValue(obj.objectID.value), newValues: obj.toRow()) })
+    fileprivate func modelChanged<T: Model>(_ obj: T) {
+        relationForModel(type(of: obj)).map({ $0.update(Attribute("objectID") *== RelationValue(obj.objectID.value), newValues: obj.toRow()) })
     }
 }

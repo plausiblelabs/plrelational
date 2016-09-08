@@ -4,10 +4,10 @@
 //
 
 class QueryPlanner {
-    typealias OutputCallback = Result<Set<Row>, RelationError> -> Void
+    typealias OutputCallback = (Result<Set<Row>, RelationError>) -> Void
     
-    private let rootRelations: [(Relation, OutputCallback)]
-    private var relationNodeIndexMap = ObjectMap<Int>()
+    fileprivate let rootRelations: [(Relation, OutputCallback)]
+    fileprivate var relationNodeIndexMap = ObjectMap<Int>()
     
     var nodes: [Node] = []
     var transactionalDatabases = ObjectDictionary<TransactionalDatabase, Int>()
@@ -23,7 +23,7 @@ class QueryPlanner {
     var initiatorIndexes: [Int] {
         return (nodes.indices).filter({
             switch nodes[$0].op {
-            case .RowGenerator, .RowSet:
+            case .rowGenerator, .rowSet:
                 return true
             default:
                 return false
@@ -35,7 +35,7 @@ class QueryPlanner {
         return rootRelations.map({ $1 })
     }
     
-    private func computeNodes() {
+    fileprivate func computeNodes() {
         QueryPlanner.visitRelationTree(rootRelations, { relation, underlyingRelation, outputCallback in
             noteTransactionalDatabases(relation, nodeIndex: 0)
             let children = QueryPlanner.relationChildren(underlyingRelation)
@@ -56,7 +56,7 @@ class QueryPlanner {
         })
     }
     
-    private func getOrCreateNodeIndex(r: Relation) -> Int {
+    fileprivate func getOrCreateNodeIndex(_ r: Relation) -> Int {
         if let obj = r as? AnyObject {
             return relationNodeIndexMap.getOrCreate(obj, defaultValue: relationToNodeIndex(r))
         } else {
@@ -64,66 +64,66 @@ class QueryPlanner {
         }
     }
     
-    private func relationToNodeIndex(r: Relation) -> Int {
+    fileprivate func relationToNodeIndex(_ r: Relation) -> Int {
         let node = relationToNode(r)
         let index = nodes.count
         nodes.append(node)
         return index
     }
     
-    private func relationToNode(r: Relation) -> Node {
+    fileprivate func relationToNode(_ r: Relation) -> Node {
         switch r.contentProvider {
-        case .Generator(let generatorGetter):
-            return Node(op: .RowGenerator(generatorGetter))
-        case .Set(let setGetter):
-            return Node(op: .RowSet(setGetter))
-        case .Intermediate(let op, let operands):
+        case .generator(let generatorGetter):
+            return Node(op: .rowGenerator(generatorGetter))
+        case .set(let setGetter):
+            return Node(op: .rowSet(setGetter))
+        case .intermediate(let op, let operands):
             return intermediateRelationToNode(op, operands)
-        case .Underlying:
+        case .underlying:
             fatalError("Underlying should never show up in QueryPlanner")
         }
     }
     
-    private func intermediateRelationToNode(op: IntermediateRelation.Operator, _ operands: [Relation]) -> Node {
+    fileprivate func intermediateRelationToNode(_ op: IntermediateRelation.Operator, _ operands: [Relation]) -> Node {
         switch op {
-        case .Union:
-            return Node(op: .Union)
-        case .Intersection:
-            return Node(op: .Intersection)
-        case .Difference:
-            return Node(op: .Difference)
-        case .Project(let scheme):
-            return Node(op: .Project(scheme))
-        case .Select(let expression):
-            return Node(op: .Select(expression))
-        case .MutableSelect(let expression):
-            return Node(op: .Select(expression))
-        case .Equijoin(let matching):
-            return Node(op: .Equijoin(matching))
-        case .Rename(let renames):
-            return Node(op: .Rename(renames))
-        case .Update(let newValues):
-            return Node(op: .Update(newValues))
-        case .Aggregate(let attribute, let initialValue, let aggregateFunction):
-            return Node(op: .Aggregate(attribute, initialValue, aggregateFunction))
-        case .Otherwise:
-            return Node(op: .Otherwise)
-        case .Unique(let attribute, let value):
-            return Node(op: .Unique(attribute, value))
+        case .union:
+            return Node(op: .union)
+        case .intersection:
+            return Node(op: .intersection)
+        case .difference:
+            return Node(op: .difference)
+        case .project(let scheme):
+            return Node(op: .project(scheme))
+        case .select(let expression):
+            return Node(op: .select(expression))
+        case .mutableSelect(let expression):
+            return Node(op: .select(expression))
+        case .equijoin(let matching):
+            return Node(op: .equijoin(matching))
+        case .rename(let renames):
+            return Node(op: .rename(renames))
+        case .update(let newValues):
+            return Node(op: .update(newValues))
+        case .aggregate(let attribute, let initialValue, let aggregateFunction):
+            return Node(op: .aggregate(attribute, initialValue, aggregateFunction))
+        case .otherwise:
+            return Node(op: .otherwise)
+        case .unique(let attribute, let value):
+            return Node(op: .unique(attribute, value))
         }
     }
     
-    private func noteTransactionalDatabases(r: Relation, nodeIndex: Int) {
+    fileprivate func noteTransactionalDatabases(_ r: Relation, nodeIndex: Int) {
         if let
             transactionalRelation = r as? TransactionalDatabase.TransactionalRelation,
-            db = transactionalRelation.db {
+            let db = transactionalRelation.db {
             transactionalDatabases[db] = nodeIndex
         }
     }
     
-    private static func underlyingRelation(r: Relation) -> Relation {
+    fileprivate static func underlyingRelation(_ r: Relation) -> Relation {
         switch r.contentProvider {
-        case .Underlying(let underlying):
+        case .underlying(let underlying):
             // We may have to peel back multiple layers, so recurse in this case.
             return underlyingRelation(underlying)
         default:
@@ -158,27 +158,27 @@ extension QueryPlanner {
     }
     
     enum Operation {
-        case RowGenerator(Void -> AnyGenerator<Result<Row, RelationError>>)
-        case RowSet(Void -> Set<Row>)
+        case rowGenerator((Void) -> AnyIterator<Result<Row, RelationError>>)
+        case rowSet((Void) -> Set<Row>)
         
-        case Union
-        case Intersection
-        case Difference
-        case Project(Scheme)
-        case Select(SelectExpression)
-        case Equijoin([Attribute: Attribute])
-        case Rename([Attribute: Attribute])
-        case Update(Row)
-        case Aggregate(Attribute, RelationValue?, (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>)
+        case union
+        case intersection
+        case difference
+        case project(Scheme)
+        case select(SelectExpression)
+        case equijoin([Attribute: Attribute])
+        case rename([Attribute: Attribute])
+        case update(Row)
+        case aggregate(Attribute, RelationValue?, (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>)
         
-        case Otherwise
-        case Unique(Attribute, RelationValue)
+        case otherwise
+        case unique(Attribute, RelationValue)
     }
 }
 
 /// Tree walking utilities.
 extension QueryPlanner {
-    static func visitRelationTree<AuxiliaryData>(roots: [(Relation, AuxiliaryData)], @noescape _ f: (relation: Relation, underlyingRelation: Relation, auxiliaryData: AuxiliaryData?) -> Void) {
+    static func visitRelationTree<AuxiliaryData>(_ roots: [(Relation, AuxiliaryData)], _ f: (_ relation: Relation, _ underlyingRelation: Relation, _ auxiliaryData: AuxiliaryData?) -> Void) {
         let visited = ObjectMap<Int>()
         var rootsToVisit = roots
         var othersToVisit: [Relation] = []
@@ -204,12 +204,12 @@ extension QueryPlanner {
                     continue
                 }
             }
-            f(relation: relation, underlyingRelation: realR, auxiliaryData: auxiliaryData)
-            othersToVisit.appendContentsOf(relationChildren(realR))
+            f(relation, realR, auxiliaryData)
+            othersToVisit.append(contentsOf: relationChildren(realR))
         }
     }
     
-    private static func relationChildren(r: Relation) -> [Relation] {
+    fileprivate static func relationChildren(_ r: Relation) -> [Relation] {
         switch r {
         case let r as IntermediateRelation:
             return r.operands

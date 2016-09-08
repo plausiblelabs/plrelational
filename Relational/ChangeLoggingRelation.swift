@@ -4,9 +4,9 @@
 //
 
 enum ChangeLoggingRelationChange {
-    case Union(Relation)
-    case Select(SelectExpression)
-    case Update(SelectExpression, Row)
+    case union(Relation)
+    case select(SelectExpression)
+    case update(SelectExpression, Row)
 }
 
 struct ChangeLoggingRelationLogEntry {
@@ -27,16 +27,16 @@ public struct ChangeLoggingRelationSnapshot {
     var savedLog: [ChangeLoggingRelationLogEntry]
 }
 
-public class ChangeLoggingRelation<BaseRelation: Relation> {
+open class ChangeLoggingRelation<BaseRelation: Relation> {
     let baseRelation: BaseRelation
     
     var log: [ChangeLoggingRelationLogEntry] = []
     
-    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    private var currentChange: ChangeLoggingRelationCurrentChange {
+    fileprivate var currentChange: ChangeLoggingRelationCurrentChange {
         didSet {
-            fullUnderlyingRelation = self.dynamicType.computeFullUnderlyingRelation(baseRelation, currentChange)
+            fullUnderlyingRelation = type(of: self).computeFullUnderlyingRelation(baseRelation, currentChange)
         }
     }
     
@@ -47,35 +47,35 @@ public class ChangeLoggingRelation<BaseRelation: Relation> {
         currentChange = ChangeLoggingRelationCurrentChange(
             added: MemoryTableRelation(scheme: baseRelation.scheme),
             removed: MemoryTableRelation(scheme: baseRelation.scheme))
-        fullUnderlyingRelation = self.dynamicType.computeFullUnderlyingRelation(baseRelation, currentChange)
+        fullUnderlyingRelation = type(of: self).computeFullUnderlyingRelation(baseRelation, currentChange)
         LogRelationCreation(self)
     }
     
-    private static func computeFullUnderlyingRelation(baseRelation: BaseRelation, _ currentChange: ChangeLoggingRelationCurrentChange) -> Relation {
+    fileprivate static func computeFullUnderlyingRelation(_ baseRelation: BaseRelation, _ currentChange: ChangeLoggingRelationCurrentChange) -> Relation {
         return baseRelation.difference(currentChange.removed).union(currentChange.added)
     }
     
-    public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
-        let change = ChangeLoggingRelationChange.Update(query, newValues)
+    open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        let change = ChangeLoggingRelationChange.update(query, newValues)
         let result = applyLogToCurrentRelationAndGetChanges([change])
         return result.then({
             var reverse: [ChangeLoggingRelationChange] = []
-            if let added = $0.added where added.isEmpty.ok != true {
+            if let added = $0.added , added.isEmpty.ok != true {
                 for row in added.rows() {
                     switch row {
                     case .Ok(let row):
-                        reverse.append(.Select(*!SelectExpressionFromRow(row)))
+                        reverse.append(.select(*!SelectExpressionFromRow(row)))
                     case .Err(let err):
                         return .Err(err)
                     }
                 }
             }
-            if let removed = $0.removed where removed.isEmpty.ok != true {
-                reverse.append(.Union(removed))
+            if let removed = $0.removed , removed.isEmpty.ok != true {
+                reverse.append(.union(removed))
             }
             log.append(ChangeLoggingRelationLogEntry(forward: change, backward: reverse))
             
-            notifyChangeObservers($0, kind: .DirectChange)
+            notifyChangeObservers($0, kind: .directChange)
             
             return .Ok()
         })
@@ -88,25 +88,25 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
     }
     
     public var contentProvider: RelationContentProvider {
-        return .Underlying(fullUnderlyingRelation)
+        return .underlying(fullUnderlyingRelation)
     }
 
-    public func contains(row: Row) -> Result<Bool, RelationError> {
+    public func contains(_ row: Row) -> Result<Bool, RelationError> {
         return fullUnderlyingRelation.contains(row)
     }
     
-    public func add(row: Row) -> Result<Int64, RelationError> {
+    public func add(_ row: Row) -> Result<Int64, RelationError> {
         switch self.contains(row) {
         case .Ok(let contains):
             if !contains {
-                let change = ChangeLoggingRelationChange.Union(ConcreteRelation(row))
+                let change = ChangeLoggingRelationChange.union(ConcreteRelation(row))
                 let logEntry = ChangeLoggingRelationLogEntry(
                     forward: change,
-                    backward: [.Select(*!SelectExpressionFromRow(row))])
+                    backward: [.select(*!SelectExpressionFromRow(row))])
                 log.append(logEntry)
                 let result = self.applyLogToCurrentRelationAndGetChanges([change])
                 return result.map({
-                    notifyChangeObservers($0, kind: .DirectChange)
+                    notifyChangeObservers($0, kind: .directChange)
                     return 0
                 })
             } else {
@@ -117,26 +117,26 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
         }
     }
     
-    public func delete(query: SelectExpression) -> Result<Void, RelationError> {
+    public func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         return ConcreteRelation.copyRelation(self.select(query)).then({ rowsToDelete in
-            let change = ChangeLoggingRelationChange.Select(*!query)
+            let change = ChangeLoggingRelationChange.select(*!query)
             let logEntry = ChangeLoggingRelationLogEntry(
                 forward: change,
-                backward: [.Union(rowsToDelete)])
+                backward: [.union(rowsToDelete)])
             log.append(logEntry)
             let result = self.applyLogToCurrentRelationAndGetChanges([change])
             return result.map({
-                notifyChangeObservers($0, kind: .DirectChange)
+                notifyChangeObservers($0, kind: .directChange)
             })
         })
     }
     
-    private func applyLogToCurrentRelation<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log) -> Result<(didAdd: Bool, didRemove: Bool), RelationError> {
+    fileprivate func applyLogToCurrentRelation<Log: Sequence>(_ log: Log) -> Result<(didAdd: Bool, didRemove: Bool), RelationError> where Log.Iterator.Element == ChangeLoggingRelationChange {
         var didAdd = false
         var didRemove = false
         for change in log {
             switch change {
-            case .Union(let relation):
+            case .union(let relation):
                 for row in relation.rows() {
                     switch row {
                     case .Ok(let row):
@@ -147,7 +147,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                         return .Err(err)
                     }
                 }
-            case .Select(let query):
+            case .select(let query):
                 didRemove = true
                 currentChange.added.delete(*!query)
                 for row in baseRelation.select(*!query).rows() {
@@ -158,7 +158,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                         return .Err(err)
                     }
                 }
-            case .Update(let query, let newValues):
+            case .update(let query, let newValues):
                 didAdd = true
                 didRemove = true
                 currentChange.added.update(query, newValues: newValues)
@@ -177,7 +177,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
         return .Ok(ret)
     }
 
-    private func applyLogToCurrentRelationAndGetChanges<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log) -> Result<RelationChange, RelationError> {
+    fileprivate func applyLogToCurrentRelationAndGetChanges<Log: Sequence>(_ log: Log) -> Result<RelationChange, RelationError> where Log.Iterator.Element == ChangeLoggingRelationChange {
         let before = currentChange.copy()
         let result = applyLogToCurrentRelation(log)
         return result.map({ didAdd, didRemove in
@@ -189,19 +189,19 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
         })
     }
     
-    static func computeChangeFromLog<Log: SequenceType where Log.Generator.Element == ChangeLoggingRelationChange>(log: Log, baseRelation: Relation) -> RelationChange {
+    static func computeChangeFromLog<Log: Sequence>(_ log: Log, baseRelation: Relation) -> RelationChange where Log.Iterator.Element == ChangeLoggingRelationChange {
         var currentAdd: Relation = ConcreteRelation(scheme: baseRelation.scheme)
         var currentRemove: Relation = ConcreteRelation(scheme: baseRelation.scheme)
         
         for change in log {
             switch change {
-            case .Union(let relation):
+            case .union(let relation):
                 currentAdd = currentAdd.union(relation.difference(currentRemove))
                 currentRemove = currentRemove.difference(relation)
-            case .Select(let query):
+            case .select(let query):
                 currentAdd = currentAdd.select(query)
                 currentRemove = currentRemove.union(baseRelation.select(*!query))
-            case .Update(let query, let newValues):
+            case .update(let query, let newValues):
                 currentAdd = currentAdd.withUpdate(query, newValues: newValues)
                 currentAdd = currentAdd.union(baseRelation.select(query).difference(currentRemove).withUpdate(newValues))
                 currentRemove = currentRemove.union(baseRelation.select(query))
@@ -254,27 +254,27 @@ extension ChangeLoggingRelation {
         return ChangeLoggingRelationSnapshot(savedLog: self.log)
     }
     
-    public func restoreSnapshot(snapshot: ChangeLoggingRelationSnapshot) -> Result<Void, RelationError> {
+    public func restoreSnapshot(_ snapshot: ChangeLoggingRelationSnapshot) -> Result<Void, RelationError> {
         let change = rawRestoreSnapshot(snapshot)
         return change.map({
-            notifyChangeObservers($0, kind: .DirectChange)
+            notifyChangeObservers($0, kind: .directChange)
         })
     }
     
     /// Restore a snapshot and compute the changes that this causes. Does not notify observers.
-    func rawRestoreSnapshot(snapshot: ChangeLoggingRelationSnapshot) -> Result<RelationChange, RelationError> {
+    func rawRestoreSnapshot(_ snapshot: ChangeLoggingRelationSnapshot) -> Result<RelationChange, RelationError> {
         // Note: right now we assume that the snapshot's log is a prefix of ours, or vice versa. We don't support
         // tree snapshots (yet?).
         if snapshot.savedLog.count > self.log.count {
             // The snapshot is ahead. Advance our state by the snapshot's log.
-            let log = snapshot.savedLog.suffixFrom(self.log.count)
+            let log = snapshot.savedLog.suffix(from: self.log.count)
             self.log = snapshot.savedLog
             return applyLogToCurrentRelationAndGetChanges(log.lazy.map({ $0.forward }))
         } else {
             // The snapshot is behind. Reverse our state by our backwards log.
-            let log = self.log.suffixFrom(snapshot.savedLog.count)
+            let log = self.log.suffix(from: snapshot.savedLog.count)
             self.log = snapshot.savedLog
-            let backwardsLog = log.flatMap({ $0.backward }).reverse()
+            let backwardsLog = log.flatMap({ $0.backward }).reversed()
             return applyLogToCurrentRelationAndGetChanges(backwardsLog)
         }
     }
@@ -286,7 +286,7 @@ extension ChangeLoggingRelation {
         return relation
     }
     
-    func restoreFromChangeLoggingRelation(relation: ChangeLoggingRelation<BaseRelation>) -> Result<RelationChange, RelationError> {
+    func restoreFromChangeLoggingRelation(_ relation: ChangeLoggingRelation<BaseRelation>) -> Result<RelationChange, RelationError> {
         // This snapshot thing is kind of elegant and ugly at the same time. It gets the job done
         // of applying the new state and retrieving the changes, anyway.
         let pretendSnapshot = relation.takeSnapshot()

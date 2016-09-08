@@ -4,35 +4,35 @@
 //
 
 public protocol SelectExpression {
-    func valueWithRow(row: Row) -> RelationValue
+    func valueWithRow(_ row: Row) -> RelationValue
 }
 
 extension RelationValue: SelectExpression {
-    public func valueWithRow(row: Row) -> RelationValue {
+    public func valueWithRow(_ row: Row) -> RelationValue {
         return self
     }
 }
 
 extension Attribute: SelectExpression {
-    public func valueWithRow(row: Row) -> RelationValue {
+    public func valueWithRow(_ row: Row) -> RelationValue {
         return row[self]
     }
 }
 
 extension String: SelectExpression {
-    public func valueWithRow(row: Row) -> RelationValue {
+    public func valueWithRow(_ row: Row) -> RelationValue {
         return RelationValue(self)
     }
 }
 
 extension Int: SelectExpression {
-    public func valueWithRow(row: Row) -> RelationValue {
+    public func valueWithRow(_ row: Row) -> RelationValue {
         return RelationValue(Int64(self))
     }
 }
 
 extension Bool: SelectExpression {
-    public func valueWithRow(row: Row) -> RelationValue {
+    public func valueWithRow(_ row: Row) -> RelationValue {
         return RelationValue.boolValue(self)
     }
 }
@@ -48,7 +48,7 @@ public struct SelectExpressionBinaryOperator: SelectExpression {
         self.rhs = rhs
     }
     
-    public func valueWithRow(row: Row) -> RelationValue {
+    public func valueWithRow(_ row: Row) -> RelationValue {
         let lvalue = lhs.valueWithRow(row)
         let rvalue = rhs.valueWithRow(row)
         return op.evaluate(lvalue, rvalue)
@@ -64,7 +64,7 @@ public struct SelectExpressionUnaryOperator: SelectExpression {
         self.expr = expr
     }
     
-    public func valueWithRow(row: Row) -> RelationValue {
+    public func valueWithRow(_ row: Row) -> RelationValue {
         return op.evaluate(expr.valueWithRow(row))
     }
 }
@@ -72,10 +72,10 @@ public struct SelectExpressionUnaryOperator: SelectExpression {
 /// Return a SelectExpression that corresponds to the given row. Each value
 /// in the row will generate an EqualityComparator matching that attribute and
 /// that value, and the whole mess will be ANDed together.
-func SelectExpressionFromRow(row: Row) -> SelectExpression {
+func SelectExpressionFromRow(_ row: Row) -> SelectExpression {
     let equalityExpressions = row.map({ $0 *== $1 })
     if equalityExpressions.isEmpty {
-        return RelationValue.Integer(1)
+        return RelationValue.integer(1)
     } else if equalityExpressions.count == 1 {
         return equalityExpressions.first!
     } else {
@@ -91,7 +91,7 @@ extension SelectExpression {
     /// Walk the entire expression tree, calling a map function at each node.
     /// Child nodes are mapped first, and then the map function is called on
     /// the parent node after the new values are substituted in.
-    func mapTree(f: SelectExpression -> SelectExpression) -> SelectExpression{
+    func mapTree(_ f: (SelectExpression) -> SelectExpression) -> SelectExpression{
         switch self {
         case let binary as SelectExpressionBinaryOperator:
             let substituted = SelectExpressionBinaryOperator(
@@ -111,7 +111,7 @@ extension SelectExpression {
 }
 
 extension SelectExpression {
-    func withRenamedAttributes(renames: [Attribute: Attribute]) -> SelectExpression {
+    func withRenamedAttributes(_ renames: [Attribute: Attribute]) -> SelectExpression {
         return self.mapTree({
             switch $0 {
             case let attribute as Attribute:

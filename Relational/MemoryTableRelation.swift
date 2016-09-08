@@ -7,56 +7,56 @@
 /// An in-memory mutable Relation. Conceptually similar to ConcreteRelation, except that
 /// this is a reference type rather than a value type, and so behaves more like we might
 /// expect a "table" to. It's also observable, in case you need that sort of thing.
-public class MemoryTableRelation: Relation, RelationDefaultChangeObserverImplementation {
-    public let scheme: Scheme
+open class MemoryTableRelation: Relation, RelationDefaultChangeObserverImplementation {
+    open let scheme: Scheme
     
     var values: Set<Row> = []
     
-    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     public init(scheme: Scheme) {
         self.scheme = scheme
     }
     
-    public var contentProvider: RelationContentProvider {
-        return .Set({ self.values })
+    open var contentProvider: RelationContentProvider {
+        return .set({ self.values })
     }
     
-    public func contains(row: Row) -> Result<Bool, RelationError> {
+    open func contains(_ row: Row) -> Result<Bool, RelationError> {
         return .Ok(values.contains(row))
     }
     
-    public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+    open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let toUpdate = values.filter({ query.valueWithRow($0).boolValue })
-        values.subtractInPlace(toUpdate)
+        values.subtract(toUpdate)
         
         let updated = toUpdate.map({ $0.rowWithUpdate(newValues) })
-        values.unionInPlace(updated)
+        values.formUnion(updated)
         
         return .Ok()
     }
     
-    public func add(row: Row) {
+    open func add(_ row: Row) {
         if !values.contains(row) {
             values.insert(row)
-            notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .DirectChange)
+            notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .directChange)
         }
     }
     
-    public func delete(query: SelectExpression) {
+    open func delete(_ query: SelectExpression) {
         let toDelete = Set(values.lazy.filter({ query.valueWithRow($0).boolValue }))
-        values.subtractInPlace(toDelete)
-        notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .DirectChange)
+        values.subtract(toDelete)
+        notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .directChange)
     }
     
-    public func delete(row: Row) {
+    open func delete(_ row: Row) {
         if values.contains(row) {
             values.remove(row)
-            notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(row)), kind: .DirectChange)
+            notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(row)), kind: .directChange)
         }
     }
     
-    public func copy() -> MemoryTableRelation {
+    open func copy() -> MemoryTableRelation {
         let copy = MemoryTableRelation(scheme: scheme)
         copy.values = values
         return copy

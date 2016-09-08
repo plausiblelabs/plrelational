@@ -15,14 +15,14 @@ struct FunctionalDependency {
 
 extension FunctionalDependency: CustomStringConvertible {
     var description: String {
-        let l = left.map({ $0.name }).joinWithSeparator(" ")
-        let r = right.map({ $0.name }).joinWithSeparator(" ")
+        let l = left.map({ $0.name }).joined(separator: " ")
+        let r = right.map({ $0.name }).joined(separator: " ")
         return "\(l) -> \(r)"
     }
 }
 
 extension Relation {
-    func satisfies(fd: FunctionalDependency) -> Result<Bool, RelationError> {
+    func satisfies(_ fd: FunctionalDependency) -> Result<Bool, RelationError> {
         let leftValues = self.project(Scheme(attributes: fd.left))
         for row in leftValues.rows() {
             switch row {
@@ -44,7 +44,7 @@ extension Relation {
     
     func allSatisfiedFunctionalDependencies() -> Result<[FunctionalDependency], RelationError> {
         let allDependencies = self.scheme.attributes.powerSet.flatMap({ left in
-            self.scheme.attributes.subtract(left).powerSet.map({ right in
+            self.scheme.attributes.subtracting(left).powerSet.map({ right in
                 FunctionalDependency(left, determines: right)
             })
         })

@@ -8,20 +8,20 @@ import Foundation
 import CommonCrypto
 
 
-public class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
-    public let scheme: Scheme
+open class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
+    open let scheme: Scheme
     
-    public let primaryKey: Attribute
+    open let primaryKey: Attribute
     
-    let url: NSURL
+    let url: URL
     
-    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    public static func withDirectory(url: NSURL, scheme: Scheme, primaryKey: Attribute, createIfDoesntExist: Bool) -> Result<PlistDirectoryRelation, RelationError> {
+    open static func withDirectory(_ url: URL, scheme: Scheme, primaryKey: Attribute, createIfDoesntExist: Bool) -> Result<PlistDirectoryRelation, RelationError> {
         do {
-            if !url.checkResourceIsReachableAndReturnError(nil) {
+            if !(url as NSURL).checkResourceIsReachableAndReturnError(nil) {
                 if createIfDoesntExist {
-                    try NSFileManager.defaultManager().createDirectoryAtURL(url, withIntermediateDirectories: true, attributes: nil)
+                    try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
                 } else {
                     return .Err(NSError(domain: NSCocoaErrorDomain, code: NSFileReadNoSuchFileError, userInfo: nil))
                 }
@@ -33,20 +33,20 @@ public class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObser
         }
     }
     
-    private init(scheme: Scheme, primaryKey: Attribute, url: NSURL) {
+    fileprivate init(scheme: Scheme, primaryKey: Attribute, url: URL) {
         precondition(scheme.attributes.contains(primaryKey), "Primary key must be in the scheme")
         self.scheme = scheme
         self.primaryKey = primaryKey
         self.url = url
     }
     
-    public var contentProvider: RelationContentProvider {
-        return .Generator(self.rowGenerator)
+    open var contentProvider: RelationContentProvider {
+        return .generator(self.rowGenerator)
     }
     
-    public func contains(row: Row) -> Result<Bool, RelationError> {
+    open func contains(_ row: Row) -> Result<Bool, RelationError> {
         let keyValue = row[primaryKey]
-        if case .NotFound = keyValue {
+        if case .notFound = keyValue {
             return .Ok(false)
         }
         
@@ -54,7 +54,7 @@ public class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObser
         return ourRow.map({ $0 == row })
     }
     
-    public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+    open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         // TODO: for queries involving the primary key, be more efficient and don't scan everything.
         let toUpdate = flatmapOk(rowGenerator(), { query.valueWithRow($0).boolValue ? $0 : nil }).map(Set.init)
         let withUpdates = toUpdate.map({
@@ -81,7 +81,7 @@ public class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObser
         })
     }
     
-    public func add(row: Row) -> Result<Int64, RelationError> {
+    open func add(_ row: Row) -> Result<Int64, RelationError> {
         return readRow(primaryKey: row[primaryKey]).then({ existingRow in
             if existingRow == row {
                 return .Ok(0)
@@ -90,13 +90,13 @@ public class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObser
             let removed = existingRow.map(ConcreteRelation.init)
             let added = ConcreteRelation(row)
             return writeRow(row).map({
-                notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .DirectChange)
+                notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .directChange)
                 return 0
             })
         })
     }
     
-    public func delete(query: SelectExpression) -> Result<Void, RelationError> {
+    open func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         // TODO: for queries involving the primary key, be more efficient and don't scan everything.
         let keysToDelete = flatmapOk(rowGenerator(), { query.valueWithRow($0).boolValue ? $0[primaryKey] : nil })
         return keysToDelete.then({
@@ -110,53 +110,53 @@ public class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObser
 }
 
 extension PlistDirectoryRelation {
-    private static let fileExtension = "rowplist"
-    private static let filePrefixLength = 2
+    fileprivate static let fileExtension = "rowplist"
+    fileprivate static let filePrefixLength = 2
     
-    private func plistURL(forKeyValue value: RelationValue) -> NSURL {
+    fileprivate func plistURL(forKeyValue value: RelationValue) -> URL {
         let valueData = canonicalData(for: value)
         let hash = SHA256(valueData)
         let hexHash = hexString(hash, uppercase: false)
         
-        let prefix = hexHash.substringToIndex(hexHash.startIndex.advancedBy(PlistDirectoryRelation.filePrefixLength))
+        let prefix = hexHash.substring(to: hexHash.characters.index(hexHash.startIndex, offsetBy: PlistDirectoryRelation.filePrefixLength))
         
         return self.url
-            .URLByAppendingPathComponent(prefix)
-            .URLByAppendingPathComponent(hexHash)
-            .URLByAppendingPathExtension(PlistDirectoryRelation.fileExtension)
+            .appendingPathComponent(prefix)
+            .appendingPathComponent(hexHash)
+            .appendingPathExtension(PlistDirectoryRelation.fileExtension)
     }
     
-    private func canonicalData(for value: RelationValue) -> [UInt8] {
+    fileprivate func canonicalData(for value: RelationValue) -> [UInt8] {
         switch value {
-        case .NULL:
+        case .null:
             return Array("n".utf8)
-        case .Integer(let value):
+        case .integer(let value):
             return Array("i\(value)".utf8)
-        case .Real(let value):
+        case .real(let value):
             let swapped = CFConvertDoubleHostToSwapped(value)
             return Array("r\(swapped)".utf8)
-        case .Text(let string):
+        case .text(let string):
             let normalized = string.decomposedStringWithCanonicalMapping
             return Array("s\(normalized)".utf8)
-        case .Blob(let data):
+        case .blob(let data):
             return "d".utf8 + data
             
-        case .NotFound:
+        case .notFound:
             preconditionFailure("Can't get canonical data for .NotFound")
         }
     }
     
-    private func readRow(url url: NSURL) -> Result<Row, RelationError> {
+    fileprivate func readRow(url: URL) -> Result<Row, RelationError> {
         do {
-            let data = try NSData(contentsOfURL: url, options: [])
-            let plist = try NSPropertyListSerialization.propertyListWithData(data, options: [], format: nil)
+            let data = try Data(contentsOf: url, options: [])
+            let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil)
             return Row.fromPlist(plist)
         } catch {
             return .Err(error)
         }
     }
     
-    private func readRow(primaryKey key: RelationValue) -> Result<Row?, RelationError> {
+    fileprivate func readRow(primaryKey key: RelationValue) -> Result<Row?, RelationError> {
         let url = plistURL(forKeyValue: key)
         let result = readRow(url: url)
         switch result {
@@ -173,17 +173,17 @@ extension PlistDirectoryRelation {
         }
     }
     
-    private func writeRow(row: Row) -> Result<Void, RelationError> {
+    fileprivate func writeRow(_ row: Row) -> Result<Void, RelationError> {
         do {
             let primaryKeyValue = row[primaryKey]
             let url = plistURL(forKeyValue: primaryKeyValue)
-            let directory = url.URLByDeletingLastPathComponent!
+            let directory = url.deletingLastPathComponent()!
             
-            try NSFileManager.defaultManager().createDirectoryAtURL(directory, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
             
             let plist = row.toPlist()
-            let data = try NSPropertyListSerialization.dataWithPropertyList(plist, format: .XMLFormat_v1_0, options: 0)
-            try data.writeToURL(url, options: .AtomicWrite)
+            let data = try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
+            try data.write(to: url, options: .atomicWrite)
             
             return .Ok()
         } catch {
@@ -191,25 +191,25 @@ extension PlistDirectoryRelation {
         }
     }
     
-    private func deleteRow(primaryKey key: RelationValue) -> Result<Void, RelationError> {
+    fileprivate func deleteRow(primaryKey key: RelationValue) -> Result<Void, RelationError> {
         do {
             let url = plistURL(forKeyValue: key)
-            try NSFileManager.defaultManager().removeItemAtURL(url)
+            try FileManager.default.removeItem(at: url)
             return .Ok()
         } catch {
             return .Err(error)
         }
     }
     
-    private func rowURLs() -> AnyGenerator<Result<NSURL, NSError>> {
+    fileprivate func rowURLs() -> AnyIterator<Result<URL, NSError>> {
         var enumerationError: NSError? = nil
         var returnedError = false
-        let enumerator = NSFileManager.defaultManager().enumeratorAtURL(self.url, includingPropertiesForKeys: nil, options: [], errorHandler: { url, error in
-            enumerationError = error
+        let enumerator = FileManager.default.enumerator(at: self.url, includingPropertiesForKeys: nil, options: [], errorHandler: { url, error in
+            enumerationError = error as NSError?
             return false
         })
         
-        return AnyGenerator(body: {
+        return AnyIterator(body: {
             while true {
                 if returnedError {
                     return nil
@@ -219,7 +219,7 @@ extension PlistDirectoryRelation {
                 if let error = enumerationError {
                     returnedError = true
                     return .Err(error)
-                } else if let url = url as? NSURL {
+                } else if let url = url as? URL {
                     switch url.isDirectory {
                     case .Ok(let isDirectory):
                         if !isDirectory && url.pathExtension == PlistDirectoryRelation.fileExtension {
@@ -235,9 +235,9 @@ extension PlistDirectoryRelation {
         })
     }
     
-    private func rowGenerator() -> AnyGenerator<Result<Row, RelationError>> {
+    fileprivate func rowGenerator() -> AnyIterator<Result<Row, RelationError>> {
         let urlGenerator = rowURLs()
-        return AnyGenerator(body: {
+        return AnyIterator(body: {
             return urlGenerator.next().map({ urlResult in
                 urlResult.mapErr({ $0 as RelationError }).then({
                     let result = self.readRow(url: $0)

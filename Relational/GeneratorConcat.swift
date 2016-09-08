@@ -3,15 +3,15 @@
 // All rights reserved.
 //
 
-extension GeneratorType {
-    public func concat<OtherGen: GeneratorType where OtherGen.Element == Self.Element>(other: OtherGen) -> ConcatGenerator<Self, OtherGen> {
+extension IteratorProtocol {
+    public func concat<OtherGen: IteratorProtocol>(_ other: OtherGen) -> ConcatGenerator<Self, OtherGen> where OtherGen.Element == Self.Element {
         return ConcatGenerator(self, other)
     }
 }
 
 /// A GeneratorType which concatenates two other generators. It will produce all elements from
 /// the first generator, then all elements from the second.
-public struct ConcatGenerator<G1: GeneratorType, G2: GeneratorType where G1.Element == G2.Element>: GeneratorType {
+public struct ConcatGenerator<G1: IteratorProtocol, G2: IteratorProtocol>: IteratorProtocol where G1.Element == G2.Element {
     var g1: G1?
     var g2: G2?
     

@@ -7,24 +7,24 @@
 /// Plus a "not found" value for when an attribute doesn't exist at all.
 /// We might want to do our own thing and not hew so closely to SQLite's way....
 public enum RelationValue {
-    case NULL
-    case Integer(Int64)
-    case Real(Double)
-    case Text(String)
-    case Blob([UInt8])
+    case null
+    case integer(Int64)
+    case real(Double)
+    case text(String)
+    case blob([UInt8])
     
-    case NotFound
+    case notFound
 }
 
 extension RelationValue: Equatable {}
 public func ==(a: RelationValue, b: RelationValue) -> Bool {
     switch (a, b) {
-    case (.NULL, .NULL): return true
-    case (.Integer(let a), .Integer(let b)): return a == b
-    case (.Real(let a), .Real(let b)): return a == b
-    case (.Text(let a), .Text(let b)): return a == b
-    case (.Blob(let a), .Blob(let b)): return a == b
-    case (.NotFound, .NotFound): return true
+    case (.null, .null): return true
+    case (.integer(let a), .integer(let b)): return a == b
+    case (.real(let a), .real(let b)): return a == b
+    case (.text(let a), .text(let b)): return a == b
+    case (.blob(let a), .blob(let b)): return a == b
+    case (.notFound, .notFound): return true
     default: return false
     }
 }
@@ -35,29 +35,29 @@ public func <(a: RelationValue, b: RelationValue) -> Bool {
     // By doing the checks in order, we ensure the wildcards only catch later cases, not
     // earlier ones.
     switch (a, b) {
-    case (.NULL, .NULL): return false
-    case (.NULL, _): return true
-    case (_, .NULL): return false
+    case (.null, .null): return false
+    case (.null, _): return true
+    case (_, .null): return false
         
-    case (.Integer(let a), .Integer(let b)): return a < b
-    case (.Integer, _): return true
-    case (_, .Integer): return false
+    case (.integer(let a), .integer(let b)): return a < b
+    case (.integer, _): return true
+    case (_, .integer): return false
         
-    case (.Real(let a), .Real(let b)): return a < b
-    case (.Real, _): return true
-    case (_, .Real): return false
+    case (.real(let a), .real(let b)): return a < b
+    case (.real, _): return true
+    case (_, .real): return false
         
-    case (.Text(let a), .Text(let b)): return a < b
-    case (.Text, _): return true
-    case (_, .Text): return false
+    case (.text(let a), .text(let b)): return a < b
+    case (.text, _): return true
+    case (_, .text): return false
         
-    case (.Blob(let a), .Blob(let b)): return a.lexicographicalCompare(b)
-    case (.Blob, _): return true
-    case (_, .Blob): return false
+    case (.blob(let a), .blob(let b)): return a.lexicographicallyPrecedes(b)
+    case (.blob, _): return true
+    case (_, .blob): return false
         
-    case (.NotFound, .NotFound): return false
-    case (.NotFound, _): return true
-    case (_, .NotFound): return false
+    case (.notFound, .notFound): return false
+    case (.notFound, _): return true
+    case (_, .notFound): return false
         
     default: fatalError("This should never execute, it's just here because the compiler can't seem to figure out that the previous cases are exhaustive")
     }
@@ -66,12 +66,12 @@ public func <(a: RelationValue, b: RelationValue) -> Bool {
 extension RelationValue: Hashable {
     public var hashValue: Int {
         switch self {
-        case .NULL: return 0
-        case .Integer(let x): return 1 ^ x.hashValue
-        case .Real(let x): return 2 ^ x.hashValue
-        case .Text(let x): return 3 ^ x.hashValue
-        case .Blob(let x): return 4 ^ x.hashValueFromElements
-        case .NotFound: return 5
+        case .null: return 0
+        case .integer(let x): return 1 ^ x.hashValue
+        case .real(let x): return 2 ^ x.hashValue
+        case .text(let x): return 3 ^ x.hashValue
+        case .blob(let x): return 4 ^ x.hashValueFromElements
+        case .notFound: return 5
         }
     }
 }
@@ -79,85 +79,85 @@ extension RelationValue: Hashable {
 extension RelationValue: CustomStringConvertible {
     public var description: String {
         switch self {
-        case .NULL: return "NULL"
-        case .Integer(let x): return String(x)
-        case .Real(let x): return String(x)
-        case .Text(let x): return String(x)
-        case .Blob(let x): return String(x)
-        case .NotFound: return "<value not found>"
+        case .null: return "NULL"
+        case .integer(let x): return String(x)
+        case .real(let x): return String(x)
+        case .text(let x): return String(x)
+        case .blob(let x): return String(describing: x)
+        case .notFound: return "<value not found>"
         }
     }
 }
 
 extension RelationValue {
     public init(_ int: Int64) {
-        self = .Integer(int)
+        self = .integer(int)
     }
     
     public init(_ real: Double) {
-        self = .Real(real)
+        self = .real(real)
     }
     
     public init(_ text: String) {
-        self = .Text(text)
+        self = .text(text)
     }
     
     public init(_ blob: [UInt8]) {
-        self = .Blob(blob)
+        self = .blob(blob)
     }
 }
 
-extension RelationValue: StringLiteralConvertible {
+extension RelationValue: ExpressibleByStringLiteral {
     public init(extendedGraphemeClusterLiteral value: String) {
-        self = .Text(value)
+        self = .text(value)
     }
     
     public init(unicodeScalarLiteral value: String) {
-        self = .Text(value)
+        self = .text(value)
     }
     
     public init(stringLiteral value: String) {
-        self = .Text(value)
+        self = .text(value)
     }
 }
 
-extension RelationValue: IntegerLiteralConvertible {
+extension RelationValue: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: Int64) {
-        self = .Integer(value)
+        self = .integer(value)
     }
 }
 
-extension RelationValue: FloatLiteralConvertible {
+extension RelationValue: ExpressibleByFloatLiteral {
     public init(floatLiteral value: Double) {
-        self = .Real(value)
+        self = .real(value)
     }
 }
 
 extension RelationValue {
     public func get() -> Int64? {
         switch self {
-        case .Integer(let x): return x
+        case .integer(let x): return x
         default: return nil
         }
     }
 
     public func get() -> Double? {
         switch self {
-        case .Real(let x): return x
+        case .real(let x): return x
         default: return nil
         }
     }
 
     public func get() -> String? {
         switch self {
-        case .Text(let x): return x
+        case .text(let x): return x
         default: return nil
         }
     }
     
     public func get() -> [UInt8]? {
         switch self {
-        case .Blob(let x): return x
+        case .blob(let x): return x
         default: return nil
         }
     }
@@ -170,10 +170,10 @@ extension RelationValue {
     /// That means that, for example, the string "0" is false. For now,
     /// we'll skip that and just say that Integer(0) is the only false.
     public var boolValue: Bool {
-        return self != .Integer(0)
+        return self != .integer(0)
     }
     
-    static func boolValue(value: Bool) -> RelationValue {
-        return .Integer(value ? 1 : 0)
+    static func boolValue(_ value: Bool) -> RelationValue {
+        return .integer(value ? 1 : 0)
     }
 }

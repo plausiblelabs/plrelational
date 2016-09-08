@@ -6,13 +6,13 @@
 import sqlite3
 
 public protocol BinaryOperator {
-    func evaluate(a: RelationValue, _ b: RelationValue) -> RelationValue
+    func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue
 }
 
 public struct EqualityComparator: BinaryOperator {
     public init() {}
     
-    public func evaluate(a: RelationValue, _ b: RelationValue) -> RelationValue {
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
         return .boolValue(a == b)
     }
 }
@@ -20,7 +20,7 @@ public struct EqualityComparator: BinaryOperator {
 public struct LTComparator: BinaryOperator {
     public init() {}
     
-    public func evaluate(a: RelationValue, _ b: RelationValue) -> RelationValue {
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
         return .boolValue(a < b)
     }
 }
@@ -28,7 +28,7 @@ public struct LTComparator: BinaryOperator {
 public struct AndComparator: BinaryOperator {
     public init() {}
     
-    public func evaluate(a: RelationValue, _ b: RelationValue) -> RelationValue {
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
         return .boolValue(a.boolValue && b.boolValue)
     }
 }
@@ -36,7 +36,7 @@ public struct AndComparator: BinaryOperator {
 public struct OrComparator: BinaryOperator {
     public init() {}
     
-    public func evaluate(a: RelationValue, _ b: RelationValue) -> RelationValue {
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
         return .boolValue(a.boolValue || b.boolValue)
     }
 }
@@ -44,15 +44,15 @@ public struct OrComparator: BinaryOperator {
 public struct GlobComparator: BinaryOperator {
     public init() {}
     
-    public func evaluate(a: RelationValue, _ b: RelationValue) -> RelationValue {
-        if let aString = a.get() as String?, bString = b.get() as String? {
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
+        if let aString = a.get() as String?, let bString = b.get() as String? {
             return .boolValue(matches(aString, bString))
         } else {
             return .boolValue(false)
         }
     }
     
-    private func matches(string: String, _ glob: String) -> Bool {
+    fileprivate func matches(_ string: String, _ glob: String) -> Bool {
         return sqlite3_strglob(glob, string) == 0
     }
 }
@@ -60,11 +60,11 @@ public struct GlobComparator: BinaryOperator {
 public struct AnyComparator: BinaryOperator {
     var compare: (RelationValue, RelationValue) -> Bool
     
-    public init(_ compare: (RelationValue, RelationValue) -> Bool) {
+    public init(_ compare: @escaping (RelationValue, RelationValue) -> Bool) {
         self.compare = compare
     }
     
-    public func evaluate(a: RelationValue, _ b: RelationValue) -> RelationValue {
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
         return .boolValue(compare(a, b))
     }
 }

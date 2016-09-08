@@ -15,11 +15,11 @@ public protocol PerThreadInstance: class {
 extension PerThreadInstance {
     public static var currentInstance: Self {
         let key = NSValue(nonretainedObject: self)
-        if let instance = NSThread.currentThread().threadDictionary[key] as? Self {
+        if let instance = Thread.current.threadDictionary[key] as? Self {
             return instance
         } else {
             let instance = self.init()
-            NSThread.currentThread().threadDictionary[key] = instance
+            Thread.current.threadDictionary[key] = instance
             return instance
         }
     }

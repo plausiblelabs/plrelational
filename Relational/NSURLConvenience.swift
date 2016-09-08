@@ -6,11 +6,11 @@
 import Foundation
 
 
-extension NSURL {
+extension URL {
     public var isDirectory: Result<Bool, NSError> {
         do {
             var resourceValue: AnyObject?
-            try getResourceValue(&resourceValue, forKey: NSURLIsDirectoryKey)
+            try getResourceValue(&resourceValue, forKey: URLResourceKey.isDirectoryKey)
             return .Ok(resourceValue?.boolValue ?? false)
         } catch let error as NSError {
             return .Err(error)

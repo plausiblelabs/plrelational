@@ -9,22 +9,22 @@
 /// not containing that object. It only supports added and removed, not arbitrary
 /// counts.
 public struct NegativeSet<T: Hashable> {
-    public private(set) var added: Set<T> = []
-    public private(set) var removed: Set<T> = []
+    public fileprivate(set) var added: Set<T> = []
+    public fileprivate(set) var removed: Set<T> = []
     
     public init() {
     }
     
-    public mutating func unionInPlace(set: Set<T>) {
-        let new = set.subtract(removed)
-        added.unionInPlace(new)
-        removed.subtractInPlace(set)
+    public mutating func unionInPlace(_ set: Set<T>) {
+        let new = set.subtracting(removed)
+        added.formUnion(new)
+        removed.subtract(set)
     }
     
-    public mutating func subtractInPlace(set: Set<T>) {
-        let gone = set.subtract(added)
-        removed.unionInPlace(gone)
-        added.subtractInPlace(set)
+    public mutating func subtractInPlace(_ set: Set<T>) {
+        let gone = set.subtracting(added)
+        removed.formUnion(gone)
+        added.subtract(set)
     }
     
     public mutating func removeAll() {

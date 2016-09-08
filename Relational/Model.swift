@@ -16,17 +16,17 @@ public protocol Model: class {
     var objectID: ModelObjectID { get set }
     
     func toRow() -> Row
-    static func fromRow(owningDatabase: ModelDatabase, _ row: Row) -> Result<Self, RelationError>
+    static func fromRow(_ owningDatabase: ModelDatabase, _ row: Row) -> Result<Self, RelationError>
 }
 
 extension Model {
-    public func parentsOfType<T: Model>(type: T.Type) -> Result<ModelRelation<T>, RelationError> {
+    public func parentsOfType<T: Model>(_ type: T.Type) -> Result<ModelRelation<T>, RelationError> {
         return owningDatabase.fetch(type, owning: self)
     }
     
-    public func parentOfType<T: Model>(type: T.Type) -> Result<T?, RelationError> {
+    public func parentOfType<T: Model>(_ type: T.Type) -> Result<T?, RelationError> {
         return parentsOfType(type).then({ parents in
-            let gen = parents.generate()
+            let gen = parents.makeIterator()
             
             // Get one parent.
             guard let result = gen.next() else { return .Ok(nil) }
@@ -49,8 +49,8 @@ public struct ModelObjectID {
     
     public static func new() -> ModelObjectID {
         let uuidLength = 16
-        var result = ModelObjectID(value: Array(count: uuidLength, repeatedValue: 0))
-        NSUUID().getUUIDBytes(&result.value)
+        var result = ModelObjectID(value: Array(repeating: 0, count: uuidLength))
+        (UUID() as NSUUID).getBytes(&result.value)
         return result
     }
 }

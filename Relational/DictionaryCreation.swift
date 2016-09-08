@@ -4,7 +4,7 @@
 //
 
 public extension Dictionary {
-    public init<S: SequenceType where S.Generator.Element == (Key, Value)>(_ seq: S) {
+    public init<S: Sequence>(_ seq: S) where S.Iterator.Element == (Key, Value) {
         self.init()
         for (k, v) in seq {
             self[k] = v

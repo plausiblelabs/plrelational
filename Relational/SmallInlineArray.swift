@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-struct SmallInlineArray<T>: SequenceType {
+struct SmallInlineArray<T>: Sequence {
     var localCount = 0
     
     var storage0: T?
@@ -62,11 +62,11 @@ struct SmallInlineArray<T>: SequenceType {
         return count == 0
     }
     
-    var indices: Range<Int> {
+    var indices: CountableRange<Int> {
         return 0..<count
     }
     
-    mutating func append(value: T) {
+    mutating func append(_ value: T) {
         if localCount < 10 {
             self[localCount] = value
             localCount += 1
@@ -79,12 +79,12 @@ struct SmallInlineArray<T>: SequenceType {
         }
     }
     
-    func generate() -> SmallInlineArrayGenerator<T> {
+    func makeIterator() -> SmallInlineArrayGenerator<T> {
         return SmallInlineArrayGenerator(array: self)
     }
 }
 
-struct SmallInlineArrayGenerator<T>: GeneratorType {
+struct SmallInlineArrayGenerator<T>: IteratorProtocol {
     var array: SmallInlineArray<T>
     var cursor = 0
     

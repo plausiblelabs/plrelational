@@ -4,10 +4,10 @@
 //
 
 /// Like Dictionary, but the keys use object identity rather than value equality.
-struct ObjectDictionary<Key: AnyObject, Value>: SequenceType, DictionaryLiteralConvertible {
-    private var dict: Dictionary<ObjectSetWrapper<Key>, Value>
+struct ObjectDictionary<Key: AnyObject, Value>: Sequence, ExpressibleByDictionaryLiteral {
+    fileprivate var dict: Dictionary<ObjectSetWrapper<Key>, Value>
     
-    init<S: SequenceType where S.Generator.Element == (Key, Value)>(_ seq: S) {
+    init<S: Sequence>(_ seq: S) where S.Iterator.Element == (Key, Value) {
         dict = Dictionary(seq.map({ (ObjectSetWrapper(object: $0), $1) }))
     }
     
@@ -15,9 +15,9 @@ struct ObjectDictionary<Key: AnyObject, Value>: SequenceType, DictionaryLiteralC
         self.init(elements)
     }
     
-    func generate() -> AnyGenerator<(Key, Value)> {
-        let gen = dict.lazy.map({ ($0.object, $1) }).generate()
-        return AnyGenerator(gen)
+    func makeIterator() -> AnyIterator<(Key, Value)> {
+        let gen = dict.lazy.map({ ($0.object, $1) }).makeIterator()
+        return AnyIterator(gen)
     }
     
     subscript(key: Key) -> Value? {
@@ -29,7 +29,7 @@ struct ObjectDictionary<Key: AnyObject, Value>: SequenceType, DictionaryLiteralC
         }
     }
     
-    mutating func getOrCreate(key: Key, @autoclosure defaultValue: Void -> Value) -> Value {
+    mutating func getOrCreate(_ key: Key, defaultValue: @autoclosure (Void) -> Value) -> Value {
         if let value = self[key] {
             return value
         } else {

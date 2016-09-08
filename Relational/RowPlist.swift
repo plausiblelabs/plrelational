@@ -7,8 +7,8 @@ import Foundation
 
 
 extension Row {
-    static func fromPlist(plist: AnyObject) -> Result<Row, RelationError> {
-        guard let dict = plist as? NSDictionary else { return .Err(RowPlistError.UnknownRowObject(unknownObject: plist)) }
+    static func fromPlist(_ plist: AnyObject) -> Result<Row, RelationError> {
+        guard let dict = plist as? NSDictionary else { return .Err(RowPlistError.unknownRowObject(unknownObject: plist)) }
         
         var values: [Attribute: RelationValue] = [:]
         for (attributeName, valuePlist) in dict {
@@ -39,46 +39,46 @@ extension RelationValue {
     //     we put an Integer in, we have to do this.)
     // Strings are encoded as strings.
     // Blobs are encoded as data.
-    static func fromPlist(plist: AnyObject) -> Result<RelationValue, RelationError> {
+    static func fromPlist(_ plist: AnyObject) -> Result<RelationValue, RelationError> {
         switch plist {
             
-        case let array as NSArray where array.count == 0: return .Ok(.NULL)
+        case let array as NSArray where array.count == 0: return .Ok(.null)
             
         case let array as NSArray where array.count == 2:
             switch array[0] as? NSString {
-            case .Some("integer"): return .Ok(.Integer(array[1].longLongValue))
-            case .Some("real"): return .Ok(.Real(array[1].doubleValue))
-            default: return .Err(RowPlistError.UnknownNumericTag(unknownTag: array[0]))
+            case .some("integer"): return .Ok(.integer(array[1].int64Value))
+            case .some("real"): return .Ok(.real(array[1].doubleValue))
+            default: return .Err(RowPlistError.unknownNumericTag(unknownTag: array[0]))
             }
             
         case let string as NSString:
-            return .Ok(.Text(string as String))
+            return .Ok(.text(string as String))
         
-        case let data as NSData:
-            let buffer = UnsafeBufferPointer(start: UnsafePointer<UInt8>(data.bytes), count: data.length)
-            return .Ok(.Blob(Array(buffer)))
+        case let data as Data:
+            let buffer = UnsafeBufferPointer(start: (data as NSData).bytes.bindMemory(to: UInt8.self, capacity: data.count), count: data.count)
+            return .Ok(.blob(Array(buffer)))
             
         default:
-            return .Err(RowPlistError.UnknownValueObject(unknownObject: plist))
+            return .Err(RowPlistError.unknownValueObject(unknownObject: plist))
         }
     }
     
     func toPlist() -> AnyObject {
         switch self {
-        case .NULL: return [] as NSArray
-        case .Integer(let value): return ["integer", NSNumber(longLong: value)] as NSArray
-        case .Real(let value): return ["real", NSNumber(double: value)] as NSArray
-        case .Text(let value): return value as NSString
-        case .Blob(let value): return NSData(bytes: value, length: value.count)
+        case .null: return [] as NSArray
+        case .integer(let value): return ["integer", NSNumber(value: value as Int64)] as NSArray
+        case .real(let value): return ["real", NSNumber(value: value as Double)] as NSArray
+        case .text(let value): return value as NSString
+        case .blob(let value): return Data(bytes: UnsafePointer<UInt8>(value), count: value.count)
             
-        case .NotFound: preconditionFailure("Can't convert RelationValue.NotFound to a plist value")
+        case .notFound: preconditionFailure("Can't convert RelationValue.NotFound to a plist value")
         }
     }
 }
 
-enum RowPlistError: ErrorType {
-    case UnknownRowObject(unknownObject: AnyObject)
+enum RowPlistError: Error {
+    case unknownRowObject(unknownObject: AnyObject)
     
-    case UnknownNumericTag(unknownTag: AnyObject)
-    case UnknownValueObject(unknownObject: AnyObject)
+    case unknownNumericTag(unknownTag: AnyObject)
+    case unknownValueObject(unknownObject: AnyObject)
 }

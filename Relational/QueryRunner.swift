@@ -3,20 +3,20 @@
 // All rights reserved.
 //
 
-public class QueryRunner {
-    private var nodes: [QueryPlanner.Node]
-    private var outputCallbacks: [QueryPlanner.OutputCallback]
+open class QueryRunner {
+    fileprivate var nodes: [QueryPlanner.Node]
+    fileprivate var outputCallbacks: [QueryPlanner.OutputCallback]
     
-    private var activeInitiatorIndexes: [Int]
+    fileprivate var activeInitiatorIndexes: [Int]
     
-    private var initiatorGenerators: Dictionary<Int, AnyGenerator<Result<Row, RelationError>>> = [:]
+    fileprivate var initiatorGenerators: Dictionary<Int, AnyIterator<Result<Row, RelationError>>> = [:]
     
-    private var intermediatesToProcess: [IntermediateToProcess] = []
+    fileprivate var intermediatesToProcess: [IntermediateToProcess] = []
     
-    private var nodeStates: [NodeState]
+    fileprivate var nodeStates: [NodeState]
     
-    public private(set) var done = false
-    public private(set) var didError = false
+    open fileprivate(set) var done = false
+    open fileprivate(set) var didError = false
     
     init(planner: QueryPlanner) {
         let nodes = planner.nodes
@@ -36,7 +36,7 @@ public class QueryRunner {
     /// Fill out each NodeState's `parentChildIndexes` array by scanning their parents.
     /// This computes each child's index within the parent, which the other code needs
     /// in order to write data and propagate EOF info.
-    private func computeParentChildIndexes() {
+    fileprivate func computeParentChildIndexes() {
         for nodeIndex in nodeStates.indices {
             nodeStates[nodeIndex].parentChildIndexes.reserveCapacity(nodes[nodeIndex].parentIndexes.count)
             
@@ -56,7 +56,7 @@ public class QueryRunner {
                 let parentIndex = parentIndexes[parentIndexesIndex]
                 let parentNode = nodes[parentIndex]
                 
-                nodeStates[nodeIndex].parentChildIndexes.appendContentsOf(parentNode.childIndexes.indexesOf(nodeIndex))
+                nodeStates[nodeIndex].parentChildIndexes.append(parentNode.childIndexes.indexesOf(nodeIndex))
                 
                 while parentIndexesIndex < parentIndexesCount && parentIndex == parentIndexes[parentIndexesIndex] {
                     parentIndexesIndex += 1
@@ -68,7 +68,7 @@ public class QueryRunner {
     /// For each node associated with a TransactionalDatabase, mark that node and all of its children
     /// as associated with that database, and fetch the database's transaction counter into the node
     /// state.
-    private func computeTransactionalDatabases(map: ObjectDictionary<TransactionalDatabase, Int>) {
+    fileprivate func computeTransactionalDatabases(_ map: ObjectDictionary<TransactionalDatabase, Int>) {
         for (db, topIndex) in map {
             db.lockReading()
             
@@ -76,7 +76,7 @@ public class QueryRunner {
             while let index = queue.popLast() {
                 nodeStates[index].transactionalDatabase = db
                 nodeStates[index].transactionalDatabaseTransactionID = db.transactionCounter
-                queue.appendContentsOf(nodes[index].childIndexes)
+                queue.append(contentsOf: nodes[index].childIndexes)
             }
             
             db.unlockReading()
@@ -102,13 +102,13 @@ public class QueryRunner {
     
     /// Process all pending intermediate nodes. If any intermediate nodes were processed, this method
     /// returns true. If no intermediates are pending, it returns false.
-    private func pumpIntermediates() -> Bool {
+    fileprivate func pumpIntermediates() -> Bool {
         guard !intermediatesToProcess.isEmpty else {
             return false
         }
         
         let localIntermediates = intermediatesToProcess
-        intermediatesToProcess.removeAll(keepCapacity: true)
+        intermediatesToProcess.removeAll(keepingCapacity: true)
         
         for intermediate in localIntermediates {
             if !nodeStates[intermediate.nodeIndex].didMarkDone && nodeStates[intermediate.nodeIndex].activeBuffers == 0 {
@@ -121,7 +121,7 @@ public class QueryRunner {
     
     /// Process an active initiator node. If there are no active initiator nodes, sets the `done` property
     /// to true. If the initiator node produces an error instead of a row, this method returns that error.
-    private func pumpInitiator() -> Result<Void, RelationError> {
+    fileprivate func pumpInitiator() -> Result<Void, RelationError> {
         guard let nodeIndex = activeInitiatorIndexes.last else {
             done = true
             return .Ok()
@@ -134,24 +134,24 @@ public class QueryRunner {
         // If the node is associated with a transactional database, it's now locked. Get the current transaction
         // counter and compare with what's in the node state. If it's different, then a transaction has been
         // committed since we started running, and the we're now in an invalid state. Return an error.
-        if let db = db where db.transactionCounter != nodeStates[nodeIndex].transactionalDatabaseTransactionID {
-            return .Err(Error.MutatedDuringEnumeration)
+        if let db = db , db.transactionCounter != nodeStates[nodeIndex].transactionalDatabaseTransactionID {
+            return .Err(Error.mutatedDuringEnumeration)
         }
         
         let op = nodes[nodeIndex].op
         switch op {
-        case .RowGenerator(let generatorGetter):
+        case .rowGenerator(let generatorGetter):
             let row = getSQLiteTableScanRow(nodeIndex, generatorGetter)
             switch row {
-            case .Some(.Err(let err)):
+            case .some(.Err(let err)):
                 return .Err(err)
-            case .Some(.Ok(let row)):
+            case .some(.Ok(let row)):
                 writeOutput([row], fromNode: nodeIndex)
-            case .None:
+            case .none:
                 activeInitiatorIndexes.removeLast()
                 markDone(nodeIndex)
             }
-        case .RowSet(let rowGetter):
+        case .rowSet(let rowGetter):
             writeOutput(rowGetter(), fromNode: nodeIndex)
             activeInitiatorIndexes.removeLast()
             markDone(nodeIndex)
@@ -160,20 +160,20 @@ public class QueryRunner {
             // from trying to print the contents of Relations contained within. We cut off subsequent lines
             // to avoid leaking data from the Relation contents, just in case there's something sensitive.
             var stream = ""
-            dump(op, &stream)
-            let firstLine = stream.componentsSeparatedByString("\n").first ?? "(empty)"
+            dump(op, to: &stream)
+            let firstLine = stream.components(separatedBy: "\n").first ?? "(empty)"
             fatalError("Unknown initiator operation \(firstLine)")
         }
         
         return .Ok()
     }
     
-    private func getSQLiteTableScanRow(initiatorIndex: Int, _ generatorGetter: Void -> AnyGenerator<Result<Row, RelationError>>) -> Result<Row, RelationError>? {
+    fileprivate func getSQLiteTableScanRow(_ initiatorIndex: Int, _ generatorGetter: (Void) -> AnyIterator<Result<Row, RelationError>>) -> Result<Row, RelationError>? {
         let generator = initiatorGenerators.getOrCreate(initiatorIndex, defaultValue: generatorGetter())
         return generator.next()
     }
     
-    private func writeOutput<Seq: CollectionType where Seq.Generator.Element == Row>(rows: Seq, fromNode: Int) {
+    fileprivate func writeOutput<Seq: Collection>(_ rows: Seq, fromNode: Int) where Seq.Iterator.Element == Row {
         guard !rows.isEmpty else { return }
         
         for (parentIndex, index) in zip(nodes[fromNode].parentIndexes, nodeStates[fromNode].parentChildIndexes) {
@@ -189,7 +189,7 @@ public class QueryRunner {
         }
     }
     
-    private func markDone(nodeIndex: Int) {
+    fileprivate func markDone(_ nodeIndex: Int) {
         nodeStates[nodeIndex].didMarkDone = true
         for (parentIndex, index) in zip(nodes[nodeIndex].parentIndexes, nodeStates[nodeIndex].parentChildIndexes) {
             nodeStates[parentIndex].setInputBufferEOF(index)
@@ -197,30 +197,30 @@ public class QueryRunner {
         }
     }
     
-    private func process(nodeIndex: Int, inputIndex: Int) {
+    fileprivate func process(_ nodeIndex: Int, inputIndex: Int) {
         let op = nodes[nodeIndex].op
         switch op {
-        case .Union:
+        case .union:
             processUnion(nodeIndex, inputIndex)
-        case .Intersection:
+        case .intersection:
             processIntersection(nodeIndex, inputIndex)
-        case .Difference:
+        case .difference:
             processDifference(nodeIndex, inputIndex)
-        case .Project(let scheme):
+        case .project(let scheme):
             processProject(nodeIndex, inputIndex, scheme)
-        case .Select(let expression):
+        case .select(let expression):
             processSelect(nodeIndex, inputIndex, expression)
-        case .Equijoin(let matching):
+        case .equijoin(let matching):
             processEquijoin(nodeIndex, inputIndex, matching)
-        case .Rename(let renames):
+        case .rename(let renames):
             processRename(nodeIndex, inputIndex, renames)
-        case .Update(let newValues):
+        case .update(let newValues):
             processUpdate(nodeIndex, inputIndex, newValues)
-        case .Aggregate(let attribute, let initialValue, let agg):
+        case .aggregate(let attribute, let initialValue, let agg):
             processAggregate(nodeIndex, inputIndex, attribute, initialValue, agg)
-        case .Otherwise:
+        case .otherwise:
             processOtherwise(nodeIndex, inputIndex)
-        case .Unique(let attribute, let matching):
+        case .unique(let attribute, let matching):
             processUnique(nodeIndex, inputIndex, attribute, matching)
         default:
             fatalError("Don't know how to process operation \(op)")
@@ -250,12 +250,12 @@ public class QueryRunner {
     // setExtraState calls. These can store arbitrary data. Single values can go in directly, or they
     // can be used with tuple types, or a struct type for more complex situations.
     
-    func processUnion(nodeIndex: Int, _ inputIndex: Int) {
+    func processUnion(_ nodeIndex: Int, _ inputIndex: Int) {
         let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
         writeOutput(nodeStates[nodeIndex].uniq(rows), fromNode: nodeIndex)
     }
     
-    func processIntersection(nodeIndex: Int, _ inputIndex: Int) {
+    func processIntersection(_ nodeIndex: Int, _ inputIndex: Int) {
         // Wait until all buffers are complete before we process anything. We could optimize this a bit
         // by streaming data if all *but one* buffer is complete. Maybe later.
         if nodeStates[nodeIndex].activeBuffers > 0 {
@@ -270,12 +270,12 @@ public class QueryRunner {
         }
         for bufferIndex in nodeStates[nodeIndex].inputBuffers.indices.dropFirst() {
             let bufferRows = nodeStates[nodeIndex].inputBuffers[bufferIndex].popAll()
-            accumulated.intersectInPlace(bufferRows)
+            accumulated.formIntersection(bufferRows)
         }
         writeOutput(accumulated, fromNode: nodeIndex)
     }
     
-    func processDifference(nodeIndex: Int, _ inputIndex: Int) {
+    func processDifference(_ nodeIndex: Int, _ inputIndex: Int) {
         // We compute buffer[0] - buffer[1]. buffer[1] must be complete before we can compute anything.
         // Once it is complete, we can stream buffer[0] through.
         guard nodeStates[nodeIndex].inputBuffers[1].eof else { return }
@@ -297,7 +297,7 @@ public class QueryRunner {
         writeOutput(subtracted, fromNode: nodeIndex)
     }
     
-    func processProject(nodeIndex: Int, _ inputIndex: Int, _ scheme: Scheme) {
+    func processProject(_ nodeIndex: Int, _ inputIndex: Int, _ scheme: Scheme) {
         let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
         let projected = Set(rows.map({ row -> Row in
             let subvalues = scheme.attributes.map({ ($0, row[$0]) })
@@ -306,13 +306,13 @@ public class QueryRunner {
         writeOutput(nodeStates[nodeIndex].uniq(projected), fromNode: nodeIndex)
     }
     
-    func processSelect(nodeIndex: Int, _ inputIndex: Int, _ expression: SelectExpression) {
+    func processSelect(_ nodeIndex: Int, _ inputIndex: Int, _ expression: SelectExpression) {
         let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
         let filtered = Set(rows.filter({ expression.valueWithRow($0).boolValue }))
         writeOutput(filtered, fromNode: nodeIndex)
     }
     
-    func processEquijoin(nodeIndex: Int, _ inputIndex: Int, _ matching: [Attribute: Attribute]) {
+    func processEquijoin(_ nodeIndex: Int, _ inputIndex: Int, _ matching: [Attribute: Attribute]) {
         // Accumulate data until at least one input is complete.
         guard nodeStates[nodeIndex].activeBuffers <= 1 else { return }
         
@@ -371,19 +371,19 @@ public class QueryRunner {
         writeOutput(Set(joined), fromNode: nodeIndex)
     }
     
-    func processRename(nodeIndex: Int, _ inputIndex: Int, _ renames: [Attribute: Attribute]) {
+    func processRename(_ nodeIndex: Int, _ inputIndex: Int, _ renames: [Attribute: Attribute]) {
         let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
         let renamed = rows.map({ $0.renameAttributes(renames) })
         writeOutput(Set(renamed), fromNode: nodeIndex)
     }
     
-    func processUpdate(nodeIndex: Int, _ inputIndex: Int, _ newValues: Row) {
+    func processUpdate(_ nodeIndex: Int, _ inputIndex: Int, _ newValues: Row) {
         let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
         let updated = rows.map({ $0 + newValues })
         writeOutput(nodeStates[nodeIndex].uniq(Set(updated)), fromNode: nodeIndex)
     }
     
-    func processAggregate(nodeIndex: Int, _ inputIndex: Int, _ attribute: Attribute, _ initialValue: RelationValue?, _ agg: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) {
+    func processAggregate(_ nodeIndex: Int, _ inputIndex: Int, _ attribute: Attribute, _ initialValue: RelationValue?, _ agg: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) {
         var soFar = nodeStates[nodeIndex].getExtraState({ initialValue })
         for row in nodeStates[nodeIndex].inputBuffers[inputIndex].popAll() {
             let newValue = row[attribute]
@@ -405,7 +405,7 @@ public class QueryRunner {
         }
     }
     
-    func processOtherwise(nodeIndex: Int, _ inputIndex: Int) {
+    func processOtherwise(_ nodeIndex: Int, _ inputIndex: Int) {
         // Wait until all buffers are complete before we process anything. We could optimize this a bit
         // by streaming data if all *but one* buffer is complete. Maybe later.
         if nodeStates[nodeIndex].activeBuffers > 0 {
@@ -422,7 +422,7 @@ public class QueryRunner {
         }
     }
     
-    func processUnique(nodeIndex: Int, _ inputIndex: Int, _ attribute: Attribute, _ matching: RelationValue) {
+    func processUnique(_ nodeIndex: Int, _ inputIndex: Int, _ attribute: Attribute, _ matching: RelationValue) {
         // We have to wait until everything is here before we can proceed.
         if nodeStates[nodeIndex].activeBuffers > 0 {
             return
@@ -477,13 +477,13 @@ extension QueryRunner {
             activeBuffers = inputBuffers.count
         }
         
-        mutating func setInputBufferEOF(index: Int) {
+        mutating func setInputBufferEOF(_ index: Int) {
             precondition(inputBuffers[index].eof == false)
             inputBuffers[index].eof = true
             activeBuffers -= 1
         }
         
-        mutating func uniq<Seq: CollectionType where Seq.Generator.Element == Row>(rows: Seq) -> Set<Row> {
+        mutating func uniq<Seq: Collection>(_ rows: Seq) -> Set<Row> where Seq.Iterator.Element == Row {
             if rows.count == 0 {
                 return []
             }
@@ -493,13 +493,13 @@ extension QueryRunner {
                 outputForUniquing = rowsSet
                 return rowsSet
             } else {
-                rowsSet.subtractInPlace(outputForUniquing!)
-                outputForUniquing!.unionInPlace(rowsSet)
+                rowsSet.subtract(outputForUniquing!)
+                outputForUniquing!.formUnion(rowsSet)
                 return rowsSet
             }
         }
         
-        mutating func getExtraState<T>(@noescape calculate: Void -> T) -> T {
+        mutating func getExtraState<T>(_ calculate: (Void) -> T) -> T {
             if let state = extraState {
                 return state as! T
             } else {
@@ -509,7 +509,7 @@ extension QueryRunner {
             }
         }
         
-        mutating func setExtraState<T>(value: T) {
+        mutating func setExtraState<T>(_ value: T) {
             extraState = value
         }
     }
@@ -530,18 +530,18 @@ extension QueryRunner {
             return ret
         }
         
-        mutating func add<S: SequenceType where S.Generator.Element == Row>(seq: S) {
-            rows.appendContentsOf(seq)
+        mutating func add<S: Sequence>(_ seq: S) where S.Iterator.Element == Row {
+            rows.append(contentsOf: seq)
         }
     }
 }
 
 extension QueryRunner {
-    private struct IntermediateToProcess: Hashable {
+    fileprivate struct IntermediateToProcess: Hashable {
         var nodeIndex: Int
         var inputIndex: Int
         
-        private var hashValue: Int {
+        fileprivate var hashValue: Int {
             return nodeIndex ^ inputIndex
         }
     }
@@ -552,7 +552,7 @@ private func ==(a: QueryRunner.IntermediateToProcess, b: QueryRunner.Intermediat
 }
 
 extension QueryRunner {
-    public enum Error: ErrorType {
-        case MutatedDuringEnumeration
+    public enum Error: Error {
+        case mutatedDuringEnumeration
     }
 }

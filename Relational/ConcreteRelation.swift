@@ -21,43 +21,43 @@ public struct ConcreteRelation: MutableRelation {
         self.init(scheme: scheme, values: [row])
     }
     
-    public static func copyRelation(other: Relation) -> Result<ConcreteRelation, RelationError> {
+    public static func copyRelation(_ other: Relation) -> Result<ConcreteRelation, RelationError> {
         return mapOk(other.rows(), { $0 }).map({ ConcreteRelation(scheme: other.scheme, values: Set($0)) })
     }
     
-    private func rowMatchesScheme(row: Row) -> Bool {
+    fileprivate func rowMatchesScheme(_ row: Row) -> Bool {
         return Set(row.attributes) == scheme.attributes
     }
     
-    private func rowIsCompatible(row: Row) -> Bool {
-        return Set(row.attributes).isSubsetOf(scheme.attributes)
+    fileprivate func rowIsCompatible(_ row: Row) -> Bool {
+        return Set(row.attributes).isSubset(of: scheme.attributes)
     }
     
-    public func setDefaultSort(attribute: Attribute?) -> Relation {
+    public func setDefaultSort(_ attribute: Attribute?) -> Relation {
         var new = self
         new.defaultSort = attribute
         return new
     }
     
-    public func sortedValues(attribute: Attribute?) -> [Row] {
-        if let attribute = attribute where scheme.attributes.contains(attribute) {
-            return values.sort({ $0[attribute].description.numericLessThan($1[attribute].description) })
+    public func sortedValues(_ attribute: Attribute?) -> [Row] {
+        if let attribute = attribute , scheme.attributes.contains(attribute) {
+            return values.sorted(by: { $0[attribute].description.numericLessThan($1[attribute].description) })
         } else {
             return Array(values)
         }
     }
     
     public var contentProvider: RelationContentProvider {
-        return .Set({ self.values })
+        return .set({ self.values })
     }
     
-    public mutating func add(row: Row) -> Result<Int64, RelationError> {
+    public mutating func add(_ row: Row) -> Result<Int64, RelationError> {
         precondition(rowMatchesScheme(row))
         values.insert(row)
         return .Ok(0)
     }
     
-    public mutating func delete(rowToDelete: Row) {
+    public mutating func delete(_ rowToDelete: Row) {
         let toDelete = select(rowToDelete)
         values = Set(values.filter({
             // We know that the result of contains() can never fail here because it's ultimately our own implementation.
@@ -65,7 +65,7 @@ public struct ConcreteRelation: MutableRelation {
         }))
     }
     
-    public mutating func delete(query: SelectExpression) -> Result<Void, RelationError> {
+    public mutating func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         let toDelete = select(query)
         values = Set(values.filter({
             // We know that the result of contains() can never fail here because it's ultimately our own implementation.
@@ -74,7 +74,7 @@ public struct ConcreteRelation: MutableRelation {
         return .Ok(())
     }
     
-    public mutating func update(rowToFind: Row, newValues: Row) {
+    public mutating func update(_ rowToFind: Row, newValues: Row) {
         let rowsToUpdate = select(rowToFind)
         delete(rowToFind)
         for rowToUpdate in rowsToUpdate.rows() {
@@ -87,7 +87,7 @@ public struct ConcreteRelation: MutableRelation {
         }
     }
     
-    public mutating func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+    public mutating func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let rowsToUpdate = select(query)
         delete(query)
         for rowToUpdate in rowsToUpdate.rows() {
@@ -101,7 +101,7 @@ public struct ConcreteRelation: MutableRelation {
         return .Ok()
     }
     
-    public func contains(row: Row) -> Result<Bool, RelationError> {
+    public func contains(_ row: Row) -> Result<Bool, RelationError> {
         return .Ok(values.contains(row))
     }
     
@@ -127,20 +127,20 @@ public struct ConcreteRelation: MutableRelation {
 //        return (one, two)
 //    }
     
-    public func addChangeObserver(observer: RelationObserver, kinds: [RelationObservationKind]) -> (Void -> Void) {
+    public func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void) {
         //fatalError("Change observation isn't implemented for ConcreteRelation. Its implementation as a value type makes that weird. We might change that if we ever need it.")
         return { _ in }
     }
 }
 
-extension ConcreteRelation: DictionaryLiteralConvertible {
+extension ConcreteRelation: ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (Attribute, RelationValue)...) {
         scheme = Scheme(attributes: Set(elements.map({ $0.0 })))
         values = [Row(values: Dictionary(elements))]
     }
 }
 
-public func MakeRelation(attributes: [Attribute], _ rowValues: [RelationValue]...) -> ConcreteRelation {
+public func MakeRelation(_ attributes: [Attribute], _ rowValues: [RelationValue]...) -> ConcreteRelation {
     let scheme = Scheme(attributes: Set(attributes))
     let rows = rowValues.map({ values -> Row in
         precondition(values.count == attributes.count)
@@ -151,17 +151,17 @@ public func MakeRelation(attributes: [Attribute], _ rowValues: [RelationValue]..
 
 extension ConcreteRelation: CustomStringConvertible, PlaygroundMonospace {
     public var description: String {
-        let columns = scheme.attributes.sort()
+        let columns = scheme.attributes.sorted()
         let rows = sortedValues(defaultSort).map({ row -> [String] in
             return columns.map({ row[$0].description })
         })
         let all = ([columns.map({ $0.name })] + rows)
         let lengths = all.map({ $0.map({ $0.characters.count }) })
         let columnLengths = (0 ..< columns.count).map({ index in
-            return lengths.map({ $0[index] }).reduce(0, combine: Swift.max)
+            return lengths.map({ $0[index] }).reduce(0, Swift.max)
         })
         let padded = all.map({ zip(columnLengths, $0).map({ $1.pad(to: $0, with: " ") }) })
-        let joined = padded.map({ $0.joinWithSeparator("  ") })
-        return joined.joinWithSeparator("\n")
+        let joined = padded.map({ $0.joined(separator: "  ") })
+        return joined.joined(separator: "\n")
     }
 }

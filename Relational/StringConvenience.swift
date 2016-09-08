@@ -6,7 +6,7 @@
 import Foundation
 
 extension String {
-    func numericLessThan(other: String) -> Bool {
-        return compare(other, options: .NumericSearch, range: nil, locale: nil) == .OrderedAscending
+    func numericLessThan(_ other: String) -> Bool {
+        return compare(other, options: .numeric, range: nil, locale: nil) == .orderedAscending
     }
 }

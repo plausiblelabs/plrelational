@@ -30,7 +30,7 @@ public func *||(lhs: SelectExpression, rhs: SelectExpression) -> SelectExpressio
     return SelectExpressionBinaryOperator(lhs: lhs, op: OrComparator(), rhs: rhs)
 }
 
-prefix operator *! {}
+prefix operator *!
 
 public prefix func *!(expr: SelectExpression) -> SelectExpression {
     return SelectExpressionUnaryOperator(op: NotOperator(), expr: expr)

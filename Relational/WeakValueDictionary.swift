@@ -25,12 +25,12 @@ struct WeakValueDictionary<Key: Hashable, Value: AnyObject> {
             if let newValue = newValue {
                 underlyingDictionary[key] = WeakReference(value: newValue)
             } else {
-                underlyingDictionary.removeValueForKey(key)
+                underlyingDictionary.removeValue(forKey: key)
             }
         }
     }
     
-    private mutating func scrubIfNeeded(key: Key) {
+    fileprivate mutating func scrubIfNeeded(_ key: Key) {
         scrubOperationCount += 1
         if scrubOperationCount >= scrubInterval {
             // Scrub starting from key, and also from the beginning of the dictionary.
@@ -38,7 +38,7 @@ struct WeakValueDictionary<Key: Hashable, Value: AnyObject> {
             // because we can't iterate backwards, so it gets a bit of special attention.
             // Otherwise if we built up a dictionary that started with a bunch of nil
             // values, they'd never get seen and evicted.
-            if let index = underlyingDictionary.indexForKey(key) {
+            if let index = underlyingDictionary.index(forKey: key) {
                 scrub(startingFrom: index, count: inPositionScrubCount)
             }
             scrub(startingFrom: underlyingDictionary.startIndex, count: beginningScrubCount)
@@ -46,7 +46,7 @@ struct WeakValueDictionary<Key: Hashable, Value: AnyObject> {
     }
     
     /// Scan a few elements in the dictionary looking for nil values to evict.
-    private mutating func scrub(startingFrom index: DictionaryIndex<Key, WeakReference<Value>>, count: Int) {
+    fileprivate mutating func scrub(startingFrom index: DictionaryIndex<Key, WeakReference<Value>>, count: Int) {
         var keysToEvict: [Key] = []
         
         var index = index
@@ -60,11 +60,11 @@ struct WeakValueDictionary<Key: Hashable, Value: AnyObject> {
                 keysToEvict.append(key)
             }
             
-            index = index.successor()
+            index = <#T##Collection corresponding to `index`##Collection#>.index(after: index)
         }
         
         for key in keysToEvict {
-            underlyingDictionary.removeValueForKey(key)
+            underlyingDictionary.removeValue(forKey: key)
         }
     }
 }

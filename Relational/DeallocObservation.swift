@@ -10,7 +10,7 @@ import Foundation
 /// - parameter target: The object to observe.
 /// - parameter f: The function to call when `target` is deallocated.
 /// - returns: A removal function. Call this to remove the observation before `target` has been deallocated.
-public func ObserveDeallocation(target: AnyObject, _ f: Void -> Void) -> (Void -> Void) {
+public func ObserveDeallocation(_ target: AnyObject, _ f: @escaping (Void) -> Void) -> ((Void) -> Void) {
     return mutex.locked({
         let callOnDeinit: CallOnDeinit
         if let obj = objc_getAssociatedObject(target, key) as? CallOnDeinit {
@@ -27,7 +27,7 @@ public func ObserveDeallocation(target: AnyObject, _ f: Void -> Void) -> (Void -
         
         return { [weak callOnDeinit] in
             mutex.locked({
-                callOnDeinit?.calls.removeValueForKey(counter)
+                callOnDeinit?.calls.removeValue(forKey: counter)
             })
         }
     })
@@ -35,7 +35,7 @@ public func ObserveDeallocation(target: AnyObject, _ f: Void -> Void) -> (Void -
 
 private class CallOnDeinit {
     var counter: UInt64 = 0
-    var calls: [UInt64: Void -> Void] = [:]
+    var calls: [UInt64: (Void) -> Void] = [:]
     
     deinit {
         for (_, call) in calls {

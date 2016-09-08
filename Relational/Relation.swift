@@ -4,77 +4,77 @@
 //
 
 /// Silly placeholder until we figure out what the error type should actually look like.
-public typealias RelationError = ErrorType
+public typealias RelationError = Error
 
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     
     var contentProvider: RelationContentProvider { get }
     
-    func contains(row: Row) -> Result<Bool, RelationError>
+    func contains(_ row: Row) -> Result<Bool, RelationError>
     
-    mutating func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError>
+    mutating func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError>
     
     /// Add an observer which is notified when the content of the Relation
     /// changes. The return value is a function which removes the observation when
     /// invoked. The caller can use that function to cancel the observation when
     /// it no longer needs it.
-    func addChangeObserver(observer: RelationObserver, kinds: [RelationObservationKind]) -> (Void -> Void)
+    func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void)
     
-    func union(other: Relation) -> Relation
-    func intersection(other: Relation) -> Relation
-    func difference(other: Relation) -> Relation
+    func union(_ other: Relation) -> Relation
+    func intersection(_ other: Relation) -> Relation
+    func difference(_ other: Relation) -> Relation
     
-    func join(other: Relation) -> Relation
-    func equijoin(other: Relation, matching: [Attribute: Attribute]) -> Relation
-    func thetajoin(other: Relation, query: SelectExpression) -> Relation
-    func split(query: SelectExpression) -> (Relation, Relation)
-    func divide(other: Relation) -> Relation
+    func join(_ other: Relation) -> Relation
+    func equijoin(_ other: Relation, matching: [Attribute: Attribute]) -> Relation
+    func thetajoin(_ other: Relation, query: SelectExpression) -> Relation
+    func split(_ query: SelectExpression) -> (Relation, Relation)
+    func divide(_ other: Relation) -> Relation
     
-    func min(attribute: Attribute) -> Relation
-    func max(attribute: Attribute) -> Relation
+    func min(_ attribute: Attribute) -> Relation
+    func max(_ attribute: Attribute) -> Relation
     func count() -> Relation
     
     /// Return a new Relation that resolves to this Relation when it is non-empty, otherwise
     /// resolves to the other Relation.
-    func otherwise(other: Relation) -> Relation
+    func otherwise(_ other: Relation) -> Relation
     
     /// Return a new Relation that resolves to this Relation when there is a unique value
     /// for the given attribute that is the same as `matching`, otherwise resolves to an
     /// empty Relation.
-    func unique(attribute: Attribute, matching: RelationValue) -> Relation
+    func unique(_ attribute: Attribute, matching: RelationValue) -> Relation
     
-    func select(rowToFind: Row) -> Relation
-    func select(query: SelectExpression) -> Relation
+    func select(_ rowToFind: Row) -> Relation
+    func select(_ query: SelectExpression) -> Relation
     
     /// Return a new Relation that is this Relation with the given update applied to it.
-    func withUpdate(query: SelectExpression, newValues: Row) -> Relation
+    func withUpdate(_ query: SelectExpression, newValues: Row) -> Relation
     
     /// The same as the two-parameter withUpdate, but it updates all rows.
-    func withUpdate(newValues: Row) -> Relation
+    func withUpdate(_ newValues: Row) -> Relation
     
-    func renameAttributes(renames: [Attribute: Attribute]) -> Relation
+    func renameAttributes(_ renames: [Attribute: Attribute]) -> Relation
 }
 
 public enum RelationContentProvider {
-    case Generator(Void -> AnyGenerator<Result<Row, RelationError>>)
-    case Set(Void -> Swift.Set<Row>)
-    case Intermediate(IntermediateRelation.Operator, [Relation])
-    case Underlying(Relation)
+    case generator((Void) -> AnyIterator<Result<Row, RelationError>>)
+    case set((Void) -> Swift.Set<Row>)
+    case intermediate(IntermediateRelation.Operator, [Relation])
+    case underlying(Relation)
 }
 
 public enum RelationObservationKind {
     /// A change due to something in the Relation itself.
-    case DirectChange
+    case directChange
     
     /// A change due to something in a dependency of an intermediate relation, not the Relation itself.
-    case DependentChange
+    case dependentChange
 }
 
 extension Relation {
     /// A shortcut that adds a change observer for all kinds.
-    public func addChangeObserver(observer: RelationObserver) -> (Void -> Void) {
-        return addChangeObserver(observer, kinds: [.DirectChange, .DependentChange])
+    public func addChangeObserver(_ observer: RelationObserver) -> ((Void) -> Void) {
+        return addChangeObserver(observer, kinds: [.directChange, .dependentChange])
     }
 }
 
@@ -90,13 +90,13 @@ extension Relation {
     /// ended up just noticing the end of rows in some Relation, or if it produced some rows internally but
     /// they all got buffered). There may still be more data coming if zero rows are returned, so code
     /// accordingly.
-    public func bulkRows() -> AnyGenerator<Result<Set<Row>, RelationError>> {
+    public func bulkRows() -> AnyIterator<Result<Set<Row>, RelationError>> {
         var collectedOutput: Set<Row> = []
         var error: RelationError?
-        func outputCallback(result: Result<Set<Row>, RelationError>) {
+        func outputCallback(_ result: Result<Set<Row>, RelationError>) {
             switch result {
             case .Ok(let rows):
-                collectedOutput.unionInPlace(rows)
+                collectedOutput.formUnion(rows)
             case .Err(let err):
                 error = err
             }
@@ -106,7 +106,7 @@ extension Relation {
         let planner = QueryPlanner(roots: [(self, outputCallback)])
         let runner = QueryRunner(planner: planner)
         
-        let generator = AnyGenerator(body: { Void -> Result<Set<Row>, RelationError>? in
+        let generator = AnyIterator(body: { Void -> Result<Set<Row>, RelationError>? in
             if runner.done { return nil }
             
             runner.pump()
@@ -115,7 +115,7 @@ extension Relation {
                 return .Err(error)
             } else {
                 let rows = collectedOutput
-                collectedOutput.removeAll(keepCapacity: true)
+                collectedOutput.removeAll(keepingCapacity: true)
                 return .Ok(rows)
             }
         })
@@ -124,19 +124,19 @@ extension Relation {
     
     /// A wrapper on bulkRows() which returns exactly one row (or error) per iteration. This can be more
     /// convenient to work with, but gives you less control over how much work is done on each iteration.
-    public func rows() -> AnyGenerator<Result<Row, RelationError>> {
+    public func rows() -> AnyIterator<Result<Row, RelationError>> {
         var buffer: Set<Row> = []
         let bulkGenerator = bulkRows()
-        return AnyGenerator(body: {
+        return AnyIterator(body: {
             while true {
                 if let bufferRow = buffer.popFirst() {
                     return .Ok(bufferRow)
                 } else {
                     let nextBulk = bulkGenerator.next()
                     switch nextBulk {
-                    case .Some(.Ok(let rows)):
+                    case .some(.Ok(let rows)):
                         buffer = rows
-                    case .Some(.Err(let err)):
+                    case .some(.Err(let err)):
                         return .Err(err)
                     case nil:
                         return nil
@@ -150,21 +150,21 @@ extension Relation {
 extension Relation {
     /// Fetch rows and invoke a callback as they come in. Each call is passed one or more rows, or an error.
     /// If no error occurs, the sequence of calls is terminated by a final call which passes zero rows.
-    public func asyncBulkRows(callback: Result<Set<Row>, RelationError> -> Void) {
+    public func asyncBulkRows(_ callback: (Result<Set<Row>, RelationError>) -> Void) {
         RunloopQueryManager.currentInstance.registerQuery(self, callback: callback)
     }
     
     /// Fetch all rows and invoke a callback when complete.
-    public func asyncAllRows(callback: Result<Set<Row>, RelationError> -> Void) {
+    public func asyncAllRows(_ callback: (Result<Set<Row>, RelationError>) -> Void) {
         var allRows: Set<Row> = []
         asyncBulkRows({ result in
             switch result {
             case .Ok([]):
                 callback(.Ok(allRows))
             case .Ok(let rows):
-                allRows.unionInPlace(rows)
+                allRows.formUnion(rows)
             
-            case .Err(QueryRunner.Error.MutatedDuringEnumeration):
+            case .Err(QueryRunner.Error.mutatedDuringEnumeration):
                 self.asyncAllRows(callback)
             case .Err:
                 callback(result)
@@ -174,48 +174,48 @@ extension Relation {
 }
 
 extension Relation {
-    public func union(other: Relation) -> Relation {
+    public func union(_ other: Relation) -> Relation {
         return IntermediateRelation.union([self, other])
     }
     
-    public func intersection(other: Relation) -> Relation {
+    public func intersection(_ other: Relation) -> Relation {
         return IntermediateRelation.intersection([self, other])
     }
     
-    public func difference(other: Relation) -> Relation {
-        return IntermediateRelation(op: .Difference, operands: [self, other])
+    public func difference(_ other: Relation) -> Relation {
+        return IntermediateRelation(op: .difference, operands: [self, other])
     }
     
-    public func project(scheme: Scheme) -> Relation {
-        return IntermediateRelation(op: .Project(scheme), operands: [self])
+    public func project(_ scheme: Scheme) -> Relation {
+        return IntermediateRelation(op: .project(scheme), operands: [self])
     }
 
-    public func project(attribute: Attribute) -> Relation {
+    public func project(_ attribute: Attribute) -> Relation {
         return project([attribute])
     }
 
-    public func join(other: Relation) -> Relation {
-        let intersectedScheme = Scheme(attributes: self.scheme.attributes.intersect(other.scheme.attributes))
+    public func join(_ other: Relation) -> Relation {
+        let intersectedScheme = Scheme(attributes: self.scheme.attributes.intersection(other.scheme.attributes))
         let matching = Dictionary(intersectedScheme.attributes.map({ ($0, $0) }))
         return equijoin(other, matching: matching)
     }
     
-    public func equijoin(other: Relation, matching: [Attribute: Attribute]) -> Relation {
-        return IntermediateRelation(op: .Equijoin(matching), operands: [self, other])
+    public func equijoin(_ other: Relation, matching: [Attribute: Attribute]) -> Relation {
+        return IntermediateRelation(op: .equijoin(matching), operands: [self, other])
     }
     
-    public func thetajoin(other: Relation, query: SelectExpression) -> Relation {
+    public func thetajoin(_ other: Relation, query: SelectExpression) -> Relation {
         return self.join(other).select(query)
     }
     
-    public func split(query: SelectExpression) -> (Relation, Relation) {
+    public func split(_ query: SelectExpression) -> (Relation, Relation) {
         let matching = select(query)
         let notmatching = difference(matching)
         return (matching, notmatching)
     }
     
-    public func divide(other: Relation) -> Relation {
-        let resultingScheme = Scheme(attributes: self.scheme.attributes.subtract(other.scheme.attributes))
+    public func divide(_ other: Relation) -> Relation {
+        let resultingScheme = Scheme(attributes: self.scheme.attributes.subtracting(other.scheme.attributes))
         let allCombinations = self.project(resultingScheme).join(other)
         let subtracted = allCombinations.difference(self)
         let projected = subtracted.project(resultingScheme)
@@ -225,49 +225,49 @@ extension Relation {
 }
 
 extension Relation {
-    public func min(attribute: Attribute) -> Relation {
+    public func min(_ attribute: Attribute) -> Relation {
         return IntermediateRelation.aggregate(self, attribute: attribute, initial: nil, agg: Swift.min)
     }
     
-    public func max(attribute: Attribute) -> Relation {
+    public func max(_ attribute: Attribute) -> Relation {
         return IntermediateRelation.aggregate(self, attribute: attribute, initial: nil, agg: Swift.max)
     }
     
     public func count() -> Relation {
-        func count(count: RelationValue?, currentValueIgnore: RelationValue) -> Result<RelationValue, RelationError> {
+        func count(_ count: RelationValue?, currentValueIgnore: RelationValue) -> Result<RelationValue, RelationError> {
             let countInt: Int64 = count!.get()!
-            return .Ok(RelationValue.Integer(countInt + 1))
+            return .Ok(RelationValue.integer(countInt + 1))
         }
-        return IntermediateRelation(op: .Aggregate("count", 0, count), operands: [self])
+        return IntermediateRelation(op: .aggregate("count", 0, count), operands: [self])
     }
 }
 
 extension Relation {
-    public func otherwise(other: Relation) -> Relation {
+    public func otherwise(_ other: Relation) -> Relation {
         precondition(self.scheme.attributes == other.scheme.attributes)
-        return IntermediateRelation(op: .Otherwise, operands: [self, other])
+        return IntermediateRelation(op: .otherwise, operands: [self, other])
     }
     
-    public func unique(attribute: Attribute, matching: RelationValue) -> Relation {
-        return IntermediateRelation(op: .Unique(attribute, matching), operands: [self])
+    public func unique(_ attribute: Attribute, matching: RelationValue) -> Relation {
+        return IntermediateRelation(op: .unique(attribute, matching), operands: [self])
     }
 }
 
 extension Relation {
-    public func select(rowToFind: Row) -> Relation {
+    public func select(_ rowToFind: Row) -> Relation {
         let rowScheme = Set(rowToFind.map({ $0.0 }))
-        precondition(rowScheme.isSubsetOf(scheme.attributes))
+        precondition(rowScheme.isSubset(of: scheme.attributes))
         return select(SelectExpressionFromRow(rowToFind))
     }
     
-    public func select(query: SelectExpression) -> Relation {
-        return IntermediateRelation(op: .Select(query), operands: [self])
+    public func select(_ query: SelectExpression) -> Relation {
+        return IntermediateRelation(op: .select(query), operands: [self])
     }
 }
 
 extension Relation {
-    public func renameAttributes(renames: [Attribute: Attribute]) -> Relation {
-        return IntermediateRelation(op: .Rename(renames), operands: [self])
+    public func renameAttributes(_ renames: [Attribute: Attribute]) -> Relation {
+        return IntermediateRelation(op: .rename(renames), operands: [self])
     }
     
     public func renamePrime() -> Relation {
@@ -277,7 +277,7 @@ extension Relation {
 }
 
 extension Relation {
-    public func withUpdate(query: SelectExpression, newValues: Row) -> Relation {
+    public func withUpdate(_ query: SelectExpression, newValues: Row) -> Relation {
         // Pick out the rows which will be updated, and update them.
         let toUpdate = self.select(query)
         let updatedValues = toUpdate.withUpdate(newValues)
@@ -289,17 +289,17 @@ extension Relation {
         return nonUpdated.union(updatedValues)
     }
     
-    public func withUpdate(newValues: Row) -> Relation {
-        return IntermediateRelation(op: .Update(newValues), operands: [self])
+    public func withUpdate(_ newValues: Row) -> Relation {
+        return IntermediateRelation(op: .update(newValues), operands: [self])
     }
 }
 
 extension Relation {
     public var isEmpty: Result<Bool, RelationError> {
         switch rows().next() {
-        case .None: return .Ok(true)
-        case .Some(.Ok): return .Ok(false)
-        case .Some(.Err(let e)): return .Err(e)
+        case .none: return .Ok(true)
+        case .some(.Ok): return .Ok(false)
+        case .some(.Err(let e)): return .Err(e)
         }
     }
 }
@@ -309,8 +309,8 @@ extension Relation {
         return descriptionWithRows(self.rows())
     }
     
-    public func descriptionWithRows(rows: AnyGenerator<Result<Row, RelationError>>) -> String {
-        let columns = scheme.attributes.sort()
+    public func descriptionWithRows(_ rows: AnyIterator<Result<Row, RelationError>>) -> String {
+        let columns = scheme.attributes.sorted()
         let rows = rows.map({ row in
             columns.map({ (col: Attribute) -> String in
                 switch row.map({ $0[col] }) {
@@ -325,22 +325,22 @@ extension Relation {
         let all = ([columns.map({ $0.name })] + rows)
         let lengths = all.map({ $0.map({ $0.characters.count }) })
         let columnLengths = (0 ..< columns.count).map({ index in
-            return lengths.map({ $0[index] }).reduce(0, combine: Swift.max)
+            return lengths.map({ $0[index] }).reduce(0, Swift.max)
         })
         let padded = all.map({ zip(columnLengths, $0).map({ $1.pad(to: $0, with: " ") }) })
-        let joined = padded.map({ $0.joinWithSeparator("  ") })
-        return joined.joinWithSeparator("\n")
+        let joined = padded.map({ $0.joined(separator: "  ") })
+        return joined.joined(separator: "\n")
     }
 }
 
 extension Relation {
-    public func addChangeObserver(f: RelationChange -> Void) -> (Void -> Void) {
+    public func addChangeObserver(_ f: (RelationChange) -> Void) -> ((Void) -> Void) {
         return addChangeObserver(SimpleRelationObserverProxy(f: f))
     }
     
-    public func addWeakChangeObserver<T: AnyObject>(target: T, method: T -> RelationChange -> Void) {
-        var relationRemove: (Void -> Void)? = nil
-        var deallocRemove: (Void -> Void)? = nil
+    public func addWeakChangeObserver<T: AnyObject>(_ target: T, method: @escaping (T) -> (RelationChange) -> Void) {
+        var relationRemove: ((Void) -> Void)? = nil
+        var deallocRemove: ((Void) -> Void)? = nil
         
         relationRemove = self.addChangeObserver({ [weak target] in
             if let target = target {
@@ -360,7 +360,7 @@ extension Relation {
         })
     }
     
-    public func addWeakChangeObserver<T: AnyObject>(target: T, call: (T, RelationChange) -> Void) {
+    public func addWeakChangeObserver<T: AnyObject>(_ target: T, call: @escaping (T, RelationChange) -> Void) {
         addWeakChangeObserver(target, method: { obj in { change in call(obj, change) } })
     }
 }

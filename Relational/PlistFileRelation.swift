@@ -6,76 +6,76 @@
 import Foundation
 
 
-public class PlistFileRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
-    public let scheme: Scheme
+open class PlistFileRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
+    open let scheme: Scheme
     
     var values: Set<Row>
     
-    let url: NSURL
+    let url: URL
     
-    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    private init(scheme: Scheme, url: NSURL) {
+    fileprivate init(scheme: Scheme, url: URL) {
         self.scheme = scheme
         self.values = []
         self.url = url
     }
     
-    public var contentProvider: RelationContentProvider {
-        return .Set({ self.values })
+    open var contentProvider: RelationContentProvider {
+        return .set({ self.values })
     }
     
-    public func contains(row: Row) -> Result<Bool, RelationError> {
+    open func contains(_ row: Row) -> Result<Bool, RelationError> {
         return .Ok(values.contains(row))
     }
     
-    public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+    open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let toUpdate = Set(values.filter({ query.valueWithRow($0).boolValue }))
-        values.subtractInPlace(toUpdate)
+        values.subtract(toUpdate)
         
         let updated = Set(toUpdate.map({ $0.rowWithUpdate(newValues) }))
-        values.unionInPlace(updated)
+        values.formUnion(updated)
         
         let added = ConcreteRelation(scheme: self.scheme, values: updated - toUpdate)
         let removed = ConcreteRelation(scheme: self.scheme, values: toUpdate - updated)
         
-        notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .DirectChange)
+        notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .directChange)
         
         return .Ok()
     }
     
-    public func add(row: Row) -> Result<Int64, RelationError> {
+    open func add(_ row: Row) -> Result<Int64, RelationError> {
         if !values.contains(row) {
             values.insert(row)
-            notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .DirectChange)
+            notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .directChange)
         }
         return .Ok(0)
     }
     
-    public func delete(query: SelectExpression) -> Result<Void, RelationError> {
+    open func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         let toDelete = Set(values.lazy.filter({ query.valueWithRow($0).boolValue }))
-        values.subtractInPlace(toDelete)
-        notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .DirectChange)
+        values.subtract(toDelete)
+        notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .directChange)
         return .Ok()
     }
 }
 
 extension PlistFileRelation {
-    enum Error: ErrorType {
-        case UnknownTopLevelObject(unknownObject: AnyObject)
-        case MissingValues
-        case UnknownValuesObject(unknownObject: AnyObject)
+    enum Error: Error {
+        case unknownTopLevelObject(unknownObject: AnyObject)
+        case missingValues
+        case unknownValuesObject(unknownObject: AnyObject)
     }
     
-    public static func withFile(url: NSURL, scheme: Scheme, createIfDoesntExist: Bool) -> Result<PlistFileRelation, RelationError> {
+    public static func withFile(_ url: URL, scheme: Scheme, createIfDoesntExist: Bool) -> Result<PlistFileRelation, RelationError> {
         do {
-            let data = try NSData(contentsOfURL: url, options: [])
+            let data = try Data(contentsOf: url, options: [])
             do {
-                let plist = try NSPropertyListSerialization.propertyListWithData(data, options: [], format: nil)
-                guard let dict = plist as? NSDictionary else { return .Err(Error.UnknownTopLevelObject(unknownObject: plist)) }
+                let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil)
+                guard let dict = plist as? NSDictionary else { return .Err(Error.unknownTopLevelObject(unknownObject: plist)) }
                 
-                guard let values = dict["values"] else { return .Err(Error.MissingValues) }
-                guard let array = values as? NSArray else { return .Err(Error.UnknownValuesObject(unknownObject: values)) }
+                guard let values = dict["values"] else { return .Err(Error.missingValues) }
+                guard let array = values as? NSArray else { return .Err(Error.unknownValuesObject(unknownObject: values)) }
                 
                 let relationValueResults = array.map({ Row.fromPlist($0) })
                 let relationValuesResult = mapOk(relationValueResults, { $0 })
@@ -100,8 +100,8 @@ extension PlistFileRelation {
         let plistValues = values.map({ $0.toPlist() })
         let dict = ["values": plistValues]
         do {
-            let data = try NSPropertyListSerialization.dataWithPropertyList(dict, format: .XMLFormat_v1_0, options: 0)
-            try data.writeToURL(url, options: .AtomicWrite)
+            let data = try PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
+            try data.write(to: url, options: .atomicWrite)
             return .Ok()
         } catch {
             return .Err(error)

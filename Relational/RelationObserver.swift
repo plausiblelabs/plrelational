@@ -5,23 +5,23 @@
 
 public protocol RelationObserver {
     func transactionBegan()
-    func relationChanged(relation: Relation, change: RelationChange)
+    func relationChanged(_ relation: Relation, change: RelationChange)
     func transactionEnded()
 }
 
 class WeakRelationObserverProxy: RelationObserver {
-    private weak var target: protocol<RelationObserver, AnyObject>?
-    private var targetRemoval: Void -> Void = { fatalError("Proxy deallocated, but target removal function never set.") }
-    private var relationRemoval: Void -> Void = { fatalError("Observer method called, but relation removal function never set.") }
+    fileprivate weak var target: RelationObserver & AnyObject
+    fileprivate var targetRemoval: (Void) -> Void = { fatalError("Proxy deallocated, but target removal function never set.") }
+    fileprivate var relationRemoval: (Void) -> Void = { fatalError("Observer method called, but relation removal function never set.") }
     
-    init(target: protocol<RelationObserver, AnyObject>) {
+    init(target: RelationObserver & AnyObject) {
         self.target = target
         targetRemoval = ObserveDeallocation(target, { [weak self] in
             self?.relationRemoval()
         })
     }
     
-    func registerOn(observee: Relation, kinds: [RelationObservationKind]) {
+    func registerOn(_ observee: Relation, kinds: [RelationObservationKind]) {
         relationRemoval = observee.addChangeObserver(self, kinds: kinds)
     }
     
@@ -29,7 +29,7 @@ class WeakRelationObserverProxy: RelationObserver {
         getTargetOrRemove()?.transactionBegan()
     }
     
-    func relationChanged(relation: Relation, change: RelationChange) {
+    func relationChanged(_ relation: Relation, change: RelationChange) {
         getTargetOrRemove()?.relationChanged(relation, change: change)
     }
     
@@ -37,7 +37,7 @@ class WeakRelationObserverProxy: RelationObserver {
         getTargetOrRemove()?.transactionEnded()
     }
     
-    private func getTargetOrRemove() -> RelationObserver? {
+    fileprivate func getTargetOrRemove() -> RelationObserver? {
         if let target = target {
             return target
         } else {
@@ -48,9 +48,9 @@ class WeakRelationObserverProxy: RelationObserver {
 }
 
 struct SimpleRelationObserverProxy: RelationObserver {
-    var f: RelationChange -> Void
+    var f: (RelationChange) -> Void
     func transactionBegan() {}
-    func relationChanged(relation: Relation, change: RelationChange) {
+    func relationChanged(_ relation: Relation, change: RelationChange) {
         f(change)
     }
     func transactionEnded() {}

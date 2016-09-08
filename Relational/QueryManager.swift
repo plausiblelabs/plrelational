@@ -7,8 +7,8 @@ import Foundation
 
 
 /// A class which can manage an entire group of queries, to share work and perform them asynchronously.
-public class QueryManager {
-    private var pendingQueries: [(Relation, Result<Set<Row>, RelationError> -> Void)] = []
+open class QueryManager {
+    fileprivate var pendingQueries: [(Relation, (Result<Set<Row>, RelationError>) -> Void)] = []
     
     public init() {}
     
@@ -16,15 +16,15 @@ public class QueryManager {
     /// available, or when an error occurs. If no error occurs, the final callback is invoked with an
     /// empty set of rows to signal that execution has completed. The callback is invoked on the same
     /// thread, when the runloop is in a common mode.
-    public func registerQuery(relation: Relation, callback: Result<Set<Row>, RelationError> -> Void) {
+    open func registerQuery(_ relation: Relation, callback: (Result<Set<Row>, RelationError>) -> Void) {
         pendingQueries.append((relation, callback))
     }
     
-    public func execute() {
+    open func execute() {
         let queries = pendingQueries
         pendingQueries = []
         
-        dispatch_async(dispatch_get_global_queue(0, 0), {
+        DispatchQueue.global(priority: 0).async(execute: {
             let planner = QueryPlanner(roots: queries)
             let runner = QueryRunner(planner: planner)
             
@@ -43,12 +43,12 @@ public class QueryManager {
 
 /// A per-thread version of QueryManager which automatically executes registered queries on the next runloop cycle.
 public final class RunloopQueryManager: QueryManager, PerThreadInstance {
-    private var executionTimer: CFRunLoopTimer?
+    fileprivate var executionTimer: CFRunLoopTimer?
     
-    public override func registerQuery(relation: Relation, callback: Result<Set<Row>, RelationError> -> Void) {
+    public override func registerQuery(_ relation: Relation, callback: (Result<Set<Row>, RelationError>) -> Void) {
         let runloop = CFRunLoopGetCurrent()
         let wrappedCallback = { (result: Result<Set<Row>, RelationError>) -> Void in
-            CFRunLoopPerformBlock(runloop, kCFRunLoopCommonModes, {
+            CFRunLoopPerformBlock(runloop, CFRunLoopMode.commonModes, {
                 callback(result)
             })
             CFRunLoopWakeUp(runloop)
@@ -60,7 +60,7 @@ public final class RunloopQueryManager: QueryManager, PerThreadInstance {
             executionTimer = CFRunLoopTimerCreateWithHandler(nil, 0, 0, 0, 0, { _ in
                 self.execute()
             })
-            CFRunLoopAddTimer(runloop, executionTimer, kCFRunLoopCommonModes)
+            CFRunLoopAddTimer(runloop, executionTimer, CFRunLoopMode.commonModes)
         }
     }
     

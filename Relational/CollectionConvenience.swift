@@ -3,39 +3,39 @@
 // All rights reserved.
 //
 
-public extension RangeReplaceableCollectionType where Generator.Element: Equatable {
-    mutating func remove(element: Generator.Element) {
-        if let index = indexOf(element) {
-            removeAtIndex(index)
+public extension RangeReplaceableCollection where Iterator.Element: Equatable {
+    mutating func remove(_ element: Iterator.Element) {
+        if let index = index(of: element) {
+            self.remove(at: index)
         }
     }
 }
     
-public extension RangeReplaceableCollectionType {
+public extension RangeReplaceableCollection {
     /// Remove ONE element matching the predicate. Don't call this if there's more than one,
     /// or you'll just confuse yourself.
-    mutating func removeOne(predicate: Generator.Element -> Bool) {
-        if let index = indexOf(predicate) {
-            removeAtIndex(index)
+    mutating func removeOne(_ predicate: (Iterator.Element) -> Bool) {
+        if let index = index(where: predicate) {
+            self.remove(at: index)
         }
     }
     
     /// Append the element if it's non-nil, and ignore the call if it's nil.
-    mutating func appendNonNil(element: Generator.Element?) {
+    mutating func appendNonNil(_ element: Iterator.Element?) {
         if let element = element {
             self.append(element)
         }
     }
 }
 
-public extension CollectionType where Generator.Element: Equatable {
-    func indexesOf(element: Generator.Element) -> [Index] {
+public extension Collection where Iterator.Element: Equatable {
+    func indexesOf(_ element: Iterator.Element) -> [Index] {
         return indices.filter({ self[$0] == element })
     }
 }
 
-public extension MutableCollectionType where Generator.Element: Equatable {
-    mutating func replace(element: Generator.Element, with: Generator.Element) {
+public extension MutableCollection where Iterator.Element: Equatable {
+    mutating func replace(_ element: Iterator.Element, with: Iterator.Element) {
         for i in indices {
             if self[i] == element {
                 self[i] = with
@@ -44,8 +44,8 @@ public extension MutableCollectionType where Generator.Element: Equatable {
     }
 }
 
-public extension MutableCollectionType {
-    mutating func mutatingForEach(f: (inout Generator.Element) -> Void) {
+public extension MutableCollection {
+    mutating func mutatingForEach(_ f: (inout Iterator.Element) -> Void) {
         for i in indices {
             f(&self[i])
         }
@@ -53,15 +53,15 @@ public extension MutableCollectionType {
 }
 
 public extension Dictionary {
-    mutating func mutatingForEach(f: (inout Value) -> Void) {
+    mutating func mutatingForEach(_ f: (inout Value) -> Void) {
         for k in keys {
             f(&self[k]!)
         }
     }
 }
 
-public extension SequenceType {
-    func all(@noescape predicate: Generator.Element -> Bool) -> Bool {
+public extension Sequence {
+    func all(_ predicate: (Iterator.Element) -> Bool) -> Bool {
         for elt in self {
             if !predicate(elt) {
                 return false
@@ -85,13 +85,13 @@ public extension Array where Element: Comparable {
             }
             
         default:
-            sortInPlace()
+            sort()
         }
     }
 }
 
 public extension Array where Element: Equatable {
-    func indexesOf(toFind: Element) -> [Int] {
+    func indexesOf(_ toFind: Element) -> [Int] {
         switch count {
         case 0: return []
         case 1 where self[0] == toFind:
@@ -110,7 +110,7 @@ public extension Array where Element: Equatable {
             var result: [Int] = []
             result.reserveCapacity(4)
             
-            for (index, element) in self.enumerate() {
+            for (index, element) in self.enumerated() {
                 if element == toFind {
                     result.append(index)
                 }
@@ -126,5 +126,5 @@ public func +<T: Hashable>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
 }
 
 public func -<T: Hashable>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
-    return lhs.subtract(rhs)
+    return lhs.subtracting(rhs)
 }

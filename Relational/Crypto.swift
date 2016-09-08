@@ -5,13 +5,13 @@
 
 import CommonCrypto
 
-public func SHA256(data: [UInt8]) -> [UInt8] {
-    var output: [UInt8] = Array(count: Int(CC_SHA256_DIGEST_LENGTH), repeatedValue: 0)
+public func SHA256(_ data: [UInt8]) -> [UInt8] {
+    var output: [UInt8] = Array(repeating: 0, count: Int(CC_SHA256_DIGEST_LENGTH))
     CC_SHA256(data, CC_LONG(data.count), &output)
     return output
 }
 
-public func hexString(data: [UInt8], uppercase: Bool) -> String {
+public func hexString(_ data: [UInt8], uppercase: Bool) -> String {
     struct Static {
         static let hexCharsUpper: [Character] = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"]
         static let hexCharsLower: [Character] = [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]

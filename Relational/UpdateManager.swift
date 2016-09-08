@@ -7,37 +7,37 @@ import Foundation
 
 
 public final class UpdateManager: PerThreadInstance {
-    public typealias ObservationRemover = Void -> Void
+    public typealias ObservationRemover = (Void) -> Void
     
-    private var pendingUpdates: [Update] = []
-    private var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
+    fileprivate var pendingUpdates: [Update] = []
+    fileprivate var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
     
-    private let runloop: CFRunLoopRef
+    fileprivate let runloop: CFRunLoop
     
-    private var isExecuting = false
-    private var executionTimer: CFRunLoopTimer?
+    fileprivate var isExecuting = false
+    fileprivate var executionTimer: CFRunLoopTimer?
     
     public init() {
         self.runloop = CFRunLoopGetCurrent()
     }
     
-    public func registerUpdate(relation: Relation, query: SelectExpression, newValues: Row) {
-        pendingUpdates.append(.Update(relation, query, newValues))
+    public func registerUpdate(_ relation: Relation, query: SelectExpression, newValues: Row) {
+        pendingUpdates.append(.update(relation, query, newValues))
         registerChange(relation)
     }
     
-    public func registerAdd(relation: TransactionalDatabase.TransactionalRelation, row: Row) {
-        pendingUpdates.append(.Add(relation, row))
+    public func registerAdd(_ relation: TransactionalDatabase.TransactionalRelation, row: Row) {
+        pendingUpdates.append(.add(relation, row))
         registerChange(relation)
     }
     
-    public func registerDelete(relation: TransactionalDatabase.TransactionalRelation, query: SelectExpression) {
-        pendingUpdates.append(.Delete(relation, query))
+    public func registerDelete(_ relation: TransactionalDatabase.TransactionalRelation, query: SelectExpression) {
+        pendingUpdates.append(.delete(relation, query))
         registerChange(relation)
     }
     
-    public func registerRestoreSnapshot(database: TransactionalDatabase, snapshot: ChangeLoggingDatabaseSnapshot) {
-        pendingUpdates.append(.RestoreSnapshot(database, snapshot))
+    public func registerRestoreSnapshot(_ database: TransactionalDatabase, snapshot: ChangeLoggingDatabaseSnapshot) {
+        pendingUpdates.append(.restoreSnapshot(database, snapshot))
         for (_, relation) in database.relations {
             registerChange(relation)
         }
@@ -45,7 +45,7 @@ public final class UpdateManager: PerThreadInstance {
     
     /// Register an observer for a Relation. The observer will receive all changes made to the relation
     /// through the UpdateManager.
-    public func observe(relation: Relation, observer: AsyncRelationChangeObserver, context: DispatchContext? = nil) -> ObservationRemover {
+    public func observe(_ relation: Relation, observer: AsyncRelationChangeObserver, context: DispatchContext? = nil) -> ObservationRemover {
         guard let obj = relation as? AnyObject else { return {} }
         
         let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
@@ -61,7 +61,7 @@ public final class UpdateManager: PerThreadInstance {
     
     /// Register an observer for a Relation. When the Relation is changed through the UpdateManager,
     /// the observer receives the Relation's new contents.
-    public func observe(relation: Relation, observer: AsyncRelationContentObserver, context: DispatchContext? = nil) -> ObservationRemover {
+    public func observe(_ relation: Relation, observer: AsyncRelationContentObserver, context: DispatchContext? = nil) -> ObservationRemover {
         guard let obj = relation as? AnyObject else { return {} }
         
         let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
@@ -75,16 +75,16 @@ public final class UpdateManager: PerThreadInstance {
         }
     }
     
-    private func registerChange(relation: Relation) {
+    fileprivate func registerChange(_ relation: Relation) {
         if !isExecuting {
             sendWillChange(relation)
             scheduleExecutionIfNeeded()
         }
     }
     
-    private func sendWillChange(relation: Relation) {
+    fileprivate func sendWillChange(_ relation: Relation) {
         QueryPlanner.visitRelationTree([(relation, ())], { relation, _, _ in
-            guard let relationObject = relation as? AnyObject where !(relation is IntermediateRelation) else { return }
+            guard let relationObject = relation as? AnyObject , !(relation is IntermediateRelation) else { return }
             
             for (observedRelation, info) in observedInfo {
                 for variable in info.derivative.allVariables {
@@ -110,23 +110,23 @@ public final class UpdateManager: PerThreadInstance {
         })
     }
     
-    private func scheduleExecutionIfNeeded() {
+    fileprivate func scheduleExecutionIfNeeded() {
         if executionTimer == nil {
             executionTimer = CFRunLoopTimerCreateWithHandler(nil, 0, 0, 0, 0, { _ in
                 self.execute()
             })
-            CFRunLoopAddTimer(runloop, executionTimer, kCFRunLoopCommonModes)
+            CFRunLoopAddTimer(runloop, executionTimer, CFRunLoopMode.commonModes)
         }
     }
     
-    private func execute() {
+    fileprivate func execute() {
         CFRunLoopTimerInvalidate(executionTimer)
         executionTimer = nil
         isExecuting = true
         executeBody()
     }
     
-    private func executeBody() {
+    fileprivate func executeBody() {
         // Apply all pending updates asynchronously. Update work is done in the background, with callbacks onto
         // this runloop for synchronization and notifying observers.
         let updates = pendingUpdates
@@ -135,12 +135,12 @@ public final class UpdateManager: PerThreadInstance {
         let observedInfo = self.observedInfo
         
         // Run updates in the background.
-        dispatch_async(dispatch_get_global_queue(0, 0), {
+        DispatchQueue.global(priority: 0).async(execute: {
             // Walk through all the observers. Observe changes on all relevant variables and update
             // observer derivatives with those changes as they come in. Also locate all
             // TransactionalDatabases referenced within so we can begin and end transactions.
             var databases: ObjectSet<TransactionalDatabase> = []
-            var removals: [Void -> Void] = []
+            var removals: [(Void) -> Void] = []
             for (_, info) in observedInfo {
                 let derivative = info.derivative
                 for variable in derivative.allVariables {
@@ -158,7 +158,7 @@ public final class UpdateManager: PerThreadInstance {
                     removals.append(removal)
                     
                     if let transactionalRelation = variable as? TransactionalDatabase.TransactionalRelation,
-                           db = transactionalRelation.db {
+                           let db = transactionalRelation.db {
                         databases.insert(db)
                     }
                 }
@@ -175,17 +175,17 @@ public final class UpdateManager: PerThreadInstance {
             for update in updates {
                 let error: RelationError?
                 switch update {
-                case .Update(let relation, let query, let newValues):
+                case .update(let relation, let query, let newValues):
                     var mutableRelation = relation
                     let result = mutableRelation.update(query, newValues: newValues)
                     error = result.err
-                case .Add(let relation, let row):
+                case .add(let relation, let row):
                     let result = relation.add(row)
                     error = result.err
-                case .Delete(let relation, let query):
+                case .delete(let relation, let query):
                     let result = relation.delete(query)
                     error = result.err
-                case .RestoreSnapshot(let database, let snapshot):
+                case .restoreSnapshot(let database, let snapshot):
                     if databases.contains(database) {
                         database.endTransaction()
                         database.restoreSnapshot(snapshot)
@@ -215,7 +215,7 @@ public final class UpdateManager: PerThreadInstance {
             let queryManager = QueryManager()
             
             // We'll be doing a bunch of async work to notify observers. Use a dispatch group to figure out when it's all done.
-            let doneGroup = dispatch_group_create()
+            let doneGroup = DispatchGroup()
             
             // Go through all the observers and notify them.
             for (observedRelationObj, info) in observedInfo {
@@ -230,11 +230,11 @@ public final class UpdateManager: PerThreadInstance {
                     // If there are additions, then iterate over them and send them to the observer. Iteration is started in the
                     // original runloop, which ensures that the callbacks happen there too.
                     if let added = change.added {
-                        dispatch_group_enter(doneGroup)
+                        doneGroup.enter()
                         queryManager.registerQuery(added, callback: { result in
                             switch result {
                             case .Ok(let rows) where rows.isEmpty:
-                                dispatch_group_leave(doneGroup)
+                                doneGroup.leave()
                             case .Ok(let rows):
                                 for observer in relationObservers {
                                     observer.withWrapped({ $0.relationAddedRows(relation, rows: rows) })
@@ -243,17 +243,17 @@ public final class UpdateManager: PerThreadInstance {
                                 for observer in relationObservers {
                                     observer.withWrapped({ $0.relationError(relation, error: err) })
                                 }
-                                dispatch_group_leave(doneGroup)
+                                doneGroup.leave()
                             }
                         })
                     }
                     // Do the same if there are removals.
                     if let removed = change.removed {
-                        dispatch_group_enter(doneGroup)
+                        doneGroup.enter()
                         queryManager.registerQuery(removed, callback: { result in
                             switch result {
                             case .Ok(let rows) where rows.isEmpty:
-                                dispatch_group_leave(doneGroup)
+                                doneGroup.leave()
                             case .Ok(let rows):
                                 for observer in relationObservers {
                                     observer.withWrapped({ $0.relationRemovedRows(relation, rows: rows) })
@@ -262,18 +262,18 @@ public final class UpdateManager: PerThreadInstance {
                                 for observer in relationObservers {
                                     observer.withWrapped({ $0.relationError(relation, error: err) })
                                 }
-                                dispatch_group_leave(doneGroup)
+                                doneGroup.leave()
                             }
                         })
                     }
                 }
                 
                 if !updateObservers.isEmpty {
-                    dispatch_group_enter(doneGroup)
+                    doneGroup.enter()
                     queryManager.registerQuery(relation, callback: { result in
                         switch result {
                         case .Ok(let rows) where rows.isEmpty:
-                            dispatch_group_leave(doneGroup)
+                            doneGroup.leave()
                         case .Ok(let rows):
                             for observer in updateObservers {
                                 observer.withWrapped({ $0.relationNewContents(relation, rows: rows) })
@@ -282,7 +282,7 @@ public final class UpdateManager: PerThreadInstance {
                             for observer in updateObservers {
                                 observer.withWrapped({ $0.relationError(relation, error: err) })
                             }
-                            dispatch_group_leave(doneGroup)
+                            doneGroup.leave()
                         }
                     })
                 }
@@ -292,7 +292,7 @@ public final class UpdateManager: PerThreadInstance {
             
             // Wait until done. If there are no changes then this will execute immediately. Otherwise it will execute
             // when all the iteration above is complete.
-            dispatch_group_notify(doneGroup, dispatch_get_global_queue(0, 0), {
+            doneGroup.notify(queue: DispatchQueue.global(priority: 0), execute: {
                 self.runloop.async({
                     // If new pending updates came in while we were doing our thing, then go back to the top
                     // and start over, applying those updates too.
@@ -329,14 +329,14 @@ public final class UpdateManager: PerThreadInstance {
 }
 
 extension UpdateManager {
-    private enum Update {
-        case Update(Relation, SelectExpression, Row)
-        case Add(TransactionalDatabase.TransactionalRelation, Row)
-        case Delete(TransactionalDatabase.TransactionalRelation, SelectExpression)
-        case RestoreSnapshot(TransactionalDatabase, ChangeLoggingDatabaseSnapshot)
+    fileprivate enum Update {
+        case update(Relation, SelectExpression, Row)
+        case add(TransactionalDatabase.TransactionalRelation, Row)
+        case delete(TransactionalDatabase.TransactionalRelation, SelectExpression)
+        case restoreSnapshot(TransactionalDatabase, ChangeLoggingDatabaseSnapshot)
     }
     
-    private class ObservedRelationInfo {
+    fileprivate class ObservedRelationInfo {
         struct ObserverEntry {
             var relationObserver: DispatchContextWrapped<AsyncRelationChangeObserver>?
             var updateObserver: DispatchContextWrapped<AsyncRelationContentObserver>?
@@ -351,13 +351,13 @@ extension UpdateManager {
             self.derivative = derivative
         }
         
-        func addObserver(observer: AsyncRelationChangeObserver, context: DispatchContext) -> UInt64 {
+        func addObserver(_ observer: AsyncRelationChangeObserver, context: DispatchContext) -> UInt64 {
             currentObserverID += 1
             observers[currentObserverID] = ObserverEntry(relationObserver: DispatchContextWrapped(context: context, wrapped: observer), updateObserver: nil, didSendWillChange: false)
             return currentObserverID
         }
         
-        func addObserver(observer: AsyncRelationContentObserver, context: DispatchContext) -> UInt64 {
+        func addObserver(_ observer: AsyncRelationContentObserver, context: DispatchContext) -> UInt64 {
             currentObserverID += 1
             observers[currentObserverID] = ObserverEntry(relationObserver: nil, updateObserver: DispatchContextWrapped(context: context, wrapped: observer), didSendWillChange: false)
             return currentObserverID

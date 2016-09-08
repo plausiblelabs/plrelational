@@ -14,9 +14,9 @@ import Foundation
 class ObjectMap<Value> {
     typealias Bucket = (key: Int, value: Value)
     
-    private(set) var count: Int = 0
-    private var deadCount: Int = 0
-    private var capacity: Int
+    fileprivate(set) var count: Int = 0
+    fileprivate var deadCount: Int = 0
+    fileprivate var capacity: Int
     
     var table: UnsafeMutablePointer<Bucket>
     
@@ -29,27 +29,27 @@ class ObjectMap<Value> {
         deallocate(table, capacity)
     }
     
-    private func deallocate(table: UnsafeMutablePointer<Bucket>, _ capacity: Int) {
+    fileprivate func deallocate(_ table: UnsafeMutablePointer<Bucket>, _ capacity: Int) {
         for index in 0..<capacity {
             let ptr = table + index
-            let key = ptr.memory.key
+            let key = ptr.pointee.key
             // Destroy all entries that aren't empty or dead
             if key != EMPTY && key != DEAD {
-                ptr.destroy()
+                ptr.deinitialize()
             }
         }
         free(table)
     }
     
-    private static func allocate(count: Int) -> UnsafeMutablePointer<Bucket> {
+    fileprivate static func allocate(_ count: Int) -> UnsafeMutablePointer<Bucket> {
         return UnsafeMutablePointer<Bucket>(calloc(count, strideof(Bucket.self)))
     }
     
-    private func keyForObject(obj: AnyObject) -> Int {
-        return unsafeBitCast(obj, Int.self)
+    fileprivate func keyForObject(_ obj: AnyObject) -> Int {
+        return unsafeBitCast(obj, to: Int.self)
     }
     
-    private func indexForKey(key: Int, _ table: UnsafeMutablePointer<Bucket>, _ capacity: Int) -> (firstEmptyOrMatch: Int, firstDead: Int?) {
+    fileprivate func indexForKey(_ key: Int, _ table: UnsafeMutablePointer<Bucket>, _ capacity: Int) -> (firstEmptyOrMatch: Int, firstDead: Int?) {
         // Objects are 16-byte aligned, so shift off the last four bits to get a better hash value.
         // If this ends up being wrong this code will still work, but hash collisions will be more
         // frequent so performance will suffer.
@@ -67,7 +67,7 @@ class ObjectMap<Value> {
     
     // Right now (2016-06-17) there is a duplicate symbol error on this func when whole module
     // optimization is enabled. Marking it final prevents that, somehow.
-    private final func reallocateIfNecessary() {
+    fileprivate final func reallocateIfNecessary() {
         if Double(count) / Double(capacity) > 0.75 {
             reallocateToSize(capacity * 2)
         } else if Double(count + deadCount) / Double(capacity) > 0.75 {
@@ -76,13 +76,13 @@ class ObjectMap<Value> {
     }
     
     // This one also causes a duplicate symbol error somehow.
-    private final func reallocateToSize(newCapacity: Int) {
+    fileprivate final func reallocateToSize(_ newCapacity: Int) {
         let newTable = ObjectMap.allocate(newCapacity)
         for index in 0..<capacity {
             let key = table[index].key
             if key != EMPTY && key != DEAD {
                 let (newIndex, _) = indexForKey(key, newTable, newCapacity)
-                (newTable + newIndex).moveInitializeFrom(table + index, count: 1)
+                (newTable + newIndex).moveInitialize(from: table + index, count: 1)
             }
         }
         free(table)
@@ -106,7 +106,7 @@ class ObjectMap<Value> {
                     table[firstEmptyOrMatch].value = newValue
                 } else {
                     let index = firstDead ?? firstEmptyOrMatch
-                    (table + index).initialize((key, newValue))
+                    (table + index).initialize(to: (key, newValue))
                     count += 1
                     if firstDead != nil {
                         deadCount -= 1
@@ -115,7 +115,7 @@ class ObjectMap<Value> {
             } else {
                 let index = firstEmptyOrMatch
                 if table[index].key == key {
-                    (table + index).destroy()
+                    (table + index).deinitialize()
                     table[index].key = DEAD
                     count -= 1
                     deadCount += 1
@@ -124,7 +124,7 @@ class ObjectMap<Value> {
         }
     }
     
-    func getOrCreate(obj: AnyObject, @autoclosure defaultValue: Void -> Value) -> Value {
+    func getOrCreate(_ obj: AnyObject, defaultValue: @autoclosure (Void) -> Value) -> Value {
         reallocateIfNecessary()
         let key = keyForObject(obj)
         let (firstEmptyOrMatch, firstDead) = indexForKey(key, table, capacity)
@@ -133,7 +133,7 @@ class ObjectMap<Value> {
         } else {
             let index = firstDead ?? firstEmptyOrMatch
             let newValue = defaultValue()
-            (table + index).initialize((key, newValue))
+            (table + index).initialize(to: (key, newValue))
             count += 1
             if firstDead != nil {
                 deadCount -= 1
@@ -162,12 +162,12 @@ extension ObjectMap: CustomDebugStringConvertible {
             } else if key == DEAD {
                 return String(format: "[%ld] DEAD", i)
             } else {
-                let bucketString = String(bucket.value) as NSString
-                let keyPtr = unsafeBitCast(key, UnsafePointer<Void>.self)
-                return String(format: "[%ld] %p = %@ (%@)", i, key, bucketString, keyPtr)
+                let bucketString = String(describing: bucket.value) as NSString
+                let keyPtr = unsafeBitCast(key, to: UnsafeRawPointer.self)
+                return String(format: "[%ld] %p = %@ (%@)", i, key, bucketString, keyPtr as! CVarArg)
             }
         })
         
-        return ([initialLine] + tableLines).joinWithSeparator("\n")
+        return ([initialLine] + tableLines).joined(separator: "\n")
     }
 }

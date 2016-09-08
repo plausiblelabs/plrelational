@@ -31,7 +31,7 @@ extension Attribute: CustomStringConvertible {
     }
 }
 
-extension Attribute: StringLiteralConvertible {
+extension Attribute: ExpressibleByStringLiteral {
     public init(extendedGraphemeClusterLiteral value: String) {
         name = value
     }
@@ -53,7 +53,7 @@ public struct Scheme {
     }
 }
 
-extension Scheme: ArrayLiteralConvertible {
+extension Scheme: ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: Attribute...) {
         attributes = Set(elements)
     }

@@ -7,14 +7,14 @@
 import Foundation
 
 class InlineMutableData: ManagedBuffer<(length: Int, capacity: Int, hash: UInt64), UInt8> {
-    static func make(capacity: Int) -> Self {
-        func cast<T, U>(val: T) -> U { return val as! U }
+    static func make(_ capacity: Int) -> Self {
+        func cast<T, U>(_ val: T) -> U { return val as! U }
         
-        let obj = create(capacity, initialValue: { _ in (length: 0, capacity: capacity, hash: 0) })
+        let obj = create(minimumCapacity: capacity, makingHeaderWith: { _ in (length: 0, capacity: capacity, hash: 0) })
         return cast(obj)
     }
     
-    static func append<T: InlineMutableData>(data: T, pointer: UnsafePointer<UInt8>, length: Int) -> T {
+    static func append<T: InlineMutableData>(_ data: T, pointer: UnsafePointer<UInt8>, length: Int) -> T {
         if data.tryAppend(pointer, length: length) {
             return data
         }
@@ -35,11 +35,11 @@ class InlineMutableData: ManagedBuffer<(length: Int, capacity: Int, hash: UInt64
         return newObj
     }
     
-    static func append<T: InlineMutableData, U>(data: T, untypedPointer pointer: UnsafePointer<U>, length: Int) -> T {
+    static func append<T: InlineMutableData, U>(_ data: T, untypedPointer pointer: UnsafePointer<U>, length: Int) -> T {
         return append(data, pointer: UnsafePointer(pointer), length: length)
     }
     
-    final func updateHash(inout hash: UInt64, pointer: UnsafePointer<UInt8>, length: Int) {
+    final func updateHash(_ hash: inout UInt64, pointer: UnsafePointer<UInt8>, length: Int) {
         // FNV-1a hash: http://www.isthe.com/chongo/tech/comp/fnv/#FNV-1a
         let fnvPrime: UInt64 = 1099511628211
         
@@ -49,15 +49,15 @@ class InlineMutableData: ManagedBuffer<(length: Int, capacity: Int, hash: UInt64
         }
     }
     
-    final func tryAppend(pointer: UnsafePointer<UInt8>, length: Int) -> Bool {
+    final func tryAppend(_ pointer: UnsafePointer<UInt8>?, length: Int) -> Bool {
         let remainingCapacity = self.value.capacity - self.value.length
         if length <= remainingCapacity {
             withUnsafeMutablePointers({ valuePtr, elementPtr in
                 if pointer != nil {
-                    memcpy(elementPtr + valuePtr.memory.length, pointer, length)
+                    memcpy(elementPtr + valuePtr.pointee.length, pointer, length)
                 }
-                valuePtr.memory.length += length
-                valuePtr.memory.hash = 0
+                valuePtr.pointee.length += length
+                valuePtr.pointee.hash = 0
             })
             return true
         } else {
@@ -73,16 +73,16 @@ class InlineMutableData: ManagedBuffer<(length: Int, capacity: Int, hash: UInt64
 extension InlineMutableData: Hashable {
     var hashValue: Int {
         return withUnsafeMutablePointers({ valuePtr, elementPtr in
-            if valuePtr.memory.hash == 0 {
+            if valuePtr.pointee.hash == 0 {
                 objc_sync_enter(self)
-                if valuePtr.memory.hash == 0 {
+                if valuePtr.pointee.hash == 0 {
                     var newHash: UInt64 = 14695981039346656037
-                    self.updateHash(&newHash, pointer: elementPtr, length: valuePtr.memory.length)
-                    valuePtr.memory.hash = newHash
+                    self.updateHash(&newHash, pointer: elementPtr, length: valuePtr.pointee.length)
+                    valuePtr.pointee.hash = newHash
                 }
             }
             objc_sync_exit(self)
-            return Int(bitPattern: UInt(truncatingBitPattern: valuePtr.memory.hash))
+            return Int(bitPattern: UInt(truncatingBitPattern: valuePtr.pointee.hash))
         })
     }
 }
@@ -103,8 +103,8 @@ func ==(lhs: InlineMutableData, rhs: InlineMutableData) -> Bool {
 extension InlineMutableData: CustomStringConvertible {
     var description: String {
         return withUnsafeMutablePointers({ valuePtr, elementPtr in
-            let data = NSData(bytes: elementPtr, length: valuePtr.memory.length)
-            return "InlineMutableData(length: \(valuePtr.memory.length), capacity: \(valuePtr.memory.capacity), hash: \(valuePtr.memory.hash)) \(data.description)"
+            let data = Data(bytes: UnsafePointer<UInt8>(elementPtr), count: valuePtr.pointee.length)
+            return "InlineMutableData(length: \(valuePtr.pointee.length), capacity: \(valuePtr.pointee.capacity), hash: \(valuePtr.pointee.hash)) \(data.description)"
         })
     }
 }

@@ -6,17 +6,17 @@
 import Foundation
 
 
-public func debugLog(items: Any..., file: String = #file, line: Int = #line) {
-    let strings = items.map({ String($0) })
-    let fullString = strings.joinWithSeparator(" ")
-    let filename = NSURL(fileURLWithPath: file).lastPathComponent ?? "<unknown>"
+public func debugLog(_ items: Any..., file: String = #file, line: Int = #line) {
+    let strings = items.map({ String(describing: $0) })
+    let fullString = strings.joined(separator: " ")
+    let filename = URL(fileURLWithPath: file).lastPathComponent ?? "<unknown>"
     NSLog("%@:%ld: %@", filename, line, fullString)
 }
 
-public func pointerString(obj: AnyObject) -> String {
-    return String(format: "%p", unsafeBitCast(obj, Int.self))
+public func pointerString(_ obj: AnyObject) -> String {
+    return String(format: "%p", unsafeBitCast(obj, to: Int.self))
 }
 
-public func pointerAndClassString(obj: AnyObject) -> String {
-    return "<\(obj.dynamicType): \(pointerString(obj))>"
+public func pointerAndClassString(_ obj: AnyObject) -> String {
+    return "<\(type(of: obj)): \(pointerString(obj))>"
 }

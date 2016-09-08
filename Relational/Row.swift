@@ -6,7 +6,7 @@
 import Foundation
 
 
-public struct Row: Hashable, SequenceType {
+public struct Row: Hashable, Sequence {
     var inlineRow: InlineRow
     
     public init(values: [Attribute: RelationValue]) {
@@ -19,7 +19,7 @@ public struct Row: Hashable, SequenceType {
     
     public subscript(attribute: Attribute) -> RelationValue {
         get {
-            return inlineRow[attribute] ?? .NotFound
+            return inlineRow[attribute] ?? .notFound
         }
         set {
             var d = Dictionary(inlineRow)
@@ -28,46 +28,46 @@ public struct Row: Hashable, SequenceType {
         }
     }
     
-    public func renameAttributes(renames: [Attribute: Attribute]) -> Row {
+    public func renameAttributes(_ renames: [Attribute: Attribute]) -> Row {
         if renames.isEmpty {
             return self
         } else {
-            return Row(values: Dictionary(self.map({ attribute, value in
+            return Row(values: Dictionary(self.map({ attribute, value -> (Attribute, RelationValue) in
                 let newAttribute = renames[attribute] ?? attribute
                 return (newAttribute, value)
-            })))
+            })) )
         }
     }
     
     /// Create a new row containing only the values whose attributes are also in the attributes parameter.
-    public func rowWithAttributes<Seq: SequenceType where Seq.Generator.Element == Attribute>(attributes: Seq) -> Row {
+    public func rowWithAttributes<Seq: Sequence>(_ attributes: Seq) -> Row where Seq.Iterator.Element == Attribute {
         return Row(values: Dictionary(attributes.flatMap({
             if let value = inlineRow[$0] {
                 return ($0, value)
             } else {
                 return nil
             }
-        })))
+        })) as! [Attribute : RelationValue] )
     }
     
     /// Produce a new Row by applying updated values to this Row. Any attributes that exist in `newValues`
     /// but not `self` will be added. Any attributes that exist in both will be set to the new value.
     /// Attributes only in `self` are left alone.
-    public func rowWithUpdate(newValues: Row) -> Row {
+    public func rowWithUpdate(_ newValues: Row) -> Row {
         let updatedValues = Dictionary(self) + newValues
         return Row(values: updatedValues)
     }
     
-    public struct Generator: GeneratorType {
-        var inner: InlineRow.Generator
+    public struct Iterator: IteratorProtocol {
+        var inner: InlineRow.Iterator
         
         public mutating func next() -> (Attribute, RelationValue)? {
             return inner.next()
         }
     }
     
-    public func generate() -> Generator {
-        return Generator(inner: inlineRow.generate())
+    public func makeIterator() -> Iterator {
+        return Iterator(inner: inlineRow.makeIterator())
     }
     
     public var attributes: LazyMapSequence<Row, Attribute> {
@@ -83,7 +83,7 @@ public struct Row: Hashable, SequenceType {
     }
 }
 
-extension Row: DictionaryLiteralConvertible {
+extension Row: ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (Attribute, RelationValue)...) {
         self.init(values: Dictionary(elements))
     }
@@ -128,7 +128,7 @@ final class InlineRow: InlineMutableData {
             let offsetIndex = index * 2 + 1
             let attributeOffset = intPtr[offsetIndex]
             let valueOffset = intPtr[offsetIndex + 1]
-            let endOffset = (index < count - 1) ? intPtr[offsetIndex + 2] : valuePtr.memory.length
+            let endOffset = (index < count - 1) ? intPtr[offsetIndex + 2] : valuePtr.pointee.length
             
             let attribute = self.deserializeAttribute(elementPtr, start: attributeOffset, end: valueOffset)
             let value = self.deserializeValue(elementPtr, start: valueOffset, end: endOffset)
@@ -147,7 +147,7 @@ final class InlineRow: InlineMutableData {
                     let attributeOffset = header[headerOffset]
                     let valueOffset = header[headerOffset + 1]
                     if attrLen == valueOffset - attributeOffset && memcmp(attrPtr, elementPtr + attributeOffset, attrLen) == 0 {
-                        let endOffset = (i < count - 1) ? header[headerOffset + 2] : valuePtr.memory.length
+                        let endOffset = (i < count - 1) ? header[headerOffset + 2] : valuePtr.pointee.length
                         return self.deserializeValue(elementPtr, start: valueOffset, end: endOffset)
                     }
                 }
@@ -157,8 +157,8 @@ final class InlineRow: InlineMutableData {
     }
 }
 
-extension InlineRow: SequenceType {
-    struct Generator: GeneratorType {
+extension InlineRow: Sequence {
+    struct Iterator: IteratorProtocol {
         var row: InlineRow
         var index: Int
         
@@ -172,14 +172,14 @@ extension InlineRow: SequenceType {
         }
     }
     
-    func generate() -> Generator {
-        return Generator(row: self, index: 0)
+    func makeIterator() -> Iterator {
+        return Iterator(row: self, index: 0)
     }
 }
 
 extension InlineRow {
-    static func buildFrom(valuesDict: [Attribute: RelationValue]) -> InlineRow {
-        let values = valuesDict.sort({ $0.0 < $1.0 })
+    static func buildFrom(_ valuesDict: [Attribute: RelationValue]) -> InlineRow {
+        let values = valuesDict.sorted(by: { $0.0 < $1.0 })
         let estimatedSize = 100 // DO THIS BETTER
         
         var obj = self.make(estimatedSize)
@@ -204,7 +204,7 @@ extension InlineRow {
         return obj
     }
     
-    static func serialize(inout obj: InlineRow, _ string: String) -> Int {
+    static func serialize(_ obj: inout InlineRow, _ string: String) -> Int {
         let offset = obj.length
         string.withCString({
             let len = Int(strlen($0))
@@ -213,29 +213,29 @@ extension InlineRow {
         return offset
     }
     
-    static func serialize(inout obj: InlineRow, _ attribute: Attribute) -> Int {
+    static func serialize(_ obj: inout InlineRow, _ attribute: Attribute) -> Int {
         return serialize(&obj, attribute.name)
     }
     
-    static func serialize(inout obj: InlineRow, _ value: RelationValue) -> Int {
+    static func serialize(_ obj: inout InlineRow, _ value: RelationValue) -> Int {
         let offset = obj.length
         
         switch value {
-        case .NULL:
+        case .null:
             obj = append(obj, pointer: [0] as [UInt8], length: 1)
-        case .Integer(var value):
+        case .integer(var value):
             obj = append(obj, pointer: [1] as [UInt8], length: 1)
             obj = append(obj, untypedPointer: &value, length: sizeofValue(value))
-        case .Real(var value):
+        case .real(var value):
             obj = append(obj, pointer: [2] as [UInt8], length: 1)
             obj = append(obj, untypedPointer: &value, length: sizeofValue(value))
-        case .Text(let string):
+        case .text(let string):
             obj = append(obj, pointer: [3] as [UInt8], length: 1)
             serialize(&obj, string)
-        case .Blob(let data):
+        case .blob(let data):
             obj = append(obj, pointer: [4] as [UInt8], length: 1)
             obj = append(obj, pointer: data, length: data.count)
-        case .NotFound:
+        case .notFound:
             obj = append(obj, pointer: [5] as [UInt8], length: 1)
         }
         
@@ -244,34 +244,34 @@ extension InlineRow {
 }
 
 extension InlineRow {
-    func deserializeString(ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> String {
+    func deserializeString(_ ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> String {
         let buf = UnsafeBufferPointer(start: ptr + start, count: end - start)
-        return String(bytes: buf, encoding: NSUTF8StringEncoding)!
+        return String(bytes: buf, encoding: String.Encoding.utf8)!
     }
     
-    func deserializeAttribute(ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> Attribute {
+    func deserializeAttribute(_ ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> Attribute {
         return Attribute(deserializeString(ptr, start: start, end: end))
     }
     
-    func deserializeValue(ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> RelationValue {
+    func deserializeValue(_ ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> RelationValue {
         switch ptr[start] {
         case 0:
-            return .NULL
+            return .null
         case 1:
-            let value = UnsafePointer<Int64>(ptr + start + 1).memory
-            return .Integer(value)
+            let value = UnsafePointer<Int64>(ptr + start + 1).pointee
+            return .integer(value)
         case 2:
-            let value = UnsafePointer<Double>(ptr + start + 1).memory
-            return .Real(value)
+            let value = UnsafePointer<Double>(ptr + start + 1).pointee
+            return .real(value)
         case 3:
             let value = deserializeString(ptr, start: start + 1, end: end)
-            return .Text(value)
+            return .text(value)
         case 4:
             let buf = UnsafeBufferPointer(start: ptr + start + 1, count: end - start - 1)
             let value = Array(buf)
-            return .Blob(value)
+            return .blob(value)
         case 5:
-            return .NotFound
+            return .notFound
         default:
             fatalError("Unknown tag byte \(ptr[start])")
         }
@@ -279,26 +279,26 @@ extension InlineRow {
 }
 
 extension InlineRow {
-    static let extantRows = Mutexed(NSHashTable(pointerFunctions: {
-        let pf = NSPointerFunctions(options: [.WeakMemory])
-        pf.hashFunction = { ptr, _ in unsafeBitCast(ptr, InlineRow.self).hashValue }
-        pf.isEqualFunction = { a, b, _ in ObjCBool(unsafeBitCast(a, InlineRow.self) == unsafeBitCast(b, InlineRow.self)) }
+    static let extantRows = Mutexed(NSHashTable(pointerFunctions: { () -> NSPointerFunctions in 
+        let pf = NSPointerFunctions(options: [.weakMemory])
+        pf.hashFunction = { ptr, _ in unsafeBitCast(ptr, to: InlineRow.self).hashValue }
+        pf.isEqualFunction = { a, b, _ in ObjCBool(unsafeBitCast(a, to: InlineRow.self) == unsafeBitCast(b, to: InlineRow.self)) }
         return pf
         }(), capacity: 0))
     
     
-    static func intern(row: InlineRow) -> InlineRow {
+    static func intern(_ row: InlineRow) -> InlineRow {
         return extantRows.withValue({
             if let extantRow = $0.member(row) {
                 return extantRow as! InlineRow
             } else {
-                $0.addObject(row)
+                $0.add(row)
                 return row
             }
         })
     }
     
-    static func intern(values: [Attribute: RelationValue]) -> InlineRow {
+    static func intern(_ values: [Attribute: RelationValue]) -> InlineRow {
         return intern(self.buildFrom(values))
     }
 }

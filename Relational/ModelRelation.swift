@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-public class ModelRelation<T: Model>: SequenceType {
+open class ModelRelation<T: Model>: Sequence {
     let owningDatabase: ModelDatabase
     
     let underlyingRelation: Relation
@@ -13,13 +13,13 @@ public class ModelRelation<T: Model>: SequenceType {
         self.underlyingRelation = underlyingRelation
     }
     
-    public func generate() -> AnyGenerator<Result<T, RelationError>> {
+    open func makeIterator() -> AnyIterator<Result<T, RelationError>> {
         let rows = underlyingRelation.rows()
-        return AnyGenerator(body: {
+        return AnyIterator(body: {
             if let row = rows.next() {
                 return row.then({ row in
                     guard let objectID: [UInt8] = row["objectID"].get() else {
-                        return .Err(ModelError.BadDataType(attribute: "objectID"))
+                        return .Err(ModelError.badDataType(attribute: "objectID"))
                     }
                     return self.owningDatabase.getOrMakeModelObject(T.self, ModelObjectID(value: objectID), {
                         T.fromRow(self.owningDatabase, row)
@@ -33,12 +33,12 @@ public class ModelRelation<T: Model>: SequenceType {
 }
 
 extension ModelRelation {
-    public func select(query: SelectExpression) -> ModelRelation {
+    public func select(_ query: SelectExpression) -> ModelRelation {
         return ModelRelation(owningDatabase: owningDatabase, underlyingRelation: underlyingRelation.select(query))
     }
 }
 
-public class ModelToManyRelation<T: Model>: ModelRelation<T> {
+open class ModelToManyRelation<T: Model>: ModelRelation<T> {
     let fromType: Model.Type
     let fromID: ModelObjectID
     
@@ -48,7 +48,7 @@ public class ModelToManyRelation<T: Model>: ModelRelation<T> {
         super.init(owningDatabase: owningDatabase, underlyingRelation: underlyingRelation)
     }
     
-    public func add(obj: T) -> Result<Void, RelationError> {
+    open func add(_ obj: T) -> Result<Void, RelationError> {
         if !owningDatabase.contains(obj) {
             if let error = owningDatabase.add(obj).err {
                 return .Err(error)

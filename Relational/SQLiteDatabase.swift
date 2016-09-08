@@ -5,10 +5,10 @@
 
 import sqlite3
 
-typealias sqlite3 = COpaquePointer
-typealias sqlite3_stmt = COpaquePointer
+typealias sqlite3 = OpaquePointer
+typealias sqlite3_stmt = OpaquePointer
 
-let SQLITE_TRANSIENT = unsafeBitCast(-1, sqlite3_destructor_type.self)
+let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
 private let busyTimeout: Int32 = 10 // milliseconds
 
@@ -18,19 +18,19 @@ private struct BLOBHeaders {
     static let BLOB = Array("BLOB".utf8)
 }
 
-public class SQLiteDatabase {
+open class SQLiteDatabase {
     let db: sqlite3
     
-    private var tables = Mutexed<[String: SQLiteTableRelation]>([:])
+    fileprivate var tables = Mutexed<[String: SQLiteTableRelation]>([:])
     
     public init(_ path: String) throws {
-        var localdb: sqlite3 = nil
+        var localdb: sqlite3? = nil
         let result = sqlite3_open_v2(path, &localdb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, nil)
         if result != SQLITE_OK {
             let message = String.fromCString(sqlite3_errstr(result))
             throw Error(code: result, message: message ?? "")
         }
-        self.db = localdb
+        self.db = localdb!
         
         try errwrap(sqlite3_busy_timeout(self.db, busyTimeout)).orThrow()
         
@@ -41,7 +41,7 @@ public class SQLiteDatabase {
         try! errwrap(sqlite3_close_v2(db)).orThrow()
     }
     
-    private func queryTables() -> Result<[String: SQLiteTableRelation], RelationError> {
+    fileprivate func queryTables() -> Result<[String: SQLiteTableRelation], RelationError> {
         let masterName = "SQLITE_MASTER"
         let masterScheme = schemeForTable(masterName)
         return masterScheme.then({ (scheme: Scheme) -> Result<[String: SQLiteTableRelation], RelationError> in
@@ -59,7 +59,7 @@ public class SQLiteDatabase {
         })
     }
     
-    private func schemeForTable(name: String) -> Result<Scheme, RelationError> {
+    fileprivate func schemeForTable(_ name: String) -> Result<Scheme, RelationError> {
         let columns = executeQuery("pragma table_info(\(escapeIdentifier(name)))")
         let names = mapOk(columns, { $0["name"].get()! as String })
         return names.map({ Scheme(attributes: Set($0.map({ Attribute($0) }))) })
@@ -67,12 +67,12 @@ public class SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    public struct Error: ErrorType {
+    public struct Error: Error {
         public var code: Int32
         public var message: String
     }
     
-    func errwrap(callResult: Int32) -> Result<Int32, RelationError> {
+    func errwrap(_ callResult: Int32) -> Result<Int32, RelationError> {
         switch callResult {
         case SQLITE_OK, SQLITE_ROW, SQLITE_DONE:
             return .Ok(callResult)
@@ -84,17 +84,17 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    func escapeIdentifier(id: String) -> String {
-        let escapedQuotes = id.stringByReplacingOccurrencesOfString("\"", withString: "\"\"")
+    func escapeIdentifier(_ id: String) -> String {
+        let escapedQuotes = id.replacingOccurrences(of: "\"", with: "\"\"")
         return "\"\(escapedQuotes)\""
     }
 }
 
 extension SQLiteDatabase {
-    public func createRelation(name: String, scheme: Scheme) -> Result<SQLiteTableRelation, RelationError> {
+    public func createRelation(_ name: String, scheme: Scheme) -> Result<SQLiteTableRelation, RelationError> {
         let allColumns: [String]  = scheme.attributes.map({ escapeIdentifier($0.name) })
         
-        let columnsSQL = allColumns.joinWithSeparator(", ")
+        let columnsSQL = allColumns.joined(separator: ", ")
         let sql = "CREATE TABLE IF NOT EXISTS \(escapeIdentifier(name)) (\(columnsSQL), UNIQUE (\(columnsSQL)) ON CONFLICT REPLACE)"
         
         let result = executeQuery(sql)
@@ -108,7 +108,7 @@ extension SQLiteDatabase {
         })
     }
     
-    public func getOrCreateRelation(name: String, scheme: Scheme) -> Result<SQLiteTableRelation, RelationError> {
+    public func getOrCreateRelation(_ name: String, scheme: Scheme) -> Result<SQLiteTableRelation, RelationError> {
         // TODO: this is not thread safe. Does it need to be?
         if let relation = self[name] {
             return .Ok(relation)
@@ -123,8 +123,8 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    func executeQuery(sql: String, _ parameters: [RelationValue] = []) -> Result<AnyGenerator<Result<Row, RelationError>>, RelationError> {
-        return makeStatement({ sqlite3_prepare_v2(self.db, sql, -1, &$0, nil) }).then({ stmt -> Result<AnyGenerator<Result<Row, RelationError>>, RelationError> in
+    func executeQuery(_ sql: String, _ parameters: [RelationValue] = []) -> Result<AnyIterator<Result<Row, RelationError>>, RelationError> {
+        return makeStatement({ sqlite3_prepare_v2(self.db, sql, -1, &$0, nil) }).then({ stmt -> Result<AnyIterator<Result<Row, RelationError>>, RelationError> in
             for (index, param) in parameters.enumerate() {
                 if let err = bindValue(stmt.value, Int32(index + 1), param).err {
                     return .Err(err)
@@ -164,7 +164,7 @@ extension SQLiteDatabase {
         })
     }
     
-    func executeQueryWithEmptyResults(sql: String, _ parameters: [RelationValue] = []) -> Result<Void, RelationError> {
+    func executeQueryWithEmptyResults(_ sql: String, _ parameters: [RelationValue] = []) -> Result<Void, RelationError> {
         return executeQuery(sql, parameters).then({
             let rows = Array($0)
             if let error = rows.first?.err {
@@ -175,10 +175,10 @@ extension SQLiteDatabase {
         })
     }
     
-    private func columnToValue(stmt: sqlite3_stmt, _ index: Int32) -> RelationValue {
+    fileprivate func columnToValue(_ stmt: sqlite3_stmt, _ index: Int32) -> RelationValue {
         let type = sqlite3_column_type(stmt, index)
         switch type {
-        case SQLITE_NULL: return .NULL // TODO: We don't really support SQLITE_NULL. We write out our own NULLs using funky BLOBs. Is it wise to read them in?
+        case SQLITE_NULL: return .null // TODO: We don't really support SQLITE_NULL. We write out our own NULLs using funky BLOBs. Is it wise to read them in?
         case SQLITE_INTEGER: return .Integer(sqlite3_column_int64(stmt, index))
         case SQLITE_FLOAT: return .Real(sqlite3_column_double(stmt, index))
         case SQLITE_TEXT: return .Text(String.fromCString(UnsafePointer(sqlite3_column_text(stmt, index)))!)
@@ -192,35 +192,35 @@ extension SQLiteDatabase {
         }
     }
     
-    private func blobToValue(buffer: UnsafeBufferPointer<UInt8>) -> RelationValue {
+    fileprivate func blobToValue(_ buffer: UnsafeBufferPointer<UInt8>) -> RelationValue {
         if buffer.count < BLOBHeaders.length { fatalError("Got a blob of length \(buffer.count) from SQLite, which isn't long enough to contain our header") }
         if memcmp(buffer.baseAddress, BLOBHeaders.NULL, BLOBHeaders.length) == 0 {
-            return .NULL
+            return .null
         } else if memcmp(buffer.baseAddress, BLOBHeaders.BLOB, BLOBHeaders.length) == 0 {
-            let remainder = buffer.suffixFrom(BLOBHeaders.length)
-            return .Blob(Array(remainder))
+            let remainder = buffer.suffix(from: BLOBHeaders.length)
+            return .blob(Array(remainder))
         } else {
             preconditionFailure("Got a blob with a header prefix \(buffer.prefix(4)) which we don't understand.")
         }
     }
     
-    private func bindValue(stmt: sqlite3_stmt, _ index: Int32, _ value: RelationValue) -> Result<Void, RelationError> {
+    fileprivate func bindValue(_ stmt: sqlite3_stmt, _ index: Int32, _ value: RelationValue) -> Result<Void, RelationError> {
         let result: Result<Int32, RelationError>
         switch value {
-        case .NULL: result = self.errwrap(sqlite3_bind_blob64(stmt, index, BLOBHeaders.NULL, UInt64(BLOBHeaders.length), SQLITE_TRANSIENT))
-        case .Integer(let x): result = self.errwrap(sqlite3_bind_int64(stmt, index, x))
-        case .Real(let x): result = self.errwrap(sqlite3_bind_double(stmt, index, x))
-        case .Text(let x): result = self.errwrap(sqlite3_bind_text(stmt, index, x, -1, SQLITE_TRANSIENT))
-        case .Blob(let x): result = self.errwrap(sqlite3_bind_blob64(stmt, index, BLOBHeaders.BLOB + x, UInt64(BLOBHeaders.length + x.count), SQLITE_TRANSIENT))
-        case .NotFound: result = .Ok(0)
+        case .null: result = self.errwrap(sqlite3_bind_blob64(stmt, index, BLOBHeaders.NULL, UInt64(BLOBHeaders.length), SQLITE_TRANSIENT))
+        case .integer(let x): result = self.errwrap(sqlite3_bind_int64(stmt, index, x))
+        case .real(let x): result = self.errwrap(sqlite3_bind_double(stmt, index, x))
+        case .text(let x): result = self.errwrap(sqlite3_bind_text(stmt, index, x, -1, SQLITE_TRANSIENT))
+        case .blob(let x): result = self.errwrap(sqlite3_bind_blob64(stmt, index, BLOBHeaders.BLOB + x, UInt64(BLOBHeaders.length + x.count), SQLITE_TRANSIENT))
+        case .notFound: result = .Ok(0)
         }
         return result.map({ _ in })
     }
 }
 
 extension SQLiteDatabase {
-    func makeStatement(@noescape sqliteCall: (inout sqlite3_stmt) -> Int32) -> Result<ValueWithDestructor<sqlite3_stmt>, RelationError> {
-        var localStmt: sqlite3_stmt = nil
+    func makeStatement(@noescape _ sqliteCall: (inout sqlite3_stmt) -> Int32) -> Result<ValueWithDestructor<sqlite3_stmt>, RelationError> {
+        var localStmt: sqlite3_stmt? = nil
         return errwrap(sqliteCall(&localStmt)).map({ _ in
             ValueWithDestructor(value: localStmt, destructor: {
                 // Note: sqlite3_finalize can return errors, but it only returns an error
@@ -236,12 +236,12 @@ extension SQLiteDatabase {
 
 extension SQLiteDatabase {
     public enum TransactionResult {
-        case Commit
-        case Rollback
-        case Retry
+        case commit
+        case rollback
+        case retry
     }
     
-    public func transaction<Return>(@noescape transactionFunction: Void -> (Return, TransactionResult)) -> Result<Return, RelationError> {
+    public func transaction<Return>(_ transactionFunction: @escaping @escaping (Void) -> (Return, TransactionResult)) -> Result<Return, RelationError> {
         // TODO: it might make sense to pass a new DB into the object, but in fact changes affect the original database object.
         // This will matter if the caller tries to access the original database during the transaction and expects it not to
         // reflect the new changes.
@@ -255,10 +255,10 @@ extension SQLiteDatabase {
                 let result = transactionFunction()
                 let sql: String
                 switch result.1 {
-                case .Commit: sql = "COMMIT TRANSACTION"
-                case .Rollback: sql = "ROLLBACK TRANSACTION"
+                case .commit: sql = "COMMIT TRANSACTION"
+                case .rollback: sql = "ROLLBACK TRANSACTION"
                     
-                case .Retry:
+                case .retry:
                     sql = "ROLLBACK TRANSACTION"
                     retry = true
                 }
@@ -269,14 +269,14 @@ extension SQLiteDatabase {
         return result
     }
     
-    public func transaction(@noescape transactionFunction: Void -> TransactionResult) -> Result<Void, RelationError> {
+    public func transaction(@noescape _ transactionFunction: (Void) -> TransactionResult) -> Result<Void, RelationError> {
         return self.transaction({ Void -> ((), TransactionResult) in
             let result = transactionFunction()
             return ((), result)
         })
     }
     
-    public func resultNeedsRetry<T>(result: Result<T, RelationError>) -> Bool {
+    public func resultNeedsRetry<T>(_ result: Result<T, RelationError>) -> Bool {
         return (result.err as? SQLiteDatabase.Error)?.code == SQLITE_BUSY
     }
 }

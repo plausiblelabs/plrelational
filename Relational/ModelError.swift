@@ -3,6 +3,6 @@
 // All rights reserved.
 //
 
-public enum ModelError: ErrorType {
-    case BadDataType(attribute: String)
+public enum ModelError: Error {
+    case badDataType(attribute: String)
 }

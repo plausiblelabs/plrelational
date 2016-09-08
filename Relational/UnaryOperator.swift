@@ -4,14 +4,14 @@
 //
 
 public protocol UnaryOperator {
-    func evaluate(value: RelationValue) -> RelationValue
+    func evaluate(_ value: RelationValue) -> RelationValue
 }
 
 public struct NotOperator: UnaryOperator {
     public init() {}
     
-    public func evaluate(value: RelationValue) -> RelationValue {
-        return .Integer(value.boolValue ? 0 : 1)
+    public func evaluate(_ value: RelationValue) -> RelationValue {
+        return .integer(value.boolValue ? 0 : 1)
     }
 }
 

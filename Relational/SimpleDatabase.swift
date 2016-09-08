@@ -8,7 +8,7 @@ import Foundation
 class SimpleDatabase {
     var relations: [String: ConcreteRelation] = [:]
     
-    func createRelation(name: String, scheme: Scheme) {
+    func createRelation(_ name: String, scheme: Scheme) {
         relations[name] = ConcreteRelation(scheme: scheme, values: [], defaultSort: nil)
     }
     
@@ -30,38 +30,38 @@ extension SimpleDatabase: CustomStringConvertible {
             "\(relation)\n" +
             "================"
         })
-        return strings.joinWithSeparator("\n\n")
+        return strings.joined(separator: "\n\n")
     }
 }
 
 extension SimpleDatabase {
-    private func valueToPlist(value: RelationValue) -> AnyObject {
+    fileprivate func valueToPlist(_ value: RelationValue) -> AnyObject {
         switch value {
-        case .NULL: return NSNull()
-        case .Integer(let x): return NSNumber(longLong: x)
-        case .Real(let x): return x
-        case .Text(let x): return x
-        case .Blob(let x): return NSData(bytes: x, length: x.count)
-        case .NotFound: fatalError("NotFound value should not be serialized!")
+        case .null: return NSNull()
+        case .integer(let x): return NSNumber(value: x as Int64)
+        case .real(let x): return x
+        case .text(let x): return x
+        case .blob(let x): return Data(bytes: UnsafePointer<UInt8>(x), count: x.count)
+        case .notFound: fatalError("NotFound value should not be serialized!")
         }
     }
     
-    static private func plistToValue(plist: AnyObject) -> RelationValue {
+    static fileprivate func plistToValue(_ plist: AnyObject) -> RelationValue {
         switch plist {
-        case is NSNull: return .NULL
+        case is NSNull: return .null
         case let x as NSNumber:
             if strcmp(x.objCType, "d") == 0 {
-                return .Real(x.doubleValue)
+                return .real(x.doubleValue)
             } else {
-                return .Integer(x.longLongValue)
+                return .integer(x.int64Value)
             }
         case let x as NSString:
-            return .Text(x as String)
-        case let x as NSData:
-            let array = Array(UnsafeBufferPointer(start: UnsafePointer<UInt8>(x.bytes), count: x.length))
-            return .Blob(array)
+            return .text(x as String)
+        case let x as Data:
+            let array = Array(UnsafeBufferPointer(start: (x as NSData).bytes.bindMemory(to: UInt8.self, capacity: x.count), count: x.count))
+            return .blob(array)
         default:
-            fatalError("Unexpected plist type \(plist.dynamicType)")
+            fatalError("Unexpected plist type \(type(of: plist))")
         }
     }
     
@@ -74,10 +74,10 @@ extension SimpleDatabase {
                 Dictionary(row.ok!.map({ ($0.name, self.valueToPlist($1)) }))
             })
             return (name, ["scheme": scheme, "values": values])
-        }))
+        })) as AnyObject
     }
     
-    static func fromPlist(plist: AnyObject) -> SimpleDatabase {
+    static func fromPlist(_ plist: AnyObject) -> SimpleDatabase {
         let dict = plist as! [String: [String: AnyObject]]
         let db = SimpleDatabase()
         for (name, contents) in dict {

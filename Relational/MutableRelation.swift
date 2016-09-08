@@ -4,8 +4,8 @@
 //
 
 public protocol MutableRelation: Relation {
-    mutating func add(row: Row) -> Result<Int64, RelationError>
-    mutating func delete(query: SelectExpression) -> Result<Void, RelationError>
+    mutating func add(_ row: Row) -> Result<Int64, RelationError>
+    mutating func delete(_ query: SelectExpression) -> Result<Void, RelationError>
 }
 
 public protocol MutableSelectRelation: class, Relation {

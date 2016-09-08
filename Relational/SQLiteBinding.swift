@@ -3,22 +3,22 @@
 // All rights reserved.
 //
 
-public class SQLiteBinding {
-    public enum Error: ErrorType {
-        case NoRows
+open class SQLiteBinding {
+    public enum Error: Error {
+        case noRows
     }
     
     let database: SQLiteDatabase
     let tableName: String
     let key: Row
     let attribute: Attribute
-    let changeObserver: RelationValue -> Void
+    let changeObserver: (RelationValue) -> Void
     
     let relation: Relation
     
-    var removal: (Void -> Void)?
+    var removal: ((Void) -> Void)?
     
-    public init(database: SQLiteDatabase, tableName: String, key: Row, attribute: Attribute, changeObserver: RelationValue -> Void) {
+    public init(database: SQLiteDatabase, tableName: String, key: Row, attribute: Attribute, changeObserver: @escaping (RelationValue) -> Void) {
         self.database = database
         self.tableName = tableName
         self.key = key
@@ -35,15 +35,15 @@ public class SQLiteBinding {
         self.removal?()
     }
     
-    public func get() -> Result<RelationValue, RelationError> {
-        return self.relation.rows().generate().next()?.map({ $0[attribute] }) ?? .Err(Error.NoRows)
+    open func get() -> Result<RelationValue, RelationError> {
+        return self.relation.rows().makeIterator().next()?.map({ $0[attribute] }) ?? .Err(Error.noRows)
     }
     
-    public func set(value: RelationValue) -> Result<Void, RelationError> {
+    open func set(_ value: RelationValue) -> Result<Void, RelationError> {
         return database[tableName]!.update(SelectExpressionFromRow(key), newValues: [attribute: value])
     }
     
-    private func changed() {
+    fileprivate func changed() {
         let value = self.get()
         if let value = value.ok {
             changeObserver(value)

@@ -12,13 +12,13 @@ infix operator ∩ {
 /// We use + instead of ∪ because it's easier to type and can still be understood.
 public func +(lhs: Relation?, rhs: Relation?) -> Relation? {
     switch (lhs, rhs) {
-    case let (.Some(lhs), .Some(rhs)):
+    case let (.some(lhs), .some(rhs)):
         return lhs.union(rhs)
-    case let (.Some(lhs), .None):
+    case let (.some(lhs), .none):
         return lhs
-    case let (.None, .Some(rhs)):
+    case let (.none, .some(rhs)):
         return rhs
-    case (.None, .None):
+    case (.none, .none):
         return nil
     }
 }
@@ -26,7 +26,7 @@ public func +(lhs: Relation?, rhs: Relation?) -> Relation? {
 /// Subtract two possibly-nil relations. The result is nil if the lhs is nil, the lhs
 /// is returned if the rhs is nil, and the difference is returned if both exist.
 public func -(lhs: Relation?, rhs: Relation?) -> Relation? {
-    if let lhs = lhs, rhs = rhs {
+    if let lhs = lhs, let rhs = rhs {
         return lhs.difference(rhs)
     } else if let lhs = lhs {
         return lhs
@@ -39,7 +39,7 @@ public func -(lhs: Relation?, rhs: Relation?) -> Relation? {
 /// I couldn't come up with a nice ASCII version of this operator, so we get the real
 /// untypeable thing. Use copy/paste or the character viewer.
 public func ∩(lhs: Relation?, rhs: Relation?) -> Relation? {
-    if let lhs = lhs, rhs = rhs {
+    if let lhs = lhs, let rhs = rhs {
         return lhs.intersection(rhs)
     } else {
         return nil

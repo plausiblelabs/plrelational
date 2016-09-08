@@ -5,13 +5,13 @@
 
 import sqlite3
 
-public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementation {
+open class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementation {
     let db: SQLiteDatabase
     
-    public let tableName: String
-    public let scheme: Scheme
+    open let tableName: String
+    open let scheme: Scheme
     
-    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     var tableNameForQuery: String {
         return db.escapeIdentifier(tableName)
@@ -31,10 +31,10 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
         precondition(queryToSQL(query) != nil, "Query terms must be SQL compatible!")
     }
     
-    private func rawGenerateRows() -> AnyGenerator<Result<Row, RelationError>> {
+    fileprivate func rawGenerateRows() -> AnyIterator<Result<Row, RelationError>> {
         let data = LogRelationIterationBegin(self)
-        var queryGenerator: AnyGenerator<Result<Row, RelationError>>? = nil
-        return LogRelationIterationReturn(data, AnyGenerator(body: {
+        var queryGenerator: AnyIterator<Result<Row, RelationError>>? = nil
+        return LogRelationIterationReturn(data, AnyIterator(body: {
             if let queryGenerator = queryGenerator {
                 return queryGenerator.next()
             } else {
@@ -51,32 +51,32 @@ public class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementati
         }))
     }
     
-    public var contentProvider: RelationContentProvider {
-        return .Generator({ self.rawGenerateRows() })
+    open var contentProvider: RelationContentProvider {
+        return .generator({ self.rawGenerateRows() })
     }
     
-    public func contains(row: Row) -> Result<Bool, RelationError> {
+    open func contains(_ row: Row) -> Result<Bool, RelationError> {
         let query = SelectExpressionFromRow(row)
         let selected = select(query)
         let rowsResult = mapOk(selected.rows(), { $0 })
         return rowsResult.map({ !$0.isEmpty })
     }
     
-    public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+    open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let baseTable = db[tableName]!
         return baseTable.update(self.queryAndedWithOtherQuery(query), newValues: newValues)
     }
     
-    public func onAddFirstObserver() {
+    open func onAddFirstObserver() {
         let baseTable = db[tableName]!
         baseTable.addWeakChangeObserver(self, call: {
-            $0.notifyChangeObservers($1, kind: .DirectChange)
+            $0.notifyChangeObservers($1, kind: .directChange)
         })
     }
 }
 
 extension SQLiteRelation {
-    private func operatorToSQL(op: BinaryOperator) -> String? {
+    fileprivate func operatorToSQL(_ op: BinaryOperator) -> String? {
         switch op {
         case is EqualityComparator:
             return "="
@@ -91,7 +91,7 @@ extension SQLiteRelation {
         }
     }
     
-    private func operatorToSQL(op: UnaryOperator) -> String? {
+    fileprivate func operatorToSQL(_ op: UnaryOperator) -> String? {
         switch op {
         case is NotOperator:
             return "NOT"
@@ -100,7 +100,7 @@ extension SQLiteRelation {
         }
     }
     
-    private func queryToSQL(query: SelectExpression?) -> (String, [RelationValue])? {
+    fileprivate func queryToSQL(_ query: SelectExpression?) -> (String, [RelationValue])? {
         switch query {
         case nil:
             return ("1", [])
@@ -117,14 +117,14 @@ extension SQLiteRelation {
         case let value as SelectExpressionBinaryOperator:
             if let
                 lhs = queryToSQL(value.lhs),
-                opSQL = operatorToSQL(value.op),
-                rhs = queryToSQL(value.rhs) {
+                let opSQL = operatorToSQL(value.op),
+                let rhs = queryToSQL(value.rhs) {
                 return ("(\(lhs.0)) \(opSQL) (\(rhs.0))", lhs.1 + rhs.1)
             }
         case let value as SelectExpressionUnaryOperator:
             if let
                 opSQL = operatorToSQL(value.op),
-                expr = queryToSQL(value.expr) {
+                let expr = queryToSQL(value.expr) {
                 return ("\(opSQL) (\(expr.0))", expr.1)
             }
         default:
@@ -135,7 +135,7 @@ extension SQLiteRelation {
     
     /// Return self.query ANDed with another query. If self.query is nil,
     /// returns the other query directly.
-    private func queryAndedWithOtherQuery(otherQuery: SelectExpression) -> SelectExpression {
+    fileprivate func queryAndedWithOtherQuery(_ otherQuery: SelectExpression) -> SelectExpression {
         if let myQuery = self.query {
             return myQuery *&& otherQuery
         } else {
@@ -143,32 +143,32 @@ extension SQLiteRelation {
         }
     }
     
-    public func select(query: SelectExpression) -> Relation {
+    public func select(_ query: SelectExpression) -> Relation {
         // Short circuit when the query is a simple true, just for useless efficiency.
-        if let query = query as? RelationValue where query.boolValue == true {
+        if let query = query as? RelationValue , query.boolValue == true {
             return self
         } else if queryToSQL(query) != nil {
             return SQLiteRelation(db: db, tableName: self.tableName, scheme: scheme, query: self.queryAndedWithOtherQuery(query))
         } else {
-            return IntermediateRelation(op: .Select(query), operands: [self])
+            return IntermediateRelation(op: .select(query), operands: [self])
         }
     }
 }
 
-public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
+open class SQLiteTableRelation: SQLiteRelation, MutableRelation {
     init(db: SQLiteDatabase, tableName: String, scheme: Scheme) {
         super.init(db: db, tableName: tableName, scheme: scheme, query: nil)
     }
     
-    public override func onAddFirstObserver() {
+    open override func onAddFirstObserver() {
         // If we're the original, base table then we have nothing to do.
     }
     
-    public func add(row: Row) -> Result<Int64, RelationError> {
+    open func add(_ row: Row) -> Result<Int64, RelationError> {
         let orderedAttributes = Array(row)
-        let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.0.name) }).joinWithSeparator(", ")
+        let attributesSQL = orderedAttributes.map({ db.escapeIdentifier($0.0.name) }).joined(separator: ", ")
         let parameters = orderedAttributes.map({ $0.1 })
-        let valuesSQL = Array(count: orderedAttributes.count, repeatedValue: "?").joinWithSeparator(", ")
+        let valuesSQL = Array(repeating: "?", count: orderedAttributes.count).joined(separator: ", ")
         let sql = "INSERT INTO \(tableNameForQuery) (\(attributesSQL)) VALUES (\(valuesSQL))"
         
         let result = db.executeQuery(sql, parameters)
@@ -180,12 +180,12 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
             
             precondition(array.isEmpty, "Unexpected results from INSERT INTO statement: \(array)")
             let rowid = sqlite3_last_insert_rowid(db.db)
-            self.notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .DirectChange)
+            self.notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .directChange)
             return .Ok(rowid)
         })
     }
 
-    public func delete(query: SelectExpression) -> Result<Void, RelationError> {
+    open func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         if let (whereSQL, whereParameters) = queryToSQL(query) {
             let willDelete = ConcreteRelation.copyRelation(self.select(query))
             return willDelete.then({ willDelete in
@@ -198,7 +198,7 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
                     }
                     
                     precondition(array.isEmpty, "Unexpected results from DELETE FROM statement: \(array)")
-                    self.notifyChangeObservers(RelationChange(added: nil, removed: willDelete), kind: .DirectChange)
+                    self.notifyChangeObservers(RelationChange(added: nil, removed: willDelete), kind: .directChange)
                     
                     return .Ok()
                 })
@@ -208,13 +208,13 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
         }
     }
     
-    override public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+    override open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         if let (whereSQL, whereParameters) = queryToSQL(self.queryAndedWithOtherQuery(query)) {
             let willUpdate = ConcreteRelation.copyRelation(self.select(query))
             return willUpdate.then({ willUpdate in
                 let orderedAttributes = Array(newValues)
                 let setParts = orderedAttributes.map({ db.escapeIdentifier($0.0.name) + " = ?" })
-                let setSQL = setParts.joinWithSeparator(", ")
+                let setSQL = setParts.joined(separator: ", ")
                 let setParameters = orderedAttributes.map({ $0.1 })
                 
                 let sql = "UPDATE \(tableNameForQuery) SET \(setSQL) WHERE \(whereSQL)"
@@ -228,7 +228,7 @@ public class SQLiteTableRelation: SQLiteRelation, MutableRelation {
                     precondition(array.isEmpty, "Unexpected results from UPDATE statement: \(array)")
                     
                     let updated = willUpdate.withUpdate(newValues)
-                    self.notifyChangeObservers(RelationChange(added: updated, removed: willUpdate), kind: .DirectChange)
+                    self.notifyChangeObservers(RelationChange(added: updated, removed: willUpdate), kind: .directChange)
                     return .Ok()
                 })
             })

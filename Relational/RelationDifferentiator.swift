@@ -119,10 +119,10 @@
  */
 
 class RelationDifferentiator {
-    private let relation: Relation
-    private var derivativeMap: ObjectDictionary<AnyObject, RelationChange> = [:]
+    fileprivate let relation: Relation
+    fileprivate var derivativeMap: ObjectDictionary<AnyObject, RelationChange> = [:]
     
-    private let derivative = RelationDerivative()
+    fileprivate let derivative = RelationDerivative()
     
     init(relation: Relation) {
         self.relation = relation
@@ -136,7 +136,7 @@ extension RelationDifferentiator {
         return derivative
     }
     
-    private func derivativeOf(relation: Relation) -> RelationChange {
+    fileprivate func derivativeOf(_ relation: Relation) -> RelationChange {
         if let obj = relation as? AnyObject {
             return derivativeMap.getOrCreate(obj, defaultValue: rawDerivativeOf(relation))
         } else {
@@ -144,7 +144,7 @@ extension RelationDifferentiator {
         }
     }
     
-    private func rawDerivativeOf(relation: Relation) -> RelationChange {
+    fileprivate func rawDerivativeOf(_ relation: Relation) -> RelationChange {
         switch relation {
         case let intermediate as IntermediateRelation:
             // Intermediate relations require more smarts. Do that elsewhere.
@@ -161,36 +161,36 @@ extension RelationDifferentiator {
 }
 
 extension RelationDifferentiator {
-    private func intermediateDerivative(r: IntermediateRelation) -> RelationChange {
+    fileprivate func intermediateDerivative(_ r: IntermediateRelation) -> RelationChange {
         switch r.op {
-        case .Union:
+        case .union:
             return unionDerivative(r)
-        case .Intersection:
+        case .intersection:
             return intersectionDerivative(r)
-        case .Difference:
+        case .difference:
             return differenceDerivative(r)
-        case .Project(let scheme):
+        case .project(let scheme):
             return projectionDerivative(r, scheme: scheme)
-        case .Select(let expression):
+        case .select(let expression):
             return selectDerivative(r, expression: expression)
-        case .MutableSelect(let expression):
+        case .mutableSelect(let expression):
             return mutableSelectDerivative(r, expression: expression)
-        case .Equijoin(let matching):
+        case .equijoin(let matching):
             return equijoinDerivative(r, matching: matching)
-        case .Rename(let renames):
+        case .rename(let renames):
             return renameDerivative(r, renames: renames)
-        case .Update(let newValues):
+        case .update(let newValues):
             return updateDerivative(r, newValues: newValues)
-        case .Aggregate(let attribute, let initialValue, let aggregateFunction):
+        case .aggregate(let attribute, let initialValue, let aggregateFunction):
             return aggregateDerivative(r, attribute: attribute, initialValue: initialValue, aggregateFunction: aggregateFunction)
-        case .Otherwise:
+        case .otherwise:
             return otherwiseDerivative(r)
-        case .Unique:
+        case .unique:
             return uniqueDerivative(r)
         }
     }
     
-    private func unionDerivative(r: IntermediateRelation) -> RelationChange {
+    fileprivate func unionDerivative(_ r: IntermediateRelation) -> RelationChange {
         if r.operands.isEmpty {
             return RelationChange(added: nil, removed: nil)
         } else if r.operands.count == 1 {
@@ -211,7 +211,7 @@ extension RelationDifferentiator {
         return RelationChange(added: added, removed: removed)
     }
     
-    private func intersectionDerivative(r: IntermediateRelation) -> RelationChange {
+    fileprivate func intersectionDerivative(_ r: IntermediateRelation) -> RelationChange {
         if r.operands.isEmpty {
             return RelationChange(added: nil, removed: nil)
         } else if r.operands.count == 1 {
@@ -232,7 +232,7 @@ extension RelationDifferentiator {
         return RelationChange(added: added, removed: removed)
     }
     
-    private func differenceDerivative(r: IntermediateRelation) -> RelationChange {
+    fileprivate func differenceDerivative(_ r: IntermediateRelation) -> RelationChange {
         if r.operands.isEmpty {
             return RelationChange(added: nil, removed: nil)
         } else if r.operands.count == 1 {
@@ -253,7 +253,7 @@ extension RelationDifferentiator {
         return RelationChange(added: added, removed: removed)
     }
     
-    private func projectionDerivative(r: IntermediateRelation, scheme: Scheme) -> RelationChange {
+    fileprivate func projectionDerivative(_ r: IntermediateRelation, scheme: Scheme) -> RelationChange {
         // Adds to the underlying relation are adds to the projected relation
         // if there were no matching rows in the relation before. To compute
         // that, project the changes, then subtract the pre-change relation,
@@ -268,7 +268,7 @@ extension RelationDifferentiator {
                                   removed: underlyingDerivative.removed?.project(scheme).difference(r))
     }
     
-    private func selectDerivative(r: IntermediateRelation, expression: SelectExpression) -> RelationChange {
+    fileprivate func selectDerivative(_ r: IntermediateRelation, expression: SelectExpression) -> RelationChange {
         // Our changes are equal to the underlying changes with the same select applied.
         // (select A)' = select A'
         let underlyingDerivative = derivativeOf(r.operands[0])
@@ -276,7 +276,7 @@ extension RelationDifferentiator {
                               removed: underlyingDerivative.removed?.select(expression))
     }
     
-    private func mutableSelectDerivative(r: IntermediateRelation, expression: SelectExpression) -> RelationChange {
+    fileprivate func mutableSelectDerivative(_ r: IntermediateRelation, expression: SelectExpression) -> RelationChange {
         // This is like the plain select derivative, but we add in changes made to the select expression
         // itself as well. It's never possible to have changes made to the select expression itself at
         // the same time as there are changes made to operands (for now?) so there doesn't need to be
@@ -290,7 +290,7 @@ extension RelationDifferentiator {
             removed: changesFromUnderlying.removed + placeholders.removed)
     }
     
-    private func equijoinDerivative(r: IntermediateRelation, matching: [Attribute: Attribute]) -> RelationChange {
+    fileprivate func equijoinDerivative(_ r: IntermediateRelation, matching: [Attribute: Attribute]) -> RelationChange {
         // TODO: if we apply some brainpower we may be able to figure out how to compute this derivative without running
         // the entire join multiple times just to compute the before/after differences.
         let prejoin = preChangeRelation(r.operands[0]).equijoin(preChangeRelation(r.operands[1]), matching: matching)
@@ -299,7 +299,7 @@ extension RelationDifferentiator {
         return RelationChange(added: added, removed: removed)
     }
     
-    private func renameDerivative(r: IntermediateRelation, renames: [Attribute: Attribute]) -> RelationChange {
+    fileprivate func renameDerivative(_ r: IntermediateRelation, renames: [Attribute: Attribute]) -> RelationChange {
         // Changes are the same, but renamed.
         // (rename A)' = rename A'
         let underlyingDerivative = derivativeOf(r.operands[0])
@@ -307,35 +307,35 @@ extension RelationDifferentiator {
                                   removed: underlyingDerivative.removed?.renameAttributes(renames))
     }
     
-    private func updateDerivative(r: IntermediateRelation, newValues: Row) -> RelationChange {
+    fileprivate func updateDerivative(_ r: IntermediateRelation, newValues: Row) -> RelationChange {
         // Our updates are equal to the projected updates joined with our newValues.
         // (update A newValues)' = (projected A') join newValues
-        let untouchedScheme = Scheme(attributes: Set(r.operands[0].scheme.attributes.subtract(newValues.attributes)))
+        let untouchedScheme = Scheme(attributes: Set(r.operands[0].scheme.attributes.subtracting(newValues.attributes)))
         let projectionDerivative = self.projectionDerivative(r, scheme: untouchedScheme)
         return RelationChange(added: projectionDerivative.added?.join(ConcreteRelation(newValues)),
                                   removed: projectionDerivative.removed?.join(ConcreteRelation(newValues)))
     }
     
-    private func aggregateDerivative(r: IntermediateRelation, attribute: Attribute, initialValue: RelationValue?, aggregateFunction: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) -> RelationChange {
+    fileprivate func aggregateDerivative(_ r: IntermediateRelation, attribute: Attribute, initialValue: RelationValue?, aggregateFunction: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) -> RelationChange {
         // Do a brute before/after difference.
         // A' = (new A) - (old A)
         // We called this approach "dumb and inefficient"; is there a better way here?
         let preChangeRelation = self.preChangeRelation(r.operands[0])
-        let previousAgg = IntermediateRelation(op: .Aggregate(attribute, initialValue, aggregateFunction), operands: [preChangeRelation])
+        let previousAgg = IntermediateRelation(op: .aggregate(attribute, initialValue, aggregateFunction), operands: [preChangeRelation])
         return RelationChange(added: r.difference(previousAgg),
                                   removed: previousAgg.difference(r))
     }
     
-    private func otherwiseDerivative(r: IntermediateRelation) -> RelationChange {
+    fileprivate func otherwiseDerivative(_ r: IntermediateRelation) -> RelationChange {
         // Do another brute before/after difference.
         // A' = (new A) - (old A)
         let preChangeRelations = r.operands.map(self.preChangeRelation)
-        let previousOtherwise = IntermediateRelation(op: .Otherwise, operands: preChangeRelations)
+        let previousOtherwise = IntermediateRelation(op: .otherwise, operands: preChangeRelations)
         return RelationChange(added: r.difference(previousOtherwise),
                               removed: previousOtherwise.difference(r))
     }
     
-    private func uniqueDerivative(r: IntermediateRelation) -> RelationChange {
+    fileprivate func uniqueDerivative(_ r: IntermediateRelation) -> RelationChange {
         // Do another brute before/after difference.
         // A' = (new A) - (old A)
         let preChangeRelations = r.operands.map(self.preChangeRelation)
@@ -346,7 +346,7 @@ extension RelationDifferentiator {
 }
 
 extension RelationDifferentiator {
-    private func union(relations: [Relation?]) -> Relation? {
+    fileprivate func union(_ relations: [Relation?]) -> Relation? {
         let nonnil = relations.flatMap({ $0 })
         if nonnil.isEmpty {
             return nil
@@ -357,7 +357,7 @@ extension RelationDifferentiator {
         }
     }
     
-    private func intersection(relations: [Relation?]) -> Relation? {
+    fileprivate func intersection(_ relations: [Relation?]) -> Relation? {
         let nonnil = relations.flatMap({ $0 })
         if nonnil.isEmpty || nonnil.count != relations.count {
             return nil
@@ -368,8 +368,8 @@ extension RelationDifferentiator {
         }
     }
     
-    private func difference(a: Relation?, _ b: Relation?) -> Relation? {
-        if let a = a, b = b {
+    fileprivate func difference(_ a: Relation?, _ b: Relation?) -> Relation? {
+        if let a = a, let b = b {
             return a.difference(b)
         } else if let a = a {
             return a
@@ -378,7 +378,7 @@ extension RelationDifferentiator {
         }
     }
     
-    private func preChangeRelation(r: Relation) -> Relation {
+    fileprivate func preChangeRelation(_ r: Relation) -> Relation {
         let d = derivativeOf(r)
         var preChangeRelation = r
         if let added = d.added {
@@ -390,7 +390,7 @@ extension RelationDifferentiator {
         return preChangeRelation
     }
     
-    private func preChangeRelations(relations: [Relation]) -> [Relation] {
+    fileprivate func preChangeRelations(_ relations: [Relation]) -> [Relation] {
         return relations.map(self.preChangeRelation)
     }
 }

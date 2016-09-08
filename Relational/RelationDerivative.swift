@@ -8,16 +8,16 @@ class RelationDerivative {
     /// something that it depends on changed). Variables must be objects, because value types can't
     /// sensibly vary in an indirect fashion. Not all object Relations are variables, but saying a
     /// variable is a Relation and an AnyObject gives us what we need here.
-    typealias Variable = protocol<Relation, AnyObject>
+    typealias Variable = Relation & AnyObject
     
     var placeholders: ObjectDictionary<AnyObject, (added: IntermediateRelation, removed: IntermediateRelation)> = [:]
     
-    private var underlyingDerivative: RelationChange?
+    fileprivate var underlyingDerivative: RelationChange?
     
-    func placeholdersForVariable(variable: Variable) -> (added: Relation, removed: Relation) {
+    func placeholdersForVariable(_ variable: Variable) -> (added: Relation, removed: Relation) {
         let placeholders = self.placeholders.getOrCreate(variable, defaultValue: (
-            added: IntermediateRelation(op: .Union, operands: [ConcreteRelation(scheme: variable.scheme)]),
-            removed: IntermediateRelation(op: .Union, operands: [ConcreteRelation(scheme: variable.scheme)])
+            added: IntermediateRelation(op: .union, operands: [ConcreteRelation(scheme: variable.scheme)]),
+            removed: IntermediateRelation(op: .union, operands: [ConcreteRelation(scheme: variable.scheme)])
         ))
         return (placeholders.0, placeholders.1)
     }
@@ -33,13 +33,13 @@ class RelationDerivative {
         }
     }
     
-    func setChange(change: RelationChange, forVariable: Variable) {
+    func setChange(_ change: RelationChange, forVariable: Variable) {
         let (added, removed) = placeholders[forVariable]!
         setChange(change.added, forPlaceholder: added)
         setChange(change.removed, forPlaceholder: removed)
     }
     
-    func addChange(change: RelationChange, toVariable variable: Variable) {
+    func addChange(_ change: RelationChange, toVariable variable: Variable) {
         let currentChange = changeForVariable(variable)
         
         let new = change.added - currentChange.removed
@@ -56,22 +56,22 @@ class RelationDerivative {
         return underlyingDerivative!
     }
     
-    func setUnderlyingDerivative(change: RelationChange) {
+    func setUnderlyingDerivative(_ change: RelationChange) {
         underlyingDerivative = change
     }
     
-    private func setChange(change: Relation?, forPlaceholder placeholder: IntermediateRelation) {
+    fileprivate func setChange(_ change: Relation?, forPlaceholder placeholder: IntermediateRelation) {
         let realChange = change ?? ConcreteRelation(scheme: placeholder.scheme)
         placeholder.operands = [realChange]
     }
     
-    private func changeForVariable(variable: Variable) -> RelationChange {
+    fileprivate func changeForVariable(_ variable: Variable) -> RelationChange {
         let (added, removed) = placeholders[variable]!
         return RelationChange(added: changeForPlaceholder(added),
                               removed: changeForPlaceholder(removed))
     }
     
-    private func changeForPlaceholder(placeholder: IntermediateRelation) -> Relation? {
+    fileprivate func changeForPlaceholder(_ placeholder: IntermediateRelation) -> Relation? {
         return placeholder.operands.first
     }
 }

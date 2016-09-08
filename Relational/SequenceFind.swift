@@ -3,8 +3,8 @@
 // All rights reserved.
 //
 
-extension SequenceType {
-    func find(predicate: Generator.Element -> Bool) -> Generator.Element? {
+extension Sequence {
+    func find(_ predicate: (Iterator.Element) -> Bool) -> Iterator.Element? {
         for element in self {
             if predicate(element) {
                 return element

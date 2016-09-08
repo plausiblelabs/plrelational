@@ -58,10 +58,10 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
 }
 #endif
 
-@inline(__always) func LogRelationCreation<T: Relation>(caller: T) {
+@inline(__always) func LogRelationCreation<T: Relation>(_ caller: T) {
     #if LOG_RELATION_ACTIVITY
         if let obj = caller as? AnyObject {
-            print("Created \(caller.dynamicType) \(String(format: "%p", ObjectIdentifier(obj).uintValue))")
+            print("Created \(type(of: caller)) \(String(format: "%p", ObjectIdentifier(obj).uintValue))")
             if Flags.printCreationStacks {
                 for line in NSThread.callStackSymbols() {
                     print(line)
@@ -71,13 +71,13 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
     #endif
 }
 
-@inline(__always) func LogRelationIterationBegin<T: Relation>(caller: T) -> RelationIterationLoggingData {
+@inline(__always) func LogRelationIterationBegin<T: Relation>(_ caller: T) -> RelationIterationLoggingData {
     #if LOG_RELATION_ACTIVITY
         let description: String
         if let obj = caller as? AnyObject {
-            description = String(format: "%@ %p", NSStringFromClass(obj.dynamicType), unsafeAddressOf(obj))
+            description = String(format: "%@ %p", NSStringFromClass(type(of: obj)), unsafeAddressOf(obj))
         } else {
-            description = String(caller.dynamicType)
+            description = String(type(of: caller))
         }
         if indentLevel.get() == 0 {
             print("----------")
@@ -135,7 +135,7 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
     #endif
 }
 
-@inline(__always) func LogRelationIterationReturn(data: RelationIterationLoggingData, _ generator: AnyGenerator<Result<Row, RelationError>>) -> AnyGenerator<Result<Row, RelationError>> {
+@inline(__always) func LogRelationIterationReturn(_ data: RelationIterationLoggingData, _ generator: AnyIterator<Result<Row, RelationError>>) -> AnyIterator<Result<Row, RelationError>> {
     #if LOG_RELATION_ACTIVITY
         var rowCount = 0
         let indentString = "".stringByPaddingToLength(data.indentLevel * 4, withString: " ", startingAtIndex: 0)
@@ -167,7 +167,7 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
     #endif
 }
 
-@inline(__always) func LogRelationIterationReturn(data: RelationIterationLoggingData, _ generator: AnyGenerator<Result<Set<Row>, RelationError>>) -> AnyGenerator<Result<Set<Row>, RelationError>> {
+@inline(__always) func LogRelationIterationReturn(_ data: RelationIterationLoggingData, _ generator: AnyIterator<Result<Set<Row>, RelationError>>) -> AnyIterator<Result<Set<Row>, RelationError>> {
     #if LOG_RELATION_ACTIVITY
         var rowCount = 0
         let indentString = "".stringByPaddingToLength(data.indentLevel * 4, withString: " ", startingAtIndex: 0)

@@ -8,10 +8,10 @@ import Foundation
 
 /// A simple mutex with a Swifty API. Note: despite being a struct, it acts like a reference type.
 public struct Mutex {
-    private let lock = NSLock()
+    fileprivate let lock = NSLock()
     
     /// Call the given function with the lock locked, automatically unlocking before returning or throwing.
-    public func locked<T>(@noescape f: Void throws -> T) rethrows -> T {
+    public func locked<T>(f: (Void) throws -> T) rethrows -> T {
         lock.lock()
         defer { lock.unlock() }
         return try f()
@@ -23,16 +23,16 @@ public struct Mutex {
 /// wrapped type is a value type, this will act weirdly, with the mutex being shared among copies
 /// but the value being separate in each copy. This struct really shouldn't be copied, just have one.
 public struct Mutexed<T> {
-    private let mutex = Mutex()
+    fileprivate let mutex = Mutex()
     
-    private var value: T
+    fileprivate var value: T
     
     public init(_ value: T) {
         self.value = value
     }
     
     /// Call the given function with the lock locked, passing in the value so it can be used while locked.
-    public func withValue<Result>(@noescape f: (T) throws -> Result) rethrows -> Result {
+    public func withValue<Result>(f: @escaping @escaping (T) throws -> Result) rethrows -> Result {
         return try mutex.locked({
             return try f(value)
         })
@@ -40,7 +40,7 @@ public struct Mutexed<T> {
     
     /// Call the given function with the lock locked, passing in the value as inout so it can be used or
     /// mutated while locked.
-    public mutating func withMutableValue<Result>(@noescape f: (inout T) throws -> Result) rethrows -> Result {
+    public mutating func withMutableValue<Result>(f: @escaping @escaping (inout T) throws -> Result) rethrows -> Result {
         return try mutex.locked({
             return try f(&value)
         })

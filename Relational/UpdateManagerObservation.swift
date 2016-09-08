@@ -32,15 +32,15 @@ import Foundation
 /// which need to have everything before they can take any action.
 
 public protocol AsyncRelationChangeObserver {
-    func relationWillChange(relation: Relation)
-    func relationAddedRows(relation: Relation, rows: Set<Row>)
-    func relationRemovedRows(relation: Relation, rows: Set<Row>)
-    func relationError(relation: Relation, error: RelationError)
-    func relationDidChange(relation: Relation)
+    func relationWillChange(_ relation: Relation)
+    func relationAddedRows(_ relation: Relation, rows: Set<Row>)
+    func relationRemovedRows(_ relation: Relation, rows: Set<Row>)
+    func relationError(_ relation: Relation, error: RelationError)
+    func relationDidChange(_ relation: Relation)
 }
 
 extension UpdateManager {
-    public func observe(relation: Relation, observer: AsyncRelationChangeCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
+    public func observe(_ relation: Relation, observer: AsyncRelationChangeCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
         class ShimObserver: AsyncRelationChangeObserver {
             let coalescedObserver: DispatchContextWrapped<AsyncRelationChangeCoalescedObserver>
             var coalescedChanges = NegativeSet<Row>()
@@ -50,23 +50,23 @@ extension UpdateManager {
                 self.coalescedObserver = coalescedObserver
             }
             
-            func relationWillChange(relation: Relation) {
+            func relationWillChange(_ relation: Relation) {
                 coalescedObserver.withWrapped({ $0.relationWillChange(relation) })
             }
             
-            func relationAddedRows(relation: Relation, rows: Set<Row>) {
+            func relationAddedRows(_ relation: Relation, rows: Set<Row>) {
                 coalescedChanges.unionInPlace(rows)
             }
             
-            func relationRemovedRows(relation: Relation, rows: Set<Row>) {
+            func relationRemovedRows(_ relation: Relation, rows: Set<Row>) {
                 coalescedChanges.subtractInPlace(rows)
             }
             
-            func relationError(relation: Relation, error: RelationError) {
+            func relationError(_ relation: Relation, error: RelationError) {
                 self.error = error
             }
             
-            func relationDidChange(relation: Relation) {
+            func relationDidChange(_ relation: Relation) {
                 let result = error.map(Result.Err) ?? .Ok(coalescedChanges)
                 coalescedChanges.removeAll()
                 coalescedObserver.withWrapped({ $0.relationDidChange(relation, result: result) })
@@ -75,112 +75,112 @@ extension UpdateManager {
         
         let wrappedObserver = DispatchContextWrapped(context: context ?? defaultObserverDispatchContext(), wrapped: observer)
         let shimObserver = ShimObserver(coalescedObserver: wrappedObserver)
-        return self.observe(relation, observer: shimObserver, context: DirectDispatchContext())
+        return self.observe(relation, observer: shimObserver as! AsyncRelationChangeCoalescedObserver, context: DirectDispatchContext())
     }
 }
 
 public protocol AsyncRelationChangeCoalescedObserver {
-    func relationWillChange(relation: Relation)
-    func relationDidChange(relation: Relation, result: Result<NegativeSet<Row>, RelationError>)
+    func relationWillChange(_ relation: Relation)
+    func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>)
 }
 
 public extension Relation {
-    func addAsyncObserver(observer: AsyncRelationChangeObserver) -> UpdateManager.ObservationRemover {
-        return UpdateManager.currentInstance.observe(self, observer: observer)
+    func addAsyncObserver(_ observer: AsyncRelationChangeObserver) -> UpdateManager.ObservationRemover {
+        return UpdateManager.currentInstance.observe(self, observer: observer as! AsyncRelationChangeCoalescedObserver)
     }
     
-    func addAsyncObserver(observer: AsyncRelationChangeCoalescedObserver) -> UpdateManager.ObservationRemover {
+    func addAsyncObserver(_ observer: AsyncRelationChangeCoalescedObserver) -> UpdateManager.ObservationRemover {
         return UpdateManager.currentInstance.observe(self, observer: observer)
     }
 }
 
 public protocol AsyncRelationContentObserver {
-    func relationWillChange(relation: Relation)
-    func relationNewContents(relation: Relation, rows: Set<Row>)
-    func relationError(relation: Relation, error: RelationError)
-    func relationDidChange(relation: Relation)
+    func relationWillChange(_ relation: Relation)
+    func relationNewContents(_ relation: Relation, rows: Set<Row>)
+    func relationError(_ relation: Relation, error: RelationError)
+    func relationDidChange(_ relation: Relation)
 }
 
 extension UpdateManager {
-    public func observe<T: AsyncRelationContentCoalescedObserver>(relation: Relation, observer: T, context: DispatchContext? = nil, postprocessor: Set<Row> -> T.PostprocessingOutput) -> ObservationRemover {
+    public func observe<T: AsyncRelationContentCoalescedObserver>(_ relation: Relation, observer: T, context: DispatchContext? = nil, postprocessor: @escaping (Set<Row>) -> T.PostprocessingOutput) -> ObservationRemover {
         
         let wrappedObserver = DispatchContextWrapped(context: context ?? defaultObserverDispatchContext(), wrapped: observer)
         let shimObserver = ShimContentObserver(coalescedObserver: wrappedObserver, postprocessor: postprocessor)
-        return self.observe(relation, observer: shimObserver, context: DirectDispatchContext())
+        return self.observe(relation, observer: shimObserver as! AsyncRelationChangeCoalescedObserver, context: DirectDispatchContext())
     }
 }
 
 public protocol AsyncRelationContentCoalescedObserver {
     associatedtype PostprocessingOutput
     
-    func relationWillChange(relation: Relation)
-    func relationDidChange(relation: Relation, result: Result<PostprocessingOutput, RelationError>)
+    func relationWillChange(_ relation: Relation)
+    func relationDidChange(_ relation: Relation, result: Result<PostprocessingOutput, RelationError>)
 }
 
 
 public extension Relation {
-    func addAsyncObserver(observer: AsyncRelationContentObserver) -> UpdateManager.ObservationRemover {
-        return UpdateManager.currentInstance.observe(self, observer: observer)
+    func addAsyncObserver(_ observer: AsyncRelationContentObserver) -> UpdateManager.ObservationRemover {
+        return UpdateManager.currentInstance.observe(self, observer: observer as! AsyncRelationChangeCoalescedObserver)
     }
     
     /// If desired, this method can be used to supply a postprocessor function which runs in the background after the rows
     /// are accumulated but before results are sent to the observer. This postprocessor can, for example, sort the rows and
     /// produce an array which is then passed to the observer.
-    func addAsyncObserver<T: AsyncRelationContentCoalescedObserver>(observer: T, postprocessor: Set<Row> -> T.PostprocessingOutput) -> UpdateManager.ObservationRemover {
+    func addAsyncObserver<T: AsyncRelationContentCoalescedObserver>(_ observer: T, postprocessor: @escaping (Set<Row>) -> T.PostprocessingOutput) -> UpdateManager.ObservationRemover {
         return UpdateManager.currentInstance.observe(self, observer: observer, postprocessor: postprocessor)
     }
     
     /// This method may be used when the observer just wants a raw set of rows to be delivered, without any postprocessing.
-    func addAsyncObserver<T: AsyncRelationContentCoalescedObserver where T.PostprocessingOutput == Set<Row>>(observer: T) -> UpdateManager.ObservationRemover {
+    func addAsyncObserver<T: AsyncRelationContentCoalescedObserver>(_ observer: T) -> UpdateManager.ObservationRemover where T.PostprocessingOutput == Set<Row> {
         return UpdateManager.currentInstance.observe(self, observer: observer, postprocessor: { $0 })
     }
 }
 
 public extension Relation {
-    func asyncUpdate(query: SelectExpression, newValues: Row) {
+    func asyncUpdate(_ query: SelectExpression, newValues: Row) {
         UpdateManager.currentInstance.registerUpdate(self, query: query, newValues: newValues)
     }
 }
 
 /// Returns a postprocessing function which sorts the rows in ascending order based on the value each row has for `attribute`.
-public func sortByAttribute(attribute: Attribute) -> (Set<Row> -> [Row]) {
+public func sortByAttribute(_ attribute: Attribute) -> ((Set<Row>) -> [Row]) {
     return {
-        $0.sort({ $0[attribute] < $1[attribute] })
+        $0.sorted(by: { $0[attribute] < $1[attribute] })
     }
 }
 
 private class ShimContentObserver<T: AsyncRelationContentCoalescedObserver>: AsyncRelationContentObserver {
     let coalescedObserver: DispatchContextWrapped<T>
-    let postprocess: Set<Row> -> T.PostprocessingOutput
+    let postprocess: (Set<Row>) -> T.PostprocessingOutput
     var coalescedRows: Set<Row> = []
     var error: RelationError?
     var changing = false
     
-    init(coalescedObserver: DispatchContextWrapped<T>, postprocessor: Set<Row> -> T.PostprocessingOutput) {
+    init(coalescedObserver: DispatchContextWrapped<T>, postprocessor: @escaping (Set<Row>) -> T.PostprocessingOutput) {
         self.coalescedObserver = coalescedObserver
         self.postprocess = postprocessor
     }
     
-    func relationWillChange(relation: Relation) {
+    func relationWillChange(_ relation: Relation) {
         precondition(!changing)
         changing = true
         
         coalescedObserver.withWrapped({ $0.relationWillChange(relation) })
     }
     
-    func relationNewContents(relation: Relation, rows: Set<Row>) {
+    func relationNewContents(_ relation: Relation, rows: Set<Row>) {
         precondition(changing)
         
-        coalescedRows.unionInPlace(rows)
+        coalescedRows.formUnion(rows)
     }
     
-    func relationError(relation: Relation, error: RelationError) {
+    func relationError(_ relation: Relation, error: RelationError) {
         precondition(changing)
         
         self.error = error
     }
     
-    func relationDidChange(relation: Relation) {
+    func relationDidChange(_ relation: Relation) {
         precondition(changing)
         changing = false
         

@@ -6,7 +6,7 @@
 extension Mirror {
     var mirrorsIncludingSupertypes: [Mirror] {
         var result = [self]
-        while let next = result.last?.superclassMirror() {
+        while let next = result.last?.superclassMirror {
             result.append(next)
         }
         return result
