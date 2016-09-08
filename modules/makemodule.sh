@@ -22,5 +22,10 @@ if [ ! -f "$OUT_FILE" ] || [ "$0" -nt "$OUT_FILE" ]; then
         export *
     }
 
+    module CommonCrypto [system] {
+        header "$SDKROOT/usr/include/CommonCrypto/CommonCrypto.h"
+        link "System"
+        export *
+    }
 MODULE
 fi

@@ -753,7 +753,6 @@
 		C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectMapTests.swift; path = RelationalTests/ObjectMapTests.swift; sourceTree = SOURCE_ROOT; };
 		C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ConsistentPRNG.swift; path = Relational/ConsistentPRNG.swift; sourceTree = "<group>"; };
 		C2B6E2681D804D5E0039923C /* PlistDirectoryRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDirectoryRelation.swift; sourceTree = "<group>"; };
-		C2B6E26A1D805CD80039923C /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = modules/module.modulemap; sourceTree = SOURCE_ROOT; };
 		C2B6E26B1D805E230039923C /* Crypto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Crypto.swift; path = Relational/Crypto.swift; sourceTree = "<group>"; };
 		C2B6E26D1D806B390039923C /* PlistDirectoryRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDirectoryRelationTests.swift; sourceTree = "<group>"; };
 		C2B6E26F1D80AA6A0039923C /* NSURLConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NSURLConvenience.swift; path = Relational/NSURLConvenience.swift; sourceTree = "<group>"; };
@@ -1346,7 +1345,6 @@
 			isa = PBXGroup;
 			children = (
 				C22921911CC6CDCC00518184 /* makemodule.sh */,
-				C2B6E26A1D805CD80039923C /* module.modulemap */,
 			);
 			name = "Custom Module Map";
 			path = Relational;
@@ -3133,7 +3131,6 @@
 				EXECUTABLE_PREFIX = lib;
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_INCLUDE_PATHS = "$(TARGET_BUILD_DIR)/modules modules";
 			};
 			name = Debug;
 		};
@@ -3146,7 +3143,6 @@
 				EXECUTABLE_PREFIX = lib;
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_INCLUDE_PATHS = "$(TARGET_BUILD_DIR)/modules modules";
 			};
 			name = Release;
 		};
