@@ -120,3 +120,11 @@ public extension Array where Element: Equatable {
         }
     }
 }
+
+public func +<T: Hashable>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
+    return lhs.union(rhs)
+}
+
+public func -<T: Hashable>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
+    return lhs.subtract(rhs)
+}

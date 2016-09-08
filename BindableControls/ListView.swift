@@ -15,7 +15,7 @@ public struct ListViewModel<E: ArrayElement> {
     public let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     public let move: ((srcIndex: Int, dstIndex: Int) -> Void)?
-    public let selection: AsyncReadWriteProperty<Set<E.ID>>
+    public let selection: AsyncReadWriteProperty<Set<E.ID>>?
     public let cellIdentifier: (E.Data) -> String
     public let cellText: (E.Data) -> CellTextProperty
     public let cellImage: ((E.Data) -> ReadableProperty<Image>)?
@@ -24,7 +24,7 @@ public struct ListViewModel<E: ArrayElement> {
         data: ArrayProperty<E>,
         contextMenu: ((E.Data) -> ContextMenu?)?,
         move: ((srcIndex: Int, dstIndex: Int) -> Void)?,
-        selection: AsyncReadWriteProperty<Set<E.ID>>,
+        selection: AsyncReadWriteProperty<Set<E.ID>>?,
         cellIdentifier: (E.Data) -> String,
         cellText: (E.Data) -> CellTextProperty,
         cellImage: ((E.Data) -> ReadableProperty<Image>)?)
@@ -43,7 +43,7 @@ public struct ListViewModel<E: ArrayElement> {
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
 public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
 
-    private let model: ListViewModel<E>
+    public let model: ListViewModel<E>
     private let outlineView: NSOutlineView
 
     private var elements: [E] {
@@ -93,7 +93,9 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
             valueChanging: { [weak self] stateChange, _ in self?.arrayChanged(stateChange) },
             valueDidChange: {}
         ))
-        selection <~> model.selection
+        if let selectionProp = model.selection {
+            selection <~> selectionProp
+        }
         
         outlineView.setDelegate(self)
         outlineView.setDataSource(self)
@@ -203,6 +205,11 @@ public class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOu
     
     public func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
         return true
+    }
+    
+    public func outlineView(outlineView: NSOutlineView, rowViewForItem item: AnyObject) -> NSTableRowView? {
+        // TODO: Make this configurable
+        return outlineView.makeViewWithIdentifier("RowView", owner: self) as? NSTableRowView
     }
     
     public func outlineViewSelectionDidChange(notification: NSNotification) {

@@ -56,17 +56,17 @@ class RelationAsTypedValueTests: BindingTestCase {
     
     func testOneValue() {
         let empty = MakeRelation(
-            ["id", "name", "friendly", "count"])
+            ["id", "name", "friendly", "count", "pulse"])
         
         let one = MakeRelation(
-            ["id", "name", "friendly", "age"],
-            [1,    "cat",  1,          5],
-            [2,    "cat",  1,          5])
+            ["id", "name", "friendly", "age", "pulse"],
+            [1,    "cat",  1,          5,     2.0],
+            [2,    "cat",  1,          5,     2.0])
         
         let multi = MakeRelation(
-            ["id", "name", "friendly", "age"],
-            [1,    "cat",  1,          5],
-            [2,    "dog",  0,          3])
+            ["id", "name", "friendly", "age", "pulse"],
+            [1,    "cat",  1,          5,     2.0],
+            [2,    "dog",  0,          3,     1.0])
         
         let expr: SelectExpression = Attribute("id") *== 1
         let transform = { (row: Row) -> String? in "\(row["name"]):\(row["age"])" }
@@ -105,6 +105,14 @@ class RelationAsTypedValueTests: BindingTestCase {
         XCTAssertNil(empty.project(["age"]).oneIntegerOrNil)
         XCTAssertEqual(one.project(["age"]).oneIntegerOrNil, 5)
         XCTAssertNil(multi.project(["age"]).oneIntegerOrNil)
+        
+        XCTAssertEqual(empty.project(["pulse"]).oneDouble, 0.0)
+        XCTAssertEqual(one.project(["pulse"]).oneDouble, 2.0)
+        XCTAssertEqual(multi.project(["pulse"]).oneDouble, 0.0)
+        
+        XCTAssertNil(empty.project(["pulse"]).oneDoubleOrNil)
+        XCTAssertEqual(one.project(["pulse"]).oneDoubleOrNil, 2.0)
+        XCTAssertNil(multi.project(["pulse"]).oneDoubleOrNil)
     }
     
     func testCommonValue() {
