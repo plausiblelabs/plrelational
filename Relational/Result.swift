@@ -68,13 +68,13 @@ extension Result {
 /// values. If the Result contains Err, or any of the sequence elements are Err, then produce the first Err.
 /// This is a free-standing function because I couldn't quite get it to work as an extension due to the extra
 /// generic types. Referencing the inner types didn't make the compiler happy.
-public func mapOk<Seq, InnerT, NewT, E where Seq: SequenceType, Seq.Generator.Element == Result<InnerT, E>>(result: Result<Seq, E>, _ f: InnerT -> NewT) -> Result<[NewT], E> {
+public func mapOk<Seq, InnerT, NewT, E where Seq: SequenceType, Seq.Generator.Element == Result<InnerT, E>>(result: Result<Seq, E>, @noescape _ f: InnerT -> NewT) -> Result<[NewT], E> {
     return result.then({ mapOk($0, f) })
 }
 
 /// Iterate over a sequence of Results, invoking the given function for each Ok value and returning a Result for the
 /// array it produces. If any sequence elements are Err, then return the first Err encountered.
-public func mapOk<Seq, InnerT, NewT, E where Seq: SequenceType, Seq.Generator.Element == Result<InnerT, E>>(seq: Seq, _ f: InnerT -> NewT) -> Result<[NewT], E> {
+public func mapOk<Seq, InnerT, NewT, E where Seq: SequenceType, Seq.Generator.Element == Result<InnerT, E>>(seq: Seq, @noescape _ f: InnerT -> NewT) -> Result<[NewT], E> {
     var results: [NewT] = []
     for elt in seq {
         switch elt {
