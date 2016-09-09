@@ -45,7 +45,12 @@ extension Relation {
     public func allValues<V: Hashable>(transform: RelationValue -> V?) -> Set<V> {
         return allValues(okRows, transform)
     }
-    
+
+    /// Resolves to a set of all values, built from one transformed value for each non-error row in the relation.
+    public func allValuesFromRows<V: Hashable>(transform: Row -> V?) -> Set<V> {
+        return Set(okRows.flatMap{transform($0)})
+    }
+
     /// Resolves to a set of all RelationValues for the single attribute in the relation.
     public var allValues: Set<RelationValue> {
         return allValues{ $0 }
