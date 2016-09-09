@@ -80,6 +80,15 @@ extension Relation {
 }
 
 extension MutableRelation {
+    /// Replaces the given values (synchronously) by performing a delete followed by an add for each row.
+    public func replaceRows(rows: [Row]) {
+        var mutableRelation = self
+        mutableRelation.delete(true)
+        for row in rows {
+            mutableRelation.add(row)
+        }
+    }
+
     /// Replaces the given values (synchronously) by performing a delete followed by an add for each value.
     public func replaceValues(values: [RelationValue]) {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
