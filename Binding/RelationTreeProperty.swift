@@ -14,12 +14,14 @@ public final class RowTreeNode: TreeNode {
     public var data: Row
     public var children: [RowTreeNode]
     private let parentAttr: Attribute
+    public let tag: AnyObject?
     
-    init(id: RelationValue, row: Row, parentAttr: Attribute, children: [RowTreeNode] = []) {
+    init(id: RelationValue, row: Row, parentAttr: Attribute, children: [RowTreeNode] = [], tag: AnyObject?) {
         self.id = id
         self.data = row
         self.children = children
         self.parentAttr = parentAttr
+        self.tag = tag
     }
     
     public var parentID: RelationValue? {
@@ -35,23 +37,24 @@ public final class RowTreeNode: TreeNode {
 class RelationTreeProperty: TreeProperty<RowTreeNode> {
 
     private let relation: Relation
+    private let tag: AnyObject?
     private let idAttr: Attribute
     private let parentAttr: Attribute
     private let orderAttr: Attribute
     
     private var removal: ObserverRemoval!
     
-    init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
+    init(relation: Relation, tag: AnyObject?, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
         precondition(relation.scheme.attributes.isSupersetOf([idAttr, parentAttr, orderAttr]))
 
         // Map Rows from underlying Relation to Node values.
         var nodeDict = [RelationValue: Node]()
         for row in relation.rows().map({$0.ok!}) {
-            nodeDict[row[idAttr]] = RowTreeNode(id: row[idAttr], row: row, parentAttr: parentAttr)
+            nodeDict[row[idAttr]] = RowTreeNode(id: row[idAttr], row: row, parentAttr: parentAttr, tag: tag)
         }
         
         // Create empty dummy Node to sit at the top of the tree.
-        let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: parentAttr)
+        let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: parentAttr, tag: tag)
         
         // Use order Attribute from underlying Relation to nest child Nodes under parent elements.
         for node in nodeDict.values {
@@ -60,6 +63,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         }
         
         self.relation = relation
+        self.tag = tag
         self.idAttr = idAttr
         self.parentAttr = parentAttr
         self.orderAttr = orderAttr
@@ -121,7 +125,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         var nodeDict: [RelationValue: Node] = [:]
         for row in rows {
             let rowID = row[idAttr]
-            nodeDict[rowID] = RowTreeNode(id: rowID, row: row, parentAttr: parentAttr)
+            nodeDict[rowID] = RowTreeNode(id: rowID, row: row, parentAttr: parentAttr, tag: tag)
         }
         
         // Wire up nodes to parents that only exist in the node dictionary
@@ -371,7 +375,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
 
 extension Relation {
     /// Returns a TreeProperty that gets its data from this relation.
-    public func treeProperty(idAttr: Attribute = "id", parentAttr: Attribute = "parent", orderAttr: Attribute = "order") -> TreeProperty<RowTreeNode> {
-        return RelationTreeProperty(relation: self, idAttr: idAttr, parentAttr: parentAttr, orderAttr: orderAttr)
+    public func treeProperty(tag tag: AnyObject? = nil, idAttr: Attribute = "id", parentAttr: Attribute = "parent", orderAttr: Attribute = "order") -> TreeProperty<RowTreeNode> {
+        return RelationTreeProperty(relation: self, tag: tag, idAttr: idAttr, parentAttr: parentAttr, orderAttr: orderAttr)
     }
 }
