@@ -200,6 +200,7 @@
 		C277E8101CE4EF5400B7B8F6 /* SelectExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */; };
 		C277E8121CE4FAD400B7B8F6 /* SelectExpressionOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */; };
 		C28BFEF11D81F7C4005F07A0 /* ObjectCasting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C28BFEF01D81F7C4005F07A0 /* ObjectCasting.swift */; };
+		C29C28361D872BEA001E20E7 /* UnsafePointerReadWrite.swift in Sources */ = {isa = PBXBuildFile; fileRef = C29C28351D872BEA001E20E7 /* UnsafePointerReadWrite.swift */; };
 		C2AC82641D3980E2005D39C9 /* NegativeSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2AC82631D3980E2005D39C9 /* NegativeSet.swift */; };
 		C2B339DE1CEA54E7008568E9 /* RelationDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B339DD1CEA54E7008568E9 /* RelationDump.swift */; };
 		C2B53CB51D1862ED006B6278 /* Mutex.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CB41D1862ED006B6278 /* Mutex.swift */; };
@@ -708,6 +709,7 @@
 		C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpression.swift; sourceTree = "<group>"; };
 		C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpressionOperators.swift; sourceTree = "<group>"; };
 		C28BFEF01D81F7C4005F07A0 /* ObjectCasting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectCasting.swift; path = Relational/ObjectCasting.swift; sourceTree = "<group>"; };
+		C29C28351D872BEA001E20E7 /* UnsafePointerReadWrite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UnsafePointerReadWrite.swift; path = Relational/UnsafePointerReadWrite.swift; sourceTree = "<group>"; };
 		C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConcreteRelation.swift; sourceTree = "<group>"; };
 		C2AC82631D3980E2005D39C9 /* NegativeSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NegativeSet.swift; path = Relational/NegativeSet.swift; sourceTree = "<group>"; };
 		C2B339DD1CEA54E7008568E9 /* RelationDump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDump.swift; sourceTree = "<group>"; };
@@ -1465,6 +1467,7 @@
 				C23BC0551D24629E00188F86 /* SmallInlineArray.swift */,
 				C257C74D1CBD8A9400234A89 /* StringConvenience.swift */,
 				C22BF13A1CBC349400D3FE59 /* StringPad.swift */,
+				C29C28351D872BEA001E20E7 /* UnsafePointerReadWrite.swift */,
 				C22921AF1CCFEB6D00518184 /* ValueWithDestructor.swift */,
 			);
 			name = Utilities;
@@ -2354,6 +2357,7 @@
 				C2B6E26C1D805E230039923C /* Crypto.swift in Sources */,
 				C22921CA1CD12A8700518184 /* FunctionalDependency.swift in Sources */,
 				C2CFC35B1D7F36DE00389373 /* RowPlist.swift in Sources */,
+				C29C28361D872BEA001E20E7 /* UnsafePointerReadWrite.swift in Sources */,
 				C23AAF481CF8CD89009E28E0 /* QueryPlanner.swift in Sources */,
 				C22921CB1CD12A8700518184 /* ObserverSet.swift in Sources */,
 				C204A1521D073E6100DF297F /* RelationObserver.swift in Sources */,

@@ -262,11 +262,9 @@ extension InlineRow {
         case 0:
             return .null
         case 1:
-            let value = UnsafeRawPointer(ptr).load(fromByteOffset: start + 1, as: Int64.self)
-            return .integer(value)
+            return .integer(ptr.unalignedLoad(fromByteOffset: start + 1))
         case 2:
-            let value = UnsafeRawPointer(ptr).load(fromByteOffset: start + 1, as: Double.self)
-            return .real(value)
+            return .real(ptr.unalignedLoad(fromByteOffset: start + 1))
         case 3:
             let value = deserializeString(ptr, start: start + 1, end: end)
             return .text(value)
