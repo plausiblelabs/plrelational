@@ -1,9 +1,0 @@
-
-FLIGHT:
-    number: Int64
-    departs: String
-    arrives: String
-
-PILOT:
-    name: String
-    based: String

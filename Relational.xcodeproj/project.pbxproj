@@ -215,10 +215,6 @@
 		C2B6E2701D80AA6A0039923C /* NSURLConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E26F1D80AA6A0039923C /* NSURLConvenience.swift */; };
 		C2BA22981D3FD65F00DCCE72 /* UpdateManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */; };
 		C2BA229A1D3FD70200DCCE72 /* RelationObservationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */; };
-		C2BD29921CD251870081FD05 /* Flight.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
-		C2BD29931CD251870081FD05 /* Store.model in Resources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
-		C2BD29941CD251A20081FD05 /* Flight.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29901CD251870081FD05 /* Flight.model */; };
-		C2BD29951CD251A20081FD05 /* Store.model in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29911CD251870081FD05 /* Store.model */; };
 		C2BD29991CD7ED900081FD05 /* SQLiteBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */; };
 		C2C2586A1D0203CC0066EB82 /* RelationOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C258691D0203CC0066EB82 /* RelationOperators.swift */; };
 		C2C630891D302B8C00AD44C1 /* QueryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C630881D302B8C00AD44C1 /* QueryManager.swift */; };
@@ -239,20 +235,6 @@
 		C2FE9B991CEE15720004E635 /* TransactionalDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FE9B981CEE15720004E635 /* TransactionalDatabase.swift */; };
 		C2FE9B9B1CEE3A810004E635 /* TransactionalDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2FE9B9A1CEE3A810004E635 /* TransactionalDatabaseTests.swift */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXBuildRule section */
-		C22921F11CD1309E00518184 /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.proxy.script;
-			filePatterns = "*.model";
-			fileType = pattern.proxy;
-			isEditable = 1;
-			outputFiles = (
-				"$(DERIVED_FILE_DIR)/${INPUT_FILE_BASE}.swift",
-			);
-			script = "$SRCROOT/Relational/genmodel.swift ${INPUT_FILE_PATH} ${DERIVED_FILE_DIR}/${INPUT_FILE_BASE}.swift";
-		};
-/* End PBXBuildRule section */
 
 /* Begin PBXContainerItemProxy section */
 		371243D81D0104F700E9BCFF /* PBXContainerItemProxy */ = {
@@ -742,8 +724,6 @@
 		C2B6E26F1D80AA6A0039923C /* NSURLConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NSURLConvenience.swift; path = Relational/NSURLConvenience.swift; sourceTree = "<group>"; };
 		C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UpdateManagerTests.swift; path = RelationalTests/UpdateManagerTests.swift; sourceTree = SOURCE_ROOT; };
 		C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationObservationTests.swift; path = RelationalTests/RelationObservationTests.swift; sourceTree = SOURCE_ROOT; };
-		C2BD29901CD251870081FD05 /* Flight.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Flight.model; sourceTree = "<group>"; };
-		C2BD29911CD251870081FD05 /* Store.model */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Store.model; sourceTree = "<group>"; };
 		C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteBinding.swift; sourceTree = "<group>"; };
 		C2C258691D0203CC0066EB82 /* RelationOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationOperators.swift; sourceTree = "<group>"; };
 		C2C630881D302B8C00AD44C1 /* QueryManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryManager.swift; sourceTree = "<group>"; };
@@ -1337,8 +1317,6 @@
 		C22921E61CD12CF100518184 /* RelationalTests */ = {
 			isa = PBXGroup;
 			children = (
-				C2BD29901CD251870081FD05 /* Flight.model */,
-				C2BD29911CD251870081FD05 /* Store.model */,
 				C22921E91CD12CF100518184 /* Info.plist */,
 				C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */,
 			);
@@ -1867,7 +1845,6 @@
 				C22921E31CD12CF100518184 /* Resources */,
 			);
 			buildRules = (
-				C22921F11CD1309E00518184 /* PBXBuildRule */,
 			);
 			dependencies = (
 				C22921EC1CD12CF100518184 /* PBXTargetDependency */,
@@ -2111,8 +2088,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C2BD29921CD251870081FD05 /* Flight.model in Resources */,
-				C2BD29931CD251870081FD05 /* Store.model in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2419,11 +2394,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C2BD29941CD251A20081FD05 /* Flight.model in Sources */,
 				C2BA22981D3FD65F00DCCE72 /* UpdateManagerTests.swift in Sources */,
 				C2BA229A1D3FD70200DCCE72 /* RelationObservationTests.swift in Sources */,
 				C2B6E26E1D806B390039923C /* PlistDirectoryRelationTests.swift in Sources */,
-				C2BD29951CD251A20081FD05 /* Store.model in Sources */,
 				C2CE513E1D469EF10011C554 /* InlineMutableDataTests.swift in Sources */,
 				C2DF2BA01CFDE2B100ED8695 /* QueryRunnerTests.swift in Sources */,
 				C277E80C1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift in Sources */,

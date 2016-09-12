@@ -1,8 +1,0 @@
-
-Store:
-    name: String
-    employees: [Employee]
-
-Employee:
-    name: String
-    directReports: [Employee]
