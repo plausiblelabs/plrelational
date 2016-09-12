@@ -12,7 +12,7 @@ public protocol DispatchContext {
 
 extension CFRunLoop: DispatchContext {
     public func async(_ f: @escaping (Void) -> Void) {
-        CFRunLoopPerformBlock(self, CFRunLoopMode.commonModes as CFTypeRef!, f)
+        CFRunLoopPerformBlock(self, CFRunLoopMode.commonModes.rawValue, f)
         CFRunLoopWakeUp(self)
     }
 }
