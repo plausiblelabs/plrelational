@@ -139,14 +139,18 @@ extension Result {
     }
 }
 
+precedencegroup ResultFlatMapPrecedence {
+    associativity: left
+}
+
 /* The flatMap (aka bind) operator. */
-infix operator >>- { associativity left }
+infix operator >>- : ResultFlatMapPrecedence
 public func >>- <T, E, NT>(result: Result<T, E>, next: (T) -> Result<NT, E>) -> Result<NT, E> {
     return result.then(next)
 }
 
 /* Alternate flatMap that assumes a Void success value (allows for chaining without braces). */
-infix operator >>>- { associativity left }
+infix operator >>>- : ResultFlatMapPrecedence
 public func >>>- <E>(result: Result<Void, E>, next: @autoclosure () -> Result<Void, E>) -> Result<Void, E> {
     return result.then(next)
 }
