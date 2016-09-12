@@ -9,7 +9,7 @@ import Foundation
 public func debugLog(_ items: Any..., file: String = #file, line: Int = #line) {
     let strings = items.map({ String(describing: $0) })
     let fullString = strings.joined(separator: " ")
-    let filename = URL(fileURLWithPath: file).lastPathComponent ?? "<unknown>"
+    let filename = URL(fileURLWithPath: file).lastPathComponent 
     NSLog("%@:%ld: %@", filename, line, fullString)
 }
 

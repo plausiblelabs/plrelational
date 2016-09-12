@@ -57,7 +57,7 @@ class QueryPlanner {
     }
     
     fileprivate func getOrCreateNodeIndex(_ r: Relation) -> Int {
-        if let obj = r as? AnyObject {
+        if let obj = asObject(r) {
             return relationNodeIndexMap.getOrCreate(obj, defaultValue: relationToNodeIndex(r))
         } else {
             return relationToNodeIndex(r)

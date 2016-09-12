@@ -31,7 +31,7 @@ extension Relation {
                 let gen = rightRows.rows()
                 
                 // See if there are two or more elements in rightRows
-                gen.next()
+                _ = gen.next()
                 if gen.next() != nil {
                     return .Ok(false)
                 }
