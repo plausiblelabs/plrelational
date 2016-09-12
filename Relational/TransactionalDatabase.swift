@@ -129,7 +129,8 @@ open class TransactionalDatabase {
             r.notifyObserversTransactionBegan(.directChange)
         }
         
-        changeLoggingDatabase.restoreSnapshot(snapshot)
+        // TODO: error checking?
+        _ = changeLoggingDatabase.restoreSnapshot(snapshot)
         
         for (_, r) in relations {
             r.notifyObserversTransactionEnded(.directChange)
@@ -143,7 +144,8 @@ open class TransactionalDatabase {
     open func transaction(_ transactionFunction: (Void) -> Void) {
         beginTransaction()
         transactionFunction()
-        endTransaction()
+        // TODO: error checking?
+        _ = endTransaction()
     }
     
     open func transactionWithSnapshots(_ transactionFunction: (Void) -> Void) -> (before: ChangeLoggingDatabaseSnapshot, after: ChangeLoggingDatabaseSnapshot) {
@@ -159,7 +161,7 @@ open class TransactionalDatabase {
 }
 
 public extension TransactionalDatabase {
-    open class TransactionalRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
+    public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
         weak var db: TransactionalDatabase?
         var underlyingRelation: ChangeLoggingRelation<SQLiteTableRelation>
         var transactionRelation: ChangeLoggingRelation<SQLiteTableRelation>?

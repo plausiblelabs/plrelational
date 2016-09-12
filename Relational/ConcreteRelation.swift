@@ -83,20 +83,20 @@ public struct ConcreteRelation: MutableRelation {
             for (attribute, value) in newValues {
                 rowToAdd[attribute] = value
             }
-            self.add(rowToAdd)
+            _ = self.add(rowToAdd)
         }
     }
     
     public mutating func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let rowsToUpdate = select(query)
-        delete(query)
+        _ = delete(query)
         for rowToUpdate in rowsToUpdate.rows() {
             // We know that rows never fail, because this is ultimately our own implementation.
             var rowToAdd = rowToUpdate.ok!
             for (attribute, value) in newValues {
                 rowToAdd[attribute] = value
             }
-            self.add(rowToAdd)
+            _ = self.add(rowToAdd)
         }
         return .Ok()
     }
