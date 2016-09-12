@@ -106,7 +106,7 @@ extension Relation {
         let planner = QueryPlanner(roots: [(self, outputCallback)])
         let runner = QueryRunner(planner: planner)
         
-        let generator = AnyIterator(body: { Void -> Result<Set<Row>, RelationError>? in
+        let generator = AnyIterator({ Void -> Result<Set<Row>, RelationError>? in
             if runner.done { return nil }
             
             runner.pump()
@@ -127,7 +127,7 @@ extension Relation {
     public func rows() -> AnyIterator<Result<Row, RelationError>> {
         var buffer: Set<Row> = []
         let bulkGenerator = bulkRows()
-        return AnyIterator(body: {
+        return AnyIterator({
             while true {
                 if let bufferRow = buffer.popFirst() {
                     return .Ok(bufferRow)
