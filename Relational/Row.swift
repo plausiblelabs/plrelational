@@ -47,7 +47,7 @@ public struct Row: Hashable, Sequence {
             } else {
                 return nil
             }
-        })) as! [Attribute : RelationValue] )
+        })))
     }
     
     /// Produce a new Row by applying updated values to this Row. Any attributes that exist in `newValues`
@@ -115,7 +115,7 @@ final class InlineRow: InlineMutableData {
     
     var count: Int {
         return withUnsafeMutablePointerToElements({
-            return UnsafePointer<Int>($0)[0]
+            return UnsafeRawPointer($0).load(fromByteOffset: 0, as: Int.self)
         })
     }
     
@@ -124,11 +124,13 @@ final class InlineRow: InlineMutableData {
         precondition(index >= 0 && index < count)
         
         return withUnsafeMutablePointers({ valuePtr, elementPtr in
-            let intPtr = UnsafePointer<Int>(elementPtr)
+            let raw = UnsafeRawPointer(elementPtr)
             let offsetIndex = index * 2 + 1
-            let attributeOffset = intPtr[offsetIndex]
-            let valueOffset = intPtr[offsetIndex + 1]
-            let endOffset = (index < count - 1) ? intPtr[offsetIndex + 2] : valuePtr.pointee.length
+            let attributeOffset = raw.load(fromByteOffset: offsetIndex * MemoryLayout<Int>.size, as: Int.self)
+            let valueOffset = raw.load(fromByteOffset: (offsetIndex + 1) * MemoryLayout<Int>.size, as: Int.self)
+            let endOffset = (index < count - 1)
+                ? raw.load(fromByteOffset: (offsetIndex + 2) * MemoryLayout<Int>.size, as: Int.self)
+                : valuePtr.pointee.length
             
             let attribute = self.deserializeAttribute(elementPtr, start: attributeOffset, end: valueOffset)
             let value = self.deserializeValue(elementPtr, start: valueOffset, end: endOffset)
@@ -139,19 +141,21 @@ final class InlineRow: InlineMutableData {
     subscript(attribute: Attribute) -> RelationValue? {
         return attribute.name.withCString({ attrPtr in
             let attrLen = Int(strlen(attrPtr))
+            let count = self.count
             return withUnsafeMutablePointers({ valuePtr, elementPtr in
-                let header = UnsafePointer<Int>(elementPtr)
-                let count = header[0]
-                for i in 0 ..< count {
-                    let headerOffset = i * 2 + 1
-                    let attributeOffset = header[headerOffset]
-                    let valueOffset = header[headerOffset + 1]
-                    if attrLen == valueOffset - attributeOffset && memcmp(attrPtr, elementPtr + attributeOffset, attrLen) == 0 {
-                        let endOffset = (i < count - 1) ? header[headerOffset + 2] : valuePtr.pointee.length
-                        return self.deserializeValue(elementPtr, start: valueOffset, end: endOffset)
+                elementPtr.withMemoryRebound(to: Int.self, capacity: count * 2 + 1, { header in
+                    let count = header[0]
+                    for i in 0 ..< count {
+                        let headerOffset = i * 2 + 1
+                        let attributeOffset = header[headerOffset]
+                        let valueOffset = header[headerOffset + 1]
+                        if attrLen == valueOffset - attributeOffset && memcmp(attrPtr, elementPtr + attributeOffset, attrLen) == 0 {
+                            let endOffset = (i < count - 1) ? header[headerOffset + 2] : valuePtr.pointee.length
+                            return self.deserializeValue(elementPtr, start: valueOffset, end: endOffset)
+                        }
                     }
-                }
-                return nil
+                    return nil
+                })
             })
         })
     }
@@ -258,10 +262,10 @@ extension InlineRow {
         case 0:
             return .null
         case 1:
-            let value = UnsafePointer<Int64>(ptr + start + 1).pointee
+            let value = UnsafeRawPointer(ptr).load(fromByteOffset: start + 1, as: Int64.self)
             return .integer(value)
         case 2:
-            let value = UnsafePointer<Double>(ptr + start + 1).pointee
+            let value = UnsafeRawPointer(ptr).load(fromByteOffset: start + 1, as: Double.self)
             return .real(value)
         case 3:
             let value = deserializeString(ptr, start: start + 1, end: end)
