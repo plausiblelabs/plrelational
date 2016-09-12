@@ -22,7 +22,7 @@ class ObjectMapTests: XCTestCase {
         
         func getOrCreate() {
             let value = NSNumber(value: rand.next(1000))
-            testMap.getOrCreate(value, defaultValue: {
+            _ = testMap.getOrCreate(value, defaultValue: {
                 currentEntries.insert(value)
                 return String(value.intValue)
             }())
