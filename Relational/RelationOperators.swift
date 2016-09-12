@@ -3,10 +3,7 @@
 // All rights reserved.
 //
 
-infix operator ∩ {
-    associativity left
-    precedence 140
-}
+infix operator ∩ : AdditionPrecedence
 
 /// Union two possibly-nil relations together. The result is nil if both inputs are nil.
 /// We use + instead of ∪ because it's easier to type and can still be understood.
