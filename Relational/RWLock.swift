@@ -14,14 +14,14 @@ class RWLock {
         lock = UnsafeMutablePointer.allocate(capacity: 1)
         let err = pthread_rwlock_init(lock, nil)
         if err != 0 {
-            fatalError("pthread_rwlock_init returned error \(err): \(String(cString: strerror(err)) ?? "unknown")")
+            fatalError("pthread_rwlock_init returned error \(err): \(String(cString: strerror(err)) )")
         }
     }
     
     deinit {
         let err = pthread_rwlock_destroy(lock)
         if err != 0 {
-            fatalError("pthread_rwlock_destroy returned error \(err): \(String(cString: strerror(err)) ?? "unknown")")
+            fatalError("pthread_rwlock_destroy returned error \(err): \(String(cString: strerror(err)) )")
         }
         lock.deallocate(capacity: 1)
     }
