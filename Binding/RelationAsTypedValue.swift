@@ -24,7 +24,7 @@ extension Relation {
     public var okRows: AnyGenerator<Row> {
         return AnyGenerator(self.rows().lazy.flatMap{ $0.ok }.generate())
     }
-
+    
     /// Resolves to a set of all values for the single attribute, built from one transformed value for each non-error row
     /// in the given set.
     public func allValues<V: Hashable>(rows: AnyGenerator<Row>, _ transform: RelationValue -> V?) -> Set<V> {
@@ -45,7 +45,12 @@ extension Relation {
     public func allValues<V: Hashable>(transform: RelationValue -> V?) -> Set<V> {
         return allValues(okRows, transform)
     }
-    
+
+    /// Resolves to a set of all values, built from one transformed value for each non-error row in the relation.
+    public func allValuesFromRows<V: Hashable>(transform: Row -> V?) -> Set<V> {
+        return Set(okRows.flatMap{transform($0)})
+    }
+
     /// Resolves to a set of all RelationValues for the single attribute in the relation.
     public var allValues: Set<RelationValue> {
         return allValues{ $0 }
@@ -88,17 +93,29 @@ extension Relation {
     public var oneRow: Row? {
         return oneRow(okRows)
     }
-    
+
+    /// Resolves to a single transformed value if there is exactly one row in the given set, otherwise resolves
+    /// to nil.
+    public func oneValueFromRow<V>(rows: AnyGenerator<Row>, _ transform: Row -> V?) -> V? {
+        return oneRow(rows).flatMap{ transform($0) }
+    }
+
     /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
     /// to nil.
     public func oneValueFromRow<V>(transform: Row -> V?) -> V? {
-        return oneRow.flatMap{ transform($0) }
+        return oneValueFromRow(okRows, transform)
     }
-    
+
+    /// Resolves to a single transformed value if there is exactly one row in the given set, otherwise resolves
+    /// to the given default value.
+    public func oneValueFromRow<V>(rows: AnyGenerator<Row>, _ transform: Row -> V?, orDefault defaultValue: V) -> V {
+        return oneValueFromRow(okRows, transform) ?? defaultValue
+    }
+
     /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
     /// to the given default value.
     public func oneValueFromRow<V>(transform: Row -> V?, orDefault defaultValue: V) -> V {
-        return oneValueFromRow{ transform($0) } ?? defaultValue
+        return oneValueFromRow(okRows, transform, orDefault: defaultValue)
     }
 
     /// Resolves to a single transformed value if there is exactly one row in the given set, otherwise resolves
@@ -122,69 +139,99 @@ extension Relation {
     }
 
     /// Resolves to a single string value if there is exactly one row in the given set, otherwise resolves
+    /// to nil.
+    public func oneStringOrNil(rows: AnyGenerator<Row>) -> String? {
+        return oneValue(rows, { $0.get() })
+    }
+    
+    /// Resolves to a single string value if there is exactly one row in the given set, otherwise resolves
     /// to an empty string.
     public func oneString(rows: AnyGenerator<Row>) -> String {
-        return oneValue(rows, { $0.get() }) ?? ""
+        return oneStringOrNil(rows) ?? ""
     }
 
     /// Resolves to a single string value if there is exactly one row in the relation, otherwise resolves
-    /// to an empty string.
-    public var oneString: String {
-        return oneValue{ $0.get() } ?? ""
+    /// to nil.
+    public var oneStringOrNil: String? {
+        return oneStringOrNil(okRows)
     }
     
     /// Resolves to a single string value if there is exactly one row in the relation, otherwise resolves
+    /// to an empty string.
+    public var oneString: String {
+        return oneString(okRows)
+    }
+
+    /// Resolves to a single integer value if there is exactly one row in the given set, otherwise resolves
     /// to nil.
-    public var oneStringOrNil: String? {
-        return oneValue{ $0.get() }
+    public func oneIntegerOrNil(rows: AnyGenerator<Row>) -> Int64? {
+        return oneValue(rows, { $0.get() })
     }
 
     /// Resolves to a single integer value if there is exactly one row in the given set, otherwise resolves
     /// to zero.
     public func oneInteger(rows: AnyGenerator<Row>) -> Int64 {
-        return oneValue(rows, { $0.get() }) ?? 0
+        return oneIntegerOrNil(rows) ?? 0
     }
 
     /// Resolves to a single integer value if there is exactly one row in the relation, otherwise resolves
-    /// to zero.
-    public var oneInteger: Int64 {
-        return oneValue{ $0.get() } ?? 0
+    /// to nil.
+    public var oneIntegerOrNil: Int64? {
+        return oneIntegerOrNil(okRows)
     }
     
     /// Resolves to a single integer value if there is exactly one row in the relation, otherwise resolves
-    /// to nil.
-    public var oneIntegerOrNil: Int64? {
-        return oneValue{ $0.get() }
+    /// to zero.
+    public var oneInteger: Int64 {
+        return oneInteger(okRows)
     }
-    
+
+    /// Resolves to a single double value if there is exactly one row in the given set, otherwise resolves
+    /// to nil.
+    public func oneDoubleOrNil(rows: AnyGenerator<Row>) -> Double? {
+        return oneValue(rows, { $0.get() })
+    }
+
     /// Resolves to a single double value if there is exactly one row in the given set, otherwise resolves
     /// to zero.
     public func oneDouble(rows: AnyGenerator<Row>) -> Double {
-        return oneValue(rows, { $0.get() }) ?? 0.0
-    }
-    
-    /// Resolves to a single double value if there is exactly one row in the relation, otherwise resolves
-    /// to zero.
-    public var oneDouble: Double {
-        return oneValue{ $0.get() } ?? 0.0
+        return oneDoubleOrNil(rows) ?? 0.0
     }
     
     /// Resolves to a single double value if there is exactly one row in the relation, otherwise resolves
     /// to nil.
     public var oneDoubleOrNil: Double? {
-        return oneValue{ $0.get() }
+        return oneDoubleOrNil(okRows)
+    }
+    
+    /// Resolves to a single double value if there is exactly one row in the relation, otherwise resolves
+    /// to zero.
+    public var oneDouble: Double {
+        return oneDouble(okRows)
+    }
+
+    /// Resolves to a single boolean value if there is exactly one row in the given set, otherwise resolves
+    /// to nil.
+    public func oneBoolOrNil(rows: AnyGenerator<Row>) -> Bool? {
+        return oneValue(rows, { $0.boolValue })
+    }
+    
+    /// Resolves to a single boolean value if there is exactly one row in the given set, otherwise resolves
+    /// to false.
+    public func oneBool(rows: AnyGenerator<Row>) -> Bool {
+        return oneBoolOrNil(rows) ?? false
     }
 
     /// Resolves to a single boolean value if there is exactly one row in the relation, otherwise resolves
-    /// to false.
-    public var oneBool: Bool {
-        return oneValue{ $0.boolValue } ?? false
+    /// to nil.
+    public var oneBoolOrNil: Bool? {
+        return oneBoolOrNil(okRows)
     }
     
     /// Resolves to a single boolean value if there is exactly one row in the relation, otherwise resolves
-    /// to nil.
-    public var oneBoolOrNil: Bool? {
-        return oneValue{ $0.boolValue }
+    /// to false.
+    public var oneBool: Bool {
+        return oneBool(okRows)
     }
     
     /// Resolves to a CommonValue that indicates whether there are zero, one, or multiple rows in the relation.

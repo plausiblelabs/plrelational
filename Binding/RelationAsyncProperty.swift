@@ -10,6 +10,26 @@ extension Relation {
     public func asyncProperty<S: SignalType>(relationToSignal: Relation -> S) -> AsyncReadableProperty<S.Value> {
         return AsyncReadableProperty(relationToSignal(self).signal)
     }
+
+    /// Returns an AsyncReadableProperty that gets its value from this relation using the given transform.
+    public func asyncProperty<T>(rowsToValue: (Relation, AnyGenerator<Row>) -> T) -> AsyncReadableProperty<T> {
+        return AsyncReadableProperty(self.signal(rowsToValue))
+    }
+    
+    /// Returns an AsyncReadableProperty that gets its value from this relation using the given transform.
+    public func asyncProperty<T: Equatable>(rowsToValue: (Relation, AnyGenerator<Row>) -> T) -> AsyncReadableProperty<T> {
+        return AsyncReadableProperty(self.signal(rowsToValue))
+    }
+    
+    /// Returns an AsyncReadableProperty that gets its value from this relation using the given transform.
+    public func asyncProperty<T>(rowsToValue: (Relation, AnyGenerator<Row>) -> T?) -> AsyncReadableProperty<T?> {
+        return AsyncReadableProperty(self.signal(rowsToValue))
+    }
+    
+    /// Returns an AsyncReadableProperty that gets its value from this relation using the given transform.
+    public func asyncProperty<T: Equatable>(rowsToValue: (Relation, AnyGenerator<Row>) -> T?) -> AsyncReadableProperty<T?> {
+        return AsyncReadableProperty(self.signal(rowsToValue))
+    }
 }
 
 private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {

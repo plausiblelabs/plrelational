@@ -45,11 +45,40 @@ public class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObser
     }
     
     public func contains(row: Row) -> Result<Bool, RelationError> {
-        fatalError()
+        let keyValue = row[primaryKey]
+        if case .NotFound = keyValue {
+            return .Ok(false)
+        }
+        
+        let ourRow = readRow(primaryKey: keyValue)
+        return ourRow.map({ $0 == row })
     }
     
     public func update(query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
-        fatalError()
+        // TODO: for queries involving the primary key, be more efficient and don't scan everything.
+        let toUpdate = flatmapOk(rowGenerator(), { query.valueWithRow($0).boolValue ? $0 : nil }).map(Set.init)
+        let withUpdates = toUpdate.map({
+            Set($0.map({
+                $0.rowWithUpdate(newValues)
+            }))
+        })
+        
+        return toUpdate.combine(withUpdates).then({ toUpdate, withUpdates in
+            let toUpdateKeys = Set(toUpdate.map({ $0[primaryKey] }))
+            let withUpdatesKeys = Set(withUpdates.map({ $0[primaryKey] }))
+            let toDeleteKeys = toUpdateKeys - withUpdatesKeys
+            
+            for updatedRow in withUpdates {
+                let result = writeRow(updatedRow)
+                if result.err != nil { return result }
+            }
+            for deleteKey in toDeleteKeys {
+                let result = deleteRow(primaryKey: deleteKey)
+                if result.err != nil { return result }
+            }
+            
+            return .Ok()
+        })
     }
     
     public func add(row: Row) -> Result<Int64, RelationError> {
@@ -68,7 +97,15 @@ public class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObser
     }
     
     public func delete(query: SelectExpression) -> Result<Void, RelationError> {
-        fatalError()
+        // TODO: for queries involving the primary key, be more efficient and don't scan everything.
+        let keysToDelete = flatmapOk(rowGenerator(), { query.valueWithRow($0).boolValue ? $0[primaryKey] : nil })
+        return keysToDelete.then({
+            for key in $0 {
+                let result = deleteRow(primaryKey: key)
+                if result.err != nil { return result }
+            }
+            return .Ok()
+        })
     }
 }
 
@@ -148,6 +185,16 @@ extension PlistDirectoryRelation {
             let data = try NSPropertyListSerialization.dataWithPropertyList(plist, format: .XMLFormat_v1_0, options: 0)
             try data.writeToURL(url, options: .AtomicWrite)
             
+            return .Ok()
+        } catch {
+            return .Err(error)
+        }
+    }
+    
+    private func deleteRow(primaryKey key: RelationValue) -> Result<Void, RelationError> {
+        do {
+            let url = plistURL(forKeyValue: key)
+            try NSFileManager.defaultManager().removeItemAtURL(url)
             return .Ok()
         } catch {
             return .Err(error)
