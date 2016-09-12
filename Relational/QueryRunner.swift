@@ -360,7 +360,7 @@ open class QueryRunner {
                 keyed: keyed,
                 largerIndex: 1 - smallerInput,
                 largerAttributes: Array(largerAttributes),
-                largerToSmallerRenaming: Dictionary(largerToSmallerRenamingWithoutNoops))
+                largerToSmallerRenaming: Dictionary(largerToSmallerRenamingWithoutNoops as [(Attribute, Attribute)])) // For some reason, Swift 3 currently fails to infer generic types without this pointless cast
         })
         
         let joined = nodeStates[nodeIndex].inputBuffers[extraState.largerIndex].popAll().flatMap({ row -> [Row] in

@@ -151,7 +151,8 @@ extension ChangeLoggingDatabase {
     /// A wrapper function that performs a transaction and provides before and after snapshots to the caller.
     public func transactionWithSnapshots(_ transactionFunction: (Transaction) -> Void) -> (before: ChangeLoggingDatabaseSnapshot, after: ChangeLoggingDatabaseSnapshot) {
         let before = takeSnapshot()
-        transaction(transactionFunction)
+        // TODO: error handling?
+        _ = transaction(transactionFunction)
         let after = takeSnapshot()
         return (before, after)
     }

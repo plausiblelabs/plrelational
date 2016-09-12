@@ -219,7 +219,7 @@ public extension TransactionalDatabase {
         func wrapInTransactionIfNecessary<T>(_ f: (Void) -> T) -> T {
             if let db = db , !db.inTransactionThread {
                 db.beginTransaction()
-                defer { db.endTransaction() }
+                defer { _ = db.endTransaction() } // TODO: error handling?
                 return f()
             } else {
                 return f()

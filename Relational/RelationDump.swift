@@ -42,7 +42,7 @@ extension Relation {
             }
         }
         
-        if let obj = self as? AnyObject {
+        if let obj = asObject(self) {
             print("\(type(of: self)) \(String(format: "%p", UInt(bitPattern: ObjectIdentifier(obj))))")
         } else {
             print("\(type(of: self))")
@@ -105,7 +105,7 @@ extension Relation {
         var relationIDs: [ObjectIdentifier: Relation] = [:]
         var counts: [ObjectIdentifier: Int] = [:]
         func populateDicts(_ r: Relation) {
-            if let obj = r as? AnyObject {
+            if let obj = asObject(r) {
                 let id = ObjectIdentifier(obj)
                 counts[id] = (counts[id] ?? 0) + 1
                 relationIDs[id] = r
@@ -120,7 +120,7 @@ extension Relation {
         var names: [ObjectIdentifier: String] = [:]
         var cursor = 0
         func populateNames(_ r: Relation) {
-            if let obj = r as? AnyObject {
+            if let obj = asObject(r) {
                 let id = ObjectIdentifier(obj)
                 if names[id] == nil && counts[id] > 1 {
                     multiples.append(id)
@@ -135,7 +135,7 @@ extension Relation {
         populateNames(self)
         
         func dumpOrName(_ r: Relation) -> String {
-            if let obj = r as? AnyObject, let name = names[ObjectIdentifier(obj)] {
+            if let obj = asObject(r), let name = names[ObjectIdentifier(obj)] {
                 return name
             } else {
                 return rawDump(r)
@@ -166,7 +166,7 @@ extension Relation {
         
         func visit(_ r: Relation, nonobjectID: String) -> String {
             let supplemental = r.getFieldsForDump().map({ "\($0): \($1)" })
-            if let obj = r as? AnyObject {
+            if let obj = asObject(r) {
                 let id = ObjectIdentifier(obj)
                 let idString = String(format: "_%lx", UInt(bitPattern: id))
                 if !seenIDs.contains(id) {
@@ -200,7 +200,7 @@ extension Relation {
                 return nonobjectID
             }
         }
-        visit(self, nonobjectID: "root")
+        _ = visit(self, nonobjectID: "root")
         
         print("}")
     }
@@ -210,7 +210,7 @@ extension Relation {
         graphvizDump(showContents: showContents, printer: { output += $0; output += "\n" })
         
         let objDescription: String
-        if let obj = self as? AnyObject {
+        if let obj = asObject(self) {
              objDescription = "\(type(of: self)) \(String(format: "%p", UInt(bitPattern: ObjectIdentifier(obj))))"
         } else {
             objDescription = "\(type(of: self))"

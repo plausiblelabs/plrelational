@@ -9,7 +9,7 @@ open class IntermediateRelation: Relation, RelationDefaultChangeObserverImplemen
     var op: Operator
     var operands: [Relation] {
         didSet {
-            let objs = operands.flatMap({ $0 as? AnyObject })
+            let objs = operands.flatMap(asObject)
             if objs.contains(where: { $0 === self }) {
                 fatalError()
             }
@@ -454,7 +454,8 @@ extension IntermediateRelation {
         let queryWithNewValues = query.mapTree({ (expr: SelectExpression) -> SelectExpression in
             switch expr {
             case let attr as Attribute:
-                return myNewValues[attr] ?? attr
+                let newValue = myNewValues[attr]
+                return newValue == .notFound ? attr : newValue
             default:
                 return expr
             }

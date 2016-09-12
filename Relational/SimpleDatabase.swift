@@ -86,7 +86,7 @@ extension SimpleDatabase {
             
             let values = contents["values"] as! [[String: AnyObject]]
             for row in values {
-                db[name].add(Row(values: Dictionary(row.map({ (Attribute($0), self.plistToValue($1)) }))))
+                _ = db[name].add(Row(values: Dictionary(row.map({ (Attribute($0), self.plistToValue($1)) }))))
             }
         }
         return db
