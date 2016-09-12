@@ -64,8 +64,8 @@ class RelationObservationTests: DBTestCase {
                         [1,    "cat",  "animal"]))
     }
     
-    func thoroughObservationForOperator(opF: (Relation, Relation) -> Relation) -> RelationChange? {
-        let sqliteDB = makeDB().db.sqliteDatabase
+    func thoroughObservationForOperator(_ opF: (Relation, Relation) -> Relation) -> RelationChange? {
+        let sqliteDB = makeDB().db
         let initial = MakeRelation(
             ["n", "A", "B"],
             [ 1,   1,   0 ],
@@ -648,9 +648,9 @@ class RelationObservationTests: DBTestCase {
     }
     
     func testComplexTransactionObservation() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
-        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+        func createRelation(_ name: String, _ scheme: Scheme) -> MutableRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
             return db[name]
@@ -666,7 +666,7 @@ class RelationObservationTests: DBTestCase {
             .project(["id", "type", "name"])
         
         let inspectorCollectionItems = selectedCollection
-            .join(MakeRelation(["parent", "order"], [.NULL, 5.0]))
+            .join(MakeRelation(["parent", "order"], [.null, 5.0]))
         let inspectorObjectItems = selectedCollectionID
             .join(objects)
             .renameAttributes(["coll_id": "parent"])
@@ -682,12 +682,12 @@ class RelationObservationTests: DBTestCase {
         var id: Int64 = 1
         var order: Double = 1.0
         
-        func addCollection(name: String) {
+        func addCollection(_ name: String) {
             let row: Row = [
                 "id": RelationValue(id),
                 "type": "coll",
                 "name": RelationValue(name),
-                "parent": .NULL,
+                "parent": .null,
                 "order": RelationValue(order)
             ]
             collections.add(row)
@@ -695,7 +695,7 @@ class RelationObservationTests: DBTestCase {
             order += 1.0
         }
         
-        func addObject(name: String) {
+        func addObject(_ name: String) {
             let row: Row = [
                 "id": RelationValue(id),
                 "type": "obj",

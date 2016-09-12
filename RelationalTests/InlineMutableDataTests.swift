@@ -23,7 +23,7 @@ class InlineMutableDataTests: XCTestCase {
         bigArray += bigArray
         bigArray += bigArray
         
-        func assertContents(data: InlineMutableData) {
+        func assertContents(_ data: InlineMutableData) {
             XCTAssertEqual(data.length, bigArray.count)
             data.withUnsafeMutablePointerToElements({
                 XCTAssertTrue(memcmp($0, bigArray, data.length) == 0)

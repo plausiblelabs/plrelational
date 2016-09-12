@@ -395,7 +395,7 @@ class RelationTests: DBTestCase {
         )
         
         let times = FLIGHTS.project(["NUMBER", "DEPARTS", "ARRIVES"])
-        AssertEqual(times.select(SelectExpressionBinaryOperator(lhs: Attribute("ARRIVES"), op: LTComparator(), rhs: RelationValue.Integer(1300))),
+        AssertEqual(times.select(SelectExpressionBinaryOperator(lhs: Attribute("ARRIVES"), op: LTComparator(), rhs: RelationValue.integer(1300))),
                     MakeRelation(
                         ["NUMBER", "DEPARTS", "ARRIVES"],
                         ["109", 2150, 0252],
@@ -587,33 +587,33 @@ class RelationTests: DBTestCase {
         
         let runloop = CFRunLoopGetCurrent()
         
-        let group = dispatch_group_create()
-        dispatch_group_enter(group)
+        let group = DispatchGroup()
+        group.enter()
         r1.asyncAllRows({ result in
             guard let rows = result.ok else { return XCTAssertNil(result.err) }
             for row in rows {
                 r2.add(row)
             }
-            dispatch_group_leave(group)
+            group.leave()
             CFRunLoopStop(runloop)
         })
         CFRunLoopRun()
-        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+        group.wait(timeout: DispatchTime.distantFuture)
         AssertEqual(r1, r2)
         
         r2 = MakeRelation(
             ["first", "last", "pet"])
-        dispatch_group_enter(group)
+        group.enter()
         r1.asyncAllRows({ result in
             guard let rows = result.ok else { return XCTAssertNil(result.err) }
             for row in rows {
                 r2.add(row)
             }
-            dispatch_group_leave(group)
+            group.leave()
             CFRunLoopStop(runloop)
         })
         CFRunLoopRun()
-        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+        group.wait(timeout: DispatchTime.distantFuture)
         AssertEqual(r1, r2)
     }
     
@@ -622,13 +622,13 @@ class RelationTests: DBTestCase {
         let r2 = MakeRelation(["n"], [2])
         
         var r1Count = 0
-        let r1Aggregate = IntermediateRelation(op: .Aggregate("n", nil, { (_, _) in
+        let r1Aggregate = IntermediateRelation(op: .aggregate("n", nil, { (_, _) in
             r1Count += 1
             return .Ok(3)
         }), operands: [r1])
         
         var r2Count = 0
-        let r2Aggregate = IntermediateRelation(op: .Aggregate("n", nil, { (_, _) in
+        let r2Aggregate = IntermediateRelation(op: .aggregate("n", nil, { (_, _) in
             r2Count += 1
             return .Ok(4)
         }), operands: [r2])
@@ -637,30 +637,30 @@ class RelationTests: DBTestCase {
         let out2 = r1Aggregate.intersection(r2Aggregate)
         let out3 = r1Aggregate.difference(r2Aggregate)
         
-        let group = dispatch_group_create()
+        let group = DispatchGroup()
         
-        dispatch_group_enter(group)
+        group.enter()
         out1.asyncAllRows({ result in
-            defer { dispatch_group_leave(group) }
+            defer { group.leave() }
             guard let rows = result.ok else { return XCTAssertNil(result.err) }
             XCTAssertEqual(rows, [["n": 3], ["n": 4]])
         })
         
-        dispatch_group_enter(group)
+        group.enter()
         out2.asyncAllRows({ result in
-            defer { dispatch_group_leave(group) }
+            defer { group.leave() }
             guard let rows = result.ok else { return XCTAssertNil(result.err) }
             XCTAssertEqual(rows, [])
         })
         
-        dispatch_group_enter(group)
+        group.enter()
         out3.asyncAllRows({ result in
-            defer { dispatch_group_leave(group) }
+            defer { group.leave() }
             guard let rows = result.ok else { return XCTAssertNil(result.err) }
             XCTAssertEqual(rows, [["n": 3]])
         })
         
-        dispatch_group_notify(group, dispatch_get_main_queue(), {
+        group.notify(queue: DispatchQueue.main, execute: {
             CFRunLoopStop(CFRunLoopGetCurrent())
         })
         CFRunLoopRun()
@@ -697,9 +697,9 @@ class RelationTests: DBTestCase {
     }
     
     func testComplexCount() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
-        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+        func createRelation(_ name: String, _ scheme: Scheme) -> MutableRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
             return db[name]
@@ -715,7 +715,7 @@ class RelationTests: DBTestCase {
             .project(["id", "type", "name"])
         
         let inspectorCollectionItems = selectedCollection
-            .join(MakeRelation(["parent", "order"], [.NULL, 5.0]))
+            .join(MakeRelation(["parent", "order"], [.null, 5.0]))
         let inspectorObjectItems = selectedCollectionID
             .join(objects)
             .renameAttributes(["coll_id": "parent"])
@@ -732,12 +732,12 @@ class RelationTests: DBTestCase {
         var id: Int64 = 1
         var order: Double = 1.0
         
-        func addCollection(name: String) {
+        func addCollection(_ name: String) {
             let row: Row = [
                 "id": RelationValue(id),
                 "type": "coll",
                 "name": RelationValue(name),
-                "parent": .NULL,
+                "parent": .null,
                 "order": RelationValue(order)
             ]
             collections.add(row)
@@ -745,7 +745,7 @@ class RelationTests: DBTestCase {
             order += 1.0
         }
         
-        func addObject(name: String) {
+        func addObject(_ name: String) {
             let row: Row = [
                 "id": RelationValue(id),
                 "type": "obj",
@@ -789,9 +789,9 @@ class RelationTests: DBTestCase {
     }
     
     func testDeleteWithJoin() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
-        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+        func createRelation(_ name: String, _ scheme: Scheme) -> MutableRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
             return db[name]
@@ -826,9 +826,9 @@ class RelationTests: DBTestCase {
     func testHugeRelationGraphPerformance() {
         let base = MakeRelation(["A"])
         
-        func unionAllPairs(relations: [Relation]) -> [Relation] {
+        func unionAllPairs(_ relations: [Relation]) -> [Relation] {
             var result: [Relation] = []
-            for (indexA, a) in relations.enumerate() {
+            for (indexA, a) in relations.enumerated() {
                 for b in relations[indexA ..< relations.endIndex] {
                     result.append(a.union(b))
                 }
@@ -836,9 +836,9 @@ class RelationTests: DBTestCase {
             return result
         }
         
-        func unionAdjacentPairs(relations: [Relation]) -> [Relation] {
+        func unionAdjacentPairs(_ relations: [Relation]) -> [Relation] {
             var result: [Relation] = []
-            for i in 0.stride(to: relations.endIndex - 1, by: 2) {
+            for i in stride(from: 0, to: relations.endIndex - 1, by: 2) {
                 result.append(relations[i].union(relations[i + 1]))
             }
             if relations.count % 2 != 0 {
@@ -857,7 +857,7 @@ class RelationTests: DBTestCase {
         }
         let final = bringTogether[0]
         
-        measureBlock({
+        measure({
             AssertEqual(nil, final)
         })
     }
@@ -876,7 +876,7 @@ class RelationTests: DBTestCase {
                         ["Earth", "planet"],
                         ["Tim", "plant"]))
         
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let sqliteRelation = sqliteDB.createRelation("whatever", scheme: concrete.scheme).ok!
         for row in concrete.rows() {
             let result = sqliteRelation.add(row.ok!)
@@ -917,7 +917,7 @@ class RelationTests: DBTestCase {
                         ["name", "kind"],
                         ["Steve", "person"]))
         
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let sqliteRelation = sqliteDB.createRelation("whatever", scheme: concrete.scheme).ok!
         for row in concrete.rows() {
             let result = sqliteRelation.add(row.ok!)
@@ -949,7 +949,7 @@ class RelationTests: DBTestCase {
         var r2 = ConcreteRelation(scheme: ["w"])
         
         for i: Int64 in 1...10 {
-            r1.add(["n": .Integer(i)])
+            r1.add(["n": .integer(i)])
         }
         
         r2.add(["w": "teapot"])
@@ -960,7 +960,7 @@ class RelationTests: DBTestCase {
         
         let joined = r1.join(r2)
         
-        dispatch_apply(1000, dispatch_get_global_queue(0, 0), { _ in
+        DispatchQueue.concurrentPerform(iterations: 1000, execute: { _ in
             for row in joined.rows() {
                 XCTAssertNil(row.err)
             }
@@ -968,13 +968,13 @@ class RelationTests: DBTestCase {
     }
     
     func testConcurrentSQLiteIteration() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         
         let r1 = db.getOrCreateRelation("numbers", scheme: ["n"]).ok!
         let r2 = db.getOrCreateRelation("words", scheme: ["w"]).ok!
         
         for i: Int64 in 1...10 {
-            r1.add(["n": .Integer(i)])
+            r1.add(["n": .integer(i)])
         }
         
         r2.add(["w": "teapot"])
@@ -985,7 +985,7 @@ class RelationTests: DBTestCase {
         
         let joined = r1.join(r2)
         
-        dispatch_apply(1000, dispatch_get_global_queue(0, 0), { _ in
+        DispatchQueue.concurrentPerform(iterations: 1000, execute: { _ in
             for row in joined.rows() {
                 XCTAssertNil(row.err)
             }

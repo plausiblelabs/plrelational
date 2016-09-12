@@ -8,8 +8,8 @@ import libRelational
 import sqlite3
 
 class SQLiteDatabaseTests: DBTestCase {
-    func makeSQLRelation(name: String, _ attributes: [Attribute], _ rowValues: [RelationValue]...) -> SQLiteTableRelation {
-        let db = makeDB().db.sqliteDatabase
+    func makeSQLRelation(_ name: String, _ attributes: [Attribute], _ rowValues: [RelationValue]...) -> SQLiteTableRelation {
+        let db = makeDB().db
         
         let scheme = Scheme(attributes: Set(attributes))
         let rows = rowValues.map({ values -> Row in
@@ -25,7 +25,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testSQLiteBasics() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
         db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
         
@@ -98,7 +98,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testCommittedTransaction() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
         
         db.transaction({
@@ -112,7 +112,7 @@ class SQLiteDatabaseTests: DBTestCase {
             FLIGHTS.add(["NUMBER": "129", "FROM": "JFK", "TO": "A"])
             FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
             FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
-            return .Commit
+            return .commit
         })
         
         AssertEqual(db["FLIGHTS"]!,
@@ -130,7 +130,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testRolledBackTransaction() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
         
         db.transaction({
@@ -144,7 +144,7 @@ class SQLiteDatabaseTests: DBTestCase {
             FLIGHTS.add(["NUMBER": "129", "FROM": "JFK", "TO": "A"])
             FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
             FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
-            return .Rollback
+            return .rollback
         })
         
         AssertEqual(db["FLIGHTS"]!,
@@ -153,7 +153,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testBasicObservation() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         
         XCTAssertNil(db.createRelation("test", scheme: ["column"]).err)
         let r = db["test"]!
@@ -176,7 +176,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testJoinObservation() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         
         XCTAssertNil(db.createRelation("a", scheme: ["1", "2"]).err)
         XCTAssertNil(db.createRelation("b", scheme: ["2", "3"]).err)
@@ -229,7 +229,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testBinding() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         
         let scheme: Scheme = ["id", "name"]
         XCTAssertNil(db.createRelation("people", scheme: scheme).err)
@@ -246,12 +246,12 @@ class SQLiteDatabaseTests: DBTestCase {
         binding.set("Roberta")
         XCTAssertEqual(currentName, "Roberta")
         
-        r.update(Attribute("id") *== RelationValue.Integer(2), newValues: ["name": "Tina"])
+        r.update(Attribute("id") *== RelationValue.integer(2), newValues: ["name": "Tina"])
         XCTAssertEqual(currentName, "Tina")
     }
     
     func testUpdates() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         
         let peopleScheme: Scheme = ["id", "name", "houseID"]
         XCTAssertNil(db.createRelation("people", scheme: peopleScheme).err)
@@ -293,7 +293,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testProjectUpdate() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         let r = db.getOrCreateRelation("people", scheme: ["first", "last", "pet"]).ok!
         XCTAssertNil(r.add(["first": "Steve", "last": "Jobs", "pet": "cat"]).err)
         XCTAssertNil(r.add(["first": "Lisa", "last": "Jobs", "pet": "cat"]).err)
@@ -313,7 +313,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testDifferenceUpdate() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         let r1 = db.getOrCreateRelation("people1", scheme: ["first", "last", "pet"]).ok!
         XCTAssertNil(r1.add(["first": "Steve", "last": "Jobs", "pet": "cat"]).err)
         XCTAssertNil(r1.add(["first": "Lisa", "last": "Jobs", "pet": "cat"]).err)
@@ -343,7 +343,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testIntersectionUpdate() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         let r1 = db.getOrCreateRelation("people1", scheme: ["first", "last", "pet"]).ok!
         XCTAssertNil(r1.add(["first": "Steve", "last": "Jobs", "pet": "cat"]).err)
         XCTAssertNil(r1.add(["first": "Lisa", "last": "Jobs", "pet": "cat"]).err)
@@ -373,7 +373,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testUnionUpdate() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         let r1 = db.getOrCreateRelation("people1", scheme: ["first", "last", "pet"]).ok!
         XCTAssertNil(r1.add(["first": "Lisa", "last": "Jobs", "pet": "cat"]).err)
         XCTAssertNil(r1.add(["first": "Allen", "last": "Jones", "pet": "dog"]).err)
@@ -448,8 +448,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testTransactionConflict() {
-        let (path, modelDB) = makeDB()
-        let db1 = modelDB.sqliteDatabase
+        let (path, db1) = makeDB()
         db1.createRelation("r", scheme: ["n"])
         let r1 = db1["r"]!
         
@@ -479,13 +478,13 @@ class SQLiteDatabaseTests: DBTestCase {
                 XCTAssertNotNil(err4)
                 XCTAssertEqual(err4?.code, SQLITE_BUSY)
                 
-                return .Commit
+                return .commit
             })
             let err = result.err as? SQLiteDatabase.Error
             XCTAssertNotNil(err)
             XCTAssertEqual(err?.code, SQLITE_BUSY)
             
-            return .Commit
+            return .commit
         })
         XCTAssertNil(result.err)
         
@@ -493,8 +492,7 @@ class SQLiteDatabaseTests: DBTestCase {
     }
     
     func testTransactionRetry() {
-        let (path, modelDB) = makeDB()
-        let db1 = modelDB.sqliteDatabase
+        let (path, db1) = makeDB()
         db1.createRelation("r", scheme: ["n"])
         let r1 = db1["r"]!
         
@@ -515,14 +513,14 @@ class SQLiteDatabaseTests: DBTestCase {
                         let result2 = r1.delete(Attribute("n") *== 1)
                         if db1.resultNeedsRetry(result2) {
                             runNumber += 1
-                            return .Retry
+                            return .retry
                         }
                     }
                     
-                    return .Commit
+                    return .commit
                 })
             }
-            return .Commit
+            return .commit
         })
         XCTAssertNil(result.err)
         XCTAssertEqual(runNumber, 2)

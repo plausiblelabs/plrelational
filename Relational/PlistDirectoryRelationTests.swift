@@ -8,20 +8,20 @@ import libRelational
 
 
 class PlistDirectoryRelationTests: XCTestCase {
-    var urls: [NSURL] = []
+    var urls: [URL] = []
     
     override func tearDown() {
         super.tearDown()
         
         for url in urls {
-            _ = try? NSFileManager.defaultManager().removeItemAtURL(url)
+            _ = try? FileManager.default.removeItem(at: url)
         }
         urls = []
     }
     
-    func tmpURL() -> NSURL {
-        let tmp = NSURL(fileURLWithPath: NSTemporaryDirectory())
-        let url = tmp.URLByAppendingPathComponent(NSProcessInfo.processInfo().globallyUniqueString)
+    func tmpURL() -> URL {
+        let tmp = URL(fileURLWithPath: NSTemporaryDirectory())
+        let url = tmp.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
         urls.append(url)
         return url
     }
@@ -58,8 +58,8 @@ class PlistDirectoryRelationTests: XCTestCase {
             ["Bob", "Dole", "Senator"],
             ["Tim", "Allen", "Pharmacist"],
             ["Steven", "Tyler", "Musician"],
-            [.NULL, 42, 666.0],
-            [0, 0, .Blob([1, 2, 3, 4, 5])]
+            [.null, 42, 666.0],
+            [0, 0, RelationValue.blob([1, 2, 3, 4, 5])]
         ]
         
         for rowValues in testRowValues {
@@ -87,10 +87,10 @@ class PlistDirectoryRelationTests: XCTestCase {
             ["Bob", "Dole", "Senator"],
             ["Tim", "Allen", "Pharmacist"],
             ["Steven", "Tyler", "Musician"],
-            [.NULL, 42, 666.0],
-            [0, 0, .Blob([1, 2, 3, 4, 5])],
+            [.null, 42, 666.0],
+            [0, 0, RelationValue.blob([1, 2, 3, 4, 5])],
             [0.0, 0, 0],
-            [.Blob([1, 2, 3, 4, 5]), 0, 0]
+            [RelationValue.blob([1, 2, 3, 4, 5]), 0, 0]
         ]
         
         for rowValues in testRowValues {
@@ -103,20 +103,20 @@ class PlistDirectoryRelationTests: XCTestCase {
         XCTAssertEqual(r1.contains(["first": "Steve", "last": "Jobs", "job": "Senator"]).ok, false)
         XCTAssertEqual(r1.contains(["first": "Billybob", "last": "Jobs", "job": "CEO"]).ok, false)
         
-        XCTAssertEqual(r1.contains(["first": .NULL, "last": 42, "job": 666.0]).ok, true)
-        XCTAssertEqual(r1.contains(["first": .NULL, "last": "Jobs", "job": "CEO"]).ok, false)
+        XCTAssertEqual(r1.contains(["first": .null, "last": 42, "job": 666.0]).ok, true)
+        XCTAssertEqual(r1.contains(["first": .null, "last": "Jobs", "job": "CEO"]).ok, false)
         
-        XCTAssertEqual(r1.contains(["first": 0, "last": 0, "job": .Blob([1, 2, 3, 4, 5])]).ok, true)
-        XCTAssertEqual(r1.contains(["first": 0, "last": 0, "job": .Blob([1, 2, 3, 4, 6])]).ok, false)
-        XCTAssertEqual(r1.contains(["first": 1, "last": 0, "job": .Blob([1, 2, 3, 4, 5])]).ok, false)
+        XCTAssertEqual(r1.contains(["first": 0, "last": 0, "job": .blob([1, 2, 3, 4, 5])]).ok, true)
+        XCTAssertEqual(r1.contains(["first": 0, "last": 0, "job": .blob([1, 2, 3, 4, 6])]).ok, false)
+        XCTAssertEqual(r1.contains(["first": 1, "last": 0, "job": .blob([1, 2, 3, 4, 5])]).ok, false)
         
         XCTAssertEqual(r1.contains(["first": 0.0, "last": 0, "job": 0]).ok, true)
         XCTAssertEqual(r1.contains(["first": 0.0, "last": 0, "job": 1]).ok, false)
         XCTAssertEqual(r1.contains(["first": 0.1, "last": 0, "job": 0]).ok, false)
         
-        XCTAssertEqual(r1.contains(["first": .Blob([1, 2, 3, 4, 5]), "last": 0, "job": 0]).ok, true)
-        XCTAssertEqual(r1.contains(["first": .Blob([1, 2, 3, 4, 5]), "last": 0, "job": 1]).ok, false)
-        XCTAssertEqual(r1.contains(["first": .Blob([1, 2, 3, 4, 6]), "last": 0, "job": 0]).ok, false)
+        XCTAssertEqual(r1.contains(["first": .blob([1, 2, 3, 4, 5]), "last": 0, "job": 0]).ok, true)
+        XCTAssertEqual(r1.contains(["first": .blob([1, 2, 3, 4, 5]), "last": 0, "job": 1]).ok, false)
+        XCTAssertEqual(r1.contains(["first": .blob([1, 2, 3, 4, 6]), "last": 0, "job": 0]).ok, false)
     }
     
     func testUpdateDelete() {
@@ -132,10 +132,10 @@ class PlistDirectoryRelationTests: XCTestCase {
             ["Bob", "Dole", "Senator"],
             ["Tim", "Allen", "Pharmacist"],
             ["Steven", "Tyler", "Musician"],
-            [.NULL, 42, 666.0],
-            [0, 0, .Blob([1, 2, 3, 4, 5])],
+            [.null, 42, 666.0],
+            [0, 0, RelationValue.blob([1, 2, 3, 4, 5])],
             [0.0, 0, 0],
-            [.Blob([1, 2, 3, 4, 5]), 0, 0]
+            [RelationValue.blob([1, 2, 3, 4, 5]), 0, 0]
         ]
         
         for rowValues in testRowValues {
@@ -155,9 +155,9 @@ class PlistDirectoryRelationTests: XCTestCase {
                         ["Steve", "Mobs", "CEO"],
                         ["Tim", "Allen", "Pharmacist"],
                         ["Steven", "Empty", "Musician"],
-                        [.NULL, 42, 666.0],
-                        [0, "Empty", .Blob([1, 2, 3, 4, 5])],
-                        [.Blob([1, 2, 3, 4, 5]), 0, 0]
+                        [.null, 42, 666.0],
+                        [0, "Empty", RelationValue.blob([1, 2, 3, 4, 5])],
+                        [RelationValue.blob([1, 2, 3, 4, 5]), 0, 0]
             ))
     }
 }

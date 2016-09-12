@@ -6,7 +6,7 @@
 import XCTest
 import libRelational
 
-func AssertEqual(a: Relation?, _ b: Relation?, file: StaticString = #file, line: UInt = #line) {
+func AssertEqual(_ a: Relation?, _ b: Relation?, file: StaticString = #file, line: UInt = #line) {
     guard let a = a else {
         guard let b = b else { return }
         XCTAssertTrue(b.isEmpty.ok == true, "First relation is nil, second relation is not nil and not empty:\n\(b)", file: file, line: line)
@@ -33,19 +33,9 @@ func AssertEqual(a: Relation?, _ b: Relation?, file: StaticString = #file, line:
     }
 }
 
-func AssertEqual<M1: Model, M2: Model, Seq: SequenceType where Seq.Generator.Element == Result<M1, RelationError>>(a: Seq, _ b: [M2], file: StaticString = #file, line: UInt = #line) {
-    let aRows = mapOk(a, { $0.toRow() })
-    let bRows = b.map({ $0.toRow() })
-    
-    XCTAssertNil(aRows.err, file: file, line: line)
-    aRows.map({
-        XCTAssertEqual(Set($0), Set(bRows), file: file, line: line)
-    })
-}
-
-func AssertEqual(a: AnyGenerator<Result<Set<Row>, RelationError>>, _ b: Relation?, file: StaticString = #file, line: UInt = #line) {
+func AssertEqual(_ a: AnyIterator<Result<Set<Row>, RelationError>>, _ b: Relation?, file: StaticString = #file, line: UInt = #line) {
     let result = mapOk(a, { $0 })
-    guard let rows = result.ok?.flatten() else {
+    guard let rows = result.ok?.joined() else {
         XCTFail("Got error iterating rows: \(result.err)", file: file, line: line)
         return
     }
@@ -66,20 +56,19 @@ class DBTestCase: XCTestCase {
     
     override func tearDown() {
         for path in dbPaths {
-            _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
+            _ = try? FileManager.default.removeItem(atPath: path)
         }
     }
     
-    func makeDB() -> (path: String, db: ModelDatabase) {
+    func makeDB() -> (path: String, db: SQLiteDatabase) {
         let tmp = NSTemporaryDirectory() as NSString
-        let dbname = "testing-\(NSUUID()).db"
-        let path = tmp.stringByAppendingPathComponent(dbname)
+        let dbname = "testing-\(UUID()).db"
+        let path = tmp.appendingPathComponent(dbname)
         
         let sqlite = try! SQLiteDatabase(path)
-        let db = ModelDatabase(sqlite)
         
         dbPaths.append(path)
         
-        return (path, db)
+        return (path, sqlite)
     }
 }

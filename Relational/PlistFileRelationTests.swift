@@ -8,20 +8,20 @@ import XCTest
 import libRelational
 
 class PlistFileRelationTests: XCTestCase {
-    var urls: [NSURL] = []
+    var urls: [URL] = []
     
     override func tearDown() {
         super.tearDown()
         
         for url in urls {
-            _ = try? NSFileManager.defaultManager().removeItemAtURL(url)
+            _ = try? FileManager.default.removeItem(at: url)
         }
         urls = []
     }
     
-    func tmpURL() -> NSURL {
-        let tmp = NSURL(fileURLWithPath: NSTemporaryDirectory())
-        let url = tmp.URLByAppendingPathComponent(NSProcessInfo.processInfo().globallyUniqueString)
+    func tmpURL() -> URL {
+        let tmp = URL(fileURLWithPath: NSTemporaryDirectory())
+        let url = tmp.appendingPathComponent(ProcessInfo.processInfo.globallyUniqueString)
         urls.append(url)
         return url
     }
@@ -60,8 +60,8 @@ class PlistFileRelationTests: XCTestCase {
             ["Bob", "Dole", "Senator"],
             ["Tim", "Allen", "Pharmacist"],
             ["Steven", "Tyler", "Musician"],
-            [.NULL, 42, 666.0],
-            [0, 0, .Blob([1, 2, 3, 4, 5])]
+            [.null, 42, 666.0],
+            [0, 0, RelationValue.blob([1, 2, 3, 4, 5])]
         ]
         
         for rowValues in testRowValues {

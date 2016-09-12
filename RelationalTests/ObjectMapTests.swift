@@ -15,16 +15,16 @@ class ObjectMapTests: XCTestCase {
         var currentEntries: Set<NSNumber> = []
         
         func add() {
-            let value = NSNumber(integer: rand.next(1000))
-            testMap[value] = String(value.integerValue)
+            let value = NSNumber(value: rand.next(1000))
+            testMap[value] = String(value.intValue)
             currentEntries.insert(value)
         }
         
         func getOrCreate() {
-            let value = NSNumber(integer: rand.next(1000))
+            let value = NSNumber(value: rand.next(1000))
             testMap.getOrCreate(value, defaultValue: {
                 currentEntries.insert(value)
-                return String(value.integerValue)
+                return String(value.intValue)
             }())
         }
         
@@ -37,12 +37,12 @@ class ObjectMapTests: XCTestCase {
         }
         
         func removeNonexistent() {
-            testMap[1000000] = nil
+            testMap[1000000 as AnyObject] = nil
         }
         
         func verify() {
             for value in currentEntries {
-                XCTAssertEqual(String(value.integerValue), testMap[value])
+                XCTAssertEqual(String(value.intValue), testMap[value])
             }
             XCTAssertEqual(testMap.count, currentEntries.count)
         }

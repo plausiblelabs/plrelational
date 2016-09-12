@@ -286,24 +286,24 @@ class ChangeLoggingDatabaseTests: DBTestCase {
     }
     
     func testSave() {
-        let db = makeDB().db.sqliteDatabase
+        let db = makeDB().db
         let scheme: Scheme = ["number", "pilot", "equipment"]
         let table = db.getOrCreateRelation("flights", scheme: scheme).ok!
         
         let loggingRelation = ChangeLoggingRelation(baseRelation: table)
         var referenceRelation = ConcreteRelation(scheme: scheme)
         
-        func add(row: Row) {
+        func add(_ row: Row) {
             loggingRelation.add(row)
             referenceRelation.add(row)
         }
         
-        func delete(query: SelectExpression) {
+        func delete(_ query: SelectExpression) {
             loggingRelation.delete(query)
             referenceRelation.delete(query)
         }
         
-        func update(query: SelectExpression, _ newValues: Row) {
+        func update(_ query: SelectExpression, _ newValues: Row) {
             loggingRelation.update(query, newValues: newValues)
             referenceRelation.update(query, newValues: newValues)
         }
@@ -354,28 +354,28 @@ class ChangeLoggingDatabaseTests: DBTestCase {
     }
     
     func testDatabase() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
         let scheme: Scheme = ["number", "pilot", "equipment"]
         sqliteDB.createRelation("flights", scheme: scheme)
         
         var referenceRelation = ConcreteRelation(scheme: scheme)
         
-        func add(row: Row) {
+        func add(_ row: Row) {
             db.transaction({
                 $0["flights"].add(row)
             })
             referenceRelation.add(row)
         }
         
-        func delete(query: SelectExpression) {
+        func delete(_ query: SelectExpression) {
             db.transaction({
                 $0["flights"].delete(query)
             })
             referenceRelation.delete(query)
         }
         
-        func update(query: SelectExpression, _ newValues: Row) {
+        func update(_ query: SelectExpression, _ newValues: Row) {
             db.transaction({
                 $0["flights"].update(query, newValues: newValues)
             })
@@ -428,7 +428,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
     }
     
     func testTransactions() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         let pilotsScheme: Scheme = ["name", "home"]
@@ -586,7 +586,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
     }
     
     func testTransactionNotifications() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         let pilotsScheme: Scheme = ["name", "home"]
@@ -664,7 +664,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
     }
     
     func testSnapshots() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         let pilotsScheme: Scheme = ["name", "home"]
@@ -727,7 +727,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                 ["Smith", "Chicago"],
                 ["Horton", "Miami"])))
         
-        for (snapshot, flights, pilots) in snapshots + snapshots.reverse() {
+        for (snapshot, flights, pilots) in snapshots + snapshots.reversed() {
             db.restoreSnapshot(snapshot)
             AssertEqual(db["flights"], flights)
             AssertEqual(db["pilots"], pilots)
@@ -735,7 +735,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
     }
     
     func testTransactionSnapshots() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         let pilotsScheme: Scheme = ["name", "home"]
@@ -816,7 +816,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
     }
     
     func testSnapshotChangeNotification() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         let pilotsScheme: Scheme = ["name", "home"]
@@ -992,7 +992,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
     }
     
     func testLongLogSpeed() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         
@@ -1003,7 +1003,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
         
         for i in 0..<100 {
-            flights.update(Attribute("number") *== 1, newValues: ["pilot": .Text("Jones \(i)")])
+            flights.update(Attribute("number") *== 1, newValues: ["pilot": .text("Jones \(i)")])
             if i % 2 == 0 {
                 flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
             } else {
@@ -1011,13 +1011,13 @@ class ChangeLoggingDatabaseTests: DBTestCase {
             }
         }
         
-        measureBlock({
+        measure({
             for _ in flights.rows() {}
         })
     }
     
     func testLongLogSnapshotSpeed() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = ChangeLoggingDatabase(sqliteDB)
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         
@@ -1028,7 +1028,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
         
         for i in 0..<100 {
-            flights.update(Attribute("number") *== 1, newValues: ["pilot": .Text("Jones \(i)")])
+            flights.update(Attribute("number") *== 1, newValues: ["pilot": .text("Jones \(i)")])
             if i % 2 == 0 {
                 flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
             } else {
@@ -1040,7 +1040,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         flights.add(["number": 3, "pilot": "Thompson", "equipment": "727"])
         let endSnapshot = db.takeSnapshot()
         
-        measureBlock({
+        measure({
             db.restoreSnapshot(snapshot)
             db.restoreSnapshot(endSnapshot)
         })
@@ -1052,9 +1052,9 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         for i: Int64 in 0..<10000 {
             r.delete(Attribute("a") *== i - 1)
-            r.add(["a": .Integer(i)])
+            r.add(["a": .integer(i)])
             
-            dispatch_apply(2, dispatch_get_global_queue(0, 0), { _ in
+            DispatchQueue.concurrentPerform(iterations: 2, execute: { _ in
                 for row in r.rows() {
                     XCTAssertNil(row.err)
                 }

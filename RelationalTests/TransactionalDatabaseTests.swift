@@ -8,7 +8,7 @@ import libRelational
 
 class TransactionalDatabaseTests: DBTestCase {
     func testTransactionNotifications() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         let pilotsScheme: Scheme = ["name", "home"]
@@ -88,7 +88,7 @@ class TransactionalDatabaseTests: DBTestCase {
     
     
     func testSnapshots() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         let pilotsScheme: Scheme = ["name", "home"]
@@ -167,10 +167,10 @@ class TransactionalDatabaseTests: DBTestCase {
     }
     
     func testRestoreSnapshotAfterDeletesOnMultipleRelations() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
         
-        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+        func createRelation(_ name: String, _ scheme: Scheme) -> MutableRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
             return db[name]
@@ -230,7 +230,7 @@ class TransactionalDatabaseTests: DBTestCase {
     }
     
     func testAddNotify() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
         
         sqliteDB.createRelation("flights", scheme: ["number", "pilot", "equipment"])
@@ -280,7 +280,7 @@ class TransactionalDatabaseTests: DBTestCase {
     }
     
     func testDeleteNotify() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
         
         sqliteDB.createRelation("flights", scheme: ["number", "pilot", "equipment"])
@@ -319,7 +319,7 @@ class TransactionalDatabaseTests: DBTestCase {
     }
     
     func testUpdateNotify() {
-        let sqliteDB = makeDB().db.sqliteDatabase
+        let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
         
         sqliteDB.createRelation("flights", scheme: ["number", "pilot", "equipment"])
@@ -374,7 +374,7 @@ class TransactionalDatabaseTests: DBTestCase {
     }
     
     func testConcurrentReadAndWriteTransactions() {
-        let sqlite = makeDB().db.sqliteDatabase
+        let sqlite = makeDB().db
         XCTAssertNil(sqlite.getOrCreateRelation("a", scheme: ["n"]).err)
         XCTAssertNil(sqlite.getOrCreateRelation("b", scheme: ["n"]).err)
         
@@ -383,7 +383,7 @@ class TransactionalDatabaseTests: DBTestCase {
         let b = db["b"]
         let intersection = a.intersection(b)
         
-        dispatch_async(dispatch_get_global_queue(0, 0), {
+        DispatchQueue.global().async(execute: {
             for _ in 0..<100 {
                 db.beginTransaction()
                 a.add(["n": 1])
@@ -405,7 +405,7 @@ class TransactionalDatabaseTests: DBTestCase {
         var done = false
         while !done {
             for row in intersection.rows() {
-                if case QueryRunner.Error.MutatedDuringEnumeration? = row.err {
+                if case QueryRunner.Error.mutatedDuringEnumeration? = row.err {
                     continue
                 }
                 XCTAssertFalse(done)
@@ -417,14 +417,14 @@ class TransactionalDatabaseTests: DBTestCase {
     }
     
     func testConcurrentReadAndWriteNoTransactions() {
-        let sqlite = makeDB().db.sqliteDatabase
+        let sqlite = makeDB().db
         XCTAssertNil(sqlite.getOrCreateRelation("a", scheme: ["n", "m"]).err)
         
         let db = TransactionalDatabase(sqlite)
         let a = db["a"]
         a.add(["n": 1, "m": 1])
         
-        dispatch_async(dispatch_get_global_queue(0, 0), {
+        DispatchQueue.global().async(execute: {
             for _ in 0..<100 {
                 a.update(true, newValues: ["m": 2])
                 a.update(true, newValues: ["m": 1])
@@ -437,7 +437,7 @@ class TransactionalDatabaseTests: DBTestCase {
         while !done {
             for row in a.rows() {
                 switch row {
-                case .Err(QueryRunner.Error.MutatedDuringEnumeration):
+                case .Err(QueryRunner.Error.mutatedDuringEnumeration):
                     continue
                 case .Err(let err):
                     XCTFail("Unexpected error \(err)")
@@ -453,23 +453,23 @@ class TransactionalDatabaseTests: DBTestCase {
     }
     
     func testConcurrentReadWhileInTransaction() {
-        let sqlite = makeDB().db.sqliteDatabase
+        let sqlite = makeDB().db
         XCTAssertNil(sqlite.getOrCreateRelation("a", scheme: ["n"]).err)
         
         let db = TransactionalDatabase(sqlite)
         let a = db["a"]
         
         db.beginTransaction()
-        let group = dispatch_group_create()
-        dispatch_group_async(group, dispatch_get_global_queue(0, 0), {
+        let group = DispatchGroup()
+        DispatchQueue.global().async(group: group, execute: {
             AssertEqual(a, MakeRelation(["n"]))
         })
-        dispatch_group_wait(group, DISPATCH_TIME_FOREVER)
+        group.wait(timeout: DispatchTime.distantFuture)
         db.endTransaction()
     }
     
     func testTransactionWhileReading() {
-        let sqlite = makeDB().db.sqliteDatabase
+        let sqlite = makeDB().db
         XCTAssertNil(sqlite.getOrCreateRelation("a", scheme: ["n"]).err)
         
         let db = TransactionalDatabase(sqlite)
@@ -484,7 +484,7 @@ class TransactionalDatabaseTests: DBTestCase {
         
         let row = rows.next()
         switch row {
-        case .Some(.Err(QueryRunner.Error.MutatedDuringEnumeration)):
+        case .some(.Err(QueryRunner.Error.mutatedDuringEnumeration)):
             break
         default:
             XCTFail("Unexpected row result: \(row)")
