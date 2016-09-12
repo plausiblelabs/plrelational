@@ -80,7 +80,7 @@ extension Relation {
 }
 
 extension MutableRelation {
-    /// Replaces the given values (synchronously) by performing a delete followed by an add for each row.
+    /// Replaces the rows in this relation (synchronously) by performing a delete-all followed by an add for each row.
     public func replaceRows(rows: [Row]) {
         var mutableRelation = self
         mutableRelation.delete(true)
@@ -89,7 +89,7 @@ extension MutableRelation {
         }
     }
 
-    /// Replaces the given values (synchronously) by performing a delete followed by an add for each value.
+    /// Replaces the rows in this relation (synchronously) by performing a delete-all followed by an add for each value.
     public func replaceValues(values: [RelationValue]) {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!
@@ -102,7 +102,15 @@ extension MutableRelation {
 }
 
 extension TransactionalDatabase.TransactionalRelation {
-    /// Replaces the given values (asynchronously) by performing a delete followed by an add for each value.
+    /// Replaces the rows in this relation (asynchronously) by performing a delete-all followed by an add for each row.
+    public func asyncReplaceRows(rows: [Row]) {
+        self.asyncDelete(true)
+        for row in rows {
+            self.asyncAdd(row)
+        }
+    }
+
+    /// Replaces the rows in this relation (asynchronously) by performing a delete-all followed by an add for each value.
     public func asyncReplaceValues(values: [RelationValue]) {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!

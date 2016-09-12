@@ -38,9 +38,6 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         super.init(signal: signal, notify: notify)
 
         removals.append(relation.addAsyncObserver(self))
-        
-        // XXX: This shouldn't be necessary if we made everything go through the async system
-        removals.append(relation.addChangeObserver{ changes in self.handleRelationChanges(changes) })
     }
     
     deinit {
@@ -226,20 +223,6 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         case .Err(let err):
             // TODO: actual handling
             fatalError("Got error for relation change: \(err)")
-        }
-    }
-    
-    // XXX: This shouldn't be necessary if we made everything go through the async system
-    private func handleRelationChanges(relationChanges: RelationChange) {
-        var arrayChanges: [Change] = []
-        let parts = relationChanges.parts(self.idAttr)
-        
-        self.onInsert(parts.addedRows, elems: &self.elements!, changes: &arrayChanges)
-        self.onUpdate(parts.updatedRows, elems: &self.elements!, changes: &arrayChanges)
-        self.onDelete(parts.deletedIDs, elems: &self.elements!, changes: &arrayChanges)
-        
-        if arrayChanges.count > 0 {
-            self.notifyObservers(arrayChanges: arrayChanges)
         }
     }
 }

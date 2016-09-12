@@ -27,7 +27,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         }
 
         let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
-        let property = nameRelation.asyncProperty{ $0.signal{ $0.oneString($1) } }
+        let property = nameRelation.asyncProperty{ $0.oneString($1) }
         let removal = property.signal.observe(SignalObserver(
             valueWillChange: {
                 willChangeCount += 1
