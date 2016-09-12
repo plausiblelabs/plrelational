@@ -283,7 +283,7 @@ extension InlineRow {
 }
 
 extension InlineRow {
-    static let extantRows = Mutexed<NSTashTable>(NSHashTable(pointerFunctions: { () -> NSPointerFunctions in
+    static let extantRows = Mutexed<NSHashTable<AnyObject>>(NSHashTable(pointerFunctions: { () -> NSPointerFunctions in
         let pf = NSPointerFunctions(options: [.weakMemory])
         pf.hashFunction = { ptr, _ in unsafeBitCast(ptr, to: InlineRow.self).hashValue }
         pf.isEqualFunction = { a, b, _ in ObjCBool(unsafeBitCast(a, to: InlineRow.self) == unsafeBitCast(b, to: InlineRow.self)) }

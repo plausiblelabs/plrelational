@@ -15,7 +15,7 @@ open class ModelRelation<T: Model>: Sequence {
     
     open func makeIterator() -> AnyIterator<Result<T, RelationError>> {
         let rows = underlyingRelation.rows()
-        return AnyIterator(body: {
+        return AnyIterator({
             if let row = rows.next() {
                 return row.then({ row in
                     guard let objectID: [UInt8] = row["objectID"].get() else {

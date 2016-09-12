@@ -81,7 +81,7 @@ public struct DispatchContextWrapped<T> {
         self.wrapped = wrapped
     }
     
-    public func withWrapped(_ f: (T) -> Void) {
+    public func withWrapped(_ f: @escaping (T) -> Void) {
         context.async({
             f(self.wrapped)
         })

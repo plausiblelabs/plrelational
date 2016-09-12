@@ -27,18 +27,18 @@ open class SQLiteDatabase {
         var localdb: sqlite3? = nil
         let result = sqlite3_open_v2(path, &localdb, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_FULLMUTEX, nil)
         if result != SQLITE_OK {
-            let message = String.fromCString(sqlite3_errstr(result))
-            throw Error(code: result, message: message ?? "")
+            let message = String(cString: sqlite3_errstr(result))
+            throw Error(code: result, message: message)
         }
         self.db = localdb!
         
-        try errwrap(sqlite3_busy_timeout(self.db, busyTimeout)).orThrow()
+        _ = try errwrap(sqlite3_busy_timeout(self.db, busyTimeout)).orThrow()
         
         try tables.withMutableValue({ $0 = try self.queryTables().orThrow() })
     }
     
     deinit {
-        try! errwrap(sqlite3_close_v2(db)).orThrow()
+        _ = try! errwrap(sqlite3_close_v2(db)).orThrow()
     }
     
     fileprivate func queryTables() -> Result<[String: SQLiteTableRelation], RelationError> {
@@ -67,7 +67,7 @@ open class SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    public struct Error: Error {
+    public struct Error: Swift.Error {
         public var code: Int32
         public var message: String
     }
@@ -77,8 +77,8 @@ extension SQLiteDatabase {
         case SQLITE_OK, SQLITE_ROW, SQLITE_DONE:
             return .Ok(callResult)
         default:
-            let message = String.fromCString(sqlite3_errmsg(db))
-            return .Err(Error(code: callResult, message: message ?? ""))
+            let message = String(cString: sqlite3_errmsg(db))
+            return .Err(Error(code: callResult, message: message))
         }
     }
 }
@@ -125,7 +125,7 @@ extension SQLiteDatabase {
 extension SQLiteDatabase {
     func executeQuery(_ sql: String, _ parameters: [RelationValue] = []) -> Result<AnyIterator<Result<Row, RelationError>>, RelationError> {
         return makeStatement({ sqlite3_prepare_v2(self.db, sql, -1, &$0, nil) }).then({ stmt -> Result<AnyIterator<Result<Row, RelationError>>, RelationError> in
-            for (index, param) in parameters.enumerate() {
+            for (index, param) in parameters.enumerated() {
                 if let err = bindValue(stmt.value, Int32(index + 1), param).err {
                     return .Err(err)
                 }
@@ -133,7 +133,7 @@ extension SQLiteDatabase {
             
             var didError = false
             
-            return .Ok(AnyGenerator(body: {
+            return .Ok(AnyIterator({
                 if didError {
                     return nil
                 }
@@ -153,9 +153,9 @@ extension SQLiteDatabase {
                     
                     let columnCount = sqlite3_column_count(stmt.value)
                     for i in 0..<columnCount {
-                        let name = String.fromCString(sqlite3_column_name(stmt.value, i))
+                        let name = String(cString: sqlite3_column_name(stmt.value, i))
                         let value = self.columnToValue(stmt.value, i)
-                        row[Attribute(name!)] = value
+                        row[Attribute(name)] = value
                     }
                     
                     return row
@@ -179,12 +179,12 @@ extension SQLiteDatabase {
         let type = sqlite3_column_type(stmt, index)
         switch type {
         case SQLITE_NULL: return .null // TODO: We don't really support SQLITE_NULL. We write out our own NULLs using funky BLOBs. Is it wise to read them in?
-        case SQLITE_INTEGER: return .Integer(sqlite3_column_int64(stmt, index))
-        case SQLITE_FLOAT: return .Real(sqlite3_column_double(stmt, index))
-        case SQLITE_TEXT: return .Text(String.fromCString(UnsafePointer(sqlite3_column_text(stmt, index)))!)
+        case SQLITE_INTEGER: return .integer(sqlite3_column_int64(stmt, index))
+        case SQLITE_FLOAT: return .real(sqlite3_column_double(stmt, index))
+        case SQLITE_TEXT: return .text(String(cString: sqlite3_column_text(stmt, index)))
         case SQLITE_BLOB:
-            let ptr = UnsafePointer<UInt8>(sqlite3_column_blob(stmt, index))
             let length = sqlite3_column_bytes(stmt, index)
+            let ptr = sqlite3_column_blob(stmt, index).bindMemory(to: UInt8.self, capacity: Int(length))
             let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: Int(length))
             return blobToValue(buffer)
         default:
@@ -219,10 +219,10 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    func makeStatement(@noescape _ sqliteCall: (inout sqlite3_stmt) -> Int32) -> Result<ValueWithDestructor<sqlite3_stmt>, RelationError> {
+    func makeStatement(_ sqliteCall: (inout sqlite3_stmt?) -> Int32) -> Result<ValueWithDestructor<sqlite3_stmt>, RelationError> {
         var localStmt: sqlite3_stmt? = nil
         return errwrap(sqliteCall(&localStmt)).map({ _ in
-            ValueWithDestructor(value: localStmt, destructor: {
+            ValueWithDestructor(value: localStmt!, destructor: {
                 // Note: sqlite3_finalize can return errors, but it only returns an error
                 // when the most recent evaluation of the statement produced an error, in
                 // which case _finalize just returns that same error again. So the only

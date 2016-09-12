@@ -39,9 +39,9 @@ extension SimpleDatabase {
         switch value {
         case .null: return NSNull()
         case .integer(let x): return NSNumber(value: x as Int64)
-        case .real(let x): return x
-        case .text(let x): return x
-        case .blob(let x): return Data(bytes: UnsafePointer<UInt8>(x), count: x.count)
+        case .real(let x): return NSNumber(value: x)
+        case .text(let x): return x as NSString
+        case .blob(let x): return NSData(bytes: UnsafePointer<UInt8>(x), length: x.count)
         case .notFound: fatalError("NotFound value should not be serialized!")
         }
     }
@@ -65,8 +65,8 @@ extension SimpleDatabase {
         }
     }
     
-    func toPlist() -> AnyObject {
-        return Dictionary(relations.map({ (name, relation) -> (String, [String: AnyObject]) in
+    func toPlist() -> Any {
+        return Dictionary(relations.map({ (name, relation) -> (String, [String: Any]) in
             let scheme = relation.scheme.attributes.map({ $0.name })
             
             let values = relation.rows().map({ row in
@@ -77,8 +77,8 @@ extension SimpleDatabase {
         })) as AnyObject
     }
     
-    static func fromPlist(_ plist: AnyObject) -> SimpleDatabase {
-        let dict = plist as! [String: [String: AnyObject]]
+    static func fromPlist(_ plist: Any) -> SimpleDatabase {
+        let dict = plist as! [String: [String: Any]]
         let db = SimpleDatabase()
         for (name, contents) in dict {
             let scheme = contents["scheme"] as! [String]

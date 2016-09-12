@@ -56,7 +56,7 @@ open class QueryRunner {
                 let parentIndex = parentIndexes[parentIndexesIndex]
                 let parentNode = nodes[parentIndex]
                 
-                nodeStates[nodeIndex].parentChildIndexes.append(parentNode.childIndexes.indexesOf(nodeIndex))
+                nodeStates[nodeIndex].parentChildIndexes.append(contentsOf: parentNode.childIndexes.indexesOf(nodeIndex))
                 
                 while parentIndexesIndex < parentIndexesCount && parentIndex == parentIndexes[parentIndexesIndex] {
                     parentIndexesIndex += 1
@@ -552,7 +552,7 @@ private func ==(a: QueryRunner.IntermediateToProcess, b: QueryRunner.Intermediat
 }
 
 extension QueryRunner {
-    public enum Error: Error {
+    public enum Error: Swift.Error {
         case mutatedDuringEnumeration
     }
 }
