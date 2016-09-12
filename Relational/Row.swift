@@ -189,7 +189,7 @@ extension InlineRow {
         var obj = self.make(estimatedSize)
         
         // Reserve space for the count and the offsets. Don't set their values yet, we'll do that at the end.
-        obj = append(obj, pointer: nil, length: (1 + values.count * 2) * sizeof(Int.self))
+        obj = append(obj, pointer: nil, length: (1 + values.count * 2) * MemoryLayout<Int>.size)
         
         var offsets: [Int] = []
         offsets.reserveCapacity(values.count * 2)
@@ -200,9 +200,9 @@ extension InlineRow {
         }
         
         obj.withUnsafeMutablePointerToElements({ ptr in
-            let intPtr = UnsafeMutablePointer<Int>(ptr)
-            intPtr[0] = values.count
-            memcpy(intPtr + 1, offsets, offsets.count * sizeof(Int.self))
+            let raw = UnsafeMutableRawPointer(ptr)
+            raw.storeBytes(of: values.count, as: Int.self)
+            memcpy(raw + MemoryLayout<Int>.size, offsets, offsets.count * MemoryLayout<Int>.size)
         })
         
         return obj
@@ -229,13 +229,13 @@ extension InlineRow {
             obj = append(obj, pointer: [0] as [UInt8], length: 1)
         case .integer(var value):
             obj = append(obj, pointer: [1] as [UInt8], length: 1)
-            obj = append(obj, untypedPointer: &value, length: sizeofValue(value))
+            obj = append(obj, untypedPointer: &value, length: MemoryLayout.size(ofValue: value))
         case .real(var value):
             obj = append(obj, pointer: [2] as [UInt8], length: 1)
-            obj = append(obj, untypedPointer: &value, length: sizeofValue(value))
+            obj = append(obj, untypedPointer: &value, length: MemoryLayout.size(ofValue: value))
         case .text(let string):
             obj = append(obj, pointer: [3] as [UInt8], length: 1)
-            serialize(&obj, string)
+            _ = serialize(&obj, string)
         case .blob(let data):
             obj = append(obj, pointer: [4] as [UInt8], length: 1)
             obj = append(obj, pointer: data, length: data.count)
@@ -283,7 +283,7 @@ extension InlineRow {
 }
 
 extension InlineRow {
-    static let extantRows = Mutexed(NSHashTable(pointerFunctions: { () -> NSPointerFunctions in 
+    static let extantRows = Mutexed<NSTashTable>(NSHashTable(pointerFunctions: { () -> NSPointerFunctions in
         let pf = NSPointerFunctions(options: [.weakMemory])
         pf.hashFunction = { ptr, _ in unsafeBitCast(ptr, to: InlineRow.self).hashValue }
         pf.isEqualFunction = { a, b, _ in ObjCBool(unsafeBitCast(a, to: InlineRow.self) == unsafeBitCast(b, to: InlineRow.self)) }

@@ -14,7 +14,7 @@ class InlineMutableData: ManagedBuffer<(length: Int, capacity: Int, hash: UInt64
         return cast(obj)
     }
     
-    static func append<T: InlineMutableData>(_ data: T, pointer: UnsafePointer<UInt8>, length: Int) -> T {
+    static func append<T: InlineMutableData>(_ data: T, pointer: UnsafeRawPointer?, length: Int) -> T {
         if data.tryAppend(pointer, length: length) {
             return data
         }
@@ -49,7 +49,7 @@ class InlineMutableData: ManagedBuffer<(length: Int, capacity: Int, hash: UInt64
         }
     }
     
-    final func tryAppend(_ pointer: UnsafePointer<UInt8>?, length: Int) -> Bool {
+    final func tryAppend(_ pointer: UnsafeRawPointer?, length: Int) -> Bool {
         let remainingCapacity = self.header.capacity - self.header.length
         if length <= remainingCapacity {
             withUnsafeMutablePointers({ headerPtr, elementPtr in
