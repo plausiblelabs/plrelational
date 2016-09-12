@@ -150,12 +150,12 @@ extension Relation {
 extension Relation {
     /// Fetch rows and invoke a callback as they come in. Each call is passed one or more rows, or an error.
     /// If no error occurs, the sequence of calls is terminated by a final call which passes zero rows.
-    public func asyncBulkRows(_ callback: (Result<Set<Row>, RelationError>) -> Void) {
+    public func asyncBulkRows(_ callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
         RunloopQueryManager.currentInstance.registerQuery(self, callback: callback)
     }
     
     /// Fetch all rows and invoke a callback when complete.
-    public func asyncAllRows(_ callback: (Result<Set<Row>, RelationError>) -> Void) {
+    public func asyncAllRows(_ callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
         var allRows: Set<Row> = []
         asyncBulkRows({ result in
             switch result {
@@ -315,7 +315,7 @@ extension Relation {
             columns.map({ (col: Attribute) -> String in
                 switch row.map({ $0[col] }) {
                 case .Ok(let value):
-                    return String(value)
+                    return String(describing: value)
                 case .Err(let err):
                     return "Err(\(err))"
                 }
@@ -334,8 +334,9 @@ extension Relation {
 }
 
 extension Relation {
-    public func addChangeObserver(_ f: (RelationChange) -> Void) -> ((Void) -> Void) {
-        return addChangeObserver(SimpleRelationObserverProxy(f: f))
+    public func addChangeObserver(_ f: @escaping (RelationChange) -> Void) -> ((Void) -> Void) {
+        let x = addChangeObserver(SimpleRelationObserverProxy(f: f))
+        return x
     }
     
     public func addWeakChangeObserver<T: AnyObject>(_ target: T, method: @escaping (T) -> (RelationChange) -> Void) {
