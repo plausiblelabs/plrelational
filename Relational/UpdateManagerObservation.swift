@@ -75,7 +75,7 @@ extension UpdateManager {
         
         let wrappedObserver = DispatchContextWrapped(context: context ?? defaultObserverDispatchContext(), wrapped: observer)
         let shimObserver = ShimObserver(coalescedObserver: wrappedObserver)
-        return self.observe(relation, observer: shimObserver as! AsyncRelationChangeCoalescedObserver, context: DirectDispatchContext())
+        return self.observe(relation, observer: shimObserver, context: DirectDispatchContext())
     }
 }
 
@@ -86,7 +86,7 @@ public protocol AsyncRelationChangeCoalescedObserver {
 
 public extension Relation {
     func addAsyncObserver(_ observer: AsyncRelationChangeObserver) -> UpdateManager.ObservationRemover {
-        return UpdateManager.currentInstance.observe(self, observer: observer as! AsyncRelationChangeCoalescedObserver)
+        return UpdateManager.currentInstance.observe(self, observer: observer)
     }
     
     func addAsyncObserver(_ observer: AsyncRelationChangeCoalescedObserver) -> UpdateManager.ObservationRemover {
@@ -106,7 +106,7 @@ extension UpdateManager {
         
         let wrappedObserver = DispatchContextWrapped(context: context ?? defaultObserverDispatchContext(), wrapped: observer)
         let shimObserver = ShimContentObserver(coalescedObserver: wrappedObserver, postprocessor: postprocessor)
-        return self.observe(relation, observer: shimObserver as! AsyncRelationChangeCoalescedObserver, context: DirectDispatchContext())
+        return self.observe(relation, observer: shimObserver, context: DirectDispatchContext())
     }
 }
 
@@ -120,7 +120,7 @@ public protocol AsyncRelationContentCoalescedObserver {
 
 public extension Relation {
     func addAsyncObserver(_ observer: AsyncRelationContentObserver) -> UpdateManager.ObservationRemover {
-        return UpdateManager.currentInstance.observe(self, observer: observer as! AsyncRelationChangeCoalescedObserver)
+        return UpdateManager.currentInstance.observe(self, observer: observer)
     }
     
     /// If desired, this method can be used to supply a postprocessor function which runs in the background after the rows
