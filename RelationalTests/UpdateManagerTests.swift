@@ -10,7 +10,7 @@ import libRelational
 class UpdateManagerTests: DBTestCase {
     func testAsyncUpdate() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
@@ -35,7 +35,7 @@ class UpdateManagerTests: DBTestCase {
     
     func testUpdateDuringAsyncUpdate() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
@@ -87,8 +87,8 @@ class UpdateManagerTests: DBTestCase {
     
     func testLimitedUpdateNotificationScope() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("1", scheme: ["n"]).ok!
-        sqliteDB.getOrCreateRelation("2", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("1", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("2", scheme: ["n"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let r1 = db["1"]
@@ -107,18 +107,18 @@ class UpdateManagerTests: DBTestCase {
     
     func testAsyncSnapshotRestore() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
         
-        r.add(["n": 1])
-        r.add(["n": 2])
+        _ = r.add(["n": 1])
+        _ = r.add(["n": 2])
         
         let snapshot = db.takeSnapshot()
         
-        r.delete(Attribute("n") *== 2)
-        r.add(["n": 3])
+        _ = r.delete(Attribute("n") *== 2)
+        _ = r.add(["n": 3])
         
         TestAsyncChangeObserver.assertChanges(r,
                                         change: { db.asyncRestoreSnapshot(snapshot) },
@@ -128,18 +128,18 @@ class UpdateManagerTests: DBTestCase {
     
     func testAsyncSnapshotRestoreWithOtherChanges() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
         
-        r.add(["n": 1])
-        r.add(["n": 2])
+        _ = r.add(["n": 1])
+        _ = r.add(["n": 2])
         
         let snapshot = db.takeSnapshot()
         
-        r.delete(Attribute("n") *== 2)
-        r.add(["n": 3])
+        _ = r.delete(Attribute("n") *== 2)
+        _ = r.add(["n": 3])
         
         TestAsyncChangeCoalescedObserver.assertChanges(r,
                                                  change: {
@@ -152,7 +152,7 @@ class UpdateManagerTests: DBTestCase {
     
     func testAsyncUpdateObservation() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
@@ -167,7 +167,7 @@ class UpdateManagerTests: DBTestCase {
     
     func testAsyncCoalescedUpdateObservation() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
@@ -185,7 +185,7 @@ class UpdateManagerTests: DBTestCase {
     
     func testAsyncCoalescedUpdateObservationWithSorting() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
@@ -203,7 +203,7 @@ class UpdateManagerTests: DBTestCase {
     
     func testErrorFromRelation() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let r1 = db["n"]
@@ -224,7 +224,7 @@ class UpdateManagerTests: DBTestCase {
             
             func contains(_ row: Row) -> Result<Bool, RelationError> {
                 switch row["n"] {
-                case 1, 2, 3 where row.count == 1: return .Ok(true)
+                case 1 where row.count == 1, 2 where row.count == 1, 3 where row.count == 1: return .Ok(true)
                 default: return .Ok(false)
                 }
             }
@@ -268,7 +268,7 @@ class UpdateManagerTests: DBTestCase {
     
     func testMultipleCoalescedChangeObservations() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
@@ -313,7 +313,7 @@ class UpdateManagerTests: DBTestCase {
     
     func testMultipleCoalescedContentObservations() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let r = db["n"]
@@ -354,8 +354,8 @@ class UpdateManagerTests: DBTestCase {
     
     func testCoalescedContentObservationsWithJoin() {
         let sqliteDB = makeDB().db
-        sqliteDB.getOrCreateRelation("person", scheme: ["id", "name"]).ok!
-        sqliteDB.getOrCreateRelation("selected_person", scheme: ["id"]).ok!
+        _ = sqliteDB.getOrCreateRelation("person", scheme: ["id", "name"]).ok!
+        _ = sqliteDB.getOrCreateRelation("selected_person", scheme: ["id"]).ok!
         
         let db = TransactionalDatabase(sqliteDB)
         let persons = db["person"]
@@ -369,7 +369,7 @@ class UpdateManagerTests: DBTestCase {
                 "id": RelationValue(id),
                 "name": RelationValue(name)
             ]
-            persons.add(row)
+            _ = persons.add(row)
         }
         
         addPerson(1, "Alice")

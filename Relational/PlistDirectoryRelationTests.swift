@@ -143,11 +143,11 @@ class PlistDirectoryRelationTests: XCTestCase {
             XCTAssertNil(r1.add(row).err)
         }
         
-        r1.update(Attribute("job") *== "CEO", newValues: ["last": "Mobs"])
-        r1.update(Attribute("job") *== "Musician" *|| Attribute("first") *== 0, newValues: ["last": "Empty"])
-        r1.delete(Attribute("first") *== "Bob")
-        r1.delete(Attribute("job") *== 0 *&& Attribute("last") *== 1)
-        r1.delete(Attribute("job") *== 0 *&& Attribute("first") *== RelationValue(0.0))
+        _ = r1.update(Attribute("job") *== "CEO", newValues: ["last": "Mobs"])
+        _ = r1.update(Attribute("job") *== "Musician" *|| Attribute("first") *== 0, newValues: ["last": "Empty"])
+        _ = r1.delete(Attribute("first") *== "Bob")
+        _ = r1.delete(Attribute("job") *== 0 *&& Attribute("last") *== 1)
+        _ = r1.delete(Attribute("job") *== 0 *&& Attribute("first") *== RelationValue(0.0))
         
         AssertEqual(r1,
                     MakeRelation(

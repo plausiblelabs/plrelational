@@ -26,19 +26,19 @@ class SQLiteDatabaseTests: DBTestCase {
     
     func testSQLiteBasics() {
         let db = makeDB().db
-        db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
-        db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
+        _ = db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
+        _ = db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
         
         let FLIGHTS = db["FLIGHTS"]!
-        FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
-        FLIGHTS.add(["NUMBER": "124", "FROM": "JFK", "TO": "A"])
-        FLIGHTS.add(["NUMBER": "125", "FROM": "JFK", "TO": "B"])
-        FLIGHTS.add(["NUMBER": "126", "FROM": "JFK", "TO": "C"])
-        FLIGHTS.add(["NUMBER": "127", "FROM": "JFK", "TO": "D"])
-        FLIGHTS.add(["NUMBER": "128", "FROM": "JFK", "TO": "A"])
-        FLIGHTS.add(["NUMBER": "129", "FROM": "JFK", "TO": "A"])
-        FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
-        FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
+        _ = FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
+        _ = FLIGHTS.add(["NUMBER": "124", "FROM": "JFK", "TO": "A"])
+        _ = FLIGHTS.add(["NUMBER": "125", "FROM": "JFK", "TO": "B"])
+        _ = FLIGHTS.add(["NUMBER": "126", "FROM": "JFK", "TO": "C"])
+        _ = FLIGHTS.add(["NUMBER": "127", "FROM": "JFK", "TO": "D"])
+        _ = FLIGHTS.add(["NUMBER": "128", "FROM": "JFK", "TO": "A"])
+        _ = FLIGHTS.add(["NUMBER": "129", "FROM": "JFK", "TO": "A"])
+        _ = FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
+        _ = FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
         
         AssertEqual(FLIGHTS,
                     MakeRelation(
@@ -75,7 +75,7 @@ class SQLiteDatabaseTests: DBTestCase {
                         ["JFK",      "128",    "A"],
                         ["JFK",      "129",    "A"]))
         
-        FLIGHTS.update(Attribute("NUMBER") *== "888", newValues: ["FROM": "Tennessee", "TO": "Spotsylvania"])
+        _ = FLIGHTS.update(Attribute("NUMBER") *== "888", newValues: ["FROM": "Tennessee", "TO": "Spotsylvania"])
         AssertEqual(FLIGHTS,
                     MakeRelation(
                         ["FROM",     "NUMBER", "TO"],
@@ -89,7 +89,7 @@ class SQLiteDatabaseTests: DBTestCase {
                         ["Tennessee","888",    "Spotsylvania"],
                         ["Atlanta",  "3",      "Atlanta"]))
         
-        FLIGHTS.delete(Attribute("FROM") *== "JFK")
+        _ = FLIGHTS.delete(Attribute("FROM") *== "JFK")
         AssertEqual(FLIGHTS,
                     MakeRelation(
                         ["FROM",     "NUMBER", "TO"],
@@ -99,19 +99,19 @@ class SQLiteDatabaseTests: DBTestCase {
     
     func testCommittedTransaction() {
         let db = makeDB().db
-        db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
+        _ = db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
         
-        db.transaction({
+        _ = db.transaction({
             let FLIGHTS = db["FLIGHTS"]!
-            FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
-            FLIGHTS.add(["NUMBER": "124", "FROM": "JFK", "TO": "A"])
-            FLIGHTS.add(["NUMBER": "125", "FROM": "JFK", "TO": "B"])
-            FLIGHTS.add(["NUMBER": "126", "FROM": "JFK", "TO": "C"])
-            FLIGHTS.add(["NUMBER": "127", "FROM": "JFK", "TO": "D"])
-            FLIGHTS.add(["NUMBER": "128", "FROM": "JFK", "TO": "A"])
-            FLIGHTS.add(["NUMBER": "129", "FROM": "JFK", "TO": "A"])
-            FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
-            FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
+            _ = FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
+            _ = FLIGHTS.add(["NUMBER": "124", "FROM": "JFK", "TO": "A"])
+            _ = FLIGHTS.add(["NUMBER": "125", "FROM": "JFK", "TO": "B"])
+            _ = FLIGHTS.add(["NUMBER": "126", "FROM": "JFK", "TO": "C"])
+            _ = FLIGHTS.add(["NUMBER": "127", "FROM": "JFK", "TO": "D"])
+            _ = FLIGHTS.add(["NUMBER": "128", "FROM": "JFK", "TO": "A"])
+            _ = FLIGHTS.add(["NUMBER": "129", "FROM": "JFK", "TO": "A"])
+            _ = FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
+            _ = FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
             return .commit
         })
         
@@ -131,19 +131,19 @@ class SQLiteDatabaseTests: DBTestCase {
     
     func testRolledBackTransaction() {
         let db = makeDB().db
-        db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
+        _ = db.createRelation("FLIGHTS", scheme: ["NUMBER", "FROM", "TO"])
         
-        db.transaction({
+        _ = db.transaction({
             let FLIGHTS = db["FLIGHTS"]!
-            FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
-            FLIGHTS.add(["NUMBER": "124", "FROM": "JFK", "TO": "A"])
-            FLIGHTS.add(["NUMBER": "125", "FROM": "JFK", "TO": "B"])
-            FLIGHTS.add(["NUMBER": "126", "FROM": "JFK", "TO": "C"])
-            FLIGHTS.add(["NUMBER": "127", "FROM": "JFK", "TO": "D"])
-            FLIGHTS.add(["NUMBER": "128", "FROM": "JFK", "TO": "A"])
-            FLIGHTS.add(["NUMBER": "129", "FROM": "JFK", "TO": "A"])
-            FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
-            FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
+            _ = FLIGHTS.add(["NUMBER": "123", "FROM": "JFK", "TO": "Unknown"])
+            _ = FLIGHTS.add(["NUMBER": "124", "FROM": "JFK", "TO": "A"])
+            _ = FLIGHTS.add(["NUMBER": "125", "FROM": "JFK", "TO": "B"])
+            _ = FLIGHTS.add(["NUMBER": "126", "FROM": "JFK", "TO": "C"])
+            _ = FLIGHTS.add(["NUMBER": "127", "FROM": "JFK", "TO": "D"])
+            _ = FLIGHTS.add(["NUMBER": "128", "FROM": "JFK", "TO": "A"])
+            _ = FLIGHTS.add(["NUMBER": "129", "FROM": "JFK", "TO": "A"])
+            _ = FLIGHTS.add(["NUMBER": "888", "FROM": "Here", "TO": "There"])
+            _ = FLIGHTS.add(["NUMBER": "3", "FROM": "Atlanta", "TO": "Atlanta"])
             return .rollback
         })
         
@@ -161,17 +161,17 @@ class SQLiteDatabaseTests: DBTestCase {
         var changeCount = 0
         let removal = r.addChangeObserver({ _ in changeCount += 1 })
         
-        r.add(["column": "42"])
+        _ = r.add(["column": "42"])
         XCTAssertEqual(changeCount, 1)
         
-        r.update(Attribute("column") *== "42", newValues: ["column": "43"])
+        _ = r.update(Attribute("column") *== "42", newValues: ["column": "43"])
         XCTAssertEqual(changeCount, 2)
         
-        r.delete(Attribute("column") *== "43")
+        _ = r.delete(Attribute("column") *== "43")
         XCTAssertEqual(changeCount, 3)
         
         removal()
-        r.add(["column": "123"])
+        _ = r.add(["column": "123"])
         XCTAssertEqual(changeCount, 3)
     }
     
@@ -184,13 +184,13 @@ class SQLiteDatabaseTests: DBTestCase {
         let a = db["a"]!
         let b = db["b"]!
         
-        a.add(["1": "X", "2": "X"])
-        a.add(["1": "X", "2": "Y"])
-        a.add(["1": "Y", "2": "Z"])
+        _ = a.add(["1": "X", "2": "X"])
+        _ = a.add(["1": "X", "2": "Y"])
+        _ = a.add(["1": "Y", "2": "Z"])
         
-        b.add(["2": "X", "3": "X"])
-        b.add(["2": "X", "3": "Y"])
-        b.add(["2": "Y", "3": "Z"])
+        _ = b.add(["2": "X", "3": "X"])
+        _ = b.add(["2": "X", "3": "Y"])
+        _ = b.add(["2": "Y", "3": "Z"])
         
         let joined = a.join(b)
         AssertEqual(joined,
@@ -204,7 +204,7 @@ class SQLiteDatabaseTests: DBTestCase {
         let removal = joined.addChangeObserver({ _ in changed = true })
         
         changed = false
-        a.delete(Attribute("2") *== "Y")
+        _ = a.delete(Attribute("2") *== "Y")
         XCTAssertTrue(changed)
         AssertEqual(joined,
                     MakeRelation(
@@ -213,7 +213,7 @@ class SQLiteDatabaseTests: DBTestCase {
                         ["X", "X", "Y"]))
         
         changed = false
-        b.add(["2": "Z", "3": "Z"])
+        _ = b.add(["2": "Z", "3": "Z"])
         XCTAssertTrue(changed)
         AssertEqual(joined,
                     MakeRelation(
@@ -224,7 +224,7 @@ class SQLiteDatabaseTests: DBTestCase {
         
         removal()
         changed = false
-        a.delete(Attribute("1") *== "X")
+        _ = a.delete(Attribute("1") *== "X")
         XCTAssertFalse(changed)
     }
     
@@ -243,10 +243,10 @@ class SQLiteDatabaseTests: DBTestCase {
         let binding = SQLiteBinding(database: db, tableName: "people", key: ["id": 2], attribute: "name", changeObserver: { currentName = $0.get() })
         XCTAssertEqual(currentName, "Steve")
         
-        binding.set("Roberta")
+        _ = binding.set("Roberta")
         XCTAssertEqual(currentName, "Roberta")
         
-        r.update(Attribute("id") *== RelationValue.integer(2), newValues: ["name": "Tina"])
+        _ = r.update(Attribute("id") *== RelationValue.integer(2), newValues: ["name": "Tina"])
         XCTAssertEqual(currentName, "Tina")
     }
     
@@ -301,7 +301,7 @@ class SQLiteDatabaseTests: DBTestCase {
         XCTAssertNil(r.add(["first": "Allen", "last": "Jones", "pet": "dog"]).err)
         
         var projected = r.project(["last", "pet"])
-        projected.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
+        _ = projected.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
         
         AssertEqual(r,
                     MakeRelation(
@@ -325,7 +325,7 @@ class SQLiteDatabaseTests: DBTestCase {
         XCTAssertNil(r2.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
         
         var difference = r1.difference(r2)
-        difference.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
+        _ = difference.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
         
         AssertEqual(r1,
                     MakeRelation(
@@ -355,7 +355,7 @@ class SQLiteDatabaseTests: DBTestCase {
         XCTAssertNil(r2.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
         
         var intersection = r1.intersection(r2)
-        intersection.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
+        _ = intersection.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
         
         AssertEqual(r1,
                     MakeRelation(
@@ -383,7 +383,7 @@ class SQLiteDatabaseTests: DBTestCase {
         XCTAssertNil(r2.add(["first": "Cindy", "last": "Jobs", "pet": "dog"]).err)
         
         var union = r1.union(r2)
-        union.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
+        _ = union.update(Attribute("pet") *== "cat", newValues: ["last": "Smith"])
         
         AssertEqual(r1,
                     MakeRelation(
@@ -435,7 +435,7 @@ class SQLiteDatabaseTests: DBTestCase {
                                       ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]
         )
         
-        FLIGHTS.update(*!(Attribute("NUMBER") *== "83") *&& *!(Attribute("NUMBER") *== "84"), newValues: ["FROM": "Miami"])
+        _ = FLIGHTS.update(*!(Attribute("NUMBER") *== "83") *&& *!(Attribute("NUMBER") *== "84"), newValues: ["FROM": "Miami"])
         
         AssertEqual(FLIGHTS,
                     MakeRelation(
@@ -449,10 +449,10 @@ class SQLiteDatabaseTests: DBTestCase {
     
     func testTransactionConflict() {
         let (path, db1) = makeDB()
-        db1.createRelation("r", scheme: ["n"])
+        _ = db1.createRelation("r", scheme: ["n"])
         let r1 = db1["r"]!
         
-        r1.add(["n": 1])
+        _ = r1.add(["n": 1])
         
         let db2 = try! SQLiteDatabase(path)
         let r2 = db2["r"]!
@@ -493,10 +493,10 @@ class SQLiteDatabaseTests: DBTestCase {
     
     func testTransactionRetry() {
         let (path, db1) = makeDB()
-        db1.createRelation("r", scheme: ["n"])
+        _ = db1.createRelation("r", scheme: ["n"])
         let r1 = db1["r"]!
         
-        r1.add(["n": 1])
+        _ = r1.add(["n": 1])
         
         let db2 = try! SQLiteDatabase(path)
         let r2 = db2["r"]!
@@ -505,7 +505,7 @@ class SQLiteDatabaseTests: DBTestCase {
         var runNumber = 1
         let result = db1.transaction({
             if runNumber == 1 {
-                db2.transaction({
+                _ = db2.transaction({
                     let result = r2.update(Attribute("n") *== 1, newValues: ["n": 3])
                     XCTAssertNil(result.err)
                     

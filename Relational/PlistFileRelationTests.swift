@@ -66,7 +66,7 @@ class PlistFileRelationTests: XCTestCase {
         
         for rowValues in testRowValues {
             let row = Row(values: Dictionary(zip(schemeAttributes, rowValues)))
-            r1.add(row)
+            _ = r1.add(row)
         }
         
         XCTAssertNil(r1.save().err)

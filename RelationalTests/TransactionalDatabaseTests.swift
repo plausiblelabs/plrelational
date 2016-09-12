@@ -13,8 +13,8 @@ class TransactionalDatabaseTests: DBTestCase {
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         let pilotsScheme: Scheme = ["name", "home"]
         
-        sqliteDB.createRelation("flights", scheme: flightsScheme)
-        sqliteDB.createRelation("pilots", scheme: pilotsScheme)
+        _ = sqliteDB.createRelation("flights", scheme: flightsScheme)
+        _ = sqliteDB.createRelation("pilots", scheme: pilotsScheme)
         
         let flights = db["flights"]
         let pilots = db["pilots"]
@@ -27,15 +27,15 @@ class TransactionalDatabaseTests: DBTestCase {
         
         db.beginTransaction()
         
-        flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
-        flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
-        flights.add(["number": 3, "pilot": "Johnson", "equipment": "797"])
+        _ = flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
+        _ = flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
+        _ = flights.add(["number": 3, "pilot": "Johnson", "equipment": "797"])
         
-        pilots.add(["name": "Jones", "home": "New York"])
-        pilots.add(["name": "Smith", "home": "Chicago"])
-        pilots.add(["name": "Johnson", "home": "Seattle"])
+        _ = pilots.add(["name": "Jones", "home": "New York"])
+        _ = pilots.add(["name": "Smith", "home": "Chicago"])
+        _ = pilots.add(["name": "Johnson", "home": "Seattle"])
         
-        db.endTransaction()
+        _ = db.endTransaction()
         
         AssertEqual(lastFlightsChange?.added,
                     MakeRelation(
@@ -54,15 +54,15 @@ class TransactionalDatabaseTests: DBTestCase {
         
         db.beginTransaction()
         
-        flights.add(["number": 4, "pilot": "Jones", "equipment": "DC-10"])
-        flights.update(Attribute("number") *== RelationValue(1 as Int64), newValues: ["pilot": "Smith"])
-        flights.delete(Attribute("equipment") *== "797")
+        _ = flights.add(["number": 4, "pilot": "Jones", "equipment": "DC-10"])
+        _ = flights.update(Attribute("number") *== RelationValue(1 as Int64), newValues: ["pilot": "Smith"])
+        _ = flights.delete(Attribute("equipment") *== "797")
         
-        pilots.add(["name": "Horton", "home": "Miami"])
-        pilots.update(Attribute("name") *== "Jones", newValues: ["home": "Boston"])
-        pilots.delete(Attribute("home") *== "Seattle")
+        _ = pilots.add(["name": "Horton", "home": "Miami"])
+        _ = pilots.update(Attribute("name") *== "Jones", newValues: ["home": "Boston"])
+        _ = pilots.delete(Attribute("home") *== "Seattle")
         
-        db.endTransaction()
+        _ = db.endTransaction()
     
         AssertEqual(lastFlightsChange?.added,
                     MakeRelation(
@@ -93,20 +93,20 @@ class TransactionalDatabaseTests: DBTestCase {
         let flightsScheme: Scheme = ["number", "pilot", "equipment"]
         let pilotsScheme: Scheme = ["name", "home"]
         
-        sqliteDB.createRelation("flights", scheme: flightsScheme)
-        sqliteDB.createRelation("pilots", scheme: pilotsScheme)
+        _ = sqliteDB.createRelation("flights", scheme: flightsScheme)
+        _ = sqliteDB.createRelation("pilots", scheme: pilotsScheme)
         
         let flights = db["flights"]
         let pilots = db["pilots"]
         
         let (before, after) = db.transactionWithSnapshots({
-            flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
-            flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
-            flights.add(["number": 3, "pilot": "Johnson", "equipment": "797"])
+            _ = flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
+            _ = flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
+            _ = flights.add(["number": 3, "pilot": "Johnson", "equipment": "797"])
             
-            pilots.add(["name": "Jones", "home": "New York"])
-            pilots.add(["name": "Smith", "home": "Chicago"])
-            pilots.add(["name": "Johnson", "home": "Seattle"])
+            _ = pilots.add(["name": "Jones", "home": "New York"])
+            _ = pilots.add(["name": "Smith", "home": "Chicago"])
+            _ = pilots.add(["name": "Johnson", "home": "Seattle"])
         })
         
         AssertEqual(flights,
@@ -147,7 +147,7 @@ class TransactionalDatabaseTests: DBTestCase {
                         ["Johnson", "Seattle"]))
         
         db.transaction({
-            pilots.delete(Attribute("name") *== "Jones")
+            _ = pilots.delete(Attribute("name") *== "Jones")
         })
         
         AssertEqual(pilots,
@@ -186,10 +186,10 @@ class TransactionalDatabaseTests: DBTestCase {
         })
         
         db.transaction{
-            objects.add(["id": 1, "name": "One", "type": 0])
-            docItems.add(["id": 1])
-            objects.add(["id": 2, "name": "Two", "type": 0])
-            docItems.add(["id": 2])
+            _ = objects.add(["id": 1, "name": "One", "type": 0])
+            _ = docItems.add(["id": 1])
+            _ = objects.add(["id": 2, "name": "Two", "type": 0])
+            _ = docItems.add(["id": 2])
         }
         
         XCTAssertEqual(changes.count, 1)
@@ -204,8 +204,8 @@ class TransactionalDatabaseTests: DBTestCase {
         let preDelete = db.takeSnapshot()
         
         db.transaction{
-            objects.delete(Attribute("id") *== 1)
-            docItems.delete(Attribute("id") *== 1)
+            _ = objects.delete(Attribute("id") *== 1)
+            _ = docItems.delete(Attribute("id") *== 1)
         }
         
         XCTAssertEqual(changes.count, 1)
@@ -233,7 +233,7 @@ class TransactionalDatabaseTests: DBTestCase {
         let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
         
-        sqliteDB.createRelation("flights", scheme: ["number", "pilot", "equipment"])
+        _ = sqliteDB.createRelation("flights", scheme: ["number", "pilot", "equipment"])
         for row in MakeRelation(
             ["number", "pilot", "equipment"],
             ["123",    "Jones", "707"],
@@ -242,7 +242,7 @@ class TransactionalDatabaseTests: DBTestCase {
             ["126",    "Alice", "767"],
             ["127",    "Wendy", "707"]
             ).rows() {
-                sqliteDB["flights"]!.add(row.ok!)
+                _ = sqliteDB["flights"]!.add(row.ok!)
         }
         
         let flights = db["flights"]
@@ -250,28 +250,28 @@ class TransactionalDatabaseTests: DBTestCase {
         var lastChange: RelationChange?
         _ = flights.addChangeObserver({ lastChange = $0 })
         
-        flights.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
+        _ = flights.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "MD-11"]))
         AssertEqual(lastChange?.removed, nil)
         
-        flights.add(["number": "43", "pilot": "Adams", "equipment": "MD-11"])
+        _ = flights.add(["number": "43", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["43",     "Adams", "MD-11"]))
         AssertEqual(lastChange?.removed, nil)
         
-        flights.add(["number": "44", "pilot": "Adams", "equipment": "MD-11"])
+        _ = flights.add(["number": "44", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         ["44",     "Adams", "MD-11"]))
         AssertEqual(lastChange?.removed, nil)
         
-        flights.add(["number": "45", "pilot": "Adams", "equipment": "MD-11"])
+        _ = flights.add(["number": "45", "pilot": "Adams", "equipment": "MD-11"])
         AssertEqual(lastChange?.added,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
@@ -283,7 +283,7 @@ class TransactionalDatabaseTests: DBTestCase {
         let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
         
-        sqliteDB.createRelation("flights", scheme: ["number", "pilot", "equipment"])
+        _ = sqliteDB.createRelation("flights", scheme: ["number", "pilot", "equipment"])
         for row in MakeRelation(
             ["number", "pilot", "equipment"],
             ["123",    "Jones", "707"],
@@ -292,7 +292,7 @@ class TransactionalDatabaseTests: DBTestCase {
             ["126",    "Alice", "767"],
             ["127",    "Wendy", "707"]
             ).rows() {
-                sqliteDB["flights"]!.add(row.ok!)
+                _ = sqliteDB["flights"]!.add(row.ok!)
         }
         
         let flights = db["flights"]
@@ -300,9 +300,9 @@ class TransactionalDatabaseTests: DBTestCase {
         var lastChange: RelationChange?
         _ = flights.addChangeObserver({ lastChange = $0 })
         
-        flights.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
+        _ = flights.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
         
-        flights.delete(Attribute("number") *== "42")
+        _ = flights.delete(Attribute("number") *== "42")
         AssertEqual(lastChange?.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
@@ -310,7 +310,7 @@ class TransactionalDatabaseTests: DBTestCase {
         AssertEqual(lastChange?.added, nil)
         
         
-        flights.delete(Attribute("number") *== "123")
+        _ = flights.delete(Attribute("number") *== "123")
         AssertEqual(lastChange?.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
@@ -322,7 +322,7 @@ class TransactionalDatabaseTests: DBTestCase {
         let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
         
-        sqliteDB.createRelation("flights", scheme: ["number", "pilot", "equipment"])
+        _ = sqliteDB.createRelation("flights", scheme: ["number", "pilot", "equipment"])
         for row in MakeRelation(
             ["number", "pilot", "equipment"],
             ["123",    "Jones", "707"],
@@ -331,7 +331,7 @@ class TransactionalDatabaseTests: DBTestCase {
             ["126",    "Alice", "767"],
             ["127",    "Wendy", "707"]
             ).rows() {
-                sqliteDB["flights"]!.add(row.ok!)
+                _ = sqliteDB["flights"]!.add(row.ok!)
         }
         
         let flights = db["flights"]
@@ -339,8 +339,8 @@ class TransactionalDatabaseTests: DBTestCase {
         var lastChange: RelationChange?
         _ = flights.addChangeObserver({ lastChange = $0 })
         
-        flights.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
-        flights.update(Attribute("number") *== "42", newValues: ["equipment": "DC-10"])
+        _ = flights.add(["number": "42", "pilot": "Adams", "equipment": "MD-11"])
+        _ = flights.update(Attribute("number") *== "42", newValues: ["equipment": "DC-10"])
         AssertEqual(lastChange?.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
@@ -350,7 +350,7 @@ class TransactionalDatabaseTests: DBTestCase {
                         ["number", "pilot", "equipment"],
                         ["42",     "Adams", "DC-10"]))
         
-        flights.update(Attribute("number") *== "123", newValues: ["equipment": "DC-10"])
+        _ = flights.update(Attribute("number") *== "123", newValues: ["equipment": "DC-10"])
         AssertEqual(lastChange?.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
@@ -360,7 +360,7 @@ class TransactionalDatabaseTests: DBTestCase {
                         ["number", "pilot", "equipment"],
                         ["123",    "Jones", "DC-10"]))
         
-        flights.update(Attribute("equipment") *== "DC-10", newValues: ["pilot": "JFK"])
+        _ = flights.update(Attribute("equipment") *== "DC-10", newValues: ["pilot": "JFK"])
         AssertEqual(lastChange?.removed,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
@@ -386,20 +386,20 @@ class TransactionalDatabaseTests: DBTestCase {
         DispatchQueue.global().async(execute: {
             for _ in 0..<100 {
                 db.beginTransaction()
-                a.add(["n": 1])
-                b.delete(Attribute("n") *== 1)
-                db.endTransaction()
+                _ = a.add(["n": 1])
+                _ = b.delete(Attribute("n") *== 1)
+                _ = db.endTransaction()
                 
                 db.beginTransaction()
-                b.add(["n": 1])
-                a.delete(Attribute("n") *== 1)
-                db.endTransaction()
+                _ = b.add(["n": 1])
+                _ = a.delete(Attribute("n") *== 1)
+                _ = db.endTransaction()
             }
             
             db.beginTransaction()
-            a.add(["n": 2])
-            b.add(["n": 2])
-            db.endTransaction()
+            _ = a.add(["n": 2])
+            _ = b.add(["n": 2])
+            _ = db.endTransaction()
         })
         
         var done = false
@@ -422,14 +422,14 @@ class TransactionalDatabaseTests: DBTestCase {
         
         let db = TransactionalDatabase(sqlite)
         let a = db["a"]
-        a.add(["n": 1, "m": 1])
+        _ = a.add(["n": 1, "m": 1])
         
         DispatchQueue.global().async(execute: {
             for _ in 0..<100 {
-                a.update(true, newValues: ["m": 2])
-                a.update(true, newValues: ["m": 1])
+                _ = a.update(true, newValues: ["m": 2])
+                _ = a.update(true, newValues: ["m": 1])
             }
-            a.update(true, newValues: ["n": 2])
+            _ = a.update(true, newValues: ["n": 2])
             print("done")
         })
         
@@ -464,8 +464,8 @@ class TransactionalDatabaseTests: DBTestCase {
         DispatchQueue.global().async(group: group, execute: {
             AssertEqual(a, MakeRelation(["n"]))
         })
-        group.wait(timeout: DispatchTime.distantFuture)
-        db.endTransaction()
+        _ = group.wait(timeout: DispatchTime.distantFuture)
+        _ = db.endTransaction()
     }
     
     func testTransactionWhileReading() {
@@ -479,8 +479,8 @@ class TransactionalDatabaseTests: DBTestCase {
         
         let rows = a.rows()
         db.beginTransaction()
-        a.add(["n": 1])
-        db.endTransaction()
+        _ = a.add(["n": 1])
+        _ = db.endTransaction()
         
         let row = rows.next()
         switch row {

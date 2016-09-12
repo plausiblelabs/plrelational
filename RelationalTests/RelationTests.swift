@@ -107,7 +107,7 @@ class RelationTests: DBTestCase {
             ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]
         )
         
-        FLIGHTS.add(["NUMBER": "117", "FROM": "Atlanta", "TO": "Boston", "DEPARTS": "10:05p", "ARRIVES": "12:43a"])
+        _ = FLIGHTS.add(["NUMBER": "117", "FROM": "Atlanta", "TO": "Boston", "DEPARTS": "10:05p", "ARRIVES": "12:43a"])
         AssertEqual(FLIGHTS,
                     MakeRelation(
                         ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
@@ -545,7 +545,7 @@ class RelationTests: DBTestCase {
         
         AssertEqual(r.count(), MakeRelation(["count"], [1]))
         
-        r2.add(["id": 2, "name": "dog"])
+        _ = r2.add(["id": 2, "name": "dog"])
         
         AssertEqual(r.count(), MakeRelation(["count"], [1]))
     }
@@ -592,13 +592,13 @@ class RelationTests: DBTestCase {
         r1.asyncAllRows({ result in
             guard let rows = result.ok else { return XCTAssertNil(result.err) }
             for row in rows {
-                r2.add(row)
+                _ = r2.add(row)
             }
             group.leave()
             CFRunLoopStop(runloop)
         })
         CFRunLoopRun()
-        group.wait(timeout: DispatchTime.distantFuture)
+        _ = group.wait(timeout: DispatchTime.distantFuture)
         AssertEqual(r1, r2)
         
         r2 = MakeRelation(
@@ -607,13 +607,13 @@ class RelationTests: DBTestCase {
         r1.asyncAllRows({ result in
             guard let rows = result.ok else { return XCTAssertNil(result.err) }
             for row in rows {
-                r2.add(row)
+                _ = r2.add(row)
             }
             group.leave()
             CFRunLoopStop(runloop)
         })
         CFRunLoopRun()
-        group.wait(timeout: DispatchTime.distantFuture)
+        _ = group.wait(timeout: DispatchTime.distantFuture)
         AssertEqual(r1, r2)
     }
     
@@ -740,7 +740,7 @@ class RelationTests: DBTestCase {
                 "parent": .null,
                 "order": RelationValue(order)
             ]
-            collections.add(row)
+            _ = collections.add(row)
             id += 1
             order += 1.0
         }
@@ -753,7 +753,7 @@ class RelationTests: DBTestCase {
                 "coll_id": 1,
                 "order": RelationValue(order)
             ]
-            objects.add(row)
+            _ = objects.add(row)
             id += 1
             order += 1.0
         }
@@ -763,8 +763,8 @@ class RelationTests: DBTestCase {
         addObject("Obj1")
         addObject("Obj2")
         
-        selectedInspectorItemIDs.delete(true)
-        selectedCollectionID.add(["coll_id": 1])
+        _ = selectedInspectorItemIDs.delete(true)
+        _ = selectedCollectionID.add(["coll_id": 1])
         
         AssertEqual(selectedItems,
                     MakeRelation(
@@ -775,8 +775,8 @@ class RelationTests: DBTestCase {
                         ["count"],
                         [1]))
         
-        selectedInspectorItemIDs.delete(true)
-        selectedInspectorItemIDs.add(["item_id": 1])
+        _ = selectedInspectorItemIDs.delete(true)
+        _ = selectedInspectorItemIDs.add(["item_id": 1])
         
         AssertEqual(selectedItems,
                     MakeRelation(
@@ -802,21 +802,21 @@ class RelationTests: DBTestCase {
         
         let selectedObject = selectedObjectID.join(objects)
         
-        objects.add(["id": 1, "name": "One"])
-        objects.add(["id": 2, "name": "Two"])
+        _ = objects.add(["id": 1, "name": "One"])
+        _ = objects.add(["id": 2, "name": "Two"])
         
         AssertEqual(selectedObject,
                     MakeRelation(
                         ["id", "name"]))
 
-        selectedObjectID.add(["id": 1])
+        _ = selectedObjectID.add(["id": 1])
         
         AssertEqual(selectedObject,
                     MakeRelation(
                         ["id", "name"],
                         [1, "One"]))
         
-        objects.delete(Attribute("id") *== 1)
+        _ = objects.delete(Attribute("id") *== 1)
         
         AssertEqual(selectedObject,
                     MakeRelation(
@@ -949,14 +949,14 @@ class RelationTests: DBTestCase {
         var r2 = ConcreteRelation(scheme: ["w"])
         
         for i: Int64 in 1...10 {
-            r1.add(["n": .integer(i)])
+            _ = r1.add(["n": .integer(i)])
         }
         
-        r2.add(["w": "teapot"])
-        r2.add(["w": "dome"])
-        r2.add(["w": "scandal"])
-        r2.add(["w": "walrus"])
-        r2.add(["w": "businessmanlike"])
+        _ = r2.add(["w": "teapot"])
+        _ = r2.add(["w": "dome"])
+        _ = r2.add(["w": "scandal"])
+        _ = r2.add(["w": "walrus"])
+        _ = r2.add(["w": "businessmanlike"])
         
         let joined = r1.join(r2)
         
@@ -974,14 +974,14 @@ class RelationTests: DBTestCase {
         let r2 = db.getOrCreateRelation("words", scheme: ["w"]).ok!
         
         for i: Int64 in 1...10 {
-            r1.add(["n": .integer(i)])
+            _ = r1.add(["n": .integer(i)])
         }
         
-        r2.add(["w": "teapot"])
-        r2.add(["w": "dome"])
-        r2.add(["w": "scandal"])
-        r2.add(["w": "walrus"])
-        r2.add(["w": "businessmanlike"])
+        _ = r2.add(["w": "teapot"])
+        _ = r2.add(["w": "dome"])
+        _ = r2.add(["w": "scandal"])
+        _ = r2.add(["w": "walrus"])
+        _ = r2.add(["w": "businessmanlike"])
         
         let joined = r1.join(r2)
         
