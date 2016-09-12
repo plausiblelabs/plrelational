@@ -198,7 +198,7 @@ extension QueryPlanner {
             
             let realR = underlyingRelation(relation)
             iterationCount += 1
-            if let obj = realR as? AnyObject {
+            if let obj = asObject(realR) {
                 let retrievedCount = visited.getOrCreate(obj, defaultValue: iterationCount)
                 if retrievedCount != iterationCount {
                     continue
