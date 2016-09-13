@@ -6,19 +6,6 @@
 import Foundation
 import libRelational
 
-// A not-so-optimal `flatMap` for lazy sequences, borrowed from:
-//   https://github.com/apple/swift-evolution/blob/master/proposals/0008-lazy-flatmap-for-optionals.md
-extension LazySequenceProtocol {
-    
-    func flatMap<T>(_ transform: (Elements.Iterator.Element) -> T?)
-        -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Elements, T?>>, T> {
-            return self
-                .map(transform)
-                .filter { opt in opt != nil }
-                .map { notNil in notNil! }
-    }
-}
-
 extension Relation {
     /// Generates all non-error rows in the relation.
     public var okRows: AnyIterator<Row> {
@@ -42,7 +29,7 @@ extension Relation {
 
     /// Resolves to a set of all values for the single attribute, built from one transformed value for each non-error row
     /// in the relation.
-    public func allValues<V: Hashable>(_ transform: (RelationValue) -> V?) -> Set<V> {
+    public func allValues<V: Hashable>(_ transform: @escaping (RelationValue) -> V?) -> Set<V> {
         return allValues(okRows, transform)
     }
 
@@ -51,8 +38,8 @@ extension Relation {
         return Set(okRows.flatMap{transform($0)})
     }
 
-    /// Resolves to a set of all RelationValues for the single attribute in the relation.
-    public var allValues: Set<RelationValue> {
+    /// Returns a set of all RelationValues for the single attribute in the relation.
+    public func allValues() -> Set<RelationValue> {
         return allValues{ $0 }
     }
     
@@ -132,9 +119,9 @@ extension Relation {
         return oneValue(okRows, transform)
     }
     
-    /// Resolves to a single RelationValue if there is exactly one row in the relation, otherwise resolves
+    /// Returns a single RelationValue if there is exactly one row in the relation, otherwise resolves
     /// to nil.
-    public var oneValue: RelationValue? {
+    public func oneValue() -> RelationValue? {
         return oneValue{ $0 }
     }
 

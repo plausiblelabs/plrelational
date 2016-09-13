@@ -135,7 +135,7 @@ extension Relation {
     /// values in the relation, otherwise resolves to the alternate string.
     public func stringWhenMulti(_ string: String, otherwise: String = "") -> ReadableProperty<String> {
         // TODO: Reimplement this using `count` (no need to gather all values first)
-        return property{ $0.allValues.count > 1 ? string : otherwise }
+        return property{ $0.allValues().count > 1 ? string : otherwise }
     }
 }
 
