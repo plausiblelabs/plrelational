@@ -516,6 +516,7 @@ open class ActionProperty: WriteOnlyProperty<()> {
 
 precedencegroup PropertyOperatorPrecedence {
     associativity: right
+    higherThan: AssignmentPrecedence
 }
 
 // This syntax is borrowed from ReactiveCocoa.
