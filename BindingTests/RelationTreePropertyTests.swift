@@ -22,7 +22,7 @@ class RelationTreePropertyTests: BindingTestCase {
                 parent = .null
             }
             
-            sqliteRelation.add([
+            _ = sqliteRelation.add([
                 "id": RelationValue(collectionID),
                 "name": RelationValue(name),
                 "parent": parent,
@@ -295,11 +295,11 @@ class RelationTreePropertyTests: BindingTestCase {
             let previous = previousID.map{ RelationValue($0) }
             let pos: TreePos<RowTreeNode> = TreePos(parentID: parent, previousID: previous, nextID: nil)
             tree.computeOrderForInsert(&row, pos: pos)
-            docItems.add(row)
+            _ = docItems.add(row)
         }
         
         func addObject(_ id: Int64, name: String) {
-            objects.add([
+            _ = objects.add([
                 "id": RelationValue(id),
                 "name": RelationValue(name),
                 "type": RelationValue(Int64(0))
@@ -329,21 +329,21 @@ class RelationTreePropertyTests: BindingTestCase {
         func deleteDocObject(_ id: Int64) {
             db.transaction{
                 let expr = Attribute("id") *== RelationValue(id)
-                objects.delete(expr)
-                docItems.delete(expr)
-                selectedDocItemID.delete(expr)
+                _ = objects.delete(expr)
+                _ = docItems.delete(expr)
+                _ = selectedDocItemID.delete(expr)
             }
         }
         
         // Insert some doc items
         let tg1 = addGroup("TopGroup1", nil)
-        addGroup("TopGroup2", nil)
+        _ = addGroup("TopGroup2", nil)
         let ng = addGroup("NestedGroup", tg1)
-        addTextPage("Page1", tg1)
+        _ = addTextPage("Page1", tg1)
         let p2 = addTextPage("Page2", tg1)
-        addTextPage("NestedPage1", ng)
-        addTextPage("NestedPage2", ng)
-        addTextPage("NestedPage3", ng)
+        _ = addTextPage("NestedPage1", ng)
+        _ = addTextPage("NestedPage2", ng)
+        _ = addTextPage("NestedPage3", ng)
         
         verifyTree(tree, [
             "TopGroup1",
