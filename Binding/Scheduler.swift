@@ -17,14 +17,14 @@ public protocol Scheduler {
     ///
     /// Optionally returns a disposable that can be used to cancel the work
     /// before it begins.
-    func schedule(action: () -> Void) -> Disposable?
+    func schedule(_ action: () -> Void) -> Disposable?
 }
 
 /// A scheduler that performs all work synchronously.
 public final class ImmediateScheduler: Scheduler {
     public init() {}
     
-    public func schedule(action: () -> Void) -> Disposable? {
+    public func schedule(_ action: () -> Void) -> Disposable? {
         action()
         return nil
     }
@@ -36,24 +36,21 @@ public final class ImmediateScheduler: Scheduler {
 /// scheduled, it may be run synchronously. However, ordering between actions
 /// will always be preserved.
 public final class UIScheduler: Scheduler {
-    private static var dispatchOnceToken: dispatch_once_t = 0
-    private static var dispatchSpecificKey: UInt8 = 0
-    private static var dispatchSpecificContext: UInt8 = 0
+    private static var __once: () = {
+            DispatchQueue.main.setSpecific(key: /*Migrator FIXME: Use a variable of type DispatchSpecificKey*/ UIScheduler.dispatchSpecificKey,
+                value: &UIScheduler.dispatchSpecificContext)
+        }()
+    fileprivate static var dispatchOnceToken: Int = 0
+    fileprivate static var dispatchSpecificKey: UInt8 = 0
+    fileprivate static var dispatchSpecificContext: UInt8 = 0
     
-    private var queueLength: Int32 = 0
+    fileprivate var queueLength: Int32 = 0
     
     public init() {
-        dispatch_once(&UIScheduler.dispatchOnceToken) {
-            dispatch_queue_set_specific(
-                dispatch_get_main_queue(),
-                &UIScheduler.dispatchSpecificKey,
-                &UIScheduler.dispatchSpecificContext,
-                nil
-            )
-        }
+        _ = UIScheduler.__once
     }
     
-    public func schedule(action: () -> Void) -> Disposable? {
+    public func schedule(_ action: @escaping () -> Void) -> Disposable? {
         let disposable = SimpleDisposable()
         let actionAndDecrement = {
             if !disposable.disposed {
@@ -67,10 +64,10 @@ public final class UIScheduler: Scheduler {
         
         // If we're already running on the main queue, and there isn't work
         // already enqueued, we can skip scheduling and just execute directly.
-        if queued == 1 && dispatch_get_specific(&UIScheduler.dispatchSpecificKey) == &UIScheduler.dispatchSpecificContext {
+        if queued == 1 && DispatchQueue.getSpecific(&UIScheduler.dispatchSpecificKey) == &UIScheduler.dispatchSpecificContext {
             actionAndDecrement()
         } else {
-            dispatch_async(dispatch_get_main_queue(), actionAndDecrement)
+            DispatchQueue.main.async(execute: actionAndDecrement)
         }
         
         return disposable
@@ -79,9 +76,9 @@ public final class UIScheduler: Scheduler {
 
 /// A scheduler backed by a serial GCD queue.
 public final class QueueScheduler: Scheduler {
-    internal let queue: dispatch_queue_t
+    internal let queue: DispatchQueue
     
-    internal init(internalQueue: dispatch_queue_t) {
+    internal init(internalQueue: DispatchQueue) {
         queue = internalQueue
     }
     
@@ -91,18 +88,18 @@ public final class QueueScheduler: Scheduler {
     /// Unlike UIScheduler, this scheduler supports scheduling for a future
     /// date, and will always schedule asynchronously (even if already running
     /// on the main thread).
-    public static let mainQueueScheduler = QueueScheduler(internalQueue: dispatch_get_main_queue())
+    public static let mainQueueScheduler = QueueScheduler(internalQueue: DispatchQueue.main)
     
     /// Initializes a scheduler that will target a new serial
     /// queue with the given quality of service class.
-    public convenience init(qos: dispatch_qos_class_t = QOS_CLASS_DEFAULT, name: String = "Binding.QueueScheduler") {
-        self.init(internalQueue: dispatch_queue_create(name, dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, qos, 0)))
+    public convenience init(qos: DispatchQoS.QoSClass = DispatchQoS.QoSClass.default, name: String = "Binding.QueueScheduler") {
+        self.init(internalQueue: DispatchQueue(label: name, attributes: dispatch_queue_attr_make_with_qos_class(DispatchQueue.Attributes(), qos, 0)))
     }
     
-    public func schedule(action: () -> Void) -> Disposable? {
+    public func schedule(_ action: @escaping () -> Void) -> Disposable? {
         let d = SimpleDisposable()
         
-        dispatch_async(queue) {
+        queue.async {
             if !d.disposed {
                 action()
             }

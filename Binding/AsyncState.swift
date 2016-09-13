@@ -4,23 +4,23 @@
 //
 
 public enum AsyncState<T> { case
-    Computing(T?),
-    Ready(T)
+    computing(T?),
+    ready(T)
     
     public var data: T? {
         switch self {
-        case .Computing(let existing):
+        case .computing(let existing):
             return existing
-        case .Ready(let d):
+        case .ready(let d):
             return d
         }
     }
     
     public var isComputing: Bool {
         switch self {
-        case .Computing:
+        case .computing:
             return true
-        case .Ready:
+        case .ready:
             return false
         }
     }

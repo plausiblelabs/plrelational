@@ -8,13 +8,13 @@ import Foundation
 extension ReadablePropertyType {
     /// Returns a ReadableProperty whose value is derived from this property's `value`.
     /// The given `transform` will be applied whenever this property's value changes.
-    public func map<U>(transform: Self.Value -> U) -> ReadableProperty<U> {
+    public func map<U>(_ transform: @escaping (Self.Value) -> U) -> ReadableProperty<U> {
         return MappedValueProperty(property: self, transform: transform, valueChanging: valueChanging)
     }
     
     /// Returns a ReadableProperty whose value is derived from this property's `value`.
     /// The given `transform` will be applied whenever this property's value changes.
-    public func map<U: Equatable>(transform: Self.Value -> U) -> ReadableProperty<U> {
+    public func map<U: Equatable>(_ transform: @escaping (Self.Value) -> U) -> ReadableProperty<U> {
         return MappedValueProperty(property: self, transform: transform, valueChanging: valueChanging)
     }
 }
@@ -22,31 +22,31 @@ extension ReadablePropertyType {
 /// Returns a ReadableProperty whose value is a tuple (pair) containing the `value` from
 /// each of the given properties.  The returned property's `value` will contain a fresh tuple
 /// any time the value of either input changes.
-public func zip<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(lhs: LHS, _ rhs: RHS) -> ReadableProperty<(LHS.Value, RHS.Value)> {
+public func zip<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(_ lhs: LHS, _ rhs: RHS) -> ReadableProperty<(LHS.Value, RHS.Value)> {
     return BinaryOpValueProperty(lhs, rhs, { ($0, $1) }, valueChanging)
 }
 
 /// Returns a ReadableProperty whose value is the negation of the boolean value of the given property.
-public func not<P: ReadablePropertyType where P.Value: BooleanType>(property: P) -> ReadableProperty<Bool> {
+public func not<P: ReadablePropertyType>(_ property: P) -> ReadableProperty<Bool> where P.Value: Bool {
     return property.map{ !$0.boolValue }
 }
 
-extension ReadablePropertyType where Value: BooleanType {
+extension ReadablePropertyType where Value: Bool {
     /// Returns a ReadableProperty whose value resolves to `self.value || other.value`.  The returned
     /// property's value will be recomputed any time the value of either input changes.
-    public func or(other: Self) -> ReadableProperty<Bool> {
+    public func or(_ other: Self) -> ReadableProperty<Bool> {
         return BinaryOpValueProperty(self, other, { $0.boolValue || $1.boolValue }, valueChanging)
     }
     
     /// Returns a ReadableProperty whose value resolves to `self.value && other.value`.  The returned
     /// property's value will be recomputed any time the value of either input changes.
-    public func and(other: Self) -> ReadableProperty<Bool> {
+    public func and(_ other: Self) -> ReadableProperty<Bool> {
         return BinaryOpValueProperty(self, other, { $0.boolValue && $1.boolValue }, valueChanging)
     }
     
     /// Returns a ReadableProperty that invokes the given function whenever this property's
     /// value resolves to `true`.
-    public func then(f: () -> Void) -> ReadableProperty<()> {
+    public func then(_ f: @escaping () -> Void) -> ReadableProperty<()> {
         return MappedValueProperty(
             property: self,
             transform: { if $0.boolValue { f() } },
@@ -55,8 +55,8 @@ extension ReadablePropertyType where Value: BooleanType {
     }
 }
 
-extension MutableValueProperty where T: BooleanType {
-    public func toggle(transient transient: Bool) {
+extension MutableValueProperty where T: Bool {
+    public func toggle(transient: Bool) {
         let newValue = !value
         self.change(newValue as! T, transient: transient)
     }
@@ -73,11 +73,11 @@ infix operator *&& {
     precedence 120
 }
 
-public func *||<P: ReadablePropertyType where P.Value: BooleanType>(lhs: P, rhs: P) -> ReadableProperty<Bool> {
+public func *||<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Bool> where P.Value: Bool {
     return lhs.or(rhs)
 }
 
-public func *&&<P: ReadablePropertyType where P.Value: BooleanType>(lhs: P, rhs: P) -> ReadableProperty<Bool> {
+public func *&&<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Bool> where P.Value: Bool {
     return lhs.and(rhs)
 }
 
@@ -86,11 +86,11 @@ infix operator *== {
     precedence 130
 }
 
-public func *==<P: ReadablePropertyType where P.Value: Equatable>(lhs: P, rhs: P) -> ReadableProperty<Bool> {
+public func *==<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Bool> where P.Value: Equatable {
     return BinaryOpValueProperty(lhs, rhs, { $0 == $1 }, valueChanging)
 }
 
-extension SequenceType where Generator.Element: ReadablePropertyType, Generator.Element.Value: BooleanType {
+extension Sequence where Iterator.Element: ReadablePropertyType, Iterator.Element.Value: Bool {
     /// Returns a ReadableProperty whose value resolves to `true` if *any* of the properties
     /// in this sequence resolve to `true`.
     public func anyTrue() -> ReadableProperty<Bool> {
@@ -110,18 +110,18 @@ extension SequenceType where Generator.Element: ReadablePropertyType, Generator.
     }
 }
 
-extension ReadablePropertyType where Value: SequenceType, Value.Generator.Element: Hashable {
+extension ReadablePropertyType where Value: Sequence, Value.Iterator.Element: Hashable {
     /// Returns a ReadableProperty whose value resolves to a CommonValue that describes this
     /// property's sequence.
-    public func common() -> ReadableProperty<CommonValue<Value.Generator.Element>> {
+    public func common() -> ReadableProperty<CommonValue<Value.Iterator.Element>> {
         return CommonValueProperty(property: self)
     }
 }
 
 private class MappedValueProperty<T>: ReadableProperty<T> {
-    private var removal: ObserverRemoval!
+    fileprivate var removal: ObserverRemoval!
     
-    init<P: ReadablePropertyType>(property: P, transform: (P.Value) -> T, valueChanging: (T, T) -> Bool) {
+    init<P: ReadablePropertyType>(property: P, transform: @escaping (P.Value) -> T, valueChanging: (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
         
         super.init(initialValue: transform(property.value), signal: signal, notify: notify, changing: valueChanging)
@@ -137,10 +137,10 @@ private class MappedValueProperty<T>: ReadableProperty<T> {
 }
 
 private class BinaryOpValueProperty<T>: ReadableProperty<T> {
-    private var removal1: ObserverRemoval!
-    private var removal2: ObserverRemoval!
+    fileprivate var removal1: ObserverRemoval!
+    fileprivate var removal2: ObserverRemoval!
     
-    init<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(_ lhs: LHS, _ rhs: RHS, _ f: (LHS.Value, RHS.Value) -> T, _ valueChanging: (T, T) -> Bool) {
+    init<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(_ lhs: LHS, _ rhs: RHS, _ f: @escaping (LHS.Value, RHS.Value) -> T, _ valueChanging: (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
 
         super.init(initialValue: f(lhs.value, rhs.value), signal: signal, notify: notify, changing: valueChanging)
@@ -160,9 +160,9 @@ private class BinaryOpValueProperty<T>: ReadableProperty<T> {
 }
 
 private class AnyTrueValueProperty: ReadableProperty<Bool> {
-    private var removals: [ObserverRemoval] = []
+    fileprivate var removals: [ObserverRemoval] = []
     
-    init<S: SequenceType where S.Generator.Element: ReadablePropertyType, S.Generator.Element.Value: BooleanType>(properties: S) {
+    init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value: Bool {
         let (signal, notify) = Signal<Bool>.pipe()
 
         func anyTrue() -> Bool {
@@ -195,15 +195,15 @@ private class AnyTrueValueProperty: ReadableProperty<Bool> {
 }
 
 private class AllTrueValueProperty: ReadableProperty<Bool> {
-    private var removals: [ObserverRemoval] = []
+    fileprivate var removals: [ObserverRemoval] = []
     
-    init<S: SequenceType where S.Generator.Element: ReadablePropertyType, S.Generator.Element.Value: BooleanType>(properties: S) {
+    init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value: Bool {
         // TODO: Require at least one element?
         let (signal, notify) = Signal<Bool>.pipe()
 
         func allTrue() -> Bool {
             for property in properties {
-                if !property.value {
+                if !property.value as! (Bool) as! (Bool) as! (Bool) as! (Bool) as! (Bool) as! (Bool) as! (Bool) {
                     return false
                 }
             }
@@ -231,9 +231,9 @@ private class AllTrueValueProperty: ReadableProperty<Bool> {
 }
 
 private class NoneTrueValueProperty: ReadableProperty<Bool> {
-    private var removals: [ObserverRemoval] = []
+    fileprivate var removals: [ObserverRemoval] = []
     
-    init<S: SequenceType where S.Generator.Element: ReadablePropertyType, S.Generator.Element.Value: BooleanType>(properties: S) {
+    init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value: Bool {
         let (signal, notify) = Signal<Bool>.pipe()
 
         func noneTrue() -> Bool {
@@ -266,20 +266,20 @@ private class NoneTrueValueProperty: ReadableProperty<Bool> {
 }
 
 private class CommonValueProperty<T: Hashable>: ReadableProperty<CommonValue<T>> {
-    private var removal: ObserverRemoval!
+    fileprivate var removal: ObserverRemoval!
     
-    init<S: SequenceType, P: ReadablePropertyType where S.Generator.Element == T, P.Value == S>(property: P) {
+    init<S: Sequence, P: ReadablePropertyType>(property: P) where S.Iterator.Element == T, P.Value == S {
         let (signal, notify) = Signal<CommonValue<T>>.pipe()
 
         func commonValue() -> CommonValue<T> {
             let valuesSet = Set(property.value)
             switch valuesSet.count {
             case 0:
-                return .None
+                return .none
             case 1:
-                return .One(valuesSet.first!)
+                return .one(valuesSet.first!)
             default:
-                return .Multi
+                return .multi
             }
         }
         

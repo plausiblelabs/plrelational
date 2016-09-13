@@ -22,7 +22,7 @@ public protocol Disposable: class {
 /// A disposable that only flips `disposed` upon disposal, and performs no other
 /// work.
 public final class SimpleDisposable: Disposable {
-    private var _disposed = Mutexed(false)
+    fileprivate var _disposed = Mutexed(false)
     
     public var disposed: Bool {
         return _disposed.get()

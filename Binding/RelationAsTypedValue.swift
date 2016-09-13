@@ -8,9 +8,9 @@ import libRelational
 
 // A not-so-optimal `flatMap` for lazy sequences, borrowed from:
 //   https://github.com/apple/swift-evolution/blob/master/proposals/0008-lazy-flatmap-for-optionals.md
-extension LazySequenceType {
-    @warn_unused_result
-    func flatMap<T>(transform: Elements.Generator.Element -> T?)
+extension LazySequenceProtocol {
+    
+    func flatMap<T>(_ transform: (Elements.Iterator.Element) -> T?)
         -> LazyMapSequence<LazyFilterSequence<LazyMapSequence<Elements, T?>>, T> {
             return self
                 .map(transform)
@@ -21,13 +21,13 @@ extension LazySequenceType {
 
 extension Relation {
     /// Generates all non-error rows in the relation.
-    public var okRows: AnyGenerator<Row> {
-        return AnyGenerator(self.rows().lazy.flatMap{ $0.ok }.generate())
+    public var okRows: AnyIterator<Row> {
+        return AnyIterator(self.rows().lazy.flatMap{ $0.ok }.makeIterator())
     }
     
     /// Resolves to a set of all values for the single attribute, built from one transformed value for each non-error row
     /// in the given set.
-    public func allValues<V: Hashable>(rows: AnyGenerator<Row>, _ transform: RelationValue -> V?) -> Set<V> {
+    public func allValues<V: Hashable>(_ rows: AnyIterator<Row>, _ transform: @escaping (RelationValue) -> V?) -> Set<V> {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!
         return Set(rows
@@ -36,18 +36,18 @@ extension Relation {
 
     /// Resolves to a set of all values for the single attribute, built from one RelationValue for each non-error row
     /// in the given set.
-    public func allValues(rows: AnyGenerator<Row>) -> Set<RelationValue> {
+    public func allValues(_ rows: AnyIterator<Row>) -> Set<RelationValue> {
         return allValues(rows, { $0 })
     }
 
     /// Resolves to a set of all values for the single attribute, built from one transformed value for each non-error row
     /// in the relation.
-    public func allValues<V: Hashable>(transform: RelationValue -> V?) -> Set<V> {
+    public func allValues<V: Hashable>(_ transform: (RelationValue) -> V?) -> Set<V> {
         return allValues(okRows, transform)
     }
 
     /// Resolves to a set of all values, built from one transformed value for each non-error row in the relation.
-    public func allValuesFromRows<V: Hashable>(transform: Row -> V?) -> Set<V> {
+    public func allValuesFromRows<V: Hashable>(_ transform: @escaping (Row) -> V?) -> Set<V> {
         return Set(okRows.flatMap{transform($0)})
     }
 
@@ -58,7 +58,7 @@ extension Relation {
     
     /// Resolves to some transformed value for the single attribute if there are one or more rows, or nil
     /// if there are no non-error rows.
-    public func anyValue<V>(transform: RelationValue -> V?) -> V? {
+    public func anyValue<V>(_ transform: (RelationValue) -> V?) -> V? {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!
         if let row = self.rows().next()?.ok {
@@ -76,7 +76,7 @@ extension Relation {
     
     /// Resolves to a single row if there is exactly one row in the given set, otherwise resolves
     /// to nil.
-    public func oneRow(rows: AnyGenerator<Row>) -> Row? {
+    public func oneRow(_ rows: AnyIterator<Row>) -> Row? {
         if let row = rows.next() {
             if rows.next() == nil {
                 return row
@@ -96,31 +96,31 @@ extension Relation {
 
     /// Resolves to a single transformed value if there is exactly one row in the given set, otherwise resolves
     /// to nil.
-    public func oneValueFromRow<V>(rows: AnyGenerator<Row>, _ transform: Row -> V?) -> V? {
+    public func oneValueFromRow<V>(_ rows: AnyIterator<Row>, _ transform: @escaping (Row) -> V?) -> V? {
         return oneRow(rows).flatMap{ transform($0) }
     }
 
     /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
     /// to nil.
-    public func oneValueFromRow<V>(transform: Row -> V?) -> V? {
+    public func oneValueFromRow<V>(_ transform: @escaping (Row) -> V?) -> V? {
         return oneValueFromRow(okRows, transform)
     }
 
     /// Resolves to a single transformed value if there is exactly one row in the given set, otherwise resolves
     /// to the given default value.
-    public func oneValueFromRow<V>(rows: AnyGenerator<Row>, _ transform: Row -> V?, orDefault defaultValue: V) -> V {
+    public func oneValueFromRow<V>(_ rows: AnyIterator<Row>, _ transform: @escaping (Row) -> V?, orDefault defaultValue: V) -> V {
         return oneValueFromRow(okRows, transform) ?? defaultValue
     }
 
     /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
     /// to the given default value.
-    public func oneValueFromRow<V>(transform: Row -> V?, orDefault defaultValue: V) -> V {
+    public func oneValueFromRow<V>(_ transform: @escaping (Row) -> V?, orDefault defaultValue: V) -> V {
         return oneValueFromRow(okRows, transform, orDefault: defaultValue)
     }
 
     /// Resolves to a single transformed value if there is exactly one row in the given set, otherwise resolves
     /// to nil.
-    public func oneValue<V>(rows: AnyGenerator<Row>, _ transform: RelationValue -> V?) -> V? {
+    public func oneValue<V>(_ rows: AnyIterator<Row>, _ transform: @escaping (RelationValue) -> V?) -> V? {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!
         return oneRow(rows).flatMap{ transform($0[attr]) }
@@ -128,7 +128,7 @@ extension Relation {
 
     /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
     /// to nil.
-    public func oneValue<V>(transform: RelationValue -> V?) -> V? {
+    public func oneValue<V>(_ transform: (RelationValue) -> V?) -> V? {
         return oneValue(okRows, transform)
     }
     
@@ -140,13 +140,13 @@ extension Relation {
 
     /// Resolves to a single string value if there is exactly one row in the given set, otherwise resolves
     /// to nil.
-    public func oneStringOrNil(rows: AnyGenerator<Row>) -> String? {
+    public func oneStringOrNil(_ rows: AnyIterator<Row>) -> String? {
         return oneValue(rows, { $0.get() })
     }
     
     /// Resolves to a single string value if there is exactly one row in the given set, otherwise resolves
     /// to an empty string.
-    public func oneString(rows: AnyGenerator<Row>) -> String {
+    public func oneString(_ rows: AnyIterator<Row>) -> String {
         return oneStringOrNil(rows) ?? ""
     }
 
@@ -164,13 +164,13 @@ extension Relation {
 
     /// Resolves to a single integer value if there is exactly one row in the given set, otherwise resolves
     /// to nil.
-    public func oneIntegerOrNil(rows: AnyGenerator<Row>) -> Int64? {
+    public func oneIntegerOrNil(_ rows: AnyIterator<Row>) -> Int64? {
         return oneValue(rows, { $0.get() })
     }
 
     /// Resolves to a single integer value if there is exactly one row in the given set, otherwise resolves
     /// to zero.
-    public func oneInteger(rows: AnyGenerator<Row>) -> Int64 {
+    public func oneInteger(_ rows: AnyIterator<Row>) -> Int64 {
         return oneIntegerOrNil(rows) ?? 0
     }
 
@@ -188,13 +188,13 @@ extension Relation {
 
     /// Resolves to a single double value if there is exactly one row in the given set, otherwise resolves
     /// to nil.
-    public func oneDoubleOrNil(rows: AnyGenerator<Row>) -> Double? {
+    public func oneDoubleOrNil(_ rows: AnyIterator<Row>) -> Double? {
         return oneValue(rows, { $0.get() })
     }
 
     /// Resolves to a single double value if there is exactly one row in the given set, otherwise resolves
     /// to zero.
-    public func oneDouble(rows: AnyGenerator<Row>) -> Double {
+    public func oneDouble(_ rows: AnyIterator<Row>) -> Double {
         return oneDoubleOrNil(rows) ?? 0.0
     }
     
@@ -212,13 +212,13 @@ extension Relation {
 
     /// Resolves to a single boolean value if there is exactly one row in the given set, otherwise resolves
     /// to nil.
-    public func oneBoolOrNil(rows: AnyGenerator<Row>) -> Bool? {
+    public func oneBoolOrNil(_ rows: AnyIterator<Row>) -> Bool? {
         return oneValue(rows, { $0.boolValue })
     }
     
     /// Resolves to a single boolean value if there is exactly one row in the given set, otherwise resolves
     /// to false.
-    public func oneBool(rows: AnyGenerator<Row>) -> Bool {
+    public func oneBool(_ rows: AnyIterator<Row>) -> Bool {
         return oneBoolOrNil(rows) ?? false
     }
 
@@ -235,7 +235,7 @@ extension Relation {
     }
     
     /// Resolves to a CommonValue that indicates whether there are zero, one, or multiple rows in the relation.
-    public func commonValue<V>(transform: RelationValue -> V?) -> CommonValue<V> {
+    public func commonValue<V>(_ transform: (RelationValue) -> V?) -> CommonValue<V> {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!
         let rows = self.rows()

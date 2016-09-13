@@ -43,22 +43,22 @@ public struct TreePos<N: TreeNode> {
 }
 
 public enum TreeChange<N: TreeNode> { case
-    Insert(TreePath<N>),
-    Delete(TreePath<N>),
-    Move(src: TreePath<N>, dst: TreePath<N>)
+    insert(TreePath<N>),
+    delete(TreePath<N>),
+    move(src: TreePath<N>, dst: TreePath<N>)
 }
 
 extension TreeChange: Equatable {}
 public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     switch (a, b) {
-    case let (.Insert(a), .Insert(b)): return a == b
-    case let (.Delete(a), .Delete(b)): return a == b
-    case let (.Move(asrc, adst), .Move(bsrc, bdst)): return asrc == bsrc && adst == bdst
+    case let (.insert(a), .insert(b)): return a == b
+    case let (.delete(a), .delete(b)): return a == b
+    case let (.move(asrc, adst), .move(bsrc, bdst)): return asrc == bsrc && adst == bdst
     default: return false
     }
 }
 
-public class TreeProperty<N: TreeNode>: ReadablePropertyType {
+open class TreeProperty<N: TreeNode>: ReadablePropertyType {
     public typealias Value = N
     public typealias SignalChange = [TreeChange<N>]
 
@@ -68,42 +68,42 @@ public class TreeProperty<N: TreeNode>: ReadablePropertyType {
     public typealias Pos = TreePos<N>
     public typealias Change = TreeChange<N>
     
-    public let root: Node
+    open let root: Node
     
-    public var value: Node {
+    open var value: Node {
         return root
     }
     
-    public let signal: Signal<[Change]>
-    private let notify: Signal<[Change]>.Notify
+    open let signal: Signal<[Change]>
+    fileprivate let notify: Signal<[Change]>.Notify
     
     init(root: Node) {
         (self.signal, self.notify) = Signal<[Change]>.pipe()
         self.root = root
     }
     
-    internal func notifyChangeObservers(changes: [Change]) {
+    internal func notifyChangeObservers(_ changes: [Change]) {
         let metadata = ChangeMetadata(transient: false)
-        notify.valueChanging(change: changes, metadata: metadata)
+        notify.valueChanging(changes, metadata)
     }
     
     // TODO: Move these to a MutableTreeProperty subclass?
-    public func insert(data: N.Data, pos: Pos) {
+    open func insert(_ data: N.Data, pos: Pos) {
     }
     
-    public func computeOrderForInsert(inout data: N.Data, pos: Pos) {
+    open func computeOrderForInsert(_ data: inout N.Data, pos: Pos) {
     }
     
-    public func delete(id: N.ID) {
+    open func delete(_ id: N.ID) {
     }
     
-    public func move(srcPath srcPath: Path, dstPath: Path) {
+    open func move(srcPath: Path, dstPath: Path) {
     }
     
     /// Returns the node with the given identifier.
-    public func nodeForID(id: NodeID) -> Node? {
+    open func nodeForID(_ id: NodeID) -> Node? {
         // TODO: Not efficient, but whatever
-        func findNode(node: Node) -> Node? {
+        func findNode(_ node: Node) -> Node? {
             if node.id == id {
                 return node
             }
@@ -121,13 +121,13 @@ public class TreeProperty<N: TreeNode>: ReadablePropertyType {
     }
     
     /// Returns the node at the given path.
-    public func nodeAtPath(path: Path) -> Node? {
+    open func nodeAtPath(_ path: Path) -> Node? {
         let parent = path.parent ?? root
         return parent.children[safe: path.index]
     }
     
     /// Returns the parent of the given node.
-    public func parentForID(id: NodeID) -> Node? {
+    open func parentForID(_ id: NodeID) -> Node? {
         if let node = nodeForID(id) {
             return parentForNode(node)
         } else {
@@ -136,7 +136,7 @@ public class TreeProperty<N: TreeNode>: ReadablePropertyType {
     }
     
     /// Returns the parent of the given node.
-    public func parentForNode(node: Node) -> Node? {
+    open func parentForNode(_ node: Node) -> Node? {
         if let parentID = node.parentID {
             return nodeForID(parentID)
         } else {
@@ -145,23 +145,23 @@ public class TreeProperty<N: TreeNode>: ReadablePropertyType {
     }
     
     /// Returns the index of the given node relative to its parent.
-    public func indexForID(id: NodeID) -> Int? {
+    open func indexForID(_ id: NodeID) -> Int? {
         if let node = nodeForID(id) {
             let parent = parentForNode(node) ?? root
-            return parent.children.indexOf({$0 === node})
+            return parent.children.index(where: {$0 === node})
         } else {
             return nil
         }
     }
     
     /// Returns the index of the given node relative to its parent.
-    public func indexForNode(node: Node) -> Int? {
+    open func indexForNode(_ node: Node) -> Int? {
         let parent = parentForNode(node) ?? root
-        return parent.children.indexOf({$0 === node})
+        return parent.children.index(where: {$0 === node})
     }
     
     /// Returns true if the first node is a descendent of (or the same as) the second node.
-    public func isNodeDescendent(node: Node, ofAncestor ancestor: Node) -> Bool {
+    open func isNodeDescendent(_ node: Node, ofAncestor ancestor: Node) -> Bool {
         if node === ancestor {
             return true
         }

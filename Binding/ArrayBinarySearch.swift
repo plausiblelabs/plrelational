@@ -4,17 +4,17 @@
 //
 
 extension Array {
-    func binarySearch(lessThan: (Element) -> Bool) -> Int {
+    func binarySearch(_ lessThan: (Element) -> Bool) -> Int {
         return self[0..<count].binarySearch(lessThan)
     }
     
-    mutating func insertSorted<T where T: Comparable>(element: Element, _ f: (Element) -> T) -> Int {
+    mutating func insertSorted<T>(_ element: Element, _ f: (Element) -> T) -> Int where T: Comparable {
         let val = f(element)
 
         let index = binarySearch({ f($0) < val })
         
         if index < count {
-            insert(element, atIndex: index)
+            insert(element, at: index)
         } else {
             append(element)
         }
@@ -24,13 +24,13 @@ extension Array {
 }
 
 extension Array where Element: Comparable {
-    func binarySearch(element: Element) -> Int {
+    func binarySearch(_ element: Element) -> Int {
         return self.binarySearch({ $0 < element })
     }
 }
 
 extension ArraySlice {
-    func binarySearch(lessThan: (Element) -> Bool) -> Int {
+    func binarySearch(_ lessThan: (Element) -> Bool) -> Int {
         if count == 0 { return startIndex }
         let mid = startIndex + ((endIndex - startIndex) / 2)
         if lessThan(self[mid]) {

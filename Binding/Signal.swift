@@ -5,7 +5,7 @@
 
 import Foundation
 
-public typealias ObserverRemoval = Void -> Void
+public typealias ObserverRemoval = (Void) -> Void
 
 public struct ChangeMetadata {
     public let transient: Bool
@@ -17,21 +17,21 @@ public struct ChangeMetadata {
 
 public struct SignalObserver<T> {
     public let valueWillChange: () -> Void
-    public let valueChanging: (change: T, metadata: ChangeMetadata) -> Void
+    public let valueChanging: (_ change: T, _ metadata: ChangeMetadata) -> Void
     public let valueDidChange: () -> Void
     
     public init(
-        valueWillChange: () -> Void,
-        valueChanging: (change: T, metadata: ChangeMetadata) -> Void,
-        valueDidChange: () -> Void)
+        valueWillChange: @escaping () -> Void,
+        valueChanging: @escaping (_ change: T, _ metadata: ChangeMetadata) -> Void,
+        valueDidChange: @escaping () -> Void)
     {
         self.valueWillChange = valueWillChange
         self.valueChanging = valueChanging
         self.valueDidChange = valueDidChange
     }
     
-    public func valueChanging(change: T, transient: Bool = false) {
-        valueChanging(change: change, metadata: ChangeMetadata(transient: transient))
+    public func valueChanging(_ change: T, transient: Bool = false) {
+        valueChanging(change, ChangeMetadata(transient: transient))
     }
 }
 
@@ -48,27 +48,27 @@ public protocol SignalType: class {
     func start()
     
     /// Registers the given observer, which will be notified when the signal delivers new values.
-    func observe(observer: SignalObserver<Value>) -> ObserverRemoval
+    func observe(_ observer: SignalObserver<Value>) -> ObserverRemoval
 }
 
-public class Signal<T>: SignalType {
+open class Signal<T>: SignalType {
     public typealias Value = T
     public typealias Observer = SignalObserver<T>
     public typealias Notify = SignalObserver<T>
 
-    public private(set) var changeCount: Int
-    private let startFunc: () -> Void
-    private var started = false
+    open fileprivate(set) var changeCount: Int
+    fileprivate let startFunc: () -> Void
+    fileprivate var started = false
     
-    private var observers: [UInt64: Observer] = [:]
-    private var nextObserverID: UInt64 = 0
+    fileprivate var observers: [UInt64: Observer] = [:]
+    fileprivate var nextObserverID: UInt64 = 0
     
-    internal init(changeCount: Int, startFunc: () -> Void) {
+    internal init(changeCount: Int, startFunc: @escaping () -> Void) {
         self.changeCount = changeCount
         self.startFunc = startFunc
     }
     
-    public static func pipe() -> (Signal, Notify) {
+    open static func pipe() -> (Signal, Notify) {
         let signal = Signal(changeCount: 0, startFunc: {})
         let notify = SignalObserver(
             valueWillChange: signal.notifyWillChange,
@@ -78,7 +78,7 @@ public class Signal<T>: SignalType {
         return (signal, notify)
     }
 
-    public var signal: Signal<T> {
+    open var signal: Signal<T> {
         return self
     }
 
@@ -94,16 +94,16 @@ public class Signal<T>: SignalType {
         startFunc()
     }
     
-    public func observe(observer: Observer) -> ObserverRemoval {
+    open func observe(_ observer: Observer) -> ObserverRemoval {
         let id = nextObserverID
         nextObserverID += 1
         observers[id] = observer
-        return { self.observers.removeValueForKey(id) }
+        return { self.observers.removeValue(forKey: id) }
     }
 
     /// Convenience form of `observe` that builds an Observer whose `valueWillChange` and `valueDidChange`
     /// handlers pass through to `notify`, but uses the given `valueChanging` handler.
-    public func observe<U>(notify: SignalObserver<U>, _ valueChanging: (change: T, metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
+    open func observe<U>(_ notify: SignalObserver<U>, _ valueChanging: @escaping (_ change: T, _ metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
         return self.observe(SignalObserver(
             valueWillChange: notify.valueWillChange,
             valueChanging: valueChanging,
@@ -113,7 +113,7 @@ public class Signal<T>: SignalType {
     
     /// Convenience form of `observe` that builds an Observer whose `valueWillChange` and `valueDidChange`
     /// are no-ops, but uses the given `valueChanging` handler.
-    public func observe(valueChanging: (change: T, metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
+    open func observe(_ valueChanging: @escaping (_ change: T, _ metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
         return self.observe(SignalObserver(
             valueWillChange: {},
             valueChanging: valueChanging,
@@ -128,9 +128,9 @@ public class Signal<T>: SignalType {
         }
     }
 
-    internal func notifyChanging(change: T, metadata: ChangeMetadata) {
+    internal func notifyChanging(_ change: T, metadata: ChangeMetadata) {
         for (_, observer) in observers {
-            observer.valueChanging(change: change, metadata: metadata)
+            observer.valueChanging(change, metadata)
         }
     }
 
@@ -146,18 +146,18 @@ public class Signal<T>: SignalType {
     internal var observerCount: Int { return observers.count }
 }
 
-internal func isRepeat<T>(v0: T, v1: T) -> Bool {
+internal func isRepeat<T>(_ v0: T, v1: T) -> Bool {
     return false
 }
 
-internal func isRepeat<T: Equatable>(v0: T, v1: T) -> Bool {
+internal func isRepeat<T: Equatable>(_ v0: T, v1: T) -> Bool {
     return v0 == v1
 }
 
-internal func isRepeat<T>(v0: T?, v1: T?) -> Bool {
+internal func isRepeat<T>(_ v0: T?, v1: T?) -> Bool {
     return false
 }
 
-internal func isRepeat<T: Equatable>(v0: T?, v1: T?) -> Bool {
+internal func isRepeat<T: Equatable>(_ v0: T?, v1: T?) -> Bool {
     return v0 == v1
 }

@@ -24,24 +24,24 @@ public struct ArrayPos<E: ArrayElement> {
 }
 
 public enum ArrayChange<E: ArrayElement> { case
-    Initial([E]),
-    Insert(Int),
-    Delete(Int),
-    Move(srcIndex: Int, dstIndex: Int)
+    initial([E]),
+    insert(Int),
+    delete(Int),
+    move(srcIndex: Int, dstIndex: Int)
 }
 
 extension ArrayChange: Equatable {}
 public func ==<E: ArrayElement>(a: ArrayChange<E>, b: ArrayChange<E>) -> Bool {
     switch (a, b) {
-    case let (.Initial(a), .Initial(b)): return a == b
-    case let (.Insert(a), .Insert(b)): return a == b
-    case let (.Delete(a), .Delete(b)): return a == b
-    case let (.Move(asrc, adst), .Move(bsrc, bdst)): return asrc == bsrc && adst == bdst
+    case let (.initial(a), .initial(b)): return a == b
+    case let (.insert(a), .insert(b)): return a == b
+    case let (.delete(a), .delete(b)): return a == b
+    case let (.move(asrc, adst), .move(bsrc, bdst)): return asrc == bsrc && adst == bdst
     default: return false
     }
 }
 
-public class ArrayProperty<E: ArrayElement>: AsyncReadablePropertyType {
+open class ArrayProperty<E: ArrayElement>: AsyncReadablePropertyType {
     public typealias Value = [E]
     public typealias SignalChange = [ArrayChange<E>]
     
@@ -52,11 +52,11 @@ public class ArrayProperty<E: ArrayElement>: AsyncReadablePropertyType {
 
     internal var elements: [Element]?
 
-    public var value: [Element]? {
+    open var value: [Element]? {
         return elements
     }
     
-    public let signal: Signal<SignalChange>
+    open let signal: Signal<SignalChange>
     internal let notify: Signal<SignalChange>.Notify
     
     init(signal: Signal<SignalChange>, notify: Signal<SignalChange>.Notify) {
@@ -65,30 +65,30 @@ public class ArrayProperty<E: ArrayElement>: AsyncReadablePropertyType {
         self.notify = notify
     }
     
-    public func start() {
+    open func start() {
     }
     
-    internal func notifyObservers(arrayChanges arrayChanges: [ArrayChange<E>]) {
+    internal func notifyObservers(arrayChanges: [ArrayChange<E>]) {
         let metadata = ChangeMetadata(transient: false)
-        notify.valueChanging(change: arrayChanges, metadata: metadata)
+        notify.valueChanging(arrayChanges, metadata)
     }
     
-    public func insert(row: E.Data, pos: Pos) {
+    open func insert(_ row: E.Data, pos: Pos) {
     }
     
-    public func delete(id: E.ID) {
+    open func delete(_ id: E.ID) {
     }
     
-    public func move(srcIndex srcIndex: Int, dstIndex: Int) {
+    open func move(srcIndex: Int, dstIndex: Int) {
     }
     
     /// Returns the index of the element with the given ID, relative to the sorted elements array.
-    public func indexForID(id: E.ID, _ elements: [Element]) -> Int? {
-        return elements.indexOf({ $0.id == id })
+    open func indexForID(_ id: E.ID, _ elements: [Element]) -> Int? {
+        return elements.index(where: { $0.id == id })
     }
     
     /// Returns the element with the given ID.
-    public func elementForID(id: E.ID, _ elements: [Element]) -> Element? {
+    open func elementForID(_ id: E.ID, _ elements: [Element]) -> Element? {
         return indexForID(id, elements).map{ elements[$0] }
     }
 }

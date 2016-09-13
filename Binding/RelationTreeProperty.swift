@@ -13,7 +13,7 @@ public final class RowTreeNode: TreeNode {
     public let id: RelationValue
     public var data: Row
     public var children: [RowTreeNode]
-    private let parentAttr: Attribute
+    fileprivate let parentAttr: Attribute
     public let tag: AnyObject?
     
     init(id: RelationValue, row: Row, parentAttr: Attribute, children: [RowTreeNode] = [], tag: AnyObject?) {
@@ -36,16 +36,16 @@ public final class RowTreeNode: TreeNode {
 
 class RelationTreeProperty: TreeProperty<RowTreeNode> {
 
-    private let relation: Relation
-    private let tag: AnyObject?
-    private let idAttr: Attribute
-    private let parentAttr: Attribute
-    private let orderAttr: Attribute
+    fileprivate let relation: Relation
+    fileprivate let tag: AnyObject?
+    fileprivate let idAttr: Attribute
+    fileprivate let parentAttr: Attribute
+    fileprivate let orderAttr: Attribute
     
-    private var removal: ObserverRemoval!
+    fileprivate var removal: ObserverRemoval!
     
     init(relation: Relation, tag: AnyObject?, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
-        precondition(relation.scheme.attributes.isSupersetOf([idAttr, parentAttr, orderAttr]))
+        precondition(relation.scheme.attributes.isSuperset(of: [idAttr, parentAttr, orderAttr]))
 
         // Map Rows from underlying Relation to Node values.
         var nodeDict = [RelationValue: Node]()
@@ -79,7 +79,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         removal()
     }
     
-    private func handleRelationChanges(relationChanges: RelationChange) {
+    fileprivate func handleRelationChanges(_ relationChanges: RelationChange) {
         let parts = relationChanges.parts(self.idAttr)
         
         var treeChanges: [Change] = []
@@ -92,7 +92,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         }
     }
     
-    override func insert(row: Row, pos: Pos) {
+    override func insert(_ row: Row, pos: Pos) {
         // TODO: Provide insert/delete/move as extension defined where R: MutableRelation
         guard var relation = relation as? MutableRelation else {
             fatalError("insert() is only supported when the underlying relation is mutable")
@@ -103,7 +103,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         relation.add(mutableRow)
     }
     
-    override func computeOrderForInsert(inout row: Row, pos: Pos) {
+    override func computeOrderForInsert(_ row: inout Row, pos: Pos) {
         let parentIDValue = pos.parentID ?? .NULL
         let order: RelationValue = orderForPos(pos)
         
@@ -111,9 +111,9 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         row[orderAttr] = order
     }
 
-    private func onInsert(rows: [Row]) -> [Change] {
+    fileprivate func onInsert(_ rows: [Row]) -> [Change] {
         
-        func insertNode(node: Node, parent: Node) -> Int {
+        func insertNode(_ node: Node, parent: Node) -> Int {
             return parent.children.insertSorted(node, { $0.data[self.orderAttr] })
         }
 
@@ -138,7 +138,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
                 }
             }
         }
-        nodesToDrop.forEach{ nodeDict.removeValueForKey($0) }
+        nodesToDrop.forEach{ nodeDict.removeValue(forKey: $0) }
         
         // Now attach the remaining nodes to the in-memory tree structure
         var changes: [Change] = []
@@ -162,7 +162,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         return changes
     }
     
-    override func delete(id: RelationValue) {
+    override func delete(_ id: RelationValue) {
         guard var relation = relation as? MutableRelation else {
             fatalError("delete() is only supported when the underlying relation is mutable")
         }
@@ -186,7 +186,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         }
     }
 
-    private func onDelete(idsToDelete: [RelationValue]) -> [Change] {
+    fileprivate func onDelete(_ idsToDelete: [RelationValue]) -> [Change] {
         // Observers should only be notified about the top-most nodes that were deleted.
         // We handle this by looking at the identifiers of the rows/nodes to be deleted,
         // and only deleting the unique (top-most) parents.
@@ -204,11 +204,11 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         return changes
     }
 
-    private func onDelete(id: RelationValue) -> Change? {
+    fileprivate func onDelete(_ id: RelationValue) -> Change? {
 
-        func deleteNode(node: Node, inout _ nodes: [Node]) -> Int {
-            let index = nodes.indexOf({$0 === node})!
-            nodes.removeAtIndex(index)
+        func deleteNode(_ node: Node, _ nodes: inout [Node]) -> Int {
+            let index = nodes.index(where: {$0 === node})!
+            nodes.remove(at: index)
             return index
         }
         
@@ -231,7 +231,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
     }
 
     /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
-    override func move(srcPath srcPath: Path, dstPath: Path) {
+    override func move(srcPath: Path, dstPath: Path) {
         let srcParent = srcPath.parent ?? root
         let dstParent = dstPath.parent ?? root
 
@@ -264,7 +264,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         ])
     }
 
-    private func onUpdate(rows: [Row]) -> [Change] {
+    fileprivate func onUpdate(_ rows: [Row]) -> [Change] {
         var changes: [Change] = []
         for row in rows {
             if let change = self.onUpdate(row) {
@@ -274,7 +274,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         return changes
     }
     
-    private func onUpdate(row: Row) -> Change? {
+    fileprivate func onUpdate(_ row: Row) -> Change? {
         let newParentID = row[parentAttr]
         let newOrder = row[orderAttr]
         if newParentID == .NotFound || newOrder == .NotFound {
@@ -287,7 +287,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         return onMove(srcNode, dstParentID: newParentID, dstOrder: newOrder)
     }
     
-    private func onMove(node: Node, dstParentID: RelationValue, dstOrder: RelationValue) -> Change {
+    fileprivate func onMove(_ node: Node, dstParentID: RelationValue, dstOrder: RelationValue) -> Change {
         let optSrcParent = parentForNode(node)
         let optDstParent: Node?
         if dstParentID == .NULL {
@@ -316,12 +316,12 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         return .Move(src: newSrcPath, dst: newDstPath)
     }
 
-    private func adjacentNodesForIndex(index: Int, inParent parent: Node, notMatching node: Node) -> (Node?, Node?) {
+    fileprivate func adjacentNodesForIndex(_ index: Int, inParent parent: Node, notMatching node: Node) -> (Node?, Node?) {
         // Note: In the case where a node is being reordered within its existing parent, `parent` will
         // still contain that node, but `index` represents the new position assuming it was already removed,
         // so we use the `notMatching` node to avoid choosing that same node again.
         
-        func nodeAtIndex(i: Int, alt: Int) -> Node? {
+        func nodeAtIndex(_ i: Int, alt: Int) -> Node? {
             if let n = parent.children[safe: i] {
                 if n !== node {
                     return n
@@ -338,7 +338,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         return (lo, hi)
     }
     
-    private func orderWithinParent(parent: Node, previous: Node?, next: Node?) -> RelationValue {
+    fileprivate func orderWithinParent(_ parent: Node, previous: Node?, next: Node?) -> RelationValue {
         let prev: Node?
         if previous == nil && next == nil {
             // Add after the last child
@@ -349,7 +349,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         }
         
         // TODO: Use a more appropriate data type for storing order
-        func orderForNode(node: Node) -> Double {
+        func orderForNode(_ node: Node) -> Double {
             return node.data[orderAttr].get()!
         }
 
@@ -358,7 +358,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         return RelationValue(lo + ((hi - lo) / 2.0))
     }
     
-    private func orderForPos(pos: Pos) -> RelationValue {
+    fileprivate func orderForPos(_ pos: Pos) -> RelationValue {
         let parent: Node
         if let parentID = pos.parentID {
             parent = nodeForID(parentID)!
@@ -375,7 +375,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
 
 extension Relation {
     /// Returns a TreeProperty that gets its data from this relation.
-    public func treeProperty(tag tag: AnyObject? = nil, idAttr: Attribute = "id", parentAttr: Attribute = "parent", orderAttr: Attribute = "order") -> TreeProperty<RowTreeNode> {
+    public func treeProperty(tag: AnyObject? = nil, idAttr: Attribute = "id", parentAttr: Attribute = "parent", orderAttr: Attribute = "order") -> TreeProperty<RowTreeNode> {
         return RelationTreeProperty(relation: self, tag: tag, idAttr: idAttr, parentAttr: parentAttr, orderAttr: orderAttr)
     }
 }

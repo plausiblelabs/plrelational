@@ -14,41 +14,41 @@ typealias PiChannelName = String
 typealias PiVariableName = String
 
 indirect enum PiValue { case
-    IntegerValue(Int),
-    IncrInteger(PiVariableName),
-    Channel(PiChannelName),
-    Pair(PiValue, PiValue)
+    integerValue(Int),
+    incrInteger(PiVariableName),
+    channel(PiChannelName),
+    pair(PiValue, PiValue)
 }
 
 extension PiValue: CustomStringConvertible {
     var description: String {
         switch self {
-        case let .IntegerValue(v):
+        case let .integerValue(v):
             return "\(v)"
-        case let .IncrInteger(name):
+        case let .incrInteger(name):
             return "\(name)+1"
-        case let .Channel(name):
+        case let .channel(name):
             return "\(name)"
-        case let .Pair(l, r):
+        case let .pair(l, r):
             return "\(l),\(r)"
         }
     }
 }
 
 indirect enum PiBinding { case
-    Integer(PiVariableName),
-    Channel(PiChannelName),
-    Pair(PiBinding, PiBinding)
+    integer(PiVariableName),
+    channel(PiChannelName),
+    pair(PiBinding, PiBinding)
 }
 
 extension PiBinding: CustomStringConvertible {
     var description: String {
         switch self {
-        case let .Integer(name):
+        case let .integer(name):
             return "\(name)"
-        case let .Channel(name):
+        case let .channel(name):
             return "\(name)"
-        case let .Pair(l, r):
+        case let .pair(l, r):
             return "\(l),\(r)"
         }
     }
@@ -56,25 +56,25 @@ extension PiBinding: CustomStringConvertible {
 
 indirect enum Pi { case
     /// Run the two computations in parallel.
-    Par(p: Pi, q: Pi),
+    par(p: Pi, q: Pi),
 
     /// Create a new channel, then run the next computation.
-    New(channel: PiChannelName, p: Pi),
+    new(channel: PiChannelName, p: Pi),
 
     /// Send a value on the given channel, then run the next computation.
-    Snd(channel: PiChannelName, value: PiValue, p: Pi),
+    snd(channel: PiChannelName, value: PiValue, p: Pi),
     
     /// Receive a value on the given channel, then run the next computation.
-    Rcv(channel: PiChannelName, binding: PiBinding, p: Pi),
+    rcv(channel: PiChannelName, binding: PiBinding, p: Pi),
     
     /// Terminate the process.
-    End
+    end
 }
 
 extension Pi: CustomStringConvertible {
     var description: String {
-        func dot(p: Pi) -> String {
-            if case .End = p {
+        func dot(_ p: Pi) -> String {
+            if case .end = p {
                 return ""
             } else {
                 return ".\(p)"
@@ -82,15 +82,15 @@ extension Pi: CustomStringConvertible {
         }
         
         switch self {
-        case let Par(p, q):
+        case let .par(p, q):
             return "\(p) | \(q)"
-        case let New(c, p):
+        case let .new(c, p):
             return "(nu \(c))(\(p))"
-        case let Snd(c, m, p):
+        case let .snd(c, m, p):
             return "\(c)<\(m)>\(dot(p))"
-        case let Rcv(c, b, p):
+        case let .rcv(c, b, p):
             return "\(c)(\(b))\(dot(p))"
-        case End:
+        case .end:
             return ""
         }
     }
@@ -101,44 +101,44 @@ struct PiAgent {
 
 typealias PiEnv = Dictionary<PiChannelName, PiAgent>
 
-func runPi(pi: Pi, inout env: PiEnv) {
+func runPi(_ pi: Pi, env: inout PiEnv) {
     // TODO
     print("PI: \(pi)")
 }
 
-func par(p: Pi, _ q: Pi) -> Pi {
-    return .Par(p: p, q: q)
+func par(_ p: Pi, _ q: Pi) -> Pi {
+    return .par(p: p, q: q)
 }
 
-func newc(name: PiChannelName, then: Pi) -> Pi {
-    return .New(channel: name, p: then)
+func newc(_ name: PiChannelName, then: Pi) -> Pi {
+    return .new(channel: name, p: then)
 }
 
-func snd(on on: PiChannelName, value v: PiValueType, then: Pi = end) -> Pi {
-    return .Snd(channel: on, value: v.value, p: then)
+func snd(on: PiChannelName, value v: PiValueType, then: Pi = end) -> Pi {
+    return .snd(channel: on, value: v.value, p: then)
 }
 
-func rcv(on on: PiChannelName, bind b: PiBindingType, then: Pi = end) -> Pi {
-    return .Rcv(channel: on, binding: b.binding, p: then)
+func rcv(on: PiChannelName, bind b: PiBindingType, then: Pi = end) -> Pi {
+    return .rcv(channel: on, binding: b.binding, p: then)
 }
 
-func bpair(b0: PiChannelName, _ b1: PiVariableName) -> PiBinding {
-    return .Pair(.Channel(b0), .Integer(b1))
+func bpair(_ b0: PiChannelName, _ b1: PiVariableName) -> PiBinding {
+    return .pair(.channel(b0), .integer(b1))
 }
 
-func intb(name: PiVariableName) -> PiBinding {
-    return .Integer(name)
+func intb(_ name: PiVariableName) -> PiBinding {
+    return .integer(name)
 }
 
-func vpair(v0: PiChannelName, _ v1: Int) -> PiValue {
-    return .Pair(.Channel(v0), .IntegerValue(v1))
+func vpair(_ v0: PiChannelName, _ v1: Int) -> PiValue {
+    return .pair(.channel(v0), .integerValue(v1))
 }
 
-func incr(b: PiVariableName) -> PiValue {
-    return .IncrInteger(b)
+func incr(_ b: PiVariableName) -> PiValue {
+    return .incrInteger(b)
 }
 
-let end: Pi = .End
+let end: Pi = .end
 
 infix operator *|* {
 associativity left
@@ -157,7 +157,7 @@ extension PiValue: PiValueType {
 }
 
 extension String: PiValueType {
-    var value: PiValue { return .Channel(self) }
+    var value: PiValue { return .channel(self) }
 }
 
 protocol PiBindingType {
@@ -169,5 +169,5 @@ extension PiBinding: PiBindingType {
 }
 
 extension String: PiBindingType {
-    var binding: PiBinding { return .Channel(self) }
+    var binding: PiBinding { return .channel(self) }
 }

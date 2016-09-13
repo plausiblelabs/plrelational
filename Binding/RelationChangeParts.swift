@@ -16,7 +16,7 @@ struct RelationChangeParts {
 extension RelationChange {
 
     /// Extracts the added, updated, and removed rows from this RelationChange.
-    func parts(idAttr: Attribute) -> RelationChangeParts {
+    func parts(_ idAttr: Attribute) -> RelationChangeParts {
         let addedRows: [Row]
         if let adds = self.added {
             let added: Relation
@@ -32,7 +32,7 @@ extension RelationChange {
         }
         
         let updatedRows: [Row]
-        if let adds = self.added, removes = self.removed {
+        if let adds = self.added, let removes = self.removed {
             let updated = removes.project([idAttr]).join(adds)
             updatedRows = updated.rows().flatMap{$0.ok}
         } else {
@@ -57,7 +57,7 @@ extension RelationChange {
 }
 
 /// Extracts the added, updated, and removed rows from the given NegativeSet.
-func partsOf(set: NegativeSet<Row>, idAttr: Attribute) -> RelationChangeParts {
+func partsOf(_ set: NegativeSet<Row>, idAttr: Attribute) -> RelationChangeParts {
     // First gather the identifiers of the rows that are being deleted (or updated)
     var deletedIDs: [RelationValue] = set.removed.map{ $0[idAttr] }
 
@@ -65,7 +65,7 @@ func partsOf(set: NegativeSet<Row>, idAttr: Attribute) -> RelationChangeParts {
     var updatedRows: [Row] = []
     for row in set.added {
         let id = row[idAttr]
-        if set.removed.contains({ $0[idAttr] == id }) {
+        if set.removed.contains(where: { $0[idAttr] == id }) {
             // A row with this identifier appears in both sets, so it must've been updated; the added set
             // will contain the new row contents
             updatedRows.append(row)

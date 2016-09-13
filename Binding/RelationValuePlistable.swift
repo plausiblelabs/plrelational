@@ -8,7 +8,7 @@ import libRelational
 
 public protocol Plistable {
     func toPlist() -> AnyObject
-    static func fromPlist(obj: AnyObject) -> Self?
+    static func fromPlist(_ obj: AnyObject) -> Self?
 }
 
 extension RelationValue: Plistable {
@@ -24,9 +24,9 @@ extension RelationValue: Plistable {
         }
     }
     
-    public static func fromPlist(obj: AnyObject) -> RelationValue? {
+    public static func fromPlist(_ obj: AnyObject) -> RelationValue? {
         if let plist = obj as? [String: String] {
-            if let type = plist["type"], stringValue = plist["value"] {
+            if let type = plist["type"], let stringValue = plist["value"] {
                 switch type {
                 case "integer":
                     if let v = Int64(stringValue) {

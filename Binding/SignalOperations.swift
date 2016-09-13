@@ -7,35 +7,35 @@ import Foundation
 
 extension SignalType {
     /// Returns a Signal that applies the given `transform` to each new value.
-    public func map<U>(transform: Self.Value -> U) -> Signal<U> {
+    public func map<U>(_ transform: @escaping (Self.Value) -> U) -> Signal<U> {
         return MappedSignal(underlying: self, transform: transform)
     }
 }
 
 /// Returns a Signal that creates a fresh tuple (pair) any time there is a new value in either input.
-public func zip<LHS: SignalType, RHS: SignalType>(lhs: LHS, _ rhs: RHS) -> Signal<(LHS.Value, RHS.Value)> {
+public func zip<LHS: SignalType, RHS: SignalType>(_ lhs: LHS, _ rhs: RHS) -> Signal<(LHS.Value, RHS.Value)> {
     return BinaryOpSignal(lhs, rhs, { ($0, $1) })
 }
 
 /// Returns a Signal whose value is the negation of the given boolean signal.
-public func not<S: SignalType where S.Value: BooleanType>(signal: S) -> Signal<Bool> {
+public func not<S: SignalType>(_ signal: S) -> Signal<Bool> where S.Value: Bool {
     return signal.map{ !$0.boolValue }
 }
 
-extension SignalType where Value: BooleanType {
+extension SignalType where Value: Bool {
     /// Returns a Signal whose value resolves to the logical OR of this signal and the other input signal.
-    public func or(other: Self) -> Signal<Bool> {
+    public func or(_ other: Self) -> Signal<Bool> {
         return BinaryOpSignal(self, other, { $0.boolValue || $1.boolValue })
     }
     
     /// Returns a Signal whose value resolves to the logical AND of the values delivered on this signal
     /// and the other input signal.
-    public func and(other: Self) -> Signal<Bool> {
+    public func and(_ other: Self) -> Signal<Bool> {
         return BinaryOpSignal(self, other, { $0.boolValue && $1.boolValue })
     }
     
     /// Returns a Signal that invokes the given function whenever this signal's value resolves to `true`.
-    public func then(f: () -> Void) -> Signal<()> {
+    public func then(_ f: @escaping () -> Void) -> Signal<()> {
         return self.map{ if $0.boolValue { f() } }
     }
 }
@@ -51,11 +51,11 @@ associativity left
 precedence 120
 }
 
-public func *||<S: SignalType where S.Value: BooleanType>(lhs: S, rhs: S) -> Signal<Bool> {
+public func *||<S: SignalType>(lhs: S, rhs: S) -> Signal<Bool> where S.Value: Bool {
     return lhs.or(rhs)
 }
 
-public func *&&<S: SignalType where S.Value: BooleanType>(lhs: S, rhs: S) -> Signal<Bool> {
+public func *&&<S: SignalType>(lhs: S, rhs: S) -> Signal<Bool> where S.Value: Bool {
     return lhs.and(rhs)
 }
 
@@ -64,11 +64,11 @@ associativity none
 precedence 130
 }
 
-public func *==<S: SignalType where S.Value: Equatable>(lhs: S, rhs: S) -> Signal<Bool> {
+public func *==<S: SignalType>(lhs: S, rhs: S) -> Signal<Bool> where S.Value: Equatable {
     return BinaryOpSignal(lhs, rhs, { $0 == $1 })
 }
 
-extension SequenceType where Generator.Element: SignalType, Generator.Element.Value: BooleanType {
+extension Sequence where Iterator.Element: SignalType, Iterator.Element.Value: Bool {
     /// Returns a Signal whose value resolves to `true` if *any* of the signals
     /// in this sequence resolve to `true`.
     public func anyTrue() -> Signal<Bool> {
@@ -127,9 +127,9 @@ extension SequenceType where Generator.Element: SignalType, Generator.Element.Va
 }
 
 private class MappedSignal<T>: Signal<T> {
-    private var removal: ObserverRemoval!
+    fileprivate var removal: ObserverRemoval!
     
-    init<S: SignalType>(underlying: S, transform: (S.Value) -> T) {
+    init<S: SignalType>(underlying: S, transform: @escaping (S.Value) -> T) {
         super.init(changeCount: underlying.changeCount, startFunc: {
             underlying.start()
         })
@@ -153,10 +153,10 @@ private class MappedSignal<T>: Signal<T> {
 }
 
 private class BinaryOpSignal<T>: Signal<T> {
-    private var removal1: ObserverRemoval!
-    private var removal2: ObserverRemoval!
+    fileprivate var removal1: ObserverRemoval!
+    fileprivate var removal2: ObserverRemoval!
     
-    init<LHS: SignalType, RHS: SignalType>(_ lhs: LHS, _ rhs: RHS, _ f: (LHS.Value, RHS.Value) -> T) {
+    init<LHS: SignalType, RHS: SignalType>(_ lhs: LHS, _ rhs: RHS, _ f: @escaping (LHS.Value, RHS.Value) -> T) {
         super.init(changeCount: lhs.changeCount + rhs.changeCount, startFunc: {
             lhs.start()
             rhs.start()
@@ -164,8 +164,8 @@ private class BinaryOpSignal<T>: Signal<T> {
         
         var lhsValue: LHS.Value?
         var rhsValue: RHS.Value?
-        func notify(s: Signal<T>?, _ metadata: ChangeMetadata) {
-            if let lv = lhsValue, rv = rhsValue {
+        func notify(_ s: Signal<T>?, _ metadata: ChangeMetadata) {
+            if let lv = lhsValue, let rv = rhsValue {
                 s?.notifyChanging(f(lv, rv), metadata: metadata)
             }
         }
@@ -204,19 +204,19 @@ private class BinaryOpSignal<T>: Signal<T> {
 
 // TODO: Merge this with BinaryOpSignal?
 private class BoolSeqSignal: Signal<Bool> {
-    private var removals: [ObserverRemoval] = []
+    fileprivate var removals: [ObserverRemoval] = []
     
-    init<S: SequenceType where S.Generator.Element: SignalType, S.Generator.Element.Value: BooleanType>(signals: S, _ f: [Bool?] -> Bool?) {
+    init<S: Sequence>(signals: S, _ f: @escaping ([Bool?]) -> Bool?) where S.Iterator.Element: SignalType, S.Iterator.Element.Value: Bool {
         var count = 0
         signals.forEach({ _ in count += 1 })
-        var values = [Bool?](count: count, repeatedValue: nil)
+        var values = [Bool?](repeating: nil, count: count)
         
-        let changeCount = signals.map{ $0.changeCount }.reduce(0, combine: +)
+        let changeCount = signals.map{ $0.changeCount }.reduce(0, +)
         super.init(changeCount: changeCount, startFunc: {
             signals.forEach{ $0.start() }
         })
         
-        for (index, signal) in signals.enumerate() {
+        for (index, signal) in signals.enumerated() {
             let removal = signal.observe(SignalObserver(
                 valueWillChange: { [weak self] in
                     self?.notifyWillChange()

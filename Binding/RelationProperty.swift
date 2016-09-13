@@ -6,9 +6,9 @@
 import libRelational
 
 private class RelationProperty<T>: ReadableProperty<T> {
-    private var removal: ObserverRemoval!
+    fileprivate var removal: ObserverRemoval!
     
-    init(relation: Relation, relationToValue: Relation -> T, valueChanging: (T, T) -> Bool) {
+    init(relation: Relation, relationToValue: @escaping (Relation) -> T, valueChanging: (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
         
         super.init(initialValue: relationToValue(relation), signal: signal, notify: notify, changing: valueChanging)
@@ -26,9 +26,9 @@ private class RelationProperty<T>: ReadableProperty<T> {
 }
 
 private class WhenNonEmptyProperty<T>: ReadableProperty<T?> {
-    private var removal: ObserverRemoval!
+    fileprivate var removal: ObserverRemoval!
     
-    init(relation: Relation, relationToValue: Relation -> T) {
+    init(relation: Relation, relationToValue: @escaping (Relation) -> T) {
         
         func evaluate() -> T? {
             if relation.isEmpty.ok == false {
@@ -65,51 +65,51 @@ private class WhenNonEmptyProperty<T>: ReadableProperty<T?> {
 
 extension Relation {
     /// Returns a ReadableProperty that gets its value from this relation.
-    public func property<V>(relationToValue: Relation -> V) -> ReadableProperty<V> {
+    public func property<V>(_ relationToValue: @escaping (Relation) -> V) -> ReadableProperty<V> {
         return RelationProperty(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
     }
     
     /// Returns a ReadableProperty that gets its value from this relation.
-    public func property<V: Equatable>(relationToValue: Relation -> V) -> ReadableProperty<V> {
+    public func property<V: Equatable>(_ relationToValue: @escaping (Relation) -> V) -> ReadableProperty<V> {
         return RelationProperty(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
     }
     
     /// Returns a ReadableProperty that gets its value from this relation.
-    public func property<V>(relationToValue: Relation -> V?) -> ReadableProperty<V?> {
+    public func property<V>(_ relationToValue: @escaping (Relation) -> V?) -> ReadableProperty<V?> {
         return RelationProperty(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
     }
     
     /// Returns a ReadableProperty that gets its value from this relation.
-    public func property<V: Equatable>(relationToValue: Relation -> V?) -> ReadableProperty<V?> {
+    public func property<V: Equatable>(_ relationToValue: @escaping (Relation) -> V?) -> ReadableProperty<V?> {
         return RelationProperty(relation: self, relationToValue: relationToValue, valueChanging: valueChanging)
     }
     
     /// Returns a ReadableProperty that resolves to a set of all values for the single attribute.
-    public func allValuesProperty<V: Hashable>(transform: RelationValue -> V?) -> ReadableProperty<Set<V>> {
+    public func allValuesProperty<V: Hashable>(_ transform: @escaping (RelationValue) -> V?) -> ReadableProperty<Set<V>> {
         return property{ $0.allValues(transform) }
     }
     
     /// Returns a ReadableProperty that resolves to some value for the single attribute, or nil if there are
     /// no non-error rows.
-    public func anyValueProperty<V>(transform: RelationValue -> V?) -> ReadableProperty<V?> {
+    public func anyValueProperty<V>(_ transform: @escaping (RelationValue) -> V?) -> ReadableProperty<V?> {
         return property{ $0.anyValue(transform) }
     }
     
     /// Returns a ReadableProperty that resolves to some value for the single attribute, or nil if there are
     /// no non-error rows.
-    public func anyValueProperty<V: Equatable>(transform: RelationValue -> V?) -> ReadableProperty<V?> {
+    public func anyValueProperty<V: Equatable>(_ transform: @escaping (RelationValue) -> V?) -> ReadableProperty<V?> {
         return property{ $0.anyValue(transform) }
     }
     
     /// Returns a ReadableProperty that resolves to a single value if there is exactly one row in the relation,
     /// otherwise resolves to nil.
-    public func oneValueProperty<V>(transform: RelationValue -> V?) -> ReadableProperty<V?> {
+    public func oneValueProperty<V>(_ transform: @escaping (RelationValue) -> V?) -> ReadableProperty<V?> {
         return property{ $0.oneValue(transform) }
     }
     
     /// Returns a ReadableProperty that resolves to a single value if there is exactly one row in the relation,
     /// otherwise resolves to nil.
-    public func oneValueProperty<V: Equatable>(transform: RelationValue -> V?) -> ReadableProperty<V?> {
+    public func oneValueProperty<V: Equatable>(_ transform: @escaping (RelationValue) -> V?) -> ReadableProperty<V?> {
         return property{ $0.oneValue(transform) }
     }
 }
@@ -127,13 +127,13 @@ extension Relation {
     
     /// Returns a ReadableProperty that resolves to an optional value, which is nil when this
     /// relation is empty and is reconstructed when this relation becomes non-empty.
-    public func whenNonEmpty<V>(relationToValue: Relation -> V) -> ReadableProperty<V?> {
+    public func whenNonEmpty<V>(_ relationToValue: @escaping (Relation) -> V) -> ReadableProperty<V?> {
         return WhenNonEmptyProperty(relation: self, relationToValue: relationToValue)
     }
     
     /// Returns a ReadableProperty that resolves to the given string value if there are multiple
     /// values in the relation, otherwise resolves to the alternate string.
-    public func stringWhenMulti(string: String, otherwise: String = "") -> ReadableProperty<String> {
+    public func stringWhenMulti(_ string: String, otherwise: String = "") -> ReadableProperty<String> {
         // TODO: Reimplement this using `count` (no need to gather all values first)
         return property{ $0.allValues.count > 1 ? string : otherwise }
     }
@@ -141,13 +141,13 @@ extension Relation {
 
 public struct RelationMutationConfig<T> {
     public let snapshot: () -> ChangeLoggingDatabaseSnapshot
-    public let update: (newValue: T) -> Void
-    public let commit: (before: ChangeLoggingDatabaseSnapshot, newValue: T) -> Void
+    public let update: (_ newValue: T) -> Void
+    public let commit: (_ before: ChangeLoggingDatabaseSnapshot, _ newValue: T) -> Void
     
     public init(
-        snapshot: () -> ChangeLoggingDatabaseSnapshot,
-        update: (newValue: T) -> Void,
-        commit: (before: ChangeLoggingDatabaseSnapshot, newValue: T) -> Void)
+        snapshot: @escaping () -> ChangeLoggingDatabaseSnapshot,
+        update: @escaping (_ newValue: T) -> Void,
+        commit: @escaping (_ before: ChangeLoggingDatabaseSnapshot, _ newValue: T) -> Void)
     {
         self.snapshot = snapshot
         self.update = update
@@ -156,12 +156,12 @@ public struct RelationMutationConfig<T> {
 }
 
 private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
-    private let config: RelationMutationConfig<T>
-    private var mutableValue: T
-    private var removal: ObserverRemoval!
-    private var before: ChangeLoggingDatabaseSnapshot?
+    fileprivate let config: RelationMutationConfig<T>
+    fileprivate var mutableValue: T
+    fileprivate var removal: ObserverRemoval!
+    fileprivate var before: ChangeLoggingDatabaseSnapshot?
 
-    init(relation: Relation, config: RelationMutationConfig<T>, relationToValue: Relation -> T, valueChanging: (T, T) -> Bool) {
+    init(relation: Relation, config: RelationMutationConfig<T>, relationToValue: @escaping (Relation) -> T, valueChanging: @escaping (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
         
         self.config = config
@@ -179,7 +179,7 @@ private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
             let newValue = relationToValue(relation)
             if valueChanging(strongSelf.mutableValue, newValue) {
                 strongSelf.mutableValue = newValue
-                notify.valueChanging(change: newValue, metadata: ChangeMetadata(transient: false))
+                notify.valueChanging(newValue, ChangeMetadata(transient: false))
             }
         })
     }
@@ -188,11 +188,11 @@ private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
         removal()
     }
     
-    private override func getValue() -> T {
+    fileprivate override func getValue() -> T {
         return mutableValue
     }
     
-    private override func setValue(value: T, _ metadata: ChangeMetadata) {
+    fileprivate override func setValue(_ value: T, _ metadata: ChangeMetadata) {
         if before == nil {
             before = config.snapshot()
         }
@@ -200,9 +200,9 @@ private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
         // Note: We don't set `mutableValue` here; instead we wait to receive the change from the
         // relation in our change observer and then update `mutableValue` there
         if metadata.transient {
-            config.update(newValue: value)
+            config.update(value)
         } else {
-            config.commit(before: before!, newValue: value)
+            config.commit(before!, value)
             before = nil
         }
     }
@@ -211,25 +211,25 @@ private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
 extension Relation {
     /// Returns a ReadWriteProperty that gets its value from this relation and writes values back to the relation
     /// according to the provided configuration.
-    public func property<V>(config: RelationMutationConfig<V>, relationToValue: Relation -> V) -> ReadWriteProperty<V> {
+    public func property<V>(_ config: RelationMutationConfig<V>, relationToValue: @escaping (Relation) -> V) -> ReadWriteProperty<V> {
         return RelationReadWriteProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a ReadWriteProperty that gets its value from this relation and writes values back to the relation
     /// according to the provided configuration.
-    public func property<V: Equatable>(config: RelationMutationConfig<V>, relationToValue: Relation -> V) -> ReadWriteProperty<V> {
+    public func property<V: Equatable>(_ config: RelationMutationConfig<V>, relationToValue: @escaping (Relation) -> V) -> ReadWriteProperty<V> {
         return RelationReadWriteProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a ReadWriteProperty that gets its value from this relation and writes values back to the relation
     /// according to the provided configuration.
-    public func property<V>(config: RelationMutationConfig<V?>, relationToValue: Relation -> V?) -> ReadWriteProperty<V?> {
+    public func property<V>(_ config: RelationMutationConfig<V?>, relationToValue: @escaping (Relation) -> V?) -> ReadWriteProperty<V?> {
         return RelationReadWriteProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 
     /// Returns a ReadWriteProperty that gets its value from this relation and writes values back to the relation
     /// according to the provided configuration.
-    public func property<V: Equatable>(config: RelationMutationConfig<V?>, relationToValue: Relation -> V?) -> ReadWriteProperty<V?> {
+    public func property<V: Equatable>(_ config: RelationMutationConfig<V?>, relationToValue: @escaping (Relation) -> V?) -> ReadWriteProperty<V?> {
         return RelationReadWriteProperty(relation: self, config: config, relationToValue: relationToValue, valueChanging: valueChanging)
     }
 }

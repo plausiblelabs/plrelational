@@ -7,20 +7,20 @@ import Foundation
 
 public enum CommonValue<T: Equatable>: Equatable { case
     /// The value is not defined for any item.
-    None,
+    none,
     
     /// The value is the same for all items.
-    One(T),
+    one(T),
     
     /// There is a mixed set of values across all items.
-    Multi
+    multi
     
     /// Returns the single value if there is one, or the given default value in the .None or .Multi cases.
-    public func orDefault(defaultValue: T) -> T {
+    public func orDefault(_ defaultValue: T) -> T {
         switch self {
-        case .None, .Multi:
+        case .none, .multi:
             return defaultValue
-        case .One(let value):
+        case .one(let value):
             return value
         }
     }
@@ -28,29 +28,29 @@ public enum CommonValue<T: Equatable>: Equatable { case
     /// Returns the single value if there is one, or nil in the .None or .Multi cases.
     public func orNil() -> T? {
         switch self {
-        case .None, .Multi:
+        case .none, .multi:
             return nil
-        case .One(let value):
+        case .one(let value):
             return value
         }
     }
     
     /// Returns the given value in the .Multi case, otherwise returns nil.
-    public func whenMulti<U>(value: U) -> U? {
+    public func whenMulti<U>(_ value: U) -> U? {
         switch self {
-        case .None, .One:
+        case .none, .one:
             return nil
-        case .Multi:
+        case .multi:
             return value
         }
     }
     
     /// Returns the given value in the .Multi case, otherwise returns the alternate value.
-    public func whenMulti<U>(value: U, otherwise: U) -> U {
+    public func whenMulti<U>(_ value: U, otherwise: U) -> U {
         switch self {
-        case .None, .One:
+        case .none, .one:
             return otherwise
-        case .Multi:
+        case .multi:
             return value
         }
     }
@@ -58,11 +58,11 @@ public enum CommonValue<T: Equatable>: Equatable { case
 
 public func ==<T>(a: CommonValue<T>, b: CommonValue<T>) -> Bool {
     switch (a, b) {
-    case (.None, .None):
+    case (.none, .none):
         return true
-    case let (.One(avalue), .One(bvalue)):
+    case let (.one(avalue), .one(bvalue)):
         return avalue == bvalue
-    case (.Multi, .Multi):
+    case (.multi, .multi):
         return true
     default:
         return false
@@ -71,9 +71,9 @@ public func ==<T>(a: CommonValue<T>, b: CommonValue<T>) -> Bool {
 
 extension CommonValue { // where T: Equatable {
     /// Returns true if all items share the given value.
-    public func all(value: T) -> Bool {
+    public func all(_ value: T) -> Bool {
         switch self {
-        case let .One(v):
+        case let .one(v):
             return v == value
         default:
             return false

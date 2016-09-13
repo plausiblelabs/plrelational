@@ -16,14 +16,14 @@ public protocol AsyncReadablePropertyType: class {
 }
 
 /// A concrete readable property whose value is fetched asynchronously.
-public class AsyncReadableProperty<T>: AsyncReadablePropertyType {
+open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
     public typealias SignalChange = T
     
-    public internal(set) var value: T?
-    public let signal: Signal<T>
-    private var removal: ObserverRemoval!
-    private var started = false
+    open internal(set) var value: T?
+    open let signal: Signal<T>
+    fileprivate var removal: ObserverRemoval!
+    fileprivate var started = false
     
     public init(_ signal: Signal<T>) {
         self.signal = signal
@@ -32,7 +32,7 @@ public class AsyncReadableProperty<T>: AsyncReadablePropertyType {
         })
     }
     
-    public func start() {
+    open func start() {
         // TODO: Need to make a SignalProducer like thing that can create a unique signal
         // each time start() is called; for now we'll assume it can be called only once
         if !started {
@@ -47,22 +47,22 @@ public class AsyncReadableProperty<T>: AsyncReadablePropertyType {
 }
 
 /// A concrete readable property whose value can be updated and fetched asynchronously.
-public class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
+open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
     public typealias SignalChange = T
 
-    public var value: T? {
+    open var value: T? {
         return getValue()
     }
     
-    public let signal: Signal<T>
-    private var started = false
+    open let signal: Signal<T>
+    fileprivate var started = false
 
     internal init(signal: Signal<T>) {
         self.signal = signal
     }
     
-    public func start() {
+    open func start() {
         // TODO: For now we'll assume it can be called only once
         if !started {
             signal.start()
@@ -78,7 +78,7 @@ public class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
     
     /// Sets the new value.  This must be overridden by subclasses and is intended to be
     /// called by the `bind` implementations only, not by external callers.
-    internal func setValue(value: T, _ metadata: ChangeMetadata) {
+    internal func setValue(_ value: T, _ metadata: ChangeMetadata) {
         fatalError("Must be implemented by subclasses")
     }
 }
