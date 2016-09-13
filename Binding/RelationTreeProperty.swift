@@ -102,36 +102,38 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         relation.asyncAdd(mutableRow)
     }
     
-    override func computeOrderForInsert(after previous: RelationValue?, inParent parent: RelationValue?) -> Double {
+    override func computeOrderForAppend(inParent parent: RelationValue?) -> Double {
         let parentNode: Node
         if let parentID = parent {
-            // TODO: Error?
+            // TODO: Handle case where node isn't present for some reason
             parentNode = nodeForID(parentID)!
         } else {
             parentNode = root
         }
         
-        let previousNode: Node?
+        return orderWithinParent(parentNode, previous: nil, next: nil)
+    }
+    
+    override func computeOrderForInsert(after previous: RelationValue) -> (RelationValue?, Double) {
+        // TODO: Handle case where node isn't present for some reason
+        let previousNode = nodeForID(previous)!
+        let parentID = previousNode.parentID
+        let parentNode = parentForNode(previousNode) ?? root
+        
         let nextNode: Node?
-        if let previousID = previous {
-            if let indexOfPrevious = parentNode.children.index(where: {$0.id == previousID}) {
-                previousNode = parentNode.children[indexOfPrevious]
-                let indexOfNext = indexOfPrevious + 1
-                if indexOfNext < parentNode.children.count {
-                    nextNode = parentNode.children[indexOfNext]
-                } else {
-                    nextNode = nil
-                }
+        if let indexOfPrevious = parentNode.children.index(where: {$0.id == previous}) {
+            let indexOfNext = indexOfPrevious + 1
+            if indexOfNext < parentNode.children.count {
+                nextNode = parentNode.children[indexOfNext]
             } else {
-                previousNode = nil
                 nextNode = nil
             }
         } else {
-            previousNode = nil
             nextNode = nil
         }
-
-        return orderWithinParent(parentNode, previous: previousNode, next: nextNode)
+        
+        let order = orderWithinParent(parentNode, previous: previousNode, next: nextNode)
+        return (parentID, order)
     }
 
     private func onInsert(rows: [Row], root: inout Node, changes: inout [Change]) {

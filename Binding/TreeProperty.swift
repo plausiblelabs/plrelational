@@ -97,10 +97,14 @@ open class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
     open func insert(data: N.Data, pos: Pos) {
     }
 
-    open func computeOrderForInsert(after previous: N.ID?, inParent parent: N.ID?) -> Double {
+    open func computeOrderForAppend(inParent parent: N.ID?) -> Double {
         return 0.0
     }
-    
+
+    open func computeOrderForInsert(after previous: N.ID) -> (N.ID?, Double) {
+        return (nil, 0.0)
+    }
+
     open func delete(_ id: N.ID) {
     }
     
