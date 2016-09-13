@@ -17,7 +17,7 @@ public protocol Scheduler {
     ///
     /// Optionally returns a disposable that can be used to cancel the work
     /// before it begins.
-    func schedule(_ action: () -> Void) -> Disposable?
+    func schedule(_ action: @escaping () -> Void) -> Disposable?
 }
 
 /// A scheduler that performs all work synchronously.

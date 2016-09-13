@@ -12,22 +12,22 @@ extension Relation {
     }
 
     /// Returns an AsyncReadableProperty that gets its value from this relation using the given transform.
-    public func asyncProperty<T>(_ rowsToValue: (Relation, AnyIterator<Row>) -> T) -> AsyncReadableProperty<T> {
+    public func asyncProperty<T>(_ rowsToValue: @escaping (Relation, AnyIterator<Row>) -> T) -> AsyncReadableProperty<T> {
         return AsyncReadableProperty(self.signal(rowsToValue))
     }
     
     /// Returns an AsyncReadableProperty that gets its value from this relation using the given transform.
-    public func asyncProperty<T: Equatable>(_ rowsToValue: (Relation, AnyIterator<Row>) -> T) -> AsyncReadableProperty<T> {
+    public func asyncProperty<T: Equatable>(_ rowsToValue: @escaping (Relation, AnyIterator<Row>) -> T) -> AsyncReadableProperty<T> {
         return AsyncReadableProperty(self.signal(rowsToValue))
     }
     
     /// Returns an AsyncReadableProperty that gets its value from this relation using the given transform.
-    public func asyncProperty<T>(_ rowsToValue: (Relation, AnyIterator<Row>) -> T?) -> AsyncReadableProperty<T?> {
+    public func asyncProperty<T>(_ rowsToValue: @escaping (Relation, AnyIterator<Row>) -> T?) -> AsyncReadableProperty<T?> {
         return AsyncReadableProperty(self.signal(rowsToValue))
     }
     
     /// Returns an AsyncReadableProperty that gets its value from this relation using the given transform.
-    public func asyncProperty<T: Equatable>(_ rowsToValue: (Relation, AnyIterator<Row>) -> T?) -> AsyncReadableProperty<T?> {
+    public func asyncProperty<T: Equatable>(_ rowsToValue: @escaping (Relation, AnyIterator<Row>) -> T?) -> AsyncReadableProperty<T?> {
         return AsyncReadableProperty(self.signal(rowsToValue))
     }
 }
