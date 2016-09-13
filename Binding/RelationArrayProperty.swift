@@ -137,7 +137,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
     fileprivate func onMove(_ element: Element, dstOrder: RelationValue, elems: inout [Element]) -> Change {
         // Remove the element from the array
         let srcIndex = indexForID(element.id, elems)!
-        elems.removeAtIndex(srcIndex)
+        _ = elems.remove(at: srcIndex)
         
         // Update the order value in the element's row
         element.data[orderAttr] = dstOrder
