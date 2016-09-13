@@ -15,7 +15,7 @@ open class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
     })
     
     fileprivate lazy var _value: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
-        self.objectValue = value as? AnyObject
+        self.objectValue = value as AnyObject
     })
     open var value: ReadWriteProperty<T?> { return _value }
     
