@@ -8,7 +8,7 @@ import libRelational
 private class RelationProperty<T>: ReadableProperty<T> {
     fileprivate var removal: ObserverRemoval!
     
-    init(relation: Relation, relationToValue: @escaping (Relation) -> T, valueChanging: (T, T) -> Bool) {
+    init(relation: Relation, relationToValue: @escaping (Relation) -> T, valueChanging: @escaping (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
         
         super.init(initialValue: relationToValue(relation), signal: signal, notify: notify, changing: valueChanging)

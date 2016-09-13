@@ -51,7 +51,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
                 let sortedRows = rows.sorted{ $0[self.orderAttr] < $1[self.orderAttr] }
                 let elements = sortedRows.map{ RowArrayElement(id: $0[self.idAttr], data: $0) }
                 self.elements = elements
-                self.notifyObservers(arrayChanges: [.Initial(elements)])
+                self.notifyObservers(arrayChanges: [.initial(elements)])
             }
             self.notify.valueDidChange()
         })
@@ -86,7 +86,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         
         for row in rows {
             let index = insertRow(row)
-            changes.append(.Insert(index))
+            changes.append(.insert(index))
         }
     }
 
@@ -103,7 +103,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         for id in ids {
             if let index = elems.index(where: { $0.id == id }) {
                 elems.remove(at: index)
-                changes.append(.Delete(index))
+                changes.append(.delete(index))
             }
         }
     }
@@ -125,7 +125,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
     fileprivate func onUpdate(_ rows: [Row], elems: inout [Element], changes: inout [Change]) {
         for row in rows {
             let newOrder = row[orderAttr]
-            if newOrder != .NotFound {
+            if newOrder != .notFound {
                 let id = row[idAttr]
                 let element = elementForID(id, elems)!
                 changes.append(onMove(element, dstOrder: newOrder, elems: &elems))
@@ -145,7 +145,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         // Insert the element in its new position
         let dstIndex = elems.insertSorted(element, { $0.data[self.orderAttr] })
         
-        return .Move(srcIndex: srcIndex, dstIndex: dstIndex)
+        return .move(srcIndex: srcIndex, dstIndex: dstIndex)
     }
     
     fileprivate func adjacentElementsForIndex(_ index: Int, notMatching element: Element, inElements elems: [Element]) -> (Element?, Element?) {

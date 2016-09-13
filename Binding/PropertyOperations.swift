@@ -121,7 +121,7 @@ extension ReadablePropertyType where Value: Sequence, Value.Iterator.Element: Ha
 private class MappedValueProperty<T>: ReadableProperty<T> {
     fileprivate var removal: ObserverRemoval!
     
-    init<P: ReadablePropertyType>(property: P, transform: @escaping (P.Value) -> T, valueChanging: (T, T) -> Bool) {
+    init<P: ReadablePropertyType>(property: P, transform: @escaping (P.Value) -> T, valueChanging: @escaping (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
         
         super.init(initialValue: transform(property.value), signal: signal, notify: notify, changing: valueChanging)
@@ -140,7 +140,7 @@ private class BinaryOpValueProperty<T>: ReadableProperty<T> {
     fileprivate var removal1: ObserverRemoval!
     fileprivate var removal2: ObserverRemoval!
     
-    init<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(_ lhs: LHS, _ rhs: RHS, _ f: @escaping (LHS.Value, RHS.Value) -> T, _ valueChanging: (T, T) -> Bool) {
+    init<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(_ lhs: LHS, _ rhs: RHS, _ f: @escaping (LHS.Value, RHS.Value) -> T, _ valueChanging: @escaping (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
 
         super.init(initialValue: f(lhs.value, rhs.value), signal: signal, notify: notify, changing: valueChanging)
