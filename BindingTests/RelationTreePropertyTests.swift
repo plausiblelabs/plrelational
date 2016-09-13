@@ -19,7 +19,7 @@ class RelationTreePropertyTests: BindingTestCase {
             if let parentID = parentID {
                 parent = RelationValue(parentID)
             } else {
-                parent = .NULL
+                parent = .null
             }
             
             sqliteRelation.add([
@@ -136,14 +136,14 @@ class RelationTreePropertyTests: BindingTestCase {
         ])
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
-            [1, "Group1",      .NULL, 5.0],
+            [1, "Group1",      .null, 5.0],
             [2, "Collection1", 1,     5.0],
             [3, "Page1",       1,     7.0],
             [4, "Page2",       1,     8.0],
             [5, "Child1",      2,     5.0],
             [6, "Child2",      2,     7.0],
             [7, "Child3",      2,     8.0],
-            [8, "Group2",      .NULL, 7.0]
+            [8, "Group2",      .null, 7.0]
         ))
 
         // Re-order a collection within its parent
@@ -163,14 +163,14 @@ class RelationTreePropertyTests: BindingTestCase {
         ])
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
-            [1, "Group1",      .NULL, 5.0],
+            [1, "Group1",      .null, 5.0],
             [2, "Collection1", 1,     5.0],
             [3, "Page1",       1,     7.0],
             [4, "Page2",       1,     8.0],
             [5, "Child1",      2,     5.0],
             [6, "Child2",      2,     7.0],
             [7, "Child3",      2,     3.0],
-            [8, "Group2",      .NULL, 7.0]
+            [8, "Group2",      .null, 7.0]
         ))
         
         // Move a collection to a new parent
@@ -190,14 +190,14 @@ class RelationTreePropertyTests: BindingTestCase {
         ])
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
-            [1, "Group1",      .NULL, 5.0],
+            [1, "Group1",      .null, 5.0],
             [2, "Collection1", 8,     5.0],
             [3, "Page1",       1,     7.0],
             [4, "Page2",       1,     8.0],
             [5, "Child1",      2,     5.0],
             [6, "Child2",      2,     7.0],
             [7, "Child3",      2,     3.0],
-            [8, "Group2",      .NULL, 7.0]
+            [8, "Group2",      .null, 7.0]
         ))
         
         // Move a collection to the top level
@@ -217,14 +217,14 @@ class RelationTreePropertyTests: BindingTestCase {
         ])
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
-            [1, "Group1",      .NULL, 5.0],
+            [1, "Group1",      .null, 5.0],
             [2, "Collection1", 8,     5.0],
             [3, "Page1",       1,     7.0],
             [4, "Page2",       1,     8.0],
-            [5, "Child1",      .NULL, 6.0],
+            [5, "Child1",      .null, 6.0],
             [6, "Child2",      2,     7.0],
             [7, "Child3",      2,     3.0],
-            [8, "Group2",      .NULL, 7.0]
+            [8, "Group2",      .null, 7.0]
         ))
         
         // Delete a couple collections
@@ -242,10 +242,10 @@ class RelationTreePropertyTests: BindingTestCase {
         ])
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
-            [1, "Group1",      .NULL, 5.0],
+            [1, "Group1",      .null, 5.0],
             [3, "Page1",       1,     7.0],
-            [5, "Child1",      .NULL, 6.0],
-            [8, "Group2",      .NULL, 7.0]
+            [5, "Child1",      .null, 6.0],
+            [8, "Group2",      .null, 7.0]
         ))
     }
     

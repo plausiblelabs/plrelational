@@ -26,7 +26,7 @@ public final class RowTreeNode: TreeNode {
     
     public var parentID: RelationValue? {
         let parent = data[parentAttr]
-        if parent != .NULL {
+        if parent != .null {
             return parent
         } else {
             return nil
@@ -104,7 +104,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
     }
     
     override func computeOrderForInsert(_ row: inout Row, pos: Pos) {
-        let parentIDValue = pos.parentID ?? .NULL
+        let parentIDValue = pos.parentID ?? .null
         let order: RelationValue = orderForPos(pos)
         
         row[parentAttr] = parentIDValue
@@ -216,7 +216,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
             let parent: Node?
             let index: Int
             let parentID = node.data[parentAttr]
-            if parentID != .NULL {
+            if parentID != .null {
                 let parentNode = nodeForID(parentID)!
                 parent = parentNode
                 index = deleteNode(node, &parentNode.children)
@@ -242,7 +242,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         if let dstParent = dstPath.parent {
             dstParentID = dstParent.id
         } else {
-            dstParentID = .NULL
+            dstParentID = .null
         }
         
         // Note that dstPath.index of -1 can occur in the case where a node is being dragged onto another
@@ -290,7 +290,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
     fileprivate func onMove(_ node: Node, dstParentID: RelationValue, dstOrder: RelationValue) -> Change {
         let optSrcParent = parentForNode(node)
         let optDstParent: Node?
-        if dstParentID == .NULL {
+        if dstParentID == .null {
             optDstParent = nil
         } else {
             optDstParent = nodeForID(dstParentID)!

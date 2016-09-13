@@ -27,7 +27,7 @@ extension Relation {
         if let value = value {
             rv = RelationValue(value)
         } else {
-            rv = .NULL
+            rv = .null
         }
         updateValue(rv)
     }
@@ -63,7 +63,7 @@ extension Relation {
         if let value = value {
             rv = RelationValue(value)
         } else {
-            rv = .NULL
+            rv = .null
         }
         asyncUpdateValue(rv)
     }

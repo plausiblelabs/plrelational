@@ -240,7 +240,7 @@ class RelationPropertyTests: BindingTestCase {
         
         // Verify that value is considered "multi" when there is a single non-NULL value and a
         // single NULL value
-        r.update(Attribute("id") *== 2, newValues: ["name": .NULL])
+        r.update(Attribute("id") *== 2, newValues: ["name": .null])
         
         XCTAssertEqual(property.value, "multi")
         XCTAssertEqual(changeObserved, false)
