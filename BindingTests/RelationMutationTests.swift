@@ -72,7 +72,7 @@ class RelationMutationTests: BindingTestCase {
         r.add(["id": 1, "name": "cat", "friendly": 1, "age": 5])
         r.add(["id": 2, "name": "dog", "friendly": 0, "age": 3])
 
-        func awaitCompletion(f: () -> Void) {
+        func awaitCompletion(_ f: () -> Void) {
             f()
             CFRunLoopRun()
         }
@@ -156,7 +156,7 @@ class RelationMutationTests: BindingTestCase {
         let db = TransactionalDatabase(sqliteDB)
         let r = db["animal"]
         
-        func awaitCompletion(f: () -> Void) {
+        func awaitCompletion(_ f: () -> Void) {
             f()
             CFRunLoopRun()
         }
@@ -185,10 +185,10 @@ class RelationMutationTests: BindingTestCase {
 }
 
 private class ContentCoalescedRunLoopStoppingObserver: AsyncRelationContentCoalescedObserver {
-    func relationWillChange(relation: Relation) {
+    func relationWillChange(_ relation: Relation) {
     }
     
-    func relationDidChange(relation: Relation, result: Result<Set<Row>, RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<Set<Row>, RelationError>) {
         CFRunLoopStop(CFRunLoopGetCurrent())
     }
 }

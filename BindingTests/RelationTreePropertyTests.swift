@@ -14,7 +14,7 @@ class RelationTreePropertyTests: BindingTestCase {
         let sqliteRelation = sqliteDB.createRelation("collection", scheme: ["id", "name", "parent", "order"]).ok!
         
         // Add some existing data to the underlying SQLite database
-        func addCollection(collectionID: Int64, name: String, parentID: Int64?, order: Double) {
+        func addCollection(_ collectionID: Int64, name: String, parentID: Int64?, order: Double) {
             let parent: RelationValue
             if let parentID = parentID {
                 parent = RelationValue(parentID)
@@ -62,10 +62,10 @@ class RelationTreePropertyTests: BindingTestCase {
         
         var changes: [RelationTreeProperty.Change] = []
         let removal = tree.signal.observe({ treeChanges, _ in
-            changes.appendContentsOf(treeChanges)
+            changes.append(contentsOf: treeChanges)
         })
         
-        func addCollection(collectionID: Int64, name: String, parentID: Int64?, previousID: Int64?) {
+        func addCollection(_ collectionID: Int64, name: String, parentID: Int64?, previousID: Int64?) {
             db.transaction({
                 let row: Row = [
                     "id": RelationValue(collectionID),
@@ -78,29 +78,29 @@ class RelationTreePropertyTests: BindingTestCase {
             })
         }
         
-        func deleteCollection(collectionID: Int64) {
+        func deleteCollection(_ collectionID: Int64) {
             db.transaction({
                 tree.delete(RelationValue(collectionID))
             })
         }
         
-        func moveCollection(srcPath srcPath: RelationTreeProperty.Path, dstPath: RelationTreeProperty.Path) {
+        func moveCollection(srcPath: RelationTreeProperty.Path, dstPath: RelationTreeProperty.Path) {
             db.transaction({
                 tree.move(srcPath: srcPath, dstPath: dstPath)
             })
         }
         
-        func verifyChanges(expected: [RelationTreeProperty.Change], file: StaticString = #file, line: UInt = #line) {
+        func verifyChanges(_ expected: [RelationTreeProperty.Change], file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(changes, expected, file: file, line: line)
             changes = []
         }
         
-        func verifySQLite(expected: Relation, file: StaticString = #file, line: UInt = #line) {
+        func verifySQLite(_ expected: Relation, file: StaticString = #file, line: UInt = #line) {
             XCTAssertNil(loggingDB.save().err)
             AssertEqual(sqliteDB["collection"]!, expected, file: file, line: line)
         }
         
-        func path(parentID: Int64?, _ index: Int) -> RelationTreeProperty.Path {
+        func path(_ parentID: Int64?, _ index: Int) -> RelationTreeProperty.Path {
             let parent = parentID.flatMap{ tree.nodeForID(RelationValue($0)) }
             return TreePath(parent: parent, index: index)
         }
@@ -125,14 +125,14 @@ class RelationTreePropertyTests: BindingTestCase {
             "Group2"
         ])
         verifyChanges([
-            .Insert(path(nil, 0)),
-            .Insert(path(1, 0)),
-            .Insert(path(1, 1)),
-            .Insert(path(1, 2)),
-            .Insert(path(2, 0)),
-            .Insert(path(2, 1)),
-            .Insert(path(2, 2)),
-            .Insert(path(nil, 1)),
+            .insert(path(nil, 0)),
+            .insert(path(1, 0)),
+            .insert(path(1, 1)),
+            .insert(path(1, 2)),
+            .insert(path(2, 0)),
+            .insert(path(2, 1)),
+            .insert(path(2, 2)),
+            .insert(path(nil, 1)),
         ])
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
@@ -159,7 +159,7 @@ class RelationTreePropertyTests: BindingTestCase {
             "Group2"
         ])
         verifyChanges([
-            .Move(src: path(2, 2), dst: path(2, 0))
+            .move(src: path(2, 2), dst: path(2, 0))
         ])
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
@@ -186,7 +186,7 @@ class RelationTreePropertyTests: BindingTestCase {
             "    Child2"
         ])
         verifyChanges([
-            .Move(src: path(1, 0), dst: path(8, 0))
+            .move(src: path(1, 0), dst: path(8, 0))
         ])
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
@@ -213,7 +213,7 @@ class RelationTreePropertyTests: BindingTestCase {
             "    Child2"
         ])
         verifyChanges([
-            .Move(src: path(2, 1), dst: path(nil, 1))
+            .move(src: path(2, 1), dst: path(nil, 1))
         ])
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
@@ -237,8 +237,8 @@ class RelationTreePropertyTests: BindingTestCase {
             "Group2"
         ])
         verifyChanges([
-            .Delete(path(1, 1)),
-            .Delete(path(8, 0))
+            .delete(path(1, 1)),
+            .delete(path(8, 0))
         ])
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
@@ -254,7 +254,7 @@ class RelationTreePropertyTests: BindingTestCase {
         let loggingDB = ChangeLoggingDatabase(sqliteDB)
         let db = TransactionalDatabase(loggingDB)
         
-        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+        func createRelation(_ name: String, _ scheme: Scheme) -> MutableRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
             return db[name]
@@ -271,25 +271,25 @@ class RelationTreePropertyTests: BindingTestCase {
         
         var changes: [RelationTreeProperty.Change] = []
         let removal = tree.signal.observe({ treeChanges, _ in
-            changes.appendContentsOf(treeChanges)
+            changes.append(contentsOf: treeChanges)
         })
         
-        func verifyChanges(expected: [RelationTreeProperty.Change], file: StaticString = #file, line: UInt = #line) {
+        func verifyChanges(_ expected: [RelationTreeProperty.Change], file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(changes, expected, file: file, line: line)
             changes = []
         }
         
-        func verifySQLite(expected: Relation, file: StaticString = #file, line: UInt = #line) {
+        func verifySQLite(_ expected: Relation, file: StaticString = #file, line: UInt = #line) {
             XCTAssertNil(loggingDB.save().err)
             AssertEqual(sqliteDB["collection"]!, expected, file: file, line: line)
         }
         
-        func path(parentID: Int64?, _ index: Int) -> RelationTreeProperty.Path {
+        func path(_ parentID: Int64?, _ index: Int) -> RelationTreeProperty.Path {
             let parent = parentID.flatMap{ tree.nodeForID(RelationValue($0)) }
             return TreePath(parent: parent, index: index)
         }
         
-        func addDocItem(id: Int64, parentID: Int64?, previousID: Int64?) {
+        func addDocItem(_ id: Int64, parentID: Int64?, previousID: Int64?) {
             var row: Row = ["id": RelationValue(id)]
             let parent = parentID.map{ RelationValue($0) }
             let previous = previousID.map{ RelationValue($0) }
@@ -298,7 +298,7 @@ class RelationTreePropertyTests: BindingTestCase {
             docItems.add(row)
         }
         
-        func addObject(id: Int64, name: String) {
+        func addObject(_ id: Int64, name: String) {
             objects.add([
                 "id": RelationValue(id),
                 "name": RelationValue(name),
@@ -308,7 +308,7 @@ class RelationTreePropertyTests: BindingTestCase {
 
         var globalID: Int64 = 1
         
-        func newDocObject(name: String, parentID: Int64?) -> Int64 {
+        func newDocObject(_ name: String, parentID: Int64?) -> Int64 {
             let id = globalID
             db.transaction{
                 addObject(id, name: name)
@@ -318,15 +318,15 @@ class RelationTreePropertyTests: BindingTestCase {
             return id
         }
         
-        func addGroup(name: String, _ parentID: Int64?) -> Int64 {
+        func addGroup(_ name: String, _ parentID: Int64?) -> Int64 {
             return newDocObject(name, parentID: parentID)
         }
         
-        func addTextPage(name: String, _ parentID: Int64?) -> Int64 {
+        func addTextPage(_ name: String, _ parentID: Int64?) -> Int64 {
             return newDocObject(name, parentID: parentID)
         }
         
-        func deleteDocObject(id: Int64) {
+        func deleteDocObject(_ id: Int64) {
             db.transaction{
                 let expr = Attribute("id") *== RelationValue(id)
                 objects.delete(expr)
@@ -356,14 +356,14 @@ class RelationTreePropertyTests: BindingTestCase {
             "TopGroup2"
         ])
         verifyChanges([
-            .Insert(path(nil, 0)),
-            .Insert(path(nil, 1)),
-            .Insert(path(tg1, 0)),
-            .Insert(path(tg1, 1)),
-            .Insert(path(tg1, 2)),
-            .Insert(path(ng, 0)),
-            .Insert(path(ng, 1)),
-            .Insert(path(ng, 2))
+            .insert(path(nil, 0)),
+            .insert(path(nil, 1)),
+            .insert(path(tg1, 0)),
+            .insert(path(tg1, 1)),
+            .insert(path(tg1, 2)),
+            .insert(path(ng, 0)),
+            .insert(path(ng, 1)),
+            .insert(path(ng, 2))
         ])
         // TODO: Verify SQLite
         
@@ -383,7 +383,7 @@ class RelationTreePropertyTests: BindingTestCase {
             "TopGroup2"
             ])
         verifyChanges([
-            .Delete(path(tg1, 2)),
+            .delete(path(tg1, 2)),
         ])
         // TODO: Verify SQLite
         
@@ -401,7 +401,7 @@ class RelationTreePropertyTests: BindingTestCase {
             "TopGroup2"
         ])
         verifyChanges([
-            .Insert(path(tg1, 2)),
+            .insert(path(tg1, 2)),
         ])
         // TODO: Verify SQLite
     }

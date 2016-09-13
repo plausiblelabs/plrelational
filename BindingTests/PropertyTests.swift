@@ -305,17 +305,17 @@ class PropertyTests: XCTestCase {
             stringProperty,
             forward: {
                 // Bool -> String
-                .Change($0.description)
+                .change($0.description)
             },
             reverse: {
                 // String -> Bool
                 switch $0 {
                 case "true":
-                    return .Change(true)
+                    return .change(true)
                 case "false":
-                    return .Change(false)
+                    return .change(false)
                 default:
-                    return .NoChange
+                    return .noChange
                 }
             }
         )
@@ -333,11 +333,11 @@ class PropertyTests: XCTestCase {
             intProperty,
             forward: {
                 // Bool -> Int
-                .Change($0 ? 1 : 0)
+                .change($0 ? 1 : 0)
             },
             reverse: {
                 // Int -> Bool
-                .Change($0 != 0)
+                .change($0 != 0)
             }
         )
         
@@ -406,11 +406,11 @@ class PropertyTests: XCTestCase {
         XCTAssertEqual(changeCount, 0)
         XCTAssertEqual(signal.observerCount, 1)
         
-        notify.valueChanging(change: (), metadata: ChangeMetadata(transient: false))
+        notify.valueChanging((), ChangeMetadata(transient: false))
         XCTAssertEqual(changeCount, 1)
         XCTAssertEqual(signal.observerCount, 1)
         
-        notify.valueChanging(change: (), metadata: ChangeMetadata(transient: false))
+        notify.valueChanging((), ChangeMetadata(transient: false))
         XCTAssertEqual(changeCount, 2)
         XCTAssertEqual(signal.observerCount, 1)
         

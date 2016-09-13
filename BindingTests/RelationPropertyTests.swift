@@ -45,7 +45,7 @@ class RelationPropertyTests: BindingTestCase {
     func testReadOnlyPropertyWithJoinAndDelete() {
         let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
-        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+        func createRelation(_ name: String, _ scheme: Scheme) -> MutableRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
             return db[name]
@@ -261,7 +261,7 @@ class RelationPropertyTests: BindingTestCase {
         XCTAssertNil(sqliteDB.createRelation("animal", scheme: ["id", "name"]).err)
         let r = db["animal"]
 
-        func updateName(newValue: String) {
+        func updateName(_ newValue: String) {
             db.transaction{
                 r.update(Attribute("id") *== 1, newValues: ["name": RelationValue(newValue)])
             }

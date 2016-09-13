@@ -21,7 +21,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
 
         let runloop = CFRunLoopGetCurrent()
 
-        func awaitCompletion(f: () -> Void) {
+        func awaitCompletion(_ f: () -> Void) {
             f()
             CFRunLoopRun()
         }
@@ -91,7 +91,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         
         let runloop = CFRunLoopGetCurrent()
 
-        func updateName(newValue: String) {
+        func updateName(_ newValue: String) {
             r.asyncUpdate(Attribute("id") *== 1, newValues: ["name": RelationValue(newValue)])
         }
         

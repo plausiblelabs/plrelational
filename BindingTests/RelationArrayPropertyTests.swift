@@ -16,7 +16,7 @@ class RelationArrayPropertyTests: BindingTestCase {
         let r = db["page"]
 
         // Add some existing data to the underlying SQLite database
-        func addPage(pageID: Int64, name: String, order: Double) {
+        func addPage(_ pageID: Int64, name: String, order: Double) {
             sqliteRelation.add([
                 "id": RelationValue(pageID),
                 "name": RelationValue(name),
@@ -30,7 +30,7 @@ class RelationArrayPropertyTests: BindingTestCase {
         
         let runloop = CFRunLoopGetCurrent()
         
-        func awaitCompletion(f: () -> Void) {
+        func awaitCompletion(_ f: () -> Void) {
             f()
             CFRunLoopRun()
         }
@@ -45,7 +45,7 @@ class RelationArrayPropertyTests: BindingTestCase {
                 willChangeCount += 1
             },
             valueChanging: { arrayChanges, _ in
-                changes.appendContentsOf(arrayChanges)
+                changes.append(contentsOf: arrayChanges)
             },
             valueDidChange: {
                 didChangeCount += 1
@@ -84,7 +84,7 @@ class RelationArrayPropertyTests: BindingTestCase {
         
         let runloop = CFRunLoopGetCurrent()
         
-        func awaitCompletion(f: () -> Void) {
+        func awaitCompletion(_ f: () -> Void) {
             f()
             CFRunLoopRun()
         }
@@ -99,7 +99,7 @@ class RelationArrayPropertyTests: BindingTestCase {
                 willChangeCount += 1
             },
             valueChanging: { arrayChanges, _ in
-                changes.appendContentsOf(arrayChanges)
+                changes.append(contentsOf: arrayChanges)
             },
             valueDidChange: {
                 didChangeCount += 1
@@ -107,7 +107,7 @@ class RelationArrayPropertyTests: BindingTestCase {
             }
         ))
         
-        func addPage(pageID: Int64, name: String, previousID: Int64?) {
+        func addPage(_ pageID: Int64, name: String, previousID: Int64?) {
             let row: Row = [
                 "id": RelationValue(pageID),
                 "name": RelationValue(name)
@@ -117,20 +117,20 @@ class RelationArrayPropertyTests: BindingTestCase {
             property.insert(row, pos: pos)
         }
         
-        func deletePage(pageID: Int64) {
+        func deletePage(_ pageID: Int64) {
             property.delete(RelationValue(pageID))
         }
         
-        func movePage(srcIndex srcIndex: Int, dstIndex: Int) {
+        func movePage(srcIndex: Int, dstIndex: Int) {
             property.move(srcIndex: srcIndex, dstIndex: dstIndex)
         }
 
-        func verifyChanges(expected: [RelationArrayProperty.Change], file: StaticString = #file, line: UInt = #line) {
+        func verifyChanges(_ expected: [RelationArrayProperty.Change], file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(changes, expected, file: file, line: line)
             changes = []
         }
 
-        func verifySQLite(expected: Relation, file: StaticString = #file, line: UInt = #line) {
+        func verifySQLite(_ expected: Relation, file: StaticString = #file, line: UInt = #line) {
             XCTAssertNil(loggingDB.save().err)
             AssertEqual(sqliteDB["page"]!, expected, file: file, line: line)
         }
@@ -146,7 +146,7 @@ class RelationArrayPropertyTests: BindingTestCase {
         XCTAssertEqual(willChangeCount, 1)
         XCTAssertEqual(didChangeCount, 1)
         verifyArray(property, [])
-        verifyChanges([.Initial([])])
+        verifyChanges([.initial([])])
         
         // Insert some pages
         awaitCompletion{ addPage(1, name: "Page1", previousID: nil) }
@@ -162,10 +162,10 @@ class RelationArrayPropertyTests: BindingTestCase {
             "Page4"
         ])
         verifyChanges([
-            .Insert(0),
-            .Insert(1),
-            .Insert(2),
-            .Insert(3),
+            .insert(0),
+            .insert(1),
+            .insert(2),
+            .insert(3),
         ])
         verifySQLite(MakeRelation(
             ["id", "name",  "order"],
@@ -186,7 +186,7 @@ class RelationArrayPropertyTests: BindingTestCase {
             "Page4"
         ])
         verifyChanges([
-            .Move(srcIndex: 2, dstIndex: 0)
+            .move(srcIndex: 2, dstIndex: 0)
         ])
         verifySQLite(MakeRelation(
             ["id", "name",  "order"],
@@ -206,7 +206,7 @@ class RelationArrayPropertyTests: BindingTestCase {
             "Page4"
         ])
         verifyChanges([
-            .Delete(1)
+            .delete(1)
         ])
         verifySQLite(MakeRelation(
             ["id", "name",  "order"],

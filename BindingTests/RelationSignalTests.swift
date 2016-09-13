@@ -21,7 +21,7 @@ class RelationSignalTests: BindingTestCase {
         
         let runloop = CFRunLoopGetCurrent()
 
-        func awaitCompletion(f: () -> Void) {
+        func awaitCompletion(_ f: () -> Void) {
             f()
             CFRunLoopRun()
         }

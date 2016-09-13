@@ -21,8 +21,8 @@ class RelationAsTypedValueTests: BindingTestCase {
         
         let rvset = Set([RelationValue("cat"), RelationValue("dog"), RelationValue("fish")])
         
-        XCTAssertEqual(empty.project(["name"]).allValues, Set())
-        XCTAssertEqual(r.project(["name"]).allValues, rvset)
+        XCTAssertEqual(empty.project(["name"]).allValues(), Set())
+        XCTAssertEqual(r.project(["name"]).allValues(), rvset)
         
         XCTAssertEqual(
             r.project(["name"]).allValues{
@@ -78,9 +78,9 @@ class RelationAsTypedValueTests: BindingTestCase {
         XCTAssertEqual(one.select(expr).oneValueFromRow(transform, orDefault: "default"), "cat:5")
         XCTAssertEqual(multi.oneValueFromRow(transform, orDefault: "default"), "default")
         
-        XCTAssertNil(empty.project(["name"]).oneValue)
-        XCTAssertEqual(one.project(["name"]).oneValue, RelationValue("cat"))
-        XCTAssertNil(multi.project(["name"]).oneValue)
+        XCTAssertNil(empty.project(["name"]).oneValue())
+        XCTAssertEqual(one.project(["name"]).oneValue(), RelationValue("cat"))
+        XCTAssertNil(multi.project(["name"]).oneValue())
         
         XCTAssertEqual(empty.project(["name"]).oneString, "")
         XCTAssertEqual(one.project(["name"]).oneString, "cat")
@@ -137,12 +137,12 @@ class RelationAsTypedValueTests: BindingTestCase {
             return value.get()
         }
         
-        XCTAssertEqual(empty.project(["name"]).commonValue(asString), CommonValue.None)
-        XCTAssertEqual(one.project(["name"]).commonValue(asString), CommonValue.One("cat"))
-        XCTAssertEqual(multi.project(["name"]).commonValue(asString), CommonValue.Multi)
+        XCTAssertEqual(empty.project(["name"]).commonValue(asString), CommonValue.none)
+        XCTAssertEqual(one.project(["name"]).commonValue(asString), CommonValue.one("cat"))
+        XCTAssertEqual(multi.project(["name"]).commonValue(asString), CommonValue.multi)
         
-        XCTAssertEqual(empty.project(["age"]).commonValue(asInt), CommonValue.None)
-        XCTAssertEqual(one.project(["age"]).commonValue(asInt), CommonValue.One(5))
-        XCTAssertEqual(multi.project(["age"]).commonValue(asInt), CommonValue.Multi)
+        XCTAssertEqual(empty.project(["age"]).commonValue(asInt), CommonValue.none)
+        XCTAssertEqual(one.project(["age"]).commonValue(asInt), CommonValue.one(5))
+        XCTAssertEqual(multi.project(["age"]).commonValue(asInt), CommonValue.multi)
     }
 }
