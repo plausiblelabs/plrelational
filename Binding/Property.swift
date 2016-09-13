@@ -203,7 +203,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     /// using `forward` and `reverse` to conditionally apply changes in each direction.
     /// Note that calling `connectBidi` will cause the other property to take on this
     /// property's value immediately (this is the opposite behavior from `bindBidi`).
-    open func connectBidi<U>(_ other: ReadWriteProperty<U>, forward: @escaping (T) -> ChangeResult<U>, reverse: (U) -> ChangeResult<T>) -> Binding {
+    open func connectBidi<U>(_ other: ReadWriteProperty<U>, forward: @escaping (T) -> ChangeResult<U>, reverse: @escaping (U) -> ChangeResult<T>) -> Binding {
         return connectBidi(
             other,
             initial: {
