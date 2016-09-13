@@ -202,13 +202,13 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
         if let textField = view.textField as? TextField {
             textField.string.unbindAll()
             switch model.cellText(node.data) {
-            case .ReadOnly(let text):
+            case .readOnly(let text):
                 textField.string <~ text
-            case .ReadWrite(let text):
+            case .readWrite(let text):
                 textField.string <~> text
-            case .AsyncReadOnly(let text):
+            case .asyncReadOnly(let text):
                 textField.string <~ text
-            case .AsyncReadWrite(let text):
+            case .asyncReadWrite(let text):
                 textField.string <~> text
             }
         }
@@ -260,7 +260,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     /// Returns the set of node IDs corresponding to the view's current selection state.
     fileprivate func selectedItemIDs() -> Set<N.ID> {
         var itemIDs: [N.ID] = []
-        (self.outlineView.selectedRowIndexes as NSIndexSet).enumerate { (index, stop) -> Void in
+        for index in self.outlineView.selectedRowIndexes {
             if let node = self.outlineView.item(atRow: index) as? N {
                 itemIDs.append(node.id)
             }
@@ -303,19 +303,19 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
         
         for change in changes {
             switch change {
-            case let .Insert(path):
-                let rows = NSIndexSet(index: path.index)
-                outlineView.insertItemsAtIndexes(rows, inParent: path.parent, withAnimation: animation)
+            case let .insert(path):
+                let rows = IndexSet(integer: path.index)
+                outlineView.insertItems(at: rows, inParent: path.parent, withAnimation: animation)
                 if let node = model.data.nodeAtPath(path) , autoExpand {
                     itemsToExpand.append(node)
                 }
 
-            case let .Delete(path):
-                let rows = NSIndexSet(index: path.index)
-                outlineView.removeItemsAtIndexes(rows, inParent: path.parent, withAnimation: animation)
+            case let .delete(path):
+                let rows = IndexSet(integer: path.index)
+                outlineView.removeItems(at: rows, inParent: path.parent, withAnimation: animation)
 
-            case let .Move(srcPath, dstPath):
-                outlineView.moveItemAtIndex(srcPath.index, inParent: srcPath.parent, toIndex: dstPath.index, inParent: dstPath.parent)
+            case let .move(srcPath, dstPath):
+                outlineView.moveItem(at: srcPath.index, inParent: srcPath.parent, to: dstPath.index, inParent: dstPath.parent)
                 // XXX: NSOutlineView doesn't appear to hide/show the disclosure triangle in the case where
                 // the parent's emptiness is changing, so we have to do that manually
                 if let srcParent = srcPath.parent {

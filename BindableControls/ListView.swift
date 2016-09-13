@@ -53,8 +53,8 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     fileprivate lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
         get: { [unowned self] in
             var itemIDs: [E.ID] = []
-            self.outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
-                if let element = self.outlineView.itemAtRow(index) as? E {
+            for index in self.outlineView.selectedRowIndexes {
+                if let element = self.outlineView.item(atRow: index) as? E {
                     itemIDs.append(element.id)
                 }
             }
@@ -175,13 +175,13 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         if let textField = view.textField as? TextField {
             textField.string.unbindAll()
             switch model.cellText(element.data) {
-            case .ReadOnly(let text):
+            case .readOnly(let text):
                 textField.string <~ text
-            case .ReadWrite(let text):
+            case .readWrite(let text):
                 textField.string <~> text
-            case .AsyncReadOnly(let text):
+            case .asyncReadOnly(let text):
                 textField.string <~ text
-            case .AsyncReadWrite(let text):
+            case .asyncReadWrite(let text):
                 textField.string <~> text
             }
         }
@@ -233,19 +233,19 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         // Record changes that were made to the array relative to its previous state
         for change in arrayChanges {
             switch change {
-            case .Initial(_):
+            case .initial(_):
                 outlineView.reloadData()
                 
-            case let .Insert(index):
-                let rows = NSIndexSet(index: index)
-                outlineView.insertItemsAtIndexes(rows, inParent: nil, withAnimation: animation)
+            case let .insert(index):
+                let rows = IndexSet(integer: index)
+                outlineView.insertItems(at: rows, inParent: nil, withAnimation: animation)
                 
-            case let .Delete(index):
-                let rows = NSIndexSet(index: index)
-                outlineView.removeItemsAtIndexes(rows, inParent: nil, withAnimation: animation)
+            case let .delete(index):
+                let rows = IndexSet(integer: index)
+                outlineView.removeItems(at: rows, inParent: nil, withAnimation: animation)
                 
-            case let .Move(srcIndex, dstIndex):
-                outlineView.moveItemAtIndex(srcIndex, inParent: nil, toIndex: dstIndex, inParent: nil)
+            case let .move(srcIndex, dstIndex):
+                outlineView.moveItem(at: srcIndex, inParent: nil, to: dstIndex, inParent: nil)
             }
         }
 

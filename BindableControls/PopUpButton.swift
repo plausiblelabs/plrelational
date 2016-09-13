@@ -38,7 +38,7 @@ open class PopUpButton<T: Equatable>: NSPopUpButton {
                 existingItem.menu?.removeItem(existingItem)
             }
             if let content = defaultItemContent {
-                let model = MenuItem(.Normal(content))
+                let model = MenuItem(.normal(content))
                 let nativeItem = NativeMenuItem(model: model)
                 nativeItem.nsitem.isHidden = true
                 nativeItem.nsitem.isEnabled = false

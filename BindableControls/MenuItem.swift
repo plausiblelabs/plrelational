@@ -35,7 +35,7 @@ public struct MenuItem<T> {
 }
 
 public func titledMenuItem(_ title: ReadableProperty<String>, object: String = "Default") -> MenuItem<String> {
-    return MenuItem(.Normal(MenuItemContent(object: object, title: title, image: nil)))
+    return MenuItem(.normal(MenuItemContent(object: object, title: title, image: nil)))
 }
 
 public func titledMenuItem(_ title: String) -> MenuItem<String> {

@@ -26,7 +26,7 @@ open class ColorPickerView: NSView {
         colorPopup.items <~ constantValueProperty(model.popupItems)
         colorPopup.selectedObject <~> model.colorItem
         colorPopup.defaultItemContent = MenuItemContent(
-            object: ColorItem.Default,
+            object: ColorItem.default,
             title: model.color.map{ $0.whenMulti("Multiple", otherwise: "Default") },
             image: model.color.map{ $0.whenMulti(multipleColorSwatchImage(), otherwise: unsetColorSwatchImage()) }
         )
@@ -122,7 +122,7 @@ private class ColorPickerModel {
     
     init(defaultColor: Color) {
         self.defaultColor = defaultColor
-        self.color = mutableValueProperty(.One(defaultColor))
+        self.color = mutableValueProperty(.one(defaultColor))
 
         // Initialize the internal properties
         // XXX: We use `valueChanging: { true }` so that binding observers are notified even
@@ -131,7 +131,7 @@ private class ColorPickerModel {
         let colorItem: MutableValueProperty<ColorItem?> = mutableValueProperty(nil, valueChanging: { _ in true })
         let customColor: ReadableProperty<Color?> = colorItem.map{
             switch $0 {
-            case .some(.Custom(let color)):
+            case .some(.custom(let color)):
                 return color
             default:
                 return nil
@@ -155,28 +155,28 @@ private class ColorPickerModel {
                 title: constantValueProperty(name),
                 image: constantValueProperty(colorSwatchImage(color))
             )
-            let menuItem = MenuItem(.Normal(content))
+            let menuItem = MenuItem(.normal(content))
             popupItems.append(menuItem)
             presets.append(color)
         }
         
         func addCustom() {
             // The "Custom" item and the separator above it are only visible when a custom color is defined
-            popupItems.append(MenuItem(.Separator, visible: colorIsCustom))
+            popupItems.append(MenuItem(.separator, visible: colorIsCustom))
             let content = MenuItemContent(
                 // TODO: Perhaps `object` should be a ReadableProperty so that it can change if needed
-                object: ColorItem.Custom(defaultColor),
+                object: ColorItem.custom(defaultColor),
                 title: constantValueProperty("Custom"),
                 image: customColor.map{ colorSwatchImage($0 ?? defaultColor) }
             )
-            popupItems.append(MenuItem(.Momentary(content, action: {}), visible: colorIsCustom))
+            popupItems.append(MenuItem(.momentary(content, action: {}), visible: colorIsCustom))
         }
         
         func addOther() {
             // The "Other" item and the separator above it are always visible
-            popupItems.append(MenuItem(.Separator))
-            let content = MenuItemContent(object: ColorItem.Other, title: constantValueProperty("Other…"))
-            popupItems.append(MenuItem(.Momentary(content, action: { panelVisible.change(true, transient: true) })))
+            popupItems.append(MenuItem(.separator))
+            let content = MenuItemContent(object: ColorItem.other, title: constantValueProperty("Other…"))
+            popupItems.append(MenuItem(.momentary(content, action: { panelVisible.change(true, transient: true) })))
         }
         
         addPreset("Black", Color.black)
@@ -201,27 +201,27 @@ private class ColorPickerModel {
             self.colorItem,
             forward: { [weak self] value in
                 // CommonValue<Color> -> ColorItem
-                guard let weakSelf = self else { return .NoChange }
+                guard let weakSelf = self else { return .noChange }
                 
                 let newColorItem: ColorItem
                 if let color = value.orNil() {
                     if weakSelf.presetColors.contains(color) {
-                        newColorItem = ColorItem.Preset(color)
+                        newColorItem = ColorItem.preset(color)
                     } else {
-                        newColorItem = ColorItem.Custom(color)
+                        newColorItem = ColorItem.custom(color)
                     }
                 } else {
-                    newColorItem = ColorItem.Default
+                    newColorItem = ColorItem.default
                 }
                 
-                return .Change(newColorItem)
+                return .change(newColorItem)
             },
             reverse: { value in
                 // ColorItem -> CommonValue<Color>
                 if let newColor = value?.color {
-                    return .Change(CommonValue.One(newColor))
+                    return .change(CommonValue.one(newColor))
                 } else {
-                    return .NoChange
+                    return .noChange
                 }
             }
         )
@@ -231,16 +231,16 @@ private class ColorPickerModel {
             self.opacityValue,
             forward: { value in
                 // CommonValue<Color> -> Double?
-                .Change(value.orNil()?.components.a)
+                .change(value.orNil()?.components.a)
             },
             reverse: { [weak self] value in
                 // Double? -> CommonValue<Color>
-                guard let weakSelf = self else { return .NoChange }
-                guard let newOpacity = value else { return .NoChange }
+                guard let weakSelf = self else { return .noChange }
+                guard let newOpacity = value else { return .noChange }
                 
                 let currentColor: Color = weakSelf.color.value.orDefault(weakSelf.defaultColor)
                 let newColor = currentColor.withAlpha(newOpacity)
-                return .Change(CommonValue.One(newColor))
+                return .change(CommonValue.one(newColor))
             }
         )
         
@@ -250,14 +250,14 @@ private class ColorPickerModel {
             forward: { value in
                 // CommonValue<Color> -> Color
                 if let color = value.orNil() {
-                    return .Change(color)
+                    return .change(color)
                 } else {
-                    return .NoChange
+                    return .noChange
                 }
             },
             reverse: { value in
                 // Color -> CommonValue<Color>
-                .Change(CommonValue.One(value))
+                .change(CommonValue.one(value))
             }
         )
     }
@@ -331,7 +331,7 @@ private class OpacityFormatter: NumberFormatter {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func getObjectValue(_ obj: AutoreleasingUnsafeMutablePointer<AutoreleasingUnsafeMutablePointer<AnyObject?>>?, for string: String, errorDescription error: AutoreleasingUnsafeMutablePointer<AutoreleasingUnsafeMutablePointer<NSString?>>?) -> Bool {
+    override func getObjectValue(_ obj: AutoreleasingUnsafeMutablePointer<AnyObject?>?, for string: String, errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>?) -> Bool {
         // Include the '%' suffix if it wasn't already there, just to make the formatter happy;
         // this allows the user to go away from the combo box even if the user left off the '%' or
         // left the box empty
@@ -345,7 +345,7 @@ private class OpacityFormatter: NumberFormatter {
         return super.getObjectValue(obj, for: s, errorDescription: error)
     }
     
-    override func isPartialStringValid(_ partialString: String, newEditingString newString: AutoreleasingUnsafeMutablePointer<AutoreleasingUnsafeMutablePointer<NSString?>>?, errorDescription error: AutoreleasingUnsafeMutablePointer<AutoreleasingUnsafeMutablePointer<NSString?>>?) -> Bool {
+    override func isPartialStringValid(_ partialString: String, newEditingString newString: AutoreleasingUnsafeMutablePointer<NSString?>?, errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>?) -> Bool {
         var s = partialString
         
         if s.isEmpty {
