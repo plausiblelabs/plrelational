@@ -242,15 +242,15 @@ extension Relation {
         if let row = rows.next()?.ok {
             if rows.next() == nil {
                 if let value = transform(row[attr]) {
-                    return .One(value)
+                    return .one(value)
                 } else {
-                    return .None
+                    return .none
                 }
             } else {
-                return .Multi
+                return .multi
             }
         } else {
-            return .None
+            return .none
         }
     }
 }

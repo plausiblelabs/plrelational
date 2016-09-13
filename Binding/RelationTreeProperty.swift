@@ -83,9 +83,9 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         let parts = relationChanges.parts(self.idAttr)
         
         var treeChanges: [Change] = []
-        treeChanges.appendContentsOf(self.onInsert(parts.addedRows))
-        treeChanges.appendContentsOf(self.onUpdate(parts.updatedRows))
-        treeChanges.appendContentsOf(self.onDelete(parts.deletedIDs))
+        treeChanges.append(contentsOf: self.onInsert(parts.addedRows))
+        treeChanges.append(contentsOf: self.onUpdate(parts.updatedRows))
+        treeChanges.append(contentsOf: self.onDelete(parts.deletedIDs))
         
         if treeChanges.count > 0 {
             self.notifyChangeObservers(treeChanges)
@@ -147,7 +147,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
                 if let parent = nodeForID(parentID) {
                     // Attach the node to the existing parent node
                     let index = insertNode(node, parent: parent)
-                    changes.append(.Insert(Path(parent: parent, index: index)))
+                    changes.append(.insert(Path(parent: parent, index: index)))
                 } else {
                     // The parent does not exist; doom
                     fatalError("Parent does not already exist in tree structure")
@@ -155,7 +155,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
             } else {
                 // The node will be attached to the root node
                 let index = insertNode(node, parent: root)
-                changes.append(.Insert(Path(parent: nil, index: index)))
+                changes.append(.insert(Path(parent: nil, index: index)))
             }
         }
         
@@ -226,7 +226,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
             }
             
             let path = TreePath(parent: parent, index: index)
-            return .Delete(path)
+            return .delete(path)
         }
     }
 
@@ -277,7 +277,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
     fileprivate func onUpdate(_ row: Row) -> Change? {
         let newParentID = row[parentAttr]
         let newOrder = row[orderAttr]
-        if newParentID == .NotFound || newOrder == .NotFound {
+        if newParentID == .notFound || newOrder == .notFound {
             // TODO: We should be able to perform the move if only one of parent/order were updated
             return nil
         }
@@ -300,8 +300,8 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         let dstParent = optDstParent ?? root
 
         // Remove the node from its current parent
-        let srcIndex = srcParent.children.indexOf({ $0 === node })!
-        srcParent.children.removeAtIndex(srcIndex)
+        let srcIndex = srcParent.children.index(where: { $0 === node })!
+        srcParent.children.remove(at: srcIndex)
         
         // Update the values in the node's row
         node.data[parentAttr] = dstParentID
@@ -313,7 +313,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         // Prepare changes
         let newSrcPath = TreePath(parent: optSrcParent, index: srcIndex)
         let newDstPath = TreePath(parent: optDstParent, index: dstIndex)
-        return .Move(src: newSrcPath, dst: newDstPath)
+        return .move(src: newSrcPath, dst: newDstPath)
     }
 
     fileprivate func adjacentNodesForIndex(_ index: Int, inParent parent: Node, notMatching node: Node) -> (Node?, Node?) {

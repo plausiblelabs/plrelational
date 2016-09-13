@@ -14,13 +14,13 @@ public protocol Plistable {
 extension RelationValue: Plistable {
     public func toPlist() -> AnyObject {
         switch self {
-        case let Integer(value):
-            return ["type": "integer", "value": value.description]
-        case let Text(value):
-            return ["type": "text", "value": value]
+        case let .integer(value):
+            return ["type": "integer", "value": value.description] as NSDictionary
+        case let .text(value):
+            return ["type": "text", "value": value] as NSDictionary
         default:
             // TODO: Support other types
-            return [:]
+            return [:] as NSDictionary
         }
     }
     
