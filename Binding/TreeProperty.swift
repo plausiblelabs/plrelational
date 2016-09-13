@@ -71,7 +71,7 @@ public class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
     public typealias Pos = TreePos<N>
     public typealias Change = TreeChange<N>
     
-    internal var root: Node
+    public var root: Node
     
     public var value: Node? {
         return root
@@ -96,8 +96,9 @@ public class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
     
     public func insert(data: N.Data, pos: Pos) {
     }
-    
-    public func computeOrderForInsert(inout data: N.Data, pos: Pos) {
+
+    public func computeOrderForInsert(after previous: N.ID?, inParent parent: N.ID?) -> Double {
+        return 0.0
     }
     
     public func delete(id: N.ID) {

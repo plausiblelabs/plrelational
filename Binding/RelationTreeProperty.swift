@@ -92,18 +92,46 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         guard let relation = relation as? TransactionalDatabase.TransactionalRelation else {
             fatalError("insert() is only supported when the underlying relation is mutable")
         }
-        
+
+        let parentIDValue = pos.parentID ?? .NULL
+        let order = orderForPos(pos)
+
         var mutableRow = row
-        computeOrderForInsert(&mutableRow, pos: pos)
+        mutableRow[parentAttr] = parentIDValue
+        mutableRow[orderAttr] = RelationValue(order)
         relation.asyncAdd(mutableRow)
     }
     
-    override func computeOrderForInsert(inout row: Row, pos: Pos) {
-        let parentIDValue = pos.parentID ?? .NULL
-        let order: RelationValue = orderForPos(pos)
+    override func computeOrderForInsert(after previous: RelationValue?, inParent parent: RelationValue?) -> Double {
+        let parentNode: Node
+        if let parentID = parent {
+            // TODO: Error?
+            parentNode = nodeForID(parentID)!
+        } else {
+            parentNode = root
+        }
         
-        row[parentAttr] = parentIDValue
-        row[orderAttr] = order
+        let previousNode: Node?
+        let nextNode: Node?
+        if let previousID = previous {
+            if let indexOfPrevious = parentNode.children.indexOf({$0.id == previousID}) {
+                previousNode = parentNode.children[indexOfPrevious]
+                let indexOfNext = indexOfPrevious + 1
+                if indexOfNext < parentNode.children.count {
+                    nextNode = parentNode.children[indexOfNext]
+                } else {
+                    nextNode = nil
+                }
+            } else {
+                previousNode = nil
+                nextNode = nil
+            }
+        } else {
+            previousNode = nil
+            nextNode = nil
+        }
+
+        return orderWithinParent(parentNode, previous: previousNode, next: nextNode)
     }
 
     private func onInsert(rows: [Row], inout root: Node, inout changes: [Change]) {
@@ -155,7 +183,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
     }
     
     override func delete(id: RelationValue) {
-        guard var relation = relation as? MutableRelation else {
+        guard let relation = relation as? TransactionalDatabase.TransactionalRelation else {
             fatalError("delete() is only supported when the underlying relation is mutable")
         }
 
@@ -165,7 +193,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         let node = nodeForID(id)
         
         // Delete from the relation
-        relation.delete(idAttr *== id)
+        relation.asyncDelete(idAttr *== id)
         
         // Recursively delete descendant nodes
         // TODO: There are probably more efficient ways to handle this (need some sort of
@@ -182,6 +210,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         // Observers should only be notified about the top-most nodes that were deleted.
         // We handle this by looking at the identifiers of the rows/nodes to be deleted,
         // and only deleting the unique (top-most) parents.
+        // TODO: This is currently broken!
         var changes: [Change] = []
         for id in ids {
             if let node = self.nodeForID(id) {
@@ -248,10 +277,9 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         let (previous, next) = adjacentNodesForIndex(dstIndex, inParent: dstParent, notMatching: srcNode)
         let newOrder = orderWithinParent(dstParent, previous: previous, next: next)
         
-        var mutableRelation = relation
-        mutableRelation.update(idAttr *== srcID, newValues: [
+        relation.asyncUpdate(idAttr *== srcID, newValues: [
             parentAttr: dstParentID,
-            orderAttr: newOrder
+            orderAttr: RelationValue(newOrder)
         ])
     }
 
@@ -327,7 +355,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         return (lo, hi)
     }
     
-    private func orderWithinParent(parent: Node, previous: Node?, next: Node?) -> RelationValue {
+    private func orderWithinParent(parent: Node, previous: Node?, next: Node?) -> Double {
         let prev: Node?
         if previous == nil && next == nil {
             // Add after the last child
@@ -344,10 +372,10 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
 
         let lo: Double = prev.map(orderForNode) ?? 1.0
         let hi: Double = next.map(orderForNode) ?? 9.0
-        return RelationValue(lo + ((hi - lo) / 2.0))
+        return lo + ((hi - lo) / 2.0)
     }
     
-    private func orderForPos(pos: Pos) -> RelationValue {
+    private func orderForPos(pos: Pos) -> Double {
         let parent: Node
         if let parentID = pos.parentID {
             parent = nodeForID(parentID)!
