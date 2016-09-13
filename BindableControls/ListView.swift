@@ -94,7 +94,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
             valueDidChange: {}
         ))
         if let selectionProp = model.selection {
-            selection <~> selectionProp
+            _ = selection <~> selectionProp
         }
         
         outlineView.delegate = self
@@ -176,19 +176,19 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
             textField.string.unbindAll()
             switch model.cellText(element.data) {
             case .readOnly(let text):
-                textField.string <~ text
+                _ = textField.string <~ text
             case .readWrite(let text):
-                textField.string <~> text
+                _ = textField.string <~> text
             case .asyncReadOnly(let text):
-                textField.string <~ text
+                _ = textField.string <~ text
             case .asyncReadWrite(let text):
-                textField.string <~> text
+                _ = textField.string <~> text
             }
         }
         if let imageView = view.imageView as? ImageView {
             imageView.img.unbindAll()
             if let image = model.cellImage?(element.data) {
-                imageView.img <~ image
+                _ = imageView.img <~ image
             }
         }
         return view

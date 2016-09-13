@@ -23,8 +23,8 @@ open class ColorPickerView: NSView {
         
         // Configure color popup button
         colorPopup = PopUpButton(frame: NSZeroRect, pullsDown: false)
-        colorPopup.items <~ constantValueProperty(model.popupItems)
-        colorPopup.selectedObject <~> model.colorItem
+        _ = colorPopup.items <~ constantValueProperty(model.popupItems)
+        _ = colorPopup.selectedObject <~> model.colorItem
         colorPopup.defaultItemContent = MenuItemContent(
             object: ColorItem.default,
             title: model.color.map{ $0.whenMulti("Multiple", otherwise: "Default") },
@@ -35,13 +35,13 @@ open class ColorPickerView: NSView {
         let opacityValues: [CGFloat] = stride(from: 0, through: 100, by: 10).map{ CGFloat($0) / 100.0 }
         opacityCombo = ComboBox(frame: NSZeroRect)
         opacityCombo.formatter = OpacityFormatter()
-        opacityCombo.items <~ constantValueProperty(opacityValues)
-        opacityCombo.value <~> model.opacityValue
+        _ = opacityCombo.items <~ constantValueProperty(opacityValues)
+        _ = opacityCombo.value <~> model.opacityValue
         
         // Configure color panel
         colorPanel = ColorPanel()
-        colorPanel.color <~> model.panelColor
-        colorPanel.visible <~> model.panelVisible
+        _ = colorPanel.color <~> model.panelColor
+        _ = colorPanel.visible <~> model.panelVisible
         
         super.init(frame: NSZeroRect)
         
@@ -197,7 +197,7 @@ private class ColorPickerModel {
         // Prepare the internal property connections
         
         // color <-> colorItem
-        self.color.connectBidi(
+        _ = self.color.connectBidi(
             self.colorItem,
             forward: { [weak self] value in
                 // CommonValue<Color> -> ColorItem
@@ -227,7 +227,7 @@ private class ColorPickerModel {
         )
         
         // color <-> opacityValue
-        self.color.connectBidi(
+        _ = self.color.connectBidi(
             self.opacityValue,
             forward: { value in
                 // CommonValue<Color> -> Double?
@@ -245,7 +245,7 @@ private class ColorPickerModel {
         )
         
         // color <-> panelColor
-        self.color.connectBidi(
+        _ = self.color.connectBidi(
             self.panelColor,
             forward: { value in
                 // CommonValue<Color> -> Color

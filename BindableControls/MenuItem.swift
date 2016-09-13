@@ -84,17 +84,17 @@ class NativeMenuItem<T> {
         }
         
         if let v = model.visible {
-            visible <~ v
+            _ = visible <~ v
         }
         
         if let content = content {
             // TODO: Avoid cycle here
             nsitem.representedObject = self
             if let t = content.title {
-                title <~ t
+                _ = title <~ t
             }
             if let i = content.image {
-                image <~ i
+                _ = image <~ i
             }
         }
     }

@@ -28,7 +28,7 @@ open class TextField: NSTextField, NSTextFieldDelegate {
     
     fileprivate lazy var _string: ExternalValueProperty<String> = ExternalValueProperty(
         get: { [unowned self] in
-            self.stringValue ?? ""
+            self.stringValue
         },
         set: { [unowned self] value, _ in
             self.stringValue = value

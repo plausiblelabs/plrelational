@@ -77,7 +77,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
             valueChanging: { [weak self] changes, _ in self?.treeChanged(changes) },
             valueDidChange: {}
         ))
-        selection <~> model.selection
+        _ = selection <~> model.selection
         
         outlineView.delegate = self
         outlineView.dataSource = self
@@ -203,19 +203,19 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
             textField.string.unbindAll()
             switch model.cellText(node.data) {
             case .readOnly(let text):
-                textField.string <~ text
+                _ = textField.string <~ text
             case .readWrite(let text):
-                textField.string <~> text
+                _ = textField.string <~> text
             case .asyncReadOnly(let text):
-                textField.string <~ text
+                _ = textField.string <~ text
             case .asyncReadWrite(let text):
-                textField.string <~> text
+                _ = textField.string <~> text
             }
         }
         if let imageView = view.imageView as? ImageView {
             imageView.img.unbindAll()
             if let image = model.cellImage?(node.data) {
-                imageView.img <~ image
+                _ = imageView.img <~ image
             }
         }
         return view
