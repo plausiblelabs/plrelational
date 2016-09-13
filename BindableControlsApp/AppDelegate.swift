@@ -14,7 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @IBOutlet weak var window: NSWindow!
     @IBOutlet var rootView: BackgroundView!
     @IBOutlet var outlineView: ExtOutlineView!
-    @IBOutlet var textField: TextField!
+    var textField: TextField!
     var checkbox: Checkbox!
     var popupButton: PopUpButton<String>!
     var stepper: StepperView!
@@ -141,6 +141,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         listView.animateChanges = true
 
         // Add some other controls (could also do this in the xib)
+        textField = TextField(frame: NSMakeRect(200, 30, 200, 24))
+        textField.setAccessibilityIdentifier("NameField")
+        rootView.addSubview(textField)
+        
         checkbox = Checkbox(frame: NSMakeRect(200, 80, 120, 24))
         checkbox.title = "Editable"
         rootView.addSubview(checkbox)

@@ -93,129 +93,129 @@ class BindableControlsAppUITests: XCTestCase {
         verifyText(wilma, "Barney")
     }
 
-    func testCheckbox() {
-        let window = XCUIApplication().windows["BindableControlsApp"]
-        let checkbox = window.checkBoxes["Editable"]
-        
-        // Tree View
-        let fred = window.outlines.children(matching: .outlineRow).element(boundBy: 0).textFields["PageName"]
-        let wilma = window.outlines.children(matching: .outlineRow).element(boundBy: 1).textFields["PageName"]
-        
-        func verifyCheckbox(_ expected: String) {
-            XCTAssertEqual(checkbox.value as? String, expected)
-        }
-        
-        func clickCheckbox() {
-            checkbox.click()
-        }
-        
-        // Verify fred's initial state
-        fred.click()
-        verifyCheckbox("Off")
-        
-        // Toggle checkbox on and off
-        clickCheckbox()
-        verifyCheckbox("On")
-        clickCheckbox()
-        verifyCheckbox("Off")
-        
-        // Verify wilma's initial state
-        wilma.click()
-        verifyCheckbox("On")
-        
-        // Shift-select both fred and wilma; verify mixed state
-        XCUIElement.perform(withKeyModifiers: .shift) {
-            fred.click()
-        }
-        verifyCheckbox("Mixed")
-        
-        // Toggle the mixed-state checkbox
-        clickCheckbox()
-        
-        // Verify both fred and wilma register the new state
-        fred.click()
-        verifyCheckbox("On")
-        wilma.click()
-        verifyCheckbox("On")
-    }
-    
-    func testPopUpButton() {
-        let window = XCUIApplication().windows["BindableControlsApp"]
-        let fred = window.outlines.children(matching: .outlineRow).element(boundBy: 0).textFields["PageName"]
-        let wilma = window.outlines.children(matching: .outlineRow).element(boundBy: 1).textFields["PageName"]
-        let popup = window.popUpButtons["Day"]
-        
-        func verifyItem(_ expected: String) {
-            XCTAssertEqual(popup.value as? String, expected)
-        }
-
-        // Select Fred in outline view
-        fred.click()
-        
-        // Verify that popup button is initially set to "Default"
-        verifyItem("Default")
-        
-        // Click on popup button and select "Saturday"; verify new Fred state
-        popup.click()
-        window.menuItems["Saturday"].click()
-        verifyItem("Saturday")
-        
-        // Select Wilma in outline view
-        wilma.click()
-        
-        // Verify that popup button is set to "Friday"
-        verifyItem("Friday")
-
-        // Click on popup button and select "Saturday"; verify new Wilma state
-        popup.click()
-        window.menuItems["Saturday"].click()
-        verifyItem("Saturday")
-
-        // Select both Fred and Wilma in outline view
-        XCUIElement.perform(withKeyModifiers: .shift) {
-            fred.click()
-        }
-        
-        // Verify that popup button is set to "Saturday"
-        verifyItem("Saturday")
-        
-        // Click on popup button and select "Tuesday"; verify new state for both Fred and Wilma
-        popup.click()
-        window.menuItems["Tuesday"].click()
-        verifyItem("Tuesday")
-        
-        // Deselect Wilma in outline view
-        XCUIElement.perform(withKeyModifiers: .command) {
-            wilma.click()
-        }
-        
-        // Verify that popup button is still set to "Tuesday" for Fred
-        verifyItem("Tuesday")
-        
-        // Click on popup button and select "Sunday"; verify new state for Fred
-        popup.click()
-        window.menuItems["Sunday"].click()
-        verifyItem("Sunday")
-        
-        // Select Wilma in outline view
-        wilma.click()
-        
-        // Verify that popup button is still set to "Tuesday" for Wilma
-        verifyItem("Tuesday")
-        
-        // Select both Fred and Wilma in outline view
-        XCUIElement.perform(withKeyModifiers: .shift) {
-            fred.click()
-        }
-        
-        // Verify that popup button shows "Multiple" placeholder
-        verifyItem("Multiple")
-        
-        // Click on popup button and select "Monday"; verify new state for both Fred and Wilma
-        popup.click()
-        window.menuItems["Monday"].click()
-        verifyItem("Monday")
-    }
+//    func testCheckbox() {
+//        let window = XCUIApplication().windows["BindableControlsApp"]
+//        let checkbox = window.checkBoxes["Editable"]
+//        
+//        // Tree View
+//        let fred = window.outlines.children(matching: .outlineRow).element(boundBy: 0).textFields["PageName"]
+//        let wilma = window.outlines.children(matching: .outlineRow).element(boundBy: 1).textFields["PageName"]
+//        
+//        func verifyCheckbox(_ expected: String) {
+//            XCTAssertEqual(checkbox.value as? String, expected)
+//        }
+//        
+//        func clickCheckbox() {
+//            checkbox.click()
+//        }
+//        
+//        // Verify fred's initial state
+//        fred.click()
+//        verifyCheckbox("Off")
+//        
+//        // Toggle checkbox on and off
+//        clickCheckbox()
+//        verifyCheckbox("On")
+//        clickCheckbox()
+//        verifyCheckbox("Off")
+//        
+//        // Verify wilma's initial state
+//        wilma.click()
+//        verifyCheckbox("On")
+//        
+//        // Shift-select both fred and wilma; verify mixed state
+//        XCUIElement.perform(withKeyModifiers: .shift) {
+//            fred.click()
+//        }
+//        verifyCheckbox("Mixed")
+//        
+//        // Toggle the mixed-state checkbox
+//        clickCheckbox()
+//        
+//        // Verify both fred and wilma register the new state
+//        fred.click()
+//        verifyCheckbox("On")
+//        wilma.click()
+//        verifyCheckbox("On")
+//    }
+//    
+//    func testPopUpButton() {
+//        let window = XCUIApplication().windows["BindableControlsApp"]
+//        let fred = window.outlines.children(matching: .outlineRow).element(boundBy: 0).textFields["PageName"]
+//        let wilma = window.outlines.children(matching: .outlineRow).element(boundBy: 1).textFields["PageName"]
+//        let popup = window.popUpButtons["Day"]
+//        
+//        func verifyItem(_ expected: String) {
+//            XCTAssertEqual(popup.value as? String, expected)
+//        }
+//
+//        // Select Fred in outline view
+//        fred.click()
+//        
+//        // Verify that popup button is initially set to "Default"
+//        verifyItem("Default")
+//        
+//        // Click on popup button and select "Saturday"; verify new Fred state
+//        popup.click()
+//        window.menuItems["Saturday"].click()
+//        verifyItem("Saturday")
+//        
+//        // Select Wilma in outline view
+//        wilma.click()
+//        
+//        // Verify that popup button is set to "Friday"
+//        verifyItem("Friday")
+//
+//        // Click on popup button and select "Saturday"; verify new Wilma state
+//        popup.click()
+//        window.menuItems["Saturday"].click()
+//        verifyItem("Saturday")
+//
+//        // Select both Fred and Wilma in outline view
+//        XCUIElement.perform(withKeyModifiers: .shift) {
+//            fred.click()
+//        }
+//        
+//        // Verify that popup button is set to "Saturday"
+//        verifyItem("Saturday")
+//        
+//        // Click on popup button and select "Tuesday"; verify new state for both Fred and Wilma
+//        popup.click()
+//        window.menuItems["Tuesday"].click()
+//        verifyItem("Tuesday")
+//        
+//        // Deselect Wilma in outline view
+//        XCUIElement.perform(withKeyModifiers: .command) {
+//            wilma.click()
+//        }
+//        
+//        // Verify that popup button is still set to "Tuesday" for Fred
+//        verifyItem("Tuesday")
+//        
+//        // Click on popup button and select "Sunday"; verify new state for Fred
+//        popup.click()
+//        window.menuItems["Sunday"].click()
+//        verifyItem("Sunday")
+//        
+//        // Select Wilma in outline view
+//        wilma.click()
+//        
+//        // Verify that popup button is still set to "Tuesday" for Wilma
+//        verifyItem("Tuesday")
+//        
+//        // Select both Fred and Wilma in outline view
+//        XCUIElement.perform(withKeyModifiers: .shift) {
+//            fred.click()
+//        }
+//        
+//        // Verify that popup button shows "Multiple" placeholder
+//        verifyItem("Multiple")
+//        
+//        // Click on popup button and select "Monday"; verify new state for both Fred and Wilma
+//        popup.click()
+//        window.menuItems["Monday"].click()
+//        verifyItem("Monday")
+//    }
     
 //    func testStepper() {
 //        // TODO
