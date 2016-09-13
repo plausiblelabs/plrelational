@@ -24,21 +24,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var nsUndoManager: SPUndoManager!
     var listView: ListView<RowArrayElement>!
 
-    func applicationDidFinishLaunching(aNotification: NSNotification) {
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
         // By default, NSColor is set to "ignore alpha" which means that color wells
         // strip alpha, dragged-and-dropped colors lose alpha, and other assorted
         // whatever. We turn this off here, because we actually want our color wells
         // and such to work with alpha values. It's a global setting because Apple,
         // so we set it once here at app startup.
-        NSColor.setIgnoresAlpha(false)
+        NSColor.ignoresAlpha = false
         
         window.delegate = self
 
         func makeDB() -> (path: String, db: SQLiteDatabase) {
             let tmp = NSTemporaryDirectory() as NSString
-            let dbname = "testing-\(NSUUID()).db"
-            let path = tmp.stringByAppendingPathComponent(dbname)
-            _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
+            let dbname = "testing-\(UUID()).db"
+            let path = tmp.appendingPathComponent(dbname)
+            _ = try? FileManager.default.removeItem(atPath: path)
             
             let db = try! SQLiteDatabase(path)
             
@@ -48,7 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Prepare the stored relations
         let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
-        func createRelation(name: String, _ scheme: Scheme) -> TransactionalDatabase.TransactionalRelation {
+        func createRelation(_ name: String, _ scheme: Scheme) -> TransactionalDatabase.TransactionalRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
             return db[name]
@@ -71,33 +71,33 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Add some test objects
         var id: Int64 = 1
         var order: Double = 1.0
-        func addObject(name: String, editable: Bool, day: String?, color: Color?, rocks: Int64) {
+        func addObject(_ name: String, editable: Bool, day: String?, color: Color?, rocks: Int64) {
             let dayValue: RelationValue
             if let day = day {
                 dayValue = RelationValue(day)
             } else {
-                dayValue = .NULL
+                dayValue = .null
             }
             
             let colorValue: RelationValue
             if let color = color {
                 colorValue = RelationValue(color.stringValue)
             } else {
-                colorValue = .NULL
+                colorValue = .null
             }
             
             let row: Row = [
                 "id": RelationValue(id),
                 "name": RelationValue(name),
                 "editable": RelationValue(Int64(editable ? 1 : 0)),
-                "best_friend": .NULL,
+                "best_friend": .null,
                 "fav_day": dayValue,
                 "fav_color": colorValue,
                 "rocks": RelationValue(rocks),
-                "parent": .NULL,
+                "parent": .null,
                 "order": RelationValue(order)
             ]
-            objects.add(row)
+            _  = objects.add(row)
             
             id += 1
             order += 1.0
@@ -105,7 +105,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         addObject("Fred", editable: false, day: nil, color: nil, rocks: 17)
         addObject("Wilma", editable: true, day: "Friday", color: Color.blue, rocks: 42)
 
-        func nameProperty(relation: Relation) -> AsyncReadWriteProperty<String> {
+        func nameProperty(_ relation: Relation) -> AsyncReadWriteProperty<String> {
             return undoableDB.asyncBidiProperty(
                 relation,
                 action: "Rename Person",
@@ -114,7 +114,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             )
         }
         
-        func listSelectionProperty(relation: TransactionalDatabase.TransactionalRelation) -> AsyncReadWriteProperty<Set<RelationValue>> {
+        func listSelectionProperty(_ relation: TransactionalDatabase.TransactionalRelation) -> AsyncReadWriteProperty<Set<RelationValue>> {
             return undoableDB.asyncBidiProperty(
                 relation,
                 action: "Change Selection",
@@ -133,7 +133,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             cellText: { row in
                 let rowID = row["id"]
                 let nameRelation = objects.select(Attribute("id") *== rowID).project(["name"])
-                return .AsyncReadWrite(nameProperty(nameRelation))
+                return .asyncReadWrite(nameProperty(nameRelation))
             },
             cellImage: nil
         )
@@ -160,8 +160,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         rootView.addSubview(colorPicker)
             
         // Set up the bindings between controls and view model
-        textField.string <~> nameProperty(selectedObjectsName)
-        textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
+        _ = textField.string <~> nameProperty(selectedObjectsName)
+        _ = textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
 
 //        checkbox.checked <~> undoableDB.bidiProperty(
 //            selectedObjectsEditable,
@@ -217,7 +217,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 //        )
     }
     
-    func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {
+    func windowWillReturnUndoManager(_ window: NSWindow) -> Foundation.UndoManager? {
         return nsUndoManager
     }
 }

@@ -22,21 +22,21 @@ class BindableControlsAppUITests: XCTestCase {
         let window = XCUIApplication().windows["BindableControlsApp"]
         let field = window.textFields["NameField"]
         
-        let fred = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(0).textFields["PageName"]
-        let wilma = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(1).textFields["PageName"]
+        let fred = window.outlines.children(matching: .outlineRow).element(boundBy: 0).textFields["PageName"]
+        let wilma = window.outlines.children(matching: .outlineRow).element(boundBy: 1).textFields["PageName"]
 
-        func verifyText(element: XCUIElement, _ expected: String, file: StaticString = #file, line: UInt = #line) {
+        func verifyText(_ element: XCUIElement, _ expected: String, file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(element.value as? String, expected, file: file, line: line)
         }
         
-        func verifyPlaceholder(element: XCUIElement, _ expected: String, file: StaticString = #file, line: UInt = #line) {
+        func verifyPlaceholder(_ element: XCUIElement, _ expected: String, file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(element.placeholderValue, expected, file: file, line: line)
         }
         
-        func clickText(element: XCUIElement, _ dx: CGFloat, _ dy: CGFloat) {
+        func clickText(_ element: XCUIElement, _ dx: CGFloat, _ dy: CGFloat) {
             let coordinate = element
-                .coordinateWithNormalizedOffset(CGVector(dx: 0, dy: 0))
-                .coordinateWithOffset(CGVector(dx: dx, dy: dy))
+                .coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+                .withOffset(CGVector(dx: dx, dy: dy))
             coordinate.click()
         }
         
@@ -78,7 +78,7 @@ class BindableControlsAppUITests: XCTestCase {
         verifyText(wilma, "Wilmax")
         
         // Shift-select both Fred and Wilma cells; verify the placeholder text
-        XCUIElement.performWithKeyModifiers(.Shift) {
+        XCUIElement.perform(withKeyModifiers: .shift) {
             fred.click()
         }
         verifyText(field, "")
@@ -98,10 +98,10 @@ class BindableControlsAppUITests: XCTestCase {
         let checkbox = window.checkBoxes["Editable"]
         
         // Tree View
-        let fred = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(0).textFields["PageName"]
-        let wilma = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(1).textFields["PageName"]
+        let fred = window.outlines.children(matching: .outlineRow).element(boundBy: 0).textFields["PageName"]
+        let wilma = window.outlines.children(matching: .outlineRow).element(boundBy: 1).textFields["PageName"]
         
-        func verifyCheckbox(expected: String) {
+        func verifyCheckbox(_ expected: String) {
             XCTAssertEqual(checkbox.value as? String, expected)
         }
         
@@ -124,7 +124,7 @@ class BindableControlsAppUITests: XCTestCase {
         verifyCheckbox("On")
         
         // Shift-select both fred and wilma; verify mixed state
-        XCUIElement.performWithKeyModifiers(.Shift) {
+        XCUIElement.perform(withKeyModifiers: .shift) {
             fred.click()
         }
         verifyCheckbox("Mixed")
@@ -141,11 +141,11 @@ class BindableControlsAppUITests: XCTestCase {
     
     func testPopUpButton() {
         let window = XCUIApplication().windows["BindableControlsApp"]
-        let fred = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(0).textFields["PageName"]
-        let wilma = window.outlines.childrenMatchingType(.OutlineRow).elementBoundByIndex(1).textFields["PageName"]
+        let fred = window.outlines.children(matching: .outlineRow).element(boundBy: 0).textFields["PageName"]
+        let wilma = window.outlines.children(matching: .outlineRow).element(boundBy: 1).textFields["PageName"]
         let popup = window.popUpButtons["Day"]
         
-        func verifyItem(expected: String) {
+        func verifyItem(_ expected: String) {
             XCTAssertEqual(popup.value as? String, expected)
         }
 
@@ -172,7 +172,7 @@ class BindableControlsAppUITests: XCTestCase {
         verifyItem("Saturday")
 
         // Select both Fred and Wilma in outline view
-        XCUIElement.performWithKeyModifiers(.Shift) {
+        XCUIElement.perform(withKeyModifiers: .shift) {
             fred.click()
         }
         
@@ -185,7 +185,7 @@ class BindableControlsAppUITests: XCTestCase {
         verifyItem("Tuesday")
         
         // Deselect Wilma in outline view
-        XCUIElement.performWithKeyModifiers(.Command) {
+        XCUIElement.perform(withKeyModifiers: .command) {
             wilma.click()
         }
         
@@ -204,7 +204,7 @@ class BindableControlsAppUITests: XCTestCase {
         verifyItem("Tuesday")
         
         // Select both Fred and Wilma in outline view
-        XCUIElement.performWithKeyModifiers(.Shift) {
+        XCUIElement.perform(withKeyModifiers: .shift) {
             fred.click()
         }
         
