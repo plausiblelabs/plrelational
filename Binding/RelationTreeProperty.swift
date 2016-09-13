@@ -78,7 +78,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
                 // Use order Attribute from underlying Relation to nest child Nodes under parent elements.
                 for node in nodeDict.values {
                     let parentNode = nodeDict[node.data[self.parentAttr]] ?? self.root
-                    parentNode.children.insertSorted(node, {$0.data[self.orderAttr]})
+                    _ = parentNode.children.insertSorted(node, {$0.data[self.orderAttr]})
                 }
 
                 self.notifyObservers(treeChanges: [.initial(self.root)])

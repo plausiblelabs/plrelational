@@ -140,7 +140,7 @@ class RelationTreePropertyTests: BindingTestCase {
             }
         }
         
-        func moveCollection(srcPath srcPath: RelationTreeProperty.Path, dstPath: RelationTreeProperty.Path) {
+        func moveCollection(srcPath: RelationTreeProperty.Path, dstPath: RelationTreeProperty.Path) {
             awaitCompletion{
                 property.move(srcPath: srcPath, dstPath: dstPath)
             }
