@@ -117,8 +117,6 @@
 		37A4A2441D259BB7005CAEA5 /* RelationChangeParts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2431D259BB7005CAEA5 /* RelationChangeParts.swift */; };
 		37A4A2461D259DD4005CAEA5 /* RelationChangePartsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */; };
 		37A4A2481D25C065005CAEA5 /* AsyncState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2471D25C065005CAEA5 /* AsyncState.swift */; };
-		37A4A24B1D25C94A005CAEA5 /* Scheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A24A1D25C94A005CAEA5 /* Scheduler.swift */; };
-		37A4A24D1D25CB13005CAEA5 /* Disposable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A24C1D25CB13005CAEA5 /* Disposable.swift */; };
 		37A4A2501D2EC81E005CAEA5 /* Pi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A24F1D2EC81E005CAEA5 /* Pi.swift */; };
 		37A4A2521D2ECCBF005CAEA5 /* PiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2511D2ECCBF005CAEA5 /* PiTests.swift */; };
 		37A4A25A1D30260F005CAEA5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2591D30260F005CAEA5 /* AppDelegate.swift */; };
@@ -623,8 +621,6 @@
 		37A4A2431D259BB7005CAEA5 /* RelationChangeParts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationChangeParts.swift; path = Binding/RelationChangeParts.swift; sourceTree = "<group>"; };
 		37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationChangePartsTests.swift; path = BindingTests/RelationChangePartsTests.swift; sourceTree = "<group>"; };
 		37A4A2471D25C065005CAEA5 /* AsyncState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncState.swift; path = Binding/AsyncState.swift; sourceTree = "<group>"; };
-		37A4A24A1D25C94A005CAEA5 /* Scheduler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Scheduler.swift; path = Binding/Scheduler.swift; sourceTree = "<group>"; };
-		37A4A24C1D25CB13005CAEA5 /* Disposable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Disposable.swift; path = Binding/Disposable.swift; sourceTree = "<group>"; };
 		37A4A24F1D2EC81E005CAEA5 /* Pi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Pi.swift; path = Binding/Pi.swift; sourceTree = "<group>"; };
 		37A4A2511D2ECCBF005CAEA5 /* PiTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PiTests.swift; path = BindingTests/PiTests.swift; sourceTree = "<group>"; };
 		37A4A2571D30260F005CAEA5 /* AsyncExampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AsyncExampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -991,7 +987,6 @@
 			children = (
 				37A1CEDF1D1469900067870D /* Signal */,
 				37A1CED71D1350C00067870D /* Property */,
-				37A4A2491D25C933005CAEA5 /* Scheduler */,
 				37A4A24E1D2EC809005CAEA5 /* Pi Calculus */,
 				37A4A2811D307435005CAEA5 /* Change Handling */,
 				37A1CEE11D147A970067870D /* Relation Extensions */,
@@ -1172,15 +1167,6 @@
 				37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */,
 			);
 			name = "Relation Extensions";
-			sourceTree = "<group>";
-		};
-		37A4A2491D25C933005CAEA5 /* Scheduler */ = {
-			isa = PBXGroup;
-			children = (
-				37A4A24C1D25CB13005CAEA5 /* Disposable.swift */,
-				37A4A24A1D25C94A005CAEA5 /* Scheduler.swift */,
-			);
-			name = Scheduler;
 			sourceTree = "<group>";
 		};
 		37A4A24E1D2EC809005CAEA5 /* Pi Calculus */ = {
@@ -2175,7 +2161,6 @@
 			files = (
 				37A1CEE71D147BD80067870D /* RelationMutation.swift in Sources */,
 				37A4A2931D357D17005CAEA5 /* AsyncProperty.swift in Sources */,
-				37A4A24D1D25CB13005CAEA5 /* Disposable.swift in Sources */,
 				37A4A2831D307AD1005CAEA5 /* ChangeHandler.swift in Sources */,
 				372707BA1CFE240E00710C80 /* TreeProperty.swift in Sources */,
 				37A4A23E1D1F1677005CAEA5 /* RelationProperty.swift in Sources */,
@@ -2187,7 +2172,6 @@
 				372707BD1CFE24F600710C80 /* ArrayBinarySearch.swift in Sources */,
 				37A1CED91D1354DD0067870D /* Property.swift in Sources */,
 				372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */,
-				37A4A24B1D25C94A005CAEA5 /* Scheduler.swift in Sources */,
 				37A4A2481D25C065005CAEA5 /* AsyncState.swift in Sources */,
 				37A1CEDE1D1469720067870D /* Signal.swift in Sources */,
 				372707BB1CFE240E00710C80 /* RelationTreeProperty.swift in Sources */,
