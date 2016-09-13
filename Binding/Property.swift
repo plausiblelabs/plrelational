@@ -514,11 +514,12 @@ open class ActionProperty: WriteOnlyProperty<()> {
     }
 }
 
-// This syntax is borrowed from ReactiveCocoa.
-infix operator <~ {
-    associativity right
-    precedence 93
+precedencegroup PropertyOperatorPrecedence {
+    associativity: right
 }
+
+// This syntax is borrowed from ReactiveCocoa.
+infix operator <~ : PropertyOperatorPrecedence
 
 public func <~ <T, RHS: ReadablePropertyType>(lhs: BindableProperty<T>, rhs: RHS) -> Binding where RHS.Value == T, RHS.SignalChange == T {
     return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
@@ -531,20 +532,14 @@ public func <~ <T, RHS: AsyncReadablePropertyType>(lhs: BindableProperty<T>, rhs
 
 // TODO: It seems that `~>` is defined somewhere already (not sure where exactly), so to avoid
 // conflicts we use `~~>` here instead
-infix operator ~~> {
-    associativity right
-    precedence 93
-}
+infix operator ~~> : PropertyOperatorPrecedence
 
 public func ~~> (lhs: Signal<()>, rhs: ActionProperty) -> Binding {
     // TODO: We invent an owner here; what if no one else owns the signal?
     return rhs.bind(lhs, initialValue: nil, owner: "" as AnyObject)
 }
 
-infix operator <~> {
-    associativity right
-    precedence 93
-}
+infix operator <~> : PropertyOperatorPrecedence
 
 public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Binding {
     return lhs.bindBidi(rhs)

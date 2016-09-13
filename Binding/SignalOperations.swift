@@ -41,15 +41,9 @@ extension SignalType where Value == Bool {
 }
 
 // TODO: This syntax is same as SelectExpression operators; maybe we should use something different
-infix operator *|| {
-associativity left
-precedence 110
-}
+infix operator *|| : LogicalDisjunctionPrecedence
 
-infix operator *&& {
-associativity left
-precedence 120
-}
+infix operator *&& : LogicalConjunctionPrecedence
 
 public func *||(lhs: Signal<Bool>, rhs: Signal<Bool>) -> Signal<Bool> {
     return lhs.or(rhs)
@@ -59,10 +53,7 @@ public func *&&(lhs: Signal<Bool>, rhs: Signal<Bool>) -> Signal<Bool> {
     return lhs.and(rhs)
 }
 
-infix operator *== {
-associativity none
-precedence 130
-}
+infix operator *== : ComparisonPrecedence
 
 public func *==<S: SignalType>(lhs: S, rhs: S) -> Signal<Bool> where S.Value: Equatable {
     return BinaryOpSignal(lhs, rhs, { $0 == $1 })
