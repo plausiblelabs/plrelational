@@ -27,21 +27,21 @@ public func zip<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(_ lhs: LHS
 }
 
 /// Returns a ReadableProperty whose value is the negation of the boolean value of the given property.
-public func not<P: ReadablePropertyType>(_ property: P) -> ReadableProperty<Bool> where P.Value: Bool {
-    return property.map{ !$0.boolValue }
+public func not<P: ReadablePropertyType>(_ property: P) -> ReadableProperty<Bool> where P.Value == Bool {
+    return property.map{ !$0 }
 }
 
-extension ReadablePropertyType where Value: Bool {
+extension ReadablePropertyType where Value == Bool {
     /// Returns a ReadableProperty whose value resolves to `self.value || other.value`.  The returned
     /// property's value will be recomputed any time the value of either input changes.
     public func or(_ other: Self) -> ReadableProperty<Bool> {
-        return BinaryOpValueProperty(self, other, { $0.boolValue || $1.boolValue }, valueChanging)
+        return BinaryOpValueProperty(self, other, { $0 || $1 }, valueChanging)
     }
     
     /// Returns a ReadableProperty whose value resolves to `self.value && other.value`.  The returned
     /// property's value will be recomputed any time the value of either input changes.
     public func and(_ other: Self) -> ReadableProperty<Bool> {
-        return BinaryOpValueProperty(self, other, { $0.boolValue && $1.boolValue }, valueChanging)
+        return BinaryOpValueProperty(self, other, { $0 && $1 }, valueChanging)
     }
     
     /// Returns a ReadableProperty that invokes the given function whenever this property's
@@ -49,15 +49,15 @@ extension ReadablePropertyType where Value: Bool {
     public func then(_ f: @escaping () -> Void) -> ReadableProperty<()> {
         return MappedValueProperty(
             property: self,
-            transform: { if $0.boolValue { f() } },
+            transform: { if $0 { f() } },
             valueChanging: { _ in false }
         )
     }
 }
 
-extension MutableValueProperty where T: Bool {
+extension MutableValueProperty where T: ExpressibleByBooleanLiteral & Equatable {
     public func toggle(transient: Bool) {
-        let newValue = !value
+        let newValue = value == false // dumb equivalent to !value for the protocol constraints
         self.change(newValue as! T, transient: transient)
     }
 }
@@ -73,11 +73,11 @@ infix operator *&& {
     precedence 120
 }
 
-public func *||<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Bool> where P.Value: Bool {
+public func *||<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Bool> where P.Value == Bool {
     return lhs.or(rhs)
 }
 
-public func *&&<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Bool> where P.Value: Bool {
+public func *&&<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Bool> where P.Value == Bool {
     return lhs.and(rhs)
 }
 
@@ -90,7 +90,7 @@ public func *==<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Boo
     return BinaryOpValueProperty(lhs, rhs, { $0 == $1 }, valueChanging)
 }
 
-extension Sequence where Iterator.Element: ReadablePropertyType, Iterator.Element.Value: Bool {
+extension Sequence where Iterator.Element: ReadablePropertyType, Iterator.Element.Value == Bool {
     /// Returns a ReadableProperty whose value resolves to `true` if *any* of the properties
     /// in this sequence resolve to `true`.
     public func anyTrue() -> ReadableProperty<Bool> {
@@ -162,7 +162,7 @@ private class BinaryOpValueProperty<T>: ReadableProperty<T> {
 private class AnyTrueValueProperty: ReadableProperty<Bool> {
     fileprivate var removals: [ObserverRemoval] = []
     
-    init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value: Bool {
+    init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value == Bool {
         let (signal, notify) = Signal<Bool>.pipe()
 
         func anyTrue() -> Bool {
@@ -197,13 +197,13 @@ private class AnyTrueValueProperty: ReadableProperty<Bool> {
 private class AllTrueValueProperty: ReadableProperty<Bool> {
     fileprivate var removals: [ObserverRemoval] = []
     
-    init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value: Bool {
+    init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value == Bool {
         // TODO: Require at least one element?
         let (signal, notify) = Signal<Bool>.pipe()
 
         func allTrue() -> Bool {
             for property in properties {
-                if !property.value as! (Bool) as! (Bool) as! (Bool) as! (Bool) as! (Bool) as! (Bool) as! (Bool) {
+                if !property.value {
                     return false
                 }
             }
@@ -233,7 +233,7 @@ private class AllTrueValueProperty: ReadableProperty<Bool> {
 private class NoneTrueValueProperty: ReadableProperty<Bool> {
     fileprivate var removals: [ObserverRemoval] = []
     
-    init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value: Bool {
+    init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value == Bool {
         let (signal, notify) = Signal<Bool>.pipe()
 
         func noneTrue() -> Bool {

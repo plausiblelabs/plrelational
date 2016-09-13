@@ -18,25 +18,25 @@ public func zip<LHS: SignalType, RHS: SignalType>(_ lhs: LHS, _ rhs: RHS) -> Sig
 }
 
 /// Returns a Signal whose value is the negation of the given boolean signal.
-public func not<S: SignalType>(_ signal: S) -> Signal<Bool> where S.Value: Bool {
-    return signal.map{ !$0.boolValue }
+public func not(_ signal: Signal<Bool>) -> Signal<Bool> {
+    return signal.map{ !$0 }
 }
 
-extension SignalType where Value: Bool {
+extension SignalType where Value == Bool {
     /// Returns a Signal whose value resolves to the logical OR of this signal and the other input signal.
     public func or(_ other: Self) -> Signal<Bool> {
-        return BinaryOpSignal(self, other, { $0.boolValue || $1.boolValue })
+        return BinaryOpSignal(self, other, { $0 || $1 })
     }
     
     /// Returns a Signal whose value resolves to the logical AND of the values delivered on this signal
     /// and the other input signal.
     public func and(_ other: Self) -> Signal<Bool> {
-        return BinaryOpSignal(self, other, { $0.boolValue && $1.boolValue })
+        return BinaryOpSignal(self, other, { $0 && $1 })
     }
     
     /// Returns a Signal that invokes the given function whenever this signal's value resolves to `true`.
     public func then(_ f: @escaping () -> Void) -> Signal<()> {
-        return self.map{ if $0.boolValue { f() } }
+        return self.map{ if $0 { f() } }
     }
 }
 
@@ -51,11 +51,11 @@ associativity left
 precedence 120
 }
 
-public func *||<S: SignalType>(lhs: S, rhs: S) -> Signal<Bool> where S.Value: Bool {
+public func *||(lhs: Signal<Bool>, rhs: Signal<Bool>) -> Signal<Bool> {
     return lhs.or(rhs)
 }
 
-public func *&&<S: SignalType>(lhs: S, rhs: S) -> Signal<Bool> where S.Value: Bool {
+public func *&&(lhs: Signal<Bool>, rhs: Signal<Bool>) -> Signal<Bool> {
     return lhs.and(rhs)
 }
 
@@ -68,7 +68,7 @@ public func *==<S: SignalType>(lhs: S, rhs: S) -> Signal<Bool> where S.Value: Eq
     return BinaryOpSignal(lhs, rhs, { $0 == $1 })
 }
 
-extension Sequence where Iterator.Element: SignalType, Iterator.Element.Value: Bool {
+extension Sequence where Iterator.Element: SignalType, Iterator.Element.Value == Bool {
     /// Returns a Signal whose value resolves to `true` if *any* of the signals
     /// in this sequence resolve to `true`.
     public func anyTrue() -> Signal<Bool> {
@@ -206,7 +206,7 @@ private class BinaryOpSignal<T>: Signal<T> {
 private class BoolSeqSignal: Signal<Bool> {
     fileprivate var removals: [ObserverRemoval] = []
     
-    init<S: Sequence>(signals: S, _ f: @escaping ([Bool?]) -> Bool?) where S.Iterator.Element: SignalType, S.Iterator.Element.Value: Bool {
+    init<S: Sequence>(signals: S, _ f: @escaping ([Bool?]) -> Bool?) where S.Iterator.Element: SignalType, S.Iterator.Element.Value == Bool {
         var count = 0
         signals.forEach({ _ in count += 1 })
         var values = [Bool?](repeating: nil, count: count)
@@ -222,7 +222,7 @@ private class BoolSeqSignal: Signal<Bool> {
                     self?.notifyWillChange()
                 },
                 valueChanging: { [weak self] newValue, metadata in
-                    values[index] = newValue.boolValue
+                    values[index] = newValue
                     if let boolValue = f(values) {
                         self?.notifyChanging(boolValue, metadata: metadata)
                     }
