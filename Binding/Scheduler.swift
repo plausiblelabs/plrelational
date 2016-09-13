@@ -24,7 +24,7 @@ public protocol Scheduler {
 public final class ImmediateScheduler: Scheduler {
     public init() {}
     
-    public func schedule(_ action: () -> Void) -> Disposable? {
+    public func schedule(_ action: @escaping () -> Void) -> Disposable? {
         action()
         return nil
     }
@@ -37,12 +37,9 @@ public final class ImmediateScheduler: Scheduler {
 /// will always be preserved.
 public final class UIScheduler: Scheduler {
     private static var __once: () = {
-            DispatchQueue.main.setSpecific(key: /*Migrator FIXME: Use a variable of type DispatchSpecificKey*/ UIScheduler.dispatchSpecificKey,
-                value: &UIScheduler.dispatchSpecificContext)
+            DispatchQueue.main.setSpecific(key: UIScheduler.dispatchSpecificKey, value: true)
         }()
-    fileprivate static var dispatchOnceToken: Int = 0
-    fileprivate static var dispatchSpecificKey: UInt8 = 0
-    fileprivate static var dispatchSpecificContext: UInt8 = 0
+    fileprivate static var dispatchSpecificKey = DispatchSpecificKey<Bool>()
     
     fileprivate var queueLength: Int32 = 0
     
@@ -64,7 +61,7 @@ public final class UIScheduler: Scheduler {
         
         // If we're already running on the main queue, and there isn't work
         // already enqueued, we can skip scheduling and just execute directly.
-        if queued == 1 && DispatchQueue.getSpecific(&UIScheduler.dispatchSpecificKey) == &UIScheduler.dispatchSpecificContext {
+        if queued == 1 && (DispatchQueue.getSpecific(key: UIScheduler.dispatchSpecificKey) ?? false) {
             actionAndDecrement()
         } else {
             DispatchQueue.main.async(execute: actionAndDecrement)
