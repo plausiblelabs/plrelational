@@ -59,7 +59,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         // Use order Attribute from underlying Relation to nest child Nodes under parent elements.
         for node in nodeDict.values {
             let parentNode = nodeDict[node.data[parentAttr]] ?? rootNode
-            parentNode.children.insertSorted(node, {$0.data[orderAttr]})
+            _ = parentNode.children.insertSorted(node, {$0.data[orderAttr]})
         }
         
         self.relation = relation
@@ -100,7 +100,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         
         var mutableRow = row
         computeOrderForInsert(&mutableRow, pos: pos)
-        relation.add(mutableRow)
+        _ = relation.add(mutableRow)
     }
     
     override func computeOrderForInsert(_ row: inout Row, pos: Pos) {
@@ -133,7 +133,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         for node in nodeDict.values {
             if let parentID = node.parentID {
                 if let parent = nodeDict[parentID] {
-                    insertNode(node, parent: parent)
+                    _ = insertNode(node, parent: parent)
                     nodesToDrop.append(node.id)
                 }
             }
@@ -173,7 +173,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         let node = nodeForID(id)
         
         // Delete from the relation
-        relation.delete(idAttr *== id)
+        _ = relation.delete(idAttr *== id)
         
         // Recursively delete descendant nodes
         // TODO: There are probably more efficient ways to handle this (need some sort of
@@ -258,7 +258,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         let newOrder = orderWithinParent(dstParent, previous: previous, next: next)
         
         var mutableRelation = relation
-        mutableRelation.update(idAttr *== srcID, newValues: [
+        _ = mutableRelation.update(idAttr *== srcID, newValues: [
             parentAttr: dstParentID,
             orderAttr: newOrder
         ])
