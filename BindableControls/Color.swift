@@ -40,12 +40,12 @@ public struct Color: Hashable {
     }
     
     public init?(string: String) {
-        let stringComps = string.componentsSeparatedByString(" ")
+        let stringComps = string.components(separatedBy: " ")
         if stringComps.count != 4 {
             return nil
         }
         let comps = stringComps.map{ s -> CGFloat in
-            if let f = NSNumberFormatter().numberFromString(s) {
+            if let f = NumberFormatter().number(from: s) {
                 let floatVal = CGFloat(f)
                 if floatVal < 0.0 {
                     return 0.0
@@ -61,7 +61,7 @@ public struct Color: Hashable {
         self.init(r: comps[0], g: comps[1], b: comps[2], a: comps[3])
     }
     
-    public func withAlpha(newAlpha: CGFloat) -> Color {
+    public func withAlpha(_ newAlpha: CGFloat) -> Color {
         return Color(r: components.r, g: components.g, b: components.b, a: newAlpha)
     }
     
@@ -70,13 +70,13 @@ public struct Color: Hashable {
     }
     
     public var stringValue: String {
-        return [components.r, components.g, components.b, components.a].map{ String($0) }.joinWithSeparator(" ")
+        return [components.r, components.g, components.b, components.a].map{ String(describing: $0) }.joined(separator: " ")
     }
 }
 
 extension Color.Components {
     init?(_ nscolor: NSColor) {
-        guard let converted = nscolor.colorUsingColorSpace(NSColorSpace.genericRGBColorSpace()) else { return nil }
+        guard let converted = nscolor.usingColorSpace(NSColorSpace.genericRGB) else { return nil }
         var r: CGFloat = 0.0
         var g: CGFloat = 0.0
         var b: CGFloat = 0.0
@@ -112,10 +112,10 @@ extension Color {
     public static let white = Color(r: 1, g: 1, b: 1)
     public static let clear = Color(r: 0, g: 0, b: 0)
     
-    public static let red    = Color(NSColor.redColor())!
-    public static let orange = Color(NSColor.orangeColor())!
-    public static let yellow = Color(NSColor.yellowColor())!
-    public static let green  = Color(NSColor.greenColor())!
-    public static let blue   = Color(NSColor.blueColor())!
-    public static let purple = Color(NSColor.purpleColor())!
+    public static let red    = Color(NSColor.red)!
+    public static let orange = Color(NSColor.orange)!
+    public static let yellow = Color(NSColor.yellow)!
+    public static let green  = Color(NSColor.green)!
+    public static let blue   = Color(NSColor.blue)!
+    public static let purple = Color(NSColor.purple)!
 }

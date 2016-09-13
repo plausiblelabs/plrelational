@@ -14,9 +14,9 @@ public enum CheckState: String { case
         switch boolValue {
         case nil:
             self = .Mixed
-        case .Some(false):
+        case .some(false):
             self = .Off
-        case .Some(true):
+        case .some(true):
             self = .On
         }
     }

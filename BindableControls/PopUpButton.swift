@@ -6,9 +6,9 @@
 import Cocoa
 import Binding
 
-public class PopUpButton<T: Equatable>: NSPopUpButton {
+open class PopUpButton<T: Equatable>: NSPopUpButton {
 
-    public lazy var items: BindableProperty<[MenuItem<T>]> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    open lazy var items: BindableProperty<[MenuItem<T>]> = WriteOnlyProperty(set: { [unowned self] value, _ in
         // Clear the menu
         self.removeAllItems()
 
@@ -20,19 +20,19 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
 
         // Insert the default menu item, if we have one
         if let defaultMenuItem = self.defaultMenuItem {
-            self.menu?.insertItem(defaultMenuItem.nsitem, atIndex: 0)
+            self.menu?.insertItem(defaultMenuItem.nsitem, at: 0)
         }
         
         // Set the selected item
         self.setSelectedItem(self.selectedObject.value)
     })
 
-    private lazy var _selectedObject: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
+    fileprivate lazy var _selectedObject: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
         self.setSelectedItem(value)
     })
-    public var selectedObject: ReadWriteProperty<T?> { return _selectedObject }
+    open var selectedObject: ReadWriteProperty<T?> { return _selectedObject }
 
-    public var defaultItemContent: MenuItemContent<T>? {
+    open var defaultItemContent: MenuItemContent<T>? {
         didSet {
             if let existingItem = defaultMenuItem?.nsitem {
                 existingItem.menu?.removeItem(existingItem)
@@ -40,10 +40,10 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
             if let content = defaultItemContent {
                 let model = MenuItem(.Normal(content))
                 let nativeItem = NativeMenuItem(model: model)
-                nativeItem.nsitem.hidden = true
-                nativeItem.nsitem.enabled = false
+                nativeItem.nsitem.isHidden = true
+                nativeItem.nsitem.isEnabled = false
                 defaultMenuItem = nativeItem
-                menu?.insertItem(nativeItem.nsitem, atIndex: 0)
+                menu?.insertItem(nativeItem.nsitem, at: 0)
             } else {
                 defaultMenuItem = nil
             }
@@ -52,11 +52,11 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
 
     // TODO: We hang on to these just to maintain strong references while their underlying
     // NSMenuItems are attached to the NSMenu
-    private var nativeMenuItems: [NativeMenuItem<T>]?
-    private var defaultMenuItem: NativeMenuItem<T>?
+    fileprivate var nativeMenuItems: [NativeMenuItem<T>]?
+    fileprivate var defaultMenuItem: NativeMenuItem<T>?
     
-    private var selfInitiatedSelectionChange = false
-    private var selectedIndex = -1
+    fileprivate var selfInitiatedSelectionChange = false
+    fileprivate var selectedIndex = -1
 
     public override init(frame: NSRect, pullsDown flag: Bool) {
         super.init(frame: frame, pullsDown: flag)
@@ -70,53 +70,53 @@ public class PopUpButton<T: Equatable>: NSPopUpButton {
         fatalError("NSCoding not supported")
     }
     
-    private func setSelectedItem(object: T?) {
+    fileprivate func setSelectedItem(_ object: T?) {
         selfInitiatedSelectionChange = true
-        if let object = object, menu = menu {
+        if let object = object, let menu = menu {
             // Find menu item that matches given object
-            let index = menu.itemArray.indexOf({
+            let index = menu.items.index(where: {
                 let nativeItem = $0.representedObject as? NativeMenuItem<T>
                 return nativeItem?.object == object
             })
             if let index = index {
-                selectItemAtIndex(index)
+                selectItem(at: index)
                 selectedIndex = index
             } else {
-                selectItem(defaultMenuItem?.nsitem)
+                select(defaultMenuItem?.nsitem)
                 selectedIndex = -1
             }
         } else {
             // Select the default item if one exists, otherwise clear selection
-            selectItem(defaultMenuItem?.nsitem)
+            select(defaultMenuItem?.nsitem)
             selectedIndex = -1
         }
         selfInitiatedSelectionChange = false
     }
     
-    @objc func selectionChanged(sender: NSPopUpButton) {
+    @objc func selectionChanged(_ sender: NSPopUpButton) {
         if selfInitiatedSelectionChange { return }
         
         guard let selectedItem = sender.selectedItem else { return }
         guard let nativeItem = selectedItem.representedObject as? NativeMenuItem<T> else { return }
         
         switch nativeItem.model.type {
-        case .Normal:
+        case .normal:
             guard let object = nativeItem.object else { return }
             selfInitiatedSelectionChange = true
             _selectedObject.change(object, transient: false)
             selfInitiatedSelectionChange = false
             
-        case .Momentary(_, let action):
+        case .momentary(_, let action):
             selfInitiatedSelectionChange = true
             if selectedIndex >= 0 {
-                selectItemAtIndex(selectedIndex)
+                selectItem(at: selectedIndex)
             } else {
-                selectItem(defaultMenuItem?.nsitem)
+                select(defaultMenuItem?.nsitem)
             }
             selfInitiatedSelectionChange = false
             action()
             
-        case .Separator:
+        case .separator:
             break
         }
     }

@@ -6,9 +6,9 @@
 import Cocoa
 import Binding
 
-public class Checkbox: NSButton {
+open class Checkbox: NSButton {
     
-    private lazy var _checked: ExternalValueProperty<CheckState> = ExternalValueProperty(
+    fileprivate lazy var _checked: ExternalValueProperty<CheckState> = ExternalValueProperty(
         get: { [unowned self] in
             return CheckState(self.state)
         },
@@ -19,23 +19,23 @@ public class Checkbox: NSButton {
             self.state = value.nsValue
         }
     )
-    public var checked: ReadWriteProperty<CheckState> { return _checked }
+    open var checked: ReadWriteProperty<CheckState> { return _checked }
     
     public override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
-        setButtonType(.SwitchButton)
+        setButtonType(.switch)
         target = self
         action = #selector(checkboxToggled(_:))
     }
 
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setButtonType(.SwitchButton)
+        setButtonType(.switch)
         target = self
         action = #selector(checkboxToggled(_:))
     }
     
-    @objc func checkboxToggled(sender: Checkbox) {
+    @objc func checkboxToggled(_ sender: Checkbox) {
         // Note that by the time this function is called, `state` already reflects the new value.
         // Cocoa always wants to cycle through the states (including mixed), but we only want the user
         // to be able to choose on/off, so disable allowsMixedState here.
@@ -43,7 +43,7 @@ public class Checkbox: NSButton {
         _checked.changed(transient: false)
     }
     
-    public override func accessibilityValue() -> AnyObject? {
+    open override func accessibilityValue() -> Any? {
         return CheckState(state).rawValue
     }
 }

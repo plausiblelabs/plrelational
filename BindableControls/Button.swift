@@ -6,14 +6,14 @@
 import Cocoa
 import Binding
 
-public class Button: NSButton {
+open class Button: NSButton {
 
-    public lazy var disabled: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
-        self.enabled = !value
+    open lazy var disabled: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
+        self.isEnabled = !value
     })
 
-    public let clicks: Signal<()>
-    private let clicksNotify: Signal<()>.Notify
+    open let clicks: Signal<()>
+    fileprivate let clicksNotify: Signal<()>.Notify
     
     public override init(frame: NSRect) {
         (clicks, clicksNotify) = Signal.pipe()
@@ -29,7 +29,7 @@ public class Button: NSButton {
         action = #selector(buttonClicked(_:))
     }
     
-    @objc func buttonClicked(sender: Button) {
-        clicksNotify.valueChanging(change: (), metadata: ChangeMetadata(transient: true))
+    @objc func buttonClicked(_ sender: Button) {
+        clicksNotify.valueChanging((), ChangeMetadata(transient: true))
     }
 }

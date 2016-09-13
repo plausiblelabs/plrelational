@@ -6,9 +6,9 @@
 import Cocoa
 import Binding
 
-public class StepperView: NSControl, NSTextFieldDelegate {
+open class StepperView: NSControl, NSTextFieldDelegate {
     
-    private lazy var _value: MutableValueProperty<Int?> = mutableValueProperty(nil, { [unowned self] value, _ in
+    fileprivate lazy var _value: MutableValueProperty<Int?> = mutableValueProperty(nil, { [unowned self] value, _ in
         if let intValue = value {
             self.stepper.integerValue = intValue
             self.textField.integerValue = intValue
@@ -17,24 +17,24 @@ public class StepperView: NSControl, NSTextFieldDelegate {
             self.textField.stringValue = ""
         }
     })
-    public var value: ReadWriteProperty<Int?> { return _value }
+    open var value: ReadWriteProperty<Int?> { return _value }
 
-    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    open lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.textField.placeholderString = value
     })
 
-    private let defaultValue: Int
-    private var textField: NSTextField!
-    private var stepper: NSStepper!
+    fileprivate let defaultValue: Int
+    fileprivate var textField: NSTextField!
+    fileprivate var stepper: NSStepper!
 
     public init(frame: NSRect, min: Int, max: Int, defaultValue: Int) {
         self.defaultValue = defaultValue
         
         super.init(frame: frame)
         
-        let formatter = NSNumberFormatter()
-        formatter.minimum = min
-        formatter.maximum = max
+        let formatter = NumberFormatter()
+        formatter.minimum = min as NSNumber?
+        formatter.maximum = max as NSNumber?
         formatter.generatesDecimalNumbers = false
         formatter.maximumFractionDigits = 0
         textField = NSTextField()
@@ -46,7 +46,7 @@ public class StepperView: NSControl, NSTextFieldDelegate {
         
         stepper = NSStepper()
         stepper.valueWraps = false
-        stepper.cell!.controlSize = .SmallControlSize
+        stepper.cell!.controlSize = .small
         stepper.target = self
         stepper.action = #selector(controlChanged(_:))
         stepper.minValue = Double(min)
@@ -61,11 +61,11 @@ public class StepperView: NSControl, NSTextFieldDelegate {
         fatalError("NSCoding not supported")
     }
     
-    public override var flipped: Bool {
+    open override var isFlipped: Bool {
         return true
     }
     
-    public override func setFrameSize(newSize: NSSize) {
+    open override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
         
         // XXX: NSStepper's width is zero until some later time, so for now just hardcode a width
@@ -88,7 +88,7 @@ public class StepperView: NSControl, NSTextFieldDelegate {
         stepper.frame = stepperFrame
     }
     
-    func controlChanged(sender: AnyObject) {
+    func controlChanged(_ sender: AnyObject) {
         let newValue: Int
         if let textField = sender as? NSTextField {
             newValue = textField.integerValue
@@ -102,7 +102,7 @@ public class StepperView: NSControl, NSTextFieldDelegate {
         _value.change(newValue, transient: false)
     }
     
-    public override func controlTextDidEndEditing(notification: NSNotification) {
+    open override func controlTextDidEndEditing(_ notification: Notification) {
         let textField = notification.object! as! NSTextField
         if !textField.stringValue.isEmpty {
             controlChanged(textField)

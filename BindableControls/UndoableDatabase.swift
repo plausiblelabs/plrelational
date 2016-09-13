@@ -7,17 +7,17 @@ import Foundation
 import libRelational
 import Binding
 
-public class UndoableDatabase {
+open class UndoableDatabase {
     
-    private let db: TransactionalDatabase
-    private let undoManager: UndoManager
+    fileprivate let db: TransactionalDatabase
+    fileprivate let undoManager: UndoManager
     
     public init(db: TransactionalDatabase, undoManager: UndoManager) {
         self.db = db
         self.undoManager = undoManager
     }
     
-    public func performUndoableAction(name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: Void -> Void) {
+    open func performUndoableAction(_ name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: (Void) -> Void) {
         let before = before ?? db.takeSnapshot()
         db.transaction(transactionFunc)
         let after = db.takeSnapshot()
@@ -35,16 +35,16 @@ public class UndoableDatabase {
     }
     
     /// Note: `set` will be called in the context of a database transaction.
-    public func bidiProperty<T: Equatable>(relation: Relation, action: String, get: Relation -> T, set: T -> Void) -> ReadWriteProperty<T> {
+    open func bidiProperty<T: Equatable>(_ relation: Relation, action: String, get: @escaping (Relation) -> T, set: @escaping (T) -> Void) -> ReadWriteProperty<T> {
         return relation.property(mutationConfig(action, set), relationToValue: get)
     }
 
     /// Note: `set` will be called in the context of a database transaction.
-    public func bidiProperty<T: Equatable>(relation: Relation, action: String, get: Relation -> T?, set: T? -> Void) -> ReadWriteProperty<T?> {
+    open func bidiProperty<T: Equatable>(_ relation: Relation, action: String, get: @escaping (Relation) -> T?, set: @escaping (T?) -> Void) -> ReadWriteProperty<T?> {
         return relation.property(mutationConfig(action, set), relationToValue: get)
     }
 
-    private func mutationConfig<T>(action: String, _ set: T -> Void) -> RelationMutationConfig<T> {
+    fileprivate func mutationConfig<T>(_ action: String, _ set: @escaping (T) -> Void) -> RelationMutationConfig<T> {
         return RelationMutationConfig(
             snapshot: {
                 return self.db.takeSnapshot()
@@ -64,7 +64,7 @@ public class UndoableDatabase {
         )
     }
     
-    public func performUndoableAsyncAction(name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: Void -> Void) {
+    open func performUndoableAsyncAction(_ name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: (Void) -> Void) {
         let before = before ?? db.takeSnapshot()
         // TODO: Need explicit transaction here
         //db.transaction(transactionFunc)
@@ -83,11 +83,11 @@ public class UndoableDatabase {
         )
     }
     
-    public func asyncBidiProperty<T>(relation: Relation, action: String, signal: Signal<T>, update: T -> Void) -> AsyncReadWriteProperty<T> {
+    open func asyncBidiProperty<T>(_ relation: Relation, action: String, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
         return relation.asyncProperty(asyncMutationConfig(action, update), { _ in signal })
     }
     
-    private func asyncMutationConfig<T>(action: String, _ update: T -> Void) -> RelationMutationConfig<T> {
+    fileprivate func asyncMutationConfig<T>(_ action: String, _ update: @escaping (T) -> Void) -> RelationMutationConfig<T> {
         return RelationMutationConfig(
             snapshot: {
                 return self.db.takeSnapshot()

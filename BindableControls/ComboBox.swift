@@ -6,24 +6,24 @@
 import Cocoa
 import Binding
 
-public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
+open class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
 
-    public lazy var items: BindableProperty<[T]> = WriteOnlyProperty(set: { [unowned self] value, _ in
-        let objects = value.map{ $0 as! AnyObject }
+    open lazy var items: BindableProperty<[T]> = WriteOnlyProperty(set: { [unowned self] value, _ in
+        let objects = value.map{ $0 as AnyObject }
         self.removeAllItems()
-        self.addItemsWithObjectValues(objects)
+        self.addItems(withObjectValues: objects)
     })
     
-    private lazy var _value: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
+    fileprivate lazy var _value: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
         self.objectValue = value as? AnyObject
     })
-    public var value: ReadWriteProperty<T?> { return _value }
+    open var value: ReadWriteProperty<T?> { return _value }
     
-    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    open lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.placeholderString = value
     })
     
-    private var previousCommittedValue: T?
+    fileprivate var previousCommittedValue: T?
 
     public override init(frame: NSRect) {
         super.init(frame: frame)
@@ -35,17 +35,17 @@ public class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
-    @objc public func comboBoxSelectionDidChange(notification: NSNotification) {
+    @objc open func comboBoxSelectionDidChange(_ notification: Notification) {
         if let newValue = objectValueOfSelectedItem {
             _value.change(newValue as? T, transient: false)
         }
     }
     
-    public override func controlTextDidBeginEditing(obj: NSNotification) {
+    open override func controlTextDidBeginEditing(_ obj: Notification) {
         previousCommittedValue = objectValue as? T
     }
 
-    public override func controlTextDidEndEditing(obj: NSNotification) {
+    open override func controlTextDidEndEditing(_ obj: Notification) {
         // Note that controlTextDidBeginEditing may not be called if the user gives focus to the text field
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value

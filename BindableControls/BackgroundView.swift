@@ -6,24 +6,24 @@
 import Cocoa
 import Binding
 
-public class BackgroundView: NSView {
+open class BackgroundView: NSView {
     
-    public lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] value, _ in
-        self?.hidden = !value
+    open lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] value, _ in
+        self?.isHidden = !value
     })
 
-    public var backgroundColor: NSColor?
+    open var backgroundColor: NSColor?
     
-    public override func drawRect(dirtyRect: NSRect) {
-        super.drawRect(dirtyRect)
+    open override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
         
         if let bg = backgroundColor {
             bg.setFill()
-            NSBezierPath.fillRect(dirtyRect)
+            NSBezierPath.fill(dirtyRect)
         }
     }
     
-    public override var flipped: Bool {
+    open override var isFlipped: Bool {
         return true
     }
 }

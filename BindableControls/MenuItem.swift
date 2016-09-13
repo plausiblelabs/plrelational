@@ -19,9 +19,9 @@ public struct MenuItemContent<T> {
 }
 
 public enum MenuItemType<T> { case
-    Normal(MenuItemContent<T>),
-    Momentary(MenuItemContent<T>, action: () -> Void),
-    Separator
+    normal(MenuItemContent<T>),
+    momentary(MenuItemContent<T>, action: () -> Void),
+    separator
 }
 
 public struct MenuItem<T> {
@@ -34,11 +34,11 @@ public struct MenuItem<T> {
     }
 }
 
-public func titledMenuItem(title: ReadableProperty<String>, object: String = "Default") -> MenuItem<String> {
+public func titledMenuItem(_ title: ReadableProperty<String>, object: String = "Default") -> MenuItem<String> {
     return MenuItem(.Normal(MenuItemContent(object: object, title: title, image: nil)))
 }
 
-public func titledMenuItem(title: String) -> MenuItem<String> {
+public func titledMenuItem(_ title: String) -> MenuItem<String> {
     return titledMenuItem(constantValueProperty(title), object: title)
 }
 
@@ -48,38 +48,38 @@ class NativeMenuItem<T> {
 
     var object: T? {
         switch model.type {
-        case .Normal(let content):
+        case .normal(let content):
             return content.object
-        case .Momentary(let content, _):
+        case .momentary(let content, _):
             return content.object
-        case .Separator:
+        case .separator:
             return nil
         }
     }
     
-    private lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
-        self.nsitem.hidden = !value
+    fileprivate lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
+        self.nsitem.isHidden = !value
     })
 
-    private lazy var title: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    fileprivate lazy var title: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.nsitem.title = value
     })
 
-    private lazy var image: BindableProperty<Image> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    fileprivate lazy var image: BindableProperty<Image> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.nsitem.image = value.nsimage
     })
 
-    private init(model: MenuItem<T>, nsitem: NSMenuItem) {
+    fileprivate init(model: MenuItem<T>, nsitem: NSMenuItem) {
         self.model = model
         self.nsitem = nsitem
 
         let content: MenuItemContent<T>?
         switch model.type {
-        case .Normal(let c):
+        case .normal(let c):
             content = c
-        case .Momentary(let c, _):
+        case .momentary(let c, _):
             content = c
-        case .Separator:
+        case .separator:
             content = nil
         }
         
@@ -102,10 +102,10 @@ class NativeMenuItem<T> {
     convenience init(model: MenuItem<T>) {
         let nsitem: NSMenuItem
         switch model.type {
-        case .Normal, .Momentary:
+        case .normal, .momentary:
             nsitem = NSMenuItem()
-        case .Separator:
-            nsitem = NSMenuItem.separatorItem()
+        case .separator:
+            nsitem = NSMenuItem.separator()
         }
         self.init(model: model, nsitem: nsitem)
     }

@@ -6,17 +6,17 @@
 import Cocoa
 import Binding
 
-public class ColorPickerView: NSView {
+open class ColorPickerView: NSView {
 
-    public lazy var color: ReadWriteProperty<CommonValue<Color>> = { [unowned self] in
+    open lazy var color: ReadWriteProperty<CommonValue<Color>> = { [unowned self] in
         return self.model.color
     }()
     
-    private let model: ColorPickerModel
+    fileprivate let model: ColorPickerModel
     
-    private let colorPopup: PopUpButton<ColorItem>
-    private let opacityCombo: ComboBox<CGFloat>
-    private let colorPanel: ColorPanel
+    fileprivate let colorPopup: PopUpButton<ColorItem>
+    fileprivate let opacityCombo: ComboBox<CGFloat>
+    fileprivate let colorPanel: ColorPanel
 
     public init(defaultColor: Color) {
         self.model = ColorPickerModel(defaultColor: defaultColor)
@@ -32,7 +32,7 @@ public class ColorPickerView: NSView {
         )
         
         // Configure opacity combo box
-        let opacityValues: [CGFloat] = 0.stride(through: 100, by: 10).map{ CGFloat($0) / 100.0 }
+        let opacityValues: [CGFloat] = stride(from: 0, through: 100, by: 10).map{ CGFloat($0) / 100.0 }
         opacityCombo = ComboBox(frame: NSZeroRect)
         opacityCombo.formatter = OpacityFormatter()
         opacityCombo.items <~ constantValueProperty(opacityValues)
@@ -47,11 +47,11 @@ public class ColorPickerView: NSView {
         
         // Configure the layout
         let horizontalStack = NSStackView(views: [colorPopup, opacityCombo])
-        horizontalStack.orientation = .Horizontal
+        horizontalStack.orientation = .horizontal
         
         let verticalStack = NSStackView(views: [horizontalStack])
-        verticalStack.orientation = .Vertical
-        verticalStack.alignment = .Leading
+        verticalStack.orientation = .vertical
+        verticalStack.alignment = .leading
         verticalStack.spacing = 2
         
 //        if let label = label {
@@ -60,10 +60,10 @@ public class ColorPickerView: NSView {
         
         self.addSubview(verticalStack)
         self.addConstraints([
-            NSLayoutConstraint(item: self, attribute: .Left, relatedBy: .Equal, toItem: verticalStack, attribute: .Left, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: self, attribute: .Right, relatedBy: .Equal, toItem: verticalStack, attribute: .Right, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: self, attribute: .Top, relatedBy: .Equal, toItem: verticalStack, attribute: .Top, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: self, attribute: .Bottom, relatedBy: .Equal, toItem: verticalStack, attribute: .Bottom, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: self, attribute: .left, relatedBy: .equal, toItem: verticalStack, attribute: .left, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: self, attribute: .right, relatedBy: .equal, toItem: verticalStack, attribute: .right, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: self, attribute: .top, relatedBy: .equal, toItem: verticalStack, attribute: .top, multiplier: 1, constant: 0),
+            NSLayoutConstraint(item: self, attribute: .bottom, relatedBy: .equal, toItem: verticalStack, attribute: .bottom, multiplier: 1, constant: 0),
         ])
     }
     
@@ -73,18 +73,18 @@ public class ColorPickerView: NSView {
 }
 
 private enum ColorItem: Equatable { case
-    Default,
-    Preset(Color),
-    Custom(Color),
-    Other
+    `default`,
+    preset(Color),
+    custom(Color),
+    other
     
     var color: Color? {
         switch self {
-        case .Preset(let color):
+        case .preset(let color):
             return color
-        case .Custom(let color):
+        case .custom(let color):
             return color
-        case .Default, .Other:
+        case .default, .other:
             return nil
         }
     }
@@ -92,13 +92,13 @@ private enum ColorItem: Equatable { case
 
 private func ==(a: ColorItem, b: ColorItem) -> Bool {
     switch (a, b) {
-    case let (.Preset(acolor), .Preset(bcolor)):
+    case let (.preset(acolor), .preset(bcolor)):
         return acolor == bcolor
-    case (.Custom, .Custom):
+    case (.custom, .custom):
         // This is a little unusual: we don't actually compare the custom color values, this way
         // the "Custom" menu item will be a match when setting any ColorItem.Custom value
         return true
-    case (.Other, .Other):
+    case (.other, .other):
         return true
     default:
         return false
@@ -108,17 +108,17 @@ private func ==(a: ColorItem, b: ColorItem) -> Bool {
 private class ColorPickerModel {
     
     /// The color to show in the color picker when there is no selected color.
-    private let defaultColor: Color
+    fileprivate let defaultColor: Color
 
-    private let presetColors: [Color]
-    private var popupItems: [MenuItem<ColorItem>]!
+    fileprivate let presetColors: [Color]
+    fileprivate var popupItems: [MenuItem<ColorItem>]!
     
-    private let color: ReadWriteProperty<CommonValue<Color>>
+    fileprivate let color: ReadWriteProperty<CommonValue<Color>>
     
-    private let colorItem: ReadWriteProperty<ColorItem?>
-    private let opacityValue: ReadWriteProperty<CGFloat?>
-    private let panelColor: ReadWriteProperty<Color>
-    private let panelVisible: ReadWriteProperty<Bool>
+    fileprivate let colorItem: ReadWriteProperty<ColorItem?>
+    fileprivate let opacityValue: ReadWriteProperty<CGFloat?>
+    fileprivate let panelColor: ReadWriteProperty<Color>
+    fileprivate let panelVisible: ReadWriteProperty<Bool>
     
     init(defaultColor: Color) {
         self.defaultColor = defaultColor
@@ -131,7 +131,7 @@ private class ColorPickerModel {
         let colorItem: MutableValueProperty<ColorItem?> = mutableValueProperty(nil, valueChanging: { _ in true })
         let customColor: ReadableProperty<Color?> = colorItem.map{
             switch $0 {
-            case .Some(.Custom(let color)):
+            case .some(.Custom(let color)):
                 return color
             default:
                 return nil
@@ -148,8 +148,8 @@ private class ColorPickerModel {
         var popupItems: [MenuItem<ColorItem>] = []
         var presets: [Color] = []
         
-        func addPreset(name: String, _ color: Color) {
-            let colorItem = ColorItem.Preset(color)
+        func addPreset(_ name: String, _ color: Color) {
+            let colorItem = ColorItem.preset(color)
             let content = MenuItemContent(
                 object: colorItem,
                 title: constantValueProperty(name),
@@ -270,9 +270,9 @@ private func unsetColorSwatchImage() -> Image {
         let bottomLeft = CGPoint(x: rect.minX, y: rect.minY)
         
         let path = NSBezierPath()
-        path.moveToPoint(topRight)
-        path.lineToPoint(bottomLeft)
-        NSColor.redColor().setStroke()
+        path.move(to: topRight)
+        path.line(to: bottomLeft)
+        NSColor.red.setStroke()
         path.stroke()
     })
 }
@@ -280,48 +280,48 @@ private func unsetColorSwatchImage() -> Image {
 /// Returns a swatch image for the multiple color case.
 private func multipleColorSwatchImage() -> Image {
     return colorSwatchImage(Color.white, f: { rect in
-        NSColor.redColor().setStroke()
-        NSBezierPath.strokeLineFromPoint(NSMakePoint(rect.minX + 4, rect.midY), toPoint: NSMakePoint(rect.maxX - 4, rect.midY))
+        NSColor.red.setStroke()
+        NSBezierPath.strokeLine(from: NSMakePoint(rect.minX + 4, rect.midY), to: NSMakePoint(rect.maxX - 4, rect.midY))
     })
 }
 
 /// Returns a color swatch image.
-private func colorSwatchImage(color: Color, f: ((NSRect) -> ())? = nil) -> Image {
+private func colorSwatchImage(_ color: Color, f: ((NSRect) -> ())? = nil) -> Image {
     let size = NSMakeSize(20, 12)
     let rect = NSRect(origin: NSZeroPoint, size: size)
     let image = NSImage(size: size)
     image.lockFocusFlipped(false)
     drawSwatch(rect, color: color.nscolor)
     f?(rect)
-    NSColor.blackColor().setStroke()
-    NSBezierPath.strokeRect(rect.insetBy(dx: 0.5, dy: 0.5))
+    NSColor.black.setStroke()
+    NSBezierPath.stroke(rect.insetBy(dx: 0.5, dy: 0.5))
     image.unlockFocus()
     return Image(image)
 }
 
 /// Draws a color swatch into the current graphics context.
-private func drawSwatch(rect: NSRect, color: NSColor) {
-    NSColor.blackColor().setFill()
+private func drawSwatch(_ rect: NSRect, color: NSColor) {
+    NSColor.black.setFill()
     NSRectFill(rect)
     
     let path = NSBezierPath()
-    path.moveToPoint(NSMakePoint(rect.minX, rect.minY))
-    path.lineToPoint(NSMakePoint(rect.maxX, rect.minY))
-    path.lineToPoint(NSMakePoint(rect.maxX, rect.maxY))
-    path.closePath()
-    NSColor.whiteColor().setFill()
+    path.move(to: NSMakePoint(rect.minX, rect.minY))
+    path.line(to: NSMakePoint(rect.maxX, rect.minY))
+    path.line(to: NSMakePoint(rect.maxX, rect.maxY))
+    path.close()
+    NSColor.white.setFill()
     path.fill()
     
     color.setFill()
-    NSRectFillUsingOperation(rect, .CompositeSourceOver)
+    NSRectFillUsingOperation(rect, .sourceOver)
 }
 
-private class OpacityFormatter: NSNumberFormatter {
+private class OpacityFormatter: NumberFormatter {
     
     override init() {
         super.init()
         
-        numberStyle = .PercentStyle
+        numberStyle = .percent
         minimum = 0.0
         maximum = 1.0
         maximumFractionDigits = 0
@@ -331,7 +331,7 @@ private class OpacityFormatter: NSNumberFormatter {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func getObjectValue(obj: AutoreleasingUnsafeMutablePointer<AnyObject?>, forString string: String, errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>) -> Bool {
+    override func getObjectValue(_ obj: AutoreleasingUnsafeMutablePointer<AutoreleasingUnsafeMutablePointer<AnyObject?>>?, for string: String, errorDescription error: AutoreleasingUnsafeMutablePointer<AutoreleasingUnsafeMutablePointer<NSString?>>?) -> Bool {
         // Include the '%' suffix if it wasn't already there, just to make the formatter happy;
         // this allows the user to go away from the combo box even if the user left off the '%' or
         // left the box empty
@@ -342,10 +342,10 @@ private class OpacityFormatter: NSNumberFormatter {
         } else if !s.hasSuffix("%") {
             s = "\(string)%"
         }
-        return super.getObjectValue(obj, forString: s, errorDescription: error)
+        return super.getObjectValue(obj, for: s, errorDescription: error)
     }
     
-    override func isPartialStringValid(partialString: String, newEditingString newString: AutoreleasingUnsafeMutablePointer<NSString?>, errorDescription error: AutoreleasingUnsafeMutablePointer<NSString?>) -> Bool {
+    override func isPartialStringValid(_ partialString: String, newEditingString newString: AutoreleasingUnsafeMutablePointer<AutoreleasingUnsafeMutablePointer<NSString?>>?, errorDescription error: AutoreleasingUnsafeMutablePointer<AutoreleasingUnsafeMutablePointer<NSString?>>?) -> Bool {
         var s = partialString
         
         if s.isEmpty {
@@ -353,7 +353,7 @@ private class OpacityFormatter: NSNumberFormatter {
         }
         
         if s.hasSuffix("%") {
-            s = s[s.startIndex..<s.endIndex.predecessor()]
+            s = s[s.startIndex..<s.characters.index(before: s.endIndex)]
         }
         
         if let intValue = Int(s) {

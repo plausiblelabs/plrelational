@@ -6,33 +6,33 @@
 import Cocoa
 
 public protocol ExtOutlineViewDelegate: NSOutlineViewDelegate {
-    func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu?
+    func outlineView(_ outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu?
 }
 
-public class ExtOutlineView: NSOutlineView {
+open class ExtOutlineView: NSOutlineView {
     
-    public override func validateProposedFirstResponder(responder: NSResponder, forEvent event: NSEvent?) -> Bool {
+    open override func validateProposedFirstResponder(_ responder: NSResponder, for event: NSEvent?) -> Bool {
         // XXX: The following prevents the text field from becoming first responder if it is right-clicked
         // (which should instead cause the context menu to be shown)
         if let event = event {
-            if event.type == .RightMouseDown || (event.type == .LeftMouseDown && event.modifierFlags.contains(.ControlKeyMask)) {
+            if event.type == .rightMouseDown || (event.type == .leftMouseDown && event.modifierFlags.contains(.control)) {
                 return false
             } else {
-                return super.validateProposedFirstResponder(responder, forEvent: event)
+                return super.validateProposedFirstResponder(responder, for: event)
             }
         } else {
-            return super.validateProposedFirstResponder(responder, forEvent: event)
+            return super.validateProposedFirstResponder(responder, for: event)
         }
     }
     
-    public override func menuForEvent(event: NSEvent) -> NSMenu? {
+    open override func menu(for event: NSEvent) -> NSMenu? {
         // Notify the delegate if a context menu is requested for an item
-        let point = self.convertPoint(event.locationInWindow, fromView: nil)
-        let row = self.rowAtPoint(point)
-        let item = self.itemAtRow(row)
+        let point = self.convert(event.locationInWindow, from: nil)
+        let row = self.row(at: point)
+        let item = self.item(atRow: row)
         if item == nil {
             return nil
         }
-        return (self.delegate() as! ExtOutlineViewDelegate).outlineView(self, menuForItem: item!)
+        return (self.delegate as! ExtOutlineViewDelegate).outlineView(self, menuForItem: item! as AnyObject)
     }
 }

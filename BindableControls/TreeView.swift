@@ -16,7 +16,7 @@ public struct TreeViewModel<N: TreeNode> {
     public let isSection: (N.Data) -> Bool
     public let contextMenu: ((N.Data) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
-    public let move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?
+    public let move: ((_ srcPath: TreePath<N>, _ dstPath: TreePath<N>) -> Void)?
     public let selection: ReadWriteProperty<Set<N.ID>>
     public let cellIdentifier: (N.Data) -> String
     public let cellText: (N.Data) -> CellTextProperty
@@ -24,13 +24,13 @@ public struct TreeViewModel<N: TreeNode> {
     
     public init(
         data: TreeProperty<N>,
-        allowsChildren: (N.Data) -> Bool,
-        isSection: (N.Data) -> Bool,
+        allowsChildren: @escaping (N.Data) -> Bool,
+        isSection: @escaping (N.Data) -> Bool,
         contextMenu: ((N.Data) -> ContextMenu?)?,
-        move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?,
+        move: ((_ srcPath: TreePath<N>, _ dstPath: TreePath<N>) -> Void)?,
         selection: ReadWriteProperty<Set<N.ID>>,
-        cellIdentifier: (N.Data) -> String,
-        cellText: (N.Data) -> CellTextProperty,
+        cellIdentifier: @escaping (N.Data) -> String,
+        cellText: @escaping (N.Data) -> CellTextProperty,
         cellImage: ((N.Data) -> ReadableProperty<Image>?)?)
     {
         self.data = data
@@ -47,23 +47,23 @@ public struct TreeViewModel<N: TreeNode> {
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
-public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
+open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
     
-    private let model: TreeViewModel<N>
-    private let outlineView: NSOutlineView
+    fileprivate let model: TreeViewModel<N>
+    fileprivate let outlineView: NSOutlineView
     
-    private lazy var selection: MutableValueProperty<Set<N.ID>> = mutableValueProperty(Set(), { [unowned self] selectedIDs, _ in
+    fileprivate lazy var selection: MutableValueProperty<Set<N.ID>> = mutableValueProperty(Set(), { [unowned self] selectedIDs, _ in
         self.selectItems(selectedIDs)
     })
 
-    private var treeObserverRemoval: ObserverRemoval?
-    private var selfInitiatedSelectionChange = false
+    fileprivate var treeObserverRemoval: ObserverRemoval?
+    fileprivate var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
-    public var animateChanges = false
+    open var animateChanges = false
     
     /// Whether to automatically expand a parent when a child is inserted.
-    public var autoExpand = false
+    open var autoExpand = false
     
     public init(model: TreeViewModel<N>, outlineView: NSOutlineView) {
         self.model = model
@@ -79,11 +79,11 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         ))
         selection <~> model.selection
         
-        outlineView.setDelegate(self)
-        outlineView.setDataSource(self)
+        outlineView.delegate = self
+        outlineView.dataSource = self
         
         // Enable drag-and-drop
-        outlineView.registerForDraggedTypes([PasteboardType])
+        outlineView.register(forDraggedTypes: [PasteboardType])
         outlineView.verticalMotionCanBeginDrag = true
     }
     
@@ -93,7 +93,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
 
     // MARK: NSOutlineViewDataSource
 
-    public func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
+    open func outlineView(_ outlineView: NSOutlineView, numberOfChildrenOfItem item: Any?) -> Int {
         switch item {
         case nil:
             return model.data.root.children.count
@@ -104,7 +104,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         }
     }
     
-    public func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
+    open func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
         switch item {
         case nil:
             return model.data.root.children[index]
@@ -115,12 +115,12 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         }
     }
     
-    public func outlineView(outlineView: NSOutlineView, isItemExpandable item: AnyObject) -> Bool {
+    open func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
         let node = item as! N
         return model.allowsChildren(node.data) && node.children.count > 0
     }
     
-    public func outlineView(outlineView: NSOutlineView, pasteboardWriterForItem item: AnyObject) -> NSPasteboardWriting? {
+    open func outlineView(_ outlineView: NSOutlineView, pasteboardWriterForItem item: Any) -> NSPasteboardWriting? {
         if model.move == nil {
             return nil
         }
@@ -131,18 +131,18 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         return pboardItem
     }
     
-    public func outlineView(outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: AnyObject?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
+    open func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: Any?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyListForType(PasteboardType) {
-            let nodeID = N.ID.fromPlist(idPlist)!
+        if let idPlist = pboard.propertyList(forType: PasteboardType) {
+            let nodeID = N.ID.fromPlist(idPlist as AnyObject)!
             let currentParent = model.data.parentForID(nodeID)
             let proposedParent = proposedItem as? N
             if proposedParent === currentParent {
                 // We are reordering the node within its existing parent (or at the top level)
                 if let srcIndex = model.data.indexForID(nodeID) {
                     if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
-                        return .Move
+                        return .move
                     }
                 }
             } else {
@@ -155,26 +155,26 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
                             (proposedIndex >= 0 || proposedParent.children.isEmpty) &&
                             !model.data.isNodeDescendent(proposedParent, ofAncestor: currentNode)
                         {
-                            return .Move
+                            return .move
                         }
                     }
                 } else {
                     // We are dragging the node into the top level
                     if proposedIndex >= 0 {
-                        return .Move
+                        return .move
                     }
                 }
             }
         }
         
-        return .None
+        return NSDragOperation()
     }
     
-    public func outlineView(outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: AnyObject?, childIndex index: Int) -> Bool {
+    open func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyListForType(PasteboardType), move = model.move {
-            let nodeID = N.ID.fromPlist(idPlist)!
+        if let idPlist = pboard.propertyList(forType: PasteboardType), let move = model.move {
+            let nodeID = N.ID.fromPlist(idPlist as AnyObject)!
             
             let currentParent = model.data.parentForID(nodeID)
             let proposedParent = item as? N
@@ -186,7 +186,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
 
             let srcPath = TreePath(parent: currentParent, index: srcIndex)
             let dstPath = TreePath(parent: proposedParent, index: dstIndex)
-            move(srcPath: srcPath, dstPath: dstPath)
+            move(srcPath, dstPath)
             return true
         }
         
@@ -195,10 +195,10 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
 
     // MARK: ExtOutlineViewDelegate
     
-    public func outlineView(outlineView: NSOutlineView, viewForTableColumn: NSTableColumn?, item: AnyObject) -> NSView? {
+    open func outlineView(_ outlineView: NSOutlineView, viewFor viewForTableColumn: NSTableColumn?, item: Any) -> NSView? {
         let node = item as! N
         let identifier = model.cellIdentifier(node.data)
-        let view = outlineView.makeViewWithIdentifier(identifier, owner: self) as! NSTableCellView
+        let view = outlineView.make(withIdentifier: identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
             textField.string.unbindAll()
             switch model.cellText(node.data) {
@@ -221,7 +221,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         return view
     }
     
-    public func outlineView(outlineView: NSOutlineView, isGroupItem item: AnyObject) -> Bool {
+    open func outlineView(_ outlineView: NSOutlineView, isGroupItem item: Any) -> Bool {
         let node = item as! N
         return model.isSection(node.data)
     }
@@ -229,25 +229,25 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     // TODO: This is one of those methods that incurs a performance penalty just by implementing it here,
     // but it's not needed by all TreeViews; we implement it just to allow for TreeView subclasses to
     // override it.  We should make a separate delegate class that can be overridden on an as needed basis.
-    public func outlineView(outlineView: NSOutlineView, heightOfRowByItem item: AnyObject) -> CGFloat {
+    open func outlineView(_ outlineView: NSOutlineView, heightOfRowByItem item: Any) -> CGFloat {
         return outlineView.rowHeight
     }
     
-    public func outlineView(outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
+    open func outlineView(_ outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
         let node = item as! N
         return model.contextMenu?(node.data).map{$0.nsmenu}
     }
     
-    public func outlineView(outlineView: NSOutlineView, shouldSelectItem item: AnyObject) -> Bool {
+    open func outlineView(_ outlineView: NSOutlineView, shouldSelectItem item: Any) -> Bool {
         return true
     }
     
-    public func outlineView(outlineView: NSOutlineView, rowViewForItem item: AnyObject) -> NSTableRowView? {
+    open func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
         // TODO: Make this configurable
-        return outlineView.makeViewWithIdentifier("RowView", owner: self) as? NSTableRowView
+        return outlineView.make(withIdentifier: "RowView", owner: self) as? NSTableRowView
     }
     
-    public func outlineViewSelectionDidChange(notification: NSNotification) {
+    open func outlineViewSelectionDidChange(_ notification: Notification) {
         if selfInitiatedSelectionChange {
             return
         }
@@ -258,10 +258,10 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     }
     
     /// Returns the set of node IDs corresponding to the view's current selection state.
-    private func selectedItemIDs() -> Set<N.ID> {
+    fileprivate func selectedItemIDs() -> Set<N.ID> {
         var itemIDs: [N.ID] = []
-        self.outlineView.selectedRowIndexes.enumerateIndexesUsingBlock { (index, stop) -> Void in
-            if let node = self.outlineView.itemAtRow(index) as? N {
+        (self.outlineView.selectedRowIndexes as NSIndexSet).enumerate { (index, stop) -> Void in
+            if let node = self.outlineView.item(atRow: index) as? N {
                 itemIDs.append(node.id)
             }
         }
@@ -269,26 +269,26 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     }
     
     /// Selects the rows corresponding to the given set of node IDs.
-    private func selectItems(ids: Set<N.ID>) {
+    fileprivate func selectItems(_ ids: Set<N.ID>) {
         let indexes = NSMutableIndexSet()
         for id in ids {
             if let node = self.model.data.nodeForID(id) {
                 // TODO: This is inefficient
-                let index = self.outlineView.rowForItem(node)
+                let index = self.outlineView.row(forItem: node)
                 if index >= 0 {
-                    indexes.addIndex(index)
+                    indexes.add(index)
                 }
             }
         }
         selfInitiatedSelectionChange = true
-        self.outlineView.selectRowIndexes(indexes, byExtendingSelection: false)
+        self.outlineView.selectRowIndexes(indexes as IndexSet, byExtendingSelection: false)
         selfInitiatedSelectionChange = false
     }
 
     // MARK: Property observers
 
-    private func treeChanged(changes: [TreeChange<N>]) {
-        let animation: NSTableViewAnimationOptions = animateChanges ? [.EffectFade] : [.EffectNone]
+    fileprivate func treeChanged(_ changes: [TreeChange<N>]) {
+        let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : NSTableViewAnimationOptions()
 
         // Get the current set of IDs from the `selection` property and then use those to restore
         // the selection state after the changes are processed; this ensures that we select items
@@ -306,7 +306,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
             case let .Insert(path):
                 let rows = NSIndexSet(index: path.index)
                 outlineView.insertItemsAtIndexes(rows, inParent: path.parent, withAnimation: animation)
-                if let node = model.data.nodeAtPath(path) where autoExpand {
+                if let node = model.data.nodeAtPath(path) , autoExpand {
                     itemsToExpand.append(node)
                 }
 

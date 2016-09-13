@@ -9,8 +9,8 @@ public struct ContextMenu {
     
     // TODO: Remove this in favor of MenuItem
     public enum Item { case
-        Titled(title: String, action: () -> Void),
-        Separator
+        titled(title: String, action: () -> Void),
+        separator
     }
     
     public let items: [Item]
@@ -28,11 +28,11 @@ extension ContextMenu {
         for item in items {
             let nsitem: NSMenuItem
             switch item {
-            case let .Titled(title, action):
+            case let .titled(title, action):
                 nsitem = ClosureMenuItem(title: title, actionClosure: action, keyEquivalent: "")
                 break
-            case .Separator:
-                nsitem = NSMenuItem.separatorItem()
+            case .separator:
+                nsitem = NSMenuItem.separator()
             }
             menu.addItem(nsitem)
         }
@@ -43,9 +43,9 @@ extension ContextMenu {
 
 private class ClosureMenuItem: NSMenuItem {
 
-    private var actionClosure: () -> Void
+    fileprivate var actionClosure: () -> Void
     
-    init(title: String, actionClosure: () -> Void, keyEquivalent: String) {
+    init(title: String, actionClosure: @escaping () -> Void, keyEquivalent: String) {
         self.actionClosure = actionClosure
         super.init(title: title, action: #selector(ClosureMenuItem.action(_:)), keyEquivalent: keyEquivalent)
         self.target = self
@@ -55,7 +55,7 @@ private class ClosureMenuItem: NSMenuItem {
         fatalError("init(coder:) has not been implemented")
     }
     
-    @objc func action(sender: NSMenuItem) {
+    @objc func action(_ sender: NSMenuItem) {
         self.actionClosure()
     }
 }

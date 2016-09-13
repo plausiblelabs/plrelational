@@ -6,14 +6,14 @@
 import Cocoa
 import Binding
 
-public class TextField: NSTextField, NSTextFieldDelegate {
+open class TextField: NSTextField, NSTextFieldDelegate {
 
-    private var timer: NSTimer?
+    fileprivate var timer: Timer?
 
-    private lazy var changeHandler: ChangeHandler = ChangeHandler(
+    fileprivate lazy var changeHandler: ChangeHandler = ChangeHandler(
         onLock: { [weak self] in
             guard let strongSelf = self else { return }
-            strongSelf.timer = NSTimer.scheduledTimerWithTimeInterval(0.5, target: strongSelf, selector: #selector(timerFired), userInfo: nil, repeats: false)
+            strongSelf.timer = Timer.scheduledTimer(timeInterval: 0.5, target: strongSelf, selector: #selector(timerFired), userInfo: nil, repeats: false)
         },
         onUnlock: { [weak self] in
             guard let strongSelf = self else { return }
@@ -21,12 +21,12 @@ public class TextField: NSTextField, NSTextFieldDelegate {
                 timer.invalidate()
                 strongSelf.timer = nil
             } else {
-                strongSelf.enabled = true
+                strongSelf.isEnabled = true
             }
         }
     )
     
-    private lazy var _string: ExternalValueProperty<String> = ExternalValueProperty(
+    fileprivate lazy var _string: ExternalValueProperty<String> = ExternalValueProperty(
         get: { [unowned self] in
             self.stringValue ?? ""
         },
@@ -35,18 +35,18 @@ public class TextField: NSTextField, NSTextFieldDelegate {
         },
         changeHandler: self.changeHandler
     )
-    public var string: ReadWriteProperty<String> { return _string }
+    open var string: ReadWriteProperty<String> { return _string }
     
-    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    open lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.placeholderString = value
     })
 
-    public lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
-        self.hidden = !value
+    open lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
+        self.isHidden = !value
     })
     
-    private var previousCommittedValue: String?
-    private var previousValue: String?
+    fileprivate var previousCommittedValue: String?
+    fileprivate var previousValue: String?
     
     public override init(frame: NSRect) {
         super.init(frame: frame)
@@ -60,19 +60,19 @@ public class TextField: NSTextField, NSTextFieldDelegate {
         self.delegate = self
     }
     
-    public override func controlTextDidBeginEditing(obj: NSNotification) {
+    open override func controlTextDidBeginEditing(_ obj: Notification) {
         //Swift.print("CONTROL DID BEGIN EDITING!")
         previousCommittedValue = stringValue
         previousValue = stringValue
     }
     
-    public override func controlTextDidChange(notification: NSNotification) {
+    open override func controlTextDidChange(_ notification: Notification) {
         //Swift.print("CONTROL DID CHANGE!")
         _string.changed(transient: true)
         previousValue = stringValue
     }
     
-    public override func controlTextDidEndEditing(obj: NSNotification) {
+    open override func controlTextDidEndEditing(_ obj: Notification) {
         // Note that controlTextDidBeginEditing may not be called if the user gives focus to the text field
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value
@@ -87,7 +87,7 @@ public class TextField: NSTextField, NSTextFieldDelegate {
         previousValue = nil
     }
     
-    @objc private func timerFired() {
-        self.enabled = false
+    @objc fileprivate func timerFired() {
+        self.isEnabled = false
     }
 }

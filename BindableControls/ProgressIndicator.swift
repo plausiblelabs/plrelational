@@ -6,10 +6,10 @@
 import Cocoa
 import Binding
 
-public class ProgressIndicator: NSProgressIndicator {
+open class ProgressIndicator: NSProgressIndicator {
     
-    public lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] value, _ in
-        self?.hidden = !value
+    open lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] value, _ in
+        self?.isHidden = !value
         if value {
             self?.startAnimation(nil)
         } else {
