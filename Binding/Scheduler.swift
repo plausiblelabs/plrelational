@@ -90,7 +90,7 @@ public final class QueueScheduler: Scheduler {
     /// Initializes a scheduler that will target a new serial
     /// queue with the given quality of service class.
     public convenience init(qos: DispatchQoS.QoSClass = DispatchQoS.QoSClass.default, name: String = "Binding.QueueScheduler") {
-        self.init(internalQueue: DispatchQueue(label: name, attributes: dispatch_queue_attr_make_with_qos_class(DispatchQueue.Attributes(), qos, 0)))
+        self.init(internalQueue: DispatchQueue(label: name, qos: DispatchQoS(qosClass: qos, relativePriority: 0), attributes: []))
     }
     
     public func schedule(_ action: @escaping () -> Void) -> Disposable? {
