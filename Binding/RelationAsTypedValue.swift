@@ -115,7 +115,7 @@ extension Relation {
 
     /// Resolves to a single transformed value if there is exactly one row in the relation, otherwise resolves
     /// to nil.
-    public func oneValue<V>(_ transform: (RelationValue) -> V?) -> V? {
+    public func oneValue<V>(_ transform: @escaping (RelationValue) -> V?) -> V? {
         return oneValue(okRows, transform)
     }
     
