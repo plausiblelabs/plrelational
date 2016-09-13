@@ -17,7 +17,7 @@ public struct TreeViewModel<N: TreeNode> {
     public let contextMenu: ((N.Data) -> ContextMenu?)?
     // Note: dstPath.index is relative to the state of the array *before* the item is removed.
     public let move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?
-    public let selection: ReadWriteProperty<Set<N.ID>>
+    public let selection: AsyncReadWriteProperty<Set<N.ID>>
     public let cellIdentifier: (N.Data) -> String
     public let cellText: (N.Data) -> CellTextProperty
     public let cellImage: ((N.Data) -> ReadableProperty<Image>?)?
@@ -28,7 +28,7 @@ public struct TreeViewModel<N: TreeNode> {
         isSection: (N.Data) -> Bool,
         contextMenu: ((N.Data) -> ContextMenu?)?,
         move: ((srcPath: TreePath<N>, dstPath: TreePath<N>) -> Void)?,
-        selection: ReadWriteProperty<Set<N.ID>>,
+        selection: AsyncReadWriteProperty<Set<N.ID>>,
         cellIdentifier: (N.Data) -> String,
         cellText: (N.Data) -> CellTextProperty,
         cellImage: ((N.Data) -> ReadableProperty<Image>?)?)
@@ -85,6 +85,9 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         // Enable drag-and-drop
         outlineView.registerForDraggedTypes([PasteboardType])
         outlineView.verticalMotionCanBeginDrag = true
+        
+        // Load the initial data
+        model.data.start()
     }
     
     deinit {
@@ -96,7 +99,11 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     public func outlineView(outlineView: NSOutlineView, numberOfChildrenOfItem item: AnyObject?) -> Int {
         switch item {
         case nil:
-            return model.data.root.children.count
+            if let root = model.data.value {
+                return root.children.count
+            } else {
+                return 0
+            }
         case let node as N:
             return node.children.count
         default:
@@ -107,7 +114,7 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
     public func outlineView(outlineView: NSOutlineView, child index: Int, ofItem item: AnyObject?) -> AnyObject {
         switch item {
         case nil:
-            return model.data.root.children[index]
+            return model.data.value!.children[index]
         case let node as N:
             return node.children[index]
         default:
@@ -303,6 +310,9 @@ public class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlin
         
         for change in changes {
             switch change {
+            case .Initial(_):
+                outlineView.reloadData()
+
             case let .Insert(path):
                 let rows = NSIndexSet(index: path.index)
                 outlineView.insertItemsAtIndexes(rows, inParent: path.parent, withAnimation: animation)
