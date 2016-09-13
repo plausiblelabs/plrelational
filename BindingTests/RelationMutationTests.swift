@@ -14,8 +14,8 @@ class RelationMutationTests: BindingTestCase {
         let sqlr = db.createRelation("animal", scheme: ["id", "name", "friendly", "age"]).ok!
         let r = ChangeLoggingRelation(baseRelation: sqlr)
         
-        r.add(["id": 1, "name": "cat", "friendly": 1, "age": 5])
-        r.add(["id": 2, "name": "dog", "friendly": 0, "age": 3])
+        _ = r.add(["id": 1, "name": "cat", "friendly": 1, "age": 5])
+        _ = r.add(["id": 2, "name": "dog", "friendly": 0, "age": 3])
         
         let name = r.project(["name"])
         let a1name = r.select(Attribute("id") *== 1).project(["name"])
@@ -69,8 +69,8 @@ class RelationMutationTests: BindingTestCase {
         let db = TransactionalDatabase(sqliteDB)
         let r = db["animal"]
         
-        r.add(["id": 1, "name": "cat", "friendly": 1, "age": 5])
-        r.add(["id": 2, "name": "dog", "friendly": 0, "age": 3])
+        _ = r.add(["id": 1, "name": "cat", "friendly": 1, "age": 5])
+        _ = r.add(["id": 2, "name": "dog", "friendly": 0, "age": 3])
 
         func awaitCompletion(_ f: () -> Void) {
             f()

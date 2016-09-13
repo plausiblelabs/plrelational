@@ -22,20 +22,20 @@ class RelationPropertyTests: BindingTestCase {
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
         
-        r.add(["id": 1, "name": "cat"])
+        _ = r.add(["id": 1, "name": "cat"])
         
         XCTAssertEqual(property.value, "cat")
         XCTAssertEqual(changeObserved, true)
         changeObserved = false
         
-        r.add(["id": 2, "name": "dog"])
+        _ = r.add(["id": 2, "name": "dog"])
         
         XCTAssertNotNil(property.value)
         XCTAssertEqual(property.value, "cat")
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
         
-        r.delete(true)
+        _ = r.delete(true)
         
         XCTAssertEqual(property.value, "")
         XCTAssertEqual(changeObserved, true)
@@ -69,10 +69,10 @@ class RelationPropertyTests: BindingTestCase {
         }
 
         db.transaction{
-            objects.add(["id": 1, "name": "One", "type": 0])
-            docItems.add(["id": 1])
-            objects.add(["id": 2, "name": "Two", "type": 0])
-            docItems.add(["id": 2])
+            _ = objects.add(["id": 1, "name": "One", "type": 0])
+            _ = docItems.add(["id": 1])
+            _ = objects.add(["id": 2, "name": "Two", "type": 0])
+            _ = docItems.add(["id": 2])
         }
         
         var changeObserved = false
@@ -83,7 +83,7 @@ class RelationPropertyTests: BindingTestCase {
         changeObserved = false
 
         db.transaction{
-            selectedDocItemID.add(["id": 1])
+            _ = selectedDocItemID.add(["id": 1])
         }
         
         XCTAssertEqual(property.value?.name, "One")
@@ -91,8 +91,8 @@ class RelationPropertyTests: BindingTestCase {
         changeObserved = false
         
         db.transaction{
-            objects.delete(Attribute("id") *== 1)
-            docItems.delete(Attribute("id") *== 1)
+            _ = objects.delete(Attribute("id") *== 1)
+            _ = docItems.delete(Attribute("id") *== 1)
         }
 
         XCTAssertEqual(property.value?.name, nil)
@@ -113,20 +113,20 @@ class RelationPropertyTests: BindingTestCase {
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
         
-        r.add(["id": 1, "name": "cat"])
+        _ = r.add(["id": 1, "name": "cat"])
         
         XCTAssertFalse(property.value)
         XCTAssertEqual(changeObserved, true)
         changeObserved = false
         
-        r.add(["id": 2, "name": "dog"])
+        _ = r.add(["id": 2, "name": "dog"])
         
         // Verify that observers are not notified when property value has not actually changed
         XCTAssertFalse(property.value)
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
         
-        r.delete(true)
+        _ = r.delete(true)
         
         XCTAssertTrue(property.value)
         XCTAssertEqual(changeObserved, true)
@@ -146,20 +146,20 @@ class RelationPropertyTests: BindingTestCase {
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
         
-        r.add(["id": 1, "name": "cat"])
+        _ = r.add(["id": 1, "name": "cat"])
         
         XCTAssertTrue(property.value)
         XCTAssertEqual(changeObserved, true)
         changeObserved = false
         
-        r.add(["id": 2, "name": "dog"])
+        _ = r.add(["id": 2, "name": "dog"])
         
         // Verify that observers are not notified when property value has not actually changed
         XCTAssertTrue(property.value)
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
         
-        r.delete(true)
+        _ = r.delete(true)
         
         XCTAssertFalse(property.value)
         XCTAssertEqual(changeObserved, true)
@@ -184,27 +184,27 @@ class RelationPropertyTests: BindingTestCase {
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
         
-        r.add(["id": 1, "name": "cat"])
+        _ = r.add(["id": 1, "name": "cat"])
         
         XCTAssertNotNil(property.value)
         XCTAssertEqual(property.value!.id, 1)
         XCTAssertEqual(changeObserved, true)
         changeObserved = false
         
-        r.add(["id": 2, "name": "dog"])
+        _ = r.add(["id": 2, "name": "dog"])
         
         XCTAssertNotNil(property.value)
         XCTAssertEqual(property.value!.id, 1)
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
         
-        r.delete(true)
+        _ = r.delete(true)
         
         XCTAssertNil(property.value)
         XCTAssertEqual(changeObserved, true)
         changeObserved = false
         
-        r.add(["id": 3, "name": "fish"])
+        _ = r.add(["id": 3, "name": "fish"])
         
         XCTAssertNotNil(property.value)
         XCTAssertEqual(property.value!.id, 2)
@@ -225,14 +225,14 @@ class RelationPropertyTests: BindingTestCase {
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
         
-        r.add(["id": 1, "name": "cat"])
+        _ = r.add(["id": 1, "name": "cat"])
         
         // Verify that observers are not notified when property value has not actually changed
         XCTAssertEqual(property.value, "")
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
         
-        r.add(["id": 2, "name": "dog"])
+        _ = r.add(["id": 2, "name": "dog"])
         
         XCTAssertEqual(property.value, "multi")
         XCTAssertEqual(changeObserved, true)
@@ -240,13 +240,13 @@ class RelationPropertyTests: BindingTestCase {
         
         // Verify that value is considered "multi" when there is a single non-NULL value and a
         // single NULL value
-        r.update(Attribute("id") *== 2, newValues: ["name": .null])
+        _ = r.update(Attribute("id") *== 2, newValues: ["name": .null])
         
         XCTAssertEqual(property.value, "multi")
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
         
-        r.delete(true)
+        _ = r.delete(true)
         
         XCTAssertEqual(property.value, "")
         XCTAssertEqual(changeObserved, true)
@@ -263,7 +263,7 @@ class RelationPropertyTests: BindingTestCase {
 
         func updateName(_ newValue: String) {
             db.transaction{
-                r.update(Attribute("id") *== 1, newValues: ["name": RelationValue(newValue)])
+                _ = r.update(Attribute("id") *== 1, newValues: ["name": RelationValue(newValue)])
             }
         }
 
@@ -297,7 +297,7 @@ class RelationPropertyTests: BindingTestCase {
         XCTAssertEqual(changeObserved, false)
         changeObserved = false
 
-        r.add(["id": 1, "name": "cat"])
+        _ = r.add(["id": 1, "name": "cat"])
 
         XCTAssertEqual(relationProperty.value, "cat")
         XCTAssertEqual(snapshotCount, 0)
@@ -311,7 +311,7 @@ class RelationPropertyTests: BindingTestCase {
         // Possibly a better way to deal with all this would be to actually notify observers
         // in the the case where the value is not changing but the transient flag *is* changing.
         let otherProperty = mutableValueProperty("", valueChanging: { _ in true })
-        otherProperty <~> relationProperty
+        _ = otherProperty <~> relationProperty
 
         otherProperty.change("dog", transient: true)
 
@@ -354,7 +354,7 @@ class RelationPropertyTests: BindingTestCase {
         XCTAssertEqual(changeObserved, true)
         changeObserved = false
         
-        r.delete(true)
+        _ = r.delete(true)
         
         XCTAssertEqual(relationProperty.value, "")
         XCTAssertEqual(snapshotCount, 2)
