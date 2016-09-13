@@ -8,7 +8,7 @@ import XCTest
 
 class SignalOperationsTests: BindingTestCase {
     
-    private func verifyUnary<T, U: Equatable>(notify notify: Signal<T>.Notify, mapped: Signal<U>, values: [T], expected: [U], file: StaticString = #file, line: UInt = #line) {
+    private func verifyUnary<T, U: Equatable>(notify: Signal<T>.Notify, mapped: Signal<U>, values: [T], expected: [U], file: StaticString = #file, line: UInt = #line) {
         var mappedValue: U?
         var willChangeCount = 0
         var changingCount = 0
@@ -47,7 +47,7 @@ class SignalOperationsTests: BindingTestCase {
         XCTAssertEqual(mapped.changeCount, 0)
     }
     
-    private func verifyBinary<T1, T2, U: Equatable>(notify1 notify1: Signal<T1>.Notify, notify2: Signal<T2>.Notify, mapped: Signal<U>, values1: [T1], values2: [T2], expected: [U], file: StaticString = #file, line: UInt = #line) {
+    private func verifyBinary<T1, T2, U: Equatable>(notify1: Signal<T1>.Notify, notify2: Signal<T2>.Notify, mapped: Signal<U>, values1: [T1], values2: [T2], expected: [U], file: StaticString = #file, line: UInt = #line) {
         var mappedValue: U?
         var willChangeCount = 0
         var changingCount = 0

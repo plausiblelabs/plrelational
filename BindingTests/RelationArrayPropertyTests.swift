@@ -17,7 +17,7 @@ class RelationArrayPropertyTests: BindingTestCase {
 
         // Add some existing data to the underlying SQLite database
         func addPage(_ pageID: Int64, name: String, order: Double) {
-            sqliteRelation.add([
+            _ = sqliteRelation.add([
                 "id": RelationValue(pageID),
                 "name": RelationValue(name),
                 "order": RelationValue(order)
