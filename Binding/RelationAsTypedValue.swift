@@ -33,9 +33,14 @@ extension Relation {
         return allValues(okRows, transform)
     }
 
+    /// Resolves to a set of all values, built from one transformed value for each row in the given set.
+    public func allValuesFromRows<V: Hashable>(_ rows: AnyIterator<Row>, _ transform: @escaping (Row) -> V?) -> Set<V> {
+        return Set(rows.flatMap{transform($0)})
+    }
+
     /// Resolves to a set of all values, built from one transformed value for each non-error row in the relation.
     public func allValuesFromRows<V: Hashable>(_ transform: @escaping (Row) -> V?) -> Set<V> {
-        return Set(okRows.flatMap{transform($0)})
+        return allValuesFromRows(okRows, transform)
     }
 
     /// Returns a set of all RelationValues for the single attribute in the relation.
