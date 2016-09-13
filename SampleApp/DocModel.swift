@@ -63,16 +63,18 @@ enum ItemType: Int64 { case
 }
 
 class DocModel {
+    
+    private typealias TransactionalRelation = TransactionalDatabase.TransactionalRelation
 
     private let db: TransactionalDatabase
     private let undoableDB: UndoableDatabase
 
-    private var collections: MutableRelation
-    private var objects: MutableRelation
-    private var textObjects: MutableRelation
-    private var imageObjects: MutableRelation
-    private var selectedCollectionID: MutableRelation
-    private var selectedInspectorItemIDs: MutableRelation
+    private var collections: TransactionalRelation
+    private var objects: TransactionalRelation
+    private var textObjects: TransactionalRelation
+    private var imageObjects: TransactionalRelation
+    private var selectedCollectionID: TransactionalRelation
+    private var selectedInspectorItemIDs: TransactionalRelation
     
     private let inspectorItems: Relation
     private let selectedCollection: Relation
@@ -107,7 +109,7 @@ class DocModel {
         // Prepare the stored relations
         let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
-        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+        func createRelation(name: String, _ scheme: Scheme) -> TransactionalRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
             return db[name]
@@ -149,27 +151,27 @@ class DocModel {
         self.db = db
         self.undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
 
-        self.removal = selectedItems.addChangeObserver({ changes in
+//        self.removal = selectedItems.addChangeObserver({ changes in
 //            print("ADDS:\n\(changes.added)")
 //            print("REMOVES:\n\(changes.removed)")
 //            print("SELECTED ITEMS:\n\(self.selectedItems)\n")
-        })
+//        })
     }
     
     func addDefaultData() {
-        func addCollection(collectionID: Int64, name: String, type: ItemType, parentID: Int64?, previousID: Int64?) {
+        func addCollection(collectionID: Int64, name: String, type: ItemType, parentID: Int64?, order: Double) {
             db.transaction({
-                self.addCollection(collectionID, name: name, type: type, parentID: parentID, previousID: previousID)
+                self.addCollection(collectionID, name: name, type: type, parentID: parentID, order: order)
             })
         }
         
-        addCollection(1, name: "Group1", type: .Group, parentID: nil, previousID: nil)
-        addCollection(2, name: "Collection1", type: .Collection, parentID: 1, previousID: nil)
-        addCollection(3, name: "Page1", type: .Page, parentID: 1, previousID: 2)
-        addCollection(4, name: "Page2", type: .Page, parentID: 1, previousID: 3)
-        addCollection(5, name: "Child1", type: .Page, parentID: 2, previousID: nil)
-        addCollection(6, name: "Child2", type: .Page, parentID: 2, previousID: 5)
-        addCollection(7, name: "Group2", type: .Group, parentID: nil, previousID: 1)
+        addCollection(1, name: "Group1", type: .Group, parentID: nil, order: 5.0)
+        addCollection(2, name: "Collection1", type: .Collection, parentID: 1, order: 5.0)
+        addCollection(3, name: "Page1", type: .Page, parentID: 1, order: 7.0)
+        addCollection(4, name: "Page2", type: .Page, parentID: 1, order: 8.0)
+        addCollection(5, name: "Child1", type: .Page, parentID: 2, order: 5.0)
+        addCollection(6, name: "Child2", type: .Page, parentID: 2, order: 7.0)
+        addCollection(7, name: "Group2", type: .Group, parentID: nil, order: 7.0)
         
         func addObject(objectID: Int64, name: String, type: ItemType, collectionID: Int64, order: Double) {
             db.transaction({
@@ -202,8 +204,21 @@ class DocModel {
         let pos: TreePos<RowTreeNode> = TreePos(parentID: parent, previousID: previous, nextID: nil)
         docOutlineTree.insert(row, pos: pos)
     }
-    
-    private func addObject(objectID: Int64, name: String, type: ItemType, collectionID: Int64, order: Double) {
+
+    /// For testing purposes only.
+    internal func addCollection(collectionID: Int64, name: String, type: ItemType, parentID: Int64?, order: Double) {
+        let parentIDValue = parentID.map{ RelationValue($0) } ?? .NULL
+        let row: Row = [
+            "id": RelationValue(collectionID),
+            "type": RelationValue(type.rawValue),
+            "name": RelationValue(name),
+            "parent": parentIDValue,
+            "order": RelationValue(order)
+        ]
+        collections.add(row)
+    }
+
+    internal func addObject(objectID: Int64, name: String, type: ItemType, collectionID: Int64, order: Double) {
         objects.add([
             "id": RelationValue(objectID),
             "name": RelationValue(name),
@@ -283,7 +298,7 @@ class DocModel {
                 let rowID = row["id"]
                 let type = ItemType(row)!
                 let nameRelation = self.collections.select(Attribute("id") *== rowID).project(["name"])
-                return .ReadWrite(self.nameProperty(nameRelation, type: type.name))
+                return .AsyncReadWrite(self.nameProperty(nameRelation, type: type.name))
             },
             cellImage: { row in
                 let type = ItemType(row)!
@@ -307,7 +322,7 @@ class DocModel {
                 let rowID = row["id"]
                 let type = ItemType(row)!
                 let nameRelation = self.inspectorItems.select(Attribute("id") *== rowID).project(["name"])
-                return .ReadWrite(self.nameProperty(nameRelation, type: type.name))
+                return .AsyncReadWrite(self.nameProperty(nameRelation, type: type.name))
             },
             cellImage: { row in
                 let type = ItemType(row)!
@@ -331,25 +346,25 @@ class DocModel {
         )
     }()
 
-    private func nameProperty(relation: Relation, type: String) -> ReadWriteProperty<String> {
-        return undoableDB.bidiProperty(
+    private func nameProperty(relation: Relation, type: String) -> AsyncReadWriteProperty<String> {
+        return undoableDB.asyncBidiProperty(
             relation,
             action: "Rename \(type)",
-            get: { $0.oneString },
-            set: { relation.updateString($0) }
+            signal: relation.signal{ $0.oneString($1) },
+            update: { relation.asyncUpdateString($0) }
         )
     }
-
-    private func treeSelectionProperty(relation: MutableRelation, clearInspectorSelection: Bool) -> ReadWriteProperty<Set<RelationValue>> {
-        return undoableDB.bidiProperty(
+    
+    private func treeSelectionProperty(relation: TransactionalRelation, clearInspectorSelection: Bool) -> AsyncReadWriteProperty<Set<RelationValue>> {
+        return undoableDB.asyncBidiProperty(
             relation,
             action: "Change Selection",
-            get: { $0.allValues },
-            set: {
+            signal: relation.signal{ $0.allValues($1) },
+            update: {
                 if clearInspectorSelection {
-                    self.selectedInspectorItemIDs.delete(true)
+                    self.selectedInspectorItemIDs.asyncDelete(true)
                 }
-                relation.replaceValues(Array($0))
+                relation.asyncReplaceValues(Array($0))
             }
         )
     }

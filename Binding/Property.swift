@@ -47,8 +47,8 @@ open class ReadableProperty<T>: ReadablePropertyType {
     
     open fileprivate(set) var value: T
     open let signal: Signal<T>
-    fileprivate let notify: Signal<T>.Notify
-    fileprivate let changing: (T, T) -> Bool
+    private let notify: Signal<T>.Notify
+    private let changing: (T, T) -> Bool
     
     public init(initialValue: T, signal: Signal<T>, notify: Signal<T>.Notify, changing: @escaping (T, T) -> Bool) {
         self.value = initialValue

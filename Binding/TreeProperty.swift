@@ -43,6 +43,7 @@ public struct TreePos<N: TreeNode> {
 }
 
 public enum TreeChange<N: TreeNode> { case
+    initial(N),
     insert(TreePath<N>),
     delete(TreePath<N>),
     move(src: TreePath<N>, dst: TreePath<N>)
@@ -51,6 +52,8 @@ public enum TreeChange<N: TreeNode> { case
 extension TreeChange: Equatable {}
 public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     switch (a, b) {
+    // TODO: Compare node structures for the .Initial case?
+    case let (.initial(a), .initial(b)): return a.id == b.id
     case let (.insert(a), .insert(b)): return a == b
     case let (.delete(a), .delete(b)): return a == b
     case let (.move(asrc, adst), .move(bsrc, bdst)): return asrc == bsrc && adst == bdst
@@ -58,7 +61,7 @@ public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     }
 }
 
-open class TreeProperty<N: TreeNode>: ReadablePropertyType {
+open class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
     public typealias Value = N
     public typealias SignalChange = [TreeChange<N>]
 
@@ -68,30 +71,34 @@ open class TreeProperty<N: TreeNode>: ReadablePropertyType {
     public typealias Pos = TreePos<N>
     public typealias Change = TreeChange<N>
     
-    open let root: Node
+    open var root: Node
     
-    open var value: Node {
+    open var value: Node? {
         return root
     }
     
-    open let signal: Signal<[Change]>
-    fileprivate let notify: Signal<[Change]>.Notify
+    open let signal: Signal<SignalChange>
+    internal let notify: Signal<SignalChange>.Notify
     
-    init(root: Node) {
-        (self.signal, self.notify) = Signal<[Change]>.pipe()
+    init(root: Node, signal: Signal<SignalChange>, notify: Signal<SignalChange>.Notify) {
         self.root = root
+        self.signal = signal
+        self.notify = notify
     }
     
-    internal func notifyChangeObservers(_ changes: [Change]) {
+    public func start() {
+    }
+    
+    internal func notifyObservers(treeChanges: [TreeChange<N>]) {
         let metadata = ChangeMetadata(transient: false)
-        notify.valueChanging(changes, metadata)
+        notify.valueChanging(treeChanges, metadata)
     }
     
-    // TODO: Move these to a MutableTreeProperty subclass?
-    open func insert(_ data: N.Data, pos: Pos) {
+    open func insert(data: N.Data, pos: Pos) {
     }
-    
-    open func computeOrderForInsert(_ data: inout N.Data, pos: Pos) {
+
+    open func computeOrderForInsert(after previous: N.ID?, inParent parent: N.ID?) -> Double {
+        return 0.0
     }
     
     open func delete(_ id: N.ID) {
