@@ -240,7 +240,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
         return outlineView.rowHeight
     }
     
-    open func outlineView(_ outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
+    open func outlineView(_ outlineView: NSOutlineView, menuForItem item: Any) -> NSMenu? {
         let node = item as! N
         return model.contextMenu?(node.data).map{$0.nsmenu}
     }

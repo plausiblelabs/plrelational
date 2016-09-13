@@ -6,7 +6,7 @@
 import Cocoa
 
 public protocol ExtOutlineViewDelegate: NSOutlineViewDelegate {
-    func outlineView(_ outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu?
+    func outlineView(_ outlineView: NSOutlineView, menuForItem item: Any) -> NSMenu?
 }
 
 open class ExtOutlineView: NSOutlineView {
@@ -33,6 +33,6 @@ open class ExtOutlineView: NSOutlineView {
         if item == nil {
             return nil
         }
-        return (self.delegate as! ExtOutlineViewDelegate).outlineView(self, menuForItem: item! as AnyObject)
+        return (self.delegate as! ExtOutlineViewDelegate).outlineView(self, menuForItem: item!)
     }
 }

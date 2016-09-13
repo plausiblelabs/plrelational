@@ -198,7 +198,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         return false
     }
     
-    open func outlineView(_ outlineView: NSOutlineView, menuForItem item: AnyObject) -> NSMenu? {
+    open func outlineView(_ outlineView: NSOutlineView, menuForItem item: Any) -> NSMenu? {
         let element = item as! E
         return model.contextMenu?(element.data).map{$0.nsmenu}
     }
