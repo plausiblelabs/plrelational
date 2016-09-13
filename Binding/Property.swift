@@ -522,11 +522,11 @@ precedencegroup PropertyOperatorPrecedence {
 // This syntax is borrowed from ReactiveCocoa.
 infix operator <~ : PropertyOperatorPrecedence
 
-public func <~ <T, RHS: ReadablePropertyType>(lhs: BindableProperty<T>, rhs: RHS) -> Binding where RHS.Value == T, RHS.SignalChange == T {
+@discardableResult public func <~ <T, RHS: ReadablePropertyType>(lhs: BindableProperty<T>, rhs: RHS) -> Binding where RHS.Value == T, RHS.SignalChange == T {
     return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
 }
 
-public func <~ <T, RHS: AsyncReadablePropertyType>(lhs: BindableProperty<T>, rhs: RHS) -> Binding where RHS.Value == T, RHS.SignalChange == T {
+@discardableResult public func <~ <T, RHS: AsyncReadablePropertyType>(lhs: BindableProperty<T>, rhs: RHS) -> Binding where RHS.Value == T, RHS.SignalChange == T {
     rhs.start()
     return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
 }
@@ -535,18 +535,18 @@ public func <~ <T, RHS: AsyncReadablePropertyType>(lhs: BindableProperty<T>, rhs
 // conflicts we use `~~>` here instead
 infix operator ~~> : PropertyOperatorPrecedence
 
-public func ~~> (lhs: Signal<()>, rhs: ActionProperty) -> Binding {
+@discardableResult public func ~~> (lhs: Signal<()>, rhs: ActionProperty) -> Binding {
     // TODO: We invent an owner here; what if no one else owns the signal?
     return rhs.bind(lhs, initialValue: nil, owner: "" as AnyObject)
 }
 
 infix operator <~> : PropertyOperatorPrecedence
 
-public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Binding {
+@discardableResult public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Binding {
     return lhs.bindBidi(rhs)
 }
 
-public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: AsyncReadWriteProperty<T>) -> Binding {
+@discardableResult public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: AsyncReadWriteProperty<T>) -> Binding {
     return lhs.bindBidi(rhs)
 }
 
