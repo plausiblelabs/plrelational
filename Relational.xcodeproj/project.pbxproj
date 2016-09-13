@@ -227,6 +227,8 @@
 		C2CFC3591D7F336F00389373 /* PlistFileRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */; };
 		C2CFC35B1D7F36DE00389373 /* RowPlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CFC35A1D7F36DE00389373 /* RowPlist.swift */; };
 		C2CFC35D1D7F49D800389373 /* PlistFileRelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */; };
+		C2D4A8531D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; };
+		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2DF2B9E1CFDD81100ED8695 /* ObjectDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */; };
 		C2DF2BA01CFDE2B100ED8695 /* QueryRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */; };
 		C2DF2BA21D006E1C00ED8695 /* RelationDifferentiator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */; };
@@ -518,6 +520,17 @@
 			name = "Copy Embedded Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C2D4A84E1D887A09001D9971 /* Copy Embedded Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */,
+			);
+			name = "Copy Embedded Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -737,6 +750,7 @@
 		C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistFileRelation.swift; sourceTree = "<group>"; };
 		C2CFC35A1D7F36DE00389373 /* RowPlist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RowPlist.swift; sourceTree = "<group>"; };
 		C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistFileRelationTests.swift; sourceTree = "<group>"; };
+		C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswiftSwiftOnoneSupport.dylib; path = Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/libswiftSwiftOnoneSupport.dylib; sourceTree = DEVELOPER_DIR; };
 		C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectDictionary.swift; path = Relational/ObjectDictionary.swift; sourceTree = "<group>"; };
 		C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QueryRunnerTests.swift; path = RelationalTests/QueryRunnerTests.swift; sourceTree = SOURCE_ROOT; };
 		C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiator.swift; sourceTree = "<group>"; };
@@ -889,6 +903,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C2D4A8531D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1352,6 +1367,7 @@
 				371243DA1D0104F700E9BCFF /* RichTextTests */,
 				371243E51D0104F700E9BCFF /* RichTextUITests */,
 				C22BF12D1CBC348500D3FE59 /* Products */,
+				C2D4A8491D88789A001D9971 /* Swift library workaround */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1484,6 +1500,14 @@
 			);
 			name = PlistRelations;
 			path = Relational;
+			sourceTree = "<group>";
+		};
+		C2D4A8491D88789A001D9971 /* Swift library workaround */ = {
+			isa = PBXGroup;
+			children = (
+				C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */,
+			);
+			name = "Swift library workaround";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1635,6 +1659,7 @@
 				372707F21CFE2C7E00710C80 /* Sources */,
 				372707F31CFE2C7E00710C80 /* Frameworks */,
 				372707F41CFE2C7E00710C80 /* Resources */,
+				C2D4A84E1D887A09001D9971 /* Copy Embedded Libraries */,
 			);
 			buildRules = (
 			);
@@ -3058,6 +3083,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXECUTABLE_PREFIX = lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
@@ -3071,6 +3100,10 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				EXECUTABLE_PREFIX = lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
