@@ -140,9 +140,11 @@ func incr(_ b: PiVariableName) -> PiValue {
 
 let end: Pi = .end
 
-infix operator *|* {
-associativity left
+precedencegroup PiPrecedence {
+    associativity: left
 }
+
+infix operator *|* : PiPrecedence
 
 func *|* (p: Pi, q: Pi) -> Pi {
     return par(p, q)
