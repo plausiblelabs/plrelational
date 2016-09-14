@@ -12,11 +12,11 @@ open class ColorPickerView: NSView {
         return self.model.color
     }()
     
-    fileprivate let model: ColorPickerModel
+    private let model: ColorPickerModel
     
-    fileprivate let colorPopup: PopUpButton<ColorItem>
-    fileprivate let opacityCombo: ComboBox<CGFloat>
-    fileprivate let colorPanel: ColorPanel
+    private let colorPopup: PopUpButton<ColorItem>
+    private let opacityCombo: ComboBox<CGFloat>
+    private let colorPanel: ColorPanel
 
     public init(defaultColor: Color) {
         self.model = ColorPickerModel(defaultColor: defaultColor)
@@ -108,7 +108,7 @@ private func ==(a: ColorItem, b: ColorItem) -> Bool {
 private class ColorPickerModel {
     
     /// The color to show in the color picker when there is no selected color.
-    fileprivate let defaultColor: Color
+    private let defaultColor: Color
 
     fileprivate let presetColors: [Color]
     fileprivate var popupItems: [MenuItem<ColorItem>]!

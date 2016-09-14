@@ -8,7 +8,7 @@ import Binding
 
 open class Checkbox: NSButton {
     
-    fileprivate lazy var _checked: ExternalValueProperty<CheckState> = ExternalValueProperty(
+    private lazy var _checked: ExternalValueProperty<CheckState> = ExternalValueProperty(
         get: { [unowned self] in
             return CheckState(self.state)
         },

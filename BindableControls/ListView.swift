@@ -44,13 +44,13 @@ public struct ListViewModel<E: ArrayElement> {
 open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
 
     open let model: ListViewModel<E>
-    fileprivate let outlineView: NSOutlineView
+    private let outlineView: NSOutlineView
 
-    fileprivate var elements: [E] {
+    private var elements: [E] {
         return model.data.value ?? []
     }
     
-    fileprivate lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
+    private lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
         get: { [unowned self] in
             var itemIDs: [E.ID] = []
             for index in self.outlineView.selectedRowIndexes {
@@ -75,7 +75,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         }
     )
 
-    fileprivate var arrayObserverRemoval: ObserverRemoval?
+    private var arrayObserverRemoval: ObserverRemoval?
     //private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
@@ -225,7 +225,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
 
     // MARK: Property observers
 
-    fileprivate func arrayChanged(_ arrayChanges: [ArrayChange<E>]) {
+    private func arrayChanged(_ arrayChanges: [ArrayChange<E>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : NSTableViewAnimationOptions()
         
         outlineView.beginUpdates()

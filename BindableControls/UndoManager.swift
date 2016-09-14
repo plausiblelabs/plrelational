@@ -7,7 +7,7 @@ import Foundation
 
 open class UndoManager {
     
-    fileprivate let nsmanager: SPUndoManager
+    private let nsmanager: SPUndoManager
     
     public init() {
         self.nsmanager = SPUndoManager()

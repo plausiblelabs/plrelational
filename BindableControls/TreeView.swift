@@ -49,15 +49,15 @@ public struct TreeViewModel<N: TreeNode> {
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
 open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
     
-    fileprivate let model: TreeViewModel<N>
-    fileprivate let outlineView: NSOutlineView
+    private let model: TreeViewModel<N>
+    private let outlineView: NSOutlineView
     
-    fileprivate lazy var selection: MutableValueProperty<Set<N.ID>> = mutableValueProperty(Set(), { [unowned self] selectedIDs, _ in
+    private lazy var selection: MutableValueProperty<Set<N.ID>> = mutableValueProperty(Set(), { [unowned self] selectedIDs, _ in
         self.selectItems(selectedIDs)
     })
 
-    fileprivate var treeObserverRemoval: ObserverRemoval?
-    fileprivate var selfInitiatedSelectionChange = false
+    private var treeObserverRemoval: ObserverRemoval?
+    private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
     open var animateChanges = false
@@ -265,7 +265,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     }
     
     /// Returns the set of node IDs corresponding to the view's current selection state.
-    fileprivate func selectedItemIDs() -> Set<N.ID> {
+    private func selectedItemIDs() -> Set<N.ID> {
         var itemIDs: [N.ID] = []
         for index in self.outlineView.selectedRowIndexes {
             if let node = self.outlineView.item(atRow: index) as? N {
@@ -276,7 +276,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     }
     
     /// Selects the rows corresponding to the given set of node IDs.
-    fileprivate func selectItems(_ ids: Set<N.ID>) {
+    private func selectItems(_ ids: Set<N.ID>) {
         let indexes = NSMutableIndexSet()
         for id in ids {
             if let node = self.model.data.nodeForID(id) {
@@ -294,7 +294,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
 
     // MARK: Property observers
 
-    fileprivate func treeChanged(_ changes: [TreeChange<N>]) {
+    private func treeChanged(_ changes: [TreeChange<N>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : NSTableViewAnimationOptions()
 
         // Get the current set of IDs from the `selection` property and then use those to restore

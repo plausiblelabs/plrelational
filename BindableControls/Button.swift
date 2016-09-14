@@ -13,7 +13,7 @@ open class Button: NSButton {
     })
 
     open let clicks: Signal<()>
-    fileprivate let clicksNotify: Signal<()>.Notify
+    private let clicksNotify: Signal<()>.Notify
     
     public override init(frame: NSRect) {
         (clicks, clicksNotify) = Signal.pipe()

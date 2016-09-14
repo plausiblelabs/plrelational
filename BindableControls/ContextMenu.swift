@@ -43,7 +43,7 @@ extension ContextMenu {
 
 private class ClosureMenuItem: NSMenuItem {
 
-    fileprivate var actionClosure: () -> Void
+    private var actionClosure: () -> Void
     
     init(title: String, actionClosure: @escaping () -> Void, keyEquivalent: String) {
         self.actionClosure = actionClosure

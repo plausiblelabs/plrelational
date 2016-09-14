@@ -14,7 +14,7 @@ open class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
         self.addItems(withObjectValues: objects)
     })
     
-    fileprivate lazy var _value: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
+    private lazy var _value: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
         self.objectValue = value as AnyObject
     })
     open var value: ReadWriteProperty<T?> { return _value }
@@ -23,7 +23,7 @@ open class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
         self.placeholderString = value
     })
     
-    fileprivate var previousCommittedValue: T?
+    private var previousCommittedValue: T?
 
     public override init(frame: NSRect) {
         super.init(frame: frame)

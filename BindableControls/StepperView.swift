@@ -8,7 +8,7 @@ import Binding
 
 open class StepperView: NSControl, NSTextFieldDelegate {
     
-    fileprivate lazy var _value: MutableValueProperty<Int?> = mutableValueProperty(nil, { [unowned self] value, _ in
+    private lazy var _value: MutableValueProperty<Int?> = mutableValueProperty(nil, { [unowned self] value, _ in
         if let intValue = value {
             self.stepper.integerValue = intValue
             self.textField.integerValue = intValue
@@ -23,9 +23,9 @@ open class StepperView: NSControl, NSTextFieldDelegate {
         self.textField.placeholderString = value
     })
 
-    fileprivate let defaultValue: Int
-    fileprivate var textField: NSTextField!
-    fileprivate var stepper: NSStepper!
+    private let defaultValue: Int
+    private var textField: NSTextField!
+    private var stepper: NSStepper!
 
     public init(frame: NSRect, min: Int, max: Int, defaultValue: Int) {
         self.defaultValue = defaultValue

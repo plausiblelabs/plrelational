@@ -9,8 +9,8 @@ import Binding
 
 open class UndoableDatabase {
     
-    fileprivate let db: TransactionalDatabase
-    fileprivate let undoManager: UndoManager
+    private let db: TransactionalDatabase
+    private let undoManager: UndoManager
     
     public init(db: TransactionalDatabase, undoManager: UndoManager) {
         self.db = db
@@ -44,7 +44,7 @@ open class UndoableDatabase {
         return relation.property(mutationConfig(action, set), relationToValue: get)
     }
 
-    fileprivate func mutationConfig<T>(_ action: String, _ set: @escaping (T) -> Void) -> RelationMutationConfig<T> {
+    private func mutationConfig<T>(_ action: String, _ set: @escaping (T) -> Void) -> RelationMutationConfig<T> {
         return RelationMutationConfig(
             snapshot: {
                 return self.db.takeSnapshot()
@@ -87,7 +87,7 @@ open class UndoableDatabase {
         return relation.asyncProperty(asyncMutationConfig(action, update), { _ in signal })
     }
     
-    fileprivate func asyncMutationConfig<T>(_ action: String, _ update: @escaping (T) -> Void) -> RelationMutationConfig<T> {
+    private func asyncMutationConfig<T>(_ action: String, _ update: @escaping (T) -> Void) -> RelationMutationConfig<T> {
         return RelationMutationConfig(
             snapshot: {
                 return self.db.takeSnapshot()

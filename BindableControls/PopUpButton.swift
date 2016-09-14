@@ -27,7 +27,7 @@ open class PopUpButton<T: Equatable>: NSPopUpButton {
         self.setSelectedItem(self.selectedObject.value)
     })
 
-    fileprivate lazy var _selectedObject: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
+    private lazy var _selectedObject: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
         self.setSelectedItem(value)
     })
     open var selectedObject: ReadWriteProperty<T?> { return _selectedObject }
@@ -52,11 +52,11 @@ open class PopUpButton<T: Equatable>: NSPopUpButton {
 
     // TODO: We hang on to these just to maintain strong references while their underlying
     // NSMenuItems are attached to the NSMenu
-    fileprivate var nativeMenuItems: [NativeMenuItem<T>]?
-    fileprivate var defaultMenuItem: NativeMenuItem<T>?
+    private var nativeMenuItems: [NativeMenuItem<T>]?
+    private var defaultMenuItem: NativeMenuItem<T>?
     
-    fileprivate var selfInitiatedSelectionChange = false
-    fileprivate var selectedIndex = -1
+    private var selfInitiatedSelectionChange = false
+    private var selectedIndex = -1
 
     public override init(frame: NSRect, pullsDown flag: Bool) {
         super.init(frame: frame, pullsDown: flag)
@@ -70,7 +70,7 @@ open class PopUpButton<T: Equatable>: NSPopUpButton {
         fatalError("NSCoding not supported")
     }
     
-    fileprivate func setSelectedItem(_ object: T?) {
+    private func setSelectedItem(_ object: T?) {
         selfInitiatedSelectionChange = true
         if let object = object, let menu = menu {
             // Find menu item that matches given object

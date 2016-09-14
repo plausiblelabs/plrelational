@@ -9,14 +9,14 @@ import Binding
 open class ColorPanel {
     
     // XXX: Fix initial value
-    fileprivate lazy var _color: MutableValueProperty<Color> = mutableValueProperty(Color.white, { [unowned self] newValue, _ in
+    private lazy var _color: MutableValueProperty<Color> = mutableValueProperty(Color.white, { [unowned self] newValue, _ in
         self.updateColorPanel(newColor: newValue, makeVisible: false)
     })
     open var color: ReadWriteProperty<Color> { return _color }
 
     // TODO: Need to watch color panel's window visibility and update this accordingly
     // TODO: Check whether shared color panel is already visible
-    fileprivate lazy var _visible: MutableValueProperty<Bool> = mutableValueProperty(false, { [unowned self] newValue, _ in
+    private lazy var _visible: MutableValueProperty<Bool> = mutableValueProperty(false, { [unowned self] newValue, _ in
         // TODO: Should we `orderOut` when visible goes to false?
         if newValue {
             self.updateColorPanel(newColor: self.color.value, makeVisible: true)
@@ -24,9 +24,9 @@ open class ColorPanel {
     })
     open var visible: ReadWriteProperty<Bool> { return _visible }
     
-    fileprivate var ignorePanelUpdates = false
+    private var ignorePanelUpdates = false
     
-    fileprivate func updateColorPanel(newColor: Color?, makeVisible: Bool) {
+    private func updateColorPanel(newColor: Color?, makeVisible: Bool) {
         ignorePanelUpdates = true
         
         let colorPanel = NSColorPanel.shared()

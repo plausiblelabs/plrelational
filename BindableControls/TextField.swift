@@ -8,9 +8,9 @@ import Binding
 
 open class TextField: NSTextField, NSTextFieldDelegate {
 
-    fileprivate var timer: Timer?
+    private var timer: Timer?
 
-    fileprivate lazy var changeHandler: ChangeHandler = ChangeHandler(
+    private lazy var changeHandler: ChangeHandler = ChangeHandler(
         onLock: { [weak self] in
             guard let strongSelf = self else { return }
             strongSelf.timer = Timer.scheduledTimer(timeInterval: 0.5, target: strongSelf, selector: #selector(timerFired), userInfo: nil, repeats: false)
@@ -26,7 +26,7 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         }
     )
     
-    fileprivate lazy var _string: ExternalValueProperty<String> = ExternalValueProperty(
+    private lazy var _string: ExternalValueProperty<String> = ExternalValueProperty(
         get: { [unowned self] in
             self.stringValue
         },
@@ -45,8 +45,8 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         self.isHidden = !value
     })
     
-    fileprivate var previousCommittedValue: String?
-    fileprivate var previousValue: String?
+    private var previousCommittedValue: String?
+    private var previousValue: String?
     
     public override init(frame: NSRect) {
         super.init(frame: frame)
@@ -87,7 +87,7 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         previousValue = nil
     }
     
-    @objc fileprivate func timerFired() {
+    @objc private func timerFired() {
         self.isEnabled = false
     }
 }
