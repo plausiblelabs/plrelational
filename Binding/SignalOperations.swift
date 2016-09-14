@@ -122,7 +122,7 @@ private class MappedSignal<T>: Signal<T> {
     
     init<S: SignalType>(underlying: S, transform: @escaping (S.Value) -> T) {
         super.init(changeCount: underlying.changeCount, startFunc: {
-            underlying.start()
+            underlying.start(deliverInitial: $0)
         })
         
         self.removal = underlying.observe(SignalObserver(
@@ -149,8 +149,8 @@ private class BinaryOpSignal<T>: Signal<T> {
     
     init<LHS: SignalType, RHS: SignalType>(_ lhs: LHS, _ rhs: RHS, _ f: @escaping (LHS.Value, RHS.Value) -> T) {
         super.init(changeCount: lhs.changeCount + rhs.changeCount, startFunc: {
-            lhs.start()
-            rhs.start()
+            lhs.start(deliverInitial: $0)
+            rhs.start(deliverInitial: $0)
         })
         
         var lhsValue: LHS.Value?
@@ -203,8 +203,8 @@ private class BoolSeqSignal: Signal<Bool> {
         var values = [Bool?](repeating: nil, count: count)
         
         let changeCount = signals.map{ $0.changeCount }.reduce(0, +)
-        super.init(changeCount: changeCount, startFunc: {
-            signals.forEach{ $0.start() }
+        super.init(changeCount: changeCount, startFunc: { deliverInitial in
+            signals.forEach{ $0.start(deliverInitial: deliverInitial) }
         })
         
         for (index, signal) in signals.enumerated() {

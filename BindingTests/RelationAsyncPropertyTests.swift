@@ -79,6 +79,61 @@ class RelationAsyncPropertyTests: BindingTestCase {
         removal()
     }
     
+    func testAsyncReadOnlyPropertyWithInitialValue() {
+        let sqliteDB = makeDB().db
+        let sqlr = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["animal"]
+        
+        var willChangeCount = 0
+        var didChangeCount = 0
+        var changes: [String] = []
+        
+        let runloop = CFRunLoopGetCurrent()
+        
+        func awaitCompletion(_ f: () -> Void) {
+            f()
+            CFRunLoopRun()
+        }
+        
+        let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
+        let property = nameRelation.asyncProperty(initialValue: "cow", { $0.oneString($1) })
+        let removal = property.signal.observe(SignalObserver(
+            valueWillChange: {
+                willChangeCount += 1
+            },
+            valueChanging: { newValue, _ in
+                changes.append(newValue)
+            },
+            valueDidChange: {
+                didChangeCount += 1
+                CFRunLoopStop(runloop)
+            }
+        ))
+        
+        // Verify that property reflects the initial value that we provided
+        XCTAssertEqual(property.value, "cow")
+        XCTAssertEqual(willChangeCount, 0)
+        XCTAssertEqual(didChangeCount, 0)
+        XCTAssertEqual(changes, [])
+        
+        // Start the property and verify that the initial value is unchanged
+        property.start()
+        XCTAssertEqual(property.value, "cow")
+        XCTAssertEqual(willChangeCount, 0)
+        XCTAssertEqual(didChangeCount, 0)
+        XCTAssertEqual(changes, [])
+        
+        // Perform an async update to the underlying relation
+        awaitCompletion{ r.asyncAdd(["id": 1, "name": "cat"]) }
+        XCTAssertEqual(property.value, "cat")
+        XCTAssertEqual(willChangeCount, 1)
+        XCTAssertEqual(didChangeCount, 1)
+        XCTAssertEqual(changes, ["cat"])
+        
+        removal()
+    }
+    
     func testAsyncReadWriteProperty() {
         let sqliteDB = makeDB().db
         let sqlr = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!

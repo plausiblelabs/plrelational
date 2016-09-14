@@ -44,7 +44,7 @@ class RelationSignalTests: BindingTestCase {
         XCTAssertEqual(didChangeCount, 0)
 
         // Start the signal to trigger the async query and wait for it to complete
-        awaitCompletion{ signal.start() }
+        awaitCompletion{ signal.start(deliverInitial: true) }
         XCTAssertEqual(changes, [""])
         XCTAssertEqual(willChangeCount, 1)
         XCTAssertEqual(didChangeCount, 1)

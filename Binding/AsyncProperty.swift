@@ -34,10 +34,11 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
         // TODO: Need to make a SignalProducer like thing that can create a unique signal
         // each time start() is called; for now we'll assume it can be called only once
         if !started {
+            let deliverInitial = value == nil
             removal = signal.observe({ [weak self] newValue, _ in
                 self?.value = newValue
             })
-            signal.start()
+            signal.start(deliverInitial: deliverInitial)
             started = true
         }
     }
@@ -66,7 +67,7 @@ open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
     open func start() {
         // TODO: For now we'll assume it can be called only once
         if !started {
-            signal.start()
+            signal.start(deliverInitial: true)
             started = true
         }
     }

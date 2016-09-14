@@ -17,20 +17,23 @@ private class RelationSignal<T>: Signal<T> {
         self.rowsToValue = rowsToValue
         self.isRepeat = isRepeat
         
-        super.init(changeCount: 0, startFunc: {})
+        super.init(changeCount: 0, startFunc: { _ in })
     }
     
-    private override func startImpl() {
+    private override func startImpl(deliverInitial: Bool) {
         self.removal = relation.addAsyncObserver(self)
-        self.notifyWillChange()
-        relation.asyncAllRows({ result in
-            if let rows = result.ok {
-                let newValue = self.rowsToValue(self.relation, AnyIterator(rows.makeIterator()))
-                self.latestValue = newValue
-                self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
-            }
-            self.notifyDidChange()
-        })
+        
+        if deliverInitial {
+            self.notifyWillChange()
+            relation.asyncAllRows({ result in
+                if let rows = result.ok {
+                    let newValue = self.rowsToValue(self.relation, AnyIterator(rows.makeIterator()))
+                    self.latestValue = newValue
+                    self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+                }
+                self.notifyDidChange()
+            })
+        }
     }
 
     fileprivate func isRepeat(_ newValue: T) -> Bool {
