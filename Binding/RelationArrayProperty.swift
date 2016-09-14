@@ -21,11 +21,11 @@ open class RowArrayElement: ArrayElement {
 
 class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChangeCoalescedObserver {
     
-    fileprivate let relation: Relation
-    fileprivate let idAttr: Attribute
-    fileprivate let orderAttr: Attribute
+    private let relation: Relation
+    private let idAttr: Attribute
+    private let orderAttr: Attribute
     
-    fileprivate var removals: [ObserverRemoval] = []
+    private var removals: [ObserverRemoval] = []
 
     init(relation: Relation, idAttr: Attribute, orderAttr: Attribute) {
         precondition(relation.scheme.attributes.isSuperset(of: [idAttr, orderAttr]))
@@ -72,7 +72,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         relation.asyncAdd(mutableRow)
     }
     
-    fileprivate func onInsert(_ rows: [Row], elems: inout [Element], changes: inout [Change]) {
+    private func onInsert(_ rows: [Row], elems: inout [Element], changes: inout [Change]) {
 
         func insertElement(_ element: Element) -> Int {
             return elems.insertSorted(element, { $0.data[self.orderAttr] })
@@ -99,7 +99,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         relation.asyncDelete(self.idAttr *== id)
     }
 
-    fileprivate func onDelete(_ ids: [RelationValue], elems: inout [Element], changes: inout [Change]) {
+    private func onDelete(_ ids: [RelationValue], elems: inout [Element], changes: inout [Change]) {
         for id in ids {
             if let index = elems.index(where: { $0.id == id }) {
                 elems.remove(at: index)
@@ -122,7 +122,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         relation.asyncUpdate(idAttr *== elemID, newValues: [orderAttr: newOrder])
     }
     
-    fileprivate func onUpdate(_ rows: [Row], elems: inout [Element], changes: inout [Change]) {
+    private func onUpdate(_ rows: [Row], elems: inout [Element], changes: inout [Change]) {
         for row in rows {
             let newOrder = row[orderAttr]
             if newOrder != .notFound {
@@ -134,7 +134,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
     }
     
     // Must be called in the context of the `workOn` scheduler.
-    fileprivate func onMove(_ element: Element, dstOrder: RelationValue, elems: inout [Element]) -> Change {
+    private func onMove(_ element: Element, dstOrder: RelationValue, elems: inout [Element]) -> Change {
         // Remove the element from the array
         let srcIndex = indexForID(element.id, elems)!
         _ = elems.remove(at: srcIndex)
@@ -148,7 +148,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         return .move(srcIndex: srcIndex, dstIndex: dstIndex)
     }
     
-    fileprivate func adjacentElementsForIndex(_ index: Int, notMatching element: Element, inElements elems: [Element]) -> (Element?, Element?) {
+    private func adjacentElementsForIndex(_ index: Int, notMatching element: Element, inElements elems: [Element]) -> (Element?, Element?) {
         // Note: In the case where an element is being reordered, the array will still contain that element,
         // but `index` represents the new position assuming it was already removed, so we use the `notMatching`
         // element to avoid choosing that same element again.
@@ -170,7 +170,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         return (lo, hi)
     }
     
-    fileprivate func orderForElementBetween(_ previous: Element?, _ next: Element?, elems: [Element]) -> RelationValue {
+    private func orderForElementBetween(_ previous: Element?, _ next: Element?, elems: [Element]) -> RelationValue {
         let prev: Element?
         if previous == nil && next == nil {
             // Add after the last element
@@ -190,7 +190,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         return RelationValue(lo + ((hi - lo) / 2.0))
     }
     
-    fileprivate func orderForPos(_ pos: Pos, elems: [Element]) -> RelationValue {
+    private func orderForPos(_ pos: Pos, elems: [Element]) -> RelationValue {
         let prev = pos.previousID.flatMap{ elementForID($0, elems) }
         let next = pos.nextID.flatMap{ elementForID($0, elems) }
         return orderForElementBetween(prev, next, elems: elems)

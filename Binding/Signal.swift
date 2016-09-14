@@ -56,12 +56,12 @@ open class Signal<T>: SignalType {
     public typealias Observer = SignalObserver<T>
     public typealias Notify = SignalObserver<T>
 
-    open fileprivate(set) var changeCount: Int
-    fileprivate let startFunc: () -> Void
-    fileprivate var started = false
+    open private(set) var changeCount: Int
+    private let startFunc: () -> Void
+    private var started = false
     
-    fileprivate var observers: [UInt64: Observer] = [:]
-    fileprivate var nextObserverID: UInt64 = 0
+    private var observers: [UInt64: Observer] = [:]
+    private var nextObserverID: UInt64 = 0
     
     internal init(changeCount: Int, startFunc: @escaping () -> Void) {
         self.changeCount = changeCount

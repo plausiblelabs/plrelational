@@ -13,7 +13,7 @@ public final class RowTreeNode: TreeNode {
     public let id: RelationValue
     public var data: Row
     public var children: [RowTreeNode]
-    fileprivate let parentAttr: Attribute
+    private let parentAttr: Attribute
     public let tag: AnyObject?
     
     init(id: RelationValue, row: Row, parentAttr: Attribute, children: [RowTreeNode] = [], tag: AnyObject?) {
@@ -36,13 +36,13 @@ public final class RowTreeNode: TreeNode {
 
 class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoalescedObserver {
 
-    fileprivate let relation: Relation
-    fileprivate let tag: AnyObject?
-    fileprivate let idAttr: Attribute
-    fileprivate let parentAttr: Attribute
-    fileprivate let orderAttr: Attribute
+    private let relation: Relation
+    private let tag: AnyObject?
+    private let idAttr: Attribute
+    private let parentAttr: Attribute
+    private let orderAttr: Attribute
     
-    fileprivate var removal: ObserverRemoval!
+    private var removal: ObserverRemoval!
     
     init(relation: Relation, tag: AnyObject?, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
         precondition(relation.scheme.attributes.isSuperset(of: [idAttr, parentAttr, orderAttr]))
@@ -208,7 +208,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         }
     }
 
-    fileprivate func onDelete(ids: [RelationValue], root: inout Node, changes: inout [Change]) {
+    private func onDelete(ids: [RelationValue], root: inout Node, changes: inout [Change]) {
         // Observers should only be notified about the top-most nodes that were deleted.
         // We handle this by looking at the identifiers of the rows/nodes to be deleted,
         // and only deleting the unique (top-most) parents.
@@ -226,7 +226,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         }
     }
 
-    fileprivate func onDelete(_ id: RelationValue) -> Change? {
+    private func onDelete(_ id: RelationValue) -> Change? {
 
         func deleteNode(_ node: Node, _ nodes: inout [Node]) -> Int {
             let index = nodes.index(where: {$0 === node})!
@@ -293,7 +293,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         }
     }
     
-    fileprivate func onUpdate(_ row: Row) -> Change? {
+    private func onUpdate(_ row: Row) -> Change? {
         let newParentID = row[parentAttr]
         let newOrder = row[orderAttr]
         if newParentID == .notFound || newOrder == .notFound {
@@ -306,7 +306,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         return onMove(srcNode, dstParentID: newParentID, dstOrder: newOrder)
     }
     
-    fileprivate func onMove(_ node: Node, dstParentID: RelationValue, dstOrder: RelationValue) -> Change {
+    private func onMove(_ node: Node, dstParentID: RelationValue, dstOrder: RelationValue) -> Change {
         let optSrcParent = parentForNode(node)
         let optDstParent: Node?
         if dstParentID == .null {
@@ -335,7 +335,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         return .move(src: newSrcPath, dst: newDstPath)
     }
 
-    fileprivate func adjacentNodesForIndex(_ index: Int, inParent parent: Node, notMatching node: Node) -> (Node?, Node?) {
+    private func adjacentNodesForIndex(_ index: Int, inParent parent: Node, notMatching node: Node) -> (Node?, Node?) {
         // Note: In the case where a node is being reordered within its existing parent, `parent` will
         // still contain that node, but `index` represents the new position assuming it was already removed,
         // so we use the `notMatching` node to avoid choosing that same node again.
@@ -357,7 +357,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         return (lo, hi)
     }
     
-    fileprivate func orderWithinParent(_ parent: Node, previous: Node?, next: Node?) -> Double {
+    private func orderWithinParent(_ parent: Node, previous: Node?, next: Node?) -> Double {
         let prev: Node?
         if previous == nil && next == nil {
             // Add after the last child
@@ -377,7 +377,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         return lo + ((hi - lo) / 2.0)
     }
     
-    fileprivate func orderForPos(_ pos: Pos) -> Double {
+    private func orderForPos(_ pos: Pos) -> Double {
         let parent: Node
         if let parentID = pos.parentID {
             parent = nodeForID(parentID)!

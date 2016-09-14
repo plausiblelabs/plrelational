@@ -16,9 +16,9 @@ open class Binding {
     // holding a strong reference to it, it may go away and the signal won't
     // deliver any changes
     // TODO: Find a better solution
-    fileprivate var signalOwner: AnyObject?
+    private var signalOwner: AnyObject?
 
-    fileprivate var removal: ((Void) -> Void)?
+    private var removal: ((Void) -> Void)?
     
     init(signalOwner: AnyObject, removal: @escaping (Void) -> Void) {
         self.signalOwner = signalOwner
@@ -45,10 +45,10 @@ open class ReadableProperty<T>: ReadablePropertyType {
     public typealias Value = T
     public typealias Change = T
     
-    open fileprivate(set) var value: T
+    open private(set) var value: T
     open let signal: Signal<T>
-    private let notify: Signal<T>.Notify
-    private let changing: (T, T) -> Bool
+    fileprivate let notify: Signal<T>.Notify
+    fileprivate let changing: (T, T) -> Bool
     
     public init(initialValue: T, signal: Signal<T>, notify: Signal<T>.Notify, changing: @escaping (T, T) -> Bool) {
         self.value = initialValue
@@ -216,7 +216,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         )
     }
 
-    fileprivate func connectBidi<U>(_ other: ReadWriteProperty<U>, initial: () -> Void, forward: @escaping (T) -> ChangeResult<U>, reverse: @escaping (U) -> ChangeResult<T>) -> Binding {
+    private func connectBidi<U>(_ other: ReadWriteProperty<U>, initial: () -> Void, forward: @escaping (T) -> ChangeResult<U>, reverse: @escaping (U) -> ChangeResult<T>) -> Binding {
         var selfInitiatedChange = false
         
         // Observe the signal of the other property
@@ -393,9 +393,9 @@ public func constantValueProperty<T>(_ value: T) -> ReadableProperty<T> {
 
 open class MutableValueProperty<T>: ReadWriteProperty<T> {
 
-    fileprivate let valueChanging: (T, T) -> Bool
-    fileprivate let didSet: Setter?
-    fileprivate var mutableValue: T
+    private let valueChanging: (T, T) -> Bool
+    private let didSet: Setter?
+    private var mutableValue: T
     
     fileprivate init(_ initialValue: T, changeHandler: ChangeHandler, valueChanging: @escaping (T, T) -> Bool, didSet: Setter?) {
         self.valueChanging = valueChanging
@@ -469,8 +469,8 @@ public func mutableValueProperty<T: Equatable>(_ initialValue: T?, _ didSet: Bin
 open class ExternalValueProperty<T>: ReadWriteProperty<T> {
     public typealias Getter = () -> T
 
-    fileprivate let get: Getter
-    fileprivate let set: Setter
+    private let get: Getter
+    private let set: Setter
     
     // TODO: Drop the default changeHandler value (to make sure all clients are properly migrated to the new system)
     public init(get: @escaping Getter, set: @escaping Setter, changeHandler: ChangeHandler = ChangeHandler()) {

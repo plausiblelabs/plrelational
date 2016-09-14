@@ -33,10 +33,10 @@ extension Relation {
 }
 
 private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
-    fileprivate let config: RelationMutationConfig<T>
-    fileprivate var mutableValue: T?
-    fileprivate var removal: ObserverRemoval!
-    fileprivate var before: ChangeLoggingDatabaseSnapshot?
+    private let config: RelationMutationConfig<T>
+    private var mutableValue: T?
+    private var removal: ObserverRemoval!
+    private var before: ChangeLoggingDatabaseSnapshot?
 
     init(config: RelationMutationConfig<T>, signal: Signal<T>) {
         self.config = config
@@ -52,11 +52,11 @@ private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
         removal()
     }
     
-    fileprivate override func getValue() -> T? {
+    private override func getValue() -> T? {
         return mutableValue
     }
     
-    fileprivate override func setValue(_ value: T, _ metadata: ChangeMetadata) {
+    private override func setValue(_ value: T, _ metadata: ChangeMetadata) {
         if before == nil {
             before = config.snapshot()
         }

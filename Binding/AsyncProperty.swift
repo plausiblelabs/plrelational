@@ -22,8 +22,8 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     
     open internal(set) var value: T?
     open let signal: Signal<T>
-    fileprivate var removal: ObserverRemoval!
-    fileprivate var started = false
+    private var removal: ObserverRemoval!
+    private var started = false
     
     public init(_ signal: Signal<T>) {
         self.signal = signal
@@ -56,7 +56,7 @@ open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
     }
     
     open let signal: Signal<T>
-    fileprivate var started = false
+    private var started = false
 
     internal init(signal: Signal<T>) {
         self.signal = signal

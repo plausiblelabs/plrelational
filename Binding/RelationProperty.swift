@@ -6,7 +6,7 @@
 import libRelational
 
 private class RelationProperty<T>: ReadableProperty<T> {
-    fileprivate var removal: ObserverRemoval!
+    private var removal: ObserverRemoval!
     
     init(relation: Relation, relationToValue: @escaping (Relation) -> T, valueChanging: @escaping (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
@@ -26,7 +26,7 @@ private class RelationProperty<T>: ReadableProperty<T> {
 }
 
 private class WhenNonEmptyProperty<T>: ReadableProperty<T?> {
-    fileprivate var removal: ObserverRemoval!
+    private var removal: ObserverRemoval!
     
     init(relation: Relation, relationToValue: @escaping (Relation) -> T) {
         
@@ -156,10 +156,10 @@ public struct RelationMutationConfig<T> {
 }
 
 private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
-    fileprivate let config: RelationMutationConfig<T>
-    fileprivate var mutableValue: T
-    fileprivate var removal: ObserverRemoval!
-    fileprivate var before: ChangeLoggingDatabaseSnapshot?
+    private let config: RelationMutationConfig<T>
+    private var mutableValue: T
+    private var removal: ObserverRemoval!
+    private var before: ChangeLoggingDatabaseSnapshot?
 
     init(relation: Relation, config: RelationMutationConfig<T>, relationToValue: @escaping (Relation) -> T, valueChanging: @escaping (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
@@ -188,11 +188,11 @@ private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
         removal()
     }
     
-    fileprivate override func getValue() -> T {
+    private override func getValue() -> T {
         return mutableValue
     }
     
-    fileprivate override func setValue(_ value: T, _ metadata: ChangeMetadata) {
+    private override func setValue(_ value: T, _ metadata: ChangeMetadata) {
         if before == nil {
             before = config.snapshot()
         }

@@ -110,7 +110,7 @@ extension ReadablePropertyType where Value: Sequence, Value.Iterator.Element: Ha
 }
 
 private class MappedValueProperty<T>: ReadableProperty<T> {
-    fileprivate var removal: ObserverRemoval!
+    private var removal: ObserverRemoval!
     
     init<P: ReadablePropertyType>(property: P, transform: @escaping (P.Value) -> T, valueChanging: @escaping (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
@@ -128,8 +128,8 @@ private class MappedValueProperty<T>: ReadableProperty<T> {
 }
 
 private class BinaryOpValueProperty<T>: ReadableProperty<T> {
-    fileprivate var removal1: ObserverRemoval!
-    fileprivate var removal2: ObserverRemoval!
+    private var removal1: ObserverRemoval!
+    private var removal2: ObserverRemoval!
     
     init<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(_ lhs: LHS, _ rhs: RHS, _ f: @escaping (LHS.Value, RHS.Value) -> T, _ valueChanging: @escaping (T, T) -> Bool) {
         let (signal, notify) = Signal<T>.pipe()
@@ -151,7 +151,7 @@ private class BinaryOpValueProperty<T>: ReadableProperty<T> {
 }
 
 private class AnyTrueValueProperty: ReadableProperty<Bool> {
-    fileprivate var removals: [ObserverRemoval] = []
+    private var removals: [ObserverRemoval] = []
     
     init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value == Bool {
         let (signal, notify) = Signal<Bool>.pipe()
@@ -186,7 +186,7 @@ private class AnyTrueValueProperty: ReadableProperty<Bool> {
 }
 
 private class AllTrueValueProperty: ReadableProperty<Bool> {
-    fileprivate var removals: [ObserverRemoval] = []
+    private var removals: [ObserverRemoval] = []
     
     init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value == Bool {
         // TODO: Require at least one element?
@@ -222,7 +222,7 @@ private class AllTrueValueProperty: ReadableProperty<Bool> {
 }
 
 private class NoneTrueValueProperty: ReadableProperty<Bool> {
-    fileprivate var removals: [ObserverRemoval] = []
+    private var removals: [ObserverRemoval] = []
     
     init<S: Sequence>(properties: S) where S.Iterator.Element: ReadablePropertyType, S.Iterator.Element.Value == Bool {
         let (signal, notify) = Signal<Bool>.pipe()
@@ -257,7 +257,7 @@ private class NoneTrueValueProperty: ReadableProperty<Bool> {
 }
 
 private class CommonValueProperty<T: Hashable>: ReadableProperty<CommonValue<T>> {
-    fileprivate var removal: ObserverRemoval!
+    private var removal: ObserverRemoval!
     
     init<S: Sequence, P: ReadablePropertyType>(property: P) where S.Iterator.Element == T, P.Value == S {
         let (signal, notify) = Signal<CommonValue<T>>.pipe()

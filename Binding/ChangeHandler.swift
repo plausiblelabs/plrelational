@@ -9,9 +9,9 @@ import Foundation
 /// a UI control when an associated Property's underlying value is changing asynchronously.
 open class ChangeHandler {
     
-    fileprivate let onLock: () -> Void
-    fileprivate let onUnlock: () -> Void
-    fileprivate var changeCount: Int = 0
+    private let onLock: () -> Void
+    private let onUnlock: () -> Void
+    private var changeCount: Int = 0
 
     public init() {
         self.onLock = {}

@@ -118,7 +118,7 @@ extension Sequence where Iterator.Element: SignalType, Iterator.Element.Value ==
 }
 
 private class MappedSignal<T>: Signal<T> {
-    fileprivate var removal: ObserverRemoval!
+    private var removal: ObserverRemoval!
     
     init<S: SignalType>(underlying: S, transform: @escaping (S.Value) -> T) {
         super.init(changeCount: underlying.changeCount, startFunc: {
@@ -144,8 +144,8 @@ private class MappedSignal<T>: Signal<T> {
 }
 
 private class BinaryOpSignal<T>: Signal<T> {
-    fileprivate var removal1: ObserverRemoval!
-    fileprivate var removal2: ObserverRemoval!
+    private var removal1: ObserverRemoval!
+    private var removal2: ObserverRemoval!
     
     init<LHS: SignalType, RHS: SignalType>(_ lhs: LHS, _ rhs: RHS, _ f: @escaping (LHS.Value, RHS.Value) -> T) {
         super.init(changeCount: lhs.changeCount + rhs.changeCount, startFunc: {
@@ -195,7 +195,7 @@ private class BinaryOpSignal<T>: Signal<T> {
 
 // TODO: Merge this with BinaryOpSignal?
 private class BoolSeqSignal: Signal<Bool> {
-    fileprivate var removals: [ObserverRemoval] = []
+    private var removals: [ObserverRemoval] = []
     
     init<S: Sequence>(signals: S, _ f: @escaping ([Bool?]) -> Bool?) where S.Iterator.Element: SignalType, S.Iterator.Element.Value == Bool {
         var count = 0
