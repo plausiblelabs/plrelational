@@ -22,27 +22,28 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     
     open internal(set) var value: T?
     open let signal: Signal<T>
-    private var removal: ObserverRemoval!
+    private var removal: ObserverRemoval?
     private var started = false
     
-    public init(_ signal: Signal<T>) {
+    public init(initialValue: T?, signal: Signal<T>) {
+        self.value = initialValue
         self.signal = signal
-        self.removal = signal.observe({ [weak self] newValue, _ in
-            self?.value = newValue
-        })
     }
     
     open func start() {
         // TODO: Need to make a SignalProducer like thing that can create a unique signal
         // each time start() is called; for now we'll assume it can be called only once
         if !started {
+            removal = signal.observe({ [weak self] newValue, _ in
+                self?.value = newValue
+            })
             signal.start()
             started = true
         }
     }
     
     deinit {
-        removal()
+        removal?()
     }
 }
 

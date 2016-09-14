@@ -10,7 +10,7 @@ private class RelationSignal<T>: Signal<T> {
     fileprivate let rowsToValue: (Relation, AnyIterator<Row>) -> T
     fileprivate let isRepeat: (T, T) -> Bool
     fileprivate var latestValue: T?
-    private var removal: ObserverRemoval!
+    private var removal: ObserverRemoval?
     
     init(relation: Relation, rowsToValue: @escaping (Relation, AnyIterator<Row>) -> T, isRepeat: @escaping (T, T) -> Bool) {
         self.relation = relation
@@ -18,11 +18,10 @@ private class RelationSignal<T>: Signal<T> {
         self.isRepeat = isRepeat
         
         super.init(changeCount: 0, startFunc: {})
-        
-        self.removal = relation.addAsyncObserver(self)
     }
     
     private override func startImpl() {
+        self.removal = relation.addAsyncObserver(self)
         self.notifyWillChange()
         relation.asyncAllRows({ result in
             if let rows = result.ok {
@@ -43,7 +42,7 @@ private class RelationSignal<T>: Signal<T> {
     }
     
     deinit {
-        removal()
+        removal?()
     }
 }
 
