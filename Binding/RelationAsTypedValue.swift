@@ -226,6 +226,30 @@ extension Relation {
         return oneBool(okRows)
     }
     
+    /// Resolves to a single blob value if there is exactly one row in the given set, otherwise resolves
+    /// to nil.
+    public func oneBlobOrNil(_ rows: AnyIterator<Row>) -> [UInt8]? {
+        return oneValue(rows, { $0.get() })
+    }
+    
+    /// Resolves to a single blob value if there is exactly one row in the given set, otherwise resolves
+    /// to an empty array.
+    public func oneBlob(_ rows: AnyIterator<Row>) -> [UInt8] {
+        return oneBlobOrNil(rows) ?? []
+    }
+    
+    /// Resolves to a single blob value if there is exactly one row in the given set, otherwise resolves
+    /// to nil.
+    public var oneBlobOrNil: [UInt8]? {
+        return oneBlobOrNil(okRows)
+    }
+    
+    /// Resolves to a single blob value if there is exactly one row in the given set, otherwise resolves
+    /// to an empty array.
+    public var oneBlob: [UInt8] {
+        return oneBlob(okRows)
+    }
+    
     /// Resolves to a CommonValue that indicates whether there are zero, one, or multiple rows in the relation.
     public func commonValue<V>(_ transform: (RelationValue) -> V?) -> CommonValue<V> {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
