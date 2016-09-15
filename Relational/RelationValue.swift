@@ -105,6 +105,10 @@ extension RelationValue {
     public init(_ blob: [UInt8]) {
         self = .blob(blob)
     }
+    
+    public init<Seq: Sequence>(_ sequence: Seq) where Seq.Iterator.Element == UInt8 {
+        self = .blob(Array(sequence))
+    }
 }
 
 extension RelationValue: ExpressibleByStringLiteral {
