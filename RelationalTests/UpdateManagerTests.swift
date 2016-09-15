@@ -395,6 +395,38 @@ class UpdateManagerTests: DBTestCase {
         selectedPersonNameRemover()
         person1NameRemover()
     }
+    
+    func testStateObservation() {
+        let sqliteDB = makeDB().db
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        
+        let observer = TestAsyncContentCoalescedObserver()
+        let remover = r.addAsyncObserver(observer, postprocessor: {
+            XCTAssertEqual(UpdateManager.currentInstance.state, .running)
+            return $0
+        })
+        
+        var observedStates: [UpdateManager.State] = [UpdateManager.currentInstance.state]
+        let stateObserverRemover = UpdateManager.currentInstance.addStateObserver({
+            observedStates.append($0)
+        })
+        
+        XCTAssertEqual(UpdateManager.currentInstance.state, .idle)
+        
+        r.asyncAdd(["n": 1])
+        XCTAssertEqual(UpdateManager.currentInstance.state, .pending)
+        
+        CFRunLoopRunOrFail()
+        
+        XCTAssertEqual(UpdateManager.currentInstance.state, .idle)
+        remover()
+        stateObserverRemover()
+        
+        XCTAssertEqual(observedStates, [.idle, .pending, .running, .idle])
+    }
 }
 
 private class TestAsyncChangeObserver: AsyncRelationChangeObserver {

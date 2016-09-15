@@ -9,16 +9,45 @@ import Foundation
 public final class UpdateManager: PerThreadInstance {
     public typealias ObservationRemover = (Void) -> Void
     
-    fileprivate var pendingUpdates: [Update] = []
-    fileprivate var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
+    private var pendingUpdates: [Update] = []
+    private var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
     
-    fileprivate let runloop: CFRunLoop
+    private let runloop: CFRunLoop
     
-    fileprivate var isExecuting = false
-    fileprivate var executionTimer: CFRunLoopTimer?
+    private var executionTimer: CFRunLoopTimer?
     
     public init() {
         self.runloop = CFRunLoopGetCurrent()
+    }
+    
+    public enum State {
+        /// Nothing is happening, no updates have been registered.
+        case idle
+        
+        /// Updates have been registered but are not yet running.
+        case pending
+        
+        /// Updates are actively running.
+        case running
+    }
+    
+    private var stateObservers: [UInt64: (State) -> Void] = [:]
+    private var stateObserversNextID: UInt64 = 0
+    
+    public var state: State = .idle {
+        didSet {
+            for (_, observer) in stateObservers {
+                observer(state)
+            }
+        }
+    }
+    
+    public func addStateObserver(_ observer: @escaping (State) -> Void) -> ObservationRemover {
+        let id = stateObserversNextID
+        stateObserversNextID += 1
+        
+        stateObservers[id] = observer
+        return { self.stateObservers.removeValue(forKey: id) }
     }
     
     public func registerUpdate(_ relation: Relation, query: SelectExpression, newValues: Row) {
@@ -76,7 +105,7 @@ public final class UpdateManager: PerThreadInstance {
     }
     
     fileprivate func registerChange(_ relation: Relation) {
-        if !isExecuting {
+        if state != .running {
             sendWillChange(relation)
             scheduleExecutionIfNeeded()
         }
@@ -116,13 +145,14 @@ public final class UpdateManager: PerThreadInstance {
                 self.execute()
             })
             CFRunLoopAddTimer(runloop, executionTimer, CFRunLoopMode.commonModes)
+            state = .pending
         }
     }
     
     fileprivate func execute() {
         CFRunLoopTimerInvalidate(executionTimer)
         executionTimer = nil
-        isExecuting = true
+        state = .running
         executeBody()
     }
     
@@ -302,7 +332,6 @@ public final class UpdateManager: PerThreadInstance {
                         self.executeBody()
                     } else {
                         // Otherwise, terminate the execution. Reset observers and send didChange to them.
-                        self.isExecuting = false
                         for (observedRelationObj, info) in observedInfo {
                             info.derivative.clearVariables()
                             
@@ -319,6 +348,7 @@ public final class UpdateManager: PerThreadInstance {
                                 entry.updateObserver?.withWrapped({ $0.relationDidChange(relation) })
                             }
                         }
+                        self.state = .idle
                     }
                 })
             })
