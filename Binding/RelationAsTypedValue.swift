@@ -238,13 +238,13 @@ extension Relation {
         return oneBlobOrNil(rows) ?? []
     }
     
-    /// Resolves to a single blob value if there is exactly one row in the given set, otherwise resolves
+    /// Resolves to a single blob value if there is exactly one row in the relation, otherwise resolves
     /// to nil.
     public var oneBlobOrNil: [UInt8]? {
         return oneBlobOrNil(okRows)
     }
     
-    /// Resolves to a single blob value if there is exactly one row in the given set, otherwise resolves
+    /// Resolves to a single blob value if there is exactly one row in the relation, otherwise resolves
     /// to an empty array.
     public var oneBlob: [UInt8] {
         return oneBlob(okRows)
