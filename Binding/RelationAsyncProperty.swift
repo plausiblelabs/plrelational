@@ -50,21 +50,26 @@ extension Relation {
 private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
     private let config: RelationMutationConfig<T>
     private var mutableValue: T?
-    private var removal: ObserverRemoval!
+    private var removal: ObserverRemoval?
     private var before: ChangeLoggingDatabaseSnapshot?
 
-    init(config: RelationMutationConfig<T>, signal: Signal<T>) {
+    init(initialValue: T?, config: RelationMutationConfig<T>, signal: Signal<T>) {
+        self.mutableValue = initialValue
         self.config = config
         
         super.init(signal: signal)
-        
-        self.removal = signal.observe({ newValue, _ in
-            self.mutableValue = newValue
-        })
     }
     
     deinit {
-        removal()
+        removal?()
+    }
+    
+    private override func startImpl() {
+        let deliverInitial = mutableValue == nil
+        removal = signal.observe({ [weak self] newValue, _ in
+            self?.mutableValue = newValue
+        })
+        signal.start(deliverInitial: deliverInitial)
     }
     
     private override func getValue() -> T? {
@@ -90,7 +95,13 @@ private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
 extension Relation {
     /// Returns an AsyncReadWriteProperty that gets its value from this relation and writes values back to the relation
     /// according to the provided configuration.
-    public func asyncProperty<S: SignalType>(_ config: RelationMutationConfig<S.Value>, _ relationToSignal: (Relation) -> S) -> AsyncReadWriteProperty<S.Value> {
-        return RelationAsyncReadWriteProperty(config: config, signal: relationToSignal(self).signal)
+    public func asyncProperty<S: SignalType>(config: RelationMutationConfig<S.Value>, _ relationToSignal: (Relation) -> S) -> AsyncReadWriteProperty<S.Value> {
+        return RelationAsyncReadWriteProperty(initialValue: nil, config: config, signal: relationToSignal(self).signal)
+    }
+    
+    /// Returns an AsyncReadWriteProperty that gets its value from this relation and writes values back to the relation
+    /// according to the provided configuration.
+    public func asyncProperty<S: SignalType>(initialValue: S.Value?, config: RelationMutationConfig<S.Value>, _ relationToSignal: (Relation) -> S) -> AsyncReadWriteProperty<S.Value> {
+        return RelationAsyncReadWriteProperty(initialValue: initialValue, config: config, signal: relationToSignal(self).signal)
     }
 }

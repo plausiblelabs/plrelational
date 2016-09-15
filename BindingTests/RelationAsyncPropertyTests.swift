@@ -171,7 +171,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         
         // Create an async r/w property from the relation
         let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
-        let nameProperty = nameRelation.asyncProperty(nameConfig, { $0.signal{ $0.oneString($1) } })
+        let nameProperty = nameRelation.asyncProperty(config: nameConfig, { $0.signal{ $0.oneString($1) } })
         let nameObserverRemoval = nameProperty.signal.observe(SignalObserver(
             valueWillChange: {
                 nameWillChangeCount += 1
@@ -247,19 +247,17 @@ class RelationAsyncPropertyTests: BindingTestCase {
         XCTAssertEqual(lhsLockCount, 0)
         XCTAssertEqual(lhsUnlockCount, 0)
         
-        // Verify the initial observer count for lhsProperty (normally it would be 0, but we added our own
+        // Verify the initial observer count for lhsProperty and nameProperty (normally it would be 0, but we added our own
         // observer above, so we expect 1 here)
         XCTAssertEqual(lhsProperty.signal.observerCount, 1)
-        
-        // Verify the initial observer count for nameProperty; RelationAsyncReadWriteProperty observes its
-        // underlying signal (which carries values from the relation), plus we added our own observer above,
-        // so we expect 2 here)
-        XCTAssertEqual(nameProperty.signal.observerCount, 2)
+        XCTAssertEqual(nameProperty.signal.observerCount, 1)
 
         // Bidirectionally bind lhs property to the async name property
         _ = lhsProperty <~> nameProperty
 
-        // Look at the observer counts to verify that lhsProperty is observing nameProperty and vice versa
+        // Look at the observer counts to verify that lhsProperty is observing nameProperty and vice versa.
+        // Note that RelationAsyncReadWriteProperty observes its underlying signal (which carries values
+        // from the relation) after the property is started, so there's an additional observer for that one.
         XCTAssertEqual(nameProperty.signal.observerCount, 3)
         XCTAssertEqual(lhsProperty.signal.observerCount, 2)
         

@@ -67,9 +67,14 @@ open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
     open func start() {
         // TODO: For now we'll assume it can be called only once
         if !started {
-            signal.start(deliverInitial: true)
+            startImpl()
             started = true
         }
+    }
+    
+    /// Invokes the provided startFunc by default, but subclasses can override for custom start behavior.
+    internal func startImpl() {
+        fatalError("Must be implemented by subclasses")
     }
     
     /// Returns the current value.  This must be overridden by subclasses and is intended to be
