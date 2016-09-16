@@ -11,6 +11,10 @@ struct RelationChangeParts {
     let addedRows: [Row]
     let updatedRows: [Row]
     let deletedIDs: [RelationValue]
+    
+    var isEmpty: Bool {
+        return addedRows.isEmpty && updatedRows.isEmpty && deletedIDs.isEmpty
+    }
 }
 
 extension RelationChange {

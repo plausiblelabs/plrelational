@@ -298,11 +298,10 @@ class RelationTreePropertyTests: BindingTestCase {
             "Child1",
             "Group2"
         ])
-        // TODO: `delete` needs to be rewritten to better support async
-//        verifyChanges([
-//            .Delete(path(1, 1)),
-//            .Delete(path(8, 0))
-//        ])
+        verifyChanges([
+            .delete(path(1, 1)),
+            .delete(path(8, 0))
+        ])
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
             [1, "Group1",      .null, 5.0],

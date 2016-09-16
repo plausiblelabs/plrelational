@@ -212,8 +212,6 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         // Observers should only be notified about the top-most nodes that were deleted.
         // We handle this by looking at the identifiers of the rows/nodes to be deleted,
         // and only deleting the unique (top-most) parents.
-        // TODO: This is currently broken!
-        var changes: [Change] = []
         for id in ids {
             if let node = self.nodeForID(id) {
                 let parentID = node.parentID
@@ -399,14 +397,16 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         switch result {
         case .Ok(let rows):
             // Compute tree changes
-            var treeChanges: [Change] = []
             let parts = partsOf(rows, idAttr: self.idAttr)
-            
-            self.onInsert(rows: parts.addedRows, root: &self.root, changes: &treeChanges)
-            self.onUpdate(rows: parts.updatedRows, root: &self.root, changes: &treeChanges)
-            self.onDelete(ids: parts.deletedIDs, root: &self.root, changes: &treeChanges)
-            
-            self.notifyObservers(treeChanges: treeChanges)
+            if !parts.isEmpty {
+                var treeChanges: [Change] = []
+                self.onInsert(rows: parts.addedRows, root: &self.root, changes: &treeChanges)
+                self.onUpdate(rows: parts.updatedRows, root: &self.root, changes: &treeChanges)
+                self.onDelete(ids: parts.deletedIDs, root: &self.root, changes: &treeChanges)
+                if treeChanges.count > 0 {
+                    self.notifyObservers(treeChanges: treeChanges)
+                }
+            }
             self.notify.valueDidChange()
             
         case .Err(let err):
