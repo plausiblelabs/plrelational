@@ -128,9 +128,9 @@ open class BindableProperty<T> {
             if let strongSelf = self {
                 if let binding = strongSelf.bindings.removeValue(forKey: bindingID) {
                     binding.unbind()
-                }
-                if let signal = signal {
-                    strongSelf.changeHandler.decrementCount(signal.changeCount)
+                    if let signal = signal {
+                        strongSelf.changeHandler.decrementCount(signal.changeCount)
+                    }
                 }
             }
         })
@@ -145,6 +145,10 @@ open class BindableProperty<T> {
             binding.unbind()
         }
         bindings.removeAll()
+        
+        // The change count should have been reset after all the preceding calls to `unbind`, but
+        // just in case it wasn't, let's do that here
+        changeHandler.resetCount()
     }
 }
 

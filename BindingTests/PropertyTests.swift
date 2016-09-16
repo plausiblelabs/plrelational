@@ -142,6 +142,64 @@ class PropertyTests: XCTestCase {
         XCTAssertEqual(rhs1.signal.observerCount, 0)
         XCTAssertEqual(rhs2.signal.observerCount, 0)
     }
+    
+    func testChangeHandlerWithBindAndUnbind() {
+        var lhsLockCount = 0
+        var lhsUnlockCount = 0
+        let lhsChangeHandler = ChangeHandler(
+            onLock: { lhsLockCount += 1 },
+            onUnlock: { lhsUnlockCount += 1 }
+        )
+        
+        let lhs = mutableValueProperty("hi", lhsChangeHandler)
+        XCTAssertEqual(lhsLockCount, 0)
+        XCTAssertEqual(lhsUnlockCount, 0)
+        
+        let rhs = mutableValueProperty("yo")
+        // XXX: This is a shady way of simulating the case where the `rhs` property's signal is in a changing
+        // state when we bind it to `lhs`
+        rhs.signal.notifyWillChange()
+        XCTAssertEqual(lhsLockCount, 0)
+        XCTAssertEqual(lhsUnlockCount, 0)
+        
+        let binding = lhs <~ rhs
+        XCTAssertEqual(lhsLockCount, 1)
+        XCTAssertEqual(lhsUnlockCount, 0)
+
+        // Verify that ChangeHandler is unlocked after we unbind `rhs`
+        binding.unbind()
+        XCTAssertEqual(lhsLockCount, 1)
+        XCTAssertEqual(lhsUnlockCount, 1)
+    }
+
+    func testChangeHandlerWithBindAndUnbindAll() {
+        var lhsLockCount = 0
+        var lhsUnlockCount = 0
+        let lhsChangeHandler = ChangeHandler(
+            onLock: { lhsLockCount += 1 },
+            onUnlock: { lhsUnlockCount += 1 }
+        )
+        
+        let lhs = mutableValueProperty("hi", lhsChangeHandler)
+        XCTAssertEqual(lhsLockCount, 0)
+        XCTAssertEqual(lhsUnlockCount, 0)
+        
+        let rhs = mutableValueProperty("yo")
+        // XXX: This is a shady way of simulating the case where the `rhs` property's signal is in a changing
+        // state when we bind it to `lhs`
+        rhs.signal.notifyWillChange()
+        XCTAssertEqual(lhsLockCount, 0)
+        XCTAssertEqual(lhsUnlockCount, 0)
+        
+        lhs <~ rhs
+        XCTAssertEqual(lhsLockCount, 1)
+        XCTAssertEqual(lhsUnlockCount, 0)
+        
+        // Verify that ChangeHandler is unlocked after we unbind all
+        lhs.unbindAll()
+        XCTAssertEqual(lhsLockCount, 1)
+        XCTAssertEqual(lhsUnlockCount, 1)
+    }
 
     func testBindBidiManyToOne() {
         var lhsValues: [String] = []

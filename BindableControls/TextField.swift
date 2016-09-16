@@ -89,5 +89,7 @@ open class TextField: NSTextField, NSTextFieldDelegate {
     
     @objc private func timerFired() {
         self.isEnabled = false
+        timer?.invalidate()
+        timer = nil
     }
 }

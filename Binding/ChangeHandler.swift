@@ -7,7 +7,7 @@ import Foundation
 
 /// Works in conjunction with will-change and did-change notifications that are delivered to
 /// a UI control when an associated Property's underlying value is changing asynchronously.
-open class ChangeHandler {
+public class ChangeHandler {
     
     private let onLock: () -> Void
     private let onUnlock: () -> Void
@@ -23,9 +23,18 @@ open class ChangeHandler {
         self.onUnlock = onUnlock
     }
     
+    /// Resets the change count to zero and calls `onUnlock` if the change count was previously non-zero.
+    /// Must be called on UI thread.
+    public func resetCount() {
+        if changeCount == 0 { return }
+
+        changeCount = 0
+        onUnlock()
+    }
+    
     /// Increments the change count by the given amount.  If the change count goes from 0 to >= 1, `onLock`
     /// will be invoked.  Must be called on UI thread.
-    open func incrementCount(_ inc: Int) {
+    public func incrementCount(_ inc: Int) {
         precondition(inc >= 0)
         if inc == 0 { return }
         
@@ -38,9 +47,9 @@ open class ChangeHandler {
 
     /// Decrements the change count by the given amount.  If the change count goes to 0, `onUnlock`
     /// will be invoked.  Must be called on UI thread.
-    open func decrementCount(_ dec: Int) {
+    public func decrementCount(_ dec: Int) {
         precondition(dec >= 0)
-        precondition(changeCount - dec >= 0)
+        precondition(changeCount >= dec, "changeCount (\(changeCount)) must be >= dec (\(dec))")
         if dec == 0 { return }
         
         changeCount -= dec
@@ -51,13 +60,13 @@ open class ChangeHandler {
 
     /// Notes that a change is coming.  If the change count goes to 1, `onLock` will be invoked.
     /// Must be called on UI thread.
-    open func willChange() {
+    public func willChange() {
         incrementCount(1)
     }
     
     /// Notes that a change has occurred.  If the change count goes to 0, `onUnlock` will be invoked.
     /// Must be called on UI thread.
-    open func didChange() {
+    public func didChange() {
         decrementCount(1)
     }
 }
