@@ -63,6 +63,7 @@ open class TextField: NSTextField, NSTextFieldDelegate {
     
     open override func controlTextDidBeginEditing(_ obj: Notification) {
         //Swift.print("CONTROL DID BEGIN EDITING!")
+        _string.exclusiveMode = true
         previousCommittedValue = stringValue
         previousValue = stringValue
     }
@@ -84,6 +85,7 @@ open class TextField: NSTextField, NSTextFieldDelegate {
                 _string.changed(transient: false)
             }
         }
+        _string.exclusiveMode = false
         previousCommittedValue = nil
         previousValue = nil
     }

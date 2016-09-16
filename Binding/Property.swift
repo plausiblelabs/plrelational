@@ -473,6 +473,12 @@ public func mutableValueProperty<T: Equatable>(_ initialValue: T?, _ didSet: Bin
 open class ExternalValueProperty<T>: ReadWriteProperty<T> {
     public typealias Getter = () -> T
 
+    /// When `true`, any changes supplied by a bound property will be ignored.  This is mainly useful
+    /// when a UI control has the concept of "edit mode" (e.g. a text field) and is primarily supplying values
+    /// *to* a bidirectionally-bound property but is not likely to receive values *from* that property while
+    /// in edit mode.
+    public var exclusiveMode: Bool = false
+    
     private let get: Getter
     private let set: Setter
     
@@ -502,6 +508,8 @@ open class ExternalValueProperty<T>: ReadWriteProperty<T> {
     
     /// Note: This is called in the case when the "other" property in a binding has changed its value.
     internal override func setValue(_ newValue: T, _ metadata: ChangeMetadata) {
+        if exclusiveMode { return }
+        
         notify.valueWillChange()
         set(newValue, metadata)
         notify.valueChanging(newValue, metadata)
