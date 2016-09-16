@@ -31,7 +31,6 @@ open class TextField: NSTextField, NSTextFieldDelegate {
             self.stringValue
         },
         set: { [unowned self] value, _ in
-            Swift.print("TEXT FIELD STRING: \(value)")
             self.stringValue = value
         },
         changeHandler: self.changeHandler
