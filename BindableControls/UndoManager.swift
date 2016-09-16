@@ -5,9 +5,27 @@
 
 import Foundation
 
-open class UndoManager {
+public protocol UndoManagerDelegate: class {
+    func safeToUndo() -> Bool
+    func safeToRedo() -> Bool
+}
+
+public class UndoManager {
     
     private let nsmanager: SPUndoManager
+    
+    public var delegate: UndoManagerDelegate? {
+        get {
+            return nsmanager.delegate
+        }
+        set {
+            nsmanager.delegate = newValue
+        }
+    }
+    
+    public var systemUndoManager: Foundation.UndoManager {
+        return nsmanager
+    }
     
     public init() {
         self.nsmanager = SPUndoManager()
@@ -17,7 +35,7 @@ open class UndoManager {
         self.nsmanager = nsmanager
     }
     
-    open func registerChange(name: String, perform: Bool, forward: @escaping () -> Void, backward: @escaping () -> Void) {
+    public func registerChange(name: String, perform: Bool, forward: @escaping () -> Void, backward: @escaping () -> Void) {
         // First register the change
         let f = nsmanager.registerChange(name, forwards: forward, backwards: backward)
         
@@ -27,11 +45,11 @@ open class UndoManager {
         }
     }
     
-    open func undo() {
+    public func undo() {
         nsmanager.undo()
     }
     
-    open func redo() {
+    public func redo() {
         nsmanager.redo()
     }
 }
@@ -222,6 +240,8 @@ open class SPUndoManager : Foundation.UndoManager {
     var pendingGroups: [SPUndoManagerGroupAction] = []
     var stateIndex = -1
     
+    weak var delegate: UndoManagerDelegate?
+    
     // MARK: Registering changes
     
     /// Add a change to be undone with separate forwards and backwards transformers.
@@ -344,11 +364,13 @@ open class SPUndoManager : Foundation.UndoManager {
     }
     
     open override var canUndo: Bool {
-        return changes.count > 0 && stateIndex >= 0
+        let safeToUndo = delegate?.safeToUndo() ?? true
+        return safeToUndo && changes.count > 0 && stateIndex >= 0
     }
     
     open override var canRedo: Bool {
-        return changes.count > 0 && stateIndex < changes.count - 1
+        let safeToRedo = delegate?.safeToRedo() ?? true
+        return safeToRedo && changes.count > 0 && stateIndex < changes.count - 1
     }
     
     var _undoing: Bool = false

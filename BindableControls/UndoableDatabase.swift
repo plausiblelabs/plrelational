@@ -66,8 +66,6 @@ open class UndoableDatabase {
     
     open func performUndoableAsyncAction(_ name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: (Void) -> Void) {
         let before = before ?? db.takeSnapshot()
-        // TODO: Need explicit transaction here
-        //db.transaction(transactionFunc)
         transactionFunc()
         let after = db.takeSnapshot()
         
