@@ -109,8 +109,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             return undoableDB.asyncBidiProperty(
                 relation,
                 action: "Rename Person",
-                signal: relation.signal{ $0.oneString($1) },
-                update: { relation.asyncUpdateString($0) }
+                signal: relation.signal{ $0.oneStringOrNil($1) ?? "UH OH" },
+                update: {
+                    Swift.print("UPDATING: state=\(UpdateManager.currentInstance.state) \($0)")
+                    relation.asyncUpdateString($0)
+                }
             )
         }
         
@@ -145,27 +148,27 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         textField.setAccessibilityIdentifier("NameField")
         rootView.addSubview(textField)
         
-        checkbox = Checkbox(frame: NSMakeRect(200, 80, 120, 24))
-        checkbox.title = "Editable"
-        rootView.addSubview(checkbox)
-
-        popupButton = PopUpButton(frame: NSMakeRect(200, 120, 120, 24), pullsDown: false)
-        popupButton.setAccessibilityIdentifier("Day")
-        rootView.addSubview(popupButton)
-
-        stepper = StepperView(frame: NSMakeRect(200, 160, 120, 24), min: 0, max: 999, defaultValue: 0)
-        rootView.addSubview(stepper)
-
-        comboBox = ComboBox(frame: NSMakeRect(200, 200, 120, 24))
-        rootView.addSubview(comboBox)
+//        checkbox = Checkbox(frame: NSMakeRect(200, 80, 120, 24))
+//        checkbox.title = "Editable"
+//        rootView.addSubview(checkbox)
+//
+//        popupButton = PopUpButton(frame: NSMakeRect(200, 120, 120, 24), pullsDown: false)
+//        popupButton.setAccessibilityIdentifier("Day")
+//        rootView.addSubview(popupButton)
+//
+//        stepper = StepperView(frame: NSMakeRect(200, 160, 120, 24), min: 0, max: 999, defaultValue: 0)
+//        rootView.addSubview(stepper)
+//
+//        comboBox = ComboBox(frame: NSMakeRect(200, 200, 120, 24))
+//        rootView.addSubview(comboBox)
+//        
+//        colorPicker = ColorPickerView(defaultColor: Color.white)
+//        colorPicker.frame = NSMakeRect(200, 240, 200, 24)
+//        rootView.addSubview(colorPicker)
         
-        colorPicker = ColorPickerView(defaultColor: Color.white)
-        colorPicker.frame = NSMakeRect(200, 240, 200, 24)
-        rootView.addSubview(colorPicker)
-            
         // Set up the bindings between controls and view model
         _ = textField.string <~> nameProperty(selectedObjectsName)
-        _ = textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
+        //_ = textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
 
 //        checkbox.checked <~> undoableDB.bidiProperty(
 //            selectedObjectsEditable,
