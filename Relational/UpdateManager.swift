@@ -329,6 +329,18 @@ public final class UpdateManager: PerThreadInstance {
                     // If new pending updates came in while we were doing our thing, then go back to the top
                     // and start over, applying those updates too.
                     if !self.pendingUpdates.isEmpty {
+                        // All content observers currently being worked on need a didChange followed by a willChange
+                        // so that they know they're getting new content, not additional content.
+                        for (observedRelationObj, info) in observedInfo {
+                            for (_, observer) in info.observers {
+                                if observer.didSendWillChange {
+                                    observer.updateObserver?.withWrapped({
+                                        $0.relationDidChange(observedRelationObj as! Relation)
+                                        $0.relationWillChange(observedRelationObj as! Relation)
+                                    })
+                                }
+                            }
+                        }
                         self.executeBody()
                     } else {
                         // Otherwise, terminate the execution. Reset observers and send didChange to them.
