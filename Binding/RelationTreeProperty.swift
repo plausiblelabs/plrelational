@@ -42,7 +42,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
     private let parentAttr: Attribute
     private let orderAttr: Attribute
     
-    private var removal: ObserverRemoval!
+    private var removal: ObserverRemoval?
     
     init(relation: Relation, tag: AnyObject?, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
         precondition(relation.scheme.attributes.isSuperset(of: [idAttr, parentAttr, orderAttr]))
@@ -56,15 +56,15 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: self.parentAttr, tag: tag)
         let (signal, notify) = Signal<SignalChange>.pipe()
         super.init(root: rootNode, signal: signal, notify: notify)
-        
-        self.removal = relation.addAsyncObserver(self)
     }
     
     deinit {
-        removal()
+        removal?()
     }
     
     override func start() {
+        removal = relation.addAsyncObserver(self)
+
         notify.valueWillChange()
         relation.asyncAllRows({ result in
             if let rows = result.ok {

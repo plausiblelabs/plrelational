@@ -167,6 +167,13 @@ class RelationTreePropertyTests: BindingTestCase {
         XCTAssertEqual(didChangeCount, 0)
         XCTAssertEqual(changes, [])
 
+        // Verify that in-memory tree structure is empty after property/signal was started
+        awaitCompletion{ property.start() }
+        XCTAssertEqual(property.value!.children.count, 0)
+        XCTAssertEqual(willChangeCount, 1)
+        XCTAssertEqual(didChangeCount, 1)
+        verifyChanges([.initial(property.value!)])
+
         // Insert some collections
         addCollection(1, name: "Group1", parentID: nil, previousID: nil)
         addCollection(2, name: "Collection1", parentID: 1, previousID: nil)

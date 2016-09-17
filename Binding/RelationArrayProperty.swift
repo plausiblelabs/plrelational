@@ -25,7 +25,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
     private let idAttr: Attribute
     private let orderAttr: Attribute
     
-    private var removals: [ObserverRemoval] = []
+    private var removal: ObserverRemoval?
 
     init(relation: Relation, idAttr: Attribute, orderAttr: Attribute) {
         precondition(relation.scheme.attributes.isSuperset(of: [idAttr, orderAttr]))
@@ -36,15 +36,15 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
 
         let (signal, notify) = Signal<SignalChange>.pipe()
         super.init(signal: signal, notify: notify)
-
-        removals.append(relation.addAsyncObserver(self))
     }
     
     deinit {
-        removals.forEach{$0()}
+        removal?()
     }
     
     override func start() {
+        removal = relation.addAsyncObserver(self)
+        
         notify.valueWillChange()
         relation.asyncAllRows({ result in
             if let rows = result.ok {

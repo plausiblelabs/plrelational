@@ -53,7 +53,7 @@ extension TreeChange: Equatable {}
 public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     switch (a, b) {
     // TODO: Compare node structures for the .Initial case?
-    case let (.initial(a), .initial(b)): return a.id == b.id
+    case (.initial, .initial): return true
     case let (.insert(a), .insert(b)): return a == b
     case let (.delete(a), .delete(b)): return a == b
     case let (.move(asrc, adst), .move(bsrc, bdst)): return asrc == bsrc && adst == bdst
