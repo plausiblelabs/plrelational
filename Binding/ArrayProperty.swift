@@ -41,15 +41,10 @@ public func ==<E: ArrayElement>(a: ArrayChange<E>, b: ArrayChange<E>) -> Bool {
     }
 }
 
-open class ArrayProperty<E: ArrayElement>: AsyncReadablePropertyType {
-    public typealias Value = [E]
-    public typealias SignalChange = [ArrayChange<E>]
+open class ArrayProperty<Element: ArrayElement>: AsyncReadablePropertyType {
+    public typealias Value = [Element]
+    public typealias SignalChange = [ArrayChange<Element>]
     
-    public typealias ElementID = E.ID
-    public typealias Element = E
-    public typealias Pos = ArrayPos<E>
-    public typealias Change = ArrayChange<E>
-
     internal var elements: [Element]?
 
     open var value: [Element]? {
@@ -68,27 +63,35 @@ open class ArrayProperty<E: ArrayElement>: AsyncReadablePropertyType {
     open func start() {
     }
     
-    internal func notifyObservers(arrayChanges: [ArrayChange<E>]) {
+    internal func notifyObservers(arrayChanges: [ArrayChange<Element>]) {
         let metadata = ChangeMetadata(transient: false)
         notify.valueChanging(arrayChanges, metadata)
     }
     
-    open func insert(_ row: E.Data, pos: Pos) {
-    }
-    
-    open func delete(_ id: E.ID) {
-    }
-    
-    open func move(srcIndex: Int, dstIndex: Int) {
-    }
-    
     /// Returns the index of the element with the given ID, relative to the sorted elements array.
-    open func indexForID(_ id: E.ID, _ elements: [Element]) -> Int? {
+    public func indexForID(_ id: Element.ID, _ elements: [Element]) -> Int? {
         return elements.index(where: { $0.id == id })
     }
     
     /// Returns the element with the given ID.
-    open func elementForID(_ id: E.ID, _ elements: [Element]) -> Element? {
+    public func elementForID(_ id: Element.ID, _ elements: [Element]) -> Element? {
         return indexForID(id, elements).map{ elements[$0] }
+    }
+    
+    /// Returns an order value that would be appropriate for an element to be inserted at
+    /// the given position, relative the current array.
+    /// Note: This only works when there is a distinct "order" property for each element
+    /// of type Double.
+    public func orderForPos(_ pos: ArrayPos<Element>) -> Double {
+        fatalError("Must be implemented by subclasses")
+    }
+    
+    /// Returns an order value that would be appropriate for an element to be moved from
+    /// its current index to the new destination index.
+    /// Note: This only works when there is a distinct "order" property for each element
+    /// of type Double.
+    /// Note: dstIndex is relative to the state of the array *after* the item is removed.
+    func orderForMove(srcIndex: Int, dstIndex: Int) -> Double {
+        fatalError("Must be implemented by subclasses")
     }
 }

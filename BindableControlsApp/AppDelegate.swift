@@ -128,7 +128,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         
         // Set up the list view
         let listViewModel = ListViewModel(
-            data: objects.arrayProperty(),
+            data: objects.arrayProperty(idAttr: "id", orderAttr: "order"),
             contextMenu: nil,
             move: nil,
             selection: listSelectionProperty(selectedObjectID),

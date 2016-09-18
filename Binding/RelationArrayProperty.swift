@@ -6,12 +6,12 @@
 import Foundation
 import libRelational
 
-open class RowArrayElement: ArrayElement {
+public class RowArrayElement: ArrayElement {
     public typealias ID = RelationValue
     public typealias Data = Row
 
-    open let id: RelationValue
-    open var data: Row
+    public let id: RelationValue
+    public var data: Row
     
     init(id: RelationValue, data: Row) {
         self.id = id
@@ -19,7 +19,11 @@ open class RowArrayElement: ArrayElement {
     }
 }
 
-class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChangeCoalescedObserver {
+private typealias Element = RowArrayElement
+private typealias Pos = ArrayPos<Element>
+private typealias Change = ArrayChange<Element>
+
+public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChangeCoalescedObserver {
     
     private let relation: Relation
     private let idAttr: Attribute
@@ -27,7 +31,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
     
     private var removal: ObserverRemoval?
 
-    init(relation: Relation, idAttr: Attribute, orderAttr: Attribute) {
+    fileprivate init(relation: Relation, idAttr: Attribute, orderAttr: Attribute) {
         precondition(relation.scheme.attributes.isSuperset(of: [idAttr, orderAttr]))
         
         self.relation = relation
@@ -42,7 +46,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         removal?()
     }
     
-    override func start() {
+    public override func start() {
         removal = relation.addAsyncObserver(self)
         
         notify.valueWillChange()
@@ -55,21 +59,6 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
             }
             self.notify.valueDidChange()
         })
-    }
-    
-    override func insert(_ row: Row, pos: Pos) {
-        // TODO: Provide insert/delete/move as extension defined where R: TransactionalRelation
-        guard let relation = relation as? TransactionalDatabase.TransactionalRelation else {
-            fatalError("insert() is only supported when the underlying relation is mutable")
-        }
-
-        // Determine the position of the row to be inserted relative to the current array state
-        var mutableRow = row
-        let elems = elements ?? []
-        mutableRow[orderAttr] = self.orderForPos(pos, elems: elems)
-
-        // Insert into the relation
-        relation.asyncAdd(mutableRow)
     }
     
     private func onInsert(_ rows: [Row], elems: inout [Element], changes: inout [Change]) {
@@ -90,15 +79,6 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         }
     }
 
-    override func delete(_ id: RelationValue) {
-        guard let relation = relation as? TransactionalDatabase.TransactionalRelation else {
-            fatalError("delete() is only supported when the underlying relation is mutable")
-        }
-
-        // Delete from the relation
-        relation.asyncDelete(self.idAttr *== id)
-    }
-
     private func onDelete(_ ids: [RelationValue], elems: inout [Element], changes: inout [Change]) {
         for id in ids {
             if let index = elems.index(where: { $0.id == id }) {
@@ -108,32 +88,18 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         }
     }
 
-    /// Note: dstIndex is relative to the state of the array *after* the item is removed.
-    override func move(srcIndex: Int, dstIndex: Int) {
-        // Determine the order of the element in its new position (relative to the current array state)
-        let elems = elements ?? []
-        let element = elems[srcIndex]
-        let elemID = element.id
-        
-        let (previous, next) = self.adjacentElementsForIndex(dstIndex, notMatching: element, inElements: elems)
-        let newOrder = self.orderForElementBetween(previous, next, elems: elems)
-
-        // Update the relation
-        relation.asyncUpdate(idAttr *== elemID, newValues: [orderAttr: newOrder])
-    }
-    
     private func onUpdate(_ rows: [Row], elems: inout [Element], changes: inout [Change]) {
         for row in rows {
             let newOrder = row[orderAttr]
             if newOrder != .notFound {
                 let id = row[idAttr]
-                let element = elementForID(id, elems)!
-                changes.append(onMove(element, dstOrder: newOrder, elems: &elems))
+                if let element = elementForID(id, elems) {
+                    changes.append(onMove(element, dstOrder: newOrder, elems: &elems))
+                }
             }
         }
     }
     
-    // Must be called in the context of the `workOn` scheduler.
     private func onMove(_ element: Element, dstOrder: RelationValue, elems: inout [Element]) -> Change {
         // Remove the element from the array
         let srcIndex = indexForID(element.id, elems)!
@@ -170,7 +136,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         return (lo, hi)
     }
     
-    private func orderForElementBetween(_ previous: Element?, _ next: Element?, elems: [Element]) -> RelationValue {
+    private func orderForElementBetween(_ previous: Element?, _ next: Element?, elems: [Element]) -> Double {
         let prev: Element?
         if previous == nil && next == nil {
             // Add after the last element
@@ -187,20 +153,31 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         
         let lo: Double = prev.map(orderForElement) ?? 1.0
         let hi: Double = next.map(orderForElement) ?? 9.0
-        return RelationValue(lo + ((hi - lo) / 2.0))
+        return lo + ((hi - lo) / 2.0)
     }
     
-    private func orderForPos(_ pos: Pos, elems: [Element]) -> RelationValue {
+    override public func orderForPos(_ pos: ArrayPos<RowArrayElement>) -> Double {
+        let elems = self.elements ?? []
         let prev = pos.previousID.flatMap{ elementForID($0, elems) }
         let next = pos.nextID.flatMap{ elementForID($0, elems) }
         return orderForElementBetween(prev, next, elems: elems)
     }
     
-    func relationWillChange(_ relation: Relation) {
+    override public func orderForMove(srcIndex: Int, dstIndex: Int) -> Double {
+        // Note: dstIndex is relative to the state of the array *after* the item is removed
+        let elems = self.elements ?? []
+        let element = elems[srcIndex]
+        let (prev, next) = adjacentElementsForIndex(dstIndex, notMatching: element, inElements: elems)
+        return orderForElementBetween(prev, next, elems: elems)
+    }
+
+    // TODO: This shouldn't be public
+    public func relationWillChange(_ relation: Relation) {
         notify.valueWillChange()
     }
 
-    func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+    // TODO: This shouldn't be public
+    public func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
         switch result {
         case .Ok(let rows):
             // Compute array changes
@@ -229,7 +206,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
 
 extension Relation {
     /// Returns an ArrayProperty that gets its data from this relation.
-    public func arrayProperty(_ idAttr: Attribute = "id", orderAttr: Attribute = "order") -> ArrayProperty<RowArrayElement> {
+    public func arrayProperty(idAttr: Attribute, orderAttr: Attribute) -> ArrayProperty<RowArrayElement> {
         return RelationArrayProperty(relation: self, idAttr: idAttr, orderAttr: orderAttr)
     }
 }
