@@ -56,23 +56,17 @@ public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     }
 }
 
-open class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
-    public typealias Value = N
-    public typealias SignalChange = [TreeChange<N>]
+open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
+    public typealias Value = Node
+    public typealias SignalChange = [TreeChange<Node>]
 
-    public typealias NodeID = N.ID
-    public typealias Node = N
-    public typealias Path = TreePath<N>
-    public typealias Pos = TreePos<N>
-    public typealias Change = TreeChange<N>
+    public private(set) var root: Node
     
-    open var root: Node
-    
-    open var value: Node? {
+    public var value: Node? {
         return root
     }
     
-    open let signal: Signal<SignalChange>
+    public let signal: Signal<SignalChange>
     internal let notify: Signal<SignalChange>.Notify
     
     init(root: Node, signal: Signal<SignalChange>, notify: Signal<SignalChange>.Notify) {
@@ -81,33 +75,21 @@ open class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
         self.notify = notify
     }
     
-    public func start() {
+    open func start() {
     }
     
-    internal func notifyObservers(treeChanges: [TreeChange<N>]) {
+    internal func notifyObservers(treeChanges: [TreeChange<Node>]) {
         let metadata = ChangeMetadata(transient: false)
         notify.valueChanging(treeChanges, metadata)
     }
     
-    open func insert(data: N.Data, pos: Pos) {
-    }
-
-    open func computeOrderForAppend(inParent parent: N.ID?) -> Double {
-        return 0.0
-    }
-
-    open func computeOrderForInsert(after previous: N.ID) -> (N.ID?, Double) {
-        return (nil, 0.0)
-    }
-
-    open func delete(_ id: N.ID) {
-    }
-    
-    open func move(srcPath: Path, dstPath: Path) {
+    // XXX: Remove this
+    public func delete(_ id: Node.ID) {
+        fatalError("Must be implemented by subclasses")
     }
     
     /// Returns the node with the given identifier.
-    open func nodeForID(_ id: NodeID) -> Node? {
+    public func nodeForID(_ id: Node.ID) -> Node? {
         // TODO: Not efficient, but whatever
         func findNode(_ node: Node) -> Node? {
             if node.id == id {
@@ -127,13 +109,13 @@ open class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
     }
     
     /// Returns the node at the given path.
-    open func nodeAtPath(_ path: Path) -> Node? {
+    public func nodeAtPath(_ path: TreePath<Node>) -> Node? {
         let parent = path.parent ?? root
         return parent.children[safe: path.index]
     }
     
     /// Returns the parent of the given node.
-    open func parentForID(_ id: NodeID) -> Node? {
+    public func parentForID(_ id: Node.ID) -> Node? {
         if let node = nodeForID(id) {
             return parentForNode(node)
         } else {
@@ -142,7 +124,7 @@ open class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
     }
     
     /// Returns the parent of the given node.
-    open func parentForNode(_ node: Node) -> Node? {
+    public func parentForNode(_ node: Node) -> Node? {
         if let parentID = node.parentID {
             return nodeForID(parentID)
         } else {
@@ -151,7 +133,7 @@ open class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
     }
     
     /// Returns the index of the given node relative to its parent.
-    open func indexForID(_ id: NodeID) -> Int? {
+    public func indexForID(_ id: Node.ID) -> Int? {
         if let node = nodeForID(id) {
             let parent = parentForNode(node) ?? root
             return parent.children.index(where: {$0 === node})
@@ -161,13 +143,13 @@ open class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
     }
     
     /// Returns the index of the given node relative to its parent.
-    open func indexForNode(_ node: Node) -> Int? {
+    public func indexForNode(_ node: Node) -> Int? {
         let parent = parentForNode(node) ?? root
         return parent.children.index(where: {$0 === node})
     }
     
     /// Returns true if the first node is a descendent of (or the same as) the second node.
-    open func isNodeDescendent(_ node: Node, ofAncestor ancestor: Node) -> Bool {
+    public func isNodeDescendent(_ node: Node, ofAncestor ancestor: Node) -> Bool {
         if node === ancestor {
             return true
         }
@@ -182,5 +164,30 @@ open class TreeProperty<N: TreeNode>: AsyncReadablePropertyType {
         }
         
         return false
+    }
+    
+    /// Returns an order value that would be appropriate for a node to be appended as a
+    /// child of the given parent.
+    /// Note: This only works when there is a distinct "order" property for each element
+    /// of type Double.
+    public func orderForAppend(inParent parent: Node.ID?) -> Double {
+        fatalError("Must be implemented by subclasses")
+    }
+
+    /// Returns an order value that would be appropriate for a node to be inserted as the
+    /// next sibling after the given node.
+    /// Note: This only works when there is a distinct "order" property for each element
+    /// of type Double.
+    public func orderForInsert(after previous: Node.ID) -> (parentID: Node.ID?, order: Double) {
+        fatalError("Must be implemented by subclasses")
+    }
+    
+    /// Returns an order value that would be appropriate for a node to be moved from
+    /// its current position to the new destination position.
+    /// Note: This only works when there is a distinct "order" property for each element
+    /// of type Double.
+    /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
+    public func orderForMove(srcPath: TreePath<Node>, dstPath: TreePath<Node>) -> (nodeID: Node.ID, dstParentID: Node.ID?, order: Double) {
+        fatalError("Must be implemented by subclasses")
     }
 }

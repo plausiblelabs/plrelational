@@ -9,6 +9,10 @@ import libRelational
 
 class RelationTreePropertyTests: BindingTestCase {
 
+    private typealias Pos = TreePos<RowTreeNode>
+    private typealias Path = TreePath<RowTreeNode>
+    private typealias Change = TreeChange<RowTreeNode>
+
     func testInit() {
         let sqliteDB = makeDB().db
         let sqliteRelation = sqliteDB.createRelation("collection", scheme: ["id", "name", "parent", "order"]).ok!
@@ -48,9 +52,9 @@ class RelationTreePropertyTests: BindingTestCase {
         
         var willChangeCount = 0
         var didChangeCount = 0
-        var changes: [RelationTreeProperty.Change] = []
+        var changes: [Change] = []
         
-        let property = r.treeProperty()
+        let property = r.treeProperty(idAttr: "id", parentAttr: "parent", orderAttr: "order")
         let removal = property.signal.observe(SignalObserver(
             valueWillChange: {
                 willChangeCount += 1
@@ -65,7 +69,7 @@ class RelationTreePropertyTests: BindingTestCase {
         ))
         
         // Verify that property value remains empty until we actually start it
-        XCTAssertEqual(property.value!.children.count, 0)
+        XCTAssertEqual(property.root.children.count, 0)
         XCTAssertEqual(willChangeCount, 0)
         XCTAssertEqual(didChangeCount, 0)
         XCTAssertEqual(changes, [])
@@ -105,9 +109,9 @@ class RelationTreePropertyTests: BindingTestCase {
         
         var willChangeCount = 0
         var didChangeCount = 0
-        var changes: [RelationTreeProperty.Change] = []
+        var changes: [Change] = []
         
-        let property = r.treeProperty()
+        let property = r.treeProperty(idAttr: "id", parentAttr: "parent", orderAttr: "order")
         let removal = property.signal.observe(SignalObserver(
             valueWillChange: {
                 willChangeCount += 1
@@ -120,17 +124,18 @@ class RelationTreePropertyTests: BindingTestCase {
                 CFRunLoopStop(runloop)
             }
         ))
-        
-        func addCollection(_ collectionID: Int64, name: String, parentID: Int64?, previousID: Int64?) {
+
+        func addCollection(_ collectionID: Int64, name: String, parentID: Int64?) {
+            let parent = parentID.map{RelationValue($0)}
+            let order = property.orderForAppend(inParent: parent)
+            let row: Row = [
+                "id": RelationValue(collectionID),
+                "name": RelationValue(name),
+                "parent": parent ?? .null,
+                "order": RelationValue(order)
+            ]
             awaitCompletion{
-                let row: Row = [
-                    "id": RelationValue(collectionID),
-                    "name": RelationValue(name)
-                ]
-                let parent = parentID.map{RelationValue($0)}
-                let previous = previousID.map{RelationValue($0)}
-                let pos = RelationTreeProperty.Pos(parentID: parent, previousID: previous, nextID: nil)
-                property.insert(data: row, pos: pos)
+                r.asyncAdd(row)
             }
         }
         
@@ -140,13 +145,18 @@ class RelationTreePropertyTests: BindingTestCase {
             }
         }
         
-        func moveCollection(srcPath: RelationTreeProperty.Path, dstPath: RelationTreeProperty.Path) {
+        func moveCollection(srcPath: Path, dstPath: Path) {
+            let (nodeID, dstParentID, order) = property.orderForMove(srcPath: srcPath, dstPath: dstPath)
+            
             awaitCompletion{
-                property.move(srcPath: srcPath, dstPath: dstPath)
+                r.asyncUpdate(Attribute("id") *== nodeID, newValues: [
+                    "parent": dstParentID ?? .null,
+                    "order": RelationValue(order)
+                ])
             }
         }
         
-        func verifyChanges(_ expected: [RelationTreeProperty.Change], file: StaticString = #file, line: UInt = #line) {
+        func verifyChanges(_ expected: [Change], file: StaticString = #file, line: UInt = #line) {
             XCTAssertEqual(changes, expected, file: file, line: line)
             changes = []
         }
@@ -156,7 +166,7 @@ class RelationTreePropertyTests: BindingTestCase {
             AssertEqual(sqliteDB["collection"]!, expected, file: file, line: line)
         }
         
-        func path(_ parentID: Int64?, _ index: Int) -> RelationTreeProperty.Path {
+        func path(_ parentID: Int64?, _ index: Int) -> Path {
             let parent = parentID.flatMap{ property.nodeForID(RelationValue($0)) }
             return TreePath(parent: parent, index: index)
         }
@@ -175,14 +185,15 @@ class RelationTreePropertyTests: BindingTestCase {
         verifyChanges([.initial(property.value!)])
 
         // Insert some collections
-        addCollection(1, name: "Group1", parentID: nil, previousID: nil)
-        addCollection(2, name: "Collection1", parentID: 1, previousID: nil)
-        addCollection(3, name: "Page1", parentID: 1, previousID: 2)
-        addCollection(4, name: "Page2", parentID: 1, previousID: 3)
-        addCollection(5, name: "Child1", parentID: 2, previousID: nil)
-        addCollection(6, name: "Child2", parentID: 2, previousID: 5)
-        addCollection(7, name: "Child3", parentID: 2, previousID: 6)
-        addCollection(8, name: "Group2", parentID: nil, previousID: 1)
+        // TODO: The following only uses orderForAppend; need to exercise orderForInsert too
+        addCollection(1, name: "Group1", parentID: nil)
+        addCollection(2, name: "Collection1", parentID: 1)
+        addCollection(3, name: "Page1", parentID: 1)
+        addCollection(4, name: "Page2", parentID: 1)
+        addCollection(5, name: "Child1", parentID: 2)
+        addCollection(6, name: "Child2", parentID: 2)
+        addCollection(7, name: "Child3", parentID: 2)
+        addCollection(8, name: "Group2", parentID: nil)
         verifyTree(property, [
             "Group1",
             "  Collection1",
@@ -241,7 +252,7 @@ class RelationTreePropertyTests: BindingTestCase {
             [7, "Child3",      2,     3.0],
             [8, "Group2",      .null, 7.0]
         ))
-        
+
         // Move a collection to a new parent
         moveCollection(srcPath: path(1, 0), dstPath: path(8, 0))
         verifyTree(property, [
@@ -268,7 +279,7 @@ class RelationTreePropertyTests: BindingTestCase {
             [7, "Child3",      2,     3.0],
             [8, "Group2",      .null, 7.0]
         ))
-        
+
         // Move a collection to the top level
         moveCollection(srcPath: path(2, 1), dstPath: path(nil, 1))
         verifyTree(property, [
@@ -295,7 +306,7 @@ class RelationTreePropertyTests: BindingTestCase {
             [7, "Child3",      2,     3.0],
             [8, "Group2",      .null, 7.0]
         ))
-        
+
         // Delete a couple collections
         deleteCollection(4)
         deleteCollection(2)

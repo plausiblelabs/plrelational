@@ -9,8 +9,8 @@ import libRelational
 
 class RelationArrayPropertyTests: BindingTestCase {
     
-    private typealias Change = ArrayChange<RowArrayElement>
     private typealias Pos = ArrayPos<RowArrayElement>
+    private typealias Change = ArrayChange<RowArrayElement>
     
     func testInitWithExplicitOrder() {
         let sqliteDB = makeDB().db

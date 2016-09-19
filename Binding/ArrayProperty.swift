@@ -39,9 +39,9 @@ open class ArrayProperty<Element: ArrayElement>: AsyncReadablePropertyType {
     public typealias Value = [Element]
     public typealias SignalChange = [ArrayChange<Element>]
     
-    open internal(set) var elements: [Element]
+    public internal(set) var elements: [Element]
 
-    open var value: [Element]? {
+    public var value: [Element]? {
         return elements
     }
     

@@ -26,24 +26,29 @@ public final class RowTreeNode: RowCollectionElement, TreeNode {
     }
 }
 
+private typealias Node = RowTreeNode
+private typealias Pos = TreePos<Node>
+private typealias Path = TreePath<Node>
+private typealias Change = TreeChange<Node>
+
 class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoalescedObserver {
 
     private let relation: Relation
-    private let tag: AnyObject?
     private let idAttr: Attribute
     private let parentAttr: Attribute
     private let orderAttr: Attribute
+    private let tag: AnyObject?
     
     private var removal: ObserverRemoval?
     
-    init(relation: Relation, tag: AnyObject?, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute) {
+    init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute, tag: AnyObject?) {
         precondition(relation.scheme.attributes.isSuperset(of: [idAttr, parentAttr, orderAttr]))
 
         self.relation = relation
-        self.tag = tag
         self.idAttr = idAttr
         self.parentAttr = parentAttr
         self.orderAttr = orderAttr
+        self.tag = tag
         
         let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: self.parentAttr, tag: tag)
         let (signal, notify) = Signal<SignalChange>.pipe()
@@ -79,59 +84,10 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         })
     }
     
-    override func insert(data row: Row, pos: Pos) {
-        // TODO: Provide insert/delete/move as extension defined where R: TransactionalRelation
-        guard let relation = relation as? TransactionalDatabase.TransactionalRelation else {
-            fatalError("insert() is only supported when the underlying relation is mutable")
-        }
-
-        let parentIDValue = pos.parentID ?? .null
-        let order = orderForPos(pos)
-
-        var mutableRow = row
-        mutableRow[parentAttr] = parentIDValue
-        mutableRow[orderAttr] = RelationValue(order)
-        relation.asyncAdd(mutableRow)
-    }
-    
-    override func computeOrderForAppend(inParent parent: RelationValue?) -> Double {
-        let parentNode: Node
-        if let parentID = parent {
-            // TODO: Handle case where node isn't present for some reason
-            parentNode = nodeForID(parentID)!
-        } else {
-            parentNode = root
-        }
-        
-        return orderWithinParent(parentNode, previous: nil, next: nil)
-    }
-    
-    override func computeOrderForInsert(after previous: RelationValue) -> (RelationValue?, Double) {
-        // TODO: Handle case where node isn't present for some reason
-        let previousNode = nodeForID(previous)!
-        let parentID = previousNode.parentID
-        let parentNode = parentForNode(previousNode) ?? root
-        
-        let nextNode: Node?
-        if let indexOfPrevious = parentNode.children.index(where: {$0.id == previous}) {
-            let indexOfNext = indexOfPrevious + 1
-            if indexOfNext < parentNode.children.count {
-                nextNode = parentNode.children[indexOfNext]
-            } else {
-                nextNode = nil
-            }
-        } else {
-            nextNode = nil
-        }
-        
-        let order = orderWithinParent(parentNode, previous: previousNode, next: nextNode)
-        return (parentID, order)
-    }
-
-    private func onInsert(rows: [Row], root: inout Node, changes: inout [Change]) {
+    private func onInsert(rows: [Row], changes: inout [Change]) {
         
         func insertNode(_ node: Node, parent: Node) -> Int {
-            return parent.children.insertSorted(node, { $0.data[self.orderAttr] })
+            return parent.children.insertSorted(node, { $0.data[orderAttr] })
         }
 
         // Observers should only be notified about the top-most nodes that were inserted.
@@ -200,7 +156,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         }
     }
 
-    private func onDelete(ids: [RelationValue], root: inout Node, changes: inout [Change]) {
+    private func onDelete(ids: [RelationValue], changes: inout [Change]) {
         // Observers should only be notified about the top-most nodes that were deleted.
         // We handle this by looking at the identifiers of the rows/nodes to be deleted,
         // and only deleting the unique (top-most) parents.
@@ -242,40 +198,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         }
     }
 
-    /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
-    override func move(srcPath: Path, dstPath: Path) {
-        let srcParent = srcPath.parent ?? root
-        let dstParent = dstPath.parent ?? root
-
-        let srcNode = srcParent.children[srcPath.index]
-        let srcID = srcNode.id
-        
-        let dstParentID: RelationValue
-        if let dstParent = dstPath.parent {
-            dstParentID = dstParent.id
-        } else {
-            dstParentID = .null
-        }
-        
-        // Note that dstPath.index of -1 can occur in the case where a node is being dragged onto another
-        let dstIndex: Int
-        if dstPath.index < 0 {
-            dstIndex = dstParent.children.count
-        } else {
-            dstIndex = dstPath.index
-        }
-        
-        // Determine the order of the node in its new parent and/or position
-        let (previous, next) = adjacentNodesForIndex(dstIndex, inParent: dstParent, notMatching: srcNode)
-        let newOrder = orderWithinParent(dstParent, previous: previous, next: next)
-        
-        relation.asyncUpdate(idAttr *== srcID, newValues: [
-            parentAttr: dstParentID,
-            orderAttr: RelationValue(newOrder)
-        ])
-    }
-
-    private func onUpdate(rows: [Row], root: inout Node, changes: inout [Change]) {
+    private func onUpdate(rows: [Row], changes: inout [Change]) {
         for row in rows {
             if let change = self.onUpdate(row) {
                 changes.append(change)
@@ -317,7 +240,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         node.data[orderAttr] = dstOrder
 
         // Insert the node in its new parent
-        let dstIndex = dstParent.children.insertSorted(node, { $0.data[self.orderAttr] })
+        let dstIndex = dstParent.children.insertSorted(node, { $0.data[orderAttr] })
 
         // Prepare changes
         let newSrcPath = TreePath(parent: optSrcParent, index: srcIndex)
@@ -381,6 +304,66 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         return orderWithinParent(parent, previous: previous, next: next)
     }
     
+    override func orderForAppend(inParent parent: RelationValue?) -> Double {
+        let parentNode: Node
+        if let parentID = parent {
+            // TODO: Handle case where node isn't present for some reason
+            parentNode = nodeForID(parentID)!
+        } else {
+            parentNode = root
+        }
+        
+        return orderWithinParent(parentNode, previous: nil, next: nil)
+    }
+    
+    override func orderForInsert(after previous: RelationValue) -> (parentID: RelationValue?, order: Double) {
+        // TODO: Handle case where node isn't present for some reason
+        let previousNode = nodeForID(previous)!
+        let parentID = previousNode.parentID
+        let parentNode = parentForNode(previousNode) ?? root
+        
+        let nextNode: Node?
+        if let indexOfPrevious = parentNode.children.index(where: {$0.id == previous}) {
+            let indexOfNext = indexOfPrevious + 1
+            if indexOfNext < parentNode.children.count {
+                nextNode = parentNode.children[indexOfNext]
+            } else {
+                nextNode = nil
+            }
+        } else {
+            nextNode = nil
+        }
+        
+        let order = orderWithinParent(parentNode, previous: previousNode, next: nextNode)
+        return (parentID, order)
+    }
+    
+    override func orderForMove(srcPath: TreePath<RowTreeNode>, dstPath: TreePath<RowTreeNode>) -> (nodeID: RelationValue, dstParentID: RelationValue?, order: Double) {
+        // Note: dstPath.index is relative to the state of the array *after* the item is removed
+        
+        let srcParent = srcPath.parent ?? root
+        let dstParent = dstPath.parent ?? root
+
+        let srcNode = srcParent.children[srcPath.index]
+        let srcID = srcNode.id
+
+        let dstParentID = dstPath.parent?.id
+
+        // Note that dstPath.index of -1 can occur in the case where a node is being dragged onto another
+        let dstIndex: Int
+        if dstPath.index < 0 {
+            dstIndex = dstParent.children.count
+        } else {
+            dstIndex = dstPath.index
+        }
+
+        // Determine the order of the node in its new parent and/or position
+        let (previous, next) = adjacentNodesForIndex(dstIndex, inParent: dstParent, notMatching: srcNode)
+        let newOrder = orderWithinParent(dstParent, previous: previous, next: next)
+
+        return (nodeID: srcID, dstParentID: dstParentID, order: newOrder)
+    }
+    
     func relationWillChange(_ relation: Relation) {
         notify.valueWillChange()
     }
@@ -389,12 +372,12 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         switch result {
         case .Ok(let rows):
             // Compute tree changes
-            let parts = partsOf(rows, idAttr: self.idAttr)
+            let parts = partsOf(rows, idAttr: idAttr)
             if !parts.isEmpty {
                 var treeChanges: [Change] = []
-                self.onInsert(rows: parts.addedRows, root: &self.root, changes: &treeChanges)
-                self.onUpdate(rows: parts.updatedRows, root: &self.root, changes: &treeChanges)
-                self.onDelete(ids: parts.deletedIDs, root: &self.root, changes: &treeChanges)
+                self.onInsert(rows: parts.addedRows, changes: &treeChanges)
+                self.onUpdate(rows: parts.updatedRows, changes: &treeChanges)
+                self.onDelete(ids: parts.deletedIDs, changes: &treeChanges)
                 if treeChanges.count > 0 {
                     self.notifyObservers(treeChanges: treeChanges)
                 }
@@ -410,7 +393,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
 
 extension Relation {
     /// Returns a TreeProperty that gets its data from this relation.
-    public func treeProperty(tag: AnyObject? = nil, idAttr: Attribute = "id", parentAttr: Attribute = "parent", orderAttr: Attribute = "order") -> TreeProperty<RowTreeNode> {
-        return RelationTreeProperty(relation: self, tag: tag, idAttr: idAttr, parentAttr: parentAttr, orderAttr: orderAttr)
+    public func treeProperty(idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute, tag: AnyObject? = nil) -> TreeProperty<RowTreeNode> {
+        return RelationTreeProperty(relation: self, idAttr: idAttr, parentAttr: parentAttr, orderAttr: orderAttr, tag: tag)
     }
 }
