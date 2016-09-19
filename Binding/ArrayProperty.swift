@@ -4,14 +4,8 @@
 //
 
 import Foundation
-import libRelational
 
-public protocol ArrayElement: class, Equatable {
-    associatedtype ID: Hashable, Plistable
-    associatedtype Data
-    
-    var id: ID { get }
-    var data: Data { get set }
+public protocol ArrayElement: CollectionElement, Equatable {
 }
 
 public func ==<E: ArrayElement>(a: E, b: E) -> Bool {
@@ -67,12 +61,25 @@ open class ArrayProperty<Element: ArrayElement>: AsyncReadablePropertyType {
         let metadata = ChangeMetadata(transient: false)
         notify.valueChanging(arrayChanges, metadata)
     }
+
+    // TODO: If we make elements non-optional, we can drop the variants that take an element array
+    // as an argument.
     
+    /// Returns the index of the element with the given ID, relative to the sorted elements array.
+    public func indexForID(_ id: Element.ID) -> Int? {
+        return indexForID(id, self.elements ?? [])
+    }
+
     /// Returns the index of the element with the given ID, relative to the sorted elements array.
     public func indexForID(_ id: Element.ID, _ elements: [Element]) -> Int? {
         return elements.index(where: { $0.id == id })
     }
-    
+
+    /// Returns the element with the given ID.
+    public func elementForID(_ id: Element.ID) -> Element? {
+        return elementForID(id, self.elements ?? [])
+    }
+
     /// Returns the element with the given ID.
     public func elementForID(_ id: Element.ID, _ elements: [Element]) -> Element? {
         return indexForID(id, elements).map{ elements[$0] }

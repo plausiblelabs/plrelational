@@ -6,16 +6,9 @@
 import Foundation
 import libRelational
 
-public class RowArrayElement: ArrayElement {
-    public typealias ID = RelationValue
-    public typealias Data = Row
-
-    public let id: RelationValue
-    public var data: Row
-    
-    init(id: RelationValue, data: Row) {
-        self.id = id
-        self.data = data
+public class RowArrayElement: RowCollectionElement, ArrayElement {
+    override init(id: RelationValue, data: Row, tag: AnyObject?) {
+        super.init(id: id, data: data, tag: tag)
     }
 }
 
@@ -28,15 +21,17 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
     private let relation: Relation
     private let idAttr: Attribute
     private let orderAttr: Attribute
+    private let tag: AnyObject?
     
     private var removal: ObserverRemoval?
 
-    fileprivate init(relation: Relation, idAttr: Attribute, orderAttr: Attribute) {
+    fileprivate init(relation: Relation, idAttr: Attribute, orderAttr: Attribute, tag: AnyObject?) {
         precondition(relation.scheme.attributes.isSuperset(of: [idAttr, orderAttr]))
         
         self.relation = relation
         self.idAttr = idAttr
         self.orderAttr = orderAttr
+        self.tag = tag
 
         let (signal, notify) = Signal<SignalChange>.pipe()
         super.init(signal: signal, notify: notify)
@@ -53,7 +48,7 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
         relation.asyncAllRows({ result in
             if let rows = result.ok {
                 let sortedRows = rows.sorted{ $0[self.orderAttr] < $1[self.orderAttr] }
-                let elements = sortedRows.map{ RowArrayElement(id: $0[self.idAttr], data: $0) }
+                let elements = sortedRows.map{ RowArrayElement(id: $0[self.idAttr], data: $0, tag: self.tag) }
                 self.elements = elements
                 self.notifyObservers(arrayChanges: [.initial(elements)])
             }
@@ -69,7 +64,7 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
 
         func insertRow(_ row: Row) -> Int {
             let id = row[self.idAttr]
-            let element = RowArrayElement(id: id, data: row)
+            let element = RowArrayElement(id: id, data: row, tag: self.tag)
             return insertElement(element)
         }
         
@@ -206,7 +201,7 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
 
 extension Relation {
     /// Returns an ArrayProperty that gets its data from this relation.
-    public func arrayProperty(idAttr: Attribute, orderAttr: Attribute) -> ArrayProperty<RowArrayElement> {
-        return RelationArrayProperty(relation: self, idAttr: idAttr, orderAttr: orderAttr)
+    public func arrayProperty(idAttr: Attribute, orderAttr: Attribute, tag: AnyObject? = nil) -> ArrayProperty<RowArrayElement> {
+        return RelationArrayProperty(relation: self, idAttr: idAttr, orderAttr: orderAttr, tag: tag)
     }
 }

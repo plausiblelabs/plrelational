@@ -5,12 +5,7 @@
 
 import Foundation
 
-public protocol TreeNode: class {
-    associatedtype ID: Hashable, Plistable
-    associatedtype Data
-
-    var id: ID { get }
-    var data: Data { get set }
+public protocol TreeNode: CollectionElement {
     var children: [Self] { get set }
     var parentID: ID? { get }
 }

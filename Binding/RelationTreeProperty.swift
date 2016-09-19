@@ -6,22 +6,14 @@
 import Foundation
 import libRelational
 
-public final class RowTreeNode: TreeNode {
-    public typealias ID = RelationValue
-    public typealias Data = Row
-    
-    public let id: RelationValue
-    public var data: Row
+public final class RowTreeNode: RowCollectionElement, TreeNode {
     public var children: [RowTreeNode]
     private let parentAttr: Attribute
-    public let tag: AnyObject?
     
     init(id: RelationValue, row: Row, parentAttr: Attribute, children: [RowTreeNode] = [], tag: AnyObject?) {
-        self.id = id
-        self.data = row
         self.children = children
         self.parentAttr = parentAttr
-        self.tag = tag
+        super.init(id: id, data: row, tag: tag)
     }
     
     public var parentID: RelationValue? {
