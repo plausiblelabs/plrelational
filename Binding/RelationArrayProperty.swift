@@ -173,14 +173,14 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         case .Ok(let rows):
             // Compute array changes
             var arrayChanges: [Change] = []
-            let parts = partsOf(rows, idAttr: self.idAttr)
-
-            self.onInsert(parts.addedRows, changes: &arrayChanges)
-            self.onUpdate(parts.updatedRows, changes: &arrayChanges)
-            self.onDelete(parts.deletedIDs, changes: &arrayChanges)
-
-            if arrayChanges.count > 0 {
-                self.notifyObservers(arrayChanges: arrayChanges)
+            let parts = partsOf(rows, idAttr: idAttr)
+            if !parts.isEmpty {
+                self.onInsert(parts.addedRows, changes: &arrayChanges)
+                self.onUpdate(parts.updatedRows, changes: &arrayChanges)
+                self.onDelete(parts.deletedIDs, changes: &arrayChanges)
+                if arrayChanges.count > 0 {
+                    self.notifyObservers(arrayChanges: arrayChanges)
+                }
             }
             self.notify.valueDidChange()
             
