@@ -16,7 +16,7 @@ private typealias Element = RowArrayElement
 private typealias Pos = ArrayPos<Element>
 private typealias Change = ArrayChange<Element>
 
-public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChangeCoalescedObserver {
+class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChangeCoalescedObserver {
     
     private let relation: Relation
     private let idAttr: Attribute
@@ -41,7 +41,7 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
         removal?()
     }
     
-    public override func start() {
+    override func start() {
         removal = relation.addAsyncObserver(self)
         
         notify.valueWillChange()
@@ -151,26 +151,24 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
         return lo + ((hi - lo) / 2.0)
     }
     
-    override public func orderForPos(_ pos: ArrayPos<RowArrayElement>) -> Double {
+    override func orderForPos(_ pos: ArrayPos<RowArrayElement>) -> Double {
         let prev = pos.previousID.flatMap(elementForID)
         let next = pos.nextID.flatMap(elementForID)
         return orderForElementBetween(prev, next)
     }
     
-    override public func orderForMove(srcIndex: Int, dstIndex: Int) -> Double {
+    override func orderForMove(srcIndex: Int, dstIndex: Int) -> Double {
         // Note: dstIndex is relative to the state of the array *after* the item is removed
         let element = elements[srcIndex]
         let (prev, next) = adjacentElementsForIndex(dstIndex, notMatching: element)
         return orderForElementBetween(prev, next)
     }
 
-    // TODO: This shouldn't be public
-    public func relationWillChange(_ relation: Relation) {
+    func relationWillChange(_ relation: Relation) {
         notify.valueWillChange()
     }
 
-    // TODO: This shouldn't be public
-    public func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
         switch result {
         case .Ok(let rows):
             // Compute array changes
@@ -181,7 +179,9 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
             self.onUpdate(parts.updatedRows, changes: &arrayChanges)
             self.onDelete(parts.deletedIDs, changes: &arrayChanges)
 
-            self.notifyObservers(arrayChanges: arrayChanges)
+            if arrayChanges.count > 0 {
+                self.notifyObservers(arrayChanges: arrayChanges)
+            }
             self.notify.valueDidChange()
             
         case .Err(let err):
