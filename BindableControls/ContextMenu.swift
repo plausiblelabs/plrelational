@@ -9,7 +9,7 @@ public struct ContextMenu {
     
     // TODO: Remove this in favor of MenuItem
     public enum Item { case
-        titled(title: String, action: () -> Void),
+        titled(title: String, enabled: Bool, action: () -> Void),
         separator
     }
     
@@ -22,14 +22,15 @@ public struct ContextMenu {
 
 extension ContextMenu {
     
-    var nsmenu: NSMenu {
+    public var nsmenu: NSMenu {
         let menu = NSMenu()
 
         for item in items {
             let nsitem: NSMenuItem
             switch item {
-            case let .titled(title, action):
+            case let .titled(title, enabled, action):
                 nsitem = ClosureMenuItem(title: title, actionClosure: action, keyEquivalent: "")
+                nsitem.isEnabled = enabled
                 break
             case .separator:
                 nsitem = NSMenuItem.separator()
