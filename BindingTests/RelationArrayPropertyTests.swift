@@ -56,8 +56,8 @@ class RelationArrayPropertyTests: BindingTestCase {
             }
         ))
         
-        // Verify that property value remains nil until we actually start it
-        XCTAssertNil(property.value)
+        // Verify that property value remains empty until we actually start it
+        XCTAssertEqual(property.elements, [])
         XCTAssertEqual(willChangeCount, 0)
         XCTAssertEqual(didChangeCount, 0)
         XCTAssertEqual(changes, [])
@@ -131,7 +131,7 @@ class RelationArrayPropertyTests: BindingTestCase {
         }
         
         func movePage(srcIndex: Int, dstIndex: Int) {
-            let elem = property.elements![srcIndex]
+            let elem = property.elements[srcIndex]
             let order = property.orderForMove(srcIndex: srcIndex, dstIndex: dstIndex)
             awaitCompletion{
                 r.asyncUpdate(Attribute("id") *== elem.id, newValues: ["order": RelationValue(order)])
@@ -148,8 +148,8 @@ class RelationArrayPropertyTests: BindingTestCase {
             AssertEqual(sqliteDB["page"]!, expected, file: file, line: line)
         }
 
-        // Verify that property value remains nil until we actually start it
-        XCTAssertNil(property.value)
+        // Verify that property value remains empty until we actually start it
+        XCTAssertEqual(property.elements, [])
         XCTAssertEqual(willChangeCount, 0)
         XCTAssertEqual(didChangeCount, 0)
         XCTAssertEqual(changes, [])
@@ -274,8 +274,8 @@ class RelationArrayPropertyTests: BindingTestCase {
             }
         ))
         
-        // Verify that property value remains nil until we actually start it
-        XCTAssertNil(property.value)
+        // Verify that property value remains empty until we actually start it
+        XCTAssertEqual(property.elements, [])
         XCTAssertEqual(willChangeCount, 0)
         XCTAssertEqual(didChangeCount, 0)
         XCTAssertEqual(changes, [])
@@ -360,8 +360,8 @@ class RelationArrayPropertyTests: BindingTestCase {
             AssertEqual(sqliteDB["person"]!, expected, file: file, line: line)
         }
         
-        // Verify that property value remains nil until we actually start it
-        XCTAssertNil(property.value)
+        // Verify that property value remains empty until we actually start it
+        XCTAssertEqual(property.elements, [])
         XCTAssertEqual(willChangeCount, 0)
         XCTAssertEqual(didChangeCount, 0)
         XCTAssertEqual(changes, [])

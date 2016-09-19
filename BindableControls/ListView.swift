@@ -47,7 +47,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     private let outlineView: NSOutlineView
 
     private var elements: [E] {
-        return model.data.value ?? []
+        return model.data.elements
     }
     
     private lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
@@ -63,7 +63,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         set: { [unowned self] selectedIDs, _ in
             let indexes = NSMutableIndexSet()
             for id in selectedIDs {
-                if let element = self.model.data.elementForID(id, self.elements) {
+                if let element = self.model.data.elementForID(id) {
                     // TODO: This is inefficient
                     let index = self.outlineView.row(forItem: element)
                     if index >= 0 {
@@ -142,7 +142,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         
         if let idPlist = pboard.propertyList(forType: PasteboardType) {
             let elementID = E.ID.fromPlist(idPlist as AnyObject)!
-            if let srcIndex = model.data.indexForID(elementID, elements) {
+            if let srcIndex = model.data.indexForID(elementID) {
                 if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
                     return NSDragOperation.move
                 }
@@ -157,7 +157,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         
         if let idPlist = pboard.propertyList(forType: PasteboardType), let move = model.move {
             let elementID = E.ID.fromPlist(idPlist as AnyObject)!
-            if let srcIndex = model.data.indexForID(elementID, elements) {
+            if let srcIndex = model.data.indexForID(elementID) {
                 move(srcIndex, index)
                 return true
             }

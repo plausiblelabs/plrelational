@@ -56,14 +56,14 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
         })
     }
     
-    private func onInsert(_ rows: [Row], elems: inout [Element], changes: inout [Change]) {
+    private func onInsert(_ rows: [Row], changes: inout [Change]) {
 
         func insertElement(_ element: Element) -> Int {
-            return elems.insertSorted(element, { $0.data[self.orderAttr] })
+            return elements.insertSorted(element, { $0.data[orderAttr] })
         }
 
         func insertRow(_ row: Row) -> Int {
-            let id = row[self.idAttr]
+            let id = row[idAttr]
             let element = RowArrayElement(id: id, data: row, tag: self.tag)
             return insertElement(element)
         }
@@ -74,52 +74,52 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
         }
     }
 
-    private func onDelete(_ ids: [RelationValue], elems: inout [Element], changes: inout [Change]) {
+    private func onDelete(_ ids: [RelationValue], changes: inout [Change]) {
         for id in ids {
-            if let index = elems.index(where: { $0.id == id }) {
-                elems.remove(at: index)
+            if let index = elements.index(where: { $0.id == id }) {
+                elements.remove(at: index)
                 changes.append(.delete(index))
             }
         }
     }
 
-    private func onUpdate(_ rows: [Row], elems: inout [Element], changes: inout [Change]) {
+    private func onUpdate(_ rows: [Row], changes: inout [Change]) {
         for row in rows {
             let newOrder = row[orderAttr]
             if newOrder != .notFound {
                 let id = row[idAttr]
-                if let element = elementForID(id, elems) {
-                    changes.append(onMove(element, dstOrder: newOrder, elems: &elems))
+                if let element = elementForID(id) {
+                    changes.append(onMove(element, dstOrder: newOrder))
                 }
             }
         }
     }
     
-    private func onMove(_ element: Element, dstOrder: RelationValue, elems: inout [Element]) -> Change {
+    private func onMove(_ element: Element, dstOrder: RelationValue) -> Change {
         // Remove the element from the array
-        let srcIndex = indexForID(element.id, elems)!
-        _ = elems.remove(at: srcIndex)
+        let srcIndex = indexForID(element.id)!
+        _ = elements.remove(at: srcIndex)
         
         // Update the order value in the element's row
         element.data[orderAttr] = dstOrder
         
         // Insert the element in its new position
-        let dstIndex = elems.insertSorted(element, { $0.data[self.orderAttr] })
+        let dstIndex = elements.insertSorted(element, { $0.data[orderAttr] })
         
         return .move(srcIndex: srcIndex, dstIndex: dstIndex)
     }
     
-    private func adjacentElementsForIndex(_ index: Int, notMatching element: Element, inElements elems: [Element]) -> (Element?, Element?) {
+    private func adjacentElementsForIndex(_ index: Int, notMatching element: Element) -> (Element?, Element?) {
         // Note: In the case where an element is being reordered, the array will still contain that element,
         // but `index` represents the new position assuming it was already removed, so we use the `notMatching`
         // element to avoid choosing that same element again.
         
         func elementAtIndex(_ i: Int, alt: Int) -> Element? {
-            if let e = elems[safe: i] {
+            if let e = elements[safe: i] {
                 if e !== element {
                     return e
                 } else {
-                    return elems[safe: alt]
+                    return elements[safe: alt]
                 }
             } else {
                 return nil
@@ -131,11 +131,11 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
         return (lo, hi)
     }
     
-    private func orderForElementBetween(_ previous: Element?, _ next: Element?, elems: [Element]) -> Double {
+    private func orderForElementBetween(_ previous: Element?, _ next: Element?) -> Double {
         let prev: Element?
         if previous == nil && next == nil {
             // Add after the last element
-            prev = elems.last
+            prev = elements.last
         } else {
             // Insert after previous element
             prev = previous
@@ -152,18 +152,16 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
     }
     
     override public func orderForPos(_ pos: ArrayPos<RowArrayElement>) -> Double {
-        let elems = self.elements ?? []
-        let prev = pos.previousID.flatMap{ elementForID($0, elems) }
-        let next = pos.nextID.flatMap{ elementForID($0, elems) }
-        return orderForElementBetween(prev, next, elems: elems)
+        let prev = pos.previousID.flatMap(elementForID)
+        let next = pos.nextID.flatMap(elementForID)
+        return orderForElementBetween(prev, next)
     }
     
     override public func orderForMove(srcIndex: Int, dstIndex: Int) -> Double {
         // Note: dstIndex is relative to the state of the array *after* the item is removed
-        let elems = self.elements ?? []
-        let element = elems[srcIndex]
-        let (prev, next) = adjacentElementsForIndex(dstIndex, notMatching: element, inElements: elems)
-        return orderForElementBetween(prev, next, elems: elems)
+        let element = elements[srcIndex]
+        let (prev, next) = adjacentElementsForIndex(dstIndex, notMatching: element)
+        return orderForElementBetween(prev, next)
     }
 
     // TODO: This shouldn't be public
@@ -179,15 +177,9 @@ public class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelatio
             var arrayChanges: [Change] = []
             let parts = partsOf(rows, idAttr: self.idAttr)
 
-            // TODO: Can we assume (or rather, should we require) that the initial data was
-            // loaded by this point?
-            if elements == nil {
-                elements = []
-            }
-            
-            self.onInsert(parts.addedRows, elems: &self.elements!, changes: &arrayChanges)
-            self.onUpdate(parts.updatedRows, elems: &self.elements!, changes: &arrayChanges)
-            self.onDelete(parts.deletedIDs, elems: &self.elements!, changes: &arrayChanges)
+            self.onInsert(parts.addedRows, changes: &arrayChanges)
+            self.onUpdate(parts.updatedRows, changes: &arrayChanges)
+            self.onDelete(parts.deletedIDs, changes: &arrayChanges)
 
             self.notifyObservers(arrayChanges: arrayChanges)
             self.notify.valueDidChange()
