@@ -360,7 +360,9 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         ))
         
         // Make this property take on the initial value from the other property (or vice versa)
+        otherInitiatedChange = true
         initial()
+        otherInitiatedChange = false
         
         // Take on the given signal's change count
         changeHandler.incrementCount(other.signal.changeCount)
