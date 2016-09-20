@@ -11,7 +11,7 @@ public enum TransactionResult {
     case retry
 }
 
-public protocol StoredDatabase: class {
+public protocol StoredDatabase {
     func storedRelation(forName name: String) -> StoredRelation?
     
     func transaction<Return>(_ transactionFunction: (Void) -> (Return, TransactionResult)) -> Result<Return, RelationError>

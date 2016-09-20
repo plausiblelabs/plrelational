@@ -5,6 +5,6 @@
 
 import Foundation
 
-public protocol StoredRelation: class, MutableRelation {
+public protocol StoredRelation: MutableRelation {
     
 }
