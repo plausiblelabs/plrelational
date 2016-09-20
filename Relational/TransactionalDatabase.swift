@@ -162,12 +162,12 @@ open class TransactionalDatabase {
 
 public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
     weak var db: TransactionalDatabase?
-    var underlyingRelation: ChangeLoggingRelation<SQLiteTableRelation>
-    var transactionRelation: ChangeLoggingRelation<SQLiteTableRelation>?
+    var underlyingRelation: ChangeLoggingRelation
+    var transactionRelation: ChangeLoggingRelation?
     
     open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    init(db: TransactionalDatabase, underlyingRelation: ChangeLoggingRelation<SQLiteTableRelation>) {
+    init(db: TransactionalDatabase, underlyingRelation: ChangeLoggingRelation) {
         self.db = db
         self.underlyingRelation = underlyingRelation
         underlyingRelation.addWeakChangeObserver(self, method: type(of: self).observeUnderlyingChange)

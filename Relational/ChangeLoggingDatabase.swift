@@ -4,19 +4,19 @@
 //
 
 public struct ChangeLoggingDatabaseSnapshot {
-    var relationSnapshots: [(ChangeLoggingRelation<SQLiteTableRelation>, ChangeLoggingRelationSnapshot)]
+    var relationSnapshots: [(ChangeLoggingRelation, ChangeLoggingRelationSnapshot)]
 }
 
 open class ChangeLoggingDatabase {
     let sqliteDatabase: SQLiteDatabase
     
-    var changeLoggingRelations: [String: ChangeLoggingRelation<SQLiteTableRelation>] = [:]
+    var changeLoggingRelations: [String: ChangeLoggingRelation] = [:]
     
     public init(_ db: SQLiteDatabase) {
         self.sqliteDatabase = db
     }
     
-    open subscript(name: String) -> ChangeLoggingRelation<SQLiteTableRelation> {
+    open subscript(name: String) -> ChangeLoggingRelation {
         return getLoggingRelation(name)
     }
     
@@ -37,7 +37,7 @@ open class ChangeLoggingDatabase {
 }
 
 extension ChangeLoggingDatabase {
-    fileprivate func getLoggingRelation(_ name: String) -> ChangeLoggingRelation<SQLiteTableRelation> {
+    fileprivate func getLoggingRelation(_ name: String) -> ChangeLoggingRelation {
         if let relation = changeLoggingRelations[name] {
             return relation
         } else {
@@ -52,13 +52,13 @@ extension ChangeLoggingDatabase {
 extension ChangeLoggingDatabase {
     open class Transaction {
         fileprivate let db: ChangeLoggingDatabase
-        fileprivate var changeLoggingRelations: [String: ChangeLoggingRelation<SQLiteTableRelation>] = [:]
+        fileprivate var changeLoggingRelations: [String: ChangeLoggingRelation] = [:]
         
         fileprivate init(db: ChangeLoggingDatabase) {
             self.db = db
         }
         
-        open subscript(name: String) -> ChangeLoggingRelation<SQLiteTableRelation> {
+        open subscript(name: String) -> ChangeLoggingRelation {
             if let relation = changeLoggingRelations[name] {
                 return relation
             } else {
@@ -75,7 +75,7 @@ extension ChangeLoggingDatabase {
         
         transactionFunction(transaction)
         
-        var changes: [(ChangeLoggingRelation<SQLiteTableRelation>, RelationChange)] = []
+        var changes: [(ChangeLoggingRelation, RelationChange)] = []
         for (name, relation) in transaction.changeLoggingRelations {
             let target = self[name]
             // This snapshot thing is kind of elegant and ugly at the same time. It gets the job done
@@ -113,7 +113,7 @@ extension ChangeLoggingDatabase {
     }
     
     public func restoreSnapshot(_ snapshot: ChangeLoggingDatabaseSnapshot) -> Result<Void, RelationError> {
-        var changes: [(ChangeLoggingRelation<SQLiteTableRelation>, RelationChange)] = []
+        var changes: [(ChangeLoggingRelation, RelationChange)] = []
         
         // Restore all the snapshotted relations.
         for (relation, snapshot) in snapshot.relationSnapshots {
