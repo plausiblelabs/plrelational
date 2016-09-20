@@ -18,7 +18,7 @@ private struct BLOBHeaders {
     static let BLOB = Array("BLOB".utf8)
 }
 
-open class SQLiteDatabase {
+open class SQLiteDatabase: StoredDatabase {
     let db: sqlite3
     
     fileprivate var tables = Mutexed<[String: SQLiteTableRelation]>([:])
@@ -117,8 +117,16 @@ extension SQLiteDatabase {
         }
     }
     
-    public subscript(name: String) -> SQLiteTableRelation? {
+    private func table(forName name: String) -> SQLiteTableRelation? {
         return tables.withValue({ $0[name] })
+    }
+
+    public func storedRelation(forName name: String) -> StoredRelation? {
+        return table(forName: name)
+    }
+    
+    public subscript(name: String) -> SQLiteTableRelation? {
+        return table(forName: name)
     }
 }
 
@@ -235,12 +243,6 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    public enum TransactionResult {
-        case commit
-        case rollback
-        case retry
-    }
-    
     public func transaction<Return>(_ transactionFunction: (Void) -> (Return, TransactionResult)) -> Result<Return, RelationError> {
         // TODO: it might make sense to pass a new DB into the object, but in fact changes affect the original database object.
         // This will matter if the caller tries to access the original database during the transaction and expects it not to

@@ -5,6 +5,15 @@
 
 import Foundation
 
-protocol StoredDatabase {
-    associatedtype Relation: StoredRelation
+public enum TransactionResult {
+    case commit
+    case rollback
+    case retry
+}
+
+public protocol StoredDatabase: class {
+    func storedRelation(forName name: String) -> StoredRelation?
+    
+    func transaction<Return>(_ transactionFunction: (Void) -> (Return, TransactionResult)) -> Result<Return, RelationError>
+    func resultNeedsRetry<T>(_ result: Result<T, RelationError>) -> Bool
 }

@@ -8,12 +8,12 @@ public struct ChangeLoggingDatabaseSnapshot {
 }
 
 open class ChangeLoggingDatabase {
-    let sqliteDatabase: SQLiteDatabase
+    let storedDatabase: StoredDatabase
     
     var changeLoggingRelations: [String: ChangeLoggingRelation] = [:]
     
-    public init(_ db: SQLiteDatabase) {
-        self.sqliteDatabase = db
+    public init(_ db: StoredDatabase) {
+        self.storedDatabase = db
     }
     
     open subscript(name: String) -> ChangeLoggingRelation {
@@ -21,10 +21,10 @@ open class ChangeLoggingDatabase {
     }
     
     open func save() -> Result<Void, RelationError> {
-        return sqliteDatabase.transaction({
+        return storedDatabase.transaction({
             for (_, relation) in changeLoggingRelations {
                 let result = relation.save()
-                if sqliteDatabase.resultNeedsRetry(result) {
+                if storedDatabase.resultNeedsRetry(result) {
                     return (.Ok(), .retry)
                 }
                 if let err = result.err {
@@ -41,8 +41,8 @@ extension ChangeLoggingDatabase {
         if let relation = changeLoggingRelations[name] {
             return relation
         } else {
-            let table = sqliteDatabase[name]!
-            let relation = ChangeLoggingRelation(baseRelation: table)
+            let storedRelation = storedDatabase.storedRelation(forName: name)!
+            let relation = ChangeLoggingRelation(baseRelation: storedRelation)
             changeLoggingRelations[name] = relation
             return relation
         }
