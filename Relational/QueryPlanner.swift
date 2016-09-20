@@ -115,7 +115,7 @@ class QueryPlanner {
     
     fileprivate func noteTransactionalDatabases(_ r: Relation, nodeIndex: Int) {
         if let
-            transactionalRelation = r as? TransactionalDatabase.TransactionalRelation,
+            transactionalRelation = r as? TransactionalRelation,
             let db = transactionalRelation.db {
             transactionalDatabases[db] = nodeIndex
         }

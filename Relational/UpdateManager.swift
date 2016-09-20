@@ -55,12 +55,12 @@ public final class UpdateManager: PerThreadInstance {
         registerChange(relation)
     }
     
-    public func registerAdd(_ relation: TransactionalDatabase.TransactionalRelation, row: Row) {
+    public func registerAdd(_ relation: TransactionalRelation, row: Row) {
         pendingUpdates.append(.add(relation, row))
         registerChange(relation)
     }
     
-    public func registerDelete(_ relation: TransactionalDatabase.TransactionalRelation, query: SelectExpression) {
+    public func registerDelete(_ relation: TransactionalRelation, query: SelectExpression) {
         pendingUpdates.append(.delete(relation, query))
         registerChange(relation)
     }
@@ -187,7 +187,7 @@ public final class UpdateManager: PerThreadInstance {
                     })
                     removals.append(removal)
                     
-                    if let transactionalRelation = variable as? TransactionalDatabase.TransactionalRelation,
+                    if let transactionalRelation = variable as? TransactionalRelation,
                            let db = transactionalRelation.db {
                         databases.insert(db)
                     }
@@ -375,8 +375,8 @@ public final class UpdateManager: PerThreadInstance {
 extension UpdateManager {
     fileprivate enum Update {
         case update(Relation, SelectExpression, Row)
-        case add(TransactionalDatabase.TransactionalRelation, Row)
-        case delete(TransactionalDatabase.TransactionalRelation, SelectExpression)
+        case add(TransactionalRelation, Row)
+        case delete(TransactionalRelation, SelectExpression)
         case restoreSnapshot(TransactionalDatabase, ChangeLoggingDatabaseSnapshot)
     }
     
