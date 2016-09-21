@@ -6,14 +6,13 @@
 import Foundation
 
 
-open class PlistFileRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
-    open let scheme: Scheme
+public class PlistFileRelation: StoredRelation, RelationDefaultChangeObserverImplementation {
+    public let scheme: Scheme
     
-    var values: Set<Row>
+    fileprivate var values: Set<Row>
+    fileprivate let url: URL
     
-    let url: URL
-    
-    open var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     fileprivate init(scheme: Scheme, url: URL) {
         self.scheme = scheme
@@ -21,15 +20,15 @@ open class PlistFileRelation: MutableRelation, RelationDefaultChangeObserverImpl
         self.url = url
     }
     
-    open var contentProvider: RelationContentProvider {
+    public var contentProvider: RelationContentProvider {
         return .set({ self.values })
     }
     
-    open func contains(_ row: Row) -> Result<Bool, RelationError> {
+    public func contains(_ row: Row) -> Result<Bool, RelationError> {
         return .Ok(values.contains(row))
     }
     
-    open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+    public func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let toUpdate = Set(values.filter({ query.valueWithRow($0).boolValue }))
         values.subtract(toUpdate)
         
@@ -44,7 +43,7 @@ open class PlistFileRelation: MutableRelation, RelationDefaultChangeObserverImpl
         return .Ok()
     }
     
-    open func add(_ row: Row) -> Result<Int64, RelationError> {
+    public func add(_ row: Row) -> Result<Int64, RelationError> {
         if !values.contains(row) {
             values.insert(row)
             notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .directChange)
@@ -52,7 +51,7 @@ open class PlistFileRelation: MutableRelation, RelationDefaultChangeObserverImpl
         return .Ok(0)
     }
     
-    open func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
+    public func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         let toDelete = Set(values.lazy.filter({ query.valueWithRow($0).boolValue }))
         values.subtract(toDelete)
         notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .directChange)

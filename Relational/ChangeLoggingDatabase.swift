@@ -7,20 +7,20 @@ public struct ChangeLoggingDatabaseSnapshot {
     var relationSnapshots: [(ChangeLoggingRelation, ChangeLoggingRelationSnapshot)]
 }
 
-open class ChangeLoggingDatabase {
-    let storedDatabase: StoredDatabase
+public class ChangeLoggingDatabase {
+    fileprivate let storedDatabase: StoredDatabase
     
-    var changeLoggingRelations: [String: ChangeLoggingRelation] = [:]
+    fileprivate var changeLoggingRelations: [String: ChangeLoggingRelation] = [:]
     
     public init(_ db: StoredDatabase) {
         self.storedDatabase = db
     }
     
-    open subscript(name: String) -> ChangeLoggingRelation {
+    public subscript(name: String) -> ChangeLoggingRelation {
         return getLoggingRelation(name)
     }
     
-    open func save() -> Result<Void, RelationError> {
+    public func save() -> Result<Void, RelationError> {
         return storedDatabase.transaction({
             for (_, relation) in changeLoggingRelations {
                 let result = relation.save()
@@ -50,7 +50,7 @@ extension ChangeLoggingDatabase {
 }
 
 extension ChangeLoggingDatabase {
-    open class Transaction {
+    public class Transaction {
         fileprivate let db: ChangeLoggingDatabase
         fileprivate var changeLoggingRelations: [String: ChangeLoggingRelation] = [:]
         
@@ -58,7 +58,7 @@ extension ChangeLoggingDatabase {
             self.db = db
         }
         
-        open subscript(name: String) -> ChangeLoggingRelation {
+        public subscript(name: String) -> ChangeLoggingRelation {
             if let relation = changeLoggingRelations[name] {
                 return relation
             } else {

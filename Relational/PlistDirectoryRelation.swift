@@ -8,16 +8,15 @@ import Foundation
 import CommonCrypto
 
 
-open class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
-    open let scheme: Scheme
+public class PlistDirectoryRelation: StoredRelation, RelationDefaultChangeObserverImplementation {
+    public let scheme: Scheme
+    public let primaryKey: Attribute
     
-    open let primaryKey: Attribute
+    fileprivate let url: URL
     
-    let url: URL
+    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    open var changeObserverData = RelationDefaultChangeObserverImplementationData()
-    
-    open static func withDirectory(_ url: URL, scheme: Scheme, primaryKey: Attribute, createIfDoesntExist: Bool) -> Result<PlistDirectoryRelation, RelationError> {
+    public static func withDirectory(_ url: URL, scheme: Scheme, primaryKey: Attribute, createIfDoesntExist: Bool) -> Result<PlistDirectoryRelation, RelationError> {
         do {
             if !(url as NSURL).checkResourceIsReachableAndReturnError(nil) {
                 if createIfDoesntExist {
@@ -40,11 +39,11 @@ open class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObserve
         self.url = url
     }
     
-    open var contentProvider: RelationContentProvider {
+    public var contentProvider: RelationContentProvider {
         return .generator(self.rowGenerator)
     }
     
-    open func contains(_ row: Row) -> Result<Bool, RelationError> {
+    public func contains(_ row: Row) -> Result<Bool, RelationError> {
         let keyValue = row[primaryKey]
         if case .notFound = keyValue {
             return .Ok(false)
@@ -54,7 +53,7 @@ open class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObserve
         return ourRow.map({ $0 == row })
     }
     
-    open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+    public func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         // TODO: for queries involving the primary key, be more efficient and don't scan everything.
         let toUpdate = flatmapOk(rowGenerator(), { query.valueWithRow($0).boolValue ? $0 : nil }).map(Set.init)
         let withUpdates = toUpdate.map({
@@ -81,7 +80,7 @@ open class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObserve
         })
     }
     
-    open func add(_ row: Row) -> Result<Int64, RelationError> {
+    public func add(_ row: Row) -> Result<Int64, RelationError> {
         return readRow(primaryKey: row[primaryKey]).then({ existingRow in
             if existingRow == row {
                 return .Ok(0)
@@ -96,7 +95,7 @@ open class PlistDirectoryRelation: MutableRelation, RelationDefaultChangeObserve
         })
     }
     
-    open func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
+    public func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         // TODO: for queries involving the primary key, be more efficient and don't scan everything.
         let keysToDelete = flatmapOk(rowGenerator(), { query.valueWithRow($0).boolValue ? $0[primaryKey] : nil })
         return keysToDelete.then({

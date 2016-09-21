@@ -27,12 +27,12 @@ public struct ChangeLoggingRelationSnapshot {
     var savedLog: [ChangeLoggingRelationLogEntry]
 }
 
-open class ChangeLoggingRelation {
-    var baseRelation: MutableRelation
+public class ChangeLoggingRelation {
+    fileprivate var baseRelation: MutableRelation
     
-    var log: [ChangeLoggingRelationLogEntry] = []
+    fileprivate var log: [ChangeLoggingRelationLogEntry] = []
     
-    open var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     fileprivate var currentChange: ChangeLoggingRelationCurrentChange {
         didSet {
@@ -40,7 +40,7 @@ open class ChangeLoggingRelation {
         }
     }
     
-    var fullUnderlyingRelation: Relation
+    fileprivate var fullUnderlyingRelation: Relation
     
     public init(baseRelation: MutableRelation) {
         self.baseRelation = baseRelation
@@ -55,7 +55,7 @@ open class ChangeLoggingRelation {
         return baseRelation.difference(currentChange.removed).union(currentChange.added)
     }
     
-    open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+    public func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let change = ChangeLoggingRelationChange.update(query, newValues)
         let result = applyLogToCurrentRelationAndGetChanges([change])
         return result.then({

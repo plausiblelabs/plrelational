@@ -60,6 +60,8 @@
 		374707321D19BAF50048E857 /* libBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		374AE9721D91C2F0007D1366 /* StoredDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9711D91C2F0007D1366 /* StoredDatabase.swift */; };
 		374AE9741D91C2FC007D1366 /* StoredRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9731D91C2FC007D1366 /* StoredRelation.swift */; };
+		374AE9761D91DBC7007D1366 /* PlistDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9751D91DBC7007D1366 /* PlistDatabase.swift */; };
+		374AE97A1D9205DC007D1366 /* PlistDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9791D9205DC007D1366 /* PlistDatabaseTests.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
 		376136991CF65F0A00F572C5 /* TextObjectPropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */; };
@@ -577,6 +579,8 @@
 		372707FC1CFE2C7E00710C80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		374AE9711D91C2F0007D1366 /* StoredDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StoredDatabase.swift; path = Relational/StoredDatabase.swift; sourceTree = "<group>"; };
 		374AE9731D91C2FC007D1366 /* StoredRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StoredRelation.swift; path = Relational/StoredRelation.swift; sourceTree = "<group>"; };
+		374AE9751D91DBC7007D1366 /* PlistDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDatabase.swift; sourceTree = "<group>"; };
+		374AE9791D9205DC007D1366 /* PlistDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistDatabaseTests.swift; path = RelationalTests/PlistDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = SampleAppTests/DocModelTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CommonValue.swift; path = Binding/CommonValue.swift; sourceTree = "<group>"; };
@@ -1553,6 +1557,8 @@
 		C2CFC3571D7F332900389373 /* Plist */ = {
 			isa = PBXGroup;
 			children = (
+				374AE9751D91DBC7007D1366 /* PlistDatabase.swift */,
+				374AE9791D9205DC007D1366 /* PlistDatabaseTests.swift */,
 				C2B6E2681D804D5E0039923C /* PlistDirectoryRelation.swift */,
 				C2B6E26D1D806B390039923C /* PlistDirectoryRelationTests.swift */,
 				C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */,
@@ -2415,6 +2421,7 @@
 				C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */,
 				C2B53CBD1D1AF4FC006B6278 /* DeallocObservation.swift in Sources */,
 				C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */,
+				374AE9761D91DBC7007D1366 /* PlistDatabase.swift in Sources */,
 				C23BC0521D21C5B100188F86 /* CollectionConvenience.swift in Sources */,
 				C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */,
 				C23BC0561D24629E00188F86 /* SmallInlineArray.swift in Sources */,
@@ -2496,6 +2503,7 @@
 				C277E80C1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift in Sources */,
 				C2B53CDE1D1DBC3F006B6278 /* ObjectMapTests.swift in Sources */,
 				C2FE9B9B1CEE3A810004E635 /* TransactionalDatabaseTests.swift in Sources */,
+				374AE97A1D9205DC007D1366 /* PlistDatabaseTests.swift in Sources */,
 				C2CFC35D1D7F49D800389373 /* PlistFileRelationTests.swift in Sources */,
 				C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */,
 				C277E8051CDBD2A000B7B8F6 /* DBTestCase.swift in Sources */,
