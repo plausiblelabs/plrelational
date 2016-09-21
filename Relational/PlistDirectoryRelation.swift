@@ -8,7 +8,7 @@ import Foundation
 import CommonCrypto
 
 
-public class PlistDirectoryRelation: StoredRelation, RelationDefaultChangeObserverImplementation {
+public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserverImplementation {
     public let scheme: Scheme
     public let primaryKey: Attribute
     
@@ -105,6 +105,12 @@ public class PlistDirectoryRelation: StoredRelation, RelationDefaultChangeObserv
             }
             return .Ok()
         })
+    }
+    
+    public func save() -> Result<Void, RelationError> {
+        // TODO: Currently we open+close the rowplist file for each change, so we don't need an additional save
+        // step here, but we should try to optimize things to reduce file I/O
+        return .Ok(())
     }
 }
 

@@ -6,7 +6,7 @@
 import Foundation
 
 
-public class PlistFileRelation: StoredRelation, RelationDefaultChangeObserverImplementation {
+public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImplementation {
     public let scheme: Scheme
     
     fileprivate var values: Set<Row>
