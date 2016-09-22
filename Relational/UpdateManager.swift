@@ -263,7 +263,7 @@ public final class UpdateManager: PerThreadInstance {
                     // original runloop, which ensures that the callbacks happen there too.
                     if let added = change.added {
                         doneGroup.enter()
-                        queryManager.registerQuery(added, callback: { result in
+                        queryManager.registerQuery(added, callback: DirectDispatchContext().wrap({ result in
                             switch result {
                             case .Ok(let rows) where rows.isEmpty:
                                 doneGroup.leave()
@@ -277,12 +277,12 @@ public final class UpdateManager: PerThreadInstance {
                                 }
                                 doneGroup.leave()
                             }
-                        })
+                        }))
                     }
                     // Do the same if there are removals.
                     if let removed = change.removed {
                         doneGroup.enter()
-                        queryManager.registerQuery(removed, callback: { result in
+                        queryManager.registerQuery(removed, callback: DirectDispatchContext().wrap({ result in
                             switch result {
                             case .Ok(let rows) where rows.isEmpty:
                                 doneGroup.leave()
@@ -296,13 +296,13 @@ public final class UpdateManager: PerThreadInstance {
                                 }
                                 doneGroup.leave()
                             }
-                        })
+                        }))
                     }
                 }
                 
                 if !updateObservers.isEmpty {
                     doneGroup.enter()
-                    queryManager.registerQuery(relation, callback: { result in
+                    queryManager.registerQuery(relation, callback: DirectDispatchContext().wrap({ result in
                         switch result {
                         case .Ok(let rows) where rows.isEmpty:
                             doneGroup.leave()
@@ -316,7 +316,7 @@ public final class UpdateManager: PerThreadInstance {
                             }
                             doneGroup.leave()
                         }
-                    })
+                    }))
                 }
             }
             

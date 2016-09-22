@@ -103,7 +103,7 @@ extension Relation {
         }
         
         let data = LogRelationIterationBegin(self)
-        let planner = QueryPlanner(roots: [(self, outputCallback)])
+        let planner = QueryPlanner(roots: [(self, DirectDispatchContext().wrap(outputCallback))])
         let runner = QueryRunner(planner: planner)
         
         let generator = AnyIterator({ Void -> Result<Set<Row>, RelationError>? in

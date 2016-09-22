@@ -94,7 +94,7 @@ open class QueryRunner {
                 self.done = true
                 self.didError = true
                 for callback in outputCallbacks {
-                    callback(.Err(err))
+                    callback.withWrapped({ $0(.Err(err)) })
                 }
             }
         }
@@ -184,7 +184,7 @@ open class QueryRunner {
         if let callbacks = nodes[fromNode].outputCallbacks {
             let rowsSet = Set(rows)
             for callback in callbacks {
-                callback(.Ok(rowsSet))
+                callback.withWrapped({ $0(.Ok(rowsSet)) })
             }
         }
     }

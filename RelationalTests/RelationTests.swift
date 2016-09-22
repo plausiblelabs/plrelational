@@ -590,6 +590,7 @@ class RelationTests: DBTestCase {
         let group = DispatchGroup()
         group.enter()
         r1.asyncAllRows({ result in
+            XCTAssertTrue(runloop === CFRunLoopGetCurrent())
             guard let rows = result.ok else { return XCTAssertNil(result.err) }
             for row in rows {
                 _ = r2.add(row)

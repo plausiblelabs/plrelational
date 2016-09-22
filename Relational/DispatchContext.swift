@@ -87,3 +87,9 @@ public struct DispatchContextWrapped<T> {
         })
     }
 }
+
+extension DispatchContext {
+    func wrap<T>(_ value: T) -> DispatchContextWrapped<T> {
+        return DispatchContextWrapped(context: self, wrapped: value)
+    }
+}
