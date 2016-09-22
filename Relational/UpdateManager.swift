@@ -55,12 +55,12 @@ public final class UpdateManager: PerThreadInstance {
         registerChange(relation)
     }
     
-    public func registerAdd(_ relation: TransactionalRelation, row: Row) {
+    public func registerAdd(_ relation: MutableRelation, row: Row) {
         pendingUpdates.append(.add(relation, row))
         registerChange(relation)
     }
     
-    public func registerDelete(_ relation: TransactionalRelation, query: SelectExpression) {
+    public func registerDelete(_ relation: MutableRelation, query: SelectExpression) {
         pendingUpdates.append(.delete(relation, query))
         registerChange(relation)
     }
@@ -263,7 +263,7 @@ public final class UpdateManager: PerThreadInstance {
                     // original runloop, which ensures that the callbacks happen there too.
                     if let added = change.added {
                         doneGroup.enter()
-                        queryManager.registerQuery(added, callback: { result in
+                        queryManager.registerQuery(added, callback: DirectDispatchContext().wrap({ result in
                             switch result {
                             case .Ok(let rows) where rows.isEmpty:
                                 doneGroup.leave()
@@ -277,12 +277,12 @@ public final class UpdateManager: PerThreadInstance {
                                 }
                                 doneGroup.leave()
                             }
-                        })
+                        }))
                     }
                     // Do the same if there are removals.
                     if let removed = change.removed {
                         doneGroup.enter()
-                        queryManager.registerQuery(removed, callback: { result in
+                        queryManager.registerQuery(removed, callback: DirectDispatchContext().wrap({ result in
                             switch result {
                             case .Ok(let rows) where rows.isEmpty:
                                 doneGroup.leave()
@@ -296,13 +296,13 @@ public final class UpdateManager: PerThreadInstance {
                                 }
                                 doneGroup.leave()
                             }
-                        })
+                        }))
                     }
                 }
                 
                 if !updateObservers.isEmpty {
                     doneGroup.enter()
-                    queryManager.registerQuery(relation, callback: { result in
+                    queryManager.registerQuery(relation, callback: DirectDispatchContext().wrap({ result in
                         switch result {
                         case .Ok(let rows) where rows.isEmpty:
                             doneGroup.leave()
@@ -316,7 +316,7 @@ public final class UpdateManager: PerThreadInstance {
                             }
                             doneGroup.leave()
                         }
-                    })
+                    }))
                 }
             }
             
@@ -375,8 +375,8 @@ public final class UpdateManager: PerThreadInstance {
 extension UpdateManager {
     fileprivate enum Update {
         case update(Relation, SelectExpression, Row)
-        case add(TransactionalRelation, Row)
-        case delete(TransactionalRelation, SelectExpression)
+        case add(MutableRelation, Row)
+        case delete(MutableRelation, SelectExpression)
         case restoreSnapshot(TransactionalDatabase, ChangeLoggingDatabaseSnapshot)
     }
     
@@ -406,5 +406,15 @@ extension UpdateManager {
             observers[currentObserverID] = ObserverEntry(relationObserver: nil, updateObserver: DispatchContextWrapped(context: context, wrapped: observer), didSendWillChange: false)
             return currentObserverID
         }
+    }
+}
+
+public extension MutableRelation {
+    func asyncAdd(_ row: Row) {
+        UpdateManager.currentInstance.registerAdd(self, row: row)
+    }
+    
+    func asyncDelete(_ query: SelectExpression) {
+        UpdateManager.currentInstance.registerDelete(self, query: query)
     }
 }

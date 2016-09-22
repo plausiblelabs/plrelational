@@ -51,9 +51,9 @@ class RelationPropertyTests: BindingTestCase {
             return db[name]
         }
         
-        var objects = createRelation("object", ["id", "name", "type"])
-        var docItems = createRelation("doc_item", ["id"])
-        var selectedDocItemID = createRelation("selected_doc_item", ["id"])
+        let objects = createRelation("object", ["id", "name", "type"])
+        let docItems = createRelation("doc_item", ["id"])
+        let selectedDocItemID = createRelation("selected_doc_item", ["id"])
         
         let selectedDocItem = selectedDocItemID.join(objects).project(["id", "name"])
 

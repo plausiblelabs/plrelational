@@ -8,7 +8,7 @@ import Foundation
 
 /// A class which can manage an entire group of queries, to share work and perform them asynchronously.
 open class QueryManager {
-    fileprivate var pendingQueries: [(Relation, (Result<Set<Row>, RelationError>) -> Void)] = []
+    fileprivate var pendingQueries: [(Relation, DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>)] = []
     
     public init() {}
     
@@ -16,7 +16,7 @@ open class QueryManager {
     /// available, or when an error occurs. If no error occurs, the final callback is invoked with an
     /// empty set of rows to signal that execution has completed. The callback is invoked on the same
     /// thread, when the runloop is in a common mode.
-    open func registerQuery(_ relation: Relation, callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
+    open func registerQuery(_ relation: Relation, callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
         pendingQueries.append((relation, callback))
     }
     
@@ -34,7 +34,7 @@ open class QueryManager {
             
             if !runner.didError {
                 for (_, callback) in queries {
-                    callback(.Ok([]))
+                    callback.withWrapped({ $0(.Ok([])) })
                 }
             }
         })
@@ -45,23 +45,19 @@ open class QueryManager {
 public final class RunloopQueryManager: QueryManager, PerThreadInstance {
     fileprivate var executionTimer: CFRunLoopTimer?
     
-    public override func registerQuery(_ relation: Relation, callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
-        let runloop = CFRunLoopGetCurrent()
-        let wrappedCallback = { (result: Result<Set<Row>, RelationError>) -> Void in
-            CFRunLoopPerformBlock(runloop, CFRunLoopMode.commonModes.rawValue, {
-                callback(result)
-            })
-            CFRunLoopWakeUp(runloop)
-        }
-        
-        super.registerQuery(relation, callback: wrappedCallback)
+    public override func registerQuery(_ relation: Relation, callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
+        super.registerQuery(relation, callback: callback)
         
         if executionTimer == nil {
             executionTimer = CFRunLoopTimerCreateWithHandler(nil, 0, 0, 0, 0, { _ in
                 self.execute()
             })
-            CFRunLoopAddTimer(runloop, executionTimer, CFRunLoopMode.commonModes)
+            CFRunLoopAddTimer(CFRunLoopGetCurrent(), executionTimer, CFRunLoopMode.commonModes)
         }
+    }
+    
+    public func registerQuery(_ relation: Relation, callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
+        registerQuery(relation, callback: DispatchContextWrapped(context: CFRunLoopGetCurrent(), wrapped: callback))
     }
     
     public override func execute() {

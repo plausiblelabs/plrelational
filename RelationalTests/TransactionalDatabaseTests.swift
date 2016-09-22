@@ -176,8 +176,8 @@ class TransactionalDatabaseTests: DBTestCase {
             return db[name]
         }
 
-        var objects = createRelation("object", ["id", "name", "type"])
-        var docItems = createRelation("doc_item", ["id"])
+        let objects = createRelation("object", ["id", "name", "type"])
+        let docItems = createRelation("doc_item", ["id"])
         let docObjects = docItems.join(objects).project(["id", "name"])
 
         var changes: [RelationChange] = []

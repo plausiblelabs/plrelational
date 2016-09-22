@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-public struct ConcreteRelation: MutableRelation {
+public struct ConcreteRelation: Relation {
     public var scheme: Scheme
     public var values: Set<Row>
     
@@ -138,15 +138,6 @@ extension ConcreteRelation: ExpressibleByDictionaryLiteral {
         scheme = Scheme(attributes: Set(elements.map({ $0.0 })))
         values = [Row(values: Dictionary(elements))]
     }
-}
-
-public func MakeRelation(_ attributes: [Attribute], _ rowValues: [RelationValue]...) -> ConcreteRelation {
-    let scheme = Scheme(attributes: Set(attributes))
-    let rows = rowValues.map({ values -> Row in
-        precondition(values.count == attributes.count)
-        return Row(values: Dictionary(zip(attributes, values)))
-    })
-    return ConcreteRelation(scheme: scheme, values: Set(rows), defaultSort: attributes.first)
 }
 
 extension ConcreteRelation: CustomStringConvertible, PlaygroundMonospace {

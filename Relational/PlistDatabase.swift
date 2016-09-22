@@ -111,7 +111,7 @@ public class PlistDatabase: StoredDatabase {
         // Check each relation's URL
         relations.withMutableValue{
             for managed in $0.values {
-                var relation = managed.relation
+                let relation = managed.relation
                 if relation.url == nil {
                     relation.url = managed.spec.url(withRoot: root)
                 }

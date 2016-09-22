@@ -4,7 +4,7 @@
 //
 
 class QueryPlanner {
-    typealias OutputCallback = (Result<Set<Row>, RelationError>) -> Void
+    typealias OutputCallback = DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>
     
     fileprivate let rootRelations: [(Relation, OutputCallback)]
     fileprivate var relationNodeIndexMap = ObjectMap<Int>()

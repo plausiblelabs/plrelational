@@ -47,9 +47,9 @@ class PlistDatabaseTests: XCTestCase {
         let db1 = createResult.ok!
 
         let addResult: Result<Void, RelationError> = db1.transaction{
-            var objects = db1["object"]!
-            var objectData = db1["object_data"]!
-            var docItems = db1["doc_item"]!
+            let objects = db1["object"]!
+            let objectData = db1["object_data"]!
+            let docItems = db1["doc_item"]!
             _ = objects.add(["id": 1, "name": "Group"])
             _ = objects.add(["id": 2, "name": "Page1"])
             _ = objects.add(["id": 3, "name": "Page2"])

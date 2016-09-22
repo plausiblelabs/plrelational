@@ -3,6 +3,9 @@
 // All rights reserved.
 //
 
+import Foundation
+
+
 /// Silly placeholder until we figure out what the error type should actually look like.
 public typealias RelationError = Error
 
@@ -103,7 +106,7 @@ extension Relation {
         }
         
         let data = LogRelationIterationBegin(self)
-        let planner = QueryPlanner(roots: [(self, outputCallback)])
+        let planner = QueryPlanner(roots: [(self, DirectDispatchContext().wrap(outputCallback))])
         let runner = QueryRunner(planner: planner)
         
         let generator = AnyIterator({ Void -> Result<Set<Row>, RelationError>? in
@@ -150,26 +153,47 @@ extension Relation {
 extension Relation {
     /// Fetch rows and invoke a callback as they come in. Each call is passed one or more rows, or an error.
     /// If no error occurs, the sequence of calls is terminated by a final call which passes zero rows.
+    public func asyncBulkRows(_ callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
+        RunloopQueryManager.currentInstance.registerQuery(self, callback: callback)
+    }
+    
+    /// Fetch rows and invoke a callback as they come in. Each call is passed one or more rows, or an error.
+    /// If no error occurs, the sequence of calls is terminated by a final call which passes zero rows.
     public func asyncBulkRows(_ callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
         RunloopQueryManager.currentInstance.registerQuery(self, callback: callback)
     }
     
     /// Fetch all rows and invoke a callback when complete.
-    public func asyncAllRows(_ callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
+    public func asyncAllRows(_ callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
         var allRows: Set<Row> = []
-        asyncBulkRows({ result in
+        asyncBulkRows(DirectDispatchContext().wrap({ result in
             switch result {
             case .Ok([]):
-                callback(.Ok(allRows))
+                callback.withWrapped({ $0(.Ok(allRows)) })
             case .Ok(let rows):
                 allRows.formUnion(rows)
             
             case .Err(QueryRunner.Error.mutatedDuringEnumeration):
+                allRows = []
                 self.asyncAllRows(callback)
             case .Err:
-                callback(result)
+                callback.withWrapped({ $0(result) })
             }
-        })
+        }))
+    }
+    
+    /// Fetch all rows and invoke a callback on the current runloop when complete.
+    public func asyncAllRows(_ callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
+        asyncAllRows(CFRunLoopGetCurrent().wrap(callback))
+    }
+    
+    /// Fetch all rows and invoke a callback on the current runloop when complete. The postprocessor is run on the background first.
+    public func asyncAllRows<T>(_ callback: @escaping (Result<T, RelationError>) -> Void, postprocessor: @escaping (Set<Row>) -> T) {
+        let runloop = CFRunLoopGetCurrent()!
+        asyncAllRows(DirectDispatchContext().wrap({
+            let postprocessedResult = $0.map(postprocessor)
+            runloop.async({ callback(postprocessedResult) })
+        }))
     }
 }
 
