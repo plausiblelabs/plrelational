@@ -140,7 +140,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                 for row in relation.rows() {
                     switch row {
                     case .Ok(let row):
-                        currentChange.added.add(row)
+                        _ = currentChange.added.add(row)
                         currentChange.removed.delete(row)
                         didAdd = true
                     case .Err(let err):
@@ -149,11 +149,11 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                 }
             case .select(let query):
                 didRemove = true
-                currentChange.added.delete(*!query)
+                _ = currentChange.added.delete(*!query)
                 for row in baseRelation.select(*!query).rows() {
                     switch row {
                     case .Ok(let row):
-                        currentChange.removed.add(row)
+                        _ = currentChange.removed.add(row)
                     case .Err(let err):
                         return .Err(err)
                     }
@@ -165,8 +165,8 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
                 for toUpdate in baseRelation.select(query).difference(currentChange.removed).rows() {
                     switch toUpdate {
                     case .Ok(let row):
-                        currentChange.added.add(row + newValues)
-                        currentChange.removed.add(row)
+                        _ = currentChange.added.add(row + newValues)
+                        _ = currentChange.removed.add(row)
                     case .Err(let err):
                         return .Err(err)
                     }
