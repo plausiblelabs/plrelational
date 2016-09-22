@@ -618,6 +618,31 @@ class RelationTests: DBTestCase {
         AssertEqual(r1, r2)
     }
     
+    func testAsyncRowsPostprocessing() {
+        var r = MakeRelation(["n"])
+        for i: Int64 in 0 ..< 20 {
+            _ = r.add(["n": .integer(i)])
+        }
+        
+        let runloop = CFRunLoopGetCurrent()
+        
+        var output: [Row] = []
+        
+        let group = DispatchGroup()
+        group.enter()
+        r.asyncAllRows({ result in
+            XCTAssertTrue(runloop === CFRunLoopGetCurrent())
+            guard let rows = result.ok else { return XCTAssertNil(result.err) }
+            output = rows
+            group.leave()
+            CFRunLoopStop(runloop)
+        }, postprocessor: sortByAttribute("n"))
+        CFRunLoopRun()
+        _ = group.wait(timeout: DispatchTime.distantFuture)
+        
+        XCTAssertEqual((0 ..< 20).map({ ["n": .integer($0)] }), output)
+    }
+
     func testAsyncWorkSharing() {
         let r1 = MakeRelation(["n"], [1])
         let r2 = MakeRelation(["n"], [2])
