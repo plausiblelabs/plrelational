@@ -7,7 +7,7 @@
 /// An in-memory mutable Relation. Conceptually similar to ConcreteRelation, except that
 /// this is a reference type rather than a value type, and so behaves more like we might
 /// expect a "table" to. It's also observable, in case you need that sort of thing.
-open class MemoryTableRelation: Relation, RelationDefaultChangeObserverImplementation {
+open class MemoryTableRelation: Relation, MutableRelation, RelationDefaultChangeObserverImplementation {
     open let scheme: Scheme
     
     var values: Set<Row> = []
@@ -16,6 +16,14 @@ open class MemoryTableRelation: Relation, RelationDefaultChangeObserverImplement
     
     public init(scheme: Scheme) {
         self.scheme = scheme
+    }
+    
+    public static func copyRelation(_ other: Relation) -> Result<MemoryTableRelation, RelationError> {
+        return mapOk(other.rows(), { $0 }).map({
+            let r = MemoryTableRelation(scheme: other.scheme)
+            r.values = Set($0)
+            return r
+        })
     }
     
     open var contentProvider: RelationContentProvider {
@@ -36,17 +44,19 @@ open class MemoryTableRelation: Relation, RelationDefaultChangeObserverImplement
         return .Ok()
     }
     
-    open func add(_ row: Row) {
+    open func add(_ row: Row) -> Result<Int64, RelationError> {
         if !values.contains(row) {
             values.insert(row)
             notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .directChange)
         }
+        return .Ok(0)
     }
     
-    open func delete(_ query: SelectExpression) {
+    open func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         let toDelete = Set(values.lazy.filter({ query.valueWithRow($0).boolValue }))
         values.subtract(toDelete)
         notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .directChange)
+        return .Ok()
     }
     
     open func delete(_ row: Row) {

@@ -227,14 +227,3 @@ public extension TransactionalDatabase {
         }
     }
 }
-
-// This ought to go in UpdateManager.swift but the compiler barfs on it there for some reason.
-public extension TransactionalDatabase.TransactionalRelation {
-    func asyncAdd(_ row: Row) {
-        UpdateManager.currentInstance.registerAdd(self, row: row)
-    }
-    
-    func asyncDelete(_ query: SelectExpression) {
-        UpdateManager.currentInstance.registerDelete(self, query: query)
-    }
-}

@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-public struct ConcreteRelation: MutableRelation {
+public struct ConcreteRelation: Relation {
     public var scheme: Scheme
     public var values: Set<Row>
     

@@ -1017,4 +1017,126 @@ class RelationTests: DBTestCase {
             }
         })
     }
+    
+    func testCascadingDelete() {
+        let r = MemoryTableRelation.copyRelation(
+            MakeRelation(
+                ["id", "parent"],
+                [1, .null],
+                [2, .null],
+                [3, .null],
+                [4, .null],
+                [10, 1],
+                [11, 1],
+                [12, 1],
+                [100, 10],
+                [101, 10],
+                [110, 11],
+                [1100, 110],
+                [20, 2],
+                [21, 2],
+                [22, 2],
+                [200, 20],
+                [201, 20],
+                [210, 21],
+                [2100, 210],
+                [30, 3],
+                [31, 3],
+                [32, 3],
+                [300, 30],
+                [301, 30],
+                [310, 31],
+                [3100, 310],
+                [40, 4],
+                [41, 4],
+                [42, 4],
+                [400, 40],
+                [401, 40],
+                [410, 41],
+                [4100, 410]
+        )).ok!
+        
+        class Observer: AsyncRelationChangeCoalescedObserver {
+            let group: DispatchGroup
+            
+            var changes: NegativeSet<Row>?
+            
+            init(group: DispatchGroup) {
+                self.group = group
+            }
+            
+            func relationWillChange(_ relation: Relation) {
+                XCTAssertNil(changes)
+            }
+            
+            func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+                XCTAssertNil(result.err)
+                self.changes = result.ok
+                group.leave()
+            }
+        }
+        
+        let group = DispatchGroup()
+        let observer = Observer(group: group)
+        
+        group.enter()
+        let remover = r.addAsyncObserver(observer)
+        
+        group.enter()
+        r.treeDelete(Attribute("id") *== 1 *|| Attribute("id") *== 2 *|| Attribute("id") *== 30, parentAttribute: "id", childAttribute: "parent", completionCallback: { result in
+            XCTAssertNil(result.err)
+            group.leave()
+        })
+        
+        let runloop = CFRunLoopGetCurrent()!
+        group.notify(queue: DispatchQueue.global(), execute: { runloop.async({ CFRunLoopStop(runloop) }) })
+        CFRunLoopRun()
+        
+        let expectedRemaining = MakeRelation(
+            ["id", "parent"],
+            [3, .null],
+            [4, .null],
+            [31, 3],
+            [32, 3],
+            [310, 31],
+            [3100, 310],
+            [40, 4],
+            [41, 4],
+            [42, 4],
+            [400, 40],
+            [401, 40],
+            [410, 41],
+            [4100, 410]
+        )
+        
+        let expectedRemoved = MakeRelation(
+            ["id", "parent"],
+            [1, .null],
+            [2, .null],
+            [10, 1],
+            [11, 1],
+            [12, 1],
+            [100, 10],
+            [101, 10],
+            [110, 11],
+            [1100, 110],
+            [20, 2],
+            [21, 2],
+            [22, 2],
+            [200, 20],
+            [201, 20],
+            [210, 21],
+            [2100, 210],
+            [30, 3],
+            [300, 30],
+            [301, 30]
+        ).values
+        
+        AssertEqual(r, expectedRemaining)
+        XCTAssertNotNil(observer.changes)
+        XCTAssertEqual(observer.changes!.added, [])
+        XCTAssertEqual(observer.changes!.removed, expectedRemoved)
+        
+        remover()
+    }
 }
