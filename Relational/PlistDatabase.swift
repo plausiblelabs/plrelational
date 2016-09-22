@@ -37,7 +37,7 @@ public class PlistDatabase: StoredDatabase {
     
     private typealias ManagedRelation = (spec: RelationSpec, relation: PlistRelation)
     
-    private var root: URL?
+    public var root: URL?
     private var relations: Mutexed<[String: ManagedRelation]>
 
     private init(root: URL?, relations: [String: ManagedRelation]) {
