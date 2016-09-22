@@ -10,7 +10,7 @@
 open class MemoryTableRelation: Relation, MutableRelation, RelationDefaultChangeObserverImplementation {
     open let scheme: Scheme
     
-    var values: Set<Row> = []
+    public var values: Set<Row> = []
     
     open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
@@ -71,4 +71,15 @@ open class MemoryTableRelation: Relation, MutableRelation, RelationDefaultChange
         copy.values = values
         return copy
     }
+}
+
+public func MakeRelation(_ attributes: [Attribute], _ rowValues: [RelationValue]...) -> MemoryTableRelation {
+    let scheme = Scheme(attributes: Set(attributes))
+    let rows = rowValues.map({ values -> Row in
+        precondition(values.count == attributes.count)
+        return Row(values: Dictionary(zip(attributes, values)))
+    })
+    let r = MemoryTableRelation(scheme: scheme)
+    r.values = Set(rows)
+    return r
 }

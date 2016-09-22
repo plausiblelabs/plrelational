@@ -212,7 +212,7 @@ class RelationObservationTests: DBTestCase {
     }
     
     func testWeakObservationRemovalLeak() {
-        let concrete = MakeRelation([])
+        let concrete = ConcreteRelation(scheme: [])
         weak var shouldDeallocate1: MutableSelectRelation?
         weak var shouldDeallocate2: MutableSelectRelation?
         

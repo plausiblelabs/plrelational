@@ -140,15 +140,6 @@ extension ConcreteRelation: ExpressibleByDictionaryLiteral {
     }
 }
 
-public func MakeRelation(_ attributes: [Attribute], _ rowValues: [RelationValue]...) -> ConcreteRelation {
-    let scheme = Scheme(attributes: Set(attributes))
-    let rows = rowValues.map({ values -> Row in
-        precondition(values.count == attributes.count)
-        return Row(values: Dictionary(zip(attributes, values)))
-    })
-    return ConcreteRelation(scheme: scheme, values: Set(rows), defaultSort: attributes.first)
-}
-
 extension ConcreteRelation: CustomStringConvertible, PlaygroundMonospace {
     public var description: String {
         let columns = scheme.attributes.sorted()

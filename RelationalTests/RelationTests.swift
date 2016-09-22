@@ -98,7 +98,7 @@ class RelationTests: DBTestCase {
     }
     
     func testSimpleMutation() {
-        var FLIGHTS = MakeRelation(
+        let FLIGHTS = MakeRelation(
             ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
             ["83",     "JFK",    "O'Hare",      "11:30a",  "1:43p"],
             ["84",     "O'Hare", "JFK",         "3:00p",   "5:55p"],
@@ -118,7 +118,7 @@ class RelationTests: DBTestCase {
                         ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"],
                         ["117",    "Atlanta", "Boston",     "10:05p",  "12:43a"]))
         
-        FLIGHTS.delete(["NUMBER": "83"])
+        _ = FLIGHTS.delete(Attribute("NUMBER") *== "83")
         AssertEqual(FLIGHTS,
                     MakeRelation(
                         ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
@@ -133,7 +133,7 @@ class RelationTests: DBTestCase {
                         ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
                         ["214",    "Boston", "O'Hare",      "2:20p",   "3:12p"]))
         
-        FLIGHTS.update(["NUMBER": "109"], newValues: ["DEPARTS": "9:40p", "ARRIVES": "2:42a"])
+        _ = FLIGHTS.update(Attribute("NUMBER") *== "109", newValues: ["DEPARTS": "9:40p", "ARRIVES": "2:42a"])
         AssertEqual(FLIGHTS,
                     MakeRelation(
                         ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],
@@ -268,7 +268,7 @@ class RelationTests: DBTestCase {
             ["Davis", "747"],
             ["Davis", "1011"],
             ["Dow", "727"]
-            ).setDefaultSort("PILOT")
+            )
         
         AssertEqual(certified.divide(q),
                     MakeRelation(
@@ -538,7 +538,7 @@ class RelationTests: DBTestCase {
         let r1 = MakeRelation(
             ["id", "name"],
             [1,    "cat"])
-        var r2 = MakeRelation(
+        let r2 = MakeRelation(
             ["id", "name"])
 
         let r = r2.otherwise(r1)
@@ -619,7 +619,7 @@ class RelationTests: DBTestCase {
     }
     
     func testAsyncRowsPostprocessing() {
-        var r = MakeRelation(["n"])
+        let r = MakeRelation(["n"])
         for i: Int64 in 0 ..< 20 {
             _ = r.add(["n": .integer(i)])
         }
@@ -823,8 +823,8 @@ class RelationTests: DBTestCase {
             return db[name]
         }
         
-        var objects = createRelation("object", ["id", "name"])
-        var selectedObjectID = createRelation("selected_object", ["id"])
+        let objects = createRelation("object", ["id", "name"])
+        let selectedObjectID = createRelation("selected_object", ["id"])
         
         let selectedObject = selectedObjectID.join(objects)
         
