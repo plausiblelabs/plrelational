@@ -79,9 +79,36 @@ public class PlistDatabase: StoredDatabase {
     }
     
     public func transaction<Return>(_ transactionFunction: (Void) -> (Return, TransactionResult)) -> Result<Return, RelationError> {
-        guard let root = root else { fatalError("Root URL must be set prior to performing transaction") }
-        
         // Ensure that all relations have a valid URL before we continue
+        switch validateRelations() {
+        case .Ok:
+            // TODO: Coordinate things so that we only save relations that have been dirtied
+            let transactionResult = transactionFunction()
+            return saveRelations().map{ transactionResult.0 }
+        case let .Err(error):
+            return .Err(error)
+        }
+    }
+    
+    public func resultNeedsRetry<T>(_ result: Result<T, RelationError>) -> Bool {
+        return false
+    }
+    
+    /// Iterates over all managed relations and ensures that each relation's URL is set relative to the current
+    /// root URL.
+    public func validateRelations() -> Result<(), RelationError> {
+        guard let root = root else { fatalError("Root URL must be set prior to performing transaction") }
+
+        // Make sure the root directory exists before we continue
+        if !(root as NSURL).checkResourceIsReachableAndReturnError(nil) {
+            do {
+                try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                return .Err(error)
+            }
+        }
+
+        // Check each relation's URL
         relations.withMutableValue{
             for managed in $0.values {
                 var relation = managed.relation
@@ -91,9 +118,12 @@ public class PlistDatabase: StoredDatabase {
             }
         }
         
-        // TODO: Coordinate things so that we only save relations that have been dirtied
-        let transactionResult = transactionFunction()
-        var result: Result<Return, RelationError> = .Ok(transactionResult.0)
+        return .Ok(())
+    }
+    
+    /// Iterates over all managed relations and saves each one to disk, if needed.
+    public func saveRelations() -> Result<(), RelationError> {
+        var result: Result<(), RelationError> = .Ok(())
         relations.withValue{
             for managed in $0.values {
                 if let saveError = managed.relation.save().err {
@@ -103,9 +133,5 @@ public class PlistDatabase: StoredDatabase {
             }
         }
         return result
-    }
-    
-    public func resultNeedsRetry<T>(_ result: Result<T, RelationError>) -> Bool {
-        return false
     }
 }
