@@ -44,6 +44,9 @@ public struct RunLoopDispatchContext: DispatchContext {
 /// A simple dispatch context that just makes the calls immediately inline. This is not really
 /// "async" but it's sometimes useful.
 public struct DirectDispatchContext: DispatchContext {
+    public init() {
+    }
+    
     public func async(_ f: @escaping (Void) -> Void) {
         f()
     }
@@ -89,7 +92,7 @@ public struct DispatchContextWrapped<T> {
 }
 
 extension DispatchContext {
-    func wrap<T>(_ value: T) -> DispatchContextWrapped<T> {
+    public func wrap<T>(_ value: T) -> DispatchContextWrapped<T> {
         return DispatchContextWrapped(context: self, wrapped: value)
     }
 }
