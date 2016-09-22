@@ -71,7 +71,7 @@ class PlistFileRelationTests: XCTestCase {
         
         XCTAssertNil(r1.save().err)
         
-        let r2Result = PlistFileRelation.withFile(url, scheme: r1.scheme, createIfDoesntExist: true)
+        let r2Result = PlistFileRelation.withFile(url, scheme: r1.scheme, createIfDoesntExist: false)
         XCTAssertNil(r2Result.err)
         let r2 = r2Result.ok!
         

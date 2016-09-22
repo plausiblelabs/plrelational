@@ -12,27 +12,27 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     public let scheme: Scheme
     public let primaryKey: Attribute
     
-    fileprivate let url: URL
+    public internal(set) var url: URL?
     
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    public static func withDirectory(_ url: URL, scheme: Scheme, primaryKey: Attribute, createIfDoesntExist: Bool) -> Result<PlistDirectoryRelation, RelationError> {
-        do {
-            if !(url as NSURL).checkResourceIsReachableAndReturnError(nil) {
-                if createIfDoesntExist {
-                    try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true, attributes: nil)
-                } else {
+    public static func withDirectory(_ url: URL?, scheme: Scheme, primaryKey: Attribute, createIfDoesntExist: Bool) -> Result<PlistDirectoryRelation, RelationError> {
+        if let url = url {
+            // We have a URL, so we are either opening an existing relation or creating a new one at a specific location
+            if !createIfDoesntExist {
+                // We are opening a relation, so let's require its existence at init time
+                if !(url as NSURL).checkResourceIsReachableAndReturnError(nil) {
                     return .Err(NSError(domain: NSCocoaErrorDomain, code: NSFileReadNoSuchFileError, userInfo: nil))
                 }
             }
-            
-            return .Ok(PlistDirectoryRelation(scheme: scheme, primaryKey: primaryKey, url: url))
-        } catch {
-            return .Err(error)
+        } else {
+            // We have no URL, so we are creating a new relation; we will defer file creation until the first write
+            precondition(createIfDoesntExist)
         }
+        return .Ok(PlistDirectoryRelation(scheme: scheme, primaryKey: primaryKey, url: url))
     }
     
-    fileprivate init(scheme: Scheme, primaryKey: Attribute, url: URL) {
+    fileprivate init(scheme: Scheme, primaryKey: Attribute, url: URL?) {
         precondition(scheme.attributes.contains(primaryKey), "Primary key must be in the scheme")
         self.scheme = scheme
         self.primaryKey = primaryKey
@@ -110,6 +110,18 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     public func save() -> Result<Void, RelationError> {
         // TODO: Currently we open+close the rowplist file for each change, so we don't need an additional save
         // step here, but we should try to optimize things to reduce file I/O
+        
+        // XXX: If there were no writes to this relation in the transaction, and the directory didn't already
+        // exist, then we want to create it now, otherwise the relation won't open successfully next time around
+        // due to the strict checks we have in `withDirectory` at the moment
+        if !(url! as NSURL).checkResourceIsReachableAndReturnError(nil) {
+            do {
+                try FileManager.default.createDirectory(at: url!, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                return .Err(error)
+            }
+        }
+
         return .Ok(())
     }
 }
@@ -125,7 +137,7 @@ extension PlistDirectoryRelation {
         
         let prefix = hexHash.substring(to: hexHash.characters.index(hexHash.startIndex, offsetBy: PlistDirectoryRelation.filePrefixLength))
         
-        return self.url
+        return self.url!
             .appendingPathComponent(prefix)
             .appendingPathComponent(hexHash)
             .appendingPathExtension(PlistDirectoryRelation.fileExtension)
@@ -207,9 +219,15 @@ extension PlistDirectoryRelation {
     }
     
     fileprivate func rowURLs() -> AnyIterator<Result<URL, NSError>> {
+        // XXX: enumerator(at:url) seems to crash if the directory does not exist, so let's avoid that; we need to find
+        // a better solution that doesn't require constantly checking for its existence
+        if !(url! as NSURL).checkResourceIsReachableAndReturnError(nil) {
+            return AnyIterator{ nil }
+        }
+        
         var enumerationError: NSError? = nil
         var returnedError = false
-        let enumerator = FileManager.default.enumerator(at: self.url, includingPropertiesForKeys: nil, options: [], errorHandler: { url, error in
+        let enumerator = FileManager.default.enumerator(at: self.url!, includingPropertiesForKeys: nil, options: [], errorHandler: { url, error in
             enumerationError = error as NSError?
             return false
         })
