@@ -160,6 +160,7 @@
 		C204A1521D073E6100DF297F /* RelationObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A1511D073E6100DF297F /* RelationObserver.swift */; };
 		C204A1541D088B6300DF297F /* ObjectMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A1531D088B6300DF297F /* ObjectMap.swift */; };
 		C20F925D1D943C6D002F9125 /* MutableRelationTreeDelete.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20F925C1D943C6D002F9125 /* MutableRelationTreeDelete.swift */; };
+		C20F926D1D9587B2002F9125 /* DataCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20F926C1D9587B2002F9125 /* DataCodec.swift */; };
 		C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */; };
 		C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7491CBD7F4500234A89 /* BinaryOperator.swift */; };
@@ -683,6 +684,7 @@
 		C204A1511D073E6100DF297F /* RelationObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObserver.swift; sourceTree = "<group>"; };
 		C204A1531D088B6300DF297F /* ObjectMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectMap.swift; path = Relational/ObjectMap.swift; sourceTree = "<group>"; };
 		C20F925C1D943C6D002F9125 /* MutableRelationTreeDelete.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelationTreeDelete.swift; sourceTree = "<group>"; };
+		C20F926C1D9587B2002F9125 /* DataCodec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCodec.swift; sourceTree = "<group>"; };
 		C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDefaultChangeObserverImplementation.swift; sourceTree = "<group>"; };
 		C22921911CC6CDCC00518184 /* makemodule.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = makemodule.sh; path = ../modules/makemodule.sh; sourceTree = "<group>"; };
 		C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteDatabase.swift; sourceTree = "<group>"; };
@@ -1409,6 +1411,14 @@
 			name = "Collection Properties";
 			sourceTree = "<group>";
 		};
+		C20F926B1D9587A3002F9125 /* Data Codec */ = {
+			isa = PBXGroup;
+			children = (
+				C20F926C1D9587B2002F9125 /* DataCodec.swift */,
+			);
+			name = "Data Codec";
+			sourceTree = "<group>";
+		};
 		C22921901CC6CD9500518184 /* SQLite */ = {
 			isa = PBXGroup;
 			children = (
@@ -1497,6 +1507,7 @@
 				C277E7FB1CDA908E00B7B8F6 /* Logging Relations */,
 				374AE9661D91B5E3007D1366 /* Query Management */,
 				374AE9671D91B5F5007D1366 /* Update Management */,
+				C20F926B1D9587A3002F9125 /* Data Codec */,
 				374AE9681D91B63A007D1366 /* Debugging Aids */,
 				C2BD298F1CD250B30081FD05 /* Utilities */,
 				C22921951CC6D25100518184 /* Custom Module Map */,
@@ -2447,6 +2458,7 @@
 				C2DF2B9E1CFDD81100ED8695 /* ObjectDictionary.swift in Sources */,
 				C23AAF401CF49AFE009E28E0 /* RelationActivityLogging.swift in Sources */,
 				C22921C71CD12A8700518184 /* ConcreteRelation.swift in Sources */,
+				C20F926D1D9587B2002F9125 /* DataCodec.swift in Sources */,
 				C22921C81CD12A8700518184 /* DictionaryConvenience.swift in Sources */,
 				C22921C91CD12A8700518184 /* DictionaryCreation.swift in Sources */,
 				C2DF2BA21D006E1C00ED8695 /* RelationDifferentiator.swift in Sources */,

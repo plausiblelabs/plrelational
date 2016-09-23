@@ -14,9 +14,11 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     
     public internal(set) var url: URL?
     
+    fileprivate let codec: DataCodec?
+    
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    public static func withDirectory(_ url: URL?, scheme: Scheme, primaryKey: Attribute, createIfDoesntExist: Bool) -> Result<PlistDirectoryRelation, RelationError> {
+    public static func withDirectory(_ url: URL?, scheme: Scheme, primaryKey: Attribute, createIfDoesntExist: Bool, codec: DataCodec? = nil) -> Result<PlistDirectoryRelation, RelationError> {
         if let url = url {
             // We have a URL, so we are either opening an existing relation or creating a new one at a specific location
             if !createIfDoesntExist {
@@ -29,14 +31,15 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
             // We have no URL, so we are creating a new relation; we will defer file creation until the first write
             precondition(createIfDoesntExist)
         }
-        return .Ok(PlistDirectoryRelation(scheme: scheme, primaryKey: primaryKey, url: url))
+        return .Ok(PlistDirectoryRelation(scheme: scheme, primaryKey: primaryKey, url: url, codec: codec))
     }
     
-    fileprivate init(scheme: Scheme, primaryKey: Attribute, url: URL?) {
+    fileprivate init(scheme: Scheme, primaryKey: Attribute, url: URL?, codec: DataCodec?) {
         precondition(scheme.attributes.contains(primaryKey), "Primary key must be in the scheme")
         self.scheme = scheme
         self.primaryKey = primaryKey
         self.url = url
+        self.codec = codec
     }
     
     public var contentProvider: RelationContentProvider {
@@ -166,7 +169,8 @@ extension PlistDirectoryRelation {
     fileprivate func readRow(url: URL) -> Result<Row, RelationError> {
         do {
             let data = try Data(contentsOf: url, options: [])
-            let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil)
+            let decodedData = codec?.decode(data) ?? data
+            let plist = try PropertyListSerialization.propertyList(from: decodedData, options: [], format: nil)
             return Row.fromPlist(plist)
         } catch {
             return .Err(error)
@@ -205,7 +209,8 @@ extension PlistDirectoryRelation {
             
             let plist = row.toPlist()
             let data = try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
-            try data.write(to: url, options: .atomicWrite)
+            let encodedData = codec?.encode(data) ?? data
+            try encodedData.write(to: url, options: .atomicWrite)
             
             return .Ok()
         } catch {

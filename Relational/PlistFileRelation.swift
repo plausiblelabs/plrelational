@@ -12,12 +12,15 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     fileprivate var values: Set<Row>
     public internal(set) var url: URL?
     
+    fileprivate let codec: DataCodec?
+    
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    fileprivate init(scheme: Scheme, url: URL?) {
+    fileprivate init(scheme: Scheme, url: URL?, codec: DataCodec?) {
         self.scheme = scheme
         self.values = []
         self.url = url
+        self.codec = codec
     }
     
     public var contentProvider: RelationContentProvider {
@@ -66,14 +69,15 @@ extension PlistFileRelation {
         case unknownValuesObject(unknownObject: Any)
     }
     
-    public static func withFile(_ url: URL?, scheme: Scheme, createIfDoesntExist: Bool) -> Result<PlistFileRelation, RelationError> {
+    public static func withFile(_ url: URL?, scheme: Scheme, createIfDoesntExist: Bool, codec: DataCodec? = nil) -> Result<PlistFileRelation, RelationError> {
         if let url = url {
             // We have a URL, so we are either opening an existing relation or creating a new one at a specific location;
             if !createIfDoesntExist {
                 // We are opening a relation, so let's require its existence at init time
                 do {
                     let data = try Data(contentsOf: url, options: [])
-                    let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil)
+                    let decodedData = codec?.decode(data) ?? data
+                    let plist = try PropertyListSerialization.propertyList(from: decodedData, options: [], format: nil)
                     guard let dict = plist as? NSDictionary else { return .Err(Error.unknownTopLevelObject(unknownObject: plist)) }
                     
                     guard let values = dict["values"] else { return .Err(Error.missingValues) }
@@ -82,7 +86,7 @@ extension PlistFileRelation {
                     let relationValueResults = array.map({ Row.fromPlist($0) })
                     let relationValuesResult = mapOk(relationValueResults, { $0 })
                     return relationValuesResult.map({
-                        let r = PlistFileRelation(scheme: scheme, url: url)
+                        let r = PlistFileRelation(scheme: scheme, url: url, codec: codec)
                         r.values = Set($0)
                         return r
                     })
@@ -94,7 +98,7 @@ extension PlistFileRelation {
             // We have no URL, so we are creating a new relation; we will defer file creation until the first save
             precondition(createIfDoesntExist)
         }
-        return .Ok(PlistFileRelation(scheme: scheme, url: url))
+        return .Ok(PlistFileRelation(scheme: scheme, url: url, codec: codec))
     }
     
     public func save() -> Result<Void, RelationError> {
@@ -104,7 +108,8 @@ extension PlistFileRelation {
         let dict = ["values": plistValues]
         do {
             let data = try PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
-            try data.write(to: url, options: .atomicWrite)
+            let encodedData = codec?.encode(data) ?? data
+            try encodedData.write(to: url, options: .atomicWrite)
             return .Ok()
         } catch {
             return .Err(error)
