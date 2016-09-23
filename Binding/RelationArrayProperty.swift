@@ -45,15 +45,21 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         removal = relation.addAsyncObserver(self)
         
         notify.valueWillChange()
-        relation.asyncAllRows({ result in
-            if let rows = result.ok {
+        relation.asyncAllRows(
+            postprocessor: { rows -> [RowArrayElement] in
                 let sortedRows = rows.sorted{ $0[self.orderAttr] < $1[self.orderAttr] }
-                let elements = sortedRows.map{ RowArrayElement(id: $0[self.idAttr], data: $0, tag: self.tag) }
-                self.elements = elements
-                self.notifyObservers(arrayChanges: [.initial(elements)])
+                return sortedRows.map{
+                    RowArrayElement(id: $0[self.idAttr], data: $0, tag: self.tag)
+                }
+            },
+            completion: { result in
+                if let sortedElements = result.ok {
+                    self.elements = sortedElements
+                    self.notifyObservers(arrayChanges: [.initial(sortedElements)])
+                }
+                self.notify.valueDidChange()
             }
-            self.notify.valueDidChange()
-        })
+        )
     }
     
     private func onInsert(_ rows: [Row], changes: inout [Change]) {

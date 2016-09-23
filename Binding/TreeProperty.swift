@@ -60,7 +60,7 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
     public typealias Value = Node
     public typealias SignalChange = [TreeChange<Node>]
 
-    public private(set) var root: Node
+    public internal(set) var root: Node
     
     public var value: Node? {
         return root
