@@ -9,7 +9,7 @@ import Foundation
 public final class UpdateManager: PerThreadInstance {
     public typealias ObservationRemover = (Void) -> Void
     
-    private var pendingUpdates: [Update] = []
+    private var pendingActions: [Action] = []
     private var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
     
     private let runloop: CFRunLoop
@@ -51,24 +51,31 @@ public final class UpdateManager: PerThreadInstance {
     }
     
     public func registerUpdate(_ relation: Relation, query: SelectExpression, newValues: Row) {
-        pendingUpdates.append(.update(relation, query, newValues))
+        pendingActions.append(.update(relation, query, newValues))
         registerChange(relation)
     }
     
     public func registerAdd(_ relation: MutableRelation, row: Row) {
-        pendingUpdates.append(.add(relation, row))
+        pendingActions.append(.add(relation, row))
         registerChange(relation)
     }
     
     public func registerDelete(_ relation: MutableRelation, query: SelectExpression) {
-        pendingUpdates.append(.delete(relation, query))
+        pendingActions.append(.delete(relation, query))
         registerChange(relation)
     }
     
     public func registerRestoreSnapshot(_ database: TransactionalDatabase, snapshot: ChangeLoggingDatabaseSnapshot) {
-        pendingUpdates.append(.restoreSnapshot(database, snapshot))
+        pendingActions.append(.restoreSnapshot(database, snapshot))
         for (_, relation) in database.relations {
             registerChange(relation)
+        }
+    }
+    
+    public func registerQuery(_ relation: Relation, callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
+        pendingActions.append(.query(relation, callback))
+        if state != .running {
+            scheduleExecutionIfNeeded()
         }
     }
     
@@ -139,6 +146,25 @@ public final class UpdateManager: PerThreadInstance {
         })
     }
     
+    fileprivate func sendWillChangeForAllPendingActions() {
+        for action in pendingActions {
+            switch action {
+            case .add(let relation, _):
+                sendWillChange(relation)
+            case .delete(let relation, _):
+                sendWillChange(relation)
+            case .update(let relation, _, _):
+                sendWillChange(relation)
+            case .restoreSnapshot(let database, _):
+                for (_, relation) in database.relations {
+                    registerChange(relation)
+                }
+            case .query:
+                break
+            }
+        }
+    }
+    
     fileprivate func scheduleExecutionIfNeeded() {
         if executionTimer == nil {
             executionTimer = CFRunLoopTimerCreateWithHandler(nil, 0, 0, 0, 0, { _ in
@@ -159,8 +185,8 @@ public final class UpdateManager: PerThreadInstance {
     fileprivate func executeBody() {
         // Apply all pending updates asynchronously. Update work is done in the background, with callbacks onto
         // this runloop for synchronization and notifying observers.
-        let updates = pendingUpdates
-        pendingUpdates = []
+        let updates = pendingActions
+        pendingActions = []
         
         let observedInfo = self.observedInfo
         
@@ -224,6 +250,8 @@ public final class UpdateManager: PerThreadInstance {
                     } else {
                         database.restoreSnapshot(snapshot)
                     }
+                    error = nil
+                case .query:
                     error = nil
                 }
                 
@@ -320,6 +348,26 @@ public final class UpdateManager: PerThreadInstance {
                 }
             }
             
+            // Make any requested queries.
+            for update in updates {
+                if case .query(let relation, let callback) = update {
+                    doneGroup.enter()
+                    queryManager.registerQuery(relation, callback: DirectDispatchContext().wrap({ result in
+                        callback.withWrapped({
+                            $0(result)
+                            switch result {
+                            case .Ok(let rows) where rows.isEmpty:
+                                doneGroup.leave()
+                            case .Err:
+                                doneGroup.leave()
+                            default:
+                                break
+                            }
+                        })
+                    }))
+                }
+            }
+            
             queryManager.execute()
             
             // Wait until done. If there are no changes then this will execute immediately. Otherwise it will execute
@@ -328,7 +376,7 @@ public final class UpdateManager: PerThreadInstance {
                 self.runloop.async({
                     // If new pending updates came in while we were doing our thing, then go back to the top
                     // and start over, applying those updates too.
-                    if !self.pendingUpdates.isEmpty {
+                    if !self.pendingActions.isEmpty {
                         // All content observers currently being worked on need a didChange followed by a willChange
                         // so that they know they're getting new content, not additional content.
                         for (observedRelationObj, info) in observedInfo {
@@ -341,6 +389,7 @@ public final class UpdateManager: PerThreadInstance {
                                 }
                             }
                         }
+                        self.sendWillChangeForAllPendingActions()
                         self.executeBody()
                     } else {
                         // Otherwise, terminate the execution. Reset observers and send didChange to them.
@@ -373,11 +422,12 @@ public final class UpdateManager: PerThreadInstance {
 }
 
 extension UpdateManager {
-    fileprivate enum Update {
+    fileprivate enum Action {
         case update(Relation, SelectExpression, Row)
         case add(MutableRelation, Row)
         case delete(MutableRelation, SelectExpression)
         case restoreSnapshot(TransactionalDatabase, ChangeLoggingDatabaseSnapshot)
+        case query(Relation, DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>)
     }
     
     fileprivate class ObservedRelationInfo {

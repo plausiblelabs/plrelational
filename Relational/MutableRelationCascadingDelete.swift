@@ -70,29 +70,31 @@ fileprivate class CascadingDeleter {
             let query = expressions[0]
             
             group.enter()
-            relation.select(query).asyncBulkRows({ result in
-                switch result {
-                case .Ok(let rows) where !rows.isEmpty:
-                    for row in rows {
-                        let cascades = self.cascade(relation, row)
-                        for (cascadeRelation, cascadeQuery) in cascades {
-                            if self.pending[cascadeRelation] == nil {
-                                self.pending[cascadeRelation] = [cascadeQuery]
-                            } else {
-                                self.pending[cascadeRelation]!.append(cascadeQuery)
+            UpdateManager.currentInstance.registerQuery(
+                relation.select(query),
+                callback: CFRunLoopGetCurrent().wrap({ result in
+                    switch result {
+                    case .Ok(let rows) where !rows.isEmpty:
+                        for row in rows {
+                            let cascades = self.cascade(relation, row)
+                            for (cascadeRelation, cascadeQuery) in cascades {
+                                if self.pending[cascadeRelation] == nil {
+                                    self.pending[cascadeRelation] = [cascadeQuery]
+                                } else {
+                                    self.pending[cascadeRelation]!.append(cascadeQuery)
+                                }
                             }
                         }
+                        
+                    case .Ok: // When rows are empty
+                        relation.asyncDelete(query)
+                        group.leave()
+                    case .Err(let err):
+                        self.error = err
+                        group.leave()
+                        
                     }
-                    
-                case .Ok: // When rows are empty
-                    relation.asyncDelete(query)
-                    group.leave()
-                case .Err(let err):
-                    self.error = err
-                    group.leave()
-
-                }
-            })
+                }))
         }
         
         let runloop = CFRunLoopGetCurrent()!

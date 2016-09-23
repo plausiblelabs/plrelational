@@ -1143,7 +1143,7 @@ class RelationTests: DBTestCase {
         remover()
     }
 
-    func DISABLED_testCascadingDelete() {
+    func testCascadingDelete() {
         let r1 = MakeRelation(
             ["id", "parent"],
             [1, .null],
