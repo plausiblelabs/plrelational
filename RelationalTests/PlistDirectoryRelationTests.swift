@@ -90,13 +90,13 @@ class PlistDirectoryRelationTests: XCTestCase {
         struct PrefixCodec: DataCodec {
             static let prefix = "testprefix"
             
-            func encode(_ data: Data) -> Data {
-                return PrefixCodec.prefix.utf8 + data
+            func encode(_ data: Data) -> Result<Data, RelationError> {
+                return .Ok(PrefixCodec.prefix.utf8 + data)
             }
             
-            func decode(_ data: Data) -> Data {
+            func decode(_ data: Data) -> Result<Data, RelationError> {
                 let prefixLength = Array(PrefixCodec.prefix.utf8).count
-                return Data(data[prefixLength ..< data.count])
+                return .Ok(Data(data[prefixLength ..< data.count]))
             }
         }
         

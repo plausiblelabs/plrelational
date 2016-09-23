@@ -25,30 +25,30 @@ extension Result {
 }
 
 extension Result {
-    public func map<NewT>(_ f: (T) -> NewT) -> Result<NewT, E> {
+    public func map<NewT>(_ f: (T) throws -> NewT) rethrows -> Result<NewT, E> {
         switch self {
-        case .Ok(let t): return .Ok(f(t))
+        case .Ok(let t): return .Ok(try f(t))
         case .Err(let e): return .Err(e)
         }
     }
     
-    public func map<NewT>(_ f: (T) -> NewT?) -> Result<NewT, E>? {
+    public func map<NewT>(_ f: (T) throws -> NewT?) rethrows -> Result<NewT, E>? {
         switch self {
-        case .Ok(let t): return f(t).map({ .Ok($0) })
+        case .Ok(let t): return try f(t).map({ .Ok($0) })
         case .Err(let e): return .Err(e)
         }
     }
     
-    public func mapErr<NewE>(_ f: (E) -> NewE) -> Result<T, NewE> {
+    public func mapErr<NewE>(_ f: (E) throws -> NewE) rethrows -> Result<T, NewE> {
         switch self {
         case .Ok(let t): return .Ok(t)
-        case .Err(let e): return .Err(f(e))
+        case .Err(let e): return .Err(try f(e))
         }
     }
     
-    public func then<NewT>(_ f: (T) -> Result<NewT, E>) -> Result<NewT, E> {
+    public func then<NewT>(_ f: (T) throws -> Result<NewT, E>) rethrows -> Result<NewT, E> {
         switch self {
-        case .Ok(let t): return f(t)
+        case .Ok(let t): return try f(t)
         case .Err(let e): return .Err(e)
         }
     }

@@ -169,9 +169,11 @@ extension PlistDirectoryRelation {
     fileprivate func readRow(url: URL) -> Result<Row, RelationError> {
         do {
             let data = try Data(contentsOf: url, options: [])
-            let decodedData = codec?.decode(data) ?? data
-            let plist = try PropertyListSerialization.propertyList(from: decodedData, options: [], format: nil)
-            return Row.fromPlist(plist)
+            let decodedDataResult = codec?.decode(data) ?? .Ok(data)
+            return try decodedDataResult.then({
+                let plist = try PropertyListSerialization.propertyList(from: $0, options: [], format: nil)
+                return Row.fromPlist(plist)
+            })
         } catch {
             return .Err(error)
         }
@@ -209,10 +211,8 @@ extension PlistDirectoryRelation {
             
             let plist = row.toPlist()
             let data = try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
-            let encodedData = codec?.encode(data) ?? data
-            try encodedData.write(to: url, options: .atomicWrite)
-            
-            return .Ok()
+            let encodedDataResult = codec?.encode(data) ?? .Ok(data)
+            return try encodedDataResult.map({ try $0.write(to: url, options: .atomicWrite) })
         } catch {
             return .Err(error)
         }

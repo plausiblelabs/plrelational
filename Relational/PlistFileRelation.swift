@@ -76,19 +76,21 @@ extension PlistFileRelation {
                 // We are opening a relation, so let's require its existence at init time
                 do {
                     let data = try Data(contentsOf: url, options: [])
-                    let decodedData = codec?.decode(data) ?? data
-                    let plist = try PropertyListSerialization.propertyList(from: decodedData, options: [], format: nil)
-                    guard let dict = plist as? NSDictionary else { return .Err(Error.unknownTopLevelObject(unknownObject: plist)) }
-                    
-                    guard let values = dict["values"] else { return .Err(Error.missingValues) }
-                    guard let array = values as? NSArray else { return .Err(Error.unknownValuesObject(unknownObject: values)) }
-                    
-                    let relationValueResults = array.map({ Row.fromPlist($0) })
-                    let relationValuesResult = mapOk(relationValueResults, { $0 })
-                    return relationValuesResult.map({
-                        let r = PlistFileRelation(scheme: scheme, url: url, codec: codec)
-                        r.values = Set($0)
-                        return r
+                    let decodedDataResult = codec?.decode(data) ?? .Ok(data)
+                    return try decodedDataResult.then({
+                        let plist = try PropertyListSerialization.propertyList(from: $0, options: [], format: nil)
+                        guard let dict = plist as? NSDictionary else { return .Err(Error.unknownTopLevelObject(unknownObject: plist)) }
+                        
+                        guard let values = dict["values"] else { return .Err(Error.missingValues) }
+                        guard let array = values as? NSArray else { return .Err(Error.unknownValuesObject(unknownObject: values)) }
+                        
+                        let relationValueResults = array.map({ Row.fromPlist($0) })
+                        let relationValuesResult = mapOk(relationValueResults, { $0 })
+                        return relationValuesResult.map({
+                            let r = PlistFileRelation(scheme: scheme, url: url, codec: codec)
+                            r.values = Set($0)
+                            return r
+                        })
                     })
                 } catch {
                     return .Err(error)
@@ -108,9 +110,8 @@ extension PlistFileRelation {
         let dict = ["values": plistValues]
         do {
             let data = try PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
-            let encodedData = codec?.encode(data) ?? data
-            try encodedData.write(to: url, options: .atomicWrite)
-            return .Ok()
+            let encodedDataResult = codec?.encode(data) ?? .Ok(data)
+            return try encodedDataResult.map({ try $0.write(to: url, options: .atomicWrite) })
         } catch {
             return .Err(error)
         }

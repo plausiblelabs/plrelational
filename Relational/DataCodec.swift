@@ -7,6 +7,6 @@ import Foundation
 
 
 public protocol DataCodec {
-    func encode(_ data: Data) -> Data
-    func decode(_ data: Data) -> Data
+    func encode(_ data: Data) -> Result<Data, RelationError>
+    func decode(_ data: Data) -> Result<Data, RelationError>
 }
