@@ -28,8 +28,8 @@ func AssertEqual(_ a: Relation?, _ b: Relation?, file: StaticString = #file, lin
         XCTAssertEqual(bRows.count, bSet.count, "Row generator returned duplicate values, all provided rows should be unique")
         XCTAssertEqual(aSet, bSet, "Relations are not equal but should be. First relation:\n\(a)\n\nSecond relation:\n\(b)", file: file, line: line)
     default:
-        XCTAssertNil(aRows.err)
-        XCTAssertNil(bRows.err)
+        XCTAssertNil(aRows.err, file: file, line: line)
+        XCTAssertNil(bRows.err, file: file, line: line)
     }
 }
 
