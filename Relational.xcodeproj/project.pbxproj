@@ -159,7 +159,7 @@
 		C204A1501D071A9200DF297F /* RelationDerivative.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A14F1D071A9200DF297F /* RelationDerivative.swift */; };
 		C204A1521D073E6100DF297F /* RelationObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A1511D073E6100DF297F /* RelationObserver.swift */; };
 		C204A1541D088B6300DF297F /* ObjectMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A1531D088B6300DF297F /* ObjectMap.swift */; };
-		C20F925D1D943C6D002F9125 /* MutableRelationTreeDelete.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20F925C1D943C6D002F9125 /* MutableRelationTreeDelete.swift */; };
+		C20F925D1D943C6D002F9125 /* MutableRelationCascadingDelete.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20F925C1D943C6D002F9125 /* MutableRelationCascadingDelete.swift */; };
 		C20F926D1D9587B2002F9125 /* DataCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20F926C1D9587B2002F9125 /* DataCodec.swift */; };
 		C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */; };
 		C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
@@ -683,7 +683,7 @@
 		C204A14F1D071A9200DF297F /* RelationDerivative.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDerivative.swift; sourceTree = "<group>"; };
 		C204A1511D073E6100DF297F /* RelationObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObserver.swift; sourceTree = "<group>"; };
 		C204A1531D088B6300DF297F /* ObjectMap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectMap.swift; path = Relational/ObjectMap.swift; sourceTree = "<group>"; };
-		C20F925C1D943C6D002F9125 /* MutableRelationTreeDelete.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelationTreeDelete.swift; sourceTree = "<group>"; };
+		C20F925C1D943C6D002F9125 /* MutableRelationCascadingDelete.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelationCascadingDelete.swift; sourceTree = "<group>"; };
 		C20F926C1D9587B2002F9125 /* DataCodec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCodec.swift; sourceTree = "<group>"; };
 		C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDefaultChangeObserverImplementation.swift; sourceTree = "<group>"; };
 		C22921911CC6CDCC00518184 /* makemodule.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = makemodule.sh; path = ../modules/makemodule.sh; sourceTree = "<group>"; };
@@ -1129,7 +1129,7 @@
 			children = (
 				C23AAF451CF76CFA009E28E0 /* IntermediateRelation.swift */,
 				3727076C1CEE60C900710C80 /* MutableRelation.swift */,
-				C20F925C1D943C6D002F9125 /* MutableRelationTreeDelete.swift */,
+				C20F925C1D943C6D002F9125 /* MutableRelationCascadingDelete.swift */,
 				C22BF1391CBC349400D3FE59 /* Relation.swift */,
 				C22921E71CD12CF100518184 /* RelationTests.swift */,
 				C257C74B1CBD835600234A89 /* RelationParts.swift */,
@@ -2478,7 +2478,7 @@
 				C22921CD1CD12A8700518184 /* PlaygroundMonospace.swift in Sources */,
 				3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */,
 				C22921CE1CD12A8700518184 /* Relation.swift in Sources */,
-				C20F925D1D943C6D002F9125 /* MutableRelationTreeDelete.swift in Sources */,
+				C20F925D1D943C6D002F9125 /* MutableRelationCascadingDelete.swift in Sources */,
 				C22921CF1CD12A8700518184 /* RelationParts.swift in Sources */,
 				C22921D01CD12A8700518184 /* RelationValue.swift in Sources */,
 				C23AAF461CF76CFA009E28E0 /* IntermediateRelation.swift in Sources */,
