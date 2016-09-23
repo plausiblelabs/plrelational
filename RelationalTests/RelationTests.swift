@@ -630,13 +630,16 @@ class RelationTests: DBTestCase {
         
         let group = DispatchGroup()
         group.enter()
-        r.asyncAllRows({ result in
-            XCTAssertTrue(runloop === CFRunLoopGetCurrent())
-            guard let rows = result.ok else { return XCTAssertNil(result.err) }
-            output = rows
-            group.leave()
-            CFRunLoopStop(runloop)
-        }, postprocessor: sortByAttribute("n"))
+        r.asyncAllRows(
+            postprocessor: sortByAttribute("n"),
+            completion: { result in
+                XCTAssertTrue(runloop === CFRunLoopGetCurrent())
+                guard let rows = result.ok else { return XCTAssertNil(result.err) }
+                output = rows
+                group.leave()
+                CFRunLoopStop(runloop)
+            }
+        )
         CFRunLoopRun()
         _ = group.wait(timeout: DispatchTime.distantFuture)
         

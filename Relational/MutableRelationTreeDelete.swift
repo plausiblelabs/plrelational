@@ -47,6 +47,6 @@ extension MutableRelation where Self: AnyObject {
             }
         }
         
-        self.select(query).asyncAllRows(callback, postprocessor: postprocessor)
+        self.select(query).asyncAllRows(postprocessor: postprocessor, completion: callback)
     }
 }
