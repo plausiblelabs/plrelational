@@ -31,8 +31,8 @@ class PropertiesView: BackgroundView {
             self.observerRemoval = property.signal.observe(SignalObserver(
                 valueWillChange: {},
                 valueChanging: { [weak self] _ in
-                    guard let weakSelf = self else { return }
-                    validate(weakSelf)
+                    guard let strongSelf = self else { return }
+                    validate(strongSelf)
                 },
                 valueDidChange: {}
             ))

@@ -14,9 +14,9 @@ private class RelationProperty<T>: ReadableProperty<T> {
         super.init(initialValue: relationToValue(relation), signal: signal, notify: notify, changing: valueChanging)
         
         self.removal = relation.addChangeObserver({ [weak self] _ in
-            guard let weakSelf = self else { return }
+            guard let strongSelf = self else { return }
             let newValue = relationToValue(relation)
-            weakSelf.setValue(newValue, ChangeMetadata(transient: false))
+            strongSelf.setValue(newValue, ChangeMetadata(transient: false))
         })
     }
     
@@ -43,16 +43,16 @@ private class WhenNonEmptyProperty<T>: ReadableProperty<T?> {
         super.init(initialValue: evaluate(), signal: signal, notify: notify, changing: valueChanging)
         
         self.removal = relation.addChangeObserver({ [weak self] _ in
-            guard let weakSelf = self else { return }
+            guard let strongSelf = self else { return }
             
             // Only re-evaluate if the relation is going from empty to non-empty or vice versa
-            if weakSelf.value == nil {
+            if strongSelf.value == nil {
                 if let newValue = evaluate() {
-                    weakSelf.setValue(newValue, ChangeMetadata(transient: false))
+                    strongSelf.setValue(newValue, ChangeMetadata(transient: false))
                 }
             } else {
                 if relation.isEmpty.ok != false {
-                    weakSelf.setValue(nil, ChangeMetadata(transient: false))
+                    strongSelf.setValue(nil, ChangeMetadata(transient: false))
                 }
             }
         })

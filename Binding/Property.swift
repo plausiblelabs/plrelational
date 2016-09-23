@@ -113,8 +113,8 @@ open class BindableProperty<T> {
                 self?.changeHandler.willChange()
             },
             valueChanging: { [weak self] value, metadata in
-                guard let weakSelf = self else { return }
-                weakSelf.setValue(value, metadata)
+                guard let strongSelf = self else { return }
+                strongSelf.setValue(value, metadata)
             },
             valueDidChange: { [weak self] in
                 self?.changeHandler.didChange()

@@ -201,11 +201,11 @@ private class ColorPickerModel {
             self.colorItem,
             forward: { [weak self] value in
                 // CommonValue<Color> -> ColorItem
-                guard let weakSelf = self else { return .noChange }
+                guard let strongSelf = self else { return .noChange }
                 
                 let newColorItem: ColorItem
                 if let color = value.orNil() {
-                    if weakSelf.presetColors.contains(color) {
+                    if strongSelf.presetColors.contains(color) {
                         newColorItem = ColorItem.preset(color)
                     } else {
                         newColorItem = ColorItem.custom(color)
@@ -235,10 +235,10 @@ private class ColorPickerModel {
             },
             reverse: { [weak self] value in
                 // Double? -> CommonValue<Color>
-                guard let weakSelf = self else { return .noChange }
+                guard let strongSelf = self else { return .noChange }
                 guard let newOpacity = value else { return .noChange }
                 
-                let currentColor: Color = weakSelf.color.value.orDefault(weakSelf.defaultColor)
+                let currentColor: Color = strongSelf.color.value.orDefault(strongSelf.defaultColor)
                 let newColor = currentColor.withAlpha(newOpacity)
                 return .change(CommonValue.one(newColor))
             }
