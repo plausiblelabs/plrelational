@@ -64,8 +64,6 @@ enum ItemType: Int64 { case
 
 class DocModel {
     
-    private typealias TransactionalRelation = TransactionalDatabase.TransactionalRelation
-
     private let db: TransactionalDatabase
     private let undoableDB: UndoableDatabase
 

@@ -58,6 +58,10 @@
 		374707301D19BAF50048E857 /* liblibRelational.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		374707311D19BAF50048E857 /* libBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		374707321D19BAF50048E857 /* libBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		374AE9721D91C2F0007D1366 /* StoredDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9711D91C2F0007D1366 /* StoredDatabase.swift */; };
+		374AE9741D91C2FC007D1366 /* StoredRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9731D91C2FC007D1366 /* StoredRelation.swift */; };
+		374AE9761D91DBC7007D1366 /* PlistDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9751D91DBC7007D1366 /* PlistDatabase.swift */; };
+		374AE97A1D9205DC007D1366 /* PlistDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9791D9205DC007D1366 /* PlistDatabaseTests.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
 		376136991CF65F0A00F572C5 /* TextObjectPropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */; };
@@ -215,7 +219,6 @@
 		C2B6E2701D80AA6A0039923C /* NSURLConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E26F1D80AA6A0039923C /* NSURLConvenience.swift */; };
 		C2BA22981D3FD65F00DCCE72 /* UpdateManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */; };
 		C2BA229A1D3FD70200DCCE72 /* RelationObservationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */; };
-		C2BD29991CD7ED900081FD05 /* SQLiteBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */; };
 		C2C2586A1D0203CC0066EB82 /* RelationOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C258691D0203CC0066EB82 /* RelationOperators.swift */; };
 		C2C630891D302B8C00AD44C1 /* QueryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C630881D302B8C00AD44C1 /* QueryManager.swift */; };
 		C2C6308B1D35553F00AD44C1 /* UpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C6308A1D35553F00AD44C1 /* UpdateManager.swift */; };
@@ -575,6 +578,10 @@
 		372707F61CFE2C7E00710C80 /* BindableControlsAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BindableControlsAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		372707FA1CFE2C7E00710C80 /* BindableControlsAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BindableControlsAppUITests.swift; sourceTree = "<group>"; };
 		372707FC1CFE2C7E00710C80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		374AE9711D91C2F0007D1366 /* StoredDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StoredDatabase.swift; path = Relational/StoredDatabase.swift; sourceTree = "<group>"; };
+		374AE9731D91C2FC007D1366 /* StoredRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = StoredRelation.swift; path = Relational/StoredRelation.swift; sourceTree = "<group>"; };
+		374AE9751D91DBC7007D1366 /* PlistDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDatabase.swift; sourceTree = "<group>"; };
+		374AE9791D9205DC007D1366 /* PlistDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistDatabaseTests.swift; path = RelationalTests/PlistDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = SampleAppTests/DocModelTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CommonValue.swift; path = Binding/CommonValue.swift; sourceTree = "<group>"; };
@@ -733,11 +740,10 @@
 		C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ConsistentPRNG.swift; path = Relational/ConsistentPRNG.swift; sourceTree = "<group>"; };
 		C2B6E2681D804D5E0039923C /* PlistDirectoryRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDirectoryRelation.swift; sourceTree = "<group>"; };
 		C2B6E26B1D805E230039923C /* Crypto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Crypto.swift; path = Relational/Crypto.swift; sourceTree = "<group>"; };
-		C2B6E26D1D806B390039923C /* PlistDirectoryRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDirectoryRelationTests.swift; sourceTree = "<group>"; };
+		C2B6E26D1D806B390039923C /* PlistDirectoryRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistDirectoryRelationTests.swift; path = ../RelationalTests/PlistDirectoryRelationTests.swift; sourceTree = "<group>"; };
 		C2B6E26F1D80AA6A0039923C /* NSURLConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = NSURLConvenience.swift; path = Relational/NSURLConvenience.swift; sourceTree = "<group>"; };
 		C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UpdateManagerTests.swift; path = RelationalTests/UpdateManagerTests.swift; sourceTree = SOURCE_ROOT; };
 		C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationObservationTests.swift; path = RelationalTests/RelationObservationTests.swift; sourceTree = SOURCE_ROOT; };
-		C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteBinding.swift; sourceTree = "<group>"; };
 		C2C258691D0203CC0066EB82 /* RelationOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationOperators.swift; sourceTree = "<group>"; };
 		C2C630881D302B8C00AD44C1 /* QueryManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryManager.swift; sourceTree = "<group>"; };
 		C2C6308A1D35553F00AD44C1 /* UpdateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateManager.swift; sourceTree = "<group>"; };
@@ -747,7 +753,7 @@
 		C2CE513D1D469EF10011C554 /* InlineMutableDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = InlineMutableDataTests.swift; path = RelationalTests/InlineMutableDataTests.swift; sourceTree = SOURCE_ROOT; };
 		C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistFileRelation.swift; sourceTree = "<group>"; };
 		C2CFC35A1D7F36DE00389373 /* RowPlist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RowPlist.swift; sourceTree = "<group>"; };
-		C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistFileRelationTests.swift; sourceTree = "<group>"; };
+		C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistFileRelationTests.swift; path = ../RelationalTests/PlistFileRelationTests.swift; sourceTree = "<group>"; };
 		C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswiftSwiftOnoneSupport.dylib; path = Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/libswiftSwiftOnoneSupport.dylib; sourceTree = DEVELOPER_DIR; };
 		C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectDictionary.swift; path = Relational/ObjectDictionary.swift; sourceTree = "<group>"; };
 		C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QueryRunnerTests.swift; path = RelationalTests/QueryRunnerTests.swift; sourceTree = SOURCE_ROOT; };
@@ -1041,6 +1047,8 @@
 		374AE9651D91B5B1007D1366 /* Stored Relations */ = {
 			isa = PBXGroup;
 			children = (
+				374AE9711D91C2F0007D1366 /* StoredDatabase.swift */,
+				374AE9731D91C2FC007D1366 /* StoredRelation.swift */,
 				C2CFC3571D7F332900389373 /* Plist */,
 				C22921901CC6CD9500518184 /* SQLite */,
 			);
@@ -1404,7 +1412,6 @@
 		C22921901CC6CD9500518184 /* SQLite */ = {
 			isa = PBXGroup;
 			children = (
-				C2BD29971CD7ED260081FD05 /* SQLiteBinding.swift */,
 				C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */,
 				C277E80B1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift */,
 				C22921961CC7E9E300518184 /* SQLiteRelation.swift */,
@@ -1553,6 +1560,8 @@
 		C2CFC3571D7F332900389373 /* Plist */ = {
 			isa = PBXGroup;
 			children = (
+				374AE9751D91DBC7007D1366 /* PlistDatabase.swift */,
+				374AE9791D9205DC007D1366 /* PlistDatabaseTests.swift */,
 				C2B6E2681D804D5E0039923C /* PlistDirectoryRelation.swift */,
 				C2B6E26D1D806B390039923C /* PlistDirectoryRelationTests.swift */,
 				C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */,
@@ -2415,6 +2424,7 @@
 				C22921C41CD12A8700518184 /* ArrayHashing.swift in Sources */,
 				C2B53CBD1D1AF4FC006B6278 /* DeallocObservation.swift in Sources */,
 				C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */,
+				374AE9761D91DBC7007D1366 /* PlistDatabase.swift in Sources */,
 				C23BC0521D21C5B100188F86 /* CollectionConvenience.swift in Sources */,
 				C22921C51CD12A8700518184 /* BinaryOperator.swift in Sources */,
 				C23BC0561D24629E00188F86 /* SmallInlineArray.swift in Sources */,
@@ -2432,6 +2442,7 @@
 				C23BC0501D21AEDF00188F86 /* QueryOptimizer.swift in Sources */,
 				C23AAF4A1CF8D651009E28E0 /* ObjectSet.swift in Sources */,
 				C23AAF421CF61890009E28E0 /* MirrorChildren.swift in Sources */,
+				374AE9741D91C2FC007D1366 /* StoredRelation.swift in Sources */,
 				C2CFC3591D7F336F00389373 /* PlistFileRelation.swift in Sources */,
 				C2DF2B9E1CFDD81100ED8695 /* ObjectDictionary.swift in Sources */,
 				C23AAF401CF49AFE009E28E0 /* RelationActivityLogging.swift in Sources */,
@@ -2449,6 +2460,7 @@
 				C29C28361D872BEA001E20E7 /* UnsafePointerReadWrite.swift in Sources */,
 				C23AAF481CF8CD89009E28E0 /* QueryPlanner.swift in Sources */,
 				C22921CB1CD12A8700518184 /* ObserverSet.swift in Sources */,
+				374AE9721D91C2F0007D1366 /* StoredDatabase.swift in Sources */,
 				C204A1521D073E6100DF297F /* RelationObserver.swift in Sources */,
 				C2EC76FD1D4BAEFB00A374B1 /* Debug.swift in Sources */,
 				C22921CD1CD12A8700518184 /* PlaygroundMonospace.swift in Sources */,
@@ -2462,7 +2474,6 @@
 				C2C6308D1D355B7500AD44C1 /* PerThreadInstance.swift in Sources */,
 				C22921D21CD12A8700518184 /* SetPowerSet.swift in Sources */,
 				C22921D31CD12A8700518184 /* SimpleDatabase.swift in Sources */,
-				C2BD29991CD7ED900081FD05 /* SQLiteBinding.swift in Sources */,
 				C2B53CB51D1862ED006B6278 /* Mutex.swift in Sources */,
 				C22921D41CD12A8700518184 /* StringConvenience.swift in Sources */,
 				C22921D51CD12A8700518184 /* StringPad.swift in Sources */,
@@ -2496,6 +2507,7 @@
 				C277E80C1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift in Sources */,
 				C2B53CDE1D1DBC3F006B6278 /* ObjectMapTests.swift in Sources */,
 				C2FE9B9B1CEE3A810004E635 /* TransactionalDatabaseTests.swift in Sources */,
+				374AE97A1D9205DC007D1366 /* PlistDatabaseTests.swift in Sources */,
 				C2CFC35D1D7F49D800389373 /* PlistFileRelationTests.swift in Sources */,
 				C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */,
 				C277E8051CDBD2A000B7B8F6 /* DBTestCase.swift in Sources */,

@@ -27,12 +27,12 @@ public struct ChangeLoggingRelationSnapshot {
     var savedLog: [ChangeLoggingRelationLogEntry]
 }
 
-open class ChangeLoggingRelation<BaseRelation: Relation> {
-    let baseRelation: BaseRelation
+public class ChangeLoggingRelation {
+    fileprivate var baseRelation: MutableRelation
     
-    var log: [ChangeLoggingRelationLogEntry] = []
+    fileprivate var log: [ChangeLoggingRelationLogEntry] = []
     
-    open var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     fileprivate var currentChange: ChangeLoggingRelationCurrentChange {
         didSet {
@@ -40,9 +40,9 @@ open class ChangeLoggingRelation<BaseRelation: Relation> {
         }
     }
     
-    var fullUnderlyingRelation: Relation
+    fileprivate var fullUnderlyingRelation: Relation
     
-    public init(baseRelation: BaseRelation) {
+    public init(baseRelation: MutableRelation) {
         self.baseRelation = baseRelation
         currentChange = ChangeLoggingRelationCurrentChange(
             added: MemoryTableRelation(scheme: baseRelation.scheme),
@@ -51,11 +51,11 @@ open class ChangeLoggingRelation<BaseRelation: Relation> {
         LogRelationCreation(self)
     }
     
-    fileprivate static func computeFullUnderlyingRelation(_ baseRelation: BaseRelation, _ currentChange: ChangeLoggingRelationCurrentChange) -> Relation {
+    fileprivate static func computeFullUnderlyingRelation(_ baseRelation: MutableRelation, _ currentChange: ChangeLoggingRelationCurrentChange) -> Relation {
         return baseRelation.difference(currentChange.removed).union(currentChange.added)
     }
     
-    open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+    public func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let change = ChangeLoggingRelationChange.update(query, newValues)
         let result = applyLogToCurrentRelationAndGetChanges([change])
         return result.then({
@@ -212,7 +212,7 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
     }
 }
 
-extension ChangeLoggingRelation where BaseRelation: SQLiteTableRelation {
+extension ChangeLoggingRelation {
     /// Save changes into the underlying database. Note that this does *not* use a transaction.
     /// Since we're likely to be saving multiple tables at once, the transaction takes place
     /// in that code to ensure everything is done together.
@@ -279,14 +279,14 @@ extension ChangeLoggingRelation {
         }
     }
     
-    func deriveChangeLoggingRelation() -> ChangeLoggingRelation<BaseRelation> {
+    func deriveChangeLoggingRelation() -> ChangeLoggingRelation {
         let relation = ChangeLoggingRelation(baseRelation: self.baseRelation)
         relation.log = self.log
         relation.currentChange = self.currentChange.copy()
         return relation
     }
     
-    func restoreFromChangeLoggingRelation(_ relation: ChangeLoggingRelation<BaseRelation>) -> Result<RelationChange, RelationError> {
+    func restoreFromChangeLoggingRelation(_ relation: ChangeLoggingRelation) -> Result<RelationChange, RelationError> {
         // This snapshot thing is kind of elegant and ugly at the same time. It gets the job done
         // of applying the new state and retrieving the changes, anyway.
         let pretendSnapshot = relation.takeSnapshot()

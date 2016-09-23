@@ -48,7 +48,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Prepare the stored relations
         let sqliteDB = makeDB().db
         let db = TransactionalDatabase(sqliteDB)
-        func createRelation(_ name: String, _ scheme: Scheme) -> TransactionalDatabase.TransactionalRelation {
+        func createRelation(_ name: String, _ scheme: Scheme) -> TransactionalRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
             return db[name]
@@ -117,7 +117,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             )
         }
         
-        func listSelectionProperty(_ relation: TransactionalDatabase.TransactionalRelation) -> AsyncReadWriteProperty<Set<RelationValue>> {
+        func listSelectionProperty(_ relation: TransactionalRelation) -> AsyncReadWriteProperty<Set<RelationValue>> {
             return undoableDB.asyncBidiProperty(
                 relation,
                 action: "Change Selection",

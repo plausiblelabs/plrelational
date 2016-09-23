@@ -228,28 +228,6 @@ class SQLiteDatabaseTests: DBTestCase {
         XCTAssertFalse(changed)
     }
     
-    func testBinding() {
-        let db = makeDB().db
-        
-        let scheme: Scheme = ["id", "name"]
-        XCTAssertNil(db.createRelation("people", scheme: scheme).err)
-        
-        let r = db["people"]!
-        XCTAssertNil(r.add(["id": 1, "name": "Joe"]).err)
-        XCTAssertNil(r.add(["id": 2, "name": "Steve"]).err)
-        XCTAssertNil(r.add(["id": 3, "name": "Jane"]).err)
-        
-        var currentName: String?
-        let binding = SQLiteBinding(database: db, tableName: "people", key: ["id": 2], attribute: "name", changeObserver: { currentName = $0.get() })
-        XCTAssertEqual(currentName, "Steve")
-        
-        _ = binding.set("Roberta")
-        XCTAssertEqual(currentName, "Roberta")
-        
-        _ = r.update(Attribute("id") *== RelationValue.integer(2), newValues: ["name": "Tina"])
-        XCTAssertEqual(currentName, "Tina")
-    }
-    
     func testUpdates() {
         let db = makeDB().db
         

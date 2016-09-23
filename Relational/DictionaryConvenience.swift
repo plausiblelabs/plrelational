@@ -30,3 +30,14 @@ func +<K: Hashable, V, Seq: Sequence>(a: [K: V], b: Seq) -> [K: V] where Seq.Ite
     }
     return result
 }
+
+extension Dictionary {
+    /// Initialize a dictionary with an array of key/value pairs.
+    init(_ pairs: [(Key, Value)]) {
+        self.init(minimumCapacity: pairs.count)
+        
+        for (k, v) in pairs {
+            self[k] = v
+        }
+    }
+}

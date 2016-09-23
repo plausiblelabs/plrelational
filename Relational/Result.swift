@@ -113,6 +113,20 @@ public func containsOk<Seq, T, E>(_ seq: Seq, _ predicate: (T) -> Bool) -> Resul
     return .Ok(false)
 }
 
+/// Iterate over a sequence of values, invoking the given Result-producing function and returning a Result for the array
+/// it produces.  If an Err result is produced for any element, then return the first Err encountered.
+public func traverse<Seq, InnerT, NewT, E>(_ seq: Seq, _ f: (InnerT) -> Result<NewT, E>) -> Result<[NewT], E> where Seq: Sequence, Seq.Iterator.Element == InnerT {
+    var results: [NewT] = []
+    for elt in seq {
+        let res = f(elt)
+        switch res {
+        case .Ok(let t): results.append(t)
+        case .Err(let e): return .Err(e)
+        }
+    }
+    return .Ok(results)
+}
+
 extension Result {
     public func combine<U>(_ other: Result<U, E>) -> Result<(T, U), E> {
         switch (self, other) {

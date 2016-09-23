@@ -133,7 +133,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
     }
     
     override func delete(_ id: RelationValue) {
-        guard let relation = relation as? TransactionalDatabase.TransactionalRelation else {
+        guard let relation = relation as? TransactionalRelation else {
             fatalError("delete() is only supported when the underlying relation is mutable")
         }
 

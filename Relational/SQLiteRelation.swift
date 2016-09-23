@@ -155,7 +155,7 @@ extension SQLiteRelation {
     }
 }
 
-open class SQLiteTableRelation: SQLiteRelation, MutableRelation {
+open class SQLiteTableRelation: SQLiteRelation, StoredRelation {
     init(db: SQLiteDatabase, tableName: String, scheme: Scheme) {
         super.init(db: db, tableName: tableName, scheme: scheme, query: nil)
     }

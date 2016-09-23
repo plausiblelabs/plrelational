@@ -99,7 +99,7 @@ extension MutableRelation {
     }
 }
 
-extension TransactionalDatabase.TransactionalRelation {
+extension TransactionalRelation {
     /// Replaces the rows in this relation (asynchronously) by performing a delete-all followed by an add for each row.
     public func asyncReplaceRows(_ rows: [Row]) {
         self.asyncDelete(true)

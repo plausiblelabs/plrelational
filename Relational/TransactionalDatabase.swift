@@ -160,70 +160,68 @@ open class TransactionalDatabase {
     }
 }
 
-public extension TransactionalDatabase {
-    public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
-        weak var db: TransactionalDatabase?
-        var underlyingRelation: ChangeLoggingRelation<SQLiteTableRelation>
-        var transactionRelation: ChangeLoggingRelation<SQLiteTableRelation>?
-        
-        open var changeObserverData = RelationDefaultChangeObserverImplementationData()
-        
-        init(db: TransactionalDatabase, underlyingRelation: ChangeLoggingRelation<SQLiteTableRelation>) {
-            self.db = db
-            self.underlyingRelation = underlyingRelation
-            underlyingRelation.addWeakChangeObserver(self, method: type(of: self).observeUnderlyingChange)
+public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserverImplementation {
+    weak var db: TransactionalDatabase?
+    var underlyingRelation: ChangeLoggingRelation
+    var transactionRelation: ChangeLoggingRelation?
+    
+    open var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    
+    init(db: TransactionalDatabase, underlyingRelation: ChangeLoggingRelation) {
+        self.db = db
+        self.underlyingRelation = underlyingRelation
+        underlyingRelation.addWeakChangeObserver(self, method: type(of: self).observeUnderlyingChange)
+    }
+    
+    open var scheme: Scheme {
+        return underlyingRelation.scheme
+    }
+    
+    open var contentProvider: RelationContentProvider {
+        return .underlying(underlyingRelationForQueryExecution)
+    }
+    
+    open var underlyingRelationForQueryExecution: Relation {
+        if let db = db , !db.inTransactionThread {
+            return underlyingRelation
+        } else {
+            return (transactionRelation ?? underlyingRelation)
         }
-        
-        open var scheme: Scheme {
-            return underlyingRelation.scheme
-        }
-        
-        open var contentProvider: RelationContentProvider {
-            return .underlying(underlyingRelationForQueryExecution)
-        }
-        
-        open var underlyingRelationForQueryExecution: Relation {
-            if let db = db , !db.inTransactionThread {
-                return underlyingRelation
-            } else {
-                return (transactionRelation ?? underlyingRelation)
-            }
-        }
-        
-        open func contains(_ row: Row) -> Result<Bool, RelationError> {
-            return underlyingRelationForQueryExecution.contains(row)
-        }
-        
-        open func add(_ row: Row) -> Result<Int64, RelationError> {
-            return wrapInTransactionIfNecessary({
-                (transactionRelation ?? underlyingRelation).add(row)
-            })
-        }
-        
-        open func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
-            return wrapInTransactionIfNecessary({
-                (transactionRelation ?? underlyingRelation).delete(query)
-            })
-        }
-        
-        open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
-            return wrapInTransactionIfNecessary({
-                (transactionRelation ?? underlyingRelation).update(query, newValues: newValues)
-            })
-        }
-        
-        func observeUnderlyingChange(_ change: RelationChange) {
-            self.notifyChangeObservers(change, kind: .directChange)
-        }
-        
-        func wrapInTransactionIfNecessary<T>(_ f: (Void) -> T) -> T {
-            if let db = db , !db.inTransactionThread {
-                db.beginTransaction()
-                defer { _ = db.endTransaction() } // TODO: error handling?
-                return f()
-            } else {
-                return f()
-            }
+    }
+    
+    open func contains(_ row: Row) -> Result<Bool, RelationError> {
+        return underlyingRelationForQueryExecution.contains(row)
+    }
+    
+    open func add(_ row: Row) -> Result<Int64, RelationError> {
+        return wrapInTransactionIfNecessary({
+            (transactionRelation ?? underlyingRelation).add(row)
+        })
+    }
+    
+    open func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
+        return wrapInTransactionIfNecessary({
+            (transactionRelation ?? underlyingRelation).delete(query)
+        })
+    }
+    
+    open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
+        return wrapInTransactionIfNecessary({
+            (transactionRelation ?? underlyingRelation).update(query, newValues: newValues)
+        })
+    }
+    
+    func observeUnderlyingChange(_ change: RelationChange) {
+        self.notifyChangeObservers(change, kind: .directChange)
+    }
+    
+    func wrapInTransactionIfNecessary<T>(_ f: (Void) -> T) -> T {
+        if let db = db , !db.inTransactionThread {
+            db.beginTransaction()
+            defer { _ = db.endTransaction() } // TODO: error handling?
+            return f()
+        } else {
+            return f()
         }
     }
 }

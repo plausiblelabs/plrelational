@@ -285,13 +285,9 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["123",    "JFK", "DC-10"]))
     }
     
-    func testSave() {
-        let db = makeDB().db
-        let scheme: Scheme = ["number", "pilot", "equipment"]
-        let table = db.getOrCreateRelation("flights", scheme: scheme).ok!
-        
+    func verifySaveRelation(table: StoredRelation) {
         let loggingRelation = ChangeLoggingRelation(baseRelation: table)
-        var referenceRelation = ConcreteRelation(scheme: scheme)
+        var referenceRelation = ConcreteRelation(scheme: table.scheme)
         
         func add(_ row: Row) {
             _ = loggingRelation.add(row)
@@ -353,13 +349,21 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         AssertEqual(table, loggingRelation)
     }
     
-    func testDatabase() {
-        let sqliteDB = makeDB().db
-        let db = ChangeLoggingDatabase(sqliteDB)
+    func testSaveRelation() {
         let scheme: Scheme = ["number", "pilot", "equipment"]
-        _ = sqliteDB.createRelation("flights", scheme: scheme)
         
-        var referenceRelation = ConcreteRelation(scheme: scheme)
+        let sqliteDB = makeDB().db
+        let sqliteTable = sqliteDB.getOrCreateRelation("flights", scheme: scheme).ok!
+        verifySaveRelation(table: sqliteTable)
+        
+        let plistDB = makePlistDB("flights", scheme)
+        verifySaveRelation(table: plistDB["flights"]!)
+    }
+    
+    func verifyDatabaseBasics(_ storedDB: StoredDatabase, _ storedRelation: StoredRelation) {
+        let db = ChangeLoggingDatabase(storedDB)
+        
+        var referenceRelation = ConcreteRelation(scheme: storedRelation.scheme)
         
         func add(_ row: Row) {
             _ = db.transaction({
@@ -385,7 +389,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         AssertEqual(db["flights"],
                     MakeRelation(
                         ["number", "pilot", "equipment"]))
-        AssertEqual(sqliteDB["flights"]!,
+        AssertEqual(storedRelation,
                     MakeRelation(
                         ["number", "pilot", "equipment"]))
         
@@ -394,7 +398,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         AssertEqual(db["flights"],
                     MakeRelation(
                         ["number", "pilot", "equipment"]))
-        AssertEqual(sqliteDB["flights"]!,
+        AssertEqual(storedRelation,
                     MakeRelation(
                         ["number", "pilot", "equipment"]))
         
@@ -402,15 +406,15 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         add(["number": "2", "pilot": "Sam", "equipment": "A320"])
         add(["number": "3", "pilot": "Sue", "equipment": "A340"])
         
-        AssertEqual(sqliteDB["flights"]!,
+        AssertEqual(storedRelation,
                     MakeRelation(
                         ["number", "pilot", "equipment"]))
         AssertEqual(db["flights"], referenceRelation)
         
         XCTAssertNil(db.save().err)
         
-        AssertEqual(sqliteDB["flights"]!, db["flights"])
-        AssertEqual(sqliteDB["flights"]!, referenceRelation)
+        AssertEqual(storedRelation, db["flights"])
+        AssertEqual(storedRelation, referenceRelation)
         
         add(["number": "4", "pilot": "Tim", "equipment": "A340"])
         delete(Attribute("equipment") *== "A340")
@@ -423,18 +427,23 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         AssertEqual(db["flights"], referenceRelation)
         XCTAssertNil(db.save().err)
-        AssertEqual(sqliteDB["flights"]!, referenceRelation)
-        AssertEqual(sqliteDB["flights"]!, db["flights"])
+        AssertEqual(storedRelation, referenceRelation)
+        AssertEqual(storedRelation, db["flights"])
     }
     
-    func testTransactions() {
-        let sqliteDB = makeDB().db
-        let db = ChangeLoggingDatabase(sqliteDB)
-        let flightsScheme: Scheme = ["number", "pilot", "equipment"]
-        let pilotsScheme: Scheme = ["name", "home"]
+    func testDatabaseBasics() {
+        let scheme: Scheme = ["number", "pilot", "equipment"]
         
-        _ = sqliteDB.createRelation("flights", scheme: flightsScheme)
-        _ = sqliteDB.createRelation("pilots", scheme: pilotsScheme)
+        let sqliteDB = makeDB().db
+        _ = sqliteDB.createRelation("flights", scheme: scheme)
+        verifyDatabaseBasics(sqliteDB, sqliteDB["flights"]!)
+        
+        let plistDB = makePlistDB("flights", scheme)
+        verifyDatabaseBasics(plistDB, plistDB["flights"]!)
+    }
+    
+    func verifyTransactions(_ storedDB: StoredDatabase, _ storedFlights: StoredRelation, _ storedPilots: StoredRelation) {
+        let db = ChangeLoggingDatabase(storedDB)
         
         _ = db.transaction({
             let flights = $0["flights"]
@@ -485,14 +494,14 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         XCTAssertNil(db.save().err)
         
-        // And finally the SQLite database should change too
-        AssertEqual(sqliteDB["flights"]!,
+        // And finally the stored database should change too
+        AssertEqual(storedFlights,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         [1, "Jones", "777"],
                         [2, "Smith", "787"],
                         [3, "Johnson", "797"]))
-        AssertEqual(sqliteDB["pilots"]!,
+        AssertEqual(storedPilots,
                     MakeRelation(
                         ["name", "home"],
                         ["Jones", "New York"],
@@ -554,14 +563,14 @@ class ChangeLoggingDatabaseTests: DBTestCase {
                         ["Smith", "Chicago"],
                         ["Horton", "Miami"]))
         
-        // And the SQLite databate should still have the old data
-        AssertEqual(sqliteDB["flights"]!,
+        // And the stored databate should still have the old data
+        AssertEqual(storedFlights,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         [1, "Jones", "777"],
                         [2, "Smith", "787"],
                         [3, "Johnson", "797"]))
-        AssertEqual(sqliteDB["pilots"]!,
+        AssertEqual(storedPilots,
                     MakeRelation(
                         ["name", "home"],
                         ["Jones", "New York"],
@@ -570,19 +579,35 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         XCTAssertNil(db.save().err)
         
-        // Finally, the SQLite database should have the new data after saving
-        AssertEqual(sqliteDB["flights"]!,
+        // Finally, the stored database should have the new data after saving
+        AssertEqual(storedFlights,
                     MakeRelation(
                         ["number", "pilot", "equipment"],
                         [1, "Smith", "777"],
                         [2, "Smith", "787"],
                         [4, "Jones", "DC-10"]))
-        AssertEqual(sqliteDB["pilots"]!,
+        AssertEqual(storedPilots,
                     MakeRelation(
                         ["name", "home"],
                         ["Jones", "Boston"],
                         ["Smith", "Chicago"],
                         ["Horton", "Miami"]))
+    }
+    
+    func testTransactions() {
+        let flightsScheme: Scheme = ["number", "pilot", "equipment"]
+        let pilotsScheme: Scheme = ["name", "home"]
+        
+        let sqliteDB = makeDB().db
+        let sqliteFlights = sqliteDB.createRelation("flights", scheme: flightsScheme).ok!
+        let sqlitePilots = sqliteDB.createRelation("pilots", scheme: pilotsScheme).ok!
+        verifyTransactions(sqliteDB, sqliteFlights, sqlitePilots)
+        
+        let plistDB = makePlistDB(specs: [
+            .file(name: "flights", path: "flights.plist", scheme: flightsScheme),
+            .file(name: "pilots", path: "pilots.plist", scheme: pilotsScheme)
+        ])
+        verifyTransactions(plistDB, plistDB["flights"]!, plistDB["pilots"]!)
     }
     
     func testTransactionNotifications() {

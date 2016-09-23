@@ -187,7 +187,7 @@ public final class UpdateManager: PerThreadInstance {
                     })
                     removals.append(removal)
                     
-                    if let transactionalRelation = variable as? TransactionalDatabase.TransactionalRelation,
+                    if let transactionalRelation = variable as? TransactionalRelation,
                            let db = transactionalRelation.db {
                         databases.insert(db)
                     }
@@ -409,7 +409,6 @@ extension UpdateManager {
     }
 }
 
-// This ought to go in UpdateManager.swift but the compiler barfs on it there for some reason.
 public extension MutableRelation {
     func asyncAdd(_ row: Row) {
         UpdateManager.currentInstance.registerAdd(self, row: row)

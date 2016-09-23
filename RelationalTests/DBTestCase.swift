@@ -52,23 +52,34 @@ func AssertEqual(_ a: AnyIterator<Result<Set<Row>, RelationError>>, _ b: Relatio
 }
 
 class DBTestCase: XCTestCase {
-    var dbPaths: [String] = []
+    var tmpFilePaths: [String] = []
     
     override func tearDown() {
-        for path in dbPaths {
+        for path in tmpFilePaths {
             _ = try? FileManager.default.removeItem(atPath: path)
         }
     }
+
+    func tmpFile(_ name: String) -> String {
+        let tmp = NSTemporaryDirectory() as NSString
+        let path = tmp.appendingPathComponent(name)
+        tmpFilePaths.append(path)
+        return path
+    }
     
     func makeDB() -> (path: String, db: SQLiteDatabase) {
-        let tmp = NSTemporaryDirectory() as NSString
-        let dbname = "testing-\(UUID()).db"
-        let path = tmp.appendingPathComponent(dbname)
-        
+        let path = tmpFile("testing-\(UUID()).db")
         let sqlite = try! SQLiteDatabase(path)
-        
-        dbPaths.append(path)
-        
         return (path, sqlite)
+    }
+    
+    func makePlistDB(specs: [PlistDatabase.RelationSpec]) -> PlistDatabase {
+        return PlistDatabase.create(URL(fileURLWithPath: tmpFile("testing-\(UUID()).plistdb")), specs).ok!
+    }
+    
+    func makePlistDB(_ relationName: String, _ scheme: Scheme) -> PlistDatabase {
+        return makePlistDB(specs: [
+            .file(name: relationName, path: "\(relationName).plist", scheme: scheme)
+        ])
     }
 }
