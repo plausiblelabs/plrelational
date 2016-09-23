@@ -42,4 +42,8 @@ struct ObjectDictionary<Key: AnyObject, Value>: Sequence, ExpressibleByDictionar
     var keys: [Key] {
         return dict.keys.map({ $0.object })
     }
+    
+    var isEmpty: Bool {
+        return dict.isEmpty
+    }
 }
