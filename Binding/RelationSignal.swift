@@ -25,14 +25,18 @@ private class RelationSignal<T>: Signal<T> {
         
         if deliverInitial {
             self.notifyWillChange()
-            relation.asyncAllRows({ result in
-                if let rows = result.ok {
-                    let newValue = self.rowsToValue(self.relation, AnyIterator(rows.makeIterator()))
-                    self.latestValue = newValue
-                    self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+            relation.asyncAllRows(
+                postprocessor: { rows -> T in
+                    return self.rowsToValue(self.relation, AnyIterator(rows.makeIterator()))
+                },
+                completion: { result in
+                    if let newValue = result.ok {
+                        self.latestValue = newValue
+                        self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+                    }
+                    self.notifyDidChange()
                 }
-                self.notifyDidChange()
-            })
+            )
         }
     }
 
