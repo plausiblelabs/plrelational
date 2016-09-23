@@ -45,6 +45,18 @@ class PlistDirectoryRelationTests: XCTestCase {
         AssertEqual(r1, r2)
     }
     
+    func testEmptyRoundTripWithUnsetURL() {
+        let r1Result = PlistDirectoryRelation.withDirectory(nil, scheme: ["a"], primaryKey: "a", createIfDoesntExist: true)
+        XCTAssertNil(r1Result.err)
+        let r1 = r1Result.ok!
+        
+        let r2Result = PlistDirectoryRelation.withDirectory(nil, scheme: ["a"], primaryKey: "a", createIfDoesntExist: true)
+        XCTAssertNil(r2Result.err)
+        let r2 = r2Result.ok!
+        
+        AssertEqual(r1, r2)
+    }
+    
     func testDataRoundTrip() {
         let url = tmpURL()
         
@@ -117,6 +129,15 @@ class PlistDirectoryRelationTests: XCTestCase {
         XCTAssertEqual(r1.contains(["first": .blob([1, 2, 3, 4, 5]), "last": 0, "job": 0]).ok, true)
         XCTAssertEqual(r1.contains(["first": .blob([1, 2, 3, 4, 5]), "last": 0, "job": 1]).ok, false)
         XCTAssertEqual(r1.contains(["first": .blob([1, 2, 3, 4, 6]), "last": 0, "job": 0]).ok, false)
+    }
+    
+    func testContainsWithEmptyRelationAndUnsetURL() {
+        let schemeAttributes: [Attribute] = ["first", "last", "job"]
+        let r1Result = PlistDirectoryRelation.withDirectory(nil, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", createIfDoesntExist: true)
+        XCTAssertNil(r1Result.err)
+        let r1 = r1Result.ok!
+        
+        XCTAssertEqual(r1.contains(["first": "Steve", "last": "Jobs", "job": "CEO"]).ok, false)
     }
     
     func testUpdateDelete() {

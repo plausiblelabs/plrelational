@@ -174,6 +174,11 @@ extension PlistDirectoryRelation {
     }
     
     fileprivate func readRow(primaryKey key: RelationValue) -> Result<Row?, RelationError> {
+        if self.url == nil {
+            // Return no row for the case where a directory URL hasn't yet been set
+            return .Ok(nil)
+        }
+        
         let url = plistURL(forKeyValue: key)
         let result = readRow(url: url)
         switch result {
@@ -221,7 +226,12 @@ extension PlistDirectoryRelation {
     fileprivate func rowURLs() -> AnyIterator<Result<URL, NSError>> {
         // XXX: enumerator(at:url) seems to crash if the directory does not exist, so let's avoid that; we need to find
         // a better solution that doesn't require constantly checking for its existence
-        if !(url! as NSURL).checkResourceIsReachableAndReturnError(nil) {
+        if let url = url {
+            if !(url as NSURL).checkResourceIsReachableAndReturnError(nil) {
+                return AnyIterator{ nil }
+            }
+        } else {
+            // Return an empty iterator for the case where a directory URL hasn't yet been set
             return AnyIterator{ nil }
         }
         

@@ -47,6 +47,18 @@ class PlistFileRelationTests: XCTestCase {
         AssertEqual(r1, r2)
     }
     
+    func testEmptyRoundTripWithUnsetURL() {
+        let r1Result = PlistFileRelation.withFile(nil, scheme: ["a"], createIfDoesntExist: true)
+        XCTAssertNil(r1Result.err)
+        let r1 = r1Result.ok!
+        
+        let r2Result = PlistFileRelation.withFile(nil, scheme: ["a"], createIfDoesntExist: true)
+        XCTAssertNil(r2Result.err)
+        let r2 = r2Result.ok!
+        
+        AssertEqual(r1, r2)
+    }
+    
     func testDataRoundTrip() {
         let url = tmpURL()
         
