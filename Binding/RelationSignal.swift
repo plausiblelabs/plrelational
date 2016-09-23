@@ -21,16 +21,16 @@ private class RelationSignal<T>: Signal<T> {
     }
     
     private override func startImpl(deliverInitial: Bool) {
-        let postprocessor = { (rows: Set<Row>) -> T in
+        func convertRowsToValue(rows: Set<Row>) -> T {
             return self.rowsToValue(self.relation, AnyIterator(rows.makeIterator()))
         }
         
-        self.removal = relation.addAsyncObserver(self, postprocessor: postprocessor)
+        self.removal = relation.addAsyncObserver(self, postprocessor: convertRowsToValue)
         
         if deliverInitial {
             self.notifyWillChange()
             relation.asyncAllRows(
-                postprocessor: postprocessor,
+                postprocessor: convertRowsToValue,
                 completion: { result in
                     if let newValue = result.ok {
                         self.latestValue = newValue
