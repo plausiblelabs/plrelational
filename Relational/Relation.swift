@@ -188,11 +188,11 @@ extension Relation {
     }
     
     /// Fetch all rows and invoke a callback on the current runloop when complete. The postprocessor is run on the background first.
-    public func asyncAllRows<T>(_ callback: @escaping (Result<T, RelationError>) -> Void, postprocessor: @escaping (Set<Row>) -> T) {
+    public func asyncAllRows<T>(postprocessor: @escaping (Set<Row>) -> T, completion: @escaping (Result<T, RelationError>) -> Void) {
         let runloop = CFRunLoopGetCurrent()!
         asyncAllRows(DirectDispatchContext().wrap({
             let postprocessedResult = $0.map(postprocessor)
-            runloop.async({ callback(postprocessedResult) })
+            runloop.async({ completion(postprocessedResult) })
         }))
     }
 }

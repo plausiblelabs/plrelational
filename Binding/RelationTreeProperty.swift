@@ -63,25 +63,32 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         removal = relation.addAsyncObserver(self)
 
         notify.valueWillChange()
-        relation.asyncAllRows({ result in
-            if let rows = result.ok {
-                // Map Rows from underlying Relation to Node values.
+        relation.asyncAllRows(
+            postprocessor: { rows -> RowTreeNode in
+                // Map Rows from underlying Relation to Node values
                 var nodeDict = [RelationValue: Node]()
                 for row in rows {
                     let rowID = row[self.idAttr]
                     nodeDict[rowID] = RowTreeNode(id: rowID, row: row, parentAttr: self.parentAttr, tag: self.tag)
                 }
-        
-                // Use order Attribute from underlying Relation to nest child Nodes under parent elements.
+                
+                // Use order Attribute from underlying Relation to nest child Nodes under parent elements
+                let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: self.parentAttr, tag: self.tag)
                 for node in nodeDict.values {
-                    let parentNode = nodeDict[node.data[self.parentAttr]] ?? self.root
+                    let parentNode = nodeDict[node.data[self.parentAttr]] ?? rootNode
                     _ = parentNode.children.insertSorted(node, {$0.data[self.orderAttr]})
                 }
-
-                self.notifyObservers(treeChanges: [.initial(self.root)])
+                
+                return rootNode
+            },
+            completion: { result in
+                if let rootNode = result.ok {
+                    self.root = rootNode
+                    self.notifyObservers(treeChanges: [.initial(rootNode)])
+                }
+                self.notify.valueDidChange()
             }
-            self.notify.valueDidChange()
-        })
+        )
     }
     
     private func onInsert(rows: [Row], changes: inout [Change]) {

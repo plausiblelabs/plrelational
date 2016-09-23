@@ -21,18 +21,24 @@ private class RelationSignal<T>: Signal<T> {
     }
     
     private override func startImpl(deliverInitial: Bool) {
-        self.removal = relation.addAsyncObserver(self)
+        func convertRowsToValue(rows: Set<Row>) -> T {
+            return self.rowsToValue(self.relation, AnyIterator(rows.makeIterator()))
+        }
+        
+        self.removal = relation.addAsyncObserver(self, postprocessor: convertRowsToValue)
         
         if deliverInitial {
             self.notifyWillChange()
-            relation.asyncAllRows({ result in
-                if let rows = result.ok {
-                    let newValue = self.rowsToValue(self.relation, AnyIterator(rows.makeIterator()))
-                    self.latestValue = newValue
-                    self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+            relation.asyncAllRows(
+                postprocessor: convertRowsToValue,
+                completion: { result in
+                    if let newValue = result.ok {
+                        self.latestValue = newValue
+                        self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+                    }
+                    self.notifyDidChange()
                 }
-                self.notifyDidChange()
-            })
+            )
         }
     }
 
@@ -54,10 +60,9 @@ extension RelationSignal: AsyncRelationContentCoalescedObserver {
         self.notifyWillChange()
     }
 
-    func relationDidChange(_ relation: Relation, result: Result<Set<Row>, RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<T, RelationError>) {
         switch result {
-        case .Ok(let rows):
-            let newValue = self.rowsToValue(self.relation, AnyIterator(rows.makeIterator()))
+        case .Ok(let newValue):
             if !isRepeat(newValue) {
                 self.latestValue = newValue
                 self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
