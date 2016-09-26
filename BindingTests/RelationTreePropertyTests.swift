@@ -141,7 +141,11 @@ class RelationTreePropertyTests: BindingTestCase {
         
         func deleteCollection(_ collectionID: Int64) {
             awaitCompletion{
-                property.delete(RelationValue(collectionID))
+                r.treeDelete(
+                    Attribute("id") *== RelationValue(collectionID),
+                    parentAttribute: "id",
+                    childAttribute: "parent",
+                    completionCallback: { _ in })
             }
         }
         

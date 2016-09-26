@@ -139,30 +139,6 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         }
     }
     
-    override func delete(_ id: RelationValue) {
-        guard let relation = relation as? TransactionalRelation else {
-            fatalError("delete() is only supported when the underlying relation is mutable")
-        }
-
-        // Grab the node before we delete from the relation; otherwise if we are being called
-        // outside of a transaction, the node may be deleted by onDelete() just after we call
-        // relation.delete() below
-        let node = nodeForID(id)
-        
-        // Delete from the relation
-        relation.asyncDelete(idAttr *== id)
-        
-        // Recursively delete descendant nodes
-        // TODO: There are probably more efficient ways to handle this (need some sort of
-        // cascading delete), but for now we'll use our tree structure to determine which
-        // children need to be deleted
-        if let node = node {
-            for child in node.children {
-                delete(child.id)
-            }
-        }
-    }
-
     private func onDelete(ids: [RelationValue], changes: inout [Change]) {
         // Observers should only be notified about the top-most nodes that were deleted.
         // We handle this by looking at the identifiers of the rows/nodes to be deleted,

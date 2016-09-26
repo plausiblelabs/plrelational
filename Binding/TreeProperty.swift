@@ -83,11 +83,6 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
         notify.valueChanging(treeChanges, metadata)
     }
     
-    // XXX: Remove this
-    public func delete(_ id: Node.ID) {
-        fatalError("Must be implemented by subclasses")
-    }
-    
     /// Returns the node with the given identifier.
     public func nodeForID(_ id: Node.ID) -> Node? {
         // TODO: Not efficient, but whatever
