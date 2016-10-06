@@ -45,16 +45,16 @@ public class PlistDatabase: StoredDatabase {
         self.relations = Mutexed(relations)
     }
 
-    private static func prepare(root: URL?, specs: [RelationSpec], createIfDoesntExist: Bool) -> Result<PlistDatabase, RelationError> {
+    private static func prepare(root: URL?, specs: [RelationSpec], codec: DataCodec?, createIfDoesntExist: Bool) -> Result<PlistDatabase, RelationError> {
 
         func prepareRelation(_ spec: RelationSpec) -> Result<(String, ManagedRelation), RelationError> {
             let url = spec.url(withRoot: root)
             switch spec {
             case let .file(name, _, scheme):
-                let result = PlistFileRelation.withFile(url, scheme: scheme, createIfDoesntExist: createIfDoesntExist)
+                let result = PlistFileRelation.withFile(url, scheme: scheme, createIfDoesntExist: createIfDoesntExist, codec: codec)
                 return result.map{ (name, (spec: spec, relation: $0)) }
             case let .directory(name, _, scheme, primaryKey):
-                let result = PlistDirectoryRelation.withDirectory(url, scheme: scheme, primaryKey: primaryKey, createIfDoesntExist: createIfDoesntExist)
+                let result = PlistDirectoryRelation.withDirectory(url, scheme: scheme, primaryKey: primaryKey, createIfDoesntExist: createIfDoesntExist, codec: codec)
                 return result.map{ (name, (spec: spec, relation: $0)) }
             }
         }
@@ -62,12 +62,12 @@ public class PlistDatabase: StoredDatabase {
         return traverse(specs, prepareRelation).map{ PlistDatabase(root: root, relations: Dictionary($0)) }
     }
     
-    public static func create(_ root: URL?, _ specs: [RelationSpec]) -> Result<PlistDatabase, RelationError> {
-        return prepare(root: root, specs: specs, createIfDoesntExist: true)
+    public static func create(_ root: URL?, _ specs: [RelationSpec], codec: DataCodec? = nil) -> Result<PlistDatabase, RelationError> {
+        return prepare(root: root, specs: specs, codec: codec, createIfDoesntExist: true)
     }
 
-    public static func open(_ root: URL, _ specs: [RelationSpec]) -> Result<PlistDatabase, RelationError> {
-        return prepare(root: root, specs: specs, createIfDoesntExist: false)
+    public static func open(_ root: URL, _ specs: [RelationSpec], codec: DataCodec? = nil) -> Result<PlistDatabase, RelationError> {
+        return prepare(root: root, specs: specs, codec: codec, createIfDoesntExist: false)
     }
     
     public subscript(name: String) -> StoredRelation? {

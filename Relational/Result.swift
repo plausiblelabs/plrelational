@@ -45,12 +45,16 @@ extension Result {
         case .Err(let e): return .Err(try f(e))
         }
     }
-    
-    public func then<NewT>(_ f: (T) throws -> Result<NewT, E>) rethrows -> Result<NewT, E> {
+
+    public func flatMap<NewT>(_ f: (T) throws -> Result<NewT, E>) rethrows -> Result<NewT, E> {
         switch self {
         case .Ok(let t): return try f(t)
         case .Err(let e): return .Err(e)
         }
+    }
+
+    public func then<NewT>(_ f: (T) throws -> Result<NewT, E>) rethrows -> Result<NewT, E> {
+        return try flatMap(f)
     }
 }
 
@@ -160,11 +164,11 @@ precedencegroup ResultFlatMapPrecedence {
 /* The flatMap (aka bind) operator. */
 infix operator >>- : ResultFlatMapPrecedence
 public func >>- <T, E, NT>(result: Result<T, E>, next: (T) -> Result<NT, E>) -> Result<NT, E> {
-    return result.then(next)
+    return result.flatMap(next)
 }
 
 /* Alternate flatMap that assumes a Void success value (allows for chaining without braces). */
 infix operator >>>- : ResultFlatMapPrecedence
 public func >>>- <E>(result: Result<Void, E>, next: @autoclosure () -> Result<Void, E>) -> Result<Void, E> {
-    return result.then(next)
+    return result.flatMap(next)
 }
