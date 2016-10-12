@@ -78,6 +78,10 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     /// Whether to animate insert/delete changes with a fade.
     public var animateChanges = false
 
+    /// Whether to select and enter edit mode for the cell that is inserted next.  This flag will
+    /// be unset automatically after the cell is selected/edited.
+    public var selectAndEditNextInsertedCell = false
+    
     public init(model: ListViewModel<E>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
@@ -224,6 +228,8 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         
         outlineView.beginUpdates()
 
+        var rowToSelectAndEdit: Int?
+        
         // Record changes that were made to the array relative to its previous state
         for change in arrayChanges {
             switch change {
@@ -232,6 +238,10 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
                 
             case let .insert(index):
                 let rows = IndexSet(integer: index)
+                if selectAndEditNextInsertedCell {
+                    rowToSelectAndEdit = index
+                    selectAndEditNextInsertedCell = false
+                }
                 outlineView.insertItems(at: rows, inParent: nil, withAnimation: animation)
                 
             case let .delete(index):
@@ -249,5 +259,21 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         //selfInitiatedSelectionChange = true
         outlineView.endUpdates()
         //selfInitiatedSelectionChange = false
+        
+        if let row = rowToSelectAndEdit {
+            // Select the newly inserted row
+            outlineView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+            
+            // Give focus to the text field in the newly inserted row
+            if let rowView = outlineView.view(atColumn: 0, row: row, makeIfNecessary: false) {
+                if let cellView = rowView as? NSTableCellView {
+                    if let textField = cellView.textField {
+                        if let window = cellView.window {
+                            window.makeFirstResponder(textField)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
