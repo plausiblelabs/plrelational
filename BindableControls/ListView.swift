@@ -15,7 +15,6 @@ public struct ListViewModel<E: ArrayElement> {
     public let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     public let move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)?
-    public let selection: AsyncReadWriteProperty<Set<E.ID>>?
     public let cellIdentifier: (E.Data) -> String
     public let cellText: (E.Data) -> CellTextProperty
     public let cellImage: ((E.Data) -> ReadableProperty<Image>)?
@@ -24,7 +23,6 @@ public struct ListViewModel<E: ArrayElement> {
         data: ArrayProperty<E>,
         contextMenu: ((E.Data) -> ContextMenu?)?,
         move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)?,
-        selection: AsyncReadWriteProperty<Set<E.ID>>?,
         cellIdentifier: @escaping (E.Data) -> String,
         cellText: @escaping (E.Data) -> CellTextProperty,
         cellImage: ((E.Data) -> ReadableProperty<Image>)?)
@@ -32,7 +30,6 @@ public struct ListViewModel<E: ArrayElement> {
         self.data = data
         self.contextMenu = contextMenu
         self.move = move
-        self.selection = selection
         self.cellIdentifier = cellIdentifier
         self.cellText = cellText
         self.cellImage = cellImage
@@ -43,14 +40,14 @@ public struct ListViewModel<E: ArrayElement> {
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
 open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
 
-    open let model: ListViewModel<E>
+    public let model: ListViewModel<E>
     private let outlineView: NSOutlineView
 
     private var elements: [E] {
         return model.data.elements
     }
     
-    private lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
+    public lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
         get: { [unowned self] in
             var itemIDs: [E.ID] = []
             for index in self.outlineView.selectedRowIndexes {
@@ -79,7 +76,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     //private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
-    open var animateChanges = false
+    public var animateChanges = false
 
     public init(model: ListViewModel<E>, outlineView: NSOutlineView) {
         self.model = model
@@ -93,9 +90,6 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
             valueChanging: { [weak self] stateChange, _ in self?.arrayChanged(stateChange) },
             valueDidChange: {}
         ))
-        if let selectionProp = model.selection {
-            _ = selection <~> selectionProp
-        }
         
         outlineView.delegate = self
         outlineView.dataSource = self
