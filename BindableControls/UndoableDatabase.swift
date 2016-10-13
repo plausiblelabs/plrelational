@@ -7,7 +7,7 @@ import Foundation
 import libRelational
 import Binding
 
-open class UndoableDatabase {
+public class UndoableDatabase {
     
     private let db: TransactionalDatabase
     private let undoManager: UndoManager
@@ -17,7 +17,7 @@ open class UndoableDatabase {
         self.undoManager = undoManager
     }
     
-    open func performUndoableAction(_ name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: (Void) -> Void) {
+    public func performUndoableAction(_ name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: (Void) -> Void) {
         let before = before ?? db.takeSnapshot()
         db.transaction(transactionFunc)
         let after = db.takeSnapshot()
@@ -35,12 +35,12 @@ open class UndoableDatabase {
     }
     
     /// Note: `set` will be called in the context of a database transaction.
-    open func bidiProperty<T: Equatable>(_ relation: Relation, action: String, get: @escaping (Relation) -> T, set: @escaping (T) -> Void) -> ReadWriteProperty<T> {
+    public func bidiProperty<T: Equatable>(_ relation: Relation, action: String, get: @escaping (Relation) -> T, set: @escaping (T) -> Void) -> ReadWriteProperty<T> {
         return relation.property(mutationConfig(action, set), relationToValue: get)
     }
 
     /// Note: `set` will be called in the context of a database transaction.
-    open func bidiProperty<T: Equatable>(_ relation: Relation, action: String, get: @escaping (Relation) -> T?, set: @escaping (T?) -> Void) -> ReadWriteProperty<T?> {
+    public func bidiProperty<T: Equatable>(_ relation: Relation, action: String, get: @escaping (Relation) -> T?, set: @escaping (T?) -> Void) -> ReadWriteProperty<T?> {
         return relation.property(mutationConfig(action, set), relationToValue: get)
     }
 
@@ -64,16 +64,24 @@ open class UndoableDatabase {
         )
     }
     
-    open func performUndoableAsyncAction(_ name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: (Void) -> Void) {
+    public func performUndoableAsyncAction(_ name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: @escaping (Void) -> Void) {
         let before = before ?? db.takeSnapshot()
         transactionFunc()
-        let after = db.takeSnapshot()
         
         undoManager.registerChange(
             name: name,
             perform: false,
             forward: {
-                self.db.asyncRestoreSnapshot(after)
+                // TODO: Currently we keep the original `transactionFunc` closure around and apply that
+                // as the "forward" operation.  This approach ensures that the specific piece of
+                // application logic is (re)applied in case of redo, but it comes with the downside
+                // that we may be hanging onto a significant amount of application logic and resources.
+                // An alternative approach would be to await completion of the original application of
+                // `transactionFunc`, create a snapshot, and then use that snapshot for future "forward"
+                // operations when registering the change with UndoManager.  This approach works as long
+                // as we assume that no other operations will be queued up while UpdateManager is busy,
+                // which is currently a valid assumption.
+                transactionFunc()
             },
             backward: {
                 self.db.asyncRestoreSnapshot(before)
@@ -81,11 +89,11 @@ open class UndoableDatabase {
         )
     }
 
-    open func asyncBidiProperty<T>(_ relation: Relation, action: String, initialValue: T?, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
+    public func asyncBidiProperty<T>(_ relation: Relation, action: String, initialValue: T?, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
         return relation.asyncProperty(initialValue: initialValue, config: asyncMutationConfig(action, update), { _ in signal })
     }
 
-    open func asyncBidiProperty<T>(_ relation: Relation, action: String, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
+    public func asyncBidiProperty<T>(_ relation: Relation, action: String, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
         return relation.asyncProperty(config: asyncMutationConfig(action, update), { _ in signal })
     }
     
