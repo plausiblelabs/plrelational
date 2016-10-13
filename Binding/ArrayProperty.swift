@@ -88,4 +88,25 @@ open class ArrayProperty<Element: ArrayElement>: AsyncReadablePropertyType {
     public func orderForMove(srcIndex: Int, dstIndex: Int) -> Double {
         fatalError("Must be implemented by subclasses")
     }
+    
+    /// Returns a view on this ArrayProperty that delivers the full array through
+    /// its Signal whenever there is any change in the underlying ArrayProperty.
+    public func fullArray() -> AsyncReadableProperty<[Element]> {
+        return FullArrayProperty(underlying: self)
+    }
+}
+
+private class FullArrayProperty<Element: ArrayElement>: AsyncReadableProperty<[Element]> {
+    
+    private let underlying: ArrayProperty<Element>
+    
+    fileprivate init(underlying: ArrayProperty<Element>) {
+        self.underlying = underlying
+        super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.elements})
+    }
+    
+    fileprivate override func start() {
+        underlying.start()
+        super.start()
+    }
 }
