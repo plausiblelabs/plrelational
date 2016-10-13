@@ -451,7 +451,7 @@ class PropertyTests: XCTestCase {
     
     func testActionProperty() {
         var changeCount = 0
-        let property = ActionProperty {
+        let property = ActionProperty { () in
             changeCount += 1
         }
 
