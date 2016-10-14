@@ -20,13 +20,13 @@ class RelationMutationTests: BindingTestCase {
         let name = r.project(["name"])
         let a1name = r.select(Attribute("id") *== 1).project(["name"])
         
-        a1name.updateString("kat")
+        _ = a1name.updateString("kat")
         AssertEqual(r, MakeRelation(
             ["id", "name", "friendly", "age"],
             [1,    "kat",  1,          5],
             [2,    "dog",  0,          3]))
         
-        name.updateString("ant")
+        _ = name.updateString("ant")
         AssertEqual(r, MakeRelation(
             ["id", "name", "friendly", "age"],
             [1,    "ant",  1,          5],
@@ -35,13 +35,13 @@ class RelationMutationTests: BindingTestCase {
         let friendly = r.project(["friendly"])
         let a1friendly = r.select(Attribute("id") *== 1).project(["friendly"])
         
-        a1friendly.updateBoolean(false)
+        _ = a1friendly.updateBoolean(false)
         AssertEqual(r, MakeRelation(
             ["id", "name", "friendly", "age"],
             [1,    "ant",  0,          5],
             [2,    "ant",  0,          3]))
         
-        friendly.updateBoolean(true)
+        _ = friendly.updateBoolean(true)
         AssertEqual(r, MakeRelation(
             ["id", "name", "friendly", "age"],
             [1,    "ant",  1,          5],
@@ -50,13 +50,13 @@ class RelationMutationTests: BindingTestCase {
         let age = r.project(["age"])
         let a1age = r.select(Attribute("id") *== 1).project(["age"])
         
-        a1age.updateInteger(7)
+        _ = a1age.updateInteger(7)
         AssertEqual(r, MakeRelation(
             ["id", "name", "friendly", "age"],
             [1,    "ant",  1,          7],
             [2,    "ant",  1,          3]))
         
-        age.updateInteger(8)
+        _ = age.updateInteger(8)
         AssertEqual(r, MakeRelation(
             ["id", "name", "friendly", "age"],
             [1,    "ant",  1,          8],

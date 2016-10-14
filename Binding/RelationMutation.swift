@@ -8,38 +8,38 @@ import libRelational
 
 extension Relation {
     /// Performs a synchronous update using a single RelationValue.
-    public func updateValue(_ value: RelationValue) {
+    public func updateValue(_ value: RelationValue) -> Result<Void, RelationError> {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!
         let row: Row = [attr: value]
         var mutableRelation = self
-        _ = mutableRelation.update(true, newValues: row)
+        return mutableRelation.update(true, newValues: row)
     }
     
     /// Performs a synchronous update using a single string value.
-    public func updateString(_ value: String) {
-        updateValue(RelationValue(value))
+    public func updateString(_ value: String) -> Result<Void, RelationError> {
+        return updateValue(RelationValue(value))
     }
     
     /// Performs a synchronous update using a single optional string value.
-    public func updateNullableString(_ value: String?) {
+    public func updateNullableString(_ value: String?) -> Result<Void, RelationError> {
         let rv: RelationValue
         if let value = value {
             rv = RelationValue(value)
         } else {
             rv = .null
         }
-        updateValue(rv)
+        return updateValue(rv)
     }
     
     /// Performs a synchronous update using a single integer value.
-    public func updateInteger(_ value: Int64) {
-        updateValue(RelationValue(value))
+    public func updateInteger(_ value: Int64) -> Result<Void, RelationError> {
+        return updateValue(RelationValue(value))
     }
     
     /// Performs a synchronous update using a single boolean value (converted to 0 for `false` and 1 for `true`).
-    public func updateBoolean(_ value: Bool) {
-        updateValue(RelationValue(Int64(value ? 1 : 0)))
+    public func updateBoolean(_ value: Bool) -> Result<Void, RelationError> {
+        return updateValue(RelationValue(Int64(value ? 1 : 0)))
     }
 }
 
