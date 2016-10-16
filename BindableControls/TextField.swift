@@ -36,7 +36,24 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         changeHandler: self.changeHandler
     )
     public var string: ReadWriteProperty<String> { return _string }
-    
+
+    private lazy var _optString: ExternalValueProperty<String?> = ExternalValueProperty(
+        get: { [unowned self] in
+            self.stringValue
+        },
+        set: { [unowned self] value, _ in
+            // This behavior is specific to optString: when `value` goes to nil, we keep the previous string value
+            // in place.  This is mainly useful for the case where an outline view item is being deleted and the
+            // relation associated with its TextField is becoming empty (thus resulting in a nil string value).
+            // Without this special behavior, the cell text will flash to the placeholder string as it fades out.
+            if let value = value {
+                self.stringValue = value
+            }
+        },
+        changeHandler: self.changeHandler
+    )
+    public var optString: ReadWriteProperty<String?> { return _optString }
+
     public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.placeholderString = value
     })

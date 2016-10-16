@@ -16,7 +16,7 @@ public struct ListViewModel<E: ArrayElement> {
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     public let move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)?
     public let cellIdentifier: (E.Data) -> String
-    public let cellText: (E.Data) -> CellTextProperty
+    public let cellText: (E.Data) -> TextProperty
     public let cellImage: ((E.Data) -> ReadableProperty<Image>)?
 
     public init(
@@ -24,7 +24,7 @@ public struct ListViewModel<E: ArrayElement> {
         contextMenu: ((E.Data) -> ContextMenu?)?,
         move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)?,
         cellIdentifier: @escaping (E.Data) -> String,
-        cellText: @escaping (E.Data) -> CellTextProperty,
+        cellText: @escaping (E.Data) -> TextProperty,
         cellImage: ((E.Data) -> ReadableProperty<Image>)?)
     {
         self.data = data
@@ -171,17 +171,8 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         let identifier = model.cellIdentifier(element.data)
         let view = outlineView.make(withIdentifier: identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            textField.string.unbindAll()
-            switch model.cellText(element.data) {
-            case .readOnly(let text):
-                _ = textField.string <~ text
-            case .readWrite(let text):
-                _ = textField.string <~> text
-            case .asyncReadOnly(let text):
-                _ = textField.string <~ text
-            case .asyncReadWrite(let text):
-                _ = textField.string <~> text
-            }
+            let cellText = model.cellText(element.data)
+            textField.bind(cellText)
         }
         if let imageView = view.imageView as? ImageView {
             imageView.img.unbindAll()

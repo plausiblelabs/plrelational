@@ -117,7 +117,7 @@
 		37A4A23C1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */; };
 		37A4A23E1D1F1677005CAEA5 /* RelationProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */; };
 		37A4A2401D1F4FD9005CAEA5 /* RelationPropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */; };
-		37A4A2421D21A613005CAEA5 /* CellTextProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2411D21A613005CAEA5 /* CellTextProperty.swift */; };
+		37A4A2421D21A613005CAEA5 /* TextProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2411D21A613005CAEA5 /* TextProperty.swift */; };
 		37A4A2441D259BB7005CAEA5 /* RelationChangeParts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2431D259BB7005CAEA5 /* RelationChangeParts.swift */; };
 		37A4A2461D259DD4005CAEA5 /* RelationChangePartsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */; };
 		37A4A2501D2EC81E005CAEA5 /* Pi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A24F1D2EC81E005CAEA5 /* Pi.swift */; };
@@ -626,7 +626,7 @@
 		37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyOperationsTests.swift; path = BindingTests/PropertyOperationsTests.swift; sourceTree = "<group>"; };
 		37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationProperty.swift; path = Binding/RelationProperty.swift; sourceTree = "<group>"; };
 		37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationPropertyTests.swift; path = BindingTests/RelationPropertyTests.swift; sourceTree = "<group>"; };
-		37A4A2411D21A613005CAEA5 /* CellTextProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CellTextProperty.swift; sourceTree = "<group>"; };
+		37A4A2411D21A613005CAEA5 /* TextProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextProperty.swift; sourceTree = "<group>"; };
 		37A4A2431D259BB7005CAEA5 /* RelationChangeParts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationChangeParts.swift; path = Binding/RelationChangeParts.swift; sourceTree = "<group>"; };
 		37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationChangePartsTests.swift; path = BindingTests/RelationChangePartsTests.swift; sourceTree = "<group>"; };
 		37A4A24F1D2EC81E005CAEA5 /* Pi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Pi.swift; path = Binding/Pi.swift; sourceTree = "<group>"; };
@@ -1213,7 +1213,7 @@
 		37A1CEAF1D10827F0067870D /* Outline Views */ = {
 			isa = PBXGroup;
 			children = (
-				37A4A2411D21A613005CAEA5 /* CellTextProperty.swift */,
+				37A4A2411D21A613005CAEA5 /* TextProperty.swift */,
 				37C611351CD7FB07001DAF59 /* ListView.swift */,
 				37C611501CE10770001DAF59 /* TreeView.swift */,
 				37C611371CD7FB9C001DAF59 /* ExtOutlineView.swift */,
@@ -2370,7 +2370,7 @@
 				37A1CEBE1D1083FD0067870D /* ColorPanel.swift in Sources */,
 				37A1CEBD1D1083FD0067870D /* ComboBox.swift in Sources */,
 				37A1CED21D10B8690067870D /* Button.swift in Sources */,
-				37A4A2421D21A613005CAEA5 /* CellTextProperty.swift in Sources */,
+				37A4A2421D21A613005CAEA5 /* TextProperty.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
