@@ -4,14 +4,24 @@
 //
 
 import Swift
+
 infix operator *==: ComparisonPrecedence
+infix operator *<: ComparisonPrecedence
+infix operator *>: ComparisonPrecedence
 
 public func *==(lhs: SelectExpression, rhs: SelectExpression) -> SelectExpression {
     return SelectExpressionBinaryOperator(lhs: lhs, op: EqualityComparator(), rhs: rhs)
 }
 
-infix operator *&&: LogicalConjunctionPrecedence
+public func *<(lhs: SelectExpression, rhs: SelectExpression) -> SelectExpression {
+    return SelectExpressionBinaryOperator(lhs: lhs, op: LTComparator(), rhs: rhs)
+}
 
+public func *>(lhs: SelectExpression, rhs: SelectExpression) -> SelectExpression {
+    return SelectExpressionBinaryOperator(lhs: lhs, op: GTComparator(), rhs: rhs)
+}
+
+infix operator *&&: LogicalConjunctionPrecedence
 infix operator *||: LogicalDisjunctionPrecedence
 
 public func *&&(lhs: SelectExpression, rhs: SelectExpression) -> SelectExpression {

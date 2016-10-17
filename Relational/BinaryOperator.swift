@@ -25,6 +25,14 @@ public struct LTComparator: BinaryOperator {
     }
 }
 
+public struct GTComparator: BinaryOperator {
+    public init() {}
+    
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
+        return .boolValue(a > b)
+    }
+}
+
 public struct AndComparator: BinaryOperator {
     public init() {}
     
@@ -78,6 +86,12 @@ extension EqualityComparator: CustomStringConvertible {
 extension LTComparator: CustomStringConvertible {
     public var description: String {
         return "<"
+    }
+}
+
+extension GTComparator: CustomStringConvertible {
+    public var description: String {
+        return ">"
     }
 }
 
