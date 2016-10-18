@@ -13,7 +13,7 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     
     var contentProvider: RelationContentProvider { get }
-    
+
     func contains(_ row: Row) -> Result<Bool, RelationError>
     
     mutating func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError>
@@ -33,6 +33,8 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     func thetajoin(_ other: Relation, query: SelectExpression) -> Relation
     func split(_ query: SelectExpression) -> (Relation, Relation)
     func divide(_ other: Relation) -> Relation
+    
+    func leftOuterJoin(_ other: Relation) -> Relation
     
     func min(_ attribute: Attribute) -> Relation
     func max(_ attribute: Attribute) -> Relation
@@ -243,8 +245,18 @@ extension Relation {
         let allCombinations = self.project(resultingScheme).join(other)
         let subtracted = allCombinations.difference(self)
         let projected = subtracted.project(resultingScheme)
-        let result = self.project(resultingScheme).difference(projected)
-        return result
+        return self.project(resultingScheme).difference(projected)
+    }
+    
+    public func leftOuterJoin(_ other: Relation) -> Relation {
+        // TODO: Optimize this
+        let joined = self.join(other)
+        let projected = joined.project(self.scheme)
+        let difference = self.difference(projected)
+        let attrsUniqueToOther = joined.scheme.attributes.symmetricDifference(self.scheme.attributes)
+        let otherNulls = MakeRelation(Array(attrsUniqueToOther), Array(repeating: .null, count: attrsUniqueToOther.count))
+        let differenceWithNulls = difference.join(otherNulls)
+        return differenceWithNulls.union(joined)
     }
 }
 

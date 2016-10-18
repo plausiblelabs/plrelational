@@ -284,6 +284,31 @@ class RelationTests: DBTestCase {
                         ["Davis"]))
     }
     
+    func testLeftOuterJoin() {
+        let employees = MakeRelation(
+            ["emp_id", "emp_name", "dept_name"],
+            [1, "Alice", "Sales"],
+            [2, "Bob", "Finance"],
+            [3, "Carlos", "Production"],
+            [4, "Donald", "Production"])
+        
+        let departments = MakeRelation(
+            ["dept_name", "manager_id"],
+            ["Sales", 1],
+            ["Production", 3])
+        
+        let joined = employees.leftOuterJoin(departments)
+        
+        AssertEqual(
+            joined,
+            MakeRelation(
+                ["emp_id", "emp_name", "dept_name", "manager_id"],
+                [1, "Alice", "Sales", 1],
+                [2, "Bob", "Finance", .null],
+                [3, "Carlos", "Production", 3],
+                [4, "Donald", "Production", 3]))
+    }
+    
     func testBuildFromJoinAndUnion() {
         let pilots = (["PILOT": "Desmond"] as ConcreteRelation).join(["EQUIPMENT": "707"] as ConcreteRelation).union((["PILOT": "Davis"] as ConcreteRelation).join(["EQUIPMENT": "707"] as ConcreteRelation))
         AssertEqual(pilots,
