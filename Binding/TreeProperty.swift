@@ -41,6 +41,7 @@ public enum TreeChange<N: TreeNode> { case
     initial(N),
     insert(TreePath<N>),
     delete(TreePath<N>),
+    update(TreePath<N>),
     move(src: TreePath<N>, dst: TreePath<N>)
 }
 
@@ -51,6 +52,7 @@ public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     case (.initial, .initial): return true
     case let (.insert(a), .insert(b)): return a == b
     case let (.delete(a), .delete(b)): return a == b
+    case let (.update(a), .update(b)): return a == b
     case let (.move(asrc, adst), .move(bsrc, bdst)): return asrc == bsrc && adst == bdst
     default: return false
     }
@@ -141,6 +143,17 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
     public func indexForNode(_ node: Node) -> Int? {
         let parent = parentForNode(node) ?? root
         return parent.children.index(where: {$0 === node})
+    }
+    
+    /// Returns the tree path of the given node.
+    public func pathForNode(_ node: Node) -> TreePath<Node>? {
+        let parent = parentForNode(node)
+        let parentNode = parent ?? root
+        if let index = parentNode.children.index(where: {$0 === node}) {
+            return TreePath(parent: parent, index: index)
+        } else {
+            return nil
+        }
     }
     
     /// Returns true if the first node is a descendent of (or the same as) the second node.

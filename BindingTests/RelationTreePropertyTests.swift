@@ -149,6 +149,12 @@ class RelationTreePropertyTests: BindingTestCase {
             }
         }
         
+        func renameCollection(_ collectionID: Int64, _ name: String) {
+            awaitCompletion{
+                r.asyncUpdate(Attribute("id") *== RelationValue(collectionID), newValues: ["name": RelationValue(name)])
+            }
+        }
+        
         func moveCollection(srcPath: Path, dstPath: Path) {
             let (nodeID, dstParentID, order) = property.orderForMove(srcPath: srcPath, dstPath: dstPath)
             
@@ -311,12 +317,40 @@ class RelationTreePropertyTests: BindingTestCase {
             [8, "Group2",      .null, 7.0]
         ))
 
+        // Update a collection name; verify that an `update` change is sent and the node's row data
+        // is updated as well
+        renameCollection(3, "PageX")
+        verifyTree(property, [
+            "Group1",
+            "  PageX",
+            "  Page2",
+            "Child1",
+            "Group2",
+            "  Collection1",
+            "    Child3",
+            "    Child2"
+        ])
+        verifyChanges([
+            .update(path(1, 0))
+        ])
+        verifySQLite(MakeRelation(
+            ["id", "name", "parent", "order"],
+            [1, "Group1",      .null, 5.0],
+            [2, "Collection1", 8,     5.0],
+            [3, "PageX",       1,     7.0],
+            [4, "Page2",       1,     8.0],
+            [5, "Child1",      .null, 6.0],
+            [6, "Child2",      2,     7.0],
+            [7, "Child3",      2,     3.0],
+            [8, "Group2",      .null, 7.0]
+        ))
+
         // Delete a couple collections
         deleteCollection(4)
         deleteCollection(2)
         verifyTree(property, [
             "Group1",
-            "  Page1",
+            "  PageX",
             "Child1",
             "Group2"
         ])
@@ -327,7 +361,7 @@ class RelationTreePropertyTests: BindingTestCase {
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
             [1, "Group1",      .null, 5.0],
-            [3, "Page1",       1,     7.0],
+            [3, "PageX",       1,     7.0],
             [5, "Child1",      .null, 6.0],
             [8, "Group2",      .null, 7.0]
         ))

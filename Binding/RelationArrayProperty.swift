@@ -91,23 +91,32 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
 
     private func onUpdate(_ rows: [Row], changes: inout [Change]) {
         for row in rows {
-            let newOrder = row[orderAttr]
-            if newOrder != .notFound {
-                let id = row[idAttr]
-                if let element = elementForID(id) {
-                    changes.append(onMove(element, dstOrder: newOrder))
+            let id = row[idAttr]
+            if let element = elementForID(id) {
+                // Capture the old/new order values
+                let oldOrder = element.data[orderAttr]
+                let newOrder = row[orderAttr]
+                
+                // Update the element's row data
+                element.data = element.data.rowWithUpdate(row)
+
+                if newOrder != .notFound && newOrder != oldOrder {
+                    // Treat this as a move
+                    changes.append(onMove(element))
+                } else {
+                    // Treat this as an update
+                    if let index = indexForID(id) {
+                        changes.append(.update(index))
+                    }
                 }
             }
         }
     }
     
-    private func onMove(_ element: Element, dstOrder: RelationValue) -> Change {
+    private func onMove(_ element: Element) -> Change {
         // Remove the element from the array
         let srcIndex = indexForID(element.id)!
         _ = elements.remove(at: srcIndex)
-        
-        // Update the order value in the element's row
-        element.data[orderAttr] = dstOrder
         
         // Insert the element in its new position
         let dstIndex = elements.insertSorted(element, { $0.data[orderAttr] })

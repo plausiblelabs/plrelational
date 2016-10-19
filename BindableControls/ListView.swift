@@ -238,6 +238,13 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
             case let .delete(index):
                 let rows = IndexSet(integer: index)
                 outlineView.removeItems(at: rows, inParent: nil, withAnimation: animation)
+             
+            case .update:
+                // TODO: For now we will ignore updates and assume that the cell contents will
+                // be updated individually in response to the change.  We should make this
+                // configurable to allow for optionally calling reloadItem() to refresh the
+                // entire cell on any non-trivial update.
+                break
                 
             case let .move(srcIndex, dstIndex):
                 outlineView.moveItem(at: srcIndex, inParent: nil, to: dstIndex, inParent: nil)

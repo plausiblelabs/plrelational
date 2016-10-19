@@ -315,6 +315,13 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
                 let rows = IndexSet(integer: path.index)
                 outlineView.removeItems(at: rows, inParent: path.parent, withAnimation: animation)
 
+            case .update:
+                // TODO: For now we will ignore updates and assume that the cell contents will
+                // be updated individually in response to the change.  We should make this
+                // configurable to allow for optionally calling reloadItem() to refresh the
+                // entire cell on any non-trivial update.
+                break
+
             case let .move(srcPath, dstPath):
                 outlineView.moveItem(at: srcPath.index, inParent: srcPath.parent, to: dstPath.index, inParent: dstPath.parent)
                 // XXX: NSOutlineView doesn't appear to hide/show the disclosure triangle in the case where

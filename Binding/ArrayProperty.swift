@@ -21,6 +21,7 @@ public enum ArrayChange<E: ArrayElement> { case
     initial([E]),
     insert(Int),
     delete(Int),
+    update(Int),
     move(srcIndex: Int, dstIndex: Int)
 }
 
@@ -30,6 +31,7 @@ public func ==<E: ArrayElement>(a: ArrayChange<E>, b: ArrayChange<E>) -> Bool {
     case let (.initial(a), .initial(b)): return a == b
     case let (.insert(a), .insert(b)): return a == b
     case let (.delete(a), .delete(b)): return a == b
+    case let (.update(a), .update(b)): return a == b
     case let (.move(asrc, adst), .move(bsrc, bdst)): return asrc == bsrc && adst == bdst
     default: return false
     }
