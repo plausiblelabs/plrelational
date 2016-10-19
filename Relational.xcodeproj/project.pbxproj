@@ -72,6 +72,8 @@
 		37832EC31CFE9DB400256DB1 /* libBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37832EC61CFE9E0200256DB1 /* liblibRelational.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* liblibRelational.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37832EC71CFE9E0200256DB1 /* libBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		37941D8C1DB811BF00F5508F /* AsyncPropertyOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */; };
+		37941D8E1DB8191200F5508F /* AsyncPropertyOperationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37941D8D1DB8191200F5508F /* AsyncPropertyOperationsTests.swift */; };
 		37A1CE511D07543F0067870D /* ImageObjectPropertiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE501D07543F0067870D /* ImageObjectPropertiesView.swift */; };
 		37A1CE6E1D1081980067870D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE6D1D1081980067870D /* AppDelegate.swift */; };
 		37A1CE701D1081980067870D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37A1CE6F1D1081980067870D /* Assets.xcassets */; };
@@ -594,6 +596,8 @@
 		376A96371D09225900E696AE /* ComboBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComboBox.swift; sourceTree = "<group>"; };
 		37832EB91CFCE63C00256DB1 /* PropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertiesModel.swift; sourceTree = "<group>"; };
 		37832EBB1CFCF17800256DB1 /* TextObjectPropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObjectPropertiesView.swift; sourceTree = "<group>"; };
+		37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyOperations.swift; path = Binding/AsyncPropertyOperations.swift; sourceTree = "<group>"; };
+		37941D8D1DB8191200F5508F /* AsyncPropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyOperationsTests.swift; path = BindingTests/AsyncPropertyOperationsTests.swift; sourceTree = "<group>"; };
 		37A1CE501D07543F0067870D /* ImageObjectPropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageObjectPropertiesView.swift; sourceTree = "<group>"; };
 		37A1CE591D08A2240067870D /* MenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuItem.swift; sourceTree = "<group>"; };
 		37A1CE5C1D08C3110067870D /* ColorPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
@@ -1318,6 +1322,8 @@
 			children = (
 				37A4A2921D357D17005CAEA5 /* AsyncProperty.swift */,
 				37A4A2941D357DF2005CAEA5 /* AsyncPropertyTests.swift */,
+				37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */,
+				37941D8D1DB8191200F5508F /* AsyncPropertyOperationsTests.swift */,
 				37A4A2961D3581B7005CAEA5 /* RelationAsyncProperty.swift */,
 				37A4A2981D358581005CAEA5 /* RelationAsyncPropertyTests.swift */,
 			);
@@ -2269,6 +2275,7 @@
 				37A1CED91D1354DD0067870D /* Property.swift in Sources */,
 				372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */,
 				37A1CEDE1D1469720067870D /* Signal.swift in Sources */,
+				37941D8C1DB811BF00F5508F /* AsyncPropertyOperations.swift in Sources */,
 				372707BB1CFE240E00710C80 /* RelationTreeProperty.swift in Sources */,
 				37A1CEE31D147ACA0067870D /* RelationAsTypedValue.swift in Sources */,
 				372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */,
@@ -2293,6 +2300,7 @@
 				372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */,
 				37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */,
 				37A4A2401D1F4FD9005CAEA5 /* RelationPropertyTests.swift in Sources */,
+				37941D8E1DB8191200F5508F /* AsyncPropertyOperationsTests.swift in Sources */,
 				372707D81CFE25D400710C80 /* RelationTreePropertyTests.swift in Sources */,
 				37A4A23C1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift in Sources */,
 				37A4A2901D34A576005CAEA5 /* SignalOperationsTests.swift in Sources */,

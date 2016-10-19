@@ -68,8 +68,8 @@ open class Signal<T>: SignalType {
         self.startFunc = startFunc
     }
     
-    open static func pipe() -> (Signal, Notify) {
-        let signal = Signal(changeCount: 0, startFunc: { _ in })
+    open static func pipe(initialValue: T? = nil) -> (Signal, Notify) {
+        let signal = PipeSignal(initialValue: initialValue)
         let notify = SignalObserver(
             valueWillChange: signal.notifyWillChange,
             valueChanging: signal.notifyChanging,
@@ -144,6 +144,25 @@ open class Signal<T>: SignalType {
 
     // For testing purposes only.
     internal var observerCount: Int { return observers.count }
+}
+
+private class PipeSignal<T>: Signal<T> {
+    let initialValue: T?
+    
+    fileprivate init(initialValue: T?) {
+        self.initialValue = initialValue
+        super.init(changeCount: 0, startFunc: { _ in })
+    }
+    
+    override func startImpl(deliverInitial: Bool) {
+        if deliverInitial {
+            if let initial = initialValue {
+                notifyWillChange()
+                notifyChanging(initial, metadata: ChangeMetadata(transient: false))
+                notifyDidChange()
+            }
+        }
+    }
 }
 
 internal func isRepeat<T>(_ v0: T, v1: T) -> Bool {

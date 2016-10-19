@@ -59,6 +59,10 @@ open class ArrayProperty<Element: ArrayElement>: AsyncReadablePropertyType {
     open func start() {
     }
     
+    public var property: AsyncReadableProperty<[Element]> {
+        return fullArray()
+    }
+    
     internal func notifyObservers(arrayChanges: [ArrayChange<Element>]) {
         let metadata = ChangeMetadata(transient: false)
         notify.valueChanging(arrayChanges, metadata)
@@ -104,7 +108,7 @@ private class FullArrayProperty<Element: ArrayElement>: AsyncReadableProperty<[E
     
     fileprivate init(underlying: ArrayProperty<Element>) {
         self.underlying = underlying
-        super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.elements})
+        super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.elements })
     }
     
     fileprivate override func start() {

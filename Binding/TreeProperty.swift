@@ -77,6 +77,10 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
         self.notify = notify
     }
     
+    public var property: AsyncReadableProperty<Node> {
+        return fullTree()
+    }
+    
     open func start() {
     }
     
@@ -197,5 +201,26 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
     /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
     public func orderForMove(srcPath: TreePath<Node>, dstPath: TreePath<Node>) -> (nodeID: Node.ID, dstParentID: Node.ID?, order: Double) {
         fatalError("Must be implemented by subclasses")
+    }
+    
+    /// Returns a view on this TreeProperty that delivers the full tree through
+    /// its Signal whenever there is any change in the underlying TreeProperty.
+    public func fullTree() -> AsyncReadableProperty<Node> {
+        return FullTreeProperty(underlying: self)
+    }
+}
+
+private class FullTreeProperty<Node: TreeNode>: AsyncReadableProperty<Node> {
+    
+    private let underlying: TreeProperty<Node>
+    
+    fileprivate init(underlying: TreeProperty<Node>) {
+        self.underlying = underlying
+        super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.root })
+    }
+    
+    fileprivate override func start() {
+        underlying.start()
+        super.start()
     }
 }

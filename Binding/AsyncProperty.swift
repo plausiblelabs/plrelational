@@ -5,14 +5,23 @@
 
 import Foundation
 
-public protocol AsyncReadablePropertyType: class {
+public protocol AsyncPropertyType {
+    /// Causes the underlying signal to start delivering values.
+    func start()
+}
+
+public protocol AsyncReadablePropertyType: class, AsyncPropertyType {
     associatedtype Value
     associatedtype SignalChange
-    
-    var value: Value? { get }
+
+    /// Converts this instance into a concrete `AsyncReadableProperty`.
+    var property: AsyncReadableProperty<Value> { get }
+
+    /// The underlying signal.
     var signal: Signal<SignalChange> { get }
     
-    func start()
+    /// The most recent value delivered by the underlying signal.
+    var value: Value? { get }
 }
 
 /// A concrete readable property whose value is fetched asynchronously.
@@ -20,14 +29,18 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
     public typealias SignalChange = T
     
-    open internal(set) var value: T?
     open let signal: Signal<T>
+    open internal(set) var value: T?
     private var removal: ObserverRemoval?
     private var started = false
     
     public init(initialValue: T?, signal: Signal<T>) {
         self.value = initialValue
         self.signal = signal
+    }
+    
+    public var property: AsyncReadableProperty<T> {
+        return self
     }
     
     open func start() {
@@ -62,6 +75,10 @@ open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
 
     internal init(signal: Signal<T>) {
         self.signal = signal
+    }
+    
+    public var property: AsyncReadableProperty<T> {
+        return AsyncReadableProperty(initialValue: self.value, signal: self.signal)
     }
     
     open func start() {

@@ -143,7 +143,7 @@ private class MappedSignal<T>: Signal<T> {
     }
 }
 
-private class BinaryOpSignal<T>: Signal<T> {
+internal class BinaryOpSignal<T>: Signal<T> {
     private var removal1: ObserverRemoval!
     private var removal2: ObserverRemoval!
     
