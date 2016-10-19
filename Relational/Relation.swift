@@ -216,6 +216,12 @@ extension Relation {
         return IntermediateRelation(op: .project(scheme), operands: [self])
     }
 
+    /// Returns a projection of this Relation that includes only those attributes that appear in this Relation's
+    /// scheme but not in the given scheme.
+    public func project(dropping scheme: Scheme) -> Relation {
+        return project(Scheme(attributes: self.scheme.attributes.subtracting(scheme.attributes)))
+    }
+
     public func project(_ attribute: Attribute) -> Relation {
         return project([attribute])
     }
