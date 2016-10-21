@@ -7,12 +7,20 @@ import Foundation
 import libRelational
 
 // TODO: Use lazy sequences here
-struct RelationChangeParts {
-    let addedRows: [Row]
-    let updatedRows: [Row]
-    let deletedIDs: [RelationValue]
+public struct RelationChangeParts {
+    public let addedRows: [Row]
+    public let updatedRows: [Row]
+    public let deletedRows: [Row]
+    public let deletedIDs: [RelationValue]
     
-    var isEmpty: Bool {
+    public init(addedRows: [Row], updatedRows: [Row], deletedRows: [Row], deletedIDs: [RelationValue]) {
+        self.addedRows = addedRows
+        self.updatedRows = updatedRows
+        self.deletedRows = deletedRows
+        self.deletedIDs = deletedIDs
+    }
+    
+    public var isEmpty: Bool {
         return addedRows.isEmpty && updatedRows.isEmpty && deletedIDs.isEmpty
     }
 }
@@ -20,7 +28,7 @@ struct RelationChangeParts {
 extension RelationChange {
 
     /// Extracts the added, updated, and removed rows from this RelationChange.
-    func parts(_ idAttr: Attribute) -> RelationChangeParts {
+    public func parts(_ idAttr: Attribute) -> RelationChangeParts {
         let addedRows: [Row]
         if let adds = self.added {
             let added: Relation
@@ -43,44 +51,48 @@ extension RelationChange {
             updatedRows = []
         }
 
+        let deletedRows: [Row]
         let deletedIDs: [RelationValue]
         if let removes = self.removed {
-            let removedIDs: Relation
+            let removed: Relation
             if let adds = self.added {
-                removedIDs = removes.project([idAttr]).difference(adds.project([idAttr]))
+                removed = removes.project([idAttr]).difference(adds.project([idAttr])).join(removes)
             } else {
-                removedIDs = removes.project([idAttr])
+                removed = removes
             }
-            deletedIDs = removedIDs.rows().flatMap{$0.ok?[idAttr]}
+            deletedRows = removed.rows().flatMap{$0.ok}
+            deletedIDs = deletedRows.map{$0[idAttr]}
         } else {
+            deletedRows = []
             deletedIDs = []
         }
         
-        return RelationChangeParts(addedRows: addedRows, updatedRows: updatedRows, deletedIDs: deletedIDs)
+        return RelationChangeParts(addedRows: addedRows, updatedRows: updatedRows, deletedRows: deletedRows, deletedIDs: deletedIDs)
     }
 }
 
 /// Extracts the added, updated, and removed rows from the given NegativeSet.
-func partsOf(_ set: NegativeSet<Row>, idAttr: Attribute) -> RelationChangeParts {
-    // First gather the identifiers of the rows that are being deleted (or updated)
-    var deletedIDs: [RelationValue] = set.removed.map{ $0[idAttr] }
+public func partsOf(_ set: NegativeSet<Row>, idAttr: Attribute) -> RelationChangeParts {
+    // First gather the rows that are being deleted (or updated)
+    var deletedRows = Set(set.removed)
 
     var addedRows: [Row] = []
     var updatedRows: [Row] = []
     for row in set.added {
         let id = row[idAttr]
-        if set.removed.contains(where: { $0[idAttr] == id }) {
+        if let index = deletedRows.index(where: { $0[idAttr] == id }) {
             // A row with this identifier appears in both sets, so it must've been updated; the added set
             // will contain the new row contents
             updatedRows.append(row)
+            
+            // We can be sure this item isn't being removed, so remove it from the set of deleted items
+            deletedRows.remove(at: index)
         } else {
             // This is a newly added row
             addedRows.append(row)
         }
-        
-        // We can be sure this item isn't being removed, so remove it from the set of deleted items
-        deletedIDs.remove(id)
     }
-
-    return RelationChangeParts(addedRows: addedRows, updatedRows: updatedRows, deletedIDs: deletedIDs)
+    
+    let deletedIDs = deletedRows.map{ $0[idAttr] }
+    return RelationChangeParts(addedRows: addedRows, updatedRows: updatedRows, deletedRows: Array(deletedRows), deletedIDs: deletedIDs)
 }
