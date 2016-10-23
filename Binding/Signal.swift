@@ -56,7 +56,7 @@ open class Signal<T>: SignalType {
     public typealias Observer = SignalObserver<T>
     public typealias Notify = SignalObserver<T>
 
-    open private(set) var changeCount: Int
+    public private(set) var changeCount: Int
     private let startFunc: (Bool) -> Void
     private var started = false
     
@@ -68,8 +68,8 @@ open class Signal<T>: SignalType {
         self.startFunc = startFunc
     }
     
-    open static func pipe(initialValue: T? = nil) -> (Signal, Notify) {
-        let signal = PipeSignal(initialValue: initialValue)
+    public static func pipe() -> (Signal, Notify) {
+        let signal = Signal(changeCount: 0, startFunc: { _ in })
         let notify = SignalObserver(
             valueWillChange: signal.notifyWillChange,
             valueChanging: signal.notifyChanging,
@@ -78,7 +78,7 @@ open class Signal<T>: SignalType {
         return (signal, notify)
     }
 
-    open var signal: Signal<T> {
+    public var signal: Signal<T> {
         return self
     }
 
@@ -94,7 +94,7 @@ open class Signal<T>: SignalType {
         startFunc(deliverInitial)
     }
     
-    open func observe(_ observer: Observer) -> ObserverRemoval {
+    public func observe(_ observer: Observer) -> ObserverRemoval {
         let id = nextObserverID
         nextObserverID += 1
         observers[id] = observer
@@ -103,7 +103,7 @@ open class Signal<T>: SignalType {
 
     /// Convenience form of `observe` that builds an Observer whose `valueWillChange` and `valueDidChange`
     /// handlers pass through to `notify`, but uses the given `valueChanging` handler.
-    open func observe<U>(_ notify: SignalObserver<U>, _ valueChanging: @escaping (_ change: T, _ metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
+    public func observe<U>(_ notify: SignalObserver<U>, _ valueChanging: @escaping (_ change: T, _ metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
         return self.observe(SignalObserver(
             valueWillChange: notify.valueWillChange,
             valueChanging: valueChanging,
@@ -113,7 +113,7 @@ open class Signal<T>: SignalType {
     
     /// Convenience form of `observe` that builds an Observer whose `valueWillChange` and `valueDidChange`
     /// are no-ops, but uses the given `valueChanging` handler.
-    open func observe(_ valueChanging: @escaping (_ change: T, _ metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
+    public func observe(_ valueChanging: @escaping (_ change: T, _ metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
         return self.observe(SignalObserver(
             valueWillChange: {},
             valueChanging: valueChanging,
@@ -144,25 +144,6 @@ open class Signal<T>: SignalType {
 
     // For testing purposes only.
     internal var observerCount: Int { return observers.count }
-}
-
-private class PipeSignal<T>: Signal<T> {
-    let initialValue: T?
-    
-    fileprivate init(initialValue: T?) {
-        self.initialValue = initialValue
-        super.init(changeCount: 0, startFunc: { _ in })
-    }
-    
-    override func startImpl(deliverInitial: Bool) {
-        if deliverInitial {
-            if let initial = initialValue {
-                notifyWillChange()
-                notifyChanging(initial, metadata: ChangeMetadata(transient: false))
-                notifyDidChange()
-            }
-        }
-    }
 }
 
 internal func isRepeat<T>(_ v0: T, v1: T) -> Bool {

@@ -22,6 +22,21 @@ public func zip<LHS: AsyncReadablePropertyType, RHS: AsyncReadablePropertyType>(
     return BinaryOpValueProperty(lhs, rhs, { ($0, $1) })
 }
 
+/// Returns an AsyncReadableProperty whose value is the negation of the boolean value of the given property.
+public func not<P: AsyncReadablePropertyType>(_ property: P) -> AsyncReadableProperty<Bool>
+    where P.Value == Bool, P.SignalChange == Bool
+{
+    return property.map{ !$0 }
+}
+
+prefix operator !
+
+public prefix func !<P: AsyncReadablePropertyType>(property: P) -> AsyncReadableProperty<Bool>
+    where P.Value == Bool, P.SignalChange == Bool
+{
+    return not(property)
+}
+
 private class MappedValueProperty<T>: AsyncReadableProperty<T> {
     private let underlying: AsyncPropertyType
     

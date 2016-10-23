@@ -29,8 +29,8 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
     public typealias SignalChange = T
     
-    open let signal: Signal<T>
-    open internal(set) var value: T?
+    public let signal: Signal<T>
+    public internal(set) var value: T?
     private var removal: ObserverRemoval?
     private var started = false
     
@@ -39,11 +39,15 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
         self.signal = signal
     }
     
+    deinit {
+        removal?()
+    }
+    
     public var property: AsyncReadableProperty<T> {
         return self
     }
     
-    open func start() {
+    public func start() {
         // TODO: Need to make a SignalProducer like thing that can create a unique signal
         // each time start() is called; for now we'll assume it can be called only once
         if !started {
@@ -56,8 +60,10 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
         }
     }
     
-    deinit {
-        removal?()
+    public static func pipe(initialValue: T? = nil) -> (AsyncReadableProperty<T>, Signal<T>.Notify) {
+        let (signal, notify) = Signal<T>.pipe()
+        let property = AsyncReadableProperty(initialValue: initialValue, signal: signal)
+        return (property, notify)
     }
 }
 
@@ -66,11 +72,11 @@ open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
     public typealias SignalChange = T
 
-    open var value: T? {
+    public var value: T? {
         return getValue()
     }
     
-    open let signal: Signal<T>
+    public let signal: Signal<T>
     private var started = false
 
     internal init(signal: Signal<T>) {
@@ -81,7 +87,7 @@ open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
         return AsyncReadableProperty(initialValue: self.value, signal: self.signal)
     }
     
-    open func start() {
+    public func start() {
         // TODO: For now we'll assume it can be called only once
         if !started {
             startImpl()
