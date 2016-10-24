@@ -78,9 +78,9 @@ class RelationAsTypedValueTests: BindingTestCase {
         XCTAssertEqual(one.select(expr).oneValueFromRow(transform, orDefault: "default"), "cat:5")
         XCTAssertEqual(multi.oneValueFromRow(transform, orDefault: "default"), "default")
         
-        XCTAssertNil(empty.project(["name"]).oneValue())
-        XCTAssertEqual(one.project(["name"]).oneValue(), RelationValue("cat"))
-        XCTAssertNil(multi.project(["name"]).oneValue())
+        XCTAssertNil(empty.project(["name"]).oneValueOrNil())
+        XCTAssertEqual(one.project(["name"]).oneValueOrNil(), RelationValue("cat"))
+        XCTAssertNil(multi.project(["name"]).oneValueOrNil())
         
         XCTAssertEqual(empty.project(["name"]).oneString, "")
         XCTAssertEqual(one.project(["name"]).oneString, "cat")
