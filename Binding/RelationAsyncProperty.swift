@@ -105,3 +105,17 @@ extension Relation {
         return RelationAsyncReadWriteProperty(initialValue: initialValue, config: config, signal: relationToSignal(self).signal)
     }
 }
+
+extension RelationMutationConfig {
+    /// Returns an AsyncReadWriteProperty that gets its value from a relation and writes values back to a relation
+    /// according to this configuration.
+    public func asyncProperty<S: SignalType>(signal: S) -> AsyncReadWriteProperty<S.Value> where T == S.Value {
+        return RelationAsyncReadWriteProperty(initialValue: nil, config: self, signal: signal.signal)
+    }
+
+    /// Returns an AsyncReadWriteProperty that gets its value from a relation and writes values back to a relation
+    /// according to this configuration.
+    public func asyncProperty<S: SignalType>(initialValue: S.Value?, signal: S) -> AsyncReadWriteProperty<S.Value> where T == S.Value {
+        return RelationAsyncReadWriteProperty(initialValue: initialValue, config: self, signal: signal.signal)
+    }
+}
