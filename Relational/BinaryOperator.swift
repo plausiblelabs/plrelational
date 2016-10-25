@@ -17,6 +17,14 @@ public struct EqualityComparator: BinaryOperator {
     }
 }
 
+public struct InequalityComparator: BinaryOperator {
+    public init() {}
+    
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
+        return .boolValue(a != b)
+    }
+}
+
 public struct LTComparator: BinaryOperator {
     public init() {}
     
@@ -96,6 +104,12 @@ public struct AnyComparator: BinaryOperator {
 extension EqualityComparator: CustomStringConvertible {
     public var description: String {
         return "="
+    }
+}
+
+extension InequalityComparator: CustomStringConvertible {
+    public var description: String {
+        return "!="
     }
 }
 
