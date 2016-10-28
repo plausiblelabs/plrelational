@@ -20,7 +20,7 @@ private class RelationSignal<T>: Signal<T> {
         super.init(changeCount: 0, startFunc: { _ in })
     }
     
-    private override func startImpl(deliverInitial: Bool) {
+    fileprivate override func startImpl(deliverInitial: Bool) {
         func convertRowsToValue(rows: Set<Row>) -> T {
             return self.rowsToValue(self.relation, AnyIterator(rows.makeIterator()))
         }

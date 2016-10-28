@@ -188,11 +188,11 @@ private class RelationReadWriteProperty<T>: ReadWriteProperty<T> {
         removal()
     }
     
-    private override func getValue() -> T {
+    fileprivate override func getValue() -> T {
         return mutableValue
     }
     
-    private override func setValue(_ value: T, _ metadata: ChangeMetadata) {
+    fileprivate override func setValue(_ value: T, _ metadata: ChangeMetadata) {
         if before == nil {
             before = config.snapshot()
         }
