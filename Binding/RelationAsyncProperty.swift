@@ -64,7 +64,7 @@ private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
         removal?()
     }
     
-    private override func startImpl() {
+    fileprivate override func startImpl() {
         let deliverInitial = mutableValue == nil
         removal = signal.observe({ [weak self] newValue, _ in
             self?.mutableValue = newValue
@@ -72,11 +72,11 @@ private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
         signal.start(deliverInitial: deliverInitial)
     }
     
-    private override func getValue() -> T? {
+    fileprivate override func getValue() -> T? {
         return mutableValue
     }
     
-    private override func setValue(_ value: T, _ metadata: ChangeMetadata) {
+    fileprivate override func setValue(_ value: T, _ metadata: ChangeMetadata) {
         if before == nil {
             before = config.snapshot()
         }
