@@ -14,7 +14,9 @@ class RelationTableView: NSObject {
     fileprivate let relation: Relation
     fileprivate let rows: [Row]
     
-    init(relation: Relation, orderAttr: Attribute, tableView: NSTableView) {
+    init(relation: Relation, orderAttr: Attribute, orderedAttrs: [Attribute], tableView: NSTableView) {
+        precondition(relation.scheme.attributes == Set(orderedAttrs))
+        
         self.tableView = tableView
         self.relation = relation
         
@@ -27,9 +29,10 @@ class RelationTableView: NSObject {
         for column in tableView.tableColumns {
             tableView.removeTableColumn(column)
         }
-        for attr in relation.scheme.attributes {
+        for attr in orderedAttrs {
             let column = TableColumn(attribute: attr)
-            column.resizingMask = .autoresizingMask
+            column.width = 80
+            column.resizingMask = .userResizingMask
             column.headerCell.stringValue = attr.name
             tableView.addTableColumn(column)
         }
