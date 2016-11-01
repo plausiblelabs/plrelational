@@ -142,8 +142,8 @@ open class Signal<T>: SignalType {
         }
     }
 
-    // For testing purposes only.
-    internal var observerCount: Int { return observers.count }
+    /// For testing purposes only.
+    public var observerCount: Int { return observers.count }
 }
 
 internal func isRepeat<T>(_ v0: T, v1: T) -> Bool {

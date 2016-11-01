@@ -68,6 +68,11 @@ open class TextField: NSTextField, NSTextFieldDelegate {
     /// done editing.
     public var deliverTransientChanges: Bool = true
     
+    // XXX: For now we assume that either `string` or `optString` will be in use, but never both at the same time.
+    private var usingOpt: Bool {
+        return _optString.signal.observerCount > 0
+    }
+    
     private var previousCommittedValue: String?
     private var previousValue: String?
     
@@ -86,6 +91,7 @@ open class TextField: NSTextField, NSTextFieldDelegate {
     open override func controlTextDidBeginEditing(_ obj: Notification) {
         //Swift.print("CONTROL DID BEGIN EDITING!")
         _string.exclusiveMode = true
+        _optString.exclusiveMode = true
         previousCommittedValue = stringValue
         previousValue = stringValue
     }
@@ -93,7 +99,11 @@ open class TextField: NSTextField, NSTextFieldDelegate {
     open override func controlTextDidChange(_ notification: Notification) {
         //Swift.print("CONTROL DID CHANGE!")
         if deliverTransientChanges {
-            _string.changed(transient: true)
+            if usingOpt {
+                _optString.changed(transient: true)
+            } else {
+                _string.changed(transient: true)
+            }
         }
         previousValue = stringValue
     }
@@ -106,10 +116,15 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         if let previousCommittedValue = previousCommittedValue {
             // TODO: Need to discard `before` snapshot if we're skipping the commit
             if stringValue != previousCommittedValue {
-                _string.changed(transient: false)
+                if usingOpt {
+                    _optString.changed(transient: false)
+                } else {
+                    _string.changed(transient: false)
+                }
             }
         }
         _string.exclusiveMode = false
+        _optString.exclusiveMode = false
         previousCommittedValue = nil
         previousValue = nil
     }
