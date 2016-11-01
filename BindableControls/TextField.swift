@@ -62,11 +62,10 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         self.isHidden = !value
     })
 
-    /// Whether to deliver transient changes.  If `true` (the default) a transient change
-    /// will be delivered via the `string` property on each keystroke.  If `false`, no transient
-    /// changes will be delivered, and only a single commit change will be delivered when the user is
-    /// done editing.
-    public var deliverTransientChanges: Bool = true
+    /// Whether to deliver transient changes.  If `true` a transient change will be delivered via the
+    /// `string` property on each keystroke.  If `false` (the default), no transient changes will be
+    /// delivered, and only a single commit change will be delivered when the user is done editing.
+    public var deliverTransientChanges: Bool = false
     
     // XXX: For now we assume that either `string` or `optString` will be in use, but never both at the same time.
     private var usingOpt: Bool {
