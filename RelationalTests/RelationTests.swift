@@ -1370,4 +1370,223 @@ class RelationTests: DBTestCase {
         remover2()
         remover3()
     }
+    
+    func testCascadingDeleteAndUpdate() {
+        let r1 = MakeRelation(
+            ["id", "parent"],
+            [1, .null],
+            [2, .null],
+            [3, .null],
+            [4, .null],
+            [10, 1],
+            [11, 1],
+            [12, 1],
+            [100, 10],
+            [101, 10],
+            [110, 11],
+            [1100, 110],
+            [20, 2],
+            [21, 2],
+            [22, 2],
+            [200, 20],
+            [201, 20],
+            [210, 21],
+            [2100, 210],
+            [30, 3],
+            [31, 3],
+            [32, 3],
+            [300, 30],
+            [301, 30],
+            [310, 31],
+            [3100, 310],
+            [40, 4],
+            [41, 4],
+            [42, 4],
+            [400, 40],
+            [401, 40],
+            [410, 41],
+            [4100, 410]
+        )
+        let r2 = MakeRelation(
+            ["id", "name"],
+            [1, "Steve"],
+            [2, "Bill"],
+            [3, "John"],
+            [4, "Ebenezer"],
+            [5, "Tim"],
+            [100, "Timmy"],
+            [200, "Timothy"],
+            [300, "Thomas"],
+            [400, "Thompson"]
+        )
+        let r3 = MemoryTableRelation.copyRelation(r2.project(["name"])).ok!
+        let r4 = MakeRelation(["id"], [30])
+        
+        class Observer: AsyncRelationChangeCoalescedObserver {
+            let group: DispatchGroup
+            
+            var changes: NegativeSet<Row>?
+            
+            init(group: DispatchGroup) {
+                self.group = group
+            }
+            
+            func relationWillChange(_ relation: Relation) {
+                XCTAssertNil(changes)
+            }
+            
+            func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+                XCTAssertNil(result.err)
+                self.changes = result.ok
+                group.leave()
+            }
+        }
+        
+        let group = DispatchGroup()
+        
+        group.enter()
+        let observer1 = Observer(group: group)
+        let remover1 = r1.addAsyncObserver(observer1)
+        
+        group.enter()
+        let observer2 = Observer(group: group)
+        let remover2 = r2.addAsyncObserver(observer2)
+        
+        group.enter()
+        let observer3 = Observer(group: group)
+        let remover3 = r3.addAsyncObserver(observer3)
+        
+        group.enter()
+        r1.cascadingDelete(
+            Attribute("id") *== 1 *|| Attribute("id") *== 2 *|| Attribute("id") *== 30,
+            cascade: { (relation, row) in
+                if relation === r1 {
+                    return [
+                        (r1, Attribute("parent") *== row["id"]),
+                        (r2, Attribute("id") *== row["id"])
+                    ]
+                } else if relation === r2 {
+                    return [(r3, Attribute("name") *== row["name"])]
+                } else {
+                    return []
+                }
+        },
+            update: { (relation, row) in
+                if relation === r1 {
+                    let id = Attribute("id")
+                    let deletedID = row["id"]
+                    let matched = r4.select(id *== deletedID)
+                    let lower = r1.select(id *<= deletedID).project(id).max(id)
+                    let higher = r1.select(id *> deletedID).project(id).min(id)
+                    let newCurrentID = lower.otherwise(higher)
+                    return [CascadingUpdate(relation: matched, query: true, attributes: [id], fromRelation: newCurrentID)]
+                } else {
+                    return []
+                }
+        },
+            completionCallback: { result in
+                XCTAssertNil(result.err)
+                group.leave()
+        }
+        )
+        
+        let runloop = CFRunLoopGetCurrent()!
+        group.notify(queue: DispatchQueue.global(), execute: { runloop.async({ CFRunLoopStop(runloop) }) })
+        CFRunLoopRun()
+        
+        let expectedRemaining1 = MakeRelation(
+            ["id", "parent"],
+            [3, .null],
+            [4, .null],
+            [31, 3],
+            [32, 3],
+            [310, 31],
+            [3100, 310],
+            [40, 4],
+            [41, 4],
+            [42, 4],
+            [400, 40],
+            [401, 40],
+            [410, 41],
+            [4100, 410]
+        )
+        
+        let expectedRemoved1 = MakeRelation(
+            ["id", "parent"],
+            [1, .null],
+            [2, .null],
+            [10, 1],
+            [11, 1],
+            [12, 1],
+            [100, 10],
+            [101, 10],
+            [110, 11],
+            [1100, 110],
+            [20, 2],
+            [21, 2],
+            [22, 2],
+            [200, 20],
+            [201, 20],
+            [210, 21],
+            [2100, 210],
+            [30, 3],
+            [300, 30],
+            [301, 30]
+            ).values
+        
+        AssertEqual(r1, expectedRemaining1)
+        XCTAssertNotNil(observer1.changes)
+        XCTAssertEqual(observer1.changes!.added, [])
+        XCTAssertEqual(observer1.changes!.removed, expectedRemoved1)
+        
+        let expectedRemaining2 = MakeRelation(
+            ["id", "name"],
+            [3, "John"],
+            [4, "Ebenezer"],
+            [5, "Tim"],
+            [400, "Thompson"]
+        )
+        
+        let expectedRemoved2 = MakeRelation(
+            ["id", "name"],
+            [1, "Steve"],
+            [2, "Bill"],
+            [100, "Timmy"],
+            [200, "Timothy"],
+            [300, "Thomas"]
+            ).values
+        
+        AssertEqual(r2, expectedRemaining2)
+        XCTAssertNotNil(observer2.changes)
+        XCTAssertEqual(observer2.changes!.added, [])
+        XCTAssertEqual(observer2.changes!.removed, expectedRemoved2)
+        
+        let expectedRemaining3 = MakeRelation(
+            ["name"],
+            ["John"],
+            ["Ebenezer"],
+            ["Tim"],
+            ["Thompson"]
+        )
+        
+        let expectedRemoved3 = MakeRelation(
+            ["name"],
+            ["Steve"],
+            ["Bill"],
+            ["Timmy"],
+            ["Timothy"],
+            ["Thomas"]
+            ).values
+        
+        AssertEqual(r3, expectedRemaining3)
+        XCTAssertNotNil(observer3.changes)
+        XCTAssertEqual(observer3.changes!.added, [])
+        XCTAssertEqual(observer3.changes!.removed, expectedRemoved3)
+        
+        AssertEqual(r4, MakeRelation(["id"], [4]))
+        
+        remover1()
+        remover2()
+        remover3()
+    }
 }
