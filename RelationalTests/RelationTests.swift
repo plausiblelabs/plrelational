@@ -1589,4 +1589,29 @@ class RelationTests: DBTestCase {
         remover2()
         remover3()
     }
+    
+    func testCodeDump() {
+        let r1 = MakeRelation(
+            ["name", "age"],
+            ["Steve", 42],
+            ["Bob", 18])
+        let r2 = MakeRelation(
+            ["name", "age"],
+            ["Jane", 20],
+            ["Sara", 55])
+        let r3 = r1.union(r2)
+        let r4 = r3.intersection(r1)
+        let r5 = r4.difference(r2)
+        let r6 = r5.project(["name"])
+        let r7 = r6.select(Attribute("name") *== "Jane")
+        let r8 = r7.mutableSelect(Attribute("name") *== "Jane")
+        let r9 = r8.equijoin(r1, matching: ["name": "name"])
+        let r10 = r9.renameAttributes(["name": "NAME"])
+        let r11 = r10.withUpdate(["NAME": "Jaaane"])
+        let r12 = r11.max("NAME")
+        let r13 = r12.otherwise(r12)
+        let r14 = r13.unique("NAME", matching: "Jaaane")
+        //r14.dumpAsCode()
+        _ = r14
+    }
 }
