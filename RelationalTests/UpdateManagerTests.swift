@@ -158,11 +158,33 @@ class UpdateManagerTests: DBTestCase {
         let r = db["n"]
         
         TestAsyncContentObserver.assertChanges(r,
-                                              change: { r.asyncAdd(["n": 1]) },
-                                              expectedContents: [["n": 1]])
+                                               change: { r.asyncAdd(["n": 1]) },
+                                               expectedContents: [["n": 1]])
         TestAsyncContentObserver.assertChanges(r,
-                                              change: { r.asyncAdd(["n": 2]) },
-                                              expectedContents: [["n": 1], ["n": 2]])
+                                               change: { r.asyncAdd(["n": 2]) },
+                                               expectedContents: [["n": 1], ["n": 2]])
+    }
+    
+    func testAsyncMultipleUpdateObservation() {
+        let sqliteDB = makeDB().db
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n", "m"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        
+        TestAsyncContentObserver.assertChanges(r,
+                                               change: { r.asyncAdd(["n": 1, "m": 0]) },
+                                               expectedContents: [["n": 1, "m": 0]])
+        TestAsyncChangeCoalescedObserver.assertChanges(
+            r,
+            change: {
+                r.asyncUpdate(true, newValues: ["n": 2])
+                r.asyncUpdate(true, newValues: ["n": 3])
+                r.asyncUpdate(true, newValues: ["n": 4])
+                r.asyncUpdate(true, newValues: ["n": 5])
+            },
+            expectedAdded: [["n": 5, "m": 0]],
+            expectedRemoved: [["n": 1, "m": 0]])
     }
     
     func testAsyncCoalescedUpdateObservation() {
