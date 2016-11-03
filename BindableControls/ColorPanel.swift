@@ -12,7 +12,7 @@ open class ColorPanel {
     private lazy var _color: MutableValueProperty<Color> = mutableValueProperty(Color.white, { [unowned self] newValue, _ in
         self.updateColorPanel(newColor: newValue, makeVisible: false)
     })
-    open var color: ReadWriteProperty<Color> { return _color }
+    public var color: ReadWriteProperty<Color> { return _color }
 
     // TODO: Need to watch color panel's window visibility and update this accordingly
     // TODO: Check whether shared color panel is already visible
@@ -22,7 +22,7 @@ open class ColorPanel {
             self.updateColorPanel(newColor: self.color.value, makeVisible: true)
         }
     })
-    open var visible: ReadWriteProperty<Bool> { return _visible }
+    public var visible: ReadWriteProperty<Bool> { return _visible }
     
     private var ignorePanelUpdates = false
     
