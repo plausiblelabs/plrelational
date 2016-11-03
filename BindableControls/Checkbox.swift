@@ -33,7 +33,7 @@ open class Checkbox: NSButton {
         set: { [unowned self] value, _ in
             // Only allow mixed state if we are starting in a mixed state; otherwise we
             // use simple two-state mode
-            self.allowsMixedState = value == .Mixed
+            self.allowsMixedState = value == .mixed
             self.state = value.nsValue
         },
         changeHandler: self.changeHandler

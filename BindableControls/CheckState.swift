@@ -6,29 +6,29 @@
 import Cocoa
 
 public enum CheckState: String { case
-    On = "On",
-    Off = "Off",
-    Mixed = "Mixed"
+    on = "On",
+    off = "Off",
+    mixed = "Mixed"
     
     public init(_ boolValue: Bool?) {
         switch boolValue {
         case nil:
-            self = .Mixed
+            self = .mixed
         case .some(false):
-            self = .Off
+            self = .off
         case .some(true):
-            self = .On
+            self = .on
         }
     }
     
     init(_ nsValue: Int) {
         switch nsValue {
         case NSMixedState:
-            self = .Mixed
+            self = .mixed
         case NSOffState:
-            self = .Off
+            self = .off
         case NSOnState:
-            self = .On
+            self = .on
         default:
             preconditionFailure("Must be one of {NSMixedState, NSOnState, NSOffState}")
         }
@@ -36,11 +36,11 @@ public enum CheckState: String { case
     
     public var boolValue: Bool {
         switch self {
-        case .On:
+        case .on:
             return true
-        case .Off:
+        case .off:
             return false
-        case .Mixed:
+        case .mixed:
             preconditionFailure("Cannot represent mixed state as a boolean")
         }
     }
@@ -48,11 +48,11 @@ public enum CheckState: String { case
     // Int value is used to set NSButton.state
     var nsValue: Int {
         switch self {
-        case .On:
+        case .on:
             return NSOnState
-        case .Off:
+        case .off:
             return NSOffState
-        case .Mixed:
+        case .mixed:
             return NSMixedState
         }
     }
