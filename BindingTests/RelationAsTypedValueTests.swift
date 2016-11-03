@@ -56,7 +56,7 @@ class RelationAsTypedValueTests: BindingTestCase {
     
     func testOneValue() {
         let empty = MakeRelation(
-            ["id", "name", "friendly", "count", "pulse"])
+            ["id", "name", "friendly", "age", "pulse"])
         
         let one = MakeRelation(
             ["id", "name", "friendly", "age", "pulse"],
