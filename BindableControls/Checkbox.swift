@@ -8,7 +8,25 @@ import Binding
 
 open class Checkbox: NSButton {
     
-    private lazy var _checked: ExternalValueProperty<CheckState> = ExternalValueProperty(
+    private var timer: Timer?
+    
+    private lazy var changeHandler: ChangeHandler = ChangeHandler(
+        onLock: { [weak self] in
+            guard let strongSelf = self else { return }
+            strongSelf.timer = Timer.scheduledTimer(timeInterval: 0.5, target: strongSelf, selector: #selector(timerFired), userInfo: nil, repeats: false)
+        },
+        onUnlock: { [weak self] in
+            guard let strongSelf = self else { return }
+            if let timer = strongSelf.timer {
+                timer.invalidate()
+                strongSelf.timer = nil
+            } else {
+                strongSelf.isEnabled = true
+            }
+        }
+    )
+
+    private lazy var _checkState: ExternalValueProperty<CheckState> = ExternalValueProperty(
         get: { [unowned self] in
             return CheckState(self.state)
         },
@@ -17,9 +35,10 @@ open class Checkbox: NSButton {
             // use simple two-state mode
             self.allowsMixedState = value == .Mixed
             self.state = value.nsValue
-        }
+        },
+        changeHandler: self.changeHandler
     )
-    open var checked: ReadWriteProperty<CheckState> { return _checked }
+    public var checkState: ReadWriteProperty<CheckState> { return _checkState }
     
     public override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
@@ -40,10 +59,16 @@ open class Checkbox: NSButton {
         // Cocoa always wants to cycle through the states (including mixed), but we only want the user
         // to be able to choose on/off, so disable allowsMixedState here.
         allowsMixedState = false
-        _checked.changed(transient: false)
+        _checkState.changed(transient: false)
     }
     
     open override func accessibilityValue() -> Any? {
         return CheckState(state).rawValue
+    }
+    
+    @objc private func timerFired() {
+        self.isEnabled = false
+        timer?.invalidate()
+        timer = nil
     }
 }
