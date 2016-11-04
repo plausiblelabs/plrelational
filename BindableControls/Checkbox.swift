@@ -10,21 +10,22 @@ open class Checkbox: NSButton {
     
     private var timer: Timer?
     
-    private lazy var changeHandler: ChangeHandler = ChangeHandler(
-        onLock: { [weak self] in
-            guard let strongSelf = self else { return }
-            strongSelf.timer = Timer.scheduledTimer(timeInterval: 0.5, target: strongSelf, selector: #selector(timerFired), userInfo: nil, repeats: false)
-        },
-        onUnlock: { [weak self] in
-            guard let strongSelf = self else { return }
-            if let timer = strongSelf.timer {
-                timer.invalidate()
-                strongSelf.timer = nil
-            } else {
-                strongSelf.isEnabled = true
-            }
-        }
-    )
+    // TODO: Re-enable timer hack once we fix it to account for `disabled` property
+//    private lazy var changeHandler: ChangeHandler = ChangeHandler(
+//        onLock: { [weak self] in
+//            guard let strongSelf = self else { return }
+//            strongSelf.timer = Timer.scheduledTimer(timeInterval: 0.5, target: strongSelf, selector: #selector(timerFired), userInfo: nil, repeats: false)
+//        },
+//        onUnlock: { [weak self] in
+//            guard let strongSelf = self else { return }
+//            if let timer = strongSelf.timer {
+//                timer.invalidate()
+//                strongSelf.timer = nil
+//            } else {
+//                strongSelf.isEnabled = true
+//            }
+//        }
+//    )
 
     private lazy var _checkState: ExternalValueProperty<CheckState> = ExternalValueProperty(
         get: { [unowned self] in
@@ -35,10 +36,14 @@ open class Checkbox: NSButton {
             // use simple two-state mode
             self.allowsMixedState = value == .mixed
             self.state = value.nsValue
-        },
-        changeHandler: self.changeHandler
+        }
+//        changeHandler: self.changeHandler
     )
     public var checkState: ReadWriteProperty<CheckState> { return _checkState }
+    
+    public lazy var disabled: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
+        self.isEnabled = !value
+    })
     
     public override init(frame frameRect: NSRect) {
         super.init(frame: frameRect)
