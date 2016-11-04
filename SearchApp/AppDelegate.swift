@@ -5,7 +5,7 @@
 
 import Cocoa
 import PLRelational
-import Binding
+import PLRelationalBinding
 import BindableControls
 
 @NSApplicationMain

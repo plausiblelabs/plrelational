@@ -20,7 +20,7 @@
 		372707681CED2F8100710C80 /* AppTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707671CED2F8100710C80 /* AppTestCase.swift */; };
 		3727076B1CED32B000710C80 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		3727076D1CEE60C900710C80 /* MutableRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076C1CEE60C900710C80 /* MutableRelation.swift */; };
-		372707B21CFE23BB00710C80 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
+		372707B21CFE23BB00710C80 /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
 		372707B71CFE240E00710C80 /* CommonValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136921CF11C8D00F572C5 /* CommonValue.swift */; };
 		372707B81CFE240E00710C80 /* ArrayProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136941CF40A9600F572C5 /* ArrayProperty.swift */; };
 		372707B91CFE240E00710C80 /* RelationArrayProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6114C1CDD603C001DAF59 /* RelationArrayProperty.swift */; };
@@ -30,19 +30,19 @@
 		372707BF1CFE24F600710C80 /* ArraySafeIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */; };
 		372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707771CF3C31200710C80 /* RelationValuePlistable.swift */; };
 		372707C61CFE258B00710C80 /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
-		372707D01CFE25B000710C80 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
+		372707D01CFE25B000710C80 /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
 		372707D71CFE25D400710C80 /* RelationArrayPropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136961CF40AB300F572C5 /* RelationArrayPropertyTests.swift */; };
 		372707D81CFE25D400710C80 /* RelationTreePropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */; };
 		372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C6115C1CE4F756001DAF59 /* ArrayBinarySearchTests.swift */; };
 		372707DB1CFE262700710C80 /* BindingTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707DA1CFE262700710C80 /* BindingTestCase.swift */; };
 		372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		372707DD1CFE268C00710C80 /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
-		372707E01CFE293000710C80 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
+		372707E01CFE293000710C80 /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
 		372707EB1CFE2C7E00710C80 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707EA1CFE2C7E00710C80 /* AppDelegate.swift */; };
 		372707ED1CFE2C7E00710C80 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 372707EC1CFE2C7E00710C80 /* Assets.xcassets */; };
 		372707F01CFE2C7E00710C80 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 372707EE1CFE2C7E00710C80 /* MainMenu.xib */; };
 		372707FB1CFE2C7E00710C80 /* BindableControlsAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707FA1CFE2C7E00710C80 /* BindableControlsAppUITests.swift */; };
-		3727080B1CFE2CBA00710C80 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
+		3727080B1CFE2CBA00710C80 /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
 		3727080C1CFE2CBA00710C80 /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
 		3747072E1D19BA9E0048E857 /* libBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		374AE9721D91C2F0007D1366 /* StoredDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9711D91C2F0007D1366 /* StoredDatabase.swift */; };
@@ -57,10 +57,10 @@
 		37504B501DC6995100CEE4D4 /* VisualizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37504B4F1DC6995100CEE4D4 /* VisualizerTests.swift */; };
 		37504B5B1DC6995100CEE4D4 /* VisualizerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37504B5A1DC6995100CEE4D4 /* VisualizerUITests.swift */; };
 		37504B6C1DC699B800CEE4D4 /* libBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; };
-		37504B6D1DC699B800CEE4D4 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
+		37504B6D1DC699B800CEE4D4 /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
 		37504B6E1DC699B800CEE4D4 /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
 		37504B701DC69BD000CEE4D4 /* libPLRelational.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		37504B711DC69BD000CEE4D4 /* libBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		37504B711DC69BD000CEE4D4 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37504B721DC69BD000CEE4D4 /* libBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37504B741DC6A13100CEE4D4 /* RelationTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37504B731DC6A13100CEE4D4 /* RelationTableView.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
@@ -68,11 +68,11 @@
 		376136991CF65F0A00F572C5 /* TextObjectPropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */; };
 		37832EBA1CFCE63C00256DB1 /* PropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37832EB91CFCE63C00256DB1 /* PropertiesModel.swift */; };
 		37832EBC1CFCF17800256DB1 /* TextObjectPropertiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37832EBB1CFCF17800256DB1 /* TextObjectPropertiesView.swift */; };
-		37832EBD1CFE9B6900256DB1 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
+		37832EBD1CFE9B6900256DB1 /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
 		37832EBE1CFE9B6900256DB1 /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
-		37832EC31CFE9DB400256DB1 /* libBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		37832EC31CFE9DB400256DB1 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37832EC61CFE9E0200256DB1 /* libPLRelational.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		37832EC71CFE9E0200256DB1 /* libBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		37832EC71CFE9E0200256DB1 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37941D8C1DB811BF00F5508F /* AsyncPropertyOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */; };
 		37941D8E1DB8191200F5508F /* AsyncPropertyOperationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37941D8D1DB8191200F5508F /* AsyncPropertyOperationsTests.swift */; };
 		37A1CE511D07543F0067870D /* ImageObjectPropertiesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE501D07543F0067870D /* ImageObjectPropertiesView.swift */; };
@@ -81,9 +81,9 @@
 		37A1CE731D1081980067870D /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37A1CE711D1081980067870D /* MainMenu.xib */; };
 		37A1CE7E1D1081980067870D /* SearchAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE7D1D1081980067870D /* SearchAppTests.swift */; };
 		37A1CE891D1081980067870D /* SearchAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE881D1081980067870D /* SearchAppUITests.swift */; };
-		37A1CE981D1081CD0067870D /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
+		37A1CE981D1081CD0067870D /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
 		37A1CE991D1081CD0067870D /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
-		37A1CEAB1D10820D0067870D /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
+		37A1CEAB1D10820D0067870D /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
 		37A1CEAC1D10820D0067870D /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
 		37A1CEB11D1083FD0067870D /* BackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611301CD7F7D7001DAF59 /* BackgroundView.swift */; };
 		37A1CEB21D1083FD0067870D /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371243A51D00B06300E9BCFF /* ImageView.swift */; };
@@ -131,7 +131,7 @@
 		37A4A26A1D30260F005CAEA5 /* AsyncExampleAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2691D30260F005CAEA5 /* AsyncExampleAppTests.swift */; };
 		37A4A2731D30265B005CAEA5 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2721D30265B005CAEA5 /* ViewModel.swift */; };
 		37A4A27A1D3026DA005CAEA5 /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
-		37A4A27B1D3026DD005CAEA5 /* libBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libBinding.dylib */; };
+		37A4A27B1D3026DD005CAEA5 /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
 		37A4A27C1D3026E1005CAEA5 /* libBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; };
 		37A4A27D1D302738005CAEA5 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
 		37A4A27E1D302738005CAEA5 /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
@@ -500,7 +500,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				37504B701DC69BD000CEE4D4 /* libPLRelational.dylib in Copy Embedded Libraries */,
-				37504B711DC69BD000CEE4D4 /* libBinding.dylib in Copy Embedded Libraries */,
+				37504B711DC69BD000CEE4D4 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */,
 				37504B721DC69BD000CEE4D4 /* libBindableControls.dylib in Copy Embedded Libraries */,
 			);
 			name = "Copy Embedded Libraries";
@@ -514,7 +514,7 @@
 			files = (
 				37A1CECB1D108B760067870D /* libBindableControls.dylib in Copy Embedded Libraries */,
 				37832EC61CFE9E0200256DB1 /* libPLRelational.dylib in Copy Embedded Libraries */,
-				37832EC71CFE9E0200256DB1 /* libBinding.dylib in Copy Embedded Libraries */,
+				37832EC71CFE9E0200256DB1 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */,
 			);
 			name = "Copy Embedded Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -526,7 +526,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				3747072E1D19BA9E0048E857 /* libBindableControls.dylib in Copy Embedded Libraries */,
-				37832EC31CFE9DB400256DB1 /* libBinding.dylib in Copy Embedded Libraries */,
+				37832EC31CFE9DB400256DB1 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */,
 				C23AAF441CF758D1009E28E0 /* libPLRelational.dylib in Copy Embedded Libraries */,
 			);
 			name = "Copy Embedded Libraries";
@@ -563,8 +563,8 @@
 		372707751CF391EC00710C80 /* TreeProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeProperty.swift; sourceTree = "<group>"; };
 		372707771CF3C31200710C80 /* RelationValuePlistable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValuePlistable.swift; sourceTree = "<group>"; };
 		372707791CF7B2CB00710C80 /* UndoableDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UndoableDatabase.swift; path = ../BindableControls/UndoableDatabase.swift; sourceTree = "<group>"; };
-		372707AE1CFE238700710C80 /* libBinding.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libBinding.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		372707CB1CFE25AF00710C80 /* BindingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BindingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libPLRelationalBinding.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		372707CB1CFE25AF00710C80 /* PLRelationalBindingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PLRelationalBindingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		372707CF1CFE25B000710C80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		372707DA1CFE262700710C80 /* BindingTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BindingTestCase.swift; sourceTree = "<group>"; };
 		372707E81CFE2C7E00710C80 /* BindableControlsApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BindableControlsApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -595,17 +595,17 @@
 		37504B731DC6A13100CEE4D4 /* RelationTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationTableView.swift; sourceTree = "<group>"; };
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = SampleAppTests/DocModelTests.swift; sourceTree = SOURCE_ROOT; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
-		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CommonValue.swift; path = Binding/CommonValue.swift; sourceTree = "<group>"; };
+		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonValue.swift; sourceTree = "<group>"; };
 		376136941CF40A9600F572C5 /* ArrayProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayProperty.swift; sourceTree = "<group>"; };
-		376136961CF40AB300F572C5 /* RelationArrayPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationArrayPropertyTests.swift; path = BindingTests/RelationArrayPropertyTests.swift; sourceTree = SOURCE_ROOT; };
+		376136961CF40AB300F572C5 /* RelationArrayPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationArrayPropertyTests.swift; path = PLRelationalBindingTests/RelationArrayPropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObjectPropertiesModel.swift; sourceTree = "<group>"; };
 		3761369A1CF9523A00F572C5 /* PopUpButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PopUpButton.swift; sourceTree = "<group>"; };
 		3761369C1CFBA42100F572C5 /* StepperView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StepperView.swift; sourceTree = "<group>"; };
 		376A96371D09225900E696AE /* ComboBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComboBox.swift; sourceTree = "<group>"; };
 		37832EB91CFCE63C00256DB1 /* PropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertiesModel.swift; sourceTree = "<group>"; };
 		37832EBB1CFCF17800256DB1 /* TextObjectPropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObjectPropertiesView.swift; sourceTree = "<group>"; };
-		37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyOperations.swift; path = Binding/AsyncPropertyOperations.swift; sourceTree = "<group>"; };
-		37941D8D1DB8191200F5508F /* AsyncPropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyOperationsTests.swift; path = BindingTests/AsyncPropertyOperationsTests.swift; sourceTree = "<group>"; };
+		37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncPropertyOperations.swift; sourceTree = "<group>"; };
+		37941D8D1DB8191200F5508F /* AsyncPropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyOperationsTests.swift; path = PLRelationalBindingTests/AsyncPropertyOperationsTests.swift; sourceTree = SOURCE_ROOT; };
 		37A1CE501D07543F0067870D /* ImageObjectPropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageObjectPropertiesView.swift; sourceTree = "<group>"; };
 		37A1CE591D08A2240067870D /* MenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuItem.swift; sourceTree = "<group>"; };
 		37A1CE5C1D08C3110067870D /* ColorPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
@@ -626,23 +626,23 @@
 		37A1CED11D10B8690067870D /* Button.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		37A1CED31D11D9180067870D /* ProgressIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
 		37A1CED51D11DC410067870D /* ViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
-		37A1CED81D1354DD0067870D /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Property.swift; path = Binding/Property.swift; sourceTree = "<group>"; };
+		37A1CED81D1354DD0067870D /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Property.swift; sourceTree = "<group>"; };
 		37A1CEDB1D1358670067870D /* CheckState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckState.swift; sourceTree = "<group>"; };
-		37A1CEDD1D1469720067870D /* Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Signal.swift; path = Binding/Signal.swift; sourceTree = "<group>"; };
-		37A1CEE21D147ACA0067870D /* RelationAsTypedValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationAsTypedValue.swift; path = Binding/RelationAsTypedValue.swift; sourceTree = "<group>"; };
-		37A1CEE41D147B0E0067870D /* RelationAsTypedValueTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationAsTypedValueTests.swift; path = BindingTests/RelationAsTypedValueTests.swift; sourceTree = "<group>"; };
-		37A1CEE61D147BD80067870D /* RelationMutation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationMutation.swift; path = Binding/RelationMutation.swift; sourceTree = "<group>"; };
-		37A1CEE81D147C190067870D /* RelationMutationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationMutationTests.swift; path = BindingTests/RelationMutationTests.swift; sourceTree = "<group>"; };
-		37A1CEEA1D1480120067870D /* PropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyTests.swift; path = BindingTests/PropertyTests.swift; sourceTree = "<group>"; };
-		37A4A2391D1DB343005CAEA5 /* PropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyOperations.swift; path = Binding/PropertyOperations.swift; sourceTree = "<group>"; };
-		37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyOperationsTests.swift; path = BindingTests/PropertyOperationsTests.swift; sourceTree = "<group>"; };
-		37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationProperty.swift; path = Binding/RelationProperty.swift; sourceTree = "<group>"; };
-		37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationPropertyTests.swift; path = BindingTests/RelationPropertyTests.swift; sourceTree = "<group>"; };
+		37A1CEDD1D1469720067870D /* Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Signal.swift; sourceTree = "<group>"; };
+		37A1CEE21D147ACA0067870D /* RelationAsTypedValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationAsTypedValue.swift; sourceTree = "<group>"; };
+		37A1CEE41D147B0E0067870D /* RelationAsTypedValueTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationAsTypedValueTests.swift; path = PLRelationalBindingTests/RelationAsTypedValueTests.swift; sourceTree = SOURCE_ROOT; };
+		37A1CEE61D147BD80067870D /* RelationMutation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationMutation.swift; sourceTree = "<group>"; };
+		37A1CEE81D147C190067870D /* RelationMutationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationMutationTests.swift; path = PLRelationalBindingTests/RelationMutationTests.swift; sourceTree = SOURCE_ROOT; };
+		37A1CEEA1D1480120067870D /* PropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyTests.swift; path = PLRelationalBindingTests/PropertyTests.swift; sourceTree = SOURCE_ROOT; };
+		37A4A2391D1DB343005CAEA5 /* PropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyOperations.swift; sourceTree = "<group>"; };
+		37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyOperationsTests.swift; path = PLRelationalBindingTests/PropertyOperationsTests.swift; sourceTree = SOURCE_ROOT; };
+		37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationProperty.swift; sourceTree = "<group>"; };
+		37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationPropertyTests.swift; path = PLRelationalBindingTests/RelationPropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		37A4A2411D21A613005CAEA5 /* TextProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextProperty.swift; sourceTree = "<group>"; };
-		37A4A2431D259BB7005CAEA5 /* RelationChangeParts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationChangeParts.swift; path = Binding/RelationChangeParts.swift; sourceTree = "<group>"; };
-		37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationChangePartsTests.swift; path = BindingTests/RelationChangePartsTests.swift; sourceTree = "<group>"; };
-		37A4A24F1D2EC81E005CAEA5 /* Pi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Pi.swift; path = Binding/Pi.swift; sourceTree = "<group>"; };
-		37A4A2511D2ECCBF005CAEA5 /* PiTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PiTests.swift; path = BindingTests/PiTests.swift; sourceTree = "<group>"; };
+		37A4A2431D259BB7005CAEA5 /* RelationChangeParts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationChangeParts.swift; sourceTree = "<group>"; };
+		37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationChangePartsTests.swift; path = PLRelationalBindingTests/RelationChangePartsTests.swift; sourceTree = SOURCE_ROOT; };
+		37A4A24F1D2EC81E005CAEA5 /* Pi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pi.swift; sourceTree = "<group>"; };
+		37A4A2511D2ECCBF005CAEA5 /* PiTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PiTests.swift; path = PLRelationalBindingTests/PiTests.swift; sourceTree = SOURCE_ROOT; };
 		37A4A2571D30260F005CAEA5 /* AsyncExampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AsyncExampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37A4A2591D30260F005CAEA5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37A4A25B1D30260F005CAEA5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -652,16 +652,16 @@
 		37A4A2691D30260F005CAEA5 /* AsyncExampleAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncExampleAppTests.swift; sourceTree = "<group>"; };
 		37A4A26B1D30260F005CAEA5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		37A4A2721D30265B005CAEA5 /* ViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
-		37A4A27F1D3073C7005CAEA5 /* ChangeHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeHandler.swift; path = ../Binding/ChangeHandler.swift; sourceTree = "<group>"; };
-		37A4A2841D307AF3005CAEA5 /* ChangeHandlerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeHandlerTests.swift; path = BindingTests/ChangeHandlerTests.swift; sourceTree = SOURCE_ROOT; };
-		37A4A28D1D34A14E005CAEA5 /* SignalOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SignalOperations.swift; path = Binding/SignalOperations.swift; sourceTree = "<group>"; };
-		37A4A28F1D34A576005CAEA5 /* SignalOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SignalOperationsTests.swift; path = BindingTests/SignalOperationsTests.swift; sourceTree = "<group>"; };
-		37A4A2921D357D17005CAEA5 /* AsyncProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncProperty.swift; path = Binding/AsyncProperty.swift; sourceTree = "<group>"; };
-		37A4A2941D357DF2005CAEA5 /* AsyncPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyTests.swift; path = BindingTests/AsyncPropertyTests.swift; sourceTree = "<group>"; };
-		37A4A2961D3581B7005CAEA5 /* RelationAsyncProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationAsyncProperty.swift; path = Binding/RelationAsyncProperty.swift; sourceTree = "<group>"; };
-		37A4A2981D358581005CAEA5 /* RelationAsyncPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationAsyncPropertyTests.swift; path = BindingTests/RelationAsyncPropertyTests.swift; sourceTree = "<group>"; };
-		37A4A29E1D35B09E005CAEA5 /* RelationSignal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationSignal.swift; path = Binding/RelationSignal.swift; sourceTree = "<group>"; };
-		37A4A2A01D35B0B7005CAEA5 /* RelationSignalTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationSignalTests.swift; path = BindingTests/RelationSignalTests.swift; sourceTree = "<group>"; };
+		37A4A27F1D3073C7005CAEA5 /* ChangeHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeHandler.swift; sourceTree = "<group>"; };
+		37A4A2841D307AF3005CAEA5 /* ChangeHandlerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeHandlerTests.swift; path = PLRelationalBindingTests/ChangeHandlerTests.swift; sourceTree = SOURCE_ROOT; };
+		37A4A28D1D34A14E005CAEA5 /* SignalOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SignalOperations.swift; sourceTree = "<group>"; };
+		37A4A28F1D34A576005CAEA5 /* SignalOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SignalOperationsTests.swift; path = PLRelationalBindingTests/SignalOperationsTests.swift; sourceTree = SOURCE_ROOT; };
+		37A4A2921D357D17005CAEA5 /* AsyncProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncProperty.swift; sourceTree = "<group>"; };
+		37A4A2941D357DF2005CAEA5 /* AsyncPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyTests.swift; path = PLRelationalBindingTests/AsyncPropertyTests.swift; sourceTree = SOURCE_ROOT; };
+		37A4A2961D3581B7005CAEA5 /* RelationAsyncProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationAsyncProperty.swift; sourceTree = "<group>"; };
+		37A4A2981D358581005CAEA5 /* RelationAsyncPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationAsyncPropertyTests.swift; path = PLRelationalBindingTests/RelationAsyncPropertyTests.swift; sourceTree = SOURCE_ROOT; };
+		37A4A29E1D35B09E005CAEA5 /* RelationSignal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationSignal.swift; sourceTree = "<group>"; };
+		37A4A2A01D35B0B7005CAEA5 /* RelationSignalTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationSignalTests.swift; path = PLRelationalBindingTests/RelationSignalTests.swift; sourceTree = SOURCE_ROOT; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -687,16 +687,16 @@
 		37C611501CE10770001DAF59 /* TreeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeView.swift; sourceTree = "<group>"; };
 		37C611521CE3A942001DAF59 /* ContextMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextMenu.swift; sourceTree = "<group>"; };
 		37C6115A1CE4F3BC001DAF59 /* ArrayBinarySearch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayBinarySearch.swift; sourceTree = "<group>"; };
-		37C6115C1CE4F756001DAF59 /* ArrayBinarySearchTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ArrayBinarySearchTests.swift; path = BindingTests/ArrayBinarySearchTests.swift; sourceTree = SOURCE_ROOT; };
-		37CA0EF01D8F664700843A1F /* RowCollectionElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RowCollectionElement.swift; path = Binding/RowCollectionElement.swift; sourceTree = "<group>"; };
-		37CA0EF21D8F673500843A1F /* CollectionElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CollectionElement.swift; path = Binding/CollectionElement.swift; sourceTree = "<group>"; };
+		37C6115C1CE4F756001DAF59 /* ArrayBinarySearchTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ArrayBinarySearchTests.swift; path = PLRelationalBindingTests/ArrayBinarySearchTests.swift; sourceTree = SOURCE_ROOT; };
+		37CA0EF01D8F664700843A1F /* RowCollectionElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RowCollectionElement.swift; sourceTree = "<group>"; };
+		37CA0EF21D8F673500843A1F /* CollectionElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionElement.swift; sourceTree = "<group>"; };
 		37E05C2D1DCAEFC7005CBFE2 /* DocDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocDatabase.swift; sourceTree = "<group>"; };
 		37E05C2F1DCAF00E005CBFE2 /* DocDatabaseError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocDatabaseError.swift; sourceTree = "<group>"; };
 		37E05C311DCAF4FB005CBFE2 /* Identifiers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Identifiers.swift; sourceTree = "<group>"; };
 		37E05C341DCAF59B005CBFE2 /* ItemType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemType.swift; sourceTree = "<group>"; };
 		37E05C361DCAF764005CBFE2 /* DocObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocObject.swift; sourceTree = "<group>"; };
 		37E05C381DCAF7B9005CBFE2 /* HistoryItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoryItem.swift; sourceTree = "<group>"; };
-		37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationTreePropertyTests.swift; path = BindingTests/RelationTreePropertyTests.swift; sourceTree = SOURCE_ROOT; };
+		37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationTreePropertyTests.swift; path = PLRelationalBindingTests/RelationTreePropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		47701CA01CF764CD00E3549D /* Checkbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
 		C204A14F1D071A9200DF297F /* RelationDerivative.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDerivative.swift; sourceTree = "<group>"; };
 		C204A1511D073E6100DF297F /* RelationObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationObserver.swift; sourceTree = "<group>"; };
@@ -799,7 +799,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				372707DD1CFE268C00710C80 /* libPLRelational.dylib in Frameworks */,
-				372707D01CFE25B000710C80 /* libBinding.dylib in Frameworks */,
+				372707D01CFE25B000710C80 /* libPLRelationalBinding.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -808,7 +808,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37A1CEC31D10843F0067870D /* libBindableControls.dylib in Frameworks */,
-				3727080B1CFE2CBA00710C80 /* libBinding.dylib in Frameworks */,
+				3727080B1CFE2CBA00710C80 /* libPLRelationalBinding.dylib in Frameworks */,
 				3727080C1CFE2CBA00710C80 /* libPLRelational.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -817,7 +817,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37832EBD1CFE9B6900256DB1 /* libBinding.dylib in Frameworks */,
+				37832EBD1CFE9B6900256DB1 /* libPLRelationalBinding.dylib in Frameworks */,
 				37832EBE1CFE9B6900256DB1 /* libPLRelational.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -827,7 +827,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37504B6E1DC699B800CEE4D4 /* libPLRelational.dylib in Frameworks */,
-				37504B6D1DC699B800CEE4D4 /* libBinding.dylib in Frameworks */,
+				37504B6D1DC699B800CEE4D4 /* libPLRelationalBinding.dylib in Frameworks */,
 				37504B6C1DC699B800CEE4D4 /* libBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -851,7 +851,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37A1CE991D1081CD0067870D /* libPLRelational.dylib in Frameworks */,
-				37A1CE981D1081CD0067870D /* libBinding.dylib in Frameworks */,
+				37A1CE981D1081CD0067870D /* libPLRelationalBinding.dylib in Frameworks */,
 				37A1CECE1D108F400067870D /* libBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -874,7 +874,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37A1CEAB1D10820D0067870D /* libBinding.dylib in Frameworks */,
+				37A1CEAB1D10820D0067870D /* libPLRelationalBinding.dylib in Frameworks */,
 				37A1CEAC1D10820D0067870D /* libPLRelational.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -884,7 +884,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37A4A27A1D3026DA005CAEA5 /* libPLRelational.dylib in Frameworks */,
-				37A4A27B1D3026DD005CAEA5 /* libBinding.dylib in Frameworks */,
+				37A4A27B1D3026DD005CAEA5 /* libPLRelationalBinding.dylib in Frameworks */,
 				37A4A27C1D3026E1005CAEA5 /* libBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -901,7 +901,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37C6112D1CD7F09B001DAF59 /* libPLRelational.dylib in Frameworks */,
-				372707B21CFE23BB00710C80 /* libBinding.dylib in Frameworks */,
+				372707B21CFE23BB00710C80 /* libPLRelationalBinding.dylib in Frameworks */,
 				37A1CEC81D1088EF0067870D /* libBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -911,7 +911,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37C611591CE3F7C0001DAF59 /* libPLRelational.dylib in Frameworks */,
-				372707E01CFE293000710C80 /* libBinding.dylib in Frameworks */,
+				372707E01CFE293000710C80 /* libPLRelationalBinding.dylib in Frameworks */,
 				37A4A28C1D343322005CAEA5 /* libBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -965,7 +965,6 @@
 				37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */,
 			);
 			name = "Tree Property";
-			path = Binding;
 			sourceTree = "<group>";
 		};
 		372707741CF3904D00710C80 /* Array Property */ = {
@@ -976,10 +975,9 @@
 				376136961CF40AB300F572C5 /* RelationArrayPropertyTests.swift */,
 			);
 			name = "Array Property";
-			path = Binding;
 			sourceTree = "<group>";
 		};
-		372707B31CFE23CA00710C80 /* Binding */ = {
+		372707B31CFE23CA00710C80 /* PLRelationalBinding */ = {
 			isa = PBXGroup;
 			children = (
 				37A1CEDF1D1469900067870D /* Signal */,
@@ -988,8 +986,9 @@
 				37A4A2811D307435005CAEA5 /* Change Handling */,
 				37A1CEE11D147A970067870D /* Relation Extensions */,
 				372707BC1CFE24C600710C80 /* Utilities */,
+				372707CC1CFE25AF00710C80 /* PLRelationalBindingTests */,
 			);
-			name = Binding;
+			path = PLRelationalBinding;
 			sourceTree = "<group>";
 		};
 		372707BC1CFE24C600710C80 /* Utilities */ = {
@@ -1001,17 +1000,16 @@
 				372707771CF3C31200710C80 /* RelationValuePlistable.swift */,
 			);
 			name = Utilities;
-			path = Binding;
 			sourceTree = "<group>";
 		};
-		372707CC1CFE25AF00710C80 /* BindingTests */ = {
+		372707CC1CFE25AF00710C80 /* PLRelationalBindingTests */ = {
 			isa = PBXGroup;
 			children = (
 				372707CF1CFE25B000710C80 /* Info.plist */,
 				372707DA1CFE262700710C80 /* BindingTestCase.swift */,
 			);
-			path = BindingTests;
-			sourceTree = "<group>";
+			path = PLRelationalBindingTests;
+			sourceTree = SOURCE_ROOT;
 		};
 		372707E91CFE2C7E00710C80 /* BindableControlsApp */ = {
 			isa = PBXGroup;
@@ -1326,7 +1324,6 @@
 				37A4A2841D307AF3005CAEA5 /* ChangeHandlerTests.swift */,
 			);
 			name = "Change Handling";
-			path = Binding;
 			sourceTree = "<group>";
 		};
 		37A4A2911D357D00005CAEA5 /* Async Property */ = {
@@ -1502,15 +1499,13 @@
 				C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */,
 			);
 			path = PLRelationalTests;
-			sourceTree = "<group>";
+			sourceTree = SOURCE_ROOT;
 		};
 		C22BF1231CBC348500D3FE59 = {
 			isa = PBXGroup;
 			children = (
 				C22BF12E1CBC348500D3FE59 /* PLRelational */,
-				C22921E61CD12CF100518184 /* PLRelationalTests */,
-				372707B31CFE23CA00710C80 /* Binding */,
-				372707CC1CFE25AF00710C80 /* BindingTests */,
+				372707B31CFE23CA00710C80 /* PLRelationalBinding */,
 				37A1CE9F1D1081FC0067870D /* BindableControls */,
 				372707E91CFE2C7E00710C80 /* BindableControlsApp */,
 				372707F91CFE2C7E00710C80 /* BindableControlsAppUITests */,
@@ -1538,8 +1533,8 @@
 				37C610FD1CD7EFAE001DAF59 /* SampleApp.app */,
 				37C611101CD7EFAE001DAF59 /* SampleAppTests.xctest */,
 				37C6111B1CD7EFAE001DAF59 /* SampleAppUITests.xctest */,
-				372707AE1CFE238700710C80 /* libBinding.dylib */,
-				372707CB1CFE25AF00710C80 /* BindingTests.xctest */,
+				372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */,
+				372707CB1CFE25AF00710C80 /* PLRelationalBindingTests.xctest */,
 				372707E81CFE2C7E00710C80 /* BindableControlsApp.app */,
 				372707F61CFE2C7E00710C80 /* BindableControlsAppUITests.xctest */,
 				37A1CE6B1D1081980067870D /* SearchApp.app */,
@@ -1568,6 +1563,7 @@
 				374AE9681D91B63A007D1366 /* Debugging Aids */,
 				C2BD298F1CD250B30081FD05 /* Utilities */,
 				C22921951CC6D25100518184 /* Custom Module Map */,
+				C22921E61CD12CF100518184 /* PLRelationalTests */,
 			);
 			path = PLRelational;
 			sourceTree = "<group>";
@@ -1673,9 +1669,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		372707AD1CFE238700710C80 /* Binding */ = {
+		372707AD1CFE238700710C80 /* PLRelationalBinding */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 372707B11CFE238700710C80 /* Build configuration list for PBXNativeTarget "Binding" */;
+			buildConfigurationList = 372707B11CFE238700710C80 /* Build configuration list for PBXNativeTarget "PLRelationalBinding" */;
 			buildPhases = (
 				372707AA1CFE238700710C80 /* Sources */,
 				372707AB1CFE238700710C80 /* Frameworks */,
@@ -1686,14 +1682,14 @@
 			dependencies = (
 				37A1CECA1D108ADA0067870D /* PBXTargetDependency */,
 			);
-			name = Binding;
+			name = PLRelationalBinding;
 			productName = Binding;
-			productReference = 372707AE1CFE238700710C80 /* libBinding.dylib */;
+			productReference = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
-		372707CA1CFE25AF00710C80 /* BindingTests */ = {
+		372707CA1CFE25AF00710C80 /* PLRelationalBindingTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 372707D31CFE25B000710C80 /* Build configuration list for PBXNativeTarget "BindingTests" */;
+			buildConfigurationList = 372707D31CFE25B000710C80 /* Build configuration list for PBXNativeTarget "PLRelationalBindingTests" */;
 			buildPhases = (
 				372707C71CFE25AF00710C80 /* Sources */,
 				372707C81CFE25AF00710C80 /* Frameworks */,
@@ -1705,9 +1701,9 @@
 				372707DF1CFE269100710C80 /* PBXTargetDependency */,
 				372707D21CFE25B000710C80 /* PBXTargetDependency */,
 			);
-			name = BindingTests;
+			name = PLRelationalBindingTests;
 			productName = BindingTests;
-			productReference = 372707CB1CFE25AF00710C80 /* BindingTests.xctest */;
+			productReference = 372707CB1CFE25AF00710C80 /* PLRelationalBindingTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		372707E71CFE2C7E00710C80 /* BindableControlsApp */ = {
@@ -2120,8 +2116,8 @@
 			targets = (
 				C22921BA1CD12A7100518184 /* PLRelational */,
 				C22921E41CD12CF100518184 /* PLRelationalTests */,
-				372707AD1CFE238700710C80 /* Binding */,
-				372707CA1CFE25AF00710C80 /* BindingTests */,
+				372707AD1CFE238700710C80 /* PLRelationalBinding */,
+				372707CA1CFE25AF00710C80 /* PLRelationalBindingTests */,
 				37A1CE9D1D1081FC0067870D /* BindableControls */,
 				372707E71CFE2C7E00710C80 /* BindableControlsApp */,
 				372707F51CFE2C7E00710C80 /* BindableControlsAppUITests */,
@@ -2602,7 +2598,7 @@
 /* Begin PBXTargetDependency section */
 		372707D21CFE25B000710C80 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 372707AD1CFE238700710C80 /* Binding */;
+			target = 372707AD1CFE238700710C80 /* PLRelationalBinding */;
 			targetProxy = 372707D11CFE25B000710C80 /* PBXContainerItemProxy */;
 		};
 		372707DF1CFE269100710C80 /* PBXTargetDependency */ = {
@@ -2622,7 +2618,7 @@
 		};
 		3727080A1CFE2CB300710C80 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 372707AD1CFE238700710C80 /* Binding */;
+			target = 372707AD1CFE238700710C80 /* PLRelationalBinding */;
 			targetProxy = 372708091CFE2CB300710C80 /* PBXContainerItemProxy */;
 		};
 		37504B4D1DC6995100CEE4D4 /* PBXTargetDependency */ = {
@@ -2642,7 +2638,7 @@
 		};
 		37504B691DC699B100CEE4D4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 372707AD1CFE238700710C80 /* Binding */;
+			target = 372707AD1CFE238700710C80 /* PLRelationalBinding */;
 			targetProxy = 37504B681DC699B100CEE4D4 /* PBXContainerItemProxy */;
 		};
 		37504B6B1DC699B100CEE4D4 /* PBXTargetDependency */ = {
@@ -2657,7 +2653,7 @@
 		};
 		37832EC21CFE9BB200256DB1 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 372707AD1CFE238700710C80 /* Binding */;
+			target = 372707AD1CFE238700710C80 /* PLRelationalBinding */;
 			targetProxy = 37832EC11CFE9BB200256DB1 /* PBXContainerItemProxy */;
 		};
 		37A1CE7B1D1081980067870D /* PBXTargetDependency */ = {
@@ -2677,7 +2673,7 @@
 		};
 		37A1CE971D1081C60067870D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 372707AD1CFE238700710C80 /* Binding */;
+			target = 372707AD1CFE238700710C80 /* PLRelationalBinding */;
 			targetProxy = 37A1CE961D1081C60067870D /* PBXContainerItemProxy */;
 		};
 		37A1CEA81D1082060067870D /* PBXTargetDependency */ = {
@@ -2687,7 +2683,7 @@
 		};
 		37A1CEAA1D1082060067870D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 372707AD1CFE238700710C80 /* Binding */;
+			target = 372707AD1CFE238700710C80 /* PLRelationalBinding */;
 			targetProxy = 37A1CEA91D1082060067870D /* PBXContainerItemProxy */;
 		};
 		37A1CEC21D10843A0067870D /* PBXTargetDependency */ = {
@@ -2697,7 +2693,7 @@
 		};
 		37A1CEC51D1088E60067870D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 372707AD1CFE238700710C80 /* Binding */;
+			target = 372707AD1CFE238700710C80 /* PLRelationalBinding */;
 			targetProxy = 37A1CEC41D1088E60067870D /* PBXContainerItemProxy */;
 		};
 		37A1CEC71D1088E60067870D /* PBXTargetDependency */ = {
@@ -2727,7 +2723,7 @@
 		};
 		37A4A2771D3026D2005CAEA5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 372707AD1CFE238700710C80 /* Binding */;
+			target = 372707AD1CFE238700710C80 /* PLRelationalBinding */;
 			targetProxy = 37A4A2761D3026D2005CAEA5 /* PBXContainerItemProxy */;
 		};
 		37A4A2791D3026D2005CAEA5 /* PBXTargetDependency */ = {
@@ -2742,7 +2738,7 @@
 		};
 		37A4A2891D34331D005CAEA5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 372707AD1CFE238700710C80 /* Binding */;
+			target = 372707AD1CFE238700710C80 /* PLRelationalBinding */;
 			targetProxy = 37A4A2881D34331D005CAEA5 /* PBXContainerItemProxy */;
 		};
 		37A4A28B1D34331D005CAEA5 /* PBXTargetDependency */ = {
@@ -2860,9 +2856,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = BindingTests/Info.plist;
+				INFOPLIST_FILE = PLRelationalBindingTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindingTests;
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBindingTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};
@@ -2872,9 +2868,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = BindingTests/Info.plist;
+				INFOPLIST_FILE = PLRelationalBindingTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindingTests;
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBindingTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};
@@ -3423,7 +3419,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		372707B11CFE238700710C80 /* Build configuration list for PBXNativeTarget "Binding" */ = {
+		372707B11CFE238700710C80 /* Build configuration list for PBXNativeTarget "PLRelationalBinding" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				372707AF1CFE238700710C80 /* Debug */,
@@ -3432,7 +3428,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		372707D31CFE25B000710C80 /* Build configuration list for PBXNativeTarget "BindingTests" */ = {
+		372707D31CFE25B000710C80 /* Build configuration list for PBXNativeTarget "PLRelationalBindingTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				372707D41CFE25B000710C80 /* Debug */,

@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-import Binding
+import PLRelationalBinding
 
 /// A sum type that holds either a read-only or read-write String-typed property, used for
 /// binding the content of a TextField or similar control.

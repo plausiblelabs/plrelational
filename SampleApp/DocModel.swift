@@ -5,7 +5,7 @@
 
 import Foundation
 import PLRelational
-import Binding
+import PLRelationalBinding
 import BindableControls
 
 // TODO: Similar to what we did with `globalID`, we put all "type" constants that describe

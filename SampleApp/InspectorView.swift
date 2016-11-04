@@ -4,7 +4,7 @@
 //
 
 import Cocoa
-import Binding
+import PLRelationalBinding
 import BindableControls
 
 // Note: Normally this would be an NSView subclass, but for the sake of expedience we defined the UI in

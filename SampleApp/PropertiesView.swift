@@ -4,7 +4,7 @@
 //
 
 import Cocoa
-import Binding
+import PLRelationalBinding
 import BindableControls
 
 class PropertiesView: BackgroundView {

@@ -5,7 +5,7 @@
 
 import XCTest
 import PLRelational
-@testable import Binding
+@testable import PLRelationalBinding
 import BindableControls
 @testable import SampleApp
 

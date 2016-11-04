@@ -5,7 +5,7 @@
 
 import XCTest
 import PLRelational
-import Binding
+import PLRelationalBinding
 @testable import SampleApp
 
 class AppTestCase: BindingTestCase {

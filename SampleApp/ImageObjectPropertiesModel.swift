@@ -5,7 +5,7 @@
 
 import Foundation
 import PLRelational
-import Binding
+import PLRelationalBinding
 import BindableControls
 
 class ImageObjectPropertiesModel {

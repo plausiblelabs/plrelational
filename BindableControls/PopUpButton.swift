@@ -4,7 +4,7 @@
 //
 
 import Cocoa
-import Binding
+import PLRelationalBinding
 
 open class PopUpButton<T: Equatable>: NSPopUpButton {
 

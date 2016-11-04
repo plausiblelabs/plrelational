@@ -4,5 +4,5 @@
 //
 
 import XCTest
-@testable import Binding
+@testable import PLRelationalBinding
 

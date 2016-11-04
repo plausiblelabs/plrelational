@@ -4,7 +4,7 @@
 //
 
 import Cocoa
-import Binding
+import PLRelationalBinding
 
 public struct MenuItemContent<T> {
     public let object: T
