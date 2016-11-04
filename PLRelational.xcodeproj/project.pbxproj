@@ -1638,7 +1638,7 @@
 		C22BF1231CBC348500D3FE59 = {
 			isa = PBXGroup;
 			children = (
-				C22BF12E1CBC348500D3FE59 /* Relational */,
+				C22BF12E1CBC348500D3FE59 /* PLRelational */,
 				C22921E61CD12CF100518184 /* RelationalTests */,
 				372707B31CFE23CA00710C80 /* Binding */,
 				372707CC1CFE25AF00710C80 /* BindingTests */,
@@ -1692,7 +1692,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C22BF12E1CBC348500D3FE59 /* Relational */ = {
+		C22BF12E1CBC348500D3FE59 /* PLRelational */ = {
 			isa = PBXGroup;
 			children = (
 				374AE96C1D91B836007D1366 /* Core */,
@@ -1706,7 +1706,7 @@
 				C2BD298F1CD250B30081FD05 /* Utilities */,
 				C22921951CC6D25100518184 /* Custom Module Map */,
 			);
-			path = Relational;
+			path = PLRelational;
 			sourceTree = "<group>";
 		};
 		C277E7FB1CDA908E00B7B8F6 /* Logging Relations */ = {
