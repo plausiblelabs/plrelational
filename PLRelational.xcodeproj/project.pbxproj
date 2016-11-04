@@ -123,8 +123,6 @@
 		37A4A2421D21A613005CAEA5 /* TextProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2411D21A613005CAEA5 /* TextProperty.swift */; };
 		37A4A2441D259BB7005CAEA5 /* RelationChangeParts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2431D259BB7005CAEA5 /* RelationChangeParts.swift */; };
 		37A4A2461D259DD4005CAEA5 /* RelationChangePartsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */; };
-		37A4A2501D2EC81E005CAEA5 /* Pi.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A24F1D2EC81E005CAEA5 /* Pi.swift */; };
-		37A4A2521D2ECCBF005CAEA5 /* PiTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2511D2ECCBF005CAEA5 /* PiTests.swift */; };
 		37A4A25A1D30260F005CAEA5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2591D30260F005CAEA5 /* AppDelegate.swift */; };
 		37A4A25C1D30260F005CAEA5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37A4A25B1D30260F005CAEA5 /* Assets.xcassets */; };
 		37A4A25F1D30260F005CAEA5 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37A4A25D1D30260F005CAEA5 /* MainMenu.xib */; };
@@ -641,8 +639,6 @@
 		37A4A2411D21A613005CAEA5 /* TextProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextProperty.swift; sourceTree = "<group>"; };
 		37A4A2431D259BB7005CAEA5 /* RelationChangeParts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationChangeParts.swift; sourceTree = "<group>"; };
 		37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationChangePartsTests.swift; path = PLRelationalBindingTests/RelationChangePartsTests.swift; sourceTree = SOURCE_ROOT; };
-		37A4A24F1D2EC81E005CAEA5 /* Pi.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pi.swift; sourceTree = "<group>"; };
-		37A4A2511D2ECCBF005CAEA5 /* PiTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PiTests.swift; path = PLRelationalBindingTests/PiTests.swift; sourceTree = SOURCE_ROOT; };
 		37A4A2571D30260F005CAEA5 /* AsyncExampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AsyncExampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37A4A2591D30260F005CAEA5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37A4A25B1D30260F005CAEA5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -982,7 +978,6 @@
 			children = (
 				37A1CEDF1D1469900067870D /* Signal */,
 				37A1CED71D1350C00067870D /* Property */,
-				37A4A24E1D2EC809005CAEA5 /* Pi Calculus */,
 				37A4A2811D307435005CAEA5 /* Change Handling */,
 				37A1CEE11D147A970067870D /* Relation Extensions */,
 				372707BC1CFE24C600710C80 /* Utilities */,
@@ -1293,15 +1288,6 @@
 				37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */,
 			);
 			name = "Relation Extensions";
-			sourceTree = "<group>";
-		};
-		37A4A24E1D2EC809005CAEA5 /* Pi Calculus */ = {
-			isa = PBXGroup;
-			children = (
-				37A4A24F1D2EC81E005CAEA5 /* Pi.swift */,
-				37A4A2511D2ECCBF005CAEA5 /* PiTests.swift */,
-			);
-			name = "Pi Calculus";
 			sourceTree = "<group>";
 		};
 		37A4A2581D30260F005CAEA5 /* AsyncExampleApp */ = {
@@ -2327,7 +2313,6 @@
 				37A1CEE31D147ACA0067870D /* RelationAsTypedValue.swift in Sources */,
 				372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */,
 				37CA0EF11D8F664700843A1F /* RowCollectionElement.swift in Sources */,
-				37A4A2501D2EC81E005CAEA5 /* Pi.swift in Sources */,
 				37A4A29F1D35B09E005CAEA5 /* RelationSignal.swift in Sources */,
 				37A4A2971D3581B7005CAEA5 /* RelationAsyncProperty.swift in Sources */,
 				372707B81CFE240E00710C80 /* ArrayProperty.swift in Sources */,
@@ -2338,7 +2323,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37A4A2521D2ECCBF005CAEA5 /* PiTests.swift in Sources */,
 				37A1CEE51D147B0E0067870D /* RelationAsTypedValueTests.swift in Sources */,
 				372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */,
 				37A4A2951D357DF2005CAEA5 /* AsyncPropertyTests.swift in Sources */,
