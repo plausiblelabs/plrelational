@@ -123,6 +123,25 @@ extension SelectExpression {
     }
 }
 
+extension Sequence where Iterator.Element == SelectExpression {
+    /// Combine a sequence of SelectExpressions using the given combining function. The combination
+    /// is performed in a way that attempts to produce the shallowest possible tree in the result.
+    /// This is a convenient way to AND or OR a bunch of expressions together.
+    public func combined(with combine: (SelectExpression, SelectExpression) -> SelectExpression) -> SelectExpression? {
+        // Build up a tree of elements that combine the subexpressions. We do this in a weird pairwise way
+        // to keep the tree shallow.
+        var expressions = Array(self)
+        while expressions.count > 1 {
+            for i in 0 ..< expressions.count / 2 {
+                let lhs = expressions.remove(at: i)
+                let rhs = expressions.remove(at: i)
+                expressions.insert(combine(lhs, rhs), at: i)
+            }
+        }
+        return expressions.first
+    }
+}
+
 extension SelectExpressionBinaryOperator: CustomStringConvertible {
     public var description: String {
         return "(\(lhs)) \(op) (\(rhs))"

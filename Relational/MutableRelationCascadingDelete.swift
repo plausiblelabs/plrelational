@@ -57,17 +57,7 @@ fileprivate class CascadingDeleter {
         for (relationObj, queries) in currentPending {
             let relation = relationObj as! MutableRelation
             
-            // Build up a tree of ORs that combine the queries. We do this in a weird pairwise way
-            // to keep the tree shallow.
-            var expressions = queries
-            while expressions.count > 1 {
-                for i in 0 ..< expressions.count / 2 {
-                    let lhs = expressions.remove(at: i)
-                    let rhs = expressions.remove(at: i)
-                    expressions.insert(lhs *|| rhs, at: i)
-                }
-            }
-            let query = expressions[0]
+            let query = queries.combined(with: *||)!
             
             group.enter()
             UpdateManager.currentInstance.registerQuery(

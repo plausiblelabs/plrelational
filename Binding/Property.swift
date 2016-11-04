@@ -25,7 +25,7 @@ open class Binding {
         self.removal = removal
     }
     
-    open func unbind() {
+    public func unbind() {
         signalOwner = nil
         removal?()
         removal = nil
@@ -45,8 +45,8 @@ open class ReadableProperty<T>: ReadablePropertyType {
     public typealias Value = T
     public typealias Change = T
     
-    open private(set) var value: T
-    open let signal: Signal<T>
+    public private(set) var value: T
+    public let signal: Signal<T>
     fileprivate let notify: Signal<T>.Notify
     fileprivate let changing: (T, T) -> Bool
     
@@ -140,7 +140,7 @@ open class BindableProperty<T> {
     }
     
     /// Unbinds all existing bindings.
-    open func unbindAll() {
+    public func unbindAll() {
         for (_, binding) in bindings {
             binding.unbind()
         }
@@ -170,10 +170,10 @@ open class WriteOnlyProperty<T>: BindableProperty<T> {
 open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     public typealias Value = T
 
-    open var value: T {
+    public var value: T {
         return getValue()
     }
-    open let signal: Signal<T>
+    public let signal: Signal<T>
     fileprivate let notify: Signal<T>.Notify
     
     internal init(signal: Signal<T>, notify: Signal<T>.Notify, changeHandler: ChangeHandler) {
@@ -192,7 +192,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     /// When this property's value changes, the other property's value will be updated and
     /// vice versa.  Note that calling `bindBidi` will cause this property to take on the
     /// other property's value immedately.
-    open func bindBidi(_ other: ReadWriteProperty<T>) -> Binding {
+    public func bindBidi(_ other: ReadWriteProperty<T>) -> Binding {
         return connectBidi(
             other,
             initial: {
@@ -207,7 +207,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     /// using `forward` and `reverse` to conditionally apply changes in each direction.
     /// Note that calling `connectBidi` will cause the other property to take on this
     /// property's value immediately (this is the opposite behavior from `bindBidi`).
-    open func connectBidi<U>(_ other: ReadWriteProperty<U>, forward: @escaping (T) -> ChangeResult<U>, reverse: @escaping (U) -> ChangeResult<T>) -> Binding {
+    public func connectBidi<U>(_ other: ReadWriteProperty<U>, forward: @escaping (T) -> ChangeResult<U>, reverse: @escaping (U) -> ChangeResult<T>) -> Binding {
         return connectBidi(
             other,
             initial: {
@@ -276,7 +276,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     /// When this property's value changes, the other property's value will be updated and
     /// vice versa.  Note that calling `bindBidi` will cause this property to take on the
     /// other property's value immedately (if the value is defined).
-    open func bindBidi(_ other: AsyncReadWriteProperty<T>) -> Binding {
+    public func bindBidi(_ other: AsyncReadWriteProperty<T>) -> Binding {
         return connectBidi(
             other,
             initial: {
@@ -397,7 +397,7 @@ public func constantValueProperty<T>(_ value: T) -> ReadableProperty<T> {
     return ConstantValueProperty(value)
 }
 
-open class MutableValueProperty<T>: ReadWriteProperty<T> {
+public final class MutableValueProperty<T>: ReadWriteProperty<T> {
 
     private let valueChanging: (T, T) -> Bool
     private let didSet: Setter?
@@ -417,12 +417,12 @@ open class MutableValueProperty<T>: ReadWriteProperty<T> {
     }
     
     /// Called to update the underlying value and notify observers that the value has been changed.
-    open func change(_ newValue: T, transient: Bool) {
+    public func change(_ newValue: T, transient: Bool) {
         change(newValue, metadata: ChangeMetadata(transient: transient))
     }
     
     /// Called to update the underlying value and notify observers that the value has been changed.
-    open func change(_ newValue: T, metadata: ChangeMetadata) {
+    public func change(_ newValue: T, metadata: ChangeMetadata) {
         if valueChanging(mutableValue, newValue) {
             notify.valueWillChange()
             mutableValue = newValue
@@ -472,7 +472,11 @@ public func mutableValueProperty<T: Equatable>(_ initialValue: T?, _ didSet: Bin
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
-open class ExternalValueProperty<T>: ReadWriteProperty<T> {
+public func mutableValueProperty<T: Equatable>(_ initialValue: [T], _ didSet: BindableProperty<[T]>.Setter? = nil) -> MutableValueProperty<[T]> {
+    return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
+}
+
+public final class ExternalValueProperty<T>: ReadWriteProperty<T> {
     public typealias Getter = () -> T
 
     /// When `true`, any changes supplied by a bound property will be ignored.  This is mainly useful
@@ -498,7 +502,7 @@ open class ExternalValueProperty<T>: ReadWriteProperty<T> {
     }
     
     /// Called to notify observers that the underlying external value has been changed.
-    open func changed(transient: Bool) {
+    public func changed(transient: Bool) {
         notify.valueWillChange()
         notify.valueChanging(getValue(), ChangeMetadata(transient: transient))
         notify.valueDidChange()
@@ -519,11 +523,11 @@ open class ExternalValueProperty<T>: ReadWriteProperty<T> {
     }
 }
 
-open class ActionProperty: WriteOnlyProperty<()> {
+public class ActionProperty<T>: WriteOnlyProperty<T> {
 
-    public init(_ action: @escaping () -> Void) {
-        super.init(set: { _ in
-            action()
+    public init(_ action: @escaping (T) -> Void) {
+        super.init(set: { param, _ in
+            action(param)
         })
     }
 }
@@ -549,7 +553,7 @@ infix operator <~ : PropertyOperatorPrecedence
 // conflicts we use `~~>` here instead
 infix operator ~~> : PropertyOperatorPrecedence
 
-@discardableResult public func ~~> (lhs: Signal<()>, rhs: ActionProperty) -> Binding {
+@discardableResult public func ~~> <T>(lhs: Signal<T>, rhs: ActionProperty<T>) -> Binding {
     // TODO: We invent an owner here; what if no one else owns the signal?
     return rhs.bind(lhs, initialValue: nil, owner: "" as AnyObject)
 }

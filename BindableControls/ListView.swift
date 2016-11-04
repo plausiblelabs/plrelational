@@ -15,24 +15,21 @@ public struct ListViewModel<E: ArrayElement> {
     public let contextMenu: ((E.Data) -> ContextMenu?)?
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     public let move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)?
-    public let selection: AsyncReadWriteProperty<Set<E.ID>>?
     public let cellIdentifier: (E.Data) -> String
-    public let cellText: (E.Data) -> CellTextProperty
+    public let cellText: (E.Data) -> TextProperty
     public let cellImage: ((E.Data) -> ReadableProperty<Image>)?
 
     public init(
         data: ArrayProperty<E>,
         contextMenu: ((E.Data) -> ContextMenu?)?,
         move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)?,
-        selection: AsyncReadWriteProperty<Set<E.ID>>?,
         cellIdentifier: @escaping (E.Data) -> String,
-        cellText: @escaping (E.Data) -> CellTextProperty,
+        cellText: @escaping (E.Data) -> TextProperty,
         cellImage: ((E.Data) -> ReadableProperty<Image>)?)
     {
         self.data = data
         self.contextMenu = contextMenu
         self.move = move
-        self.selection = selection
         self.cellIdentifier = cellIdentifier
         self.cellText = cellText
         self.cellImage = cellImage
@@ -43,14 +40,14 @@ public struct ListViewModel<E: ArrayElement> {
 // a single Document.xib, so this class simply manages a subset of views defined in that xib.
 open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutlineViewDelegate {
 
-    open let model: ListViewModel<E>
+    public let model: ListViewModel<E>
     private let outlineView: NSOutlineView
 
     private var elements: [E] {
         return model.data.elements
     }
     
-    private lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
+    public lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
         get: { [unowned self] in
             var itemIDs: [E.ID] = []
             for index in self.outlineView.selectedRowIndexes {
@@ -79,8 +76,12 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     //private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
-    open var animateChanges = false
+    public var animateChanges = false
 
+    /// Whether to select and enter edit mode for the cell that is inserted next.  This flag will
+    /// be unset automatically after the cell is selected/edited.
+    public var selectAndEditNextInsertedCell = false
+    
     public init(model: ListViewModel<E>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
@@ -93,9 +94,6 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
             valueChanging: { [weak self] stateChange, _ in self?.arrayChanged(stateChange) },
             valueDidChange: {}
         ))
-        if let selectionProp = model.selection {
-            _ = selection <~> selectionProp
-        }
         
         outlineView.delegate = self
         outlineView.dataSource = self
@@ -173,17 +171,8 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         let identifier = model.cellIdentifier(element.data)
         let view = outlineView.make(withIdentifier: identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            textField.string.unbindAll()
-            switch model.cellText(element.data) {
-            case .readOnly(let text):
-                _ = textField.string <~ text
-            case .readWrite(let text):
-                _ = textField.string <~> text
-            case .asyncReadOnly(let text):
-                _ = textField.string <~ text
-            case .asyncReadWrite(let text):
-                _ = textField.string <~> text
-            }
+            let cellText = model.cellText(element.data)
+            textField.bind(cellText)
         }
         if let imageView = view.imageView as? ImageView {
             imageView.img.unbindAll()
@@ -230,6 +219,8 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         
         outlineView.beginUpdates()
 
+        var rowToSelectAndEdit: Int?
+        
         // Record changes that were made to the array relative to its previous state
         for change in arrayChanges {
             switch change {
@@ -238,6 +229,10 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
                 
             case let .insert(index):
                 let rows = IndexSet(integer: index)
+                if selectAndEditNextInsertedCell {
+                    rowToSelectAndEdit = index
+                    selectAndEditNextInsertedCell = false
+                }
                 outlineView.insertItems(at: rows, inParent: nil, withAnimation: animation)
                 
             case let .delete(index):
@@ -255,5 +250,21 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         //selfInitiatedSelectionChange = true
         outlineView.endUpdates()
         //selfInitiatedSelectionChange = false
+        
+        if let row = rowToSelectAndEdit {
+            // Select the newly inserted row
+            outlineView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+            
+            // Give focus to the text field in the newly inserted row
+            if let rowView = outlineView.view(atColumn: 0, row: row, makeIfNecessary: false) {
+                if let cellView = rowView as? NSTableCellView {
+                    if let textField = cellView.textField {
+                        if let window = cellView.window {
+                            window.makeFirstResponder(textField)
+                        }
+                    }
+                }
+            }
+        }
     }
 }

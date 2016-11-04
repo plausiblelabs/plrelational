@@ -8,11 +8,11 @@ import Binding
 
 open class Button: NSButton {
 
-    open lazy var disabled: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    public lazy var disabled: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.isEnabled = !value
     })
 
-    open let clicks: Signal<()>
+    public let clicks: Signal<()>
     private let clicksNotify: Signal<()>.Notify
     
     public override init(frame: NSRect) {

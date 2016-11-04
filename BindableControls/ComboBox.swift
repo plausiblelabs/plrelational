@@ -8,7 +8,7 @@ import Binding
 
 open class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
 
-    open lazy var items: BindableProperty<[T]> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    public lazy var items: BindableProperty<[T]> = WriteOnlyProperty(set: { [unowned self] value, _ in
         let objects = value.map{ $0 as AnyObject }
         self.removeAllItems()
         self.addItems(withObjectValues: objects)
@@ -17,9 +17,9 @@ open class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
     private lazy var _value: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
         self.objectValue = value as AnyObject
     })
-    open var value: ReadWriteProperty<T?> { return _value }
+    public var value: ReadWriteProperty<T?> { return _value }
     
-    open lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.placeholderString = value
     })
     

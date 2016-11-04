@@ -35,15 +35,38 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         },
         changeHandler: self.changeHandler
     )
-    open var string: ReadWriteProperty<String> { return _string }
-    
-    open lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    public var string: ReadWriteProperty<String> { return _string }
+
+    private lazy var _optString: ExternalValueProperty<String?> = ExternalValueProperty(
+        get: { [unowned self] in
+            self.stringValue
+        },
+        set: { [unowned self] value, _ in
+            // This behavior is specific to optString: when `value` goes to nil, we keep the previous string value
+            // in place.  This is mainly useful for the case where an outline view item is being deleted and the
+            // relation associated with its TextField is becoming empty (thus resulting in a nil string value).
+            // Without this special behavior, the cell text will flash to the placeholder string as it fades out.
+            if let value = value {
+                self.stringValue = value
+            }
+        },
+        changeHandler: self.changeHandler
+    )
+    public var optString: ReadWriteProperty<String?> { return _optString }
+
+    public lazy var placeholder: BindableProperty<String> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.placeholderString = value
     })
 
-    open lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    public lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.isHidden = !value
     })
+
+    /// Whether to deliver transient changes.  If `true` (the default) a transient change
+    /// will be delivered via the `string` property on each keystroke.  If `false`, no transient
+    /// changes will be delivered, and only a single commit change will be delivered when the user is
+    /// done editing.
+    public var deliverTransientChanges: Bool = true
     
     private var previousCommittedValue: String?
     private var previousValue: String?
@@ -69,7 +92,9 @@ open class TextField: NSTextField, NSTextFieldDelegate {
     
     open override func controlTextDidChange(_ notification: Notification) {
         //Swift.print("CONTROL DID CHANGE!")
-        _string.changed(transient: true)
+        if deliverTransientChanges {
+            _string.changed(transient: true)
+        }
         previousValue = stringValue
     }
     

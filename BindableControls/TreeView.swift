@@ -19,7 +19,7 @@ public struct TreeViewModel<N: TreeNode> {
     public let move: ((_ srcPath: TreePath<N>, _ dstPath: TreePath<N>) -> Void)?
     public let selection: AsyncReadWriteProperty<Set<N.ID>>
     public let cellIdentifier: (N.Data) -> String
-    public let cellText: (N.Data) -> CellTextProperty
+    public let cellText: (N.Data) -> TextProperty
     public let cellImage: ((N.Data) -> ReadableProperty<Image>?)?
     
     public init(
@@ -30,7 +30,7 @@ public struct TreeViewModel<N: TreeNode> {
         move: ((_ srcPath: TreePath<N>, _ dstPath: TreePath<N>) -> Void)?,
         selection: AsyncReadWriteProperty<Set<N.ID>>,
         cellIdentifier: @escaping (N.Data) -> String,
-        cellText: @escaping (N.Data) -> CellTextProperty,
+        cellText: @escaping (N.Data) -> TextProperty,
         cellImage: ((N.Data) -> ReadableProperty<Image>?)?)
     {
         self.data = data
@@ -207,17 +207,8 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
         let identifier = model.cellIdentifier(node.data)
         let view = outlineView.make(withIdentifier: identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            textField.string.unbindAll()
-            switch model.cellText(node.data) {
-            case .readOnly(let text):
-                _ = textField.string <~ text
-            case .readWrite(let text):
-                _ = textField.string <~> text
-            case .asyncReadOnly(let text):
-                _ = textField.string <~ text
-            case .asyncReadWrite(let text):
-                _ = textField.string <~> text
-            }
+            let cellText = model.cellText(node.data)
+            textField.bind(cellText)
         }
         if let imageView = view.imageView as? ImageView {
             imageView.img.unbindAll()
