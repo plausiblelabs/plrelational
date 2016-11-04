@@ -6,7 +6,7 @@
 import Cocoa
 import PLRelational
 import PLRelationalBinding
-import BindableControls
+import PLBindableControls
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {

@@ -6,7 +6,7 @@
 import XCTest
 import PLRelational
 @testable import PLRelationalBinding
-import BindableControls
+import PLBindableControls
 @testable import SampleApp
 
 extension DocModel {

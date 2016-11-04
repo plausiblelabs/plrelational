@@ -44,7 +44,7 @@
 		372707FB1CFE2C7E00710C80 /* BindableControlsAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707FA1CFE2C7E00710C80 /* BindableControlsAppUITests.swift */; };
 		3727080B1CFE2CBA00710C80 /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
 		3727080C1CFE2CBA00710C80 /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
-		3747072E1D19BA9E0048E857 /* libBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		3747072E1D19BA9E0048E857 /* libPLBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		374AE9721D91C2F0007D1366 /* StoredDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9711D91C2F0007D1366 /* StoredDatabase.swift */; };
 		374AE9741D91C2FC007D1366 /* StoredRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9731D91C2FC007D1366 /* StoredRelation.swift */; };
 		374AE9761D91DBC7007D1366 /* PlistDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374AE9751D91DBC7007D1366 /* PlistDatabase.swift */; };
@@ -56,12 +56,12 @@
 		37504B451DC6995100CEE4D4 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37504B431DC6995100CEE4D4 /* MainMenu.xib */; };
 		37504B501DC6995100CEE4D4 /* VisualizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37504B4F1DC6995100CEE4D4 /* VisualizerTests.swift */; };
 		37504B5B1DC6995100CEE4D4 /* VisualizerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37504B5A1DC6995100CEE4D4 /* VisualizerUITests.swift */; };
-		37504B6C1DC699B800CEE4D4 /* libBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; };
+		37504B6C1DC699B800CEE4D4 /* libPLBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; };
 		37504B6D1DC699B800CEE4D4 /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
 		37504B6E1DC699B800CEE4D4 /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
 		37504B701DC69BD000CEE4D4 /* libPLRelational.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37504B711DC69BD000CEE4D4 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		37504B721DC69BD000CEE4D4 /* libBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		37504B721DC69BD000CEE4D4 /* libPLBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37504B741DC6A13100CEE4D4 /* RelationTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37504B731DC6A13100CEE4D4 /* RelationTableView.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
@@ -101,10 +101,10 @@
 		37A1CEBE1D1083FD0067870D /* ColorPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE621D0B25F40067870D /* ColorPanel.swift */; };
 		37A1CEBF1D1083FD0067870D /* ContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611521CE3A942001DAF59 /* ContextMenu.swift */; };
 		37A1CEC01D1083FD0067870D /* MenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE591D08A2240067870D /* MenuItem.swift */; };
-		37A1CEC31D10843F0067870D /* libBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; };
-		37A1CEC81D1088EF0067870D /* libBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; };
-		37A1CECB1D108B760067870D /* libBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		37A1CECE1D108F400067870D /* libBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; };
+		37A1CEC31D10843F0067870D /* libPLBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; };
+		37A1CEC81D1088EF0067870D /* libPLBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; };
+		37A1CECB1D108B760067870D /* libPLBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		37A1CECE1D108F400067870D /* libPLBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; };
 		37A1CED21D10B8690067870D /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED11D10B8690067870D /* Button.swift */; };
 		37A1CED41D11D9180067870D /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED31D11D9180067870D /* ProgressIndicator.swift */; };
 		37A1CED61D11DC410067870D /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED51D11DC410067870D /* ViewModel.swift */; };
@@ -132,12 +132,12 @@
 		37A4A2731D30265B005CAEA5 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2721D30265B005CAEA5 /* ViewModel.swift */; };
 		37A4A27A1D3026DA005CAEA5 /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
 		37A4A27B1D3026DD005CAEA5 /* libPLRelationalBinding.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; };
-		37A4A27C1D3026E1005CAEA5 /* libBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; };
+		37A4A27C1D3026E1005CAEA5 /* libPLBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; };
 		37A4A27D1D302738005CAEA5 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
 		37A4A27E1D302738005CAEA5 /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
 		37A4A2831D307AD1005CAEA5 /* ChangeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A27F1D3073C7005CAEA5 /* ChangeHandler.swift */; };
 		37A4A2851D307AF3005CAEA5 /* ChangeHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2841D307AF3005CAEA5 /* ChangeHandlerTests.swift */; };
-		37A4A28C1D343322005CAEA5 /* libBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */; };
+		37A4A28C1D343322005CAEA5 /* libPLBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; };
 		37A4A28E1D34A14E005CAEA5 /* SignalOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A28D1D34A14E005CAEA5 /* SignalOperations.swift */; };
 		37A4A2901D34A576005CAEA5 /* SignalOperationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A28F1D34A576005CAEA5 /* SignalOperationsTests.swift */; };
 		37A4A2931D357D17005CAEA5 /* AsyncProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2921D357D17005CAEA5 /* AsyncProperty.swift */; };
@@ -501,7 +501,7 @@
 			files = (
 				37504B701DC69BD000CEE4D4 /* libPLRelational.dylib in Copy Embedded Libraries */,
 				37504B711DC69BD000CEE4D4 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */,
-				37504B721DC69BD000CEE4D4 /* libBindableControls.dylib in Copy Embedded Libraries */,
+				37504B721DC69BD000CEE4D4 /* libPLBindableControls.dylib in Copy Embedded Libraries */,
 			);
 			name = "Copy Embedded Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -512,7 +512,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				37A1CECB1D108B760067870D /* libBindableControls.dylib in Copy Embedded Libraries */,
+				37A1CECB1D108B760067870D /* libPLBindableControls.dylib in Copy Embedded Libraries */,
 				37832EC61CFE9E0200256DB1 /* libPLRelational.dylib in Copy Embedded Libraries */,
 				37832EC71CFE9E0200256DB1 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */,
 			);
@@ -525,7 +525,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				3747072E1D19BA9E0048E857 /* libBindableControls.dylib in Copy Embedded Libraries */,
+				3747072E1D19BA9E0048E857 /* libPLBindableControls.dylib in Copy Embedded Libraries */,
 				37832EC31CFE9DB400256DB1 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */,
 				C23AAF441CF758D1009E28E0 /* libPLRelational.dylib in Copy Embedded Libraries */,
 			);
@@ -562,7 +562,7 @@
 		3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArraySafeIndex.swift; sourceTree = "<group>"; };
 		372707751CF391EC00710C80 /* TreeProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeProperty.swift; sourceTree = "<group>"; };
 		372707771CF3C31200710C80 /* RelationValuePlistable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValuePlistable.swift; sourceTree = "<group>"; };
-		372707791CF7B2CB00710C80 /* UndoableDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UndoableDatabase.swift; path = ../BindableControls/UndoableDatabase.swift; sourceTree = "<group>"; };
+		372707791CF7B2CB00710C80 /* UndoableDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UndoableDatabase.swift; sourceTree = "<group>"; };
 		372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libPLRelationalBinding.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		372707CB1CFE25AF00710C80 /* PLRelationalBindingTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PLRelationalBindingTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		372707CF1CFE25B000710C80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -622,7 +622,7 @@
 		37A1CE841D1081980067870D /* SearchAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SearchAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		37A1CE881D1081980067870D /* SearchAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchAppUITests.swift; sourceTree = "<group>"; };
 		37A1CE8A1D1081980067870D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libBindableControls.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libPLBindableControls.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		37A1CED11D10B8690067870D /* Button.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		37A1CED31D11D9180067870D /* ProgressIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
 		37A1CED51D11DC410067870D /* ViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
@@ -679,7 +679,7 @@
 		37C611351CD7FB07001DAF59 /* ListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		37C611371CD7FB9C001DAF59 /* ExtOutlineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtOutlineView.swift; sourceTree = "<group>"; };
 		37C611391CD80566001DAF59 /* DocModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocModel.swift; sourceTree = "<group>"; };
-		37C611411CD94784001DAF59 /* UndoManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UndoManager.swift; path = ../BindableControls/UndoManager.swift; sourceTree = "<group>"; };
+		37C611411CD94784001DAF59 /* UndoManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UndoManager.swift; sourceTree = "<group>"; };
 		37C611471CDBCB4C001DAF59 /* DocOutlineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocOutlineView.swift; sourceTree = "<group>"; };
 		37C6114A1CDBCB5C001DAF59 /* PropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertiesView.swift; sourceTree = "<group>"; };
 		37C6114C1CDD603C001DAF59 /* RelationArrayProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationArrayProperty.swift; sourceTree = "<group>"; };
@@ -807,7 +807,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37A1CEC31D10843F0067870D /* libBindableControls.dylib in Frameworks */,
+				37A1CEC31D10843F0067870D /* libPLBindableControls.dylib in Frameworks */,
 				3727080B1CFE2CBA00710C80 /* libPLRelationalBinding.dylib in Frameworks */,
 				3727080C1CFE2CBA00710C80 /* libPLRelational.dylib in Frameworks */,
 			);
@@ -828,7 +828,7 @@
 			files = (
 				37504B6E1DC699B800CEE4D4 /* libPLRelational.dylib in Frameworks */,
 				37504B6D1DC699B800CEE4D4 /* libPLRelationalBinding.dylib in Frameworks */,
-				37504B6C1DC699B800CEE4D4 /* libBindableControls.dylib in Frameworks */,
+				37504B6C1DC699B800CEE4D4 /* libPLBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -852,7 +852,7 @@
 			files = (
 				37A1CE991D1081CD0067870D /* libPLRelational.dylib in Frameworks */,
 				37A1CE981D1081CD0067870D /* libPLRelationalBinding.dylib in Frameworks */,
-				37A1CECE1D108F400067870D /* libBindableControls.dylib in Frameworks */,
+				37A1CECE1D108F400067870D /* libPLBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -885,7 +885,7 @@
 			files = (
 				37A4A27A1D3026DA005CAEA5 /* libPLRelational.dylib in Frameworks */,
 				37A4A27B1D3026DD005CAEA5 /* libPLRelationalBinding.dylib in Frameworks */,
-				37A4A27C1D3026E1005CAEA5 /* libBindableControls.dylib in Frameworks */,
+				37A4A27C1D3026E1005CAEA5 /* libPLBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -902,7 +902,7 @@
 			files = (
 				37C6112D1CD7F09B001DAF59 /* libPLRelational.dylib in Frameworks */,
 				372707B21CFE23BB00710C80 /* libPLRelationalBinding.dylib in Frameworks */,
-				37A1CEC81D1088EF0067870D /* libBindableControls.dylib in Frameworks */,
+				37A1CEC81D1088EF0067870D /* libPLBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -912,7 +912,7 @@
 			files = (
 				37C611591CE3F7C0001DAF59 /* libPLRelational.dylib in Frameworks */,
 				372707E01CFE293000710C80 /* libPLRelationalBinding.dylib in Frameworks */,
-				37A4A28C1D343322005CAEA5 /* libBindableControls.dylib in Frameworks */,
+				37A4A28C1D343322005CAEA5 /* libPLBindableControls.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1186,7 +1186,7 @@
 			path = SearchAppUITests;
 			sourceTree = "<group>";
 		};
-		37A1CE9F1D1081FC0067870D /* BindableControls */ = {
+		37A1CE9F1D1081FC0067870D /* PLBindableControls */ = {
 			isa = PBXGroup;
 			children = (
 				37A1CEB01D10829D0067870D /* Basic Views */,
@@ -1195,7 +1195,7 @@
 				37A1CEAD1D1082440067870D /* Menus */,
 				37C611401CD94772001DAF59 /* Undo */,
 			);
-			path = BindableControls;
+			path = PLBindableControls;
 			sourceTree = "<group>";
 		};
 		37A1CEAD1D1082440067870D /* Menus */ = {
@@ -1388,7 +1388,6 @@
 				372707791CF7B2CB00710C80 /* UndoableDatabase.swift */,
 			);
 			name = Undo;
-			path = ../SampleApp;
 			sourceTree = "<group>";
 		};
 		37C611451CDBCB19001DAF59 /* Views */ = {
@@ -1506,7 +1505,7 @@
 			children = (
 				C22BF12E1CBC348500D3FE59 /* PLRelational */,
 				372707B31CFE23CA00710C80 /* PLRelationalBinding */,
-				37A1CE9F1D1081FC0067870D /* BindableControls */,
+				37A1CE9F1D1081FC0067870D /* PLBindableControls */,
 				372707E91CFE2C7E00710C80 /* BindableControlsApp */,
 				372707F91CFE2C7E00710C80 /* BindableControlsAppUITests */,
 				37C610FE1CD7EFAE001DAF59 /* SampleApp */,
@@ -1540,7 +1539,7 @@
 				37A1CE6B1D1081980067870D /* SearchApp.app */,
 				37A1CE791D1081980067870D /* SearchAppTests.xctest */,
 				37A1CE841D1081980067870D /* SearchAppUITests.xctest */,
-				37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */,
+				37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */,
 				37A4A2571D30260F005CAEA5 /* AsyncExampleApp.app */,
 				37A4A2651D30260F005CAEA5 /* AsyncExampleAppTests.xctest */,
 				37504B381DC6995100CEE4D4 /* Visualizer.app */,
@@ -1861,9 +1860,9 @@
 			productReference = 37A1CE841D1081980067870D /* SearchAppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		37A1CE9D1D1081FC0067870D /* BindableControls */ = {
+		37A1CE9D1D1081FC0067870D /* PLBindableControls */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 37A1CEA41D1081FC0067870D /* Build configuration list for PBXNativeTarget "BindableControls" */;
+			buildConfigurationList = 37A1CEA41D1081FC0067870D /* Build configuration list for PBXNativeTarget "PLBindableControls" */;
 			buildPhases = (
 				37A1CE9A1D1081FC0067870D /* Sources */,
 				37A1CE9B1D1081FC0067870D /* Frameworks */,
@@ -1875,9 +1874,9 @@
 				37A1CEA81D1082060067870D /* PBXTargetDependency */,
 				37A1CEAA1D1082060067870D /* PBXTargetDependency */,
 			);
-			name = BindableControls;
+			name = PLBindableControls;
 			productName = BindableControls;
-			productReference = 37A1CE9E1D1081FC0067870D /* libBindableControls.dylib */;
+			productReference = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		37A4A2561D30260F005CAEA5 /* AsyncExampleApp */ = {
@@ -2118,7 +2117,7 @@
 				C22921E41CD12CF100518184 /* PLRelationalTests */,
 				372707AD1CFE238700710C80 /* PLRelationalBinding */,
 				372707CA1CFE25AF00710C80 /* PLRelationalBindingTests */,
-				37A1CE9D1D1081FC0067870D /* BindableControls */,
+				37A1CE9D1D1081FC0067870D /* PLBindableControls */,
 				372707E71CFE2C7E00710C80 /* BindableControlsApp */,
 				372707F51CFE2C7E00710C80 /* BindableControlsAppUITests */,
 				37C610FC1CD7EFAE001DAF59 /* SampleApp */,
@@ -2643,7 +2642,7 @@
 		};
 		37504B6B1DC699B100CEE4D4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 37A1CE9D1D1081FC0067870D /* BindableControls */;
+			target = 37A1CE9D1D1081FC0067870D /* PLBindableControls */;
 			targetProxy = 37504B6A1DC699B100CEE4D4 /* PBXContainerItemProxy */;
 		};
 		37832EC01CFE9BB200256DB1 /* PBXTargetDependency */ = {
@@ -2688,7 +2687,7 @@
 		};
 		37A1CEC21D10843A0067870D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 37A1CE9D1D1081FC0067870D /* BindableControls */;
+			target = 37A1CE9D1D1081FC0067870D /* PLBindableControls */;
 			targetProxy = 37A1CEC11D10843A0067870D /* PBXContainerItemProxy */;
 		};
 		37A1CEC51D1088E60067870D /* PBXTargetDependency */ = {
@@ -2698,7 +2697,7 @@
 		};
 		37A1CEC71D1088E60067870D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 37A1CE9D1D1081FC0067870D /* BindableControls */;
+			target = 37A1CE9D1D1081FC0067870D /* PLBindableControls */;
 			targetProxy = 37A1CEC61D1088E60067870D /* PBXContainerItemProxy */;
 		};
 		37A1CECA1D108ADA0067870D /* PBXTargetDependency */ = {
@@ -2708,7 +2707,7 @@
 		};
 		37A1CECD1D108F390067870D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 37A1CE9D1D1081FC0067870D /* BindableControls */;
+			target = 37A1CE9D1D1081FC0067870D /* PLBindableControls */;
 			targetProxy = 37A1CECC1D108F390067870D /* PBXContainerItemProxy */;
 		};
 		37A4A2671D30260F005CAEA5 /* PBXTargetDependency */ = {
@@ -2728,7 +2727,7 @@
 		};
 		37A4A2791D3026D2005CAEA5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 37A1CE9D1D1081FC0067870D /* BindableControls */;
+			target = 37A1CE9D1D1081FC0067870D /* PLBindableControls */;
 			targetProxy = 37A4A2781D3026D2005CAEA5 /* PBXContainerItemProxy */;
 		};
 		37A4A2871D34331D005CAEA5 /* PBXTargetDependency */ = {
@@ -2743,7 +2742,7 @@
 		};
 		37A4A28B1D34331D005CAEA5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 37A1CE9D1D1081FC0067870D /* BindableControls */;
+			target = 37A1CE9D1D1081FC0067870D /* PLBindableControls */;
 			targetProxy = 37A4A28A1D34331D005CAEA5 /* PBXContainerItemProxy */;
 		};
 		37C611121CD7EFAE001DAF59 /* PBXTargetDependency */ = {
@@ -3509,7 +3508,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		37A1CEA41D1081FC0067870D /* Build configuration list for PBXNativeTarget "BindableControls" */ = {
+		37A1CEA41D1081FC0067870D /* Build configuration list for PBXNativeTarget "PLBindableControls" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				37A1CEA51D1081FC0067870D /* Debug */,

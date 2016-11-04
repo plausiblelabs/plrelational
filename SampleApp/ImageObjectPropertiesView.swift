@@ -5,7 +5,7 @@
 
 import Cocoa
 import PLRelationalBinding
-import BindableControls
+import PLBindableControls
 
 class ImageObjectPropertiesView: BackgroundView {
     

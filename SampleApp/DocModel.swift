@@ -6,7 +6,7 @@
 import Foundation
 import PLRelational
 import PLRelationalBinding
-import BindableControls
+import PLBindableControls
 
 // TODO: Similar to what we did with `globalID`, we put all "type" constants that describe
 // collections and objects into the same space, even though it would be more appropriate

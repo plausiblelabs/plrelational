@@ -6,7 +6,7 @@
 import Foundation
 import PLRelational
 import PLRelationalBinding
-import BindableControls
+import PLBindableControls
 
 class TextObjectPropertiesModel {
     
