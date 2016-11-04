@@ -105,21 +105,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         addObject("Fred", editable: false, day: nil, color: nil, rocks: 17)
         addObject("Wilma", editable: true, day: "Friday", color: Color.blue, rocks: 42)
 
-        func nameProperty(_ relation: Relation) -> AsyncReadWriteProperty<String> {
+        func nameProperty(_ relation: Relation) -> AsyncReadWriteProperty<String?> {
             return undoableDB.asyncBidiProperty(
-                relation,
                 action: "Rename Person",
-                signal: relation.signal{ $0.oneStringOrNil($1) ?? "UH OH" },
+                signal: relation.signal{ $0.oneStringOrNil($1) },
                 update: {
-                    Swift.print("UPDATING: state=\(UpdateManager.currentInstance.state) \($0)")
-                    relation.asyncUpdateString($0)
+                    relation.asyncUpdateNullableString($0)
                 }
             )
         }
         
         func listSelectionProperty(_ relation: TransactionalRelation) -> AsyncReadWriteProperty<Set<RelationValue>> {
             return undoableDB.asyncBidiProperty(
-                relation,
                 action: "Change Selection",
                 signal: relation.signal{ $0.allValues($1) },
                 update: { relation.asyncReplaceValues(Array($0)) }
@@ -131,17 +128,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             data: objects.arrayProperty(idAttr: "id", orderAttr: "order"),
             contextMenu: nil,
             move: nil,
-            selection: listSelectionProperty(selectedObjectID),
             cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 let rowID = row["id"]
                 let nameRelation = objects.select(Attribute("id") *== rowID).project(["name"])
-                return .asyncReadWrite(nameProperty(nameRelation))
+                return .asyncReadWriteOpt(nameProperty(nameRelation))
             },
             cellImage: nil
         )
         listView = ListView(model: listViewModel, outlineView: outlineView)
         listView.animateChanges = true
+        listView.selection <~> listSelectionProperty(selectedObjectID)
 
         // Add some other controls (could also do this in the xib)
         textField = TextField(frame: NSMakeRect(200, 30, 200, 24))
@@ -167,7 +164,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 //        rootView.addSubview(colorPicker)
         
         // Set up the bindings between controls and view model
-        _ = textField.string <~> nameProperty(selectedObjectsName)
+        textField.deliverTransientChanges = true
+        _ = textField.optString <~> nameProperty(selectedObjectsName)
         //_ = textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
 
 //        checkbox.checked <~> undoableDB.bidiProperty(

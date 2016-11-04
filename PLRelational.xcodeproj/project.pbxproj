@@ -593,7 +593,7 @@
 		37504B5A1DC6995100CEE4D4 /* VisualizerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizerUITests.swift; sourceTree = "<group>"; };
 		37504B5C1DC6995100CEE4D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		37504B731DC6A13100CEE4D4 /* RelationTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationTableView.swift; sourceTree = "<group>"; };
-		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = SampleAppTests/DocModelTests.swift; sourceTree = SOURCE_ROOT; };
+		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = ../SampleAppTests/DocModelTests.swift; sourceTree = "<group>"; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonValue.swift; sourceTree = "<group>"; };
 		376136941CF40A9600F572C5 /* ArrayProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayProperty.swift; sourceTree = "<group>"; };
@@ -1019,8 +1019,9 @@
 				372707EC1CFE2C7E00710C80 /* Assets.xcassets */,
 				372707F11CFE2C7E00710C80 /* Info.plist */,
 			);
-			path = BindableControlsApp;
-			sourceTree = "<group>";
+			name = BindableControlsApp;
+			path = Examples/BindableControlsApp;
+			sourceTree = SOURCE_ROOT;
 		};
 		372707F91CFE2C7E00710C80 /* BindableControlsAppUITests */ = {
 			isa = PBXGroup;
@@ -1028,8 +1029,9 @@
 				372707FA1CFE2C7E00710C80 /* BindableControlsAppUITests.swift */,
 				372707FC1CFE2C7E00710C80 /* Info.plist */,
 			);
-			path = BindableControlsAppUITests;
-			sourceTree = "<group>";
+			name = BindableControlsAppUITests;
+			path = Examples/BindableControlsAppUITests;
+			sourceTree = SOURCE_ROOT;
 		};
 		374AE9651D91B5B1007D1366 /* Stored Relations */ = {
 			isa = PBXGroup;
@@ -1135,8 +1137,9 @@
 				37E05C331DCAF568005CBFE2 /* Model */,
 				37E05C2B1DCAEFA0005CBFE2 /* Other Stuff */,
 			);
-			path = Visualizer;
-			sourceTree = "<group>";
+			name = Visualizer;
+			path = Examples/Visualizer;
+			sourceTree = SOURCE_ROOT;
 		};
 		37504B4E1DC6995100CEE4D4 /* VisualizerTests */ = {
 			isa = PBXGroup;
@@ -1144,8 +1147,9 @@
 				37504B4F1DC6995100CEE4D4 /* VisualizerTests.swift */,
 				37504B511DC6995100CEE4D4 /* Info.plist */,
 			);
-			path = VisualizerTests;
-			sourceTree = "<group>";
+			name = VisualizerTests;
+			path = Examples/VisualizerTests;
+			sourceTree = SOURCE_ROOT;
 		};
 		37504B591DC6995100CEE4D4 /* VisualizerUITests */ = {
 			isa = PBXGroup;
@@ -1153,8 +1157,9 @@
 				37504B5A1DC6995100CEE4D4 /* VisualizerUITests.swift */,
 				37504B5C1DC6995100CEE4D4 /* Info.plist */,
 			);
-			path = VisualizerUITests;
-			sourceTree = "<group>";
+			name = VisualizerUITests;
+			path = Examples/VisualizerUITests;
+			sourceTree = SOURCE_ROOT;
 		};
 		37A1CE6C1D1081980067870D /* SearchApp */ = {
 			isa = PBXGroup;
@@ -1165,8 +1170,9 @@
 				37A1CE6F1D1081980067870D /* Assets.xcassets */,
 				37A1CE741D1081980067870D /* Info.plist */,
 			);
-			path = SearchApp;
-			sourceTree = "<group>";
+			name = SearchApp;
+			path = Examples/SearchApp;
+			sourceTree = SOURCE_ROOT;
 		};
 		37A1CE7C1D1081980067870D /* SearchAppTests */ = {
 			isa = PBXGroup;
@@ -1174,8 +1180,9 @@
 				37A1CE7D1D1081980067870D /* SearchAppTests.swift */,
 				37A1CE7F1D1081980067870D /* Info.plist */,
 			);
-			path = SearchAppTests;
-			sourceTree = "<group>";
+			name = SearchAppTests;
+			path = Examples/SearchAppTests;
+			sourceTree = SOURCE_ROOT;
 		};
 		37A1CE871D1081980067870D /* SearchAppUITests */ = {
 			isa = PBXGroup;
@@ -1183,8 +1190,9 @@
 				37A1CE881D1081980067870D /* SearchAppUITests.swift */,
 				37A1CE8A1D1081980067870D /* Info.plist */,
 			);
-			path = SearchAppUITests;
-			sourceTree = "<group>";
+			name = SearchAppUITests;
+			path = Examples/SearchAppUITests;
+			sourceTree = SOURCE_ROOT;
 		};
 		37A1CE9F1D1081FC0067870D /* PLBindableControls */ = {
 			isa = PBXGroup;
@@ -1305,8 +1313,9 @@
 				37A4A25B1D30260F005CAEA5 /* Assets.xcassets */,
 				37A4A2601D30260F005CAEA5 /* Info.plist */,
 			);
-			path = AsyncExampleApp;
-			sourceTree = "<group>";
+			name = AsyncExampleApp;
+			path = Examples/AsyncExampleApp;
+			sourceTree = SOURCE_ROOT;
 		};
 		37A4A2681D30260F005CAEA5 /* AsyncExampleAppTests */ = {
 			isa = PBXGroup;
@@ -1314,8 +1323,9 @@
 				37A4A2691D30260F005CAEA5 /* AsyncExampleAppTests.swift */,
 				37A4A26B1D30260F005CAEA5 /* Info.plist */,
 			);
-			path = AsyncExampleAppTests;
-			sourceTree = "<group>";
+			name = AsyncExampleAppTests;
+			path = Examples/AsyncExampleAppTests;
+			sourceTree = SOURCE_ROOT;
 		};
 		37A4A2811D307435005CAEA5 /* Change Handling */ = {
 			isa = PBXGroup;
@@ -1350,8 +1360,9 @@
 				371243A71D00B5C100E9BCFF /* Resources */,
 				37C6112F1CD7F7A5001DAF59 /* Other Stuff */,
 			);
-			path = SampleApp;
-			sourceTree = "<group>";
+			name = SampleApp;
+			path = Examples/SampleApp;
+			sourceTree = SOURCE_ROOT;
 		};
 		37C611131CD7EFAE001DAF59 /* SampleAppTests */ = {
 			isa = PBXGroup;
@@ -1359,8 +1370,9 @@
 				37C611161CD7EFAE001DAF59 /* Info.plist */,
 				372707671CED2F8100710C80 /* AppTestCase.swift */,
 			);
-			path = SampleAppTests;
-			sourceTree = "<group>";
+			name = SampleAppTests;
+			path = Examples/SampleAppTests;
+			sourceTree = SOURCE_ROOT;
 		};
 		37C6111E1CD7EFAE001DAF59 /* SampleAppUITests */ = {
 			isa = PBXGroup;
@@ -1368,8 +1380,9 @@
 				37C6111F1CD7EFAE001DAF59 /* SampleAppUITests.swift */,
 				37C611211CD7EFAE001DAF59 /* Info.plist */,
 			);
-			path = SampleAppUITests;
-			sourceTree = "<group>";
+			name = SampleAppUITests;
+			path = Examples/SampleAppUITests;
+			sourceTree = SOURCE_ROOT;
 		};
 		37C6112F1CD7F7A5001DAF59 /* Other Stuff */ = {
 			isa = PBXGroup;
@@ -1465,6 +1478,27 @@
 			name = Model;
 			sourceTree = "<group>";
 		};
+		37F1D9B41DCD3D1C004D4AAD /* Example Apps */ = {
+			isa = PBXGroup;
+			children = (
+				372707E91CFE2C7E00710C80 /* BindableControlsApp */,
+				372707F91CFE2C7E00710C80 /* BindableControlsAppUITests */,
+				37C610FE1CD7EFAE001DAF59 /* SampleApp */,
+				37C611131CD7EFAE001DAF59 /* SampleAppTests */,
+				37C6111E1CD7EFAE001DAF59 /* SampleAppUITests */,
+				37A1CE6C1D1081980067870D /* SearchApp */,
+				37A1CE7C1D1081980067870D /* SearchAppTests */,
+				37A1CE871D1081980067870D /* SearchAppUITests */,
+				37A4A2581D30260F005CAEA5 /* AsyncExampleApp */,
+				37A4A2681D30260F005CAEA5 /* AsyncExampleAppTests */,
+				37504B391DC6995100CEE4D4 /* Visualizer */,
+				37504B4E1DC6995100CEE4D4 /* VisualizerTests */,
+				37504B591DC6995100CEE4D4 /* VisualizerUITests */,
+			);
+			name = "Example Apps";
+			path = Examples;
+			sourceTree = "<group>";
+		};
 		C20F926B1D9587A3002F9125 /* Data Codec */ = {
 			isa = PBXGroup;
 			children = (
@@ -1506,19 +1540,7 @@
 				C22BF12E1CBC348500D3FE59 /* PLRelational */,
 				372707B31CFE23CA00710C80 /* PLRelationalBinding */,
 				37A1CE9F1D1081FC0067870D /* PLBindableControls */,
-				372707E91CFE2C7E00710C80 /* BindableControlsApp */,
-				372707F91CFE2C7E00710C80 /* BindableControlsAppUITests */,
-				37C610FE1CD7EFAE001DAF59 /* SampleApp */,
-				37C611131CD7EFAE001DAF59 /* SampleAppTests */,
-				37C6111E1CD7EFAE001DAF59 /* SampleAppUITests */,
-				37A1CE6C1D1081980067870D /* SearchApp */,
-				37A1CE7C1D1081980067870D /* SearchAppTests */,
-				37A1CE871D1081980067870D /* SearchAppUITests */,
-				37A4A2581D30260F005CAEA5 /* AsyncExampleApp */,
-				37A4A2681D30260F005CAEA5 /* AsyncExampleAppTests */,
-				37504B391DC6995100CEE4D4 /* Visualizer */,
-				37504B4E1DC6995100CEE4D4 /* VisualizerTests */,
-				37504B591DC6995100CEE4D4 /* VisualizerUITests */,
+				37F1D9B41DCD3D1C004D4AAD /* Example Apps */,
 				C22BF12D1CBC348500D3FE59 /* Products */,
 				C2D4A8491D88789A001D9971 /* Swift library workaround */,
 			);
@@ -2880,7 +2902,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = BindableControlsApp/Info.plist;
+				INFOPLIST_FILE = Examples/BindableControlsApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2893,7 +2915,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = BindableControlsApp/Info.plist;
+				INFOPLIST_FILE = Examples/BindableControlsApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2905,7 +2927,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = BindableControlsAppUITests/Info.plist;
+				INFOPLIST_FILE = Examples/BindableControlsAppUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2918,7 +2940,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = BindableControlsAppUITests/Info.plist;
+				INFOPLIST_FILE = Examples/BindableControlsAppUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2937,7 +2959,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Visualizer/Info.plist;
+				INFOPLIST_FILE = Examples/Visualizer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.Visualizer;
@@ -2957,7 +2979,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = Visualizer/Info.plist;
+				INFOPLIST_FILE = Examples/Visualizer/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.Visualizer;
@@ -2977,7 +2999,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
-				INFOPLIST_FILE = VisualizerTests/Info.plist;
+				INFOPLIST_FILE = Examples/VisualizerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerTests;
@@ -2998,7 +3020,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
-				INFOPLIST_FILE = VisualizerTests/Info.plist;
+				INFOPLIST_FILE = Examples/VisualizerTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerTests;
@@ -3018,7 +3040,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
-				INFOPLIST_FILE = VisualizerUITests/Info.plist;
+				INFOPLIST_FILE = Examples/VisualizerUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerUITests;
@@ -3038,7 +3060,7 @@
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
-				INFOPLIST_FILE = VisualizerUITests/Info.plist;
+				INFOPLIST_FILE = Examples/VisualizerUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerUITests;
@@ -3054,7 +3076,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SearchApp/Info.plist;
+				INFOPLIST_FILE = Examples/SearchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3066,7 +3088,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SearchApp/Info.plist;
+				INFOPLIST_FILE = Examples/SearchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3078,7 +3100,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SearchAppTests/Info.plist;
+				INFOPLIST_FILE = Examples/SearchAppTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3091,7 +3113,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SearchAppTests/Info.plist;
+				INFOPLIST_FILE = Examples/SearchAppTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3103,7 +3125,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SearchAppUITests/Info.plist;
+				INFOPLIST_FILE = Examples/SearchAppUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3115,7 +3137,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SearchAppUITests/Info.plist;
+				INFOPLIST_FILE = Examples/SearchAppUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3152,7 +3174,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = AsyncExampleApp/Info.plist;
+				INFOPLIST_FILE = Examples/AsyncExampleApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.AsyncExampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3164,7 +3186,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = AsyncExampleApp/Info.plist;
+				INFOPLIST_FILE = Examples/AsyncExampleApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.AsyncExampleApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3176,7 +3198,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = AsyncExampleAppTests/Info.plist;
+				INFOPLIST_FILE = Examples/AsyncExampleAppTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.AsyncExampleAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3189,7 +3211,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = AsyncExampleAppTests/Info.plist;
+				INFOPLIST_FILE = Examples/AsyncExampleAppTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.AsyncExampleAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3202,7 +3224,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SampleApp/Info.plist;
+				INFOPLIST_FILE = Examples/SampleApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SampleApp;
@@ -3215,7 +3237,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SampleApp/Info.plist;
+				INFOPLIST_FILE = Examples/SampleApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SampleApp;
@@ -3228,7 +3250,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SampleAppTests/Info.plist;
+				INFOPLIST_FILE = Examples/SampleAppTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SampleAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3241,7 +3263,7 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SampleAppTests/Info.plist;
+				INFOPLIST_FILE = Examples/SampleAppTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SampleAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3253,7 +3275,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SampleAppUITests/Info.plist;
+				INFOPLIST_FILE = Examples/SampleAppUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SampleAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -3265,7 +3287,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = SampleAppUITests/Info.plist;
+				INFOPLIST_FILE = Examples/SampleAppUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SampleAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
