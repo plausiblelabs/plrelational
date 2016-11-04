@@ -1013,6 +1013,7 @@
 				372707EE1CFE2C7E00710C80 /* MainMenu.xib */,
 				372707EC1CFE2C7E00710C80 /* Assets.xcassets */,
 				372707F11CFE2C7E00710C80 /* Info.plist */,
+				372707F91CFE2C7E00710C80 /* BindableControlsAppUITests */,
 			);
 			name = BindableControlsApp;
 			path = Examples/BindableControlsApp;
@@ -1131,6 +1132,8 @@
 				37E05C2C1DCAEFAE005CBFE2 /* Database */,
 				37E05C331DCAF568005CBFE2 /* Model */,
 				37E05C2B1DCAEFA0005CBFE2 /* Other Stuff */,
+				37504B4E1DC6995100CEE4D4 /* VisualizerTests */,
+				37504B591DC6995100CEE4D4 /* VisualizerUITests */,
 			);
 			name = Visualizer;
 			path = Examples/Visualizer;
@@ -1164,6 +1167,8 @@
 				37A1CE711D1081980067870D /* MainMenu.xib */,
 				37A1CE6F1D1081980067870D /* Assets.xcassets */,
 				37A1CE741D1081980067870D /* Info.plist */,
+				37A1CE7C1D1081980067870D /* SearchAppTests */,
+				37A1CE871D1081980067870D /* SearchAppUITests */,
 			);
 			name = SearchApp;
 			path = Examples/SearchApp;
@@ -1298,6 +1303,7 @@
 				37A4A25D1D30260F005CAEA5 /* MainMenu.xib */,
 				37A4A25B1D30260F005CAEA5 /* Assets.xcassets */,
 				37A4A2601D30260F005CAEA5 /* Info.plist */,
+				37A4A2681D30260F005CAEA5 /* AsyncExampleAppTests */,
 			);
 			name = AsyncExampleApp;
 			path = Examples/AsyncExampleApp;
@@ -1345,6 +1351,8 @@
 				37C611461CDBCB2F001DAF59 /* Model */,
 				371243A71D00B5C100E9BCFF /* Resources */,
 				37C6112F1CD7F7A5001DAF59 /* Other Stuff */,
+				37C611131CD7EFAE001DAF59 /* SampleAppTests */,
+				37C6111E1CD7EFAE001DAF59 /* SampleAppUITests */,
 			);
 			name = SampleApp;
 			path = Examples/SampleApp;
@@ -1468,18 +1476,10 @@
 			isa = PBXGroup;
 			children = (
 				372707E91CFE2C7E00710C80 /* BindableControlsApp */,
-				372707F91CFE2C7E00710C80 /* BindableControlsAppUITests */,
 				37C610FE1CD7EFAE001DAF59 /* SampleApp */,
-				37C611131CD7EFAE001DAF59 /* SampleAppTests */,
-				37C6111E1CD7EFAE001DAF59 /* SampleAppUITests */,
 				37A1CE6C1D1081980067870D /* SearchApp */,
-				37A1CE7C1D1081980067870D /* SearchAppTests */,
-				37A1CE871D1081980067870D /* SearchAppUITests */,
 				37A4A2581D30260F005CAEA5 /* AsyncExampleApp */,
-				37A4A2681D30260F005CAEA5 /* AsyncExampleAppTests */,
 				37504B391DC6995100CEE4D4 /* Visualizer */,
-				37504B4E1DC6995100CEE4D4 /* VisualizerTests */,
-				37504B591DC6995100CEE4D4 /* VisualizerUITests */,
 			);
 			name = "Example Apps";
 			path = Examples;
