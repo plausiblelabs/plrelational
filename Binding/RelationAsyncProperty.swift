@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-import libRelational
+import PLRelational
 
 extension Relation {
     /// Returns an AsyncReadableProperty that gets its value from this relation.

@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import libRelational
+import PLRelational
 
 enum DocDatabaseError: Error, CustomStringConvertible { case
     createFailed(underlying: RelationError),

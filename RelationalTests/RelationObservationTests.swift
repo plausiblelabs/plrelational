@@ -4,7 +4,7 @@
 //
 
 import XCTest
-import libRelational
+import PLRelational
 
 
 class RelationObservationTests: DBTestCase {

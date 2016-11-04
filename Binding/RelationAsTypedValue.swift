@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import libRelational
+import PLRelational
 
 extension Relation {
     /// Generates all non-error rows in the relation.

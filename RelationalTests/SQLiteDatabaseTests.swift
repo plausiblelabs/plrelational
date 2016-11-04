@@ -4,7 +4,7 @@
 //
 
 import XCTest
-import libRelational
+import PLRelational
 import sqlite3
 
 class SQLiteDatabaseTests: DBTestCase {

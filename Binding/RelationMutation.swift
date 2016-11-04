@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import libRelational
+import PLRelational
 
 extension Relation {
     /// Performs a synchronous update using a single RelationValue.

@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-import libRelational
+import PLRelational
 
 private class RelationSignal<T>: Signal<T> {
     fileprivate let relation: Relation

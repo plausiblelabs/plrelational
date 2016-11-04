@@ -4,7 +4,7 @@
 //
 
 import XCTest
-import libRelational
+import PLRelational
 
 class TransactionalDatabaseTests: DBTestCase {
     func testTransactionNotifications() {

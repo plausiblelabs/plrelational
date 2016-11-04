@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import libRelational
+import PLRelational
 import Binding
 import BindableControls
 
@@ -702,7 +702,7 @@ extension SchemeEnum {
     }
 }
 
-// TODO: Move this to libRelational
+// TODO: Move this to PLRelational
 extension Relation {
     
     /// Selects all rows that pass the comparison test (e.g. <= `value`), and then from that set of rows,

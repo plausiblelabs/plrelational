@@ -5,7 +5,7 @@
 
 import Cocoa
 
-import libRelational
+import PLRelational
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {

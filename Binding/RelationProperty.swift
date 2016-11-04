@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-import libRelational
+import PLRelational
 
 private class RelationProperty<T>: ReadableProperty<T> {
     private var removal: ObserverRemoval!

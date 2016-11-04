@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import libRelational
+import PLRelational
 
 public final class RowTreeNode: RowCollectionElement, TreeNode {
     public var children: [RowTreeNode]

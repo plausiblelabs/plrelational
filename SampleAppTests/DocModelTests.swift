@@ -4,7 +4,7 @@
 //
 
 import XCTest
-import libRelational
+import PLRelational
 @testable import Binding
 import BindableControls
 @testable import SampleApp

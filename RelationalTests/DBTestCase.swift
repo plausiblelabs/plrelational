@@ -4,7 +4,7 @@
 //
 
 import XCTest
-import libRelational
+import PLRelational
 
 func AssertEqual(_ a: Relation?, _ b: Relation?, file: StaticString = #file, line: UInt = #line) {
     guard let a = a else {

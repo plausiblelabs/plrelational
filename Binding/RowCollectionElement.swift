@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import libRelational
+import PLRelational
 
 public class RowCollectionElement: CollectionElement {
     public typealias ID = RelationValue

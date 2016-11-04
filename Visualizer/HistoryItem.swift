@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import libRelational
+import PLRelational
 
 struct HistoryItem {
     let id: HistoryItemID

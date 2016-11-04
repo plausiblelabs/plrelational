@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import libRelational
+import PLRelational
 import Binding
 
 public class UndoableDatabase {

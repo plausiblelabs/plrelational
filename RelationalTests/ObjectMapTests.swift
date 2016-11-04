@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-@testable import libRelational
+@testable import PLRelational
 import XCTest
 
 

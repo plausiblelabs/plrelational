@@ -4,7 +4,7 @@
 //
 
 import XCTest
-@testable import libRelational
+@testable import PLRelational
 
 class QueryRunnerTests: XCTestCase {
     func testLargerTree() {

@@ -5,7 +5,7 @@
 
 
 import XCTest
-import libRelational
+import PLRelational
 
 class PlistFileRelationTests: XCTestCase {
     var urls: [URL] = []

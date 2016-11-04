@@ -4,7 +4,7 @@
 //
 
 import Cocoa
-import libRelational
+import PLRelational
 
 class Document: NSDocument {
 

@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import libRelational
+import PLRelational
 
 // TODO: Use lazy sequences here
 public struct RelationChangeParts {

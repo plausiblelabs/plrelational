@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import libRelational
+import PLRelational
 
 public protocol Plistable {
     func toPlist() -> AnyObject

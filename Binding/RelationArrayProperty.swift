@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import libRelational
+import PLRelational
 
 public class RowArrayElement: RowCollectionElement, ArrayElement {
     override init(id: RelationValue, data: Row, tag: AnyObject?) {

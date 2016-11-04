@@ -7,7 +7,7 @@
 //
 
 import XCTest
-@testable import libRelational
+@testable import PLRelational
 
 class InlineMutableDataTests: XCTestCase {
     func testBigData() {

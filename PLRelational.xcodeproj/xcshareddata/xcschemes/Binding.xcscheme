@@ -17,7 +17,7 @@
                BlueprintIdentifier = "372707AD1CFE238700710C80"
                BuildableName = "libBinding.dylib"
                BlueprintName = "Binding"
-               ReferencedContainer = "container:Relational.xcodeproj">
+               ReferencedContainer = "container:PLRelational.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,7 +35,7 @@
                BlueprintIdentifier = "372707CA1CFE25AF00710C80"
                BuildableName = "BindingTests.xctest"
                BlueprintName = "BindingTests"
-               ReferencedContainer = "container:Relational.xcodeproj">
+               ReferencedContainer = "container:PLRelational.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -45,7 +45,7 @@
             BlueprintIdentifier = "372707AD1CFE238700710C80"
             BuildableName = "libBinding.dylib"
             BlueprintName = "Binding"
-            ReferencedContainer = "container:Relational.xcodeproj">
+            ReferencedContainer = "container:PLRelational.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -67,7 +67,7 @@
             BlueprintIdentifier = "372707AD1CFE238700710C80"
             BuildableName = "libBinding.dylib"
             BlueprintName = "Binding"
-            ReferencedContainer = "container:Relational.xcodeproj">
+            ReferencedContainer = "container:PLRelational.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -85,7 +85,7 @@
             BlueprintIdentifier = "372707AD1CFE238700710C80"
             BuildableName = "libBinding.dylib"
             BlueprintName = "Binding"
-            ReferencedContainer = "container:Relational.xcodeproj">
+            ReferencedContainer = "container:PLRelational.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

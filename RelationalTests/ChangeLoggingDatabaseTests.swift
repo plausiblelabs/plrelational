@@ -4,7 +4,7 @@
 //
 
 import XCTest
-import libRelational
+import PLRelational
 
 class ChangeLoggingDatabaseTests: DBTestCase {
     func testBare() {
