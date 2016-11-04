@@ -652,7 +652,7 @@
 		374AE9711D91C2F0007D1366 /* StoredDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredDatabase.swift; sourceTree = "<group>"; };
 		374AE9731D91C2FC007D1366 /* StoredRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredRelation.swift; sourceTree = "<group>"; };
 		374AE9751D91DBC7007D1366 /* PlistDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDatabase.swift; sourceTree = "<group>"; };
-		374AE9791D9205DC007D1366 /* PlistDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistDatabaseTests.swift; path = RelationalTests/PlistDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
+		374AE9791D9205DC007D1366 /* PlistDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistDatabaseTests.swift; path = PLRelationalTests/PlistDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
 		37504B381DC6995100CEE4D4 /* Visualizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Visualizer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37504B3A1DC6995100CEE4D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37504B3C1DC6995100CEE4D4 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -788,7 +788,7 @@
 		C22921B51CD10BA800518184 /* ObserverSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObserverSet.swift; sourceTree = "<group>"; };
 		C22921BB1CD12A7100518184 /* libPLRelational.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libPLRelational.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		C22921E51CD12CF100518184 /* PLRelationalTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PLRelationalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C22921E71CD12CF100518184 /* RelationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RelationTests.swift; path = RelationalTests/RelationTests.swift; sourceTree = SOURCE_ROOT; };
+		C22921E71CD12CF100518184 /* RelationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RelationTests.swift; path = PLRelationalTests/RelationTests.swift; sourceTree = SOURCE_ROOT; };
 		C22921E91CD12CF100518184 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C22AC5231D1061FB00224091 /* Row.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Row.swift; sourceTree = "<group>"; };
 		C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryConvenience.swift; sourceTree = "<group>"; };
@@ -813,11 +813,11 @@
 		C257C7531CC017EB00234A89 /* SimpleDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleDatabase.swift; sourceTree = "<group>"; };
 		C263BBF21CE51B51006B7662 /* UnaryOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnaryOperator.swift; sourceTree = "<group>"; };
 		C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelation.swift; sourceTree = "<group>"; };
-		C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeLoggingDatabaseTests.swift; path = RelationalTests/ChangeLoggingDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
+		C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeLoggingDatabaseTests.swift; path = PLRelationalTests/ChangeLoggingDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
 		C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratorConcat.swift; sourceTree = "<group>"; };
 		C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DBTestCase.swift; sourceTree = "<group>"; };
 		C277E8061CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingDatabase.swift; sourceTree = "<group>"; };
-		C277E80B1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SQLiteDatabaseTests.swift; path = RelationalTests/SQLiteDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
+		C277E80B1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SQLiteDatabaseTests.swift; path = PLRelationalTests/SQLiteDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
 		C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpression.swift; sourceTree = "<group>"; };
 		C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpressionOperators.swift; sourceTree = "<group>"; };
 		C28BFEF01D81F7C4005F07A0 /* ObjectCasting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectCasting.swift; sourceTree = "<group>"; };
@@ -830,33 +830,33 @@
 		C2B53CBC1D1AF4FC006B6278 /* DeallocObservation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeallocObservation.swift; sourceTree = "<group>"; };
 		C2B53CBE1D1C2B0A006B6278 /* MemoryTableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoryTableRelation.swift; sourceTree = "<group>"; };
 		C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryPlannerDump.swift; sourceTree = "<group>"; };
-		C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectMapTests.swift; path = RelationalTests/ObjectMapTests.swift; sourceTree = SOURCE_ROOT; };
+		C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ObjectMapTests.swift; path = PLRelationalTests/ObjectMapTests.swift; sourceTree = SOURCE_ROOT; };
 		C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsistentPRNG.swift; sourceTree = "<group>"; };
 		C2B6E2681D804D5E0039923C /* PlistDirectoryRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDirectoryRelation.swift; sourceTree = "<group>"; };
 		C2B6E26B1D805E230039923C /* Crypto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Crypto.swift; sourceTree = "<group>"; };
-		C2B6E26D1D806B390039923C /* PlistDirectoryRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistDirectoryRelationTests.swift; path = ../RelationalTests/PlistDirectoryRelationTests.swift; sourceTree = "<group>"; };
+		C2B6E26D1D806B390039923C /* PlistDirectoryRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistDirectoryRelationTests.swift; path = PLRelationalTests/PlistDirectoryRelationTests.swift; sourceTree = SOURCE_ROOT; };
 		C2B6E26F1D80AA6A0039923C /* NSURLConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSURLConvenience.swift; sourceTree = "<group>"; };
-		C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UpdateManagerTests.swift; path = RelationalTests/UpdateManagerTests.swift; sourceTree = SOURCE_ROOT; };
-		C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationObservationTests.swift; path = RelationalTests/RelationObservationTests.swift; sourceTree = SOURCE_ROOT; };
+		C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UpdateManagerTests.swift; path = PLRelationalTests/UpdateManagerTests.swift; sourceTree = SOURCE_ROOT; };
+		C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationObservationTests.swift; path = PLRelationalTests/RelationObservationTests.swift; sourceTree = SOURCE_ROOT; };
 		C2C258691D0203CC0066EB82 /* RelationOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationOperators.swift; sourceTree = "<group>"; };
 		C2C630881D302B8C00AD44C1 /* QueryManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryManager.swift; sourceTree = "<group>"; };
 		C2C6308A1D35553F00AD44C1 /* UpdateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateManager.swift; sourceTree = "<group>"; };
 		C2C6308C1D355B7500AD44C1 /* PerThreadInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PerThreadInstance.swift; sourceTree = "<group>"; };
 		C2CA46181D3FF1870082E2D2 /* UpdateManagerObservation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateManagerObservation.swift; sourceTree = "<group>"; };
 		C2CE513B1D4693DC0011C554 /* InlineMutableData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InlineMutableData.swift; sourceTree = "<group>"; };
-		C2CE513D1D469EF10011C554 /* InlineMutableDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = InlineMutableDataTests.swift; path = RelationalTests/InlineMutableDataTests.swift; sourceTree = SOURCE_ROOT; };
+		C2CE513D1D469EF10011C554 /* InlineMutableDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = InlineMutableDataTests.swift; path = PLRelationalTests/InlineMutableDataTests.swift; sourceTree = SOURCE_ROOT; };
 		C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistFileRelation.swift; sourceTree = "<group>"; };
 		C2CFC35A1D7F36DE00389373 /* RowPlist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RowPlist.swift; sourceTree = "<group>"; };
-		C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistFileRelationTests.swift; path = ../RelationalTests/PlistFileRelationTests.swift; sourceTree = "<group>"; };
+		C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistFileRelationTests.swift; path = PLRelationalTests/PlistFileRelationTests.swift; sourceTree = SOURCE_ROOT; };
 		C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswiftSwiftOnoneSupport.dylib; path = Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/libswiftSwiftOnoneSupport.dylib; sourceTree = DEVELOPER_DIR; };
 		C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectDictionary.swift; sourceTree = "<group>"; };
-		C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QueryRunnerTests.swift; path = RelationalTests/QueryRunnerTests.swift; sourceTree = SOURCE_ROOT; };
+		C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QueryRunnerTests.swift; path = PLRelationalTests/QueryRunnerTests.swift; sourceTree = SOURCE_ROOT; };
 		C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiator.swift; sourceTree = "<group>"; };
 		C2EC76FC1D4BAEFB00A374B1 /* Debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
 		C2EC76FE1D4FD75A00A374B1 /* DispatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DispatchContext.swift; sourceTree = "<group>"; };
 		C2FE9B961CEE02BC0004E635 /* RelationChange.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationChange.swift; sourceTree = "<group>"; };
 		C2FE9B981CEE15720004E635 /* TransactionalDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionalDatabase.swift; sourceTree = "<group>"; };
-		C2FE9B9A1CEE3A810004E635 /* TransactionalDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TransactionalDatabaseTests.swift; path = RelationalTests/TransactionalDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
+		C2FE9B9A1CEE3A810004E635 /* TransactionalDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TransactionalDatabaseTests.swift; path = PLRelationalTests/TransactionalDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1624,20 +1624,20 @@
 			name = "Custom Module Map";
 			sourceTree = "<group>";
 		};
-		C22921E61CD12CF100518184 /* RelationalTests */ = {
+		C22921E61CD12CF100518184 /* PLRelationalTests */ = {
 			isa = PBXGroup;
 			children = (
 				C22921E91CD12CF100518184 /* Info.plist */,
 				C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */,
 			);
-			path = RelationalTests;
+			path = PLRelationalTests;
 			sourceTree = "<group>";
 		};
 		C22BF1231CBC348500D3FE59 = {
 			isa = PBXGroup;
 			children = (
 				C22BF12E1CBC348500D3FE59 /* PLRelational */,
-				C22921E61CD12CF100518184 /* RelationalTests */,
+				C22921E61CD12CF100518184 /* PLRelationalTests */,
 				372707B31CFE23CA00710C80 /* Binding */,
 				372707CC1CFE25AF00710C80 /* BindingTests */,
 				37A1CE9F1D1081FC0067870D /* BindableControls */,
@@ -3686,9 +3686,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = RelationalTests/Info.plist;
+				INFOPLIST_FILE = PLRelationalTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationalTests;
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};
@@ -3698,9 +3698,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
-				INFOPLIST_FILE = RelationalTests/Info.plist;
+				INFOPLIST_FILE = PLRelationalTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationalTests;
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};
