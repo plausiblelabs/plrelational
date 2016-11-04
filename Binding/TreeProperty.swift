@@ -41,6 +41,7 @@ public enum TreeChange<N: TreeNode> { case
     initial(N),
     insert(TreePath<N>),
     delete(TreePath<N>),
+    update(TreePath<N>),
     move(src: TreePath<N>, dst: TreePath<N>)
 }
 
@@ -51,6 +52,7 @@ public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     case (.initial, .initial): return true
     case let (.insert(a), .insert(b)): return a == b
     case let (.delete(a), .delete(b)): return a == b
+    case let (.update(a), .update(b)): return a == b
     case let (.move(asrc, adst), .move(bsrc, bdst)): return asrc == bsrc && adst == bdst
     default: return false
     }
@@ -73,6 +75,10 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
         self.root = root
         self.signal = signal
         self.notify = notify
+    }
+    
+    public var property: AsyncReadableProperty<Node> {
+        return fullTree()
     }
     
     open func start() {
@@ -143,6 +149,17 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
         return parent.children.index(where: {$0 === node})
     }
     
+    /// Returns the tree path of the given node.
+    public func pathForNode(_ node: Node) -> TreePath<Node>? {
+        let parent = parentForNode(node)
+        let parentNode = parent ?? root
+        if let index = parentNode.children.index(where: {$0 === node}) {
+            return TreePath(parent: parent, index: index)
+        } else {
+            return nil
+        }
+    }
+    
     /// Returns true if the first node is a descendent of (or the same as) the second node.
     public func isNodeDescendent(_ node: Node, ofAncestor ancestor: Node) -> Bool {
         if node === ancestor {
@@ -184,5 +201,26 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
     /// Note: dstPath.index is relative to the state of the array *after* the item is removed.
     public func orderForMove(srcPath: TreePath<Node>, dstPath: TreePath<Node>) -> (nodeID: Node.ID, dstParentID: Node.ID?, order: Double) {
         fatalError("Must be implemented by subclasses")
+    }
+    
+    /// Returns a view on this TreeProperty that delivers the full tree through
+    /// its Signal whenever there is any change in the underlying TreeProperty.
+    public func fullTree() -> AsyncReadableProperty<Node> {
+        return FullTreeProperty(underlying: self)
+    }
+}
+
+private class FullTreeProperty<Node: TreeNode>: AsyncReadableProperty<Node> {
+    
+    private let underlying: TreeProperty<Node>
+    
+    fileprivate init(underlying: TreeProperty<Node>) {
+        self.underlying = underlying
+        super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.root })
+    }
+    
+    fileprivate override func start() {
+        underlying.start()
+        super.start()
     }
 }

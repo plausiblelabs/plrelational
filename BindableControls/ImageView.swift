@@ -8,7 +8,7 @@ import Binding
 
 open class ImageView: NSImageView {
 
-    open lazy var img: BindableProperty<Image> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    public lazy var img: BindableProperty<Image> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.image = value.nsimage
     })
     

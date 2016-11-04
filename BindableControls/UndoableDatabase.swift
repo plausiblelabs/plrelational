@@ -89,12 +89,14 @@ public class UndoableDatabase {
         )
     }
 
-    public func asyncBidiProperty<T>(_ relation: Relation, action: String, initialValue: T?, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
-        return relation.asyncProperty(initialValue: initialValue, config: asyncMutationConfig(action, update), { _ in signal })
+    public func asyncBidiProperty<T>(action: String, initialValue: T?, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
+        let config = asyncMutationConfig(action, update)
+        return config.asyncProperty(initialValue: initialValue, signal: signal)
     }
 
-    public func asyncBidiProperty<T>(_ relation: Relation, action: String, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
-        return relation.asyncProperty(config: asyncMutationConfig(action, update), { _ in signal })
+    public func asyncBidiProperty<T>(action: String, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
+        let config = asyncMutationConfig(action, update)
+        return config.asyncProperty(signal: signal)
     }
     
     private func asyncMutationConfig<T>(_ action: String, _ update: @escaping (T) -> Void) -> RelationMutationConfig<T> {

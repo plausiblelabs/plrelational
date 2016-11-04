@@ -5,14 +5,23 @@
 
 import Foundation
 
-public protocol AsyncReadablePropertyType: class {
+public protocol AsyncPropertyType {
+    /// Causes the underlying signal to start delivering values.
+    func start()
+}
+
+public protocol AsyncReadablePropertyType: class, AsyncPropertyType {
     associatedtype Value
     associatedtype SignalChange
-    
-    var value: Value? { get }
+
+    /// Converts this instance into a concrete `AsyncReadableProperty`.
+    var property: AsyncReadableProperty<Value> { get }
+
+    /// The underlying signal.
     var signal: Signal<SignalChange> { get }
     
-    func start()
+    /// The most recent value delivered by the underlying signal.
+    var value: Value? { get }
 }
 
 /// A concrete readable property whose value is fetched asynchronously.
@@ -20,8 +29,8 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
     public typealias SignalChange = T
     
-    open internal(set) var value: T?
-    open let signal: Signal<T>
+    public let signal: Signal<T>
+    public internal(set) var value: T?
     private var removal: ObserverRemoval?
     private var started = false
     
@@ -30,7 +39,15 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
         self.signal = signal
     }
     
-    open func start() {
+    deinit {
+        removal?()
+    }
+    
+    public var property: AsyncReadableProperty<T> {
+        return self
+    }
+    
+    public func start() {
         // TODO: Need to make a SignalProducer like thing that can create a unique signal
         // each time start() is called; for now we'll assume it can be called only once
         if !started {
@@ -43,8 +60,10 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
         }
     }
     
-    deinit {
-        removal?()
+    public static func pipe(initialValue: T? = nil) -> (AsyncReadableProperty<T>, Signal<T>.Notify) {
+        let (signal, notify) = Signal<T>.pipe()
+        let property = AsyncReadableProperty(initialValue: initialValue, signal: signal)
+        return (property, notify)
     }
 }
 
@@ -53,18 +72,22 @@ open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
     public typealias SignalChange = T
 
-    open var value: T? {
+    public var value: T? {
         return getValue()
     }
     
-    open let signal: Signal<T>
+    public let signal: Signal<T>
     private var started = false
 
     internal init(signal: Signal<T>) {
         self.signal = signal
     }
     
-    open func start() {
+    public var property: AsyncReadableProperty<T> {
+        return AsyncReadableProperty(initialValue: self.value, signal: self.signal)
+    }
+    
+    public func start() {
         // TODO: For now we'll assume it can be called only once
         if !started {
             startImpl()

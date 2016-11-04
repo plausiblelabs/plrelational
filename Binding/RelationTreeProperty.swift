@@ -190,26 +190,40 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
     }
     
     private func onUpdate(_ row: Row) -> Change? {
-        let newParentID = row[parentAttr]
-        let newOrder = row[orderAttr]
-        if newParentID == .notFound || newOrder == .notFound {
-            // TODO: We should be able to perform the move if only one of parent/order were updated
+        let srcID = row[idAttr]
+        guard let node = nodeForID(srcID) else {
             return nil
         }
-
-        let srcID = row[idAttr]
-        let srcNode = nodeForID(srcID)!
-        return onMove(srcNode, dstParentID: newParentID, dstOrder: newOrder)
+        
+        // Capture the old/new parent and order values
+        let oldParentID = node.data[parentAttr]
+        let newParentID = row[parentAttr]
+        let oldOrder = node.data[orderAttr]
+        let newOrder = row[orderAttr]
+        
+        // Update the node's row data
+        node.data = node.data.rowWithUpdate(row)
+        
+        if newParentID != .notFound && newOrder != .notFound && (newParentID != oldParentID || newOrder != oldOrder) {
+            // Treat this as a move
+            return onMove(node, srcParentID: oldParentID, dstParentID: newParentID)
+        } else {
+            // Treat this as an update
+            return pathForNode(node).map{ .update($0) }
+        }
     }
     
-    private func onMove(_ node: Node, dstParentID: RelationValue, dstOrder: RelationValue) -> Change {
-        let optSrcParent = parentForNode(node)
-        let optDstParent: Node?
-        if dstParentID == .null {
-            optDstParent = nil
-        } else {
-            optDstParent = nodeForID(dstParentID)!
+    private func onMove(_ node: Node, srcParentID: RelationValue, dstParentID: RelationValue) -> Change {
+        func parentForNullableID(_ id: RelationValue) -> Node? {
+            if id == .null {
+                return nil
+            } else {
+                return nodeForID(id)
+            }
         }
+        
+        let optSrcParent = parentForNullableID(srcParentID)
+        let optDstParent = parentForNullableID(dstParentID)
 
         let srcParent = optSrcParent ?? root
         let dstParent = optDstParent ?? root
@@ -218,10 +232,6 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         let srcIndex = srcParent.children.index(where: { $0 === node })!
         srcParent.children.remove(at: srcIndex)
         
-        // Update the values in the node's row
-        node.data[parentAttr] = dstParentID
-        node.data[orderAttr] = dstOrder
-
         // Insert the node in its new parent
         let dstIndex = dstParent.children.insertSorted(node, { $0.data[orderAttr] })
 

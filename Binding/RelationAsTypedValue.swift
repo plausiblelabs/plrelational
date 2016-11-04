@@ -126,8 +126,14 @@ extension Relation {
     
     /// Returns a single RelationValue if there is exactly one row in the relation, otherwise resolves
     /// to nil.
-    public func oneValue() -> RelationValue? {
+    public func oneValueOrNil() -> RelationValue? {
         return oneValue{ $0 }
+    }
+
+    /// Returns a single RelationValue if there is exactly one row in the relation, otherwise resolves
+    /// to nil.
+    public func oneValueOrNil(_ rows: AnyIterator<Row>) -> RelationValue? {
+        return oneValue(rows, { $0 })
     }
 
     /// Resolves to a single string value if there is exactly one row in the given set, otherwise resolves

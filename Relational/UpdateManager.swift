@@ -199,6 +199,7 @@ public final class UpdateManager: PerThreadInstance {
             var removals: [(Void) -> Void] = []
             for (_, info) in observedInfo {
                 let derivative = info.derivative
+                derivative.clearVariables()
                 for variable in derivative.allVariables {
                     let removal = variable.addChangeObserver({
                         let copiedAddResult = $0.added.map(ConcreteRelation.copyRelation)

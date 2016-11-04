@@ -17,11 +17,43 @@ public struct EqualityComparator: BinaryOperator {
     }
 }
 
+public struct InequalityComparator: BinaryOperator {
+    public init() {}
+    
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
+        return .boolValue(a != b)
+    }
+}
+
 public struct LTComparator: BinaryOperator {
     public init() {}
     
     public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
         return .boolValue(a < b)
+    }
+}
+
+public struct LEComparator: BinaryOperator {
+    public init() {}
+    
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
+        return .boolValue(a <= b)
+    }
+}
+
+public struct GTComparator: BinaryOperator {
+    public init() {}
+    
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
+        return .boolValue(a > b)
+    }
+}
+
+public struct GEComparator: BinaryOperator {
+    public init() {}
+    
+    public func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue {
+        return .boolValue(a >= b)
     }
 }
 
@@ -75,9 +107,33 @@ extension EqualityComparator: CustomStringConvertible {
     }
 }
 
+extension InequalityComparator: CustomStringConvertible {
+    public var description: String {
+        return "!="
+    }
+}
+
 extension LTComparator: CustomStringConvertible {
     public var description: String {
         return "<"
+    }
+}
+
+extension LEComparator: CustomStringConvertible {
+    public var description: String {
+        return "<="
+    }
+}
+
+extension GTComparator: CustomStringConvertible {
+    public var description: String {
+        return ">"
+    }
+}
+
+extension GEComparator: CustomStringConvertible {
+    public var description: String {
+        return ">="
     }
 }
 

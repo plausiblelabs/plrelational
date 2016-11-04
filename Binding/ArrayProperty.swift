@@ -21,6 +21,7 @@ public enum ArrayChange<E: ArrayElement> { case
     initial([E]),
     insert(Int),
     delete(Int),
+    update(Int),
     move(srcIndex: Int, dstIndex: Int)
 }
 
@@ -30,6 +31,7 @@ public func ==<E: ArrayElement>(a: ArrayChange<E>, b: ArrayChange<E>) -> Bool {
     case let (.initial(a), .initial(b)): return a == b
     case let (.insert(a), .insert(b)): return a == b
     case let (.delete(a), .delete(b)): return a == b
+    case let (.update(a), .update(b)): return a == b
     case let (.move(asrc, adst), .move(bsrc, bdst)): return asrc == bsrc && adst == bdst
     default: return false
     }
@@ -55,6 +57,10 @@ open class ArrayProperty<Element: ArrayElement>: AsyncReadablePropertyType {
     }
     
     open func start() {
+    }
+    
+    public var property: AsyncReadableProperty<[Element]> {
+        return fullArray()
     }
     
     internal func notifyObservers(arrayChanges: [ArrayChange<Element>]) {
@@ -102,7 +108,7 @@ private class FullArrayProperty<Element: ArrayElement>: AsyncReadableProperty<[E
     
     fileprivate init(underlying: ArrayProperty<Element>) {
         self.underlying = underlying
-        super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.elements})
+        super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.elements })
     }
     
     fileprivate override func start() {

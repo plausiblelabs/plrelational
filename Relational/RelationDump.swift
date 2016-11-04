@@ -225,4 +225,118 @@ extension Relation {
         try! output.write(toFile: filename, atomically: true, encoding: String.Encoding.utf8)
         NSWorkspace.shared().openFile(filename, withApplication: "Graphviz")
     }
+    
+    public func dumpAsCode(print: @escaping (String) -> Void = { print($0, terminator: "") }) {
+        var lastNumber = 0
+        var relationNumbers: ObjectDictionary<AnyObject, Int> = [:]
+        
+        func codeForValue(_ value: RelationValue) -> String {
+            switch value {
+            case .null: return ".null"
+            case .integer(let x): return String(x)
+            case .real(let x): return String(x)
+            case .text(let x): return "\"\(x)\""
+            case .blob: return ".blob([…SOME BLOB HERE…])"
+            case .notFound: return ".notFound"
+            }
+        }
+        
+        func visit(_ r: Relation) -> Int {
+            if let obj = asObject(r) {
+                if let n = relationNumbers[obj] {
+                    return n
+                } else {
+                    relationNumbers[obj] = lastNumber
+                }
+            }
+            
+            if case let r as IntermediateRelation = r {
+                let numbers = r.operands.map(visit)
+                print("let r\(lastNumber) = ")
+                switch r.op {
+                case .union:
+                    if numbers.count == 2 {
+                        print("r\(numbers[0]).union(r\(numbers[1]))\n")
+                    } else {
+                        print("IntermediateRelation.union([")
+                        print(numbers.map({ "r\($0)" }).joined(separator: ", "))
+                        print("])\n")
+                    }
+                    
+                case .intersection:
+                    if numbers.count == 2 {
+                        print("r\(numbers[0]).intersection(r\(numbers[1]))\n")
+                    } else {
+                        print("intersection([")
+                        print(numbers.map({ "r\($0)" }).joined(separator: ", "))
+                        print("])\n")
+                    }
+                    
+                case .difference:
+                    if numbers.count == 2 {
+                        print("r\(numbers[0]).difference(r\(numbers[1]))\n")
+                    } else {
+                        print("IntermediateRelation(op: .difference, operands: [")
+                        print(numbers.map({ "r\($0)" }).joined(separator: ", "))
+                        print("])\n")
+                    }
+                    
+                case .project(let scheme):
+                    print("r\(numbers[0]).project([")
+                    print(scheme.attributes.map({ "\"\($0.name)\"" }).joined(separator: ", "))
+                    print("])\n")
+                    
+                case .select(let query):
+                    print("r\(numbers[0]).select(\(query))\n")
+                    
+                case .mutableSelect(let query):
+                    print("r\(numbers[0]).mutableSelect(\(query))\n")
+                    
+                case .equijoin(let mapping):
+                    print("r\(numbers[0]).equijoin(r\(numbers[1]), matching: [")
+                    print(mapping.map({ "\"\($0)\": \"\($1)\"" }).joined(separator: ", "))
+                    print("])\n")
+                    
+                case .rename(let mapping):
+                    print("r\(numbers[0]).rename(")
+                    print(mapping.map({ "\"\($0)\": \"\($1)\"" }).joined(separator: ", "))
+                    print("])\n")
+                    
+                case .update(let row):
+                    print("r\(numbers[0]).withUpdate([")
+                    print(row.map({ "\"\($0.name)\": \(codeForValue($1))" }).joined(separator: ", "))
+                    print("])\n")
+                    
+                case .aggregate(let attribute, let initialValue, _):
+                    print("r\(numbers[0]).someAggregateFunction(\(attribute), \(initialValue))\n")
+                    
+                case .otherwise:
+                    print("r\(numbers[0]).otherwise(r\(numbers[1]))\n")
+                    
+                case .unique(let attribute, let value):
+                    print("r\(numbers[0]).unique(\"\(attribute.name)\", matching: \(codeForValue(value)))\n")
+                }
+            } else {
+                print("let r\(lastNumber) = MakeRelation(\n")
+                print("[\"")
+                let sortedScheme = r.scheme.attributes.map({ $0.name }).sorted()
+                print(sortedScheme.joined(separator: "\", \""))
+                print("\"]\n")
+                
+                for rowResult in r.rows() {
+                    let row = rowResult.ok!
+                    let contents = sortedScheme.map({ row[Attribute($0)] })
+                    print(",[")
+                    print(contents.map(codeForValue).joined(separator: ", "))
+                    print("]\n")
+                }
+                
+                print(")\n")
+            }
+            
+            lastNumber += 1
+            return lastNumber - 1
+        }
+        _ = visit(self)
+    }
 }

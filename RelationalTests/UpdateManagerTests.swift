@@ -158,11 +158,167 @@ class UpdateManagerTests: DBTestCase {
         let r = db["n"]
         
         TestAsyncContentObserver.assertChanges(r,
-                                              change: { r.asyncAdd(["n": 1]) },
-                                              expectedContents: [["n": 1]])
+                                               change: { r.asyncAdd(["n": 1]) },
+                                               expectedContents: [["n": 1]])
         TestAsyncContentObserver.assertChanges(r,
-                                              change: { r.asyncAdd(["n": 2]) },
-                                              expectedContents: [["n": 1], ["n": 2]])
+                                               change: { r.asyncAdd(["n": 2]) },
+                                               expectedContents: [["n": 1], ["n": 2]])
+    }
+    
+    func testAsyncMultipleUpdateObservation() {
+        let sqliteDB = makeDB().db
+        _ = sqliteDB.getOrCreateRelation("n", scheme: ["n", "m"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["n"]
+        
+        TestAsyncContentObserver.assertChanges(r,
+                                               change: { r.asyncAdd(["n": 1, "m": 0]) },
+                                               expectedContents: [["n": 1, "m": 0]])
+        TestAsyncChangeCoalescedObserver.assertChanges(
+            r,
+            change: {
+                r.asyncUpdate(true, newValues: ["n": 2])
+                r.asyncUpdate(true, newValues: ["n": 3])
+                r.asyncUpdate(true, newValues: ["n": 4])
+                r.asyncUpdate(true, newValues: ["n": 5])
+            },
+            expectedAdded: [["n": 5, "m": 0]],
+            expectedRemoved: [["n": 1, "m": 0]])
+    }
+    
+    func testAsyncUpdateObservationWithComplexRelation() {
+        let sqliteDB = makeDB().db
+        _ = sqliteDB.getOrCreateRelation("object", scheme: ["obj_id", "name"]).ok!
+        _ = sqliteDB.getOrCreateRelation("tab", scheme: ["tab_id", "current_item_id"]).ok!
+        _ = sqliteDB.getOrCreateRelation("history_item", scheme: ["item_id", "tab_id", "obj_id", "position"]).ok!
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let objects = db["object"]
+        let historyItems = db["history_item"]
+        let tabs = db["tab"]
+
+        let tabHistoryItems = historyItems
+            .renameAttributes(["item_id": "current_item_id"])
+        
+        let currentHistoryItemForEachTab = tabs
+            .leftOuterJoin(tabHistoryItems)
+        
+        let tabObjects = currentHistoryItemForEachTab
+            .project(["tab_id", "obj_id"])
+            .leftOuterJoin(objects)
+
+        TestAsyncContentObserver.assertChanges(
+            objects,
+            change: {
+                objects.asyncAdd(["obj_id": "o1", "name": "Object1"])
+                objects.asyncAdd(["obj_id": "o2", "name": "Object2"])
+                objects.asyncAdd(["obj_id": "o3", "name": "Object3"])
+            },
+            expectedContents: [
+                ["obj_id": "o1", "name": "Object1"],
+                ["obj_id": "o2", "name": "Object2"],
+                ["obj_id": "o3", "name": "Object3"]
+            ]
+        )
+        
+        TestAsyncContentObserver.assertChanges(
+            tabs,
+            change: {
+                tabs.asyncAdd(["tab_id": "t1", "current_item_id": "i1"])
+                tabs.asyncAdd(["tab_id": "t2", "current_item_id": "i2"])
+            },
+            expectedContents: [
+                ["tab_id": "t1", "current_item_id": "i1"],
+                ["tab_id": "t2", "current_item_id": "i2"]
+            ]
+        )
+
+        TestAsyncContentObserver.assertChanges(
+            historyItems,
+            change: {
+                historyItems.asyncAdd(["item_id": "i1", "tab_id": "t1", "obj_id": "o1", "position": 1])
+                historyItems.asyncAdd(["item_id": "i2", "tab_id": "t2", "obj_id": "o2", "position": 1])
+                historyItems.asyncAdd(["item_id": "i3", "tab_id": "t2", "obj_id": "o3", "position": 2])
+            },
+            expectedContents: [
+                ["item_id": "i1", "tab_id": "t1", "obj_id": "o1", "position": 1],
+                ["item_id": "i2", "tab_id": "t2", "obj_id": "o2", "position": 1],
+                ["item_id": "i3", "tab_id": "t2", "obj_id": "o3", "position": 2],
+            ]
+        )
+
+        AssertEqual(
+            tabObjects,
+            MakeRelation(
+                ["tab_id", "obj_id", "name"],
+                ["t1", "o1", "Object1"],
+                ["t2", "o2", "Object2"]
+            )
+        )
+        
+        func deleteObject(_ objID: String) {
+            let group = DispatchGroup()
+            group.enter()
+
+            objects.cascadingDelete(
+                Attribute("obj_id") *== RelationValue(objID),
+                cascade: { (relation, row) in
+                    if relation === objects {
+                        let rowObjID = row["obj_id"]
+                        return [
+                            (historyItems, Attribute("obj_id") *== rowObjID)
+                        ]
+                    } else {
+                        return []
+                    }
+                },
+                update: { (relation, row) in
+                    if relation === historyItems {
+                        // XXX: This is hardcoded to set the new current item for the second tab
+                        return [
+                            CascadingUpdate(
+                                relation: tabs,
+                                query: Attribute("tab_id") *== "t2",
+                                attributes: ["current_item_id"],
+                                fromRelation: MakeRelation(["current_item_id"], ["i3"])
+                            )
+                        ]
+                    } else {
+                        return []
+                    }
+                },
+                completionCallback: { _ in
+                    group.leave()
+                }
+            )
+            
+            let runloop = CFRunLoopGetCurrent()!
+            group.notify(queue: DispatchQueue.global(), execute: { runloop.async({ CFRunLoopStop(runloop) }) })
+            CFRunLoopRun()
+        }
+        
+        TestAsyncChangeCoalescedObserver.assertChanges(
+            tabObjects,
+            change: {
+                deleteObject("o2")
+            },
+            expectedAdded: [
+                ["tab_id": "t2", "obj_id": "o3", "name": "Object3"]
+            ],
+            expectedRemoved: [
+                ["tab_id": "t2", "obj_id": "o2", "name": "Object2"]
+            ]
+        )
+        
+        AssertEqual(
+            tabObjects,
+            MakeRelation(
+                ["tab_id", "obj_id", "name"],
+                ["t1", "o1", "Object1"],
+                ["t2", "o3", "Object3"]
+            )
+        )
     }
     
     func testAsyncCoalescedUpdateObservation() {

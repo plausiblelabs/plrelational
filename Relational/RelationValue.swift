@@ -177,7 +177,7 @@ extension RelationValue {
         return self != .integer(0)
     }
     
-    static func boolValue(_ value: Bool) -> RelationValue {
+    public static func boolValue(_ value: Bool) -> RelationValue {
         return .integer(value ? 1 : 0)
     }
 }

@@ -129,6 +129,12 @@ class RelationArrayPropertyTests: BindingTestCase {
                 r.asyncDelete(Attribute("id") *== RelationValue(pageID))
             }
         }
+
+        func renamePage(_ pageID: Int64, _ name: String) {
+            awaitCompletion{
+                r.asyncUpdate(Attribute("id") *== RelationValue(pageID), newValues: ["name": RelationValue(name)])
+            }
+        }
         
         func movePage(srcIndex: Int, dstIndex: Int) {
             let elem = property.elements[srcIndex]
@@ -187,13 +193,35 @@ class RelationArrayPropertyTests: BindingTestCase {
             [3,    "Page3", 8.0],
             [4,    "Page4", 8.5]
         ))
-
-        // Re-order a page
-        movePage(srcIndex: 2, dstIndex: 0)
+        
+        // Update a page name; verify that an `update` change is sent and the element's row data
+        // is updated as well
+        renamePage(3, "PageX")
         XCTAssertEqual(willChangeCount, 6)
         XCTAssertEqual(didChangeCount, 6)
         verifyArray(property, [
-            "Page3",
+            "Page1",
+            "Page2",
+            "PageX",
+            "Page4"
+        ])
+        verifyChanges([
+            .update(2)
+        ])
+        verifySQLite(MakeRelation(
+            ["id", "name",  "order"],
+            [1,    "Page1", 5.0],
+            [2,    "Page2", 7.0],
+            [3,    "PageX", 8.0],
+            [4,    "Page4", 8.5]
+        ))
+
+        // Re-order a page
+        movePage(srcIndex: 2, dstIndex: 0)
+        XCTAssertEqual(willChangeCount, 7)
+        XCTAssertEqual(didChangeCount, 7)
+        verifyArray(property, [
+            "PageX",
             "Page1",
             "Page2",
             "Page4"
@@ -205,16 +233,16 @@ class RelationArrayPropertyTests: BindingTestCase {
             ["id", "name",  "order"],
             [1,    "Page1", 5.0],
             [2,    "Page2", 7.0],
-            [3,    "Page3", 3.0],
+            [3,    "PageX", 3.0],
             [4,    "Page4", 8.5]
         ))
 
         // Delete a page
         deletePage(1)
-        XCTAssertEqual(willChangeCount, 7)
-        XCTAssertEqual(didChangeCount, 7)
+        XCTAssertEqual(willChangeCount, 8)
+        XCTAssertEqual(didChangeCount, 8)
         verifyArray(property, [
-            "Page3",
+            "PageX",
             "Page2",
             "Page4"
         ])
@@ -224,7 +252,7 @@ class RelationArrayPropertyTests: BindingTestCase {
         verifySQLite(MakeRelation(
             ["id", "name",  "order"],
             [2,    "Page2", 7.0],
-            [3,    "Page3", 3.0],
+            [3,    "PageX", 3.0],
             [4,    "Page4", 8.5]
         ))
         

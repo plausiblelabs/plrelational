@@ -24,6 +24,7 @@ extension ContextMenu {
     
     public var nsmenu: NSMenu {
         let menu = NSMenu()
+        menu.autoenablesItems = false
 
         for item in items {
             let nsitem: NSMenuItem

@@ -8,7 +8,7 @@ import Binding
 
 open class PopUpButton<T: Equatable>: NSPopUpButton {
 
-    open lazy var items: BindableProperty<[MenuItem<T>]> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    public lazy var items: BindableProperty<[MenuItem<T>]> = WriteOnlyProperty(set: { [unowned self] value, _ in
         // Clear the menu
         self.removeAllItems()
 
@@ -30,9 +30,9 @@ open class PopUpButton<T: Equatable>: NSPopUpButton {
     private lazy var _selectedObject: MutableValueProperty<T?> = mutableValueProperty(nil, { [unowned self] value, _ in
         self.setSelectedItem(value)
     })
-    open var selectedObject: ReadWriteProperty<T?> { return _selectedObject }
+    public var selectedObject: ReadWriteProperty<T?> { return _selectedObject }
 
-    open var defaultItemContent: MenuItemContent<T>? {
+    public var defaultItemContent: MenuItemContent<T>? {
         didSet {
             if let existingItem = defaultMenuItem?.nsitem {
                 existingItem.menu?.removeItem(existingItem)
