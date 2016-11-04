@@ -8,11 +8,11 @@ import Binding
 
 open class BackgroundView: NSView {
     
-    open lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] value, _ in
+    public lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] value, _ in
         self?.isHidden = !value
     })
 
-    open var backgroundColor: NSColor?
+    public var backgroundColor: NSColor?
     
     open override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)

@@ -8,7 +8,7 @@ import Binding
 
 open class ProgressIndicator: NSProgressIndicator {
     
-    open lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] value, _ in
+    public lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] value, _ in
         self?.isHidden = !value
         if value {
             self?.startAnimation(nil)

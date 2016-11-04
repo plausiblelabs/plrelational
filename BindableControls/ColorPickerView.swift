@@ -8,7 +8,7 @@ import Binding
 
 open class ColorPickerView: NSView {
 
-    open lazy var color: ReadWriteProperty<CommonValue<Color>> = { [unowned self] in
+    public lazy var color: ReadWriteProperty<CommonValue<Color>> = { [unowned self] in
         return self.model.color
     }()
     
