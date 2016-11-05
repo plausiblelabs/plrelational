@@ -63,6 +63,8 @@
 		37504B711DC69BD000CEE4D4 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37504B721DC69BD000CEE4D4 /* libPLBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37504B741DC6A13100CEE4D4 /* RelationTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37504B731DC6A13100CEE4D4 /* RelationTableView.swift */; };
+		375699461DCDACB600EA0D8C /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375699451DCDACB600EA0D8C /* Box.swift */; };
+		375699481DCDAD1B00EA0D8C /* DocModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375699471DCDAD1B00EA0D8C /* DocModel.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
 		376136991CF65F0A00F572C5 /* TextObjectPropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */; };
@@ -163,6 +165,8 @@
 		37E05C351DCAF59B005CBFE2 /* ItemType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C341DCAF59B005CBFE2 /* ItemType.swift */; };
 		37E05C371DCAF764005CBFE2 /* DocObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C361DCAF764005CBFE2 /* DocObject.swift */; };
 		37E05C391DCAF7B9005CBFE2 /* HistoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C381DCAF7B9005CBFE2 /* HistoryItem.swift */; };
+		37E05C491DCDA33F005CBFE2 /* DocOutlineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */; };
+		37E05C4B1DCDA39F005CBFE2 /* SectionedTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C4A1DCDA39F005CBFE2 /* SectionedTreeView.swift */; };
 		C204A1501D071A9200DF297F /* RelationDerivative.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A14F1D071A9200DF297F /* RelationDerivative.swift */; };
 		C204A1521D073E6100DF297F /* RelationObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A1511D073E6100DF297F /* RelationObserver.swift */; };
 		C204A1541D088B6300DF297F /* ObjectMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A1531D088B6300DF297F /* ObjectMap.swift */; };
@@ -591,6 +595,8 @@
 		37504B5A1DC6995100CEE4D4 /* VisualizerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizerUITests.swift; sourceTree = "<group>"; };
 		37504B5C1DC6995100CEE4D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		37504B731DC6A13100CEE4D4 /* RelationTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationTableView.swift; sourceTree = "<group>"; };
+		375699451DCDACB600EA0D8C /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
+		375699471DCDAD1B00EA0D8C /* DocModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocModel.swift; sourceTree = "<group>"; };
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = ../SampleAppTests/DocModelTests.swift; sourceTree = "<group>"; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonValue.swift; sourceTree = "<group>"; };
@@ -692,6 +698,8 @@
 		37E05C341DCAF59B005CBFE2 /* ItemType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemType.swift; sourceTree = "<group>"; };
 		37E05C361DCAF764005CBFE2 /* DocObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocObject.swift; sourceTree = "<group>"; };
 		37E05C381DCAF7B9005CBFE2 /* HistoryItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoryItem.swift; sourceTree = "<group>"; };
+		37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocOutlineModel.swift; sourceTree = "<group>"; };
+		37E05C4A1DCDA39F005CBFE2 /* SectionedTreeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SectionedTreeView.swift; sourceTree = "<group>"; };
 		37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationTreePropertyTests.swift; path = PLRelationalBindingTests/RelationTreePropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		47701CA01CF764CD00E3549D /* Checkbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
 		C204A14F1D071A9200DF297F /* RelationDerivative.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDerivative.swift; sourceTree = "<group>"; };
@@ -1131,6 +1139,7 @@
 				37E05C2A1DCAEF8A005CBFE2 /* UI */,
 				37E05C2C1DCAEFAE005CBFE2 /* Database */,
 				37E05C331DCAF568005CBFE2 /* Model */,
+				375699441DCDACA000EA0D8C /* Utilities */,
 				37E05C2B1DCAEFA0005CBFE2 /* Other Stuff */,
 				37504B4E1DC6995100CEE4D4 /* VisualizerTests */,
 				37504B591DC6995100CEE4D4 /* VisualizerUITests */,
@@ -1158,6 +1167,22 @@
 			name = VisualizerUITests;
 			path = Examples/VisualizerUITests;
 			sourceTree = SOURCE_ROOT;
+		};
+		3756991F1DCDAC1A00EA0D8C /* For PLFoundation */ = {
+			isa = PBXGroup;
+			children = (
+				C22921AD1CCFABA300518184 /* Result.swift */,
+			);
+			name = "For PLFoundation";
+			sourceTree = "<group>";
+		};
+		375699441DCDACA000EA0D8C /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				375699451DCDACB600EA0D8C /* Box.swift */,
+			);
+			name = Utilities;
+			sourceTree = "<group>";
 		};
 		37A1CE6C1D1081980067870D /* SearchApp */ = {
 			isa = PBXGroup;
@@ -1238,6 +1263,7 @@
 				37A4A2411D21A613005CAEA5 /* TextProperty.swift */,
 				37C611351CD7FB07001DAF59 /* ListView.swift */,
 				37C611501CE10770001DAF59 /* TreeView.swift */,
+				37E05C4A1DCDA39F005CBFE2 /* SectionedTreeView.swift */,
 				37C611371CD7FB9C001DAF59 /* ExtOutlineView.swift */,
 			);
 			name = "Outline Views";
@@ -1438,6 +1464,8 @@
 				37504B3C1DC6995100CEE4D4 /* Document.swift */,
 				37504B3E1DC6995100CEE4D4 /* Document.xib */,
 				37504B731DC6A13100CEE4D4 /* RelationTableView.swift */,
+				37E05C461DCDA309005CBFE2 /* View */,
+				37E05C471DCDA30F005CBFE2 /* View Model */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -1470,6 +1498,22 @@
 				37E05C381DCAF7B9005CBFE2 /* HistoryItem.swift */,
 			);
 			name = Model;
+			sourceTree = "<group>";
+		};
+		37E05C461DCDA309005CBFE2 /* View */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
+		37E05C471DCDA30F005CBFE2 /* View Model */ = {
+			isa = PBXGroup;
+			children = (
+				375699471DCDAD1B00EA0D8C /* DocModel.swift */,
+				37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */,
+			);
+			name = "View Model";
 			sourceTree = "<group>";
 		};
 		37F1D9B41DCD3D1C004D4AAD /* Example Apps */ = {
@@ -1569,6 +1613,7 @@
 				C20F926B1D9587A3002F9125 /* Data Codec */,
 				374AE9681D91B63A007D1366 /* Debugging Aids */,
 				C2BD298F1CD250B30081FD05 /* Utilities */,
+				3756991F1DCDAC1A00EA0D8C /* For PLFoundation */,
 				C22921951CC6D25100518184 /* Custom Module Map */,
 				C22921E61CD12CF100518184 /* PLRelationalTests */,
 			);
@@ -1614,7 +1659,6 @@
 				C22921B51CD10BA800518184 /* ObserverSet.swift */,
 				C2C6308C1D355B7500AD44C1 /* PerThreadInstance.swift */,
 				C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */,
-				C22921AD1CCFABA300518184 /* Result.swift */,
 				C2B53CBA1D197814006B6278 /* RWLock.swift */,
 				C257C7511CBEBF6300234A89 /* SetPowerSet.swift */,
 				C23AAF4D1CF8E3F8009E28E0 /* SequenceFind.swift */,
@@ -2366,9 +2410,12 @@
 				37E05C351DCAF59B005CBFE2 /* ItemType.swift in Sources */,
 				37504B741DC6A13100CEE4D4 /* RelationTableView.swift in Sources */,
 				37E05C391DCAF7B9005CBFE2 /* HistoryItem.swift in Sources */,
+				37E05C491DCDA33F005CBFE2 /* DocOutlineModel.swift in Sources */,
 				37504B3D1DC6995100CEE4D4 /* Document.swift in Sources */,
+				375699461DCDACB600EA0D8C /* Box.swift in Sources */,
 				37E05C301DCAF00E005CBFE2 /* DocDatabaseError.swift in Sources */,
 				37504B3B1DC6995100CEE4D4 /* AppDelegate.swift in Sources */,
+				375699481DCDAD1B00EA0D8C /* DocModel.swift in Sources */,
 				37E05C321DCAF4FB005CBFE2 /* Identifiers.swift in Sources */,
 				37E05C2E1DCAEFC7005CBFE2 /* DocDatabase.swift in Sources */,
 				37E05C371DCAF764005CBFE2 /* DocObject.swift in Sources */,
@@ -2437,6 +2484,7 @@
 				37A1CEBF1D1083FD0067870D /* ContextMenu.swift in Sources */,
 				37A1CEB91D1083FD0067870D /* PopUpButton.swift in Sources */,
 				37A1CEB61D1083FD0067870D /* ExtOutlineView.swift in Sources */,
+				37E05C4B1DCDA39F005CBFE2 /* SectionedTreeView.swift in Sources */,
 				37A1CEC01D1083FD0067870D /* MenuItem.swift in Sources */,
 				37A1CEBE1D1083FD0067870D /* ColorPanel.swift in Sources */,
 				37A1CEBD1D1083FD0067870D /* ComboBox.swift in Sources */,

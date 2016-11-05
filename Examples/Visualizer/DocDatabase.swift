@@ -9,6 +9,7 @@ import PLRelationalBinding
 import PLBindableControls
 
 typealias DB = DocDatabase
+typealias PLUndoManager = PLBindableControls.UndoManager
 
 class DocDatabase {
     
@@ -89,7 +90,7 @@ class DocDatabase {
     private let transactional: Bool
     
     static func create(at url: URL?,
-                       undoManager: BindableControls.UndoManager,
+                       undoManager: PLUndoManager,
                        transactional: Bool) -> Result<DocDatabase, DocDatabaseError>
     {
         switch PlistDatabase.create(url, relationSpecs()) {
@@ -109,7 +110,7 @@ class DocDatabase {
     }
     
     static func open(from url: URL,
-                     undoManager: BindableControls.UndoManager,
+                     undoManager: PLUndoManager,
                      transactional: Bool) -> Result<DocDatabase, DocDatabaseError>
     {
         // TODO: Validate relation files, etc
@@ -123,7 +124,7 @@ class DocDatabase {
     
     private init(url: URL?,
                  plistDB: PlistDatabase,
-                 undoManager: BindableControls.UndoManager,
+                 undoManager: PLUndoManager,
                  transactional: Bool)
     {
         self.url = url
@@ -596,26 +597,12 @@ extension DocOutlinePath {
         let sectionID: DocOutlineSectionID
         let objectID: ObjectID
         let docItemID: DocItemID?
-        let tagID: ObjectID?
         let type: ItemType
         switch self {
-        case let .homePage(oid, t):
-            sectionID = .home
-            objectID = oid
-            docItemID = nil
-            tagID = nil
-            type = t
-        case let .userPage(did, oid, t):
-            sectionID = .userPages
+        case let .relation(did, oid, t):
+            sectionID = .relations
             objectID = oid
             docItemID = did
-            tagID = nil
-            type = t
-        case let .taggedPage(tid, oid, t):
-            sectionID = .tags
-            objectID = oid
-            docItemID = nil
-            tagID = tid
             type = t
         }
         return [
@@ -624,7 +611,6 @@ extension DocOutlinePath {
             DB.TabHistoryItem.Section.a: RelationValue(sectionID.rawValue),
             DB.TabHistoryItem.ObjectID.a: objectID.relationValue,
             DB.TabHistoryItem.DocItemID.a: docItemID?.relationValue ?? .null,
-            DB.TabHistoryItem.TagID.a: tagID?.relationValue ?? .null,
             DB.TabHistoryItem.ItemType.a: RelationValue(type.rawValue),
             DB.TabHistoryItem.Position.a: RelationValue(position)
         ]
@@ -644,12 +630,8 @@ extension HistoryItem {
         let type = ItemType(row[DB.TabHistoryItem.ItemType.a])!
         let outlinePath: DocOutlinePath
         switch sectionID {
-        case .home:
-            outlinePath = .homePage(objectID: objectID!, type: type)
-        case .userPages:
-            outlinePath = .userPage(docItemID: docItemID!, objectID: objectID!, type: type)
-        case .tags:
-            outlinePath = .taggedPage(tagID: tagID!, objectID: objectID!, type: type)
+        case .relations:
+            outlinePath = .relation(docItemID: docItemID!, objectID: objectID!, type: type)
         }
         
         return HistoryItem(id: id, tabID: tabID, outlinePath: outlinePath, position: position)
