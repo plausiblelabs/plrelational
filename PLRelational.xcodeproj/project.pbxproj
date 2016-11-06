@@ -146,6 +146,12 @@
 		37A4A2991D358581005CAEA5 /* RelationAsyncPropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2981D358581005CAEA5 /* RelationAsyncPropertyTests.swift */; };
 		37A4A29F1D35B09E005CAEA5 /* RelationSignal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A29E1D35B09E005CAEA5 /* RelationSignal.swift */; };
 		37A4A2A11D35B0B7005CAEA5 /* RelationSignalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2A01D35B0B7005CAEA5 /* RelationSignalTests.swift */; };
+		37B253861DCFD94800E9311D /* DocOutlineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B253851DCFD94800E9311D /* DocOutlineView.swift */; };
+		37B253881DCFD99C00E9311D /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B253871DCFD99C00E9311D /* EditorView.swift */; };
+		37B2538A1DCFDC6C00E9311D /* NSColor255.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B253891DCFDC6C00E9311D /* NSColor255.swift */; };
+		37B2538D1DCFDE4300E9311D /* OutlineRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B2538C1DCFDE4300E9311D /* OutlineRowView.swift */; };
+		37B2538F1DCFDE7400E9311D /* VisualizerColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B2538E1DCFDE7400E9311D /* VisualizerColors.swift */; };
+		37B253911DCFE61E00E9311D /* Environment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B253901DCFE61E00E9311D /* Environment.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -664,6 +670,12 @@
 		37A4A2981D358581005CAEA5 /* RelationAsyncPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationAsyncPropertyTests.swift; path = PLRelationalBindingTests/RelationAsyncPropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		37A4A29E1D35B09E005CAEA5 /* RelationSignal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationSignal.swift; sourceTree = "<group>"; };
 		37A4A2A01D35B0B7005CAEA5 /* RelationSignalTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationSignalTests.swift; path = PLRelationalBindingTests/RelationSignalTests.swift; sourceTree = SOURCE_ROOT; };
+		37B253851DCFD94800E9311D /* DocOutlineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocOutlineView.swift; sourceTree = "<group>"; };
+		37B253871DCFD99C00E9311D /* EditorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
+		37B253891DCFDC6C00E9311D /* NSColor255.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSColor255.swift; sourceTree = "<group>"; };
+		37B2538C1DCFDE4300E9311D /* OutlineRowView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OutlineRowView.swift; sourceTree = "<group>"; };
+		37B2538E1DCFDE7400E9311D /* VisualizerColors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VisualizerColors.swift; sourceTree = "<group>"; };
+		37B253901DCFE61E00E9311D /* Environment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Environment.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -1180,6 +1192,9 @@
 			isa = PBXGroup;
 			children = (
 				375699451DCDACB600EA0D8C /* Box.swift */,
+				37B253901DCFE61E00E9311D /* Environment.swift */,
+				37B253891DCFDC6C00E9311D /* NSColor255.swift */,
+				37B2538E1DCFDE7400E9311D /* VisualizerColors.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -1376,6 +1391,14 @@
 			name = "Async Property";
 			sourceTree = "<group>";
 		};
+		37B2538B1DCFDE2C00E9311D /* Custom Views */ = {
+			isa = PBXGroup;
+			children = (
+				37B2538C1DCFDE4300E9311D /* OutlineRowView.swift */,
+			);
+			name = "Custom Views";
+			sourceTree = "<group>";
+		};
 		37C610FE1CD7EFAE001DAF59 /* SampleApp */ = {
 			isa = PBXGroup;
 			children = (
@@ -1511,6 +1534,9 @@
 		37E05C461DCDA309005CBFE2 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				37B253851DCFD94800E9311D /* DocOutlineView.swift */,
+				37B253871DCFD99C00E9311D /* EditorView.swift */,
+				37B2538B1DCFDE2C00E9311D /* Custom Views */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -2415,17 +2441,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37B253861DCFD94800E9311D /* DocOutlineView.swift in Sources */,
+				37B2538F1DCFDE7400E9311D /* VisualizerColors.swift in Sources */,
+				37B2538A1DCFDC6C00E9311D /* NSColor255.swift in Sources */,
 				37E05C351DCAF59B005CBFE2 /* ItemType.swift in Sources */,
+				37B2538D1DCFDE4300E9311D /* OutlineRowView.swift in Sources */,
 				37E05C391DCAF7B9005CBFE2 /* HistoryItem.swift in Sources */,
 				37E05C491DCDA33F005CBFE2 /* DocOutlineModel.swift in Sources */,
 				37504B3D1DC6995100CEE4D4 /* Document.swift in Sources */,
 				375699461DCDACB600EA0D8C /* Box.swift in Sources */,
 				37E05C301DCAF00E005CBFE2 /* DocDatabaseError.swift in Sources */,
 				37504B3B1DC6995100CEE4D4 /* AppDelegate.swift in Sources */,
+				37B253881DCFD99C00E9311D /* EditorView.swift in Sources */,
 				375699481DCDAD1B00EA0D8C /* DocModel.swift in Sources */,
 				37E05C321DCAF4FB005CBFE2 /* Identifiers.swift in Sources */,
 				37E05C2E1DCAEFC7005CBFE2 /* DocDatabase.swift in Sources */,
 				37E05C371DCAF764005CBFE2 /* DocObject.swift in Sources */,
+				37B253911DCFE61E00E9311D /* Environment.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

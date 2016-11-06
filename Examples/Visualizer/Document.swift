@@ -8,105 +8,140 @@ import PLRelational
 import PLRelationalBinding
 import PLBindableControls
 
-struct RelationTableColumnModel: TableColumnModel {
-    typealias ID = Attribute
-    
-    let identifier: Attribute
-    var identifierString: String {
-        return identifier.name
-    }
-    let title: String
-}
-
 class Document: NSDocument {
-
-    typealias RelationTableView = TableView<RelationTableColumnModel, RowArrayElement>
     
-    @IBOutlet var tableView1: NSTableView!
-    @IBOutlet var tableView2: NSTableView!
-    @IBOutlet var tableView3: NSTableView!
+    @IBOutlet var mainSplitView: NSSplitView!
+    @IBOutlet var leftSidebarView: BackgroundView!
+    @IBOutlet var leftSidebarSplitView: NSSplitView!
+    @IBOutlet var documentOutlineView: ExtOutlineView!
+    @IBOutlet var inspectorScrollView: NSScrollView!
+    @IBOutlet var inspectorOutlineView: ExtOutlineView!
+    @IBOutlet var centerView: BackgroundView!
+    @IBOutlet var contentView: BackgroundView!
+    @IBOutlet var newItemButton: NSPopUpButton!
+    @IBOutlet var rightSidebarView: BackgroundView!
     
-    private var relTableView1: RelationTableView!
-    private var relTableView2: RelationTableView!
-    private var relTableView3: RelationTableView!
+    @IBOutlet var backButton: Button!
+    @IBOutlet var forwardButton: Button!
+    
+    private var docOutlineView: DocOutlineView!
+    private var editorView: EditorView!
+    
+    private var _undoManager: PLUndoManager!
+    fileprivate var db: DocDatabase!
+    fileprivate var docModel: DocModel!
     
     override init() {
         super.init()
+        
+        // Prepare the undo manager
+        _undoManager = UndoManager()
+        _undoManager.delegate = self
+        self.undoManager = _undoManager.systemUndoManager
     }
-
+    
     override class func autosavesInPlace() -> Bool {
-        return true
+        return false
     }
-
+    
     override var windowNibName: String? {
         return "Document"
     }
-
-    override func data(ofType typeName: String) throws -> Data {
-        throw NSError(domain: NSOSStatusErrorDomain, code: unimpErr, userInfo: nil)
+    
+    override func read(from url: URL, ofType typeName: String) throws {
+        switch DocDatabase.open(from: url, undoManager: _undoManager, transactional: true) {
+        case .Ok(let db):
+            self.db = db
+        case .Err:
+            // TODO: Use a more specific error code
+            throw NSError(domain: NSCocoaErrorDomain, code: NSFileReadUnknownError, userInfo: nil)
+        }
     }
-
-    override func read(from data: Data, ofType typeName: String) throws {
-        throw NSError(domain: NSOSStatusErrorDomain, code: unimpErr, userInfo: nil)
+    
+    override func writeSafely(to url: URL, ofType typeName: String, for saveOperation: NSSaveOperationType) throws {
+        // TODO
     }
     
     override func windowControllerDidLoadNib(_ windowController: NSWindowController) {
         super.windowControllerDidLoadNib(windowController)
         
-        let employees = MakeRelation(
-            ["emp_id", "emp_name", "dept_name"],
-            [1, "Alice", "Sales"],
-            [2, "Bob", "Finance"],
-            [3, "Carlos", "Production"],
-            [4, "Donald", "Production"])
+        // Set the background colors
+        let bg = NSColor(r: 244, g: 246, b: 249)
+        leftSidebarView.backgroundColor = bg
+        documentOutlineView.backgroundColor = bg
+        inspectorOutlineView.backgroundColor = bg
+        rightSidebarView.backgroundColor = bg
+        contentView.backgroundColor = NSColor(r: 234, g: 236, b: 239)
         
-        let departments = MakeRelation(
-            ["dept_name", "manager_id"],
-            ["Sales", 1],
-            ["Production", 3])
-        
-        let joined = employees.leftOuterJoin(departments)
-
-        func tableView(relation: Relation,
-                       idAttr: Attribute, orderedAttrs: [Attribute],
-                       underlying: NSTableView) -> RelationTableView
-        {
-            let columns = orderedAttrs.map{ RelationTableColumnModel(identifier: $0, title: $0.name) }
-            let data = relation.arrayProperty(idAttr: idAttr, orderAttr: idAttr)
-            let model = TableViewModel(
-                columns: columns,
-                data: data,
-                cellText: { attribute, row in
-                    let rowID = row[idAttr]
-                    // TODO: For now we will convert non-string values to a string for display in
-                    // the cell, but eventually we should have native support for these
-                    let initialStringValue = row[attribute].description
-                    let textProperty = relation
-                        .select(idAttr *== rowID)
-                        .project(attribute)
-                        .asyncProperty(initialValue: initialStringValue, { $0.oneValueOrNil($1)?.description ?? "" })
-                    return .asyncReadOnly(textProperty)
-                }
-            )
-            let view = TableView(model: model, tableView: underlying)
-            view.animateChanges = true
-            return view
+        if db == nil {
+            // Create the document database
+            db = DocDatabase.create(at: nil, undoManager: _undoManager, transactional: true).ok!
+            db.addDefaultData()
         }
         
-        relTableView1 = tableView(
-            relation: employees,
-            idAttr: "emp_id",
-            orderedAttrs: ["emp_id", "emp_name", "dept_name"],
-            underlying: tableView1)
-        relTableView2 = tableView(
-            relation: departments,
-            idAttr: "dept_name",
-            orderedAttrs: ["dept_name", "manager_id"],
-            underlying: tableView2)
-        relTableView3 = tableView(
-            relation: joined,
-            idAttr: "emp_id",
-            orderedAttrs: ["emp_id", "emp_name", "dept_name", "manager_id"],
-            underlying: tableView3)
+        // Create the document model
+        docModel = DocModel(db: db)
+        
+        // Create the views and bind to the document model
+        docOutlineView = DocOutlineView(model: docModel.docOutlineModel, outlineView: documentOutlineView)
+        // XXX: Keep the inspector hidden until it does something useful
+        inspectorScrollView.isHidden = true
+        leftSidebarView.visible <~ docModel.leftSidebarVisible
+        
+        editorView = EditorView(frame: contentView.bounds, model: docModel)
+        editorView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
+        contentView.addSubview(editorView)
+        
+        rightSidebarView.visible <~ docModel.rightSidebarVisible
+        
+//        backButton.clicks ~~> docModel.navigateBackProperty
+//        backButton.disabled <~ !docModel.backButtonEnabled
+//        forwardButton.clicks ~~> docModel.navigateForwardProperty
+//        forwardButton.disabled <~ !docModel.forwardButtonEnabled
+    }
+    
+    @IBAction func newSharedRelationAction(_ sender: NSMenuItem) {
+        // TODO
+    }
+    
+    @IBAction func toggleLeftSidebar(_ sender: NSMenuItem) {
+        docModel.leftSidebarVisible.toggle(transient: false)
+    }
+    
+    @IBAction func toggleRightSidebar(_ sender: NSMenuItem) {
+        docModel.rightSidebarVisible.toggle(transient: false)
+    }
+    
+    override func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        switch menuItem.action {
+        case #selector(toggleLeftSidebar)?:
+            if docModel.leftSidebarVisible.value {
+                menuItem.title = "Hide Navigator"
+            } else {
+                menuItem.title = "Show Navigator"
+            }
+            return true
+        case #selector(toggleRightSidebar)?:
+            if docModel.rightSidebarVisible.value {
+                menuItem.title = "Hide Info Inspector"
+            } else {
+                menuItem.title = "Show Info Inspector"
+            }
+            return true
+        case #selector(newSharedRelationAction)?:
+            return db.isNotBusy
+        default:
+            return true
+        }
+    }
+}
+
+extension Document: UndoManagerDelegate {
+    func safeToUndo() -> Bool {
+        return db?.isNotBusy ?? false
+    }
+    
+    func safeToRedo() -> Bool {
+        return db?.isNotBusy ?? false
     }
 }

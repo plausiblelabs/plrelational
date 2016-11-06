@@ -28,10 +28,16 @@ class DocDatabase {
         Created = "created_date",
         Modified = "modified_date",
         LastEditingUser = "last_user",
-        LastEditingComputer = "last_computer",
-        Value = "value"
+        LastEditingComputer = "last_computer"
         static var relationName: String { return "object_data" }
         static var relationSpec: Spec { return dir(path: "object_data", primaryKey: ObjectData.ID.a) }
+    }
+    
+    enum RelationData: String, SchemeEnum { case
+        ID = "id" // Foreign Key: Object.ID
+        // TODO
+        static var relationName: String { return "relation_data" }
+        static var relationSpec: Spec { return dir(path: "relation_data", primaryKey: RelationData.ID.a) }
     }
     
     enum DocItem: String, SchemeEnum { case
@@ -210,6 +216,7 @@ class DocDatabase {
     
     lazy var objects: TransactionalRelation = self.transactionalRelation(Object.self)
     lazy var objectData: TransactionalRelation = self.transactionalRelation(ObjectData.self)
+    lazy var relationData: TransactionalRelation = self.transactionalRelation(RelationData.self)
     lazy var docItems: TransactionalRelation = self.transactionalRelation(DocItem.self)
     lazy var tabs: TransactionalRelation = self.transactionalRelation(Tab.self)
     lazy var selectedTab: TransactionalRelation = self.transactionalRelation(SelectedTab.self)
@@ -220,13 +227,8 @@ class DocDatabase {
     
     private func addObject(objectID: ObjectID, name: String, type: ItemType,
                            created: Date, modified: Date,
-                           lastUser: String, lastComputer: String,
-                           value: RelationValue?)
+                           lastUser: String, lastComputer: String)
     {
-        if type.isObjectType {
-            precondition(value != nil)
-        }
-        
         let orow: Row = [
             Object.ID.a: objectID.relationValue,
             Object.ItemType.a: RelationValue(type.rawValue),
@@ -237,8 +239,7 @@ class DocDatabase {
             ObjectData.Created.a: RelationValue(created.timeIntervalSince1970),
             ObjectData.Modified.a: RelationValue(modified.timeIntervalSince1970),
             ObjectData.LastEditingUser.a: RelationValue(lastUser),
-            ObjectData.LastEditingComputer.a: RelationValue(lastComputer),
-            ObjectData.Value.a: value ?? .null
+            ObjectData.LastEditingComputer.a: RelationValue(lastComputer)
         ]
         
         // TODO: Error handling
@@ -280,13 +281,11 @@ class DocDatabase {
     func addDocObject(docObject: DocObject, name: String,
                       created: Date, modified: Date,
                       lastUser: String, lastComputer: String,
-                      value: RelationValue?,
                       parentID: DocItemID?, order: Double)
     {
         addObject(objectID: docObject.objectID, name: name, type: docObject.type,
                   created: created, modified: modified,
-                  lastUser: lastUser, lastComputer: lastComputer,
-                  value: value)
+                  lastUser: lastUser, lastComputer: lastComputer)
         
         addDocItem(docItemID: docObject.docItemID, objectID: docObject.objectID,
                    parentID: parentID, order: order)
@@ -400,12 +399,28 @@ class DocDatabase {
         ])
     }
     
+    func addRelationData(objectID: ObjectID) {
+        let row: Row = [
+            RelationData.ID.a: objectID.relationValue
+        ]
+        
+        // TODO: Error handling
+        if transactional {
+            relationData.asyncAdd(row)
+        } else {
+            let result = storedRelation(RelationData.self).add(row)
+            if let error = result.err {
+                print("Failed to add row to `relation_data`: \(error)")
+            }
+        }
+    }
+    
     func addTab(tabID: TabID, historyItemID: HistoryItemID?, order: Double) {
         let row: Row = [
             Tab.ID.a: tabID.relationValue,
             Tab.Order.a: RelationValue(order),
             Tab.HistoryID.a: historyItemID?.relationValue ?? .null,
-            ]
+        ]
         
         // TODO: Error handling
         if transactional {
@@ -561,6 +576,7 @@ class DocDatabase {
         return [
             Object.relationSpec,
             ObjectData.relationSpec,
+            RelationData.relationSpec,
             DocItem.relationSpec,
             Tab.relationSpec,
             TabHistoryItem.relationSpec,
@@ -573,7 +589,40 @@ class DocDatabase {
     // XXX: This is temporary
     func addDefaultData() {
         precondition(transactional)
+
+        let storedSection = DocObject(.section)
+        let persons = DocObject(.storedRelation)
+        let courses = DocObject(.storedRelation)
+        let departments = DocObject(.storedRelation)
+        let studentCourses = DocObject(.storedRelation)
+        let selectedPerson = DocObject(.storedRelation)
         
+        let sharedSection = DocObject(.section)
+        let selectedPersonCourses = DocObject(.sharedRelation)
+
+        func addDocObject(_ docObject: DocObject, name: String, parent: DocObject?, order: Double, value: RelationValue? = nil) {
+            let parentDocItemID = parent?.docItemID
+            self.addDocObject(docObject: docObject, name: name,
+                              created: Date(), modified: Date(),
+                              lastUser: Environment.fullUserName(), lastComputer: Environment.computerName(),
+                              parentID: parentDocItemID, order: order)
+        }
+        
+        func addRelationObject(_ docObject: DocObject, name: String, parent: DocObject?, order: Double, value: RelationValue? = nil) {
+            addDocObject(docObject, name: name, parent: parent, order: order, value: value)
+            _ = addRelationData(objectID: docObject.objectID)
+        }
+        
+        addDocObject(storedSection, name: "Stored Relations", parent: nil, order: 5.0)
+        addRelationObject(persons, name: "person", parent: storedSection, order: 5.0, value: nil)
+        addRelationObject(courses, name: "course", parent: storedSection, order: 5.5, value: nil)
+        addRelationObject(departments, name: "department", parent: storedSection, order: 6.0, value: nil)
+        addRelationObject(studentCourses, name: "student_course", parent: storedSection, order: 6.5, value: nil)
+        addRelationObject(selectedPerson, name: "selected_person", parent: storedSection, order: 7.0, value: nil)
+
+        addDocObject(sharedSection, name: "Shared Relations", parent: nil, order: 7.0)
+        addRelationObject(selectedPersonCourses, name: "selected_person_course", parent: sharedSection, order: 5.0, value: nil)
+
         // Create the default (implicit) tab
         let tab0 = TabID()
         addTab(tabID: tab0, historyItemID: nil, order: 5.0)

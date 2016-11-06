@@ -29,6 +29,18 @@ class DocModel {
         // XXX: Eagerly start some properties that are dependencies of other actions
         self.activeTabID.start()
     }
+
+    lazy var leftSidebarVisible: MutableValueProperty<Bool> = {
+        return mutableValueProperty(true)
+    }()
+    
+    lazy var rightSidebarVisible: MutableValueProperty<Bool> = {
+        return mutableValueProperty(false)
+    }()
+    
+    lazy var docOutlineModel: DocOutlineModel = {
+        return DocOutlineModel(docModel: self, db: self.db, docItems: self.docItemsTree)
+    }()
     
     /// The selected tab identifier.
     lazy var activeTabID: AsyncReadWriteProperty<RelationValue?> = {
