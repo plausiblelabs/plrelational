@@ -215,7 +215,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     // MARK: Property observers
 
     private func arrayChanged(_ arrayChanges: [ArrayChange<E>]) {
-        let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : NSTableViewAnimationOptions()
+        let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : []
         
         outlineView.beginUpdates()
 

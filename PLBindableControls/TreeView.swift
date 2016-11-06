@@ -286,7 +286,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     // MARK: Property observers
 
     private func treeChanged(_ changes: [TreeChange<N>]) {
-        let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : NSTableViewAnimationOptions()
+        let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : []
 
         // Get the current set of IDs from the `selection` property and then use those to restore
         // the selection state after the changes are processed; this ensures that we select items

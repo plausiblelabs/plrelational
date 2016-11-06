@@ -62,9 +62,9 @@
 		37504B701DC69BD000CEE4D4 /* libPLRelational.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37504B711DC69BD000CEE4D4 /* libPLRelationalBinding.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 372707AE1CFE238700710C80 /* libPLRelationalBinding.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		37504B721DC69BD000CEE4D4 /* libPLBindableControls.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		37504B741DC6A13100CEE4D4 /* RelationTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37504B731DC6A13100CEE4D4 /* RelationTableView.swift */; };
 		375699461DCDACB600EA0D8C /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375699451DCDACB600EA0D8C /* Box.swift */; };
 		375699481DCDAD1B00EA0D8C /* DocModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375699471DCDAD1B00EA0D8C /* DocModel.swift */; };
+		3756994B1DCE8ABB00EA0D8C /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3756994A1DCE8ABB00EA0D8C /* TableView.swift */; };
 		3761368D1CE91EDA00F572C5 /* DocModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368C1CE91EDA00F572C5 /* DocModelTests.swift */; };
 		3761368F1CE928D700F572C5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3761368E1CE928D700F572C5 /* InspectorView.swift */; };
 		376136991CF65F0A00F572C5 /* TextObjectPropertiesModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 376136981CF65F0A00F572C5 /* TextObjectPropertiesModel.swift */; };
@@ -594,9 +594,9 @@
 		37504B561DC6995100CEE4D4 /* VisualizerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VisualizerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		37504B5A1DC6995100CEE4D4 /* VisualizerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizerUITests.swift; sourceTree = "<group>"; };
 		37504B5C1DC6995100CEE4D4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		37504B731DC6A13100CEE4D4 /* RelationTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationTableView.swift; sourceTree = "<group>"; };
 		375699451DCDACB600EA0D8C /* Box.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Box.swift; sourceTree = "<group>"; };
 		375699471DCDAD1B00EA0D8C /* DocModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocModel.swift; sourceTree = "<group>"; };
+		3756994A1DCE8ABB00EA0D8C /* TableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		3761368C1CE91EDA00F572C5 /* DocModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DocModelTests.swift; path = ../SampleAppTests/DocModelTests.swift; sourceTree = "<group>"; };
 		3761368E1CE928D700F572C5 /* InspectorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		376136921CF11C8D00F572C5 /* CommonValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommonValue.swift; sourceTree = "<group>"; };
@@ -1184,6 +1184,14 @@
 			name = Utilities;
 			sourceTree = "<group>";
 		};
+		375699491DCE8AAC00EA0D8C /* Table View */ = {
+			isa = PBXGroup;
+			children = (
+				3756994A1DCE8ABB00EA0D8C /* TableView.swift */,
+			);
+			name = "Table View";
+			sourceTree = "<group>";
+		};
 		37A1CE6C1D1081980067870D /* SearchApp */ = {
 			isa = PBXGroup;
 			children = (
@@ -1224,6 +1232,7 @@
 			children = (
 				37A1CEB01D10829D0067870D /* Basic Views */,
 				37A1CEAF1D10827F0067870D /* Outline Views */,
+				375699491DCE8AAC00EA0D8C /* Table View */,
 				37A1CEAE1D1082530067870D /* Controls */,
 				37A1CEAD1D1082440067870D /* Menus */,
 				37C611401CD94772001DAF59 /* Undo */,
@@ -1463,7 +1472,6 @@
 			children = (
 				37504B3C1DC6995100CEE4D4 /* Document.swift */,
 				37504B3E1DC6995100CEE4D4 /* Document.xib */,
-				37504B731DC6A13100CEE4D4 /* RelationTableView.swift */,
 				37E05C461DCDA309005CBFE2 /* View */,
 				37E05C471DCDA30F005CBFE2 /* View Model */,
 			);
@@ -2408,7 +2416,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				37E05C351DCAF59B005CBFE2 /* ItemType.swift in Sources */,
-				37504B741DC6A13100CEE4D4 /* RelationTableView.swift in Sources */,
 				37E05C391DCAF7B9005CBFE2 /* HistoryItem.swift in Sources */,
 				37E05C491DCDA33F005CBFE2 /* DocOutlineModel.swift in Sources */,
 				37504B3D1DC6995100CEE4D4 /* Document.swift in Sources */,
@@ -2480,6 +2487,7 @@
 				37A1CEBA1D1083FD0067870D /* StepperView.swift in Sources */,
 				37A1CEBB1D1083FD0067870D /* ColorPickerView.swift in Sources */,
 				37A1CEB11D1083FD0067870D /* BackgroundView.swift in Sources */,
+				3756994B1DCE8ABB00EA0D8C /* TableView.swift in Sources */,
 				37A1CED41D11D9180067870D /* ProgressIndicator.swift in Sources */,
 				37A1CEBF1D1083FD0067870D /* ContextMenu.swift in Sources */,
 				37A1CEB91D1083FD0067870D /* PopUpButton.swift in Sources */,
