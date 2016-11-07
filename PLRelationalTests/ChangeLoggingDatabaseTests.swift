@@ -442,6 +442,38 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         verifyDatabaseBasics(plistDB, plistDB["flights"]!)
     }
     
+    func testDatabaseSaveAfterPartialRowUpdate() {
+        let plistDB = makePlistDB("prefs", ["default_thing", "warp_enabled"])
+        _ = plistDB["prefs"]!.add(["default_thing": "foo", "warp_enabled": 0])
+
+        XCTAssertNil(plistDB.validateRelations().err)
+        XCTAssertNil(plistDB.saveRelations().err)
+        
+        let db = ChangeLoggingDatabase(plistDB)
+        let r = db["prefs"]
+        _ = r.update(true, newValues: ["warp_enabled": 1])
+        
+        AssertEqual(plistDB["prefs"]!,
+                    MakeRelation(
+                        ["default_thing", "warp_enabled"],
+                        ["foo", 0]))
+        AssertEqual(r,
+                    MakeRelation(
+                        ["default_thing", "warp_enabled"],
+                        ["foo", 1]))
+        
+        XCTAssertNil(db.save().err)
+        
+        AssertEqual(plistDB["prefs"]!,
+                    MakeRelation(
+                        ["default_thing", "warp_enabled"],
+                        ["foo", 1]))
+        AssertEqual(r,
+                    MakeRelation(
+                        ["default_thing", "warp_enabled"],
+                        ["foo", 1]))
+    }
+    
     func verifyTransactions(_ storedDB: StoredDatabase, _ storedFlights: StoredRelation, _ storedPilots: StoredRelation) {
         let db = ChangeLoggingDatabase(storedDB)
         
