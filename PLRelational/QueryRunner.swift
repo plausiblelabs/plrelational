@@ -141,7 +141,7 @@ open class QueryRunner {
         let op = nodes[nodeIndex].op
         switch op {
         case .rowGenerator(let generatorGetter):
-            let row = getSQLiteTableScanRow(nodeIndex, generatorGetter)
+            let row = getRowGeneratorRow(nodeIndex, generatorGetter)
             switch row {
             case .some(.Err(let err)):
                 return .Err(err)
@@ -168,7 +168,7 @@ open class QueryRunner {
         return .Ok()
     }
     
-    fileprivate func getSQLiteTableScanRow(_ initiatorIndex: Int, _ generatorGetter: (Void) -> AnyIterator<Result<Row, RelationError>>) -> Result<Row, RelationError>? {
+    fileprivate func getRowGeneratorRow(_ initiatorIndex: Int, _ generatorGetter: (Void) -> AnyIterator<Result<Row, RelationError>>) -> Result<Row, RelationError>? {
         let generator = initiatorGenerators.getOrCreate(initiatorIndex, defaultValue: generatorGetter())
         return generator.next()
     }
