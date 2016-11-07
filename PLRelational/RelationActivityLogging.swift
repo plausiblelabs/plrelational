@@ -40,7 +40,7 @@ private struct Flags {
 struct RelationIterationLoggingData {
     #if LOG_RELATION_ACTIVITY
     var callerDescription: String
-    var startTime: NSTimeInterval
+    var startTime: TimeInterval
     var indentLevel: Int
     var indentDecrementor: ValueWithDestructor<Void>
     #endif
@@ -49,21 +49,21 @@ struct RelationIterationLoggingData {
 #if LOG_RELATION_ACTIVITY
 private var indentLevel = Mutexed(0)
 private var completionScheduled = false
-private var completedTopLevelRelations: [(String, NSTimeInterval)] = []
+private var completedTopLevelRelations: [(String, TimeInterval)] = []
 #endif
 
 #if LOG_RELATION_ACTIVITY
-func elapsedTimeString(interval: NSTimeInterval) -> String {
+func elapsedTimeString(interval: TimeInterval) -> String {
     return String(format: "%4fs", interval)
 }
 #endif
 
 @inline(__always) func LogRelationCreation<T: Relation>(_ caller: T) {
     #if LOG_RELATION_ACTIVITY
-        if let obj = caller as? AnyObject {
-            print("Created \(type(of: caller)) \(String(format: "%p", ObjectIdentifier(obj).uintValue))")
+        if let obj = asObject(caller) {
+            print("Created \(type(of: caller)) \(String(format: "%p", UInt(bitPattern: ObjectIdentifier(obj))))")
             if Flags.printCreationStacks {
-                for line in NSThread.callStackSymbols() {
+                for line in Thread.callStackSymbols {
                     print(line)
                 }
             }
@@ -74,10 +74,10 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
 @inline(__always) func LogRelationIterationBegin<T: Relation>(_ caller: T) -> RelationIterationLoggingData {
     #if LOG_RELATION_ACTIVITY
         let description: String
-        if let obj = caller as? AnyObject {
-            description = String(format: "%@ %p", NSStringFromClass(type(of: obj)), unsafeAddressOf(obj))
+        if let obj = asObject(caller) {
+            description = String(format: "%@ %p", NSStringFromClass(type(of: obj)), UInt(bitPattern: ObjectIdentifier(obj)))
         } else {
-            description = String(type(of: caller))
+            description = String(describing: type(of: caller))
         }
         if indentLevel.get() == 0 {
             print("----------")
@@ -96,29 +96,29 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
             }
             
             if !completionScheduled {
-                dispatch_async(dispatch_get_main_queue(), {
+                DispatchQueue.main.async(execute: {
                     print("==========")
                     print("RETURNED TO EVENT LOOP")
                     print("==========")
                     completionScheduled = false
                     
                     if Flags.printTopLevelRunningTimes {
-                        completedTopLevelRelations.sortInPlace({ $0.1 < $1.1 })
+                        completedTopLevelRelations.sort(by: { $0.1 < $1.1 })
                         for (description, elapsedTime) in completedTopLevelRelations {
-                            print("\(elapsedTimeString(elapsedTime)): \(description)")
+                            print("\(elapsedTimeString(interval: elapsedTime)): \(description)")
                         }
-                        let total = completedTopLevelRelations.reduce(0, combine: { $0 + $1.1 })
-                        print("Iterated \(completedTopLevelRelations.count) relations in total time: \(elapsedTimeString(total))")
+                        let total = completedTopLevelRelations.reduce(0, { $0 + $1.1 })
+                        print("Iterated \(completedTopLevelRelations.count) relations in total time: \(elapsedTimeString(interval: total))")
                         completedTopLevelRelations = []
                     }
                 })
                 completionScheduled = true
             }
         }
-        let now = NSProcessInfo().systemUptime
+        let now = ProcessInfo().systemUptime
         
         if Flags.printIterations {
-            let indentString = "".stringByPaddingToLength(indentLevel.get() * 4, withString: " ", startingAtIndex: 0)
+            let indentString = "".padding(toLength: indentLevel.get() * 4, withPad: " ", startingAt: 0)
             print("\(indentString)\(description) began iteration at \(now)")
         }
         
@@ -138,23 +138,23 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
 @inline(__always) func LogRelationIterationReturn(_ data: RelationIterationLoggingData, _ generator: AnyIterator<Result<Row, RelationError>>) -> AnyIterator<Result<Row, RelationError>> {
     #if LOG_RELATION_ACTIVITY
         var rowCount = 0
-        let indentString = "".stringByPaddingToLength(data.indentLevel * 4, withString: " ", startingAtIndex: 0)
-        return AnyGenerator(body: {
+        let indentString = "".padding(toLength: data.indentLevel * 4, withPad: " ", startingAt: 0)
+        return AnyIterator({
             let next = generator.next()
             switch next {
-            case .Some(.Ok(let row)):
+            case .some(.Ok(let row)):
                 if Flags.printIterations {
                     print("\(indentString)\(data.callerDescription) returning row \(row)")
                     rowCount += 1
                 }
-            case .Some(.Err(let err)):
+            case .some(.Err(let err)):
                 if Flags.printIterations {
                     print("\(indentString)\(data.callerDescription) returning error \(err)")
                 }
-            case .None:
-                let elapsedTime = NSProcessInfo().systemUptime - data.startTime
+            case .none:
+                let elapsedTime = ProcessInfo().systemUptime - data.startTime
                 if Flags.printIterations {
-                    print("\(indentString)\(data.callerDescription) finished iteration, produced \(rowCount) rows in \(elapsedTimeString(elapsedTime)) seconds")
+                    print("\(indentString)\(data.callerDescription) finished iteration, produced \(rowCount) rows in \(elapsedTimeString(interval: elapsedTime)) seconds")
                 }
                 if data.indentLevel == 0 && Flags.printTopLevelRunningTimes {
                     completedTopLevelRelations.append((data.callerDescription, elapsedTime))
@@ -170,23 +170,23 @@ func elapsedTimeString(interval: NSTimeInterval) -> String {
 @inline(__always) func LogRelationIterationReturn(_ data: RelationIterationLoggingData, _ generator: AnyIterator<Result<Set<Row>, RelationError>>) -> AnyIterator<Result<Set<Row>, RelationError>> {
     #if LOG_RELATION_ACTIVITY
         var rowCount = 0
-        let indentString = "".stringByPaddingToLength(data.indentLevel * 4, withString: " ", startingAtIndex: 0)
-        return AnyGenerator(body: {
+        let indentString = "".padding(toLength: data.indentLevel * 4, withPad: " ", startingAt: 0)
+        return AnyIterator({
             let next = generator.next()
             switch next {
-            case .Some(.Ok(let rows)):
+            case .some(.Ok(let rows)):
                 if Flags.printIterations {
                     print("\(indentString)\(data.callerDescription) returning rows \(rows)")
                     rowCount += rows.count
                 }
-            case .Some(.Err(let err)):
+            case .some(.Err(let err)):
                 if Flags.printIterations {
                     print("\(indentString)\(data.callerDescription) returning error \(err)")
                 }
-            case .None:
-                let elapsedTime = NSProcessInfo().systemUptime - data.startTime
+            case .none:
+                let elapsedTime = ProcessInfo().systemUptime - data.startTime
                 if Flags.printIterations {
-                    print("\(indentString)\(data.callerDescription) finished iteration, produced \(rowCount) rows in \(elapsedTimeString(elapsedTime)) seconds")
+                    print("\(indentString)\(data.callerDescription) finished iteration, produced \(rowCount) rows in \(elapsedTimeString(interval: elapsedTime)) seconds")
                 }
                 if data.indentLevel == 0 && Flags.printTopLevelRunningTimes {
                     completedTopLevelRelations.append((data.callerDescription, elapsedTime))
