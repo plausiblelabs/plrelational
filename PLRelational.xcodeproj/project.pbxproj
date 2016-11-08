@@ -173,6 +173,8 @@
 		37E05C391DCAF7B9005CBFE2 /* HistoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C381DCAF7B9005CBFE2 /* HistoryItem.swift */; };
 		37E05C491DCDA33F005CBFE2 /* DocOutlineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */; };
 		37E05C4B1DCDA39F005CBFE2 /* SectionedTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C4A1DCDA39F005CBFE2 /* SectionedTreeView.swift */; };
+		37F1DA5A1DD250DA004D4AAD /* StoredRelationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1DA591DD250DA004D4AAD /* StoredRelationModel.swift */; };
+		37F1DA5C1DD250E4004D4AAD /* SharedRelationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1DA5B1DD250E4004D4AAD /* SharedRelationModel.swift */; };
 		C204A1501D071A9200DF297F /* RelationDerivative.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A14F1D071A9200DF297F /* RelationDerivative.swift */; };
 		C204A1521D073E6100DF297F /* RelationObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A1511D073E6100DF297F /* RelationObserver.swift */; };
 		C204A1541D088B6300DF297F /* ObjectMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = C204A1531D088B6300DF297F /* ObjectMap.swift */; };
@@ -712,6 +714,8 @@
 		37E05C381DCAF7B9005CBFE2 /* HistoryItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoryItem.swift; sourceTree = "<group>"; };
 		37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocOutlineModel.swift; sourceTree = "<group>"; };
 		37E05C4A1DCDA39F005CBFE2 /* SectionedTreeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SectionedTreeView.swift; sourceTree = "<group>"; };
+		37F1DA591DD250DA004D4AAD /* StoredRelationModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredRelationModel.swift; sourceTree = "<group>"; };
+		37F1DA5B1DD250E4004D4AAD /* SharedRelationModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharedRelationModel.swift; sourceTree = "<group>"; };
 		37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationTreePropertyTests.swift; path = PLRelationalBindingTests/RelationTreePropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		47701CA01CF764CD00E3549D /* Checkbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
 		C204A14F1D071A9200DF297F /* RelationDerivative.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDerivative.swift; sourceTree = "<group>"; };
@@ -1527,6 +1531,8 @@
 				37E05C361DCAF764005CBFE2 /* DocObject.swift */,
 				37E05C341DCAF59B005CBFE2 /* ItemType.swift */,
 				37E05C381DCAF7B9005CBFE2 /* HistoryItem.swift */,
+				37F1DA5B1DD250E4004D4AAD /* SharedRelationModel.swift */,
+				37F1DA591DD250DA004D4AAD /* StoredRelationModel.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -2445,7 +2451,9 @@
 				37B2538F1DCFDE7400E9311D /* VisualizerColors.swift in Sources */,
 				37B2538A1DCFDC6C00E9311D /* NSColor255.swift in Sources */,
 				37E05C351DCAF59B005CBFE2 /* ItemType.swift in Sources */,
+				37F1DA5A1DD250DA004D4AAD /* StoredRelationModel.swift in Sources */,
 				37B2538D1DCFDE4300E9311D /* OutlineRowView.swift in Sources */,
+				37F1DA5C1DD250E4004D4AAD /* SharedRelationModel.swift in Sources */,
 				37E05C391DCAF7B9005CBFE2 /* HistoryItem.swift in Sources */,
 				37E05C491DCDA33F005CBFE2 /* DocOutlineModel.swift in Sources */,
 				37504B3D1DC6995100CEE4D4 /* Document.swift in Sources */,

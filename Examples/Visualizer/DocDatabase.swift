@@ -11,47 +11,6 @@ import PLBindableControls
 typealias DB = DocDatabase
 typealias PLUndoManager = PLBindableControls.UndoManager
 
-struct StoredRelationModel {
-    let attributes: [Attribute]
-    let idAttr: Attribute
-    let rows: [Row]
-    
-    func toPlistData() -> Data? {
-        let attrNames = self.attributes.map{ $0.name }
-        let rowPlists = self.rows.map{ $0.toPlist() }
-        let dict = [
-            "attributes": attrNames,
-            "idAttr": idAttr.name,
-            "rows": rowPlists
-        ] as [String : Any]
-        do {
-            return try? PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
-        }
-    }
-    
-    static func fromPlistData(_ data: Data) -> StoredRelationModel? {
-        do {
-            let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as! [String: Any]
-            guard let attrNames = plist["attributes"] as? [String] else { return nil }
-            guard let idAttr = plist["idAttr"] as? String else { return nil }
-            guard let rowPlists = plist["rows"] as? [Any] else { return nil }
-            return StoredRelationModel(
-                attributes: attrNames.map{ Attribute($0) },
-                idAttr: Attribute(idAttr),
-                rows: rowPlists.map{ Row.fromPlist($0).ok! }
-            )
-        } catch {
-            return nil
-        }
-    }
-    
-    func toRelation() -> Relation {
-        let r = MemoryTableRelation(scheme: Scheme(attributes: Set(attributes)))
-        r.values = Set(rows)
-        return r
-    }
-}
-
 class DocDatabase {
     
     typealias Spec = PlistDatabase.RelationSpec
@@ -88,6 +47,13 @@ class DocDatabase {
         Plist = "plist" // XXX: Lazy!
         static var relationName: String { return "stored_relation_data" }
         static var relationSpec: Spec { return dir(path: "stored_relation_data", primaryKey: StoredRelationData.ObjectID.a) }
+    }
+
+    enum SharedRelationData: String, SchemeEnum { case
+        ObjectID = "obj_id", // Foreign Key: Object.ID
+        Plist = "plist" // XXX: Lazy!
+        static var relationName: String { return "shared_relation_data" }
+        static var relationSpec: Spec { return dir(path: "shared_relation_data", primaryKey: SharedRelationData.ObjectID.a) }
     }
 
     enum DocItem: String, SchemeEnum { case
@@ -157,8 +123,15 @@ class DocDatabase {
                     return .Err(.createFailed(underlying: error))
                 }
             }
+
+            let db = DocDatabase(url: url, plistDB: plistDB, undoManager: undoManager, transactional: transactional)
+
+            // Create the default (implicit) tab
+            let tab0 = TabID()
+            db.addTab(tabID: tab0, historyItemID: nil, order: 5.0)
+            db.setSelectedTab(tabID: tab0)
             
-            return .Ok(DocDatabase(url: url, plistDB: plistDB, undoManager: undoManager, transactional: transactional))
+            return .Ok(db)
             
         case .Err(let error):
             return .Err(.createFailed(underlying: error))
@@ -268,6 +241,7 @@ class DocDatabase {
     lazy var objectData: TransactionalRelation = self.transactionalRelation(ObjectData.self)
     //lazy var storedRelationAttributes: TransactionalRelation = self.transactionalRelation(StoredRelationAttribute.self)
     lazy var storedRelationData: TransactionalRelation = self.transactionalRelation(StoredRelationData.self)
+    lazy var sharedRelationData: TransactionalRelation = self.transactionalRelation(SharedRelationData.self)
     lazy var docItems: TransactionalRelation = self.transactionalRelation(DocItem.self)
     lazy var tabs: TransactionalRelation = self.transactionalRelation(Tab.self)
     lazy var selectedTab: TransactionalRelation = self.transactionalRelation(SelectedTab.self)
@@ -466,12 +440,22 @@ class DocDatabase {
             }
         }
     }
-    
-    struct SharedRelationModel {
-        // TODO: Need model for different operations; for now assume a join followed by another join
-        let r1: ObjectID
-        let r2: ObjectID
-        let r3: ObjectID
+
+    func addSharedRelationData(objectID: ObjectID, model: SharedRelationModel) {
+        let row: Row = [
+            SharedRelationData.ObjectID.a: objectID.relationValue,
+            SharedRelationData.Plist.a: RelationValue(model.toPlistData()!)
+        ]
+        
+        // TODO: Error handling
+        if transactional {
+            sharedRelationData.asyncAdd(row)
+        } else {
+            let result = storedRelation(SharedRelationData.self).add(row)
+            if let error = result.err {
+                print("Failed to add row to `shared_relation_data`: \(error)")
+            }
+        }
     }
     
     func addTab(tabID: TabID, historyItemID: HistoryItemID?, order: Double) {
@@ -635,8 +619,8 @@ class DocDatabase {
         return [
             Object.relationSpec,
             ObjectData.relationSpec,
-            //StoredRelationAttribute.relationSpec,
             StoredRelationData.relationSpec,
+            SharedRelationData.relationSpec,
             DocItem.relationSpec,
             Tab.relationSpec,
             TabHistoryItem.relationSpec,
@@ -657,9 +641,25 @@ class DocDatabase {
             })
             return StoredRelationModel(attributes: attributes, idAttr: attributes[0], rows: rows)
         }
+
+        func prev(_ projection: [Attribute]? = nil) -> SharedRelationAtom {
+            return SharedRelationAtom(source: .previous, projection: projection)
+        }
         
-        func shared(_ r1: ObjectID, _ r2: ObjectID, _ r3: ObjectID) -> SharedRelationModel {
-            return SharedRelationModel(r1: r1, r2: r2, r3: r3)
+        func ref(_ docObject: DocObject, _ projection: [Attribute]? = nil) -> SharedRelationAtom {
+            return SharedRelationAtom(source: .reference(docObject.objectID), projection: projection)
+        }
+
+        func join(_ atom: SharedRelationAtom) -> SharedRelationOp {
+            return .combine(.join(atom))
+        }
+        
+        func element(_ atom: SharedRelationAtom, _ op: SharedRelationOp? = nil) -> SharedRelationElement {
+            return SharedRelationElement(atom: atom, op: op)
+        }
+        
+        func shared(_ elements: [SharedRelationElement]) -> SharedRelationModel {
+            return SharedRelationModel(elements: elements)
         }
 
         let personsModel = stored(
@@ -719,12 +719,11 @@ class DocDatabase {
         let sharedSection = DocObject(.section)
         let selectedPersonCourses = DocObject(.sharedRelation)
 
-        let selectedPersonCoursesModel = shared(
-            selectedPersons.objectID,
-            persons.objectID,
-            courses.objectID
-        )
-        
+        let selectedPersonCoursesModel = shared([
+            element(ref(persons), join(ref(courses))),
+            element(prev(), join(ref(selectedPersons)))
+        ])
+    
         func addDocObject(_ docObject: DocObject, name: String, parent: DocObject?, order: Double) {
             let parentDocItemID = parent?.docItemID
             self.addDocObject(docObject: docObject, name: name,
@@ -740,7 +739,7 @@ class DocDatabase {
 
         func addSharedRelationObject(_ docObject: DocObject, name: String, parent: DocObject?, order: Double, model: SharedRelationModel) {
             addDocObject(docObject, name: name, parent: parent, order: order)
-            //_ = addSharedRelationData(objectID: docObject.objectID)
+            _ = addSharedRelationData(objectID: docObject.objectID, model: model)
         }
 
         addDocObject(storedSection, name: "Stored Relations", parent: nil, order: 5.0)
@@ -753,11 +752,6 @@ class DocDatabase {
         addDocObject(sharedSection, name: "Shared Relations", parent: nil, order: 7.0)
         addSharedRelationObject(selectedPersonCourses, name: "selected_person_course", parent: sharedSection, order: 5.0, model: selectedPersonCoursesModel)
 
-        // Create the default (implicit) tab
-        let tab0 = TabID()
-        addTab(tabID: tab0, historyItemID: nil, order: 5.0)
-        setSelectedTab(tabID: tab0)
-        
         // XXX: Wait for async updates to finish before we continue
         let runloop = CFRunLoopGetCurrent()
         let stateObserverRemover = UpdateManager.currentInstance.addStateObserver({

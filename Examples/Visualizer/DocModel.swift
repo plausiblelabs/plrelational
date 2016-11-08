@@ -110,4 +110,11 @@ class DocModel {
             .select(DB.StoredRelationData.ObjectID.a *== objectID.relationValue)
             .project(DB.StoredRelationData.Plist.a)
     }
+    
+    /// Returns a Relation that contains the shared relation model for the given identifier.
+    func sharedRelationModel(objectID: ObjectID) -> Relation {
+        return db.sharedRelationData
+            .select(DB.SharedRelationData.ObjectID.a *== objectID.relationValue)
+            .project(DB.SharedRelationData.Plist.a)
+    }
 }

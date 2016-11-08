@@ -20,6 +20,9 @@ private struct RelationTableColumnModel: TableColumnModel {
 
 private typealias RelationTableView = TableView<RelationTableColumnModel, RowArrayElement>
 
+private let tableW: CGFloat = 340
+private let tableH: CGFloat = 200
+
 class EditorView: BackgroundView {
     
     private let docModel: DocModel
@@ -42,8 +45,9 @@ class EditorView: BackgroundView {
                 switch docOutlinePath.type {
                 case .storedRelation:
                     self.setStoredRelationContent(docOutlinePath)
-//                case .sharedRelation, .privateRelation:
-//                    break
+                case .sharedRelation:
+                    self.setSharedRelationContent(docOutlinePath)
+                //case .privateRelation:
                 default:
                     self.contentView?.removeFromSuperview()
                 }
@@ -66,6 +70,7 @@ class EditorView: BackgroundView {
         // Add the content view
         let chainView = BackgroundView(frame: self.bounds)
         chainView.backgroundColor = NSColor(white: 0.98, alpha: 1.0)
+        chainView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
         addSubview(chainView)
         self.contentView = chainView
         
@@ -82,79 +87,205 @@ class EditorView: BackgroundView {
             guard let rows = result.ok else { return }
             guard let plistBlob = contentRelation.oneBlobOrNil(AnyIterator(rows.makeIterator())) else { return }
             guard let model = StoredRelationModel.fromPlistData(Data(bytes: plistBlob)) else { return }
-            self.addRelationTables(fromModel: model, toView: chainView)
+            self.addStoredRelationTable(fromModel: model, toView: chainView, x: 20, y: 20)
         }
     }
-    
-    private func addRelationTables(fromModel model: StoredRelationModel, toView view: NSView) {
-//        let employees = MakeRelation(
-//            ["emp_id", "emp_name", "dept_name"],
-//            [1, "Alice", "Sales"],
-//            [2, "Bob", "Finance"],
-//            [3, "Carlos", "Production"],
-//            [4, "Donald", "Production"])
-//        
-//        let departments = MakeRelation(
-//            ["dept_name", "manager_id"],
-//            ["Sales", 1],
-//            ["Production", 3])
-//        
-//        let joined = employees.leftOuterJoin(departments)
 
-        func addTableView(x: CGFloat, y: CGFloat, relation: Relation,
-                          idAttr: Attribute, orderedAttrs: [Attribute])
-        {
-            let columns = orderedAttrs.map{ RelationTableColumnModel(identifier: $0, title: $0.name) }
-            let data = relation.arrayProperty(idAttr: idAttr, orderAttr: idAttr)
-            let model = TableViewModel(
-                columns: columns,
-                data: data,
-                cellText: { attribute, row in
-                    let rowID = row[idAttr]
-                    // TODO: For now we will convert non-string values to a string for display in
-                    // the cell, but eventually we should have native support for these
-                    let initialStringValue = row[attribute].description
-                    let textProperty = relation
-                        .select(idAttr *== rowID)
-                        .project(attribute)
-                        .asyncProperty(initialValue: initialStringValue, { $0.oneValueOrNil($1)?.description ?? "" })
-                    return .asyncReadOnly(textProperty)
-                }
-            )
-
-            let scrollView = NSScrollView(frame: NSMakeRect(x, y, 340, 200))
-            let nsTableView = NSTableView(frame: scrollView.bounds)
-            nsTableView.allowsColumnResizing = true
-            nsTableView.allowsColumnReordering = false
-            scrollView.documentView = nsTableView
-            scrollView.hasVerticalScroller = true
-            scrollView.borderType = .bezelBorder
-            let tableView = TableView(model: model, tableView: nsTableView)
-            tableView.animateChanges = true
-            view.addSubview(scrollView)
-        }
-
-//        addTableView(
-//            x: 20, y: 20,
-//            relation: employees,
-//            idAttr: "emp_id",
-//            orderedAttrs: ["emp_id", "emp_name", "dept_name"])
-//        addTableView(
-//            x: 400, y: 20,
-//            relation: departments,
-//            idAttr: "dept_name",
-//            orderedAttrs: ["dept_name", "manager_id"])
-//        addTableView(
-//            x: 20, y: 260,
-//            relation: joined,
-//            idAttr: "emp_id",
-//            orderedAttrs: ["emp_id", "emp_name", "dept_name", "manager_id"])
+    private func setSharedRelationContent(_ docOutlinePath: DocOutlinePath) {
+        prepareForNewContent()
         
+        // Add the content view
+        let chainView = BackgroundView(frame: self.bounds)
+        chainView.backgroundColor = NSColor(white: 0.98, alpha: 1.0)
+        chainView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
+        addSubview(chainView)
+        self.contentView = chainView
+        
+        // Load the relation model asynchronously
+        let contentLoadID = UUID()
+        currentContentLoadID = contentLoadID
+        let contentRelation = docModel.sharedRelationModel(objectID: docOutlinePath.objectID)
+        contentRelation.asyncAllRows{ result in
+            // Only set the loaded data if our content load ID matches
+            if self.currentContentLoadID != contentLoadID {
+                return
+            }
+            // TODO: Show error message if any step fails here
+            guard let rows = result.ok else { return }
+            guard let plistBlob = contentRelation.oneBlobOrNil(AnyIterator(rows.makeIterator())) else { return }
+            guard let model = SharedRelationModel.fromPlistData(Data(bytes: plistBlob)) else { return }
+            self.addSharedRelationTables(fromModel: model, toView: chainView)
+        }
+    }
+
+    private func addStoredRelationTable(fromModel model: StoredRelationModel, toView parent: NSView, x: CGFloat, y: CGFloat) {
         addTableView(
-            x: 20, y: 20,
+            to: parent,
+            x: x, y: y,
             relation: model.toRelation(),
             idAttr: model.idAttr,
             orderedAttrs: model.attributes)
+    }
+    
+    private func addSharedRelationTables(fromModel model: SharedRelationModel, toView parent: NSView) {
+        // Determine which stored relations are referenced in this SharedRelationModel
+        var referencedObjectIDs: Set<ObjectID> = []
+        for element in model.elements {
+            func processAtom(_ atom: SharedRelationAtom) {
+                switch atom.source {
+                case .previous:
+                    break
+                case .reference(let objectID):
+                    referencedObjectIDs.insert(objectID)
+                }
+            }
+            
+            processAtom(element.atom)
+            
+            if let op = element.op {
+                switch op {
+                case .filter:
+                    break
+                case .combine(let binaryOp):
+                    processAtom(binaryOp.atom)
+                }
+            }
+        }
+
+        // Asynchronously load the model for each of those stored relations
+        let group = DispatchGroup()
+        var storedRelationModels: [ObjectID: StoredRelationModel] = [:]
+        for objectID in referencedObjectIDs {
+            let contentRelation = docModel.storedRelationModel(objectID: objectID)
+            group.enter()
+            contentRelation.asyncAllRows{ result in
+                group.leave()
+                // TODO: Show error message if any step fails here
+                guard let rows = result.ok else { return }
+                guard let plistBlob = contentRelation.oneBlobOrNil(AnyIterator(rows.makeIterator())) else { return }
+                guard let model = StoredRelationModel.fromPlistData(Data(bytes: plistBlob)) else { return }
+                storedRelationModels[objectID] = model
+            }
+        }
+
+        group.notify(queue: DispatchQueue.main, execute: {
+            var x: CGFloat = 20
+            var y: CGFloat = 20
+            let padX: CGFloat = 20
+            let padY: CGFloat = 20
+            
+            var accumulatedRelation: Relation? = nil
+            var idAttrForAccumulatedRelation: Attribute? = nil
+            
+            // Display the relation tables
+            for element in model.elements {
+                func addTableForAtom(_ atom: SharedRelationAtom, x: CGFloat, y: CGFloat) -> StoredRelationModel? {
+                    switch atom.source {
+                    case .previous:
+                        return nil
+                    case .reference(let objectID):
+                        if let storedRelationModel = storedRelationModels[objectID] {
+                            self.addStoredRelationTable(fromModel: storedRelationModel, toView: parent, x: x, y: y)
+                            return storedRelationModel
+                        } else {
+                            // TODO: Error message?
+                            return nil
+                        }
+                    }
+                }
+                
+                // Add the left-side table
+                let lhsModel = addTableForAtom(element.atom, x: x, y: y)
+                if accumulatedRelation == nil, let lhs = lhsModel {
+                    accumulatedRelation = lhs.toRelation()
+                    idAttrForAccumulatedRelation = lhs.idAttr
+                }
+
+                if let op = element.op {
+                    switch op {
+                    case .filter(let unaryOp):
+                        // Derive the relation that results from the filter operation
+                        // TODO
+                        break
+
+                    case .combine(let binaryOp):
+                        // Add a table to the right side that shows the relation being combined
+                        let rhsModel = addTableForAtom(binaryOp.atom, x: x + tableW + padX, y: y)
+                        
+                        // Derive the relation that results from the combine operation
+                        if let lhsRelation = accumulatedRelation, let rhs = rhsModel {
+                            let rhsRelation = rhs.toRelation()
+                            switch binaryOp {
+                            case .join:
+                                accumulatedRelation = lhsRelation.join(rhsRelation)
+                            case .union:
+                                accumulatedRelation = lhsRelation.union(rhsRelation)
+                            }
+                        } else {
+                            Swift.print("Unable to combine relations from shared relation model, stopping early")
+                            return
+                        }
+                    }
+                    
+                    // Add a table below the last one that displays the result of the operation
+                    y += tableH + padY
+                    if let relation = accumulatedRelation {
+                        // TODO
+//                        self.addTableView(
+//                            to: parent,
+//                            x: x, y: y,
+//                            relation: relation,
+//                            idAttr: idAttr,
+//                            orderedAttrs: model.attributes)
+                    } else {
+                        Swift.print("No accumulated relation for shared relation model, stopping early")
+                        return
+                    }
+                    
+                    // Advance to the next row
+                    y += tableH + padY
+
+                } else {
+                    // Stop early when we have no operation (this shouldn't be necessary if the model is well-formed,
+                    // but just in case...)
+                    Swift.print("Invalid shared relation model, stopping early")
+                    return
+                }
+            }
+        })
+    }
+    
+    private func addTableView(to parent: NSView, x: CGFloat, y: CGFloat, relation: Relation,
+                              idAttr: Attribute, orderedAttrs: [Attribute])
+    {
+        let columns = orderedAttrs.map{ RelationTableColumnModel(identifier: $0, title: $0.name) }
+        let data = relation.arrayProperty(idAttr: idAttr, orderAttr: idAttr)
+        let model = TableViewModel(
+            columns: columns,
+            data: data,
+            cellText: { attribute, row in
+                let rowID = row[idAttr]
+                // TODO: For now we will convert non-string values to a string for display in
+                // the cell, but eventually we should have native support for these
+                let initialStringValue = row[attribute].description
+                let textProperty = relation
+                    .select(idAttr *== rowID)
+                    .project(attribute)
+                    .asyncProperty(initialValue: initialStringValue, { $0.oneValueOrNil($1)?.description ?? "" })
+                return .asyncReadOnly(textProperty)
+            }
+        )
+        
+        let scrollView = NSScrollView(frame: NSMakeRect(x, y, tableW, tableH))
+        let nsTableView = NSTableView(frame: scrollView.bounds)
+        nsTableView.allowsColumnResizing = true
+        nsTableView.allowsColumnReordering = false
+        scrollView.documentView = nsTableView
+        scrollView.hasVerticalScroller = true
+        scrollView.borderType = .bezelBorder
+        let tableView = TableView(model: model, tableView: nsTableView)
+        tableView.animateChanges = true
+        parent.addSubview(scrollView)
     }
     
     required init?(coder: NSCoder) {
