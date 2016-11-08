@@ -103,4 +103,11 @@ class DocModel {
         let currentPosition = activeTabCurrentHistoryItem.value??.position
         return db.selectDocOutlineItem(tabID: TabID(currentTabID), path: path, currentPosition: currentPosition)
     }
+    
+    /// Returns a Relation that contains the stored relation model for the given identifier.
+    func storedRelationModel(objectID: ObjectID) -> Relation {
+        return db.storedRelationData
+            .select(DB.StoredRelationData.ObjectID.a *== objectID.relationValue)
+            .project(DB.StoredRelationData.Plist.a)
+    }
 }

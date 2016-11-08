@@ -7,7 +7,7 @@ import Foundation
 
 
 extension Row {
-    static func fromPlist(_ plist: Any) -> Result<Row, RelationError> {
+    public static func fromPlist(_ plist: Any) -> Result<Row, RelationError> {
         guard let dict = plist as? NSDictionary else { return .Err(RowPlistError.unknownRowObject(unknownObject: plist)) }
         
         var values: [Attribute: RelationValue] = [:]
@@ -20,7 +20,7 @@ extension Row {
         return .Ok(Row(values: values))
     }
     
-    func toPlist() -> Any {
+    public func toPlist() -> Any {
         let result = NSMutableDictionary()
         for (attribute, value) in self {
             result[attribute.name] = value.toPlist()
