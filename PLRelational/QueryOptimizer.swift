@@ -43,6 +43,10 @@ class QueryOptimizer {
                     }
                 }
                 nodes[i].parentIndexes = []
+                
+            case .selectableGenerator(let generatorGetter):
+                optimizeSelectableGenerator(i, generatorGetter: generatorGetter)
+                
             default:
                 break
             }
@@ -67,5 +71,43 @@ class QueryOptimizer {
         } else {
             return false
         }
+    }
+    
+    private func optimizeSelectableGenerator(_ index: Int, generatorGetter: @escaping (SelectExpression) -> AnyIterator<Result<Row, RelationError>>) {
+        let heightLimit = 10
+        
+        var parents: [Int] = []
+        parents.reserveCapacity(heightLimit)
+        
+        if nodes[index].parentCount != 1 {
+            return
+        }
+        
+        var cursorCameFrom = index
+        var cursor = nodes[index].parentIndexes.first!
+        for _ in 0 ..< heightLimit {
+            if case .equijoin(let matching) = nodes[cursor].op {
+                addFilterTo(selectableGenerator: index, generatorGetter: generatorGetter, equijoin: cursor, equijoinChild: cursorCameFrom, matching: matching)
+                return
+            }
+            
+            if nodes[cursor].parentCount != 1 {
+                return
+            }
+            cursorCameFrom = cursor
+            cursor = nodes[cursor].parentIndexes.first!
+        }
+    }
+    
+    private func addFilterTo(selectableGenerator: Int, generatorGetter: @escaping (SelectExpression) -> AnyIterator<Result<Row, RelationError>>, equijoin: Int, equijoinChild: Int, matching: [Attribute: Attribute]) {
+        let thisChildIndex = nodes[equijoin].childIndexes.index(of: equijoinChild)!
+        let otherChildIndex = 1 - thisChildIndex
+        let otherChild = nodes[equijoin].childIndexes[otherChildIndex]
+        
+        let newMatching = thisChildIndex == 0 ? matching.reversed : matching
+        nodes[selectableGenerator].op = .equijoinedSelectableGenerator(newMatching, generatorGetter)
+        nodes[selectableGenerator].childIndexes = [otherChild]
+        
+        nodes[otherChild].parentIndexes.append(selectableGenerator)
     }
 }

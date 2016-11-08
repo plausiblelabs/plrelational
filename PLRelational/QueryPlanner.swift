@@ -23,7 +23,7 @@ class QueryPlanner {
     var initiatorIndexes: [Int] {
         return (nodes.indices).filter({
             switch nodes[$0].op {
-            case .rowGenerator, .rowSet:
+            case .rowGenerator, .selectableGenerator, .rowSet:
                 return true
             default:
                 return false
@@ -75,6 +75,8 @@ class QueryPlanner {
         switch r.contentProvider {
         case .generator(let generatorGetter):
             return Node(op: .rowGenerator(generatorGetter))
+        case .efficientlySelectableGenerator(let generatorGetter):
+            return Node(op: .selectableGenerator(generatorGetter))
         case .set(let setGetter):
             return Node(op: .rowSet(setGetter))
         case .intermediate(let op, let operands):
@@ -147,9 +149,7 @@ extension QueryPlanner {
         
         var parentIndexes: [Int] = []
         
-        /// All children of this node. The child is represented as its index, and the parent's
-        /// index within the parent. `parentIndexInChild` is the index of the parent within the
-        /// child's parentIndexes.
+        /// All children of this node.
         var childIndexes: [Int] = []
         
         init(op: Operation) {
@@ -159,6 +159,7 @@ extension QueryPlanner {
     
     enum Operation {
         case rowGenerator((Void) -> AnyIterator<Result<Row, RelationError>>)
+        case selectableGenerator((SelectExpression) -> AnyIterator<Result<Row, RelationError>>)
         case rowSet((Void) -> Set<Row>)
         
         case union
@@ -173,6 +174,8 @@ extension QueryPlanner {
         
         case otherwise
         case unique(Attribute, RelationValue)
+        
+        case equijoinedSelectableGenerator([Attribute: Attribute], (SelectExpression) -> AnyIterator<Result<Row, RelationError>>)
     }
 }
 

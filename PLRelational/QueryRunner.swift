@@ -111,12 +111,32 @@ open class QueryRunner {
         intermediatesToProcess.removeAll(keepingCapacity: true)
         
         for intermediate in localIntermediates {
-            if !nodeStates[intermediate.nodeIndex].didMarkDone && nodeStates[intermediate.nodeIndex].activeBuffers == 0 {
+            if shouldMarkIntermediateDone(intermediate.nodeIndex) {
                 markDone(intermediate.nodeIndex)
             }
             process(intermediate.nodeIndex, inputIndex: intermediate.inputIndex)
         }
         return true
+    }
+    
+    /// Return whether a given intermediate node should be marked as done. Nodes should be marked as
+    /// done if they aren't already marked, if they have zero active buffers, and they will not
+    /// become an initiator.
+    private func shouldMarkIntermediateDone(_ index: Int) -> Bool {
+        return !nodeStates[index].didMarkDone
+            && nodeStates[index].activeBuffers == 0
+            && !intermediateWillBecomeInitiator(index)
+    }
+    
+    /// Return whether a given intermediate node will become an initiator. Right now, only
+    /// equijoinedSelectableGenerator does this. It starts out as an intermediate node, then
+    /// turns into an initiator node once it collects its input.
+    private func intermediateWillBecomeInitiator(_ index: Int) -> Bool {
+        if case .equijoinedSelectableGenerator = nodes[index].op {
+            return true
+        } else {
+            return false
+        }
     }
     
     /// Process an active initiator node. If there are no active initiator nodes, sets the `done` property
@@ -151,10 +171,33 @@ open class QueryRunner {
                 activeInitiatorIndexes.removeLast()
                 markDone(nodeIndex)
             }
+        case .selectableGenerator(let generatorGetter):
+            let row = getRowGeneratorRow(nodeIndex, { generatorGetter(true) })
+            switch row {
+            case .some(.Err(let err)):
+                return .Err(err)
+            case .some(.Ok(let row)):
+                writeOutput([row], fromNode: nodeIndex)
+            case .none:
+                activeInitiatorIndexes.removeLast()
+                markDone(nodeIndex)
+            }
         case .rowSet(let rowGetter):
             writeOutput(rowGetter(), fromNode: nodeIndex)
             activeInitiatorIndexes.removeLast()
             markDone(nodeIndex)
+        case .equijoinedSelectableGenerator:
+            let iterator = nodeStates[nodeIndex].extraState as! AnyIterator<Result<Row, RelationError>>
+            let row = iterator.next()
+            switch row {
+            case .some(.Err(let err)):
+                return .Err(err)
+            case .some(.Ok(let row)):
+                writeOutput([row], fromNode: nodeIndex)
+            case .none:
+                activeInitiatorIndexes.removeLast()
+                markDone(nodeIndex)
+            }
         default:
             // These shenanigans let us print the operation without descending into an infinite recursion
             // from trying to print the contents of Relations contained within. We cut off subsequent lines
@@ -222,6 +265,8 @@ open class QueryRunner {
             processOtherwise(nodeIndex, inputIndex)
         case .unique(let attribute, let matching):
             processUnique(nodeIndex, inputIndex, attribute, matching)
+        case .equijoinedSelectableGenerator(let matching, let generatorGetter):
+            processEquijoinedSelectableGenerator(nodeIndex, inputIndex, matching, generatorGetter)
         default:
             fatalError("Don't know how to process operation \(op)")
         }
@@ -443,6 +488,24 @@ open class QueryRunner {
         
         if isUnique {
             writeOutput(Set(rows), fromNode: nodeIndex)
+        }
+    }
+    
+    func processEquijoinedSelectableGenerator(_ nodeIndex: Int, _ inputIndex: Int, _ matching: [Attribute: Attribute], _ generatorGetter: (SelectExpression) -> AnyIterator<Result<Row, RelationError>>) {
+        if nodeStates[nodeIndex].activeBuffers > 0 {
+            return
+        }
+        
+        if nodeStates[nodeIndex].extraState == nil {
+            let rows = nodeStates[nodeIndex].inputBuffers[0].popAll()
+            let onlyMatchingAttributes = rows.map({ $0.rowWithAttributes(matching.keys) })
+            let renamed = Set(onlyMatchingAttributes.map({ $0.renameAttributes(matching) }))
+            let expressions = renamed.map(SelectExpressionFromRow)
+            let expression = expressions.combined(with: *||)
+            
+            let iterator = generatorGetter(expression ?? false) // TODO: select stuff
+            nodeStates[nodeIndex].setExtraState(iterator)
+            activeInitiatorIndexes.append(nodeIndex)
         }
     }
 }

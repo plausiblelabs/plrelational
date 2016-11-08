@@ -232,4 +232,64 @@ class PlistDirectoryRelationTests: XCTestCase {
                         [RelationValue.blob([1, 2, 3, 4, 5]), 0, 0]
             ))
     }
+    
+    func testJoinPerformance() {
+        let url = tmpURL()
+        
+        class LoggingCodec: DataCodec {
+            var encoded: [Data] = []
+            var decoded: [Data] = []
+            
+            func encode(_ data: Data) -> Result<Data, RelationError> {
+                encoded.append(data)
+                return .Ok(data)
+            }
+            
+            func decode(_ data: Data) -> Result<Data, RelationError> {
+                decoded.append(data)
+                return .Ok(data)
+            }
+        }
+        let loggingCodec = LoggingCodec()
+        
+        let initialValues = MakeRelation(
+            ["id", "name"],
+            [1, "Bob"],
+            [2, "Susan"],
+            [3, "Jane"],
+            [4, "Pat"],
+            [5, "Steve"]
+        )
+        let dirRResult = PlistDirectoryRelation.withDirectory(url, scheme: initialValues.scheme, primaryKey: "id", createIfDoesntExist: true, codec: loggingCodec)
+        XCTAssertNil(dirRResult.err)
+        let dirR = dirRResult.ok!
+        
+        for row in initialValues.rows() {
+            _ = dirR.add(row.ok!)
+        }
+        
+        let toSubtract = MakeRelation(["id", "name"], [4, "Pat"])
+        let toUnion = MakeRelation(["id", "name"], [6, "Sam"])
+        let toJoin = MakeRelation(["id"])
+        
+        let output = dirR.difference(toSubtract).union(toUnion).join(toJoin)
+        
+        loggingCodec.encoded = []
+        loggingCodec.decoded = []
+        AssertEqual(output, MakeRelation(["id", "name"]))
+        XCTAssertEqual(loggingCodec.decoded.count, 0)
+        
+        _ = toJoin.add(["id": 2])
+        loggingCodec.encoded = []
+        loggingCodec.decoded = []
+        AssertEqual(output, MakeRelation(["id", "name"], [2, "Susan"]))
+        XCTAssertEqual(loggingCodec.decoded.count, 1)
+        
+        _ = toJoin.delete(true)
+        _ = toJoin.add(["id": 12345])
+        loggingCodec.encoded = []
+        loggingCodec.decoded = []
+        AssertEqual(output, MakeRelation(["id", "name"]))
+        XCTAssertEqual(loggingCodec.decoded.count, 0)
+    }
 }

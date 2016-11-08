@@ -43,7 +43,36 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     }
     
     public var contentProvider: RelationContentProvider {
-        return .generator(self.rowGenerator)
+        return .efficientlySelectableGenerator({ expression in
+            if expression as? Bool == false {
+                return AnyIterator([].makeIterator())
+            } else if let value = self.primaryKeyEquality(expression: expression) {
+                // TODO: we probably also want to handle cases where the expression is
+                // multiple primary key values ORed together.
+                return self.filteredRowGenerator(primaryKeyValues: [value])
+            } else {
+                let lazy = self.rowGenerator().lazy
+                let filtered = lazy.filter({
+                $0.ok.map({
+                    expression.valueWithRow($0).boolValue
+                }) ?? true
+                })
+                let wrapped = AnyIterator(filtered.makeIterator())
+                return wrapped
+            }
+        })
+    }
+    
+    private func primaryKeyEquality(expression: SelectExpression) -> RelationValue? {
+        if case let op as SelectExpressionBinaryOperator = expression, op.op is EqualityComparator {
+            if op.lhs as? Attribute == primaryKey, let value = op.rhs as? RelationValue {
+                return value
+            }
+            if op.rhs as? Attribute == primaryKey, let value = op.lhs as? RelationValue {
+                return value
+            }
+        }
+        return nil
     }
     
     public func contains(_ row: Row) -> Result<Bool, RelationError> {
@@ -283,5 +312,20 @@ extension PlistDirectoryRelation {
                 })
             })
         })
+    }
+    
+    fileprivate func filteredRowGenerator(primaryKeyValues: [RelationValue]) -> AnyIterator<Result<Row, RelationError>> {
+        let rows = primaryKeyValues.lazy.flatMap({ value -> Result<Row, RelationError>? in
+            let result = self.readRow(primaryKey: value)
+            switch result {
+            case .Ok(nil):
+                return nil
+            case .Ok(.some(let row)):
+                return .Ok(row)
+            case .Err(let err):
+                return .Err(err)
+            }
+        })
+        return AnyIterator(rows.makeIterator())
     }
 }
