@@ -7,32 +7,42 @@ public protocol SelectExpression {
     func valueWithRow(_ row: Row) -> RelationValue
 }
 
-extension RelationValue: SelectExpression {
-    public func valueWithRow(_ row: Row) -> RelationValue {
-        return self
-    }
-}
-
 extension Attribute: SelectExpression {
     public func valueWithRow(_ row: Row) -> RelationValue {
         return row[self]
     }
 }
 
-extension String: SelectExpression {
+public protocol SelectExpressionConstantValue: SelectExpression {
+    var relationValue: RelationValue { get }
+}
+
+extension RelationValue: SelectExpressionConstantValue {
+    public var relationValue: RelationValue {
+        return self
+    }
+}
+
+extension SelectExpressionConstantValue {
     public func valueWithRow(_ row: Row) -> RelationValue {
+        return self.relationValue
+    }
+}
+
+extension String: SelectExpressionConstantValue {
+    public var relationValue: RelationValue {
         return RelationValue(self)
     }
 }
 
-extension Int: SelectExpression {
-    public func valueWithRow(_ row: Row) -> RelationValue {
+extension Int: SelectExpressionConstantValue {
+    public var relationValue: RelationValue  {
         return RelationValue(Int64(self))
     }
 }
 
-extension Bool: SelectExpression {
-    public func valueWithRow(_ row: Row) -> RelationValue {
+extension Bool: SelectExpressionConstantValue {
+    public var relationValue: RelationValue {
         return RelationValue.boolValue(self)
     }
 }

@@ -65,11 +65,11 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     
     private func primaryKeyEquality(expression: SelectExpression) -> RelationValue? {
         if case let op as SelectExpressionBinaryOperator = expression, op.op is EqualityComparator {
-            if op.lhs as? Attribute == primaryKey, let value = op.rhs as? RelationValue {
-                return value
+            if op.lhs as? Attribute == primaryKey, let value = op.rhs as? SelectExpressionConstantValue {
+                return value.relationValue
             }
-            if op.rhs as? Attribute == primaryKey, let value = op.lhs as? RelationValue {
-                return value
+            if op.rhs as? Attribute == primaryKey, let value = op.lhs as? SelectExpressionConstantValue {
+                return value.relationValue
             }
         }
         return nil

@@ -89,7 +89,12 @@ class QueryOptimizer {
             if case .equijoin(let matching) = nodes[cursor].op {
                 addFilterTo(selectableGenerator: index, generatorGetter: generatorGetter, equijoin: cursor, equijoinChild: cursorCameFrom, matching: matching)
                 return
+            } else if case .select(let expression) = nodes[cursor].op {
+                addFilterTo(selectableGenerator: index, generatorGetter: generatorGetter, selectExpression: expression)
+                return
             }
+            
+            // TODO: bail out if there are renames or other things that would make this invalid
             
             if nodes[cursor].parentCount != 1 {
                 return
@@ -109,5 +114,9 @@ class QueryOptimizer {
         nodes[selectableGenerator].childIndexes = [otherChild]
         
         nodes[otherChild].parentIndexes.append(selectableGenerator)
+    }
+    
+    private func addFilterTo(selectableGenerator: Int, generatorGetter:  @escaping (SelectExpression) -> AnyIterator<Result<Row, RelationError>>, selectExpression: SelectExpression) {
+        nodes[selectableGenerator].op = .rowGenerator({ generatorGetter(selectExpression) })
     }
 }
