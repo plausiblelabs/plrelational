@@ -25,6 +25,10 @@ class EditorView: BackgroundView {
     private let docModel: DocModel
     private var contentView: NSView?
     
+    // XXX: This is a unique identifier that allows for determining whether an async query is still valid
+    // i.e., whether the content should be set
+    private var currentContentLoadID: UUID?
+
     private var observerRemovals: [ObserverRemoval] = []
     
     init(frame: NSRect, model: DocModel) {
@@ -36,8 +40,10 @@ class EditorView: BackgroundView {
             if let historyItem = historyItem {
                 let docOutlinePath = historyItem.outlinePath
                 switch docOutlinePath.type {
-                case .storedRelation, .sharedRelation, .privateRelation:
-                    self.setRelationContent(docOutlinePath)
+                case .storedRelation:
+                    self.setStoredRelationContent(docOutlinePath)
+//                case .sharedRelation, .privateRelation:
+//                    break
                 default:
                     self.contentView?.removeFromSuperview()
                 }
@@ -54,24 +60,46 @@ class EditorView: BackgroundView {
         contentView?.removeFromSuperview()
     }
     
-    func setRelationContent(_ docOutlinePath: DocOutlinePath) {
+    private func setStoredRelationContent(_ docOutlinePath: DocOutlinePath) {
         prepareForNewContent()
 
+        // Add the content view
         let chainView = BackgroundView(frame: self.bounds)
+        chainView.backgroundColor = NSColor(white: 0.98, alpha: 1.0)
+        addSubview(chainView)
+        self.contentView = chainView
         
-        let employees = MakeRelation(
-            ["emp_id", "emp_name", "dept_name"],
-            [1, "Alice", "Sales"],
-            [2, "Bob", "Finance"],
-            [3, "Carlos", "Production"],
-            [4, "Donald", "Production"])
-        
-        let departments = MakeRelation(
-            ["dept_name", "manager_id"],
-            ["Sales", 1],
-            ["Production", 3])
-        
-        let joined = employees.leftOuterJoin(departments)
+        // Load the relation model asynchronously
+        let contentLoadID = UUID()
+        currentContentLoadID = contentLoadID
+        let contentRelation = docModel.storedRelationModel(objectID: docOutlinePath.objectID)
+        contentRelation.asyncAllRows{ result in
+            // Only set the loaded data if our content load ID matches
+            if self.currentContentLoadID != contentLoadID {
+                return
+            }
+            // TODO: Show error message if any step fails here
+            guard let rows = result.ok else { return }
+            guard let plistBlob = contentRelation.oneBlobOrNil(AnyIterator(rows.makeIterator())) else { return }
+            guard let model = StoredRelationModel.fromPlistData(Data(bytes: plistBlob)) else { return }
+            self.addRelationTables(fromModel: model, toView: chainView)
+        }
+    }
+    
+    private func addRelationTables(fromModel model: StoredRelationModel, toView view: NSView) {
+//        let employees = MakeRelation(
+//            ["emp_id", "emp_name", "dept_name"],
+//            [1, "Alice", "Sales"],
+//            [2, "Bob", "Finance"],
+//            [3, "Carlos", "Production"],
+//            [4, "Donald", "Production"])
+//        
+//        let departments = MakeRelation(
+//            ["dept_name", "manager_id"],
+//            ["Sales", 1],
+//            ["Production", 3])
+//        
+//        let joined = employees.leftOuterJoin(departments)
 
         func addTableView(x: CGFloat, y: CGFloat, relation: Relation,
                           idAttr: Attribute, orderedAttrs: [Attribute])
@@ -100,29 +128,33 @@ class EditorView: BackgroundView {
             nsTableView.allowsColumnReordering = false
             scrollView.documentView = nsTableView
             scrollView.hasVerticalScroller = true
-            let view = TableView(model: model, tableView: nsTableView)
-            view.animateChanges = true
-            chainView.addSubview(scrollView)
+            scrollView.borderType = .bezelBorder
+            let tableView = TableView(model: model, tableView: nsTableView)
+            tableView.animateChanges = true
+            view.addSubview(scrollView)
         }
 
+//        addTableView(
+//            x: 20, y: 20,
+//            relation: employees,
+//            idAttr: "emp_id",
+//            orderedAttrs: ["emp_id", "emp_name", "dept_name"])
+//        addTableView(
+//            x: 400, y: 20,
+//            relation: departments,
+//            idAttr: "dept_name",
+//            orderedAttrs: ["dept_name", "manager_id"])
+//        addTableView(
+//            x: 20, y: 260,
+//            relation: joined,
+//            idAttr: "emp_id",
+//            orderedAttrs: ["emp_id", "emp_name", "dept_name", "manager_id"])
+        
         addTableView(
             x: 20, y: 20,
-            relation: employees,
-            idAttr: "emp_id",
-            orderedAttrs: ["emp_id", "emp_name", "dept_name"])
-        addTableView(
-            x: 400, y: 20,
-            relation: departments,
-            idAttr: "dept_name",
-            orderedAttrs: ["dept_name", "manager_id"])
-        addTableView(
-            x: 20, y: 260,
-            relation: joined,
-            idAttr: "emp_id",
-            orderedAttrs: ["emp_id", "emp_name", "dept_name", "manager_id"])
-        
-        addSubview(chainView)
-        self.contentView = chainView
+            relation: model.toRelation(),
+            idAttr: model.idAttr,
+            orderedAttrs: model.attributes)
     }
     
     required init?(coder: NSCoder) {

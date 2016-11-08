@@ -14,7 +14,7 @@ class RelationPropertyTests: BindingTestCase {
         let sqlr = db.createRelation("animal", scheme: ["id", "name"]).ok!
         let r = ChangeLoggingRelation(baseRelation: sqlr)
         
-        let property = r.select(Attribute("id") *== 1).project(["name"]).property{ $0.oneString }
+        let property = r.select(Attribute("id") *== 1).project(["name"]).property{ $0.oneString() }
         var changeObserved = false
         _ = property.signal.observe({ _ in changeObserved = true })
         
@@ -286,7 +286,7 @@ class RelationPropertyTests: BindingTestCase {
             }
         )
 
-        let relationProperty = r.select(Attribute("id") *== 1).project(["name"]).property(config, relationToValue: { $0.oneString })
+        let relationProperty = r.select(Attribute("id") *== 1).project(["name"]).property(config, relationToValue: { $0.oneString() })
         var changeObserved = false
         _ = relationProperty.signal.observe({ _ in changeObserved = true })
 

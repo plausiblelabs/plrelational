@@ -11,6 +11,47 @@ import PLBindableControls
 typealias DB = DocDatabase
 typealias PLUndoManager = PLBindableControls.UndoManager
 
+struct StoredRelationModel {
+    let attributes: [Attribute]
+    let idAttr: Attribute
+    let rows: [Row]
+    
+    func toPlistData() -> Data? {
+        let attrNames = self.attributes.map{ $0.name }
+        let rowPlists = self.rows.map{ $0.toPlist() }
+        let dict = [
+            "attributes": attrNames,
+            "idAttr": idAttr.name,
+            "rows": rowPlists
+        ] as [String : Any]
+        do {
+            return try? PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
+        }
+    }
+    
+    static func fromPlistData(_ data: Data) -> StoredRelationModel? {
+        do {
+            let plist = try PropertyListSerialization.propertyList(from: data, options: [], format: nil) as! [String: Any]
+            guard let attrNames = plist["attributes"] as? [String] else { return nil }
+            guard let idAttr = plist["idAttr"] as? String else { return nil }
+            guard let rowPlists = plist["rows"] as? [Any] else { return nil }
+            return StoredRelationModel(
+                attributes: attrNames.map{ Attribute($0) },
+                idAttr: Attribute(idAttr),
+                rows: rowPlists.map{ Row.fromPlist($0).ok! }
+            )
+        } catch {
+            return nil
+        }
+    }
+    
+    func toRelation() -> Relation {
+        let r = MemoryTableRelation(scheme: Scheme(attributes: Set(attributes)))
+        r.values = Set(rows)
+        return r
+    }
+}
+
 class DocDatabase {
     
     typealias Spec = PlistDatabase.RelationSpec
@@ -409,15 +450,10 @@ class DocDatabase {
         ])
     }
     
-    struct StoredRelationModel {
-        let attributes: [Attribute]
-        let rows: [Row]
-    }
-    
     func addStoredRelationData(objectID: ObjectID, model: StoredRelationModel) {
         let row: Row = [
             StoredRelationData.ObjectID.a: objectID.relationValue,
-            StoredRelationData.Plist.a: .null
+            StoredRelationData.Plist.a: RelationValue(model.toPlistData()!)
         ]
         
         // TODO: Error handling
@@ -619,7 +655,7 @@ class DocDatabase {
                 precondition(values.count == attributes.count)
                 return Row(values: Dictionary(zip(attributes, values)))
             })
-            return StoredRelationModel(attributes: attributes, rows: rows)
+            return StoredRelationModel(attributes: attributes, idAttr: attributes[0], rows: rows)
         }
         
         func shared(_ r1: ObjectID, _ r2: ObjectID, _ r3: ObjectID) -> SharedRelationModel {
