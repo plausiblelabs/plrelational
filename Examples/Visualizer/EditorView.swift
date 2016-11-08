@@ -27,6 +27,7 @@ class EditorView: BackgroundView {
     
     private let docModel: DocModel
     private var contentView: NSView?
+    private var tableViews: [RelationTableView] = []
     
     // XXX: This is a unique identifier that allows for determining whether an async query is still valid
     // i.e., whether the content should be set
@@ -62,6 +63,7 @@ class EditorView: BackgroundView {
     private func prepareForNewContent() {
         // TODO: Commit changes for current selection
         contentView?.removeFromSuperview()
+        tableViews.removeAll()
     }
     
     private func setStoredRelationContent(_ docOutlinePath: DocOutlinePath) {
@@ -174,8 +176,13 @@ class EditorView: BackgroundView {
             let padX: CGFloat = 20
             let padY: CGFloat = 20
             
-            var accumulatedRelation: Relation? = nil
-            var idAttrForAccumulatedRelation: Attribute? = nil
+            struct Accum {
+                let relation: Relation
+                let idAttr: Attribute
+                let orderedAttrs: [Attribute]
+            }
+            
+            var accumulated: Accum? = nil
             
             // Display the relation tables
             for element in model.elements {
@@ -196,9 +203,16 @@ class EditorView: BackgroundView {
                 
                 // Add the left-side table
                 let lhsModel = addTableForAtom(element.atom, x: x, y: y)
-                if accumulatedRelation == nil, let lhs = lhsModel {
-                    accumulatedRelation = lhs.toRelation()
-                    idAttrForAccumulatedRelation = lhs.idAttr
+                if accumulated == nil {
+                    guard let lhs = lhsModel else {
+                        Swift.print("Missing relation for initial element in shared relation")
+                        return
+                    }
+                    accumulated = Accum(
+                        relation: lhs.toRelation(),
+                        idAttr: lhs.idAttr,
+                        orderedAttrs: lhs.attributes
+                    )
                 }
 
                 if let op = element.op {
@@ -213,14 +227,30 @@ class EditorView: BackgroundView {
                         let rhsModel = addTableForAtom(binaryOp.atom, x: x + tableW + padX, y: y)
                         
                         // Derive the relation that results from the combine operation
-                        if let lhsRelation = accumulatedRelation, let rhs = rhsModel {
+                        if let accum = accumulated, let rhs = rhsModel {
+                            let lhsRelation = accum.relation
                             let rhsRelation = rhs.toRelation()
+                            let combined: Relation
                             switch binaryOp {
                             case .join:
-                                accumulatedRelation = lhsRelation.join(rhsRelation)
+                                combined = lhsRelation.join(rhsRelation)
                             case .union:
-                                accumulatedRelation = lhsRelation.union(rhsRelation)
+                                combined = lhsRelation.union(rhsRelation)
                             }
+                            // TODO: Determine idAttr for the combined relation (for now we'll take the
+                            // one from the LHS always, but later when we handle projections, this may no
+                            // longer be valid)
+                            var orderedAttrs = accum.orderedAttrs
+                            for attr in rhs.attributes {
+                                if !orderedAttrs.contains(attr) {
+                                    orderedAttrs.append(attr)
+                                }
+                            }
+                            accumulated = Accum(
+                                relation: combined,
+                                idAttr: accum.idAttr,
+                                orderedAttrs: orderedAttrs
+                            )
                         } else {
                             Swift.print("Unable to combine relations from shared relation model, stopping early")
                             return
@@ -229,22 +259,18 @@ class EditorView: BackgroundView {
                     
                     // Add a table below the last one that displays the result of the operation
                     y += tableH + padY
-                    if let relation = accumulatedRelation {
-                        // TODO
-//                        self.addTableView(
-//                            to: parent,
-//                            x: x, y: y,
-//                            relation: relation,
-//                            idAttr: idAttr,
-//                            orderedAttrs: model.attributes)
+                    if let accum = accumulated {
+                        self.addTableView(
+                            to: parent,
+                            x: x, y: y,
+                            relation: accum.relation,
+                            idAttr: accum.idAttr,
+                            orderedAttrs: accum.orderedAttrs)
                     } else {
                         Swift.print("No accumulated relation for shared relation model, stopping early")
                         return
                     }
                     
-                    // Advance to the next row
-                    y += tableH + padY
-
                 } else {
                     // Stop early when we have no operation (this shouldn't be necessary if the model is well-formed,
                     // but just in case...)
@@ -286,6 +312,8 @@ class EditorView: BackgroundView {
         let tableView = TableView(model: model, tableView: nsTableView)
         tableView.animateChanges = true
         parent.addSubview(scrollView)
+        
+        tableViews.append(tableView)
     }
     
     required init?(coder: NSCoder) {

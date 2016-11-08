@@ -99,8 +99,6 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
         }
         
         let element = elements[row]
-//        let relationValue = relationRow[column.attribute]
-//        Swift.print("\(column.attribute): \(relationValue)")
         if let textField = cellView?.textField as? TextField {
             let cellText = model.cellText(column.model.identifier, element.data)
             textField.bind(cellText)
@@ -176,6 +174,7 @@ private class CellView: NSTableCellView {
         _textField.isSelectable = false
         _textField.isBezeled = false
         _textField.drawsBackground = false
+        _textField.lineBreakMode = .byTruncatingTail
         _textField.autoresizingMask = [.viewWidthSizable]
         addSubview(_textField)
         

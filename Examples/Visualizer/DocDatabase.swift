@@ -695,13 +695,13 @@ class DocDatabase {
         let studentCoursesModel = stored(
             ["person_id", "course_id", "grade"],
             [6, 1, "A"],
-            [6, 2, "B"],
-            [7, 1, "C"],
-            [7, 1, "D"],
-            [8, 1, "B"],
-            [8, 1, "A"],
-            [9, 1, "A"],
-            [9, 1, "A"]
+            [6, 3, "B"],
+            [7, 2, "C"],
+            [7, 4, "D"],
+            [8, 2, "B"],
+            [8, 5, "A"],
+            [9, 3, "A"],
+            [9, 6, "A"]
         )
         
         let selectedPersonsModel = stored(
@@ -717,11 +717,11 @@ class DocDatabase {
         let selectedPersons = DocObject(.storedRelation)
         
         let sharedSection = DocObject(.section)
-        let selectedPersonCourses = DocObject(.sharedRelation)
+        let selectedStudentCourses = DocObject(.sharedRelation)
 
-        let selectedPersonCoursesModel = shared([
-            element(ref(persons), join(ref(courses))),
-            element(prev(), join(ref(selectedPersons)))
+        let selectedStudentCoursesModel = shared([
+            element(ref(selectedPersons), join(ref(studentCourses))),
+            element(prev(), join(ref(courses)))
         ])
     
         func addDocObject(_ docObject: DocObject, name: String, parent: DocObject?, order: Double) {
@@ -750,7 +750,7 @@ class DocDatabase {
         addStoredRelationObject(selectedPersons, name: "selected_person", parent: storedSection, order: 7.0, model: selectedPersonsModel)
 
         addDocObject(sharedSection, name: "Shared Relations", parent: nil, order: 7.0)
-        addSharedRelationObject(selectedPersonCourses, name: "selected_person_course", parent: sharedSection, order: 5.0, model: selectedPersonCoursesModel)
+        addSharedRelationObject(selectedStudentCourses, name: "selected_student_course", parent: sharedSection, order: 5.0, model: selectedStudentCoursesModel)
 
         // XXX: Wait for async updates to finish before we continue
         let runloop = CFRunLoopGetCurrent()
