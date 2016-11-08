@@ -86,21 +86,22 @@ class QueryOptimizer {
         var cursorCameFrom = index
         var cursor = nodes[index].parentIndexes.first!
         for _ in 0 ..< heightLimit {
-            if case .equijoin(let matching) = nodes[cursor].op {
+            switch nodes[cursor].op {
+            case .equijoin(let matching):
                 addFilterTo(selectableGenerator: index, generatorGetter: generatorGetter, equijoin: cursor, equijoinChild: cursorCameFrom, matching: matching)
                 return
-            } else if case .select(let expression) = nodes[cursor].op {
+            case .select(let expression):
                 addFilterTo(selectableGenerator: index, generatorGetter: generatorGetter, selectExpression: expression)
                 return
-            }
-            
-            // TODO: bail out if there are renames or other things that would make this invalid
-            
-            if nodes[cursor].parentCount != 1 {
+            case .project, .rename, .update, .aggregate, .otherwise, .unique:
+                // These may make the early filtering invalid, so bail out.
                 return
+            case _ where nodes[cursor].parentCount != 1:
+                return
+            default:
+                cursorCameFrom = cursor
+                cursor = nodes[cursor].parentIndexes.first!
             }
-            cursorCameFrom = cursor
-            cursor = nodes[cursor].parentIndexes.first!
         }
     }
     
