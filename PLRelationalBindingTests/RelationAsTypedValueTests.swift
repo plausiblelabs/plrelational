@@ -49,8 +49,8 @@ class RelationAsTypedValueTests: BindingTestCase {
         let rvset = Set([RelationValue("cat"), RelationValue("dog"), RelationValue("fish")])
         let strset = Set(["cat", "dog", "fish"])
         
-        XCTAssertNil(empty.project(["name"]).anyValue)
-        XCTAssertTrue(rvset.contains(r.project(["name"]).anyValue!))
+        XCTAssertNil(empty.project(["name"]).anyValue())
+        XCTAssertTrue(rvset.contains(r.project(["name"]).anyValue()!))
         XCTAssertTrue(strset.contains(r.project(["name"]).anyValue{ v -> String? in v.get()! }!))
     }
     
@@ -82,37 +82,37 @@ class RelationAsTypedValueTests: BindingTestCase {
         XCTAssertEqual(one.project(["name"]).oneValueOrNil(), RelationValue("cat"))
         XCTAssertNil(multi.project(["name"]).oneValueOrNil())
         
-        XCTAssertEqual(empty.project(["name"]).oneString, "")
-        XCTAssertEqual(one.project(["name"]).oneString, "cat")
-        XCTAssertEqual(multi.project(["name"]).oneString, "")
+        XCTAssertEqual(empty.project(["name"]).oneString(), "")
+        XCTAssertEqual(one.project(["name"]).oneString(), "cat")
+        XCTAssertEqual(multi.project(["name"]).oneString(), "")
         
-        XCTAssertNil(empty.project(["name"]).oneStringOrNil, "")
-        XCTAssertEqual(one.project(["name"]).oneStringOrNil, "cat")
-        XCTAssertNil(multi.project(["name"]).oneStringOrNil)
+        XCTAssertNil(empty.project(["name"]).oneStringOrNil(), "")
+        XCTAssertEqual(one.project(["name"]).oneStringOrNil(), "cat")
+        XCTAssertNil(multi.project(["name"]).oneStringOrNil())
         
-        XCTAssertEqual(empty.project(["friendly"]).oneBool, false)
-        XCTAssertEqual(one.project(["friendly"]).oneBool, true)
-        XCTAssertEqual(multi.project(["friendly"]).oneBool, false)
+        XCTAssertEqual(empty.project(["friendly"]).oneBool(), false)
+        XCTAssertEqual(one.project(["friendly"]).oneBool(), true)
+        XCTAssertEqual(multi.project(["friendly"]).oneBool(), false)
         
-        XCTAssertNil(empty.project(["friendly"]).oneBoolOrNil)
-        XCTAssertEqual(one.project(["friendly"]).oneBoolOrNil, true)
-        XCTAssertNil(multi.project(["friendly"]).oneBoolOrNil)
+        XCTAssertNil(empty.project(["friendly"]).oneBoolOrNil())
+        XCTAssertEqual(one.project(["friendly"]).oneBoolOrNil(), true)
+        XCTAssertNil(multi.project(["friendly"]).oneBoolOrNil())
         
-        XCTAssertEqual(empty.project(["age"]).oneInteger, 0)
-        XCTAssertEqual(one.project(["age"]).oneInteger, 5)
-        XCTAssertEqual(multi.project(["age"]).oneInteger, 0)
+        XCTAssertEqual(empty.project(["age"]).oneInteger(), 0)
+        XCTAssertEqual(one.project(["age"]).oneInteger(), 5)
+        XCTAssertEqual(multi.project(["age"]).oneInteger(), 0)
         
-        XCTAssertNil(empty.project(["age"]).oneIntegerOrNil)
-        XCTAssertEqual(one.project(["age"]).oneIntegerOrNil, 5)
-        XCTAssertNil(multi.project(["age"]).oneIntegerOrNil)
+        XCTAssertNil(empty.project(["age"]).oneIntegerOrNil())
+        XCTAssertEqual(one.project(["age"]).oneIntegerOrNil(), 5)
+        XCTAssertNil(multi.project(["age"]).oneIntegerOrNil())
         
-        XCTAssertEqual(empty.project(["pulse"]).oneDouble, 0.0)
-        XCTAssertEqual(one.project(["pulse"]).oneDouble, 2.0)
-        XCTAssertEqual(multi.project(["pulse"]).oneDouble, 0.0)
+        XCTAssertEqual(empty.project(["pulse"]).oneDouble(), 0.0)
+        XCTAssertEqual(one.project(["pulse"]).oneDouble(), 2.0)
+        XCTAssertEqual(multi.project(["pulse"]).oneDouble(), 0.0)
         
-        XCTAssertNil(empty.project(["pulse"]).oneDoubleOrNil)
-        XCTAssertEqual(one.project(["pulse"]).oneDoubleOrNil, 2.0)
-        XCTAssertNil(multi.project(["pulse"]).oneDoubleOrNil)
+        XCTAssertNil(empty.project(["pulse"]).oneDoubleOrNil())
+        XCTAssertEqual(one.project(["pulse"]).oneDoubleOrNil(), 2.0)
+        XCTAssertNil(multi.project(["pulse"]).oneDoubleOrNil())
     }
     
     func testCommonValue() {
