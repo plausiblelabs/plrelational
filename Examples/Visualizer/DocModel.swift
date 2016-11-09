@@ -104,17 +104,10 @@ class DocModel {
         return db.selectDocOutlineItem(tabID: TabID(currentTabID), path: path, currentPosition: currentPosition)
     }
     
-    /// Returns a Relation that contains the stored relation model for the given identifier.
-    func storedRelationModel(objectID: ObjectID) -> Relation {
-        return db.storedRelationData
-            .select(DB.StoredRelationData.ObjectID.a *== objectID.relationValue)
-            .project(DB.StoredRelationData.Plist.a)
-    }
-    
-    /// Returns a Relation that contains the shared relation model for the given identifier.
-    func sharedRelationModel(objectID: ObjectID) -> Relation {
-        return db.sharedRelationData
-            .select(DB.SharedRelationData.ObjectID.a *== objectID.relationValue)
-            .project(DB.SharedRelationData.Plist.a)
+    /// Returns a Relation that contains the relation model for the given identifier.
+    func relationModelPlistData(objectID: ObjectID) -> Relation {
+        return db.relationModelData
+            .select(DB.RelationModelData.ObjectID.a *== objectID.relationValue)
+            .project(DB.RelationModelData.Plist.a)
     }
 }

@@ -33,27 +33,11 @@ class DocDatabase {
         static var relationSpec: Spec { return file(path: "object_data") }
     }
     
-//    enum StoredRelationAttribute: String, SchemeEnum { case
-//        ID = "id",
-//        ObjectID = "obj_id", // Foreign Key: Object.ID
-//        Name = "name",
-//        DataType = "data_type"
-//        static var relationName: String { return "stored_relation_attribute" }
-//        static var relationSpec: Spec { return file(path: "stored_relation_attribute") }
-//    }
-
-    enum StoredRelationData: String, SchemeEnum { case
+    enum RelationModelData: String, SchemeEnum { case
         ObjectID = "obj_id", // Foreign Key: Object.ID
         Plist = "plist" // XXX: Lazy!
-        static var relationName: String { return "stored_relation_data" }
-        static var relationSpec: Spec { return dir(path: "stored_relation_data", primaryKey: StoredRelationData.ObjectID.a) }
-    }
-
-    enum SharedRelationData: String, SchemeEnum { case
-        ObjectID = "obj_id", // Foreign Key: Object.ID
-        Plist = "plist" // XXX: Lazy!
-        static var relationName: String { return "shared_relation_data" }
-        static var relationSpec: Spec { return dir(path: "shared_relation_data", primaryKey: SharedRelationData.ObjectID.a) }
+        static var relationName: String { return "relation_model_data" }
+        static var relationSpec: Spec { return dir(path: "relation_model_data", primaryKey: RelationModelData.ObjectID.a) }
     }
 
     enum DocItem: String, SchemeEnum { case
@@ -239,9 +223,7 @@ class DocDatabase {
     
     lazy var objects: TransactionalRelation = self.transactionalRelation(Object.self)
     lazy var objectData: TransactionalRelation = self.transactionalRelation(ObjectData.self)
-    //lazy var storedRelationAttributes: TransactionalRelation = self.transactionalRelation(StoredRelationAttribute.self)
-    lazy var storedRelationData: TransactionalRelation = self.transactionalRelation(StoredRelationData.self)
-    lazy var sharedRelationData: TransactionalRelation = self.transactionalRelation(SharedRelationData.self)
+    lazy var relationModelData: TransactionalRelation = self.transactionalRelation(RelationModelData.self)
     lazy var docItems: TransactionalRelation = self.transactionalRelation(DocItem.self)
     lazy var tabs: TransactionalRelation = self.transactionalRelation(Tab.self)
     lazy var selectedTab: TransactionalRelation = self.transactionalRelation(SelectedTab.self)
@@ -423,37 +405,20 @@ class DocDatabase {
             DocItem.Order.a: RelationValue(order)
         ])
     }
-    
-    func addStoredRelationData(objectID: ObjectID, model: StoredRelationModel) {
-        let row: Row = [
-            StoredRelationData.ObjectID.a: objectID.relationValue,
-            StoredRelationData.Plist.a: RelationValue(model.toPlistData()!)
-        ]
-        
-        // TODO: Error handling
-        if transactional {
-            storedRelationData.asyncAdd(row)
-        } else {
-            let result = storedRelation(StoredRelationData.self).add(row)
-            if let error = result.err {
-                print("Failed to add row to `stored_relation_data`: \(error)")
-            }
-        }
-    }
 
-    func addSharedRelationData(objectID: ObjectID, model: SharedRelationModel) {
+    func addRelationModelData(objectID: ObjectID, model: RelationModel) {
         let row: Row = [
-            SharedRelationData.ObjectID.a: objectID.relationValue,
-            SharedRelationData.Plist.a: RelationValue(model.toPlistData()!)
+            RelationModelData.ObjectID.a: objectID.relationValue,
+            RelationModelData.Plist.a: RelationValue(model.toPlistData()!)
         ]
         
         // TODO: Error handling
         if transactional {
-            sharedRelationData.asyncAdd(row)
+            relationModelData.asyncAdd(row)
         } else {
-            let result = storedRelation(SharedRelationData.self).add(row)
+            let result = storedRelation(RelationModelData.self).add(row)
             if let error = result.err {
-                print("Failed to add row to `shared_relation_data`: \(error)")
+                print("Failed to add row to `relation_model_data`: \(error)")
             }
         }
     }
@@ -619,8 +584,7 @@ class DocDatabase {
         return [
             Object.relationSpec,
             ObjectData.relationSpec,
-            StoredRelationData.relationSpec,
-            SharedRelationData.relationSpec,
+            RelationModelData.relationSpec,
             DocItem.relationSpec,
             Tab.relationSpec,
             TabHistoryItem.relationSpec,
@@ -634,34 +598,26 @@ class DocDatabase {
     func addDefaultData() {
         precondition(transactional)
 
-        func stored(_ attributes: [Attribute], _ rowValues: [RelationValue]...) -> StoredRelationModel {
+        func stored(_ attributes: [Attribute], _ rowValues: [RelationValue]...) -> RelationModel {
             let rows = rowValues.map({ values -> Row in
                 precondition(values.count == attributes.count)
                 return Row(values: Dictionary(zip(attributes, values)))
             })
-            return StoredRelationModel(attributes: attributes, idAttr: attributes[0], rows: rows)
+            return .stored(StoredRelationModel(attributes: attributes, idAttr: attributes[0], rows: rows))
         }
 
-        func prev(_ projection: [Attribute]? = nil) -> SharedRelationAtom {
-            return SharedRelationAtom(source: .previous, projection: projection)
-        }
-        
-        func ref(_ docObject: DocObject, _ projection: [Attribute]? = nil) -> SharedRelationAtom {
-            return SharedRelationAtom(source: .reference(docObject.objectID), projection: projection)
+        func join(_ rhs: SharedRelationInput, projecting projection: [Attribute]? = nil) -> SharedRelationStage {
+            return SharedRelationStage(op: .combine(.join(rhs)), projection: projection)
         }
 
-        func join(_ atom: SharedRelationAtom) -> SharedRelationOp {
-            return .combine(.join(atom))
+        func input(_ docObject: DocObject, projecting projection: [Attribute]? = nil) -> SharedRelationInput {
+            return SharedRelationInput(objectID: docObject.objectID, projection: projection)
         }
         
-        func element(_ atom: SharedRelationAtom, _ op: SharedRelationOp? = nil) -> SharedRelationElement {
-            return SharedRelationElement(atom: atom, op: op)
+        func shared(_ input: SharedRelationInput, _ stages: SharedRelationStage...) -> RelationModel {
+            return .shared(SharedRelationModel(input: input, stages: stages))
         }
         
-        func shared(_ elements: [SharedRelationElement]) -> SharedRelationModel {
-            return SharedRelationModel(elements: elements)
-        }
-
         let personsModel = stored(
             ["person_id", "first_name", "last_name"],
             [1, "George", "Washington"],
@@ -694,14 +650,14 @@ class DocDatabase {
         
         let studentCoursesModel = stored(
             ["person_id", "course_id", "grade"],
-            [6, 1, "A"],
-            [6, 3, "B"],
-            [7, 2, "C"],
-            [7, 4, "D"],
-            [8, 2, "B"],
-            [8, 5, "A"],
-            [9, 3, "A"],
-            [9, 6, "A"]
+            [6, 1, 92],
+            [6, 3, 84],
+            [7, 2, 76],
+            [7, 4, 67],
+            [8, 2, 88],
+            [8, 5, 95],
+            [9, 3, 91],
+            [9, 6, 91]
         )
         
         let selectedPersonsModel = stored(
@@ -718,12 +674,23 @@ class DocDatabase {
         
         let sharedSection = DocObject(.section)
         let selectedStudentCourses = DocObject(.sharedRelation)
+        let selectedStudentBestCourse = DocObject(.sharedRelation)
 
-        let selectedStudentCoursesModel = shared([
-            element(ref(selectedPersons), join(ref(studentCourses))),
-            element(prev(), join(ref(courses)))
-        ])
-    
+        let selectedStudentCoursesModel = shared(
+            input(selectedPersons),
+            join(input(studentCourses)),
+            // TODO: Ideally we would not need to include `course_id` here, but currently the view code
+            // relies on the presences of a unique identifier
+            join(input(courses), projecting: ["course_id", "title", "grade"])
+        )
+
+//        let selectedStudentBestCoursesModel = shared(
+//            input(selectedPersons),
+//            join(input(studentCourses)),
+//            join(input(courses), ["title", "grade"]),
+//            selectMax("grade")
+//        )
+
         func addDocObject(_ docObject: DocObject, name: String, parent: DocObject?, order: Double) {
             let parentDocItemID = parent?.docItemID
             self.addDocObject(docObject: docObject, name: name,
@@ -732,25 +699,20 @@ class DocDatabase {
                               parentID: parentDocItemID, order: order)
         }
         
-        func addStoredRelationObject(_ docObject: DocObject, name: String, parent: DocObject?, order: Double, model: StoredRelationModel) {
+        func addRelationObject(_ docObject: DocObject, name: String, parent: DocObject?, order: Double, model: RelationModel) {
             addDocObject(docObject, name: name, parent: parent, order: order)
-            _ = addStoredRelationData(objectID: docObject.objectID, model: model)
-        }
-
-        func addSharedRelationObject(_ docObject: DocObject, name: String, parent: DocObject?, order: Double, model: SharedRelationModel) {
-            addDocObject(docObject, name: name, parent: parent, order: order)
-            _ = addSharedRelationData(objectID: docObject.objectID, model: model)
+            _ = addRelationModelData(objectID: docObject.objectID, model: model)
         }
 
         addDocObject(storedSection, name: "Stored Relations", parent: nil, order: 5.0)
-        addStoredRelationObject(persons, name: "person", parent: storedSection, order: 5.0, model: personsModel)
-        addStoredRelationObject(courses, name: "course", parent: storedSection, order: 5.5, model: coursesModel)
-        addStoredRelationObject(departments, name: "department", parent: storedSection, order: 6.0, model: departmentsModel)
-        addStoredRelationObject(studentCourses, name: "student_course", parent: storedSection, order: 6.5, model: studentCoursesModel)
-        addStoredRelationObject(selectedPersons, name: "selected_person", parent: storedSection, order: 7.0, model: selectedPersonsModel)
+        addRelationObject(persons, name: "person", parent: storedSection, order: 5.0, model: personsModel)
+        addRelationObject(courses, name: "course", parent: storedSection, order: 5.5, model: coursesModel)
+        addRelationObject(departments, name: "department", parent: storedSection, order: 6.0, model: departmentsModel)
+        addRelationObject(studentCourses, name: "student_course", parent: storedSection, order: 6.5, model: studentCoursesModel)
+        addRelationObject(selectedPersons, name: "selected_person", parent: storedSection, order: 7.0, model: selectedPersonsModel)
 
         addDocObject(sharedSection, name: "Shared Relations", parent: nil, order: 7.0)
-        addSharedRelationObject(selectedStudentCourses, name: "selected_student_course", parent: sharedSection, order: 5.0, model: selectedStudentCoursesModel)
+        addRelationObject(selectedStudentCourses, name: "selected_student_course", parent: sharedSection, order: 5.0, model: selectedStudentCoursesModel)
 
         // XXX: Wait for async updates to finish before we continue
         let runloop = CFRunLoopGetCurrent()
