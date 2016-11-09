@@ -609,6 +609,14 @@ class DocDatabase {
         func join(_ rhs: SharedRelationInput, projecting projection: [Attribute]? = nil) -> SharedRelationStage {
             return SharedRelationStage(op: .combine(.join(rhs)), projection: projection)
         }
+        
+        func selectEq(_ attr: Attribute, _ value: RelationValue) -> SharedRelationStage {
+            return SharedRelationStage(op: .filter(.selectEq(attr, value)), projection: nil)
+        }
+
+        func count() -> SharedRelationStage {
+            return SharedRelationStage(op: .filter(.count), projection: nil)
+        }
 
         func input(_ docObject: DocObject, projecting projection: [Attribute]? = nil) -> SharedRelationInput {
             return SharedRelationInput(objectID: docObject.objectID, projection: projection)
@@ -674,22 +682,22 @@ class DocDatabase {
         
         let sharedSection = DocObject(.section)
         let selectedStudentCourses = DocObject(.sharedRelation)
-        let selectedStudentBestCourse = DocObject(.sharedRelation)
+        let calculusStudentCount = DocObject(.sharedRelation)
 
         let selectedStudentCoursesModel = shared(
             input(selectedPersons),
             join(input(studentCourses)),
             // TODO: Ideally we would not need to include `course_id` here, but currently the view code
-            // relies on the presences of a unique identifier
+            // relies on the presence of a unique identifier
             join(input(courses), projecting: ["course_id", "title", "grade"])
         )
-
-//        let selectedStudentBestCoursesModel = shared(
-//            input(selectedPersons),
-//            join(input(studentCourses)),
-//            join(input(courses), ["title", "grade"]),
-//            selectMax("grade")
-//        )
+        
+        let calculusStudentCountModel = shared(
+            input(courses),
+            selectEq("title", "Calculus"),
+            join(input(studentCourses)),
+            count()
+        )
 
         func addDocObject(_ docObject: DocObject, name: String, parent: DocObject?, order: Double) {
             let parentDocItemID = parent?.docItemID
@@ -713,6 +721,7 @@ class DocDatabase {
 
         addDocObject(sharedSection, name: "Shared Relations", parent: nil, order: 7.0)
         addRelationObject(selectedStudentCourses, name: "selected_student_course", parent: sharedSection, order: 5.0, model: selectedStudentCoursesModel)
+        addRelationObject(calculusStudentCount, name: "calculus_student_count", parent: sharedSection, order: 5.5, model: calculusStudentCountModel)
 
         // XXX: Wait for async updates to finish before we continue
         let runloop = CFRunLoopGetCurrent()

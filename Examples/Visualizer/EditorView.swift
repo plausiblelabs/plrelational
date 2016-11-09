@@ -152,7 +152,7 @@ class EditorView: BackgroundView {
             let idAttr: Attribute
             let orderedAttrs: [Attribute]
         }
-
+        
         func displayTables() {
             var x: CGFloat = 20
             var y: CGFloat = 20
@@ -195,8 +195,21 @@ class EditorView: BackgroundView {
                 switch op {
                 case .filter(let unaryOp):
                     // Derive the relation that results from the filter operation
-                    // TODO
-                    break
+                    // TODO: Take projection into account
+                    switch unaryOp {
+                    case let .selectEq(attr, value):
+                        accum = Accum(
+                            relation: accum.relation.select(attr *== value),
+                            idAttr: accum.idAttr,
+                            orderedAttrs: accum.orderedAttrs
+                        )
+                    case .count:
+                        accum = Accum(
+                            relation: accum.relation.count(),
+                            idAttr: "count",
+                            orderedAttrs: ["count"]
+                        )
+                    }
 
                 case .combine(let binaryOp):
                     // Add a table to the right side that shows the relation being combined

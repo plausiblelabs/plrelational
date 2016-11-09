@@ -43,7 +43,7 @@ struct SharedRelationInput {
 
 enum SharedRelationUnaryOp {
     // TODO: Generalize this (different comparison ops, different value types)
-    case selectEq(Attribute, String)
+    case selectEq(Attribute, RelationValue)
     case count
 }
 
@@ -176,10 +176,10 @@ extension SharedRelationUnaryOp {
         let dict = NSMutableDictionary()
         switch self {
         case let .selectEq(attr, value):
-            dict["selectEq"] = [
-                "attribute": attr.name,
-                "value": value
-            ]
+            let selectEqDict = NSMutableDictionary()
+            selectEqDict["attribute"] = attr.name
+            selectEqDict["value"] = value.toEncodedPlist()
+            dict["selectEq"] = selectEqDict
         case .count:
             dict["count"] = true
         }
@@ -191,7 +191,8 @@ extension SharedRelationUnaryOp {
 
         if let selectEqDict = dict["selectEq"] as? NSDictionary {
             guard let attrName = selectEqDict["attribute"] as? String else { return nil }
-            guard let value = selectEqDict["value"] as? String else { return nil }
+            guard let valuePlist = selectEqDict["value"] else { return nil }
+            guard let value = RelationValue.fromEncodedPlist(valuePlist).ok else { return nil }
             return .selectEq(Attribute(attrName), value)
         } else if dict["count"] != nil {
             return .count
