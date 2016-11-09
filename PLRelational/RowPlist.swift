@@ -12,7 +12,7 @@ extension Row {
         
         var values: [Attribute: RelationValue] = [:]
         for (attributeName, valuePlist) in dict {
-            switch RelationValue.fromPlist(valuePlist) {
+            switch RelationValue.fromEncodedPlist(valuePlist) {
             case .Ok(let value): values[Attribute(attributeName as! String)] = value
             case .Err(let err): return .Err(err)
             }
@@ -23,7 +23,7 @@ extension Row {
     public func toPlist() -> Any {
         let result = NSMutableDictionary()
         for (attribute, value) in self {
-            result[attribute.name] = value.toPlist()
+            result[attribute.name] = value.toEncodedPlist()
         }
         return result
     }
@@ -39,7 +39,7 @@ extension RelationValue {
     //     we put an Integer in, we have to do this.)
     // Strings are encoded as strings.
     // Blobs are encoded as data.
-    static func fromPlist(_ plist: Any) -> Result<RelationValue, RelationError> {
+    public static func fromEncodedPlist(_ plist: Any) -> Result<RelationValue, RelationError> {
         switch plist {
             
         case let array as NSArray where array.count == 0: return .Ok(.null)
@@ -63,7 +63,7 @@ extension RelationValue {
         }
     }
     
-    func toPlist() -> Any {
+    public func toEncodedPlist() -> Any {
         switch self {
         case .null: return [] as NSArray
         case .integer(let value): return ["integer", NSNumber(value: value as Int64)] as NSArray
