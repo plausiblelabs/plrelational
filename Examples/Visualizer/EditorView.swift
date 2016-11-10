@@ -16,6 +16,7 @@ private struct RelationTableColumnModel: TableColumnModel {
         return identifier.name
     }
     let title: String
+    let width: CGFloat
 }
 
 private typealias RelationTableView = TableView<RelationTableColumnModel, RowArrayElement>
@@ -283,7 +284,7 @@ class EditorView: BackgroundView {
     private func addTableView(to parent: NSView, x: CGFloat, y: CGFloat, relation: Relation,
                               idAttr: Attribute, orderedAttrs: [Attribute])
     {
-        let columns = orderedAttrs.map{ RelationTableColumnModel(identifier: $0, title: $0.name) }
+        let columns = orderedAttrs.map{ RelationTableColumnModel(identifier: $0, title: $0.name, width: 80) }
         let data = relation.arrayProperty(idAttr: idAttr, orderAttr: idAttr)
         let model = TableViewModel(
             columns: columns,

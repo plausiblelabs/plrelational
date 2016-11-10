@@ -12,6 +12,7 @@ public protocol TableColumnModel {
     var identifier: ID { get }
     var identifierString: String { get }
     var title: String { get }
+    var width: CGFloat { get }
 }
 
 public struct TableViewModel<C: TableColumnModel, E: ArrayElement> {
@@ -55,11 +56,12 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
         }
         for columnModel in model.columns {
             let column = TableColumn(model: columnModel)
-            column.width = 80
-            column.resizingMask = .userResizingMask
+            column.width = columnModel.width
+            column.resizingMask = .autoresizingMask
             column.headerCell.stringValue = columnModel.title
             tableView.addTableColumn(column)
         }
+        tableView.columnAutoresizingStyle = .lastColumnOnlyAutoresizingStyle
         tableView.sizeLastColumnToFit()
 
         // TODO: Handle will/didChange
