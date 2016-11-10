@@ -131,6 +131,11 @@ public func traverse<Seq, InnerT, NewT, E>(_ seq: Seq, _ f: (InnerT) -> Result<N
     return .Ok(results)
 }
 
+/// Take an Optional<Result> and turn it into a Result<Optional>.
+public func hoistOptional<T, E>(_ optionalResult: Result<T, E>?) -> Result<T?, E> {
+    return optionalResult.map({ $0.map({ $0 }) }) ?? .Ok(nil)
+}
+
 extension Result {
     public func combine<U>(_ other: Result<U, E>) -> Result<(T, U), E> {
         switch (self, other) {
