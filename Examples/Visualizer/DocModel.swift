@@ -14,6 +14,11 @@ class DocModel {
     /// The tree of doc outline items for the "relations" section.
     private let docItemsTree: TreeProperty<RowTreeNode>
     
+    /// Keep the most recent pending selection path, which will be processed the next time the database is freed up.
+    private var pendingSelectionPath: DocOutlinePath?
+    
+    private var observerRemovals: [ObserverRemoval] = []
+
     init(db: DocDatabase) {
         self.db = db
         
@@ -26,6 +31,21 @@ class DocModel {
             orderAttr: DB.DocItem.Order.a,
             tag: Box(DocOutlineSectionID.relations))
         
+        // Observe the UpdateManager state and handle enqueued selection changes
+        let stateObserverRemover = UpdateManager.currentInstance.addStateObserver({
+            if $0 == .idle {
+                if let path = self.pendingSelectionPath {
+                    // Update the database with the enqueued selection change
+                    self.pendingSelectionPath = nil
+                    _ = self.selectDocOutlineItem(path: path)
+                } else {
+                    // No pending selection change, so exit exclusive mode
+                    self.docOutlineModel.selectionExclusiveMode = false
+                }
+            }
+        })
+        observerRemovals.append(stateObserverRemover)
+
         // XXX: Eagerly start some properties that are dependencies of other actions
         self.activeTabID.start()
     }
@@ -84,11 +104,20 @@ class DocModel {
             },
             update: { paths in
                 if let path = paths.first {
+                    // XXX: Put the outline selection model into a sort of "exclusive mode" while the user
+                    // is changing the selection.  This helps prevent updating the outline view's selection
+                    // when the database's selection state is changing (possibly with some latency).  The
+                    // downside is that we run the risk of missing some non-user-initiated update to the
+                    // database's selection state while we are in exclusive mode.
+                    self.docOutlineModel.selectionExclusiveMode = true
+                    
                     if self.db.isBusy {
-                        print("WARNING: Attempting to change doc outline selection while database is busy")
-                        return
+                        // Queue up this path and update the database the next time it is idle
+                        self.pendingSelectionPath = path
+                    } else {
+                        // Update the database immediately
+                        _ = self.selectDocOutlineItem(path: path)
                     }
-                    _ = self.selectDocOutlineItem(path: path)
                 }
             }
         )

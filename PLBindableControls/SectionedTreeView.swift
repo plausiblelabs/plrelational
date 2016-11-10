@@ -57,7 +57,7 @@ public func ==(a: SectionedTreeChange, b: SectionedTreeChange) -> Bool {
 }
 
 public protocol SectionedTreeViewModelDelegate: class {
-    func treeChanged(_ changes: [SectionedTreeChange])
+    func sectionedTreeViewModelTreeChanged(_ changes: [SectionedTreeChange])
 }
 
 public protocol SectionedTreeViewModel: class {
@@ -65,6 +65,7 @@ public protocol SectionedTreeViewModel: class {
     
     weak var delegate: SectionedTreeViewModelDelegate? { get set }
     var selection: AsyncReadWriteProperty<Set<Path>> { get }
+    var selectionExclusiveMode: Bool { get set }
     
     func start()
     
@@ -208,6 +209,11 @@ open class SectionedTreeView<M: SectionedTreeViewModel>: NSObject, NSOutlineView
     
     /// Selects the rows corresponding to the given set of item paths.
     private func selectItems(_ paths: Set<M.Path>) {
+        // XXX: Ignore external selection changes made while in exclusive mode
+        if model.selectionExclusiveMode {
+            return
+        }
+        
         let indexes = NSMutableIndexSet()
         for path in paths {
             if let item = self.model.itemForPath(path) {
@@ -223,9 +229,13 @@ open class SectionedTreeView<M: SectionedTreeViewModel>: NSObject, NSOutlineView
         selfInitiatedSelectionChange = false
     }
     
-    // MARK: Tree change observation
+    // MARK: SectionedTreeViewModelDelegate protocol
     
-    public func treeChanged(_ changes: [SectionedTreeChange]) {
+    public func sectionedTreeViewModelShouldIgnoreSelectionChanges() -> Bool {
+        return false
+    }
+    
+    public func sectionedTreeViewModelTreeChanged(_ changes: [SectionedTreeChange]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : NSTableViewAnimationOptions()
         
         // Get the current set of IDs from the `selection` property and then use those to restore

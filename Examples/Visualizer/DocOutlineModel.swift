@@ -161,6 +161,8 @@ class DocOutlineModel: SectionedTreeViewModel {
     private var observerRemovals: [ObserverRemoval] = []
     
     let selection: AsyncReadWriteProperty<Set<DocOutlinePath>>
+    var selectionExclusiveMode: Bool = false
+    
     weak var delegate: SectionedTreeViewModelDelegate?
     
     let relationsSection: DocOutlineSection
@@ -427,7 +429,7 @@ class DocOutlineModel: SectionedTreeViewModel {
         }
         
         if sectionedTreeChanges.count > 0 {
-            delegate.treeChanged(sectionedTreeChanges)
+            delegate.sectionedTreeViewModelTreeChanged(sectionedTreeChanges)
         }
     }
     
@@ -456,7 +458,7 @@ class DocOutlineModel: SectionedTreeViewModel {
         }
         
         if sectionedTreeChanges.count > 0 {
-            delegate.treeChanged(sectionedTreeChanges)
+            delegate.sectionedTreeViewModelTreeChanged(sectionedTreeChanges)
         }
     }
     
