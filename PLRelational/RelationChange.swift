@@ -13,6 +13,18 @@ public struct RelationChange {
     }
 }
 
+extension RelationChange {
+    public func copy() -> Result<RelationChange, RelationError> {
+        let copiedAdded = added.map(ConcreteRelation.copyRelation)
+        let copiedRemoved = removed.map(ConcreteRelation.copyRelation)
+        
+        return
+            hoistOptional(copiedAdded)
+                .combine(hoistOptional(copiedRemoved))
+                .map(RelationChange.init)
+    }
+}
+
 extension RelationChange: CustomStringConvertible {
     public var description: String {
         func stringForRelation(_ r: Relation?) -> String {

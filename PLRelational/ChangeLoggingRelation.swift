@@ -218,34 +218,37 @@ extension ChangeLoggingRelation {
     /// in that code to ensure everything is done together.
     public func save() -> Result<Void, RelationError> {
         let change = ChangeLoggingRelation.computeChangeFromLog(self.log.lazy.map({ $0.forward }), baseRelation: self.baseRelation)
-        if let removed = change.removed {
-            for row in removed.rows() {
-                switch row {
-                case .Ok(let row):
-                    if let err = baseRelation.delete(SelectExpressionFromRow(row)).err {
+        
+        return change.copy().then({ change in
+            if let removed = change.removed {
+                for row in removed.rows() {
+                    switch row {
+                    case .Ok(let row):
+                        if let err = baseRelation.delete(SelectExpressionFromRow(row)).err {
+                            return .Err(err)
+                        }
+                    case .Err(let err):
                         return .Err(err)
                     }
-                case .Err(let err):
-                    return .Err(err)
                 }
             }
-        }
-        
-        if let added = change.added {
-            for row in added.rows() {
-                switch row {
-                case .Ok(let row):
-                    if let err = baseRelation.add(row).err {
+            
+            if let added = change.added {
+                for row in added.rows() {
+                    switch row {
+                    case .Ok(let row):
+                        if let err = baseRelation.add(row).err {
+                            return .Err(err)
+                        }
+                    case .Err(let err):
                         return .Err(err)
                     }
-                case .Err(let err):
-                    return .Err(err)
+                    
                 }
-                
             }
-        }
-        
-        return .Ok()
+            
+            return .Ok()
+        })
     }
 }
 
