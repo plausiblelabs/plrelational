@@ -51,7 +51,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         get: { [unowned self] in
             var itemIDs: [E.ID] = []
             for index in self.outlineView.selectedRowIndexes {
-                if let element = self.outlineView.item(atRow: index) as? E {
+                if let element = self.elements[safe: index] {
                     itemIDs.append(element.id)
                 }
             }
@@ -60,12 +60,8 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         set: { [unowned self] selectedIDs, _ in
             let indexes = NSMutableIndexSet()
             for id in selectedIDs {
-                if let element = self.model.data.elementForID(id) {
-                    // TODO: This is inefficient
-                    let index = self.outlineView.row(forItem: element)
-                    if index >= 0 {
-                        indexes.add(index)
-                    }
+                if let index = self.model.data.indexForID(id) {
+                    indexes.add(index)
                 }
             }
             self.outlineView.selectRowIndexes(indexes as IndexSet, byExtendingSelection: false)

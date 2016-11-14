@@ -40,6 +40,27 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
         return model.data.elements
     }
     
+    public lazy var selection: ExternalValueProperty<Set<E.ID>> = ExternalValueProperty(
+        get: { [unowned self] in
+            var itemIDs: [E.ID] = []
+            for index in self.tableView.selectedRowIndexes {
+                if let element = self.elements[safe: index] {
+                    itemIDs.append(element.id)
+                }
+            }
+            return Set(itemIDs)
+        },
+        set: { [unowned self] selectedIDs, _ in
+            let indexes = NSMutableIndexSet()
+            for id in selectedIDs {
+                if let index = self.model.data.indexForID(id) {
+                    indexes.add(index)
+                }
+            }
+            self.tableView.selectRowIndexes(indexes as IndexSet, byExtendingSelection: false)
+        }
+    )
+
     private var arrayObserverRemoval: ObserverRemoval?
     
     /// Whether to animate insert/delete changes with a fade.
@@ -110,7 +131,9 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
 
     // MARK: NSTableViewDataSource
     
-    // TODO
+    open func tableViewSelectionDidChange(_ notification: Notification) {
+        selection.changed(transient: false)
+    }
     
     // MARK: Property observers
     
