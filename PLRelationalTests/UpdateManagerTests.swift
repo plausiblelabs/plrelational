@@ -583,6 +583,38 @@ class UpdateManagerTests: DBTestCase {
         
         XCTAssertEqual(observedStates, [.idle, .pending, .running, .idle])
     }
+    
+    func testStatesWithQuery() {
+        let r = MakeRelation(["n"], [1], [2], [3])
+        
+        let runloop = CFRunLoopGetCurrent()!
+        let manager = UpdateManager.currentInstance
+        
+        XCTAssertEqual(manager.state, .idle)
+        
+        let remover = manager.addStateObserver({ _ in runloop.async({ CFRunLoopStop(runloop) }) })
+        
+        var didRun = false
+        r.asyncAllRows({ result in
+            XCTAssertEqual(manager.state, .running)
+            
+            XCTAssertNotNil(result.ok)
+            XCTAssertNil(result.err)
+            XCTAssertEqual(result.ok, [["n": 1], ["n": 2], ["n": 3]])
+            CFRunLoopStop(runloop)
+            didRun = true
+        })
+        XCTAssertEqual(manager.state, .pending)
+        
+        let start = ProcessInfo.processInfo.systemUptime
+        while manager.state != .idle && ProcessInfo.processInfo.systemUptime - start < 10 {
+            CFRunLoopRunOrFail()
+        }
+        XCTAssertTrue(didRun)
+        XCTAssertEqual(manager.state, .idle)
+        
+        remover()
+    }
 }
 
 private class TestAsyncChangeObserver: AsyncRelationChangeObserver {
