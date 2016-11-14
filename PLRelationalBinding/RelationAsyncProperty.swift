@@ -47,6 +47,22 @@ extension Relation {
     }
 }
 
+public struct RelationMutationConfig<T> {
+    public let snapshot: () -> ChangeLoggingDatabaseSnapshot
+    public let update: (_ newValue: T) -> Void
+    public let commit: (_ before: ChangeLoggingDatabaseSnapshot, _ newValue: T) -> Void
+
+    public init(
+        snapshot: @escaping () -> ChangeLoggingDatabaseSnapshot,
+        update: @escaping (_ newValue: T) -> Void,
+        commit: @escaping (_ before: ChangeLoggingDatabaseSnapshot, _ newValue: T) -> Void)
+    {
+        self.snapshot = snapshot
+        self.update = update
+        self.commit = commit
+    }
+}
+
 private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
     private let config: RelationMutationConfig<T>
     private var mutableValue: T?

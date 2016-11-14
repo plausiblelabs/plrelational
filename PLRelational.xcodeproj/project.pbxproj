@@ -120,8 +120,6 @@
 		37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEEA1D1480120067870D /* PropertyTests.swift */; };
 		37A4A23A1D1DB343005CAEA5 /* PropertyOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2391D1DB343005CAEA5 /* PropertyOperations.swift */; };
 		37A4A23C1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */; };
-		37A4A23E1D1F1677005CAEA5 /* RelationProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */; };
-		37A4A2401D1F4FD9005CAEA5 /* RelationPropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */; };
 		37A4A2421D21A613005CAEA5 /* TextProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2411D21A613005CAEA5 /* TextProperty.swift */; };
 		37A4A2441D259BB7005CAEA5 /* RelationChangeParts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2431D259BB7005CAEA5 /* RelationChangeParts.swift */; };
 		37A4A2461D259DD4005CAEA5 /* RelationChangePartsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */; };
@@ -647,8 +645,6 @@
 		37A1CEEA1D1480120067870D /* PropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyTests.swift; path = PLRelationalBindingTests/PropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		37A4A2391D1DB343005CAEA5 /* PropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyOperations.swift; sourceTree = "<group>"; };
 		37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyOperationsTests.swift; path = PLRelationalBindingTests/PropertyOperationsTests.swift; sourceTree = SOURCE_ROOT; };
-		37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationProperty.swift; sourceTree = "<group>"; };
-		37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationPropertyTests.swift; path = PLRelationalBindingTests/RelationPropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		37A4A2411D21A613005CAEA5 /* TextProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextProperty.swift; sourceTree = "<group>"; };
 		37A4A2431D259BB7005CAEA5 /* RelationChangeParts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationChangeParts.swift; sourceTree = "<group>"; };
 		37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationChangePartsTests.swift; path = PLRelationalBindingTests/RelationChangePartsTests.swift; sourceTree = SOURCE_ROOT; };
@@ -1313,8 +1309,6 @@
 				37A1CEEA1D1480120067870D /* PropertyTests.swift */,
 				37A4A2391D1DB343005CAEA5 /* PropertyOperations.swift */,
 				37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */,
-				37A4A23D1D1F1677005CAEA5 /* RelationProperty.swift */,
-				37A4A23F1D1F4FD9005CAEA5 /* RelationPropertyTests.swift */,
 				376136921CF11C8D00F572C5 /* CommonValue.swift */,
 				37A4A2911D357D00005CAEA5 /* Async Property */,
 				37CA0EF41D8F673F00843A1F /* Collection Properties */,
@@ -2379,7 +2373,6 @@
 				37CA0EF31D8F673500843A1F /* CollectionElement.swift in Sources */,
 				37A4A2831D307AD1005CAEA5 /* ChangeHandler.swift in Sources */,
 				372707BA1CFE240E00710C80 /* TreeProperty.swift in Sources */,
-				37A4A23E1D1F1677005CAEA5 /* RelationProperty.swift in Sources */,
 				372707B71CFE240E00710C80 /* CommonValue.swift in Sources */,
 				37A4A2441D259BB7005CAEA5 /* RelationChangeParts.swift in Sources */,
 				372707B91CFE240E00710C80 /* RelationArrayProperty.swift in Sources */,
@@ -2411,7 +2404,6 @@
 				37A4A2A11D35B0B7005CAEA5 /* RelationSignalTests.swift in Sources */,
 				372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */,
 				37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */,
-				37A4A2401D1F4FD9005CAEA5 /* RelationPropertyTests.swift in Sources */,
 				37941D8E1DB8191200F5508F /* AsyncPropertyOperationsTests.swift in Sources */,
 				372707D81CFE25D400710C80 /* RelationTreePropertyTests.swift in Sources */,
 				37A4A23C1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift in Sources */,
