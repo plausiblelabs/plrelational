@@ -212,11 +212,11 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
 
     private func arrayChanged(_ arrayChanges: [ArrayChange<E>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : []
-        
-        outlineView.beginUpdates()
 
         var rowToSelectAndEdit: Int?
         
+        outlineView.beginUpdates()
+
         // Record changes that were made to the array relative to its previous state
         for change in arrayChanges {
             switch change {

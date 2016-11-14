@@ -66,6 +66,10 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
     /// Whether to animate insert/delete changes with a fade.
     public var animateChanges = false
 
+    /// Whether to select and enter edit mode for the cell that is inserted next.  This flag will
+    /// be unset automatically after the cell is selected/edited.
+    public var selectAndEditNextInsertedCell = false
+
     public init(model: TableViewModel<C, E>, tableView: NSTableView) {
         self.model = model
         self.tableView = tableView
@@ -139,9 +143,11 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
     
     private func arrayChanged(_ arrayChanges: [ArrayChange<E>]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : []
+
+        var rowToSelectAndEdit: Int?
         
         tableView.beginUpdates()
-        
+
         // Record changes that were made to the array relative to its previous state
         for change in arrayChanges {
             switch change {
@@ -150,6 +156,10 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
                 
             case let .insert(index):
                 let rows = IndexSet(integer: index)
+                if selectAndEditNextInsertedCell {
+                    rowToSelectAndEdit = index
+                    selectAndEditNextInsertedCell = false
+                }
                 tableView.insertRows(at: rows, withAnimation: animation)
                 
             case let .delete(index):
@@ -170,6 +180,22 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
         }
         
         tableView.endUpdates()
+        
+        if let row = rowToSelectAndEdit {
+            // Select the newly inserted row
+            tableView.selectRowIndexes(IndexSet(integer: row), byExtendingSelection: false)
+            
+            // Give focus to the text field in the newly inserted row
+            if let rowView = tableView.view(atColumn: 0, row: row, makeIfNecessary: false) {
+                if let cellView = rowView as? NSTableCellView {
+                    if let textField = cellView.textField {
+                        if let window = cellView.window {
+                            window.makeFirstResponder(textField)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
