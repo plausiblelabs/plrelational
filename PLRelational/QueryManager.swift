@@ -40,30 +40,3 @@ open class QueryManager {
         })
     }
 }
-
-/// A per-thread version of QueryManager which automatically executes registered queries on the next runloop cycle.
-public final class RunloopQueryManager: QueryManager, PerThreadInstance {
-    fileprivate var executionTimer: CFRunLoopTimer?
-    
-    public override func registerQuery(_ relation: Relation, callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
-        super.registerQuery(relation, callback: callback)
-        
-        if executionTimer == nil {
-            executionTimer = CFRunLoopTimerCreateWithHandler(nil, 0, 0, 0, 0, { _ in
-                self.execute()
-            })
-            CFRunLoopAddTimer(CFRunLoopGetCurrent(), executionTimer, CFRunLoopMode.commonModes)
-        }
-    }
-    
-    public func registerQuery(_ relation: Relation, callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
-        registerQuery(relation, callback: DispatchContextWrapped(context: CFRunLoopGetCurrent(), wrapped: callback))
-    }
-    
-    public override func execute() {
-        CFRunLoopTimerInvalidate(executionTimer)
-        executionTimer = nil
-        
-        super.execute()
-    }
-}
