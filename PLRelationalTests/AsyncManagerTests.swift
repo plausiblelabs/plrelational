@@ -7,7 +7,7 @@ import XCTest
 import PLRelational
 
 
-class UpdateManagerTests: DBTestCase {
+class AsyncManagerTests: DBTestCase {
     func testAsyncUpdate() {
         let sqliteDB = makeDB().db
         _ = sqliteDB.getOrCreateRelation("n", scheme: ["n"]).ok!
@@ -70,8 +70,8 @@ class UpdateManagerTests: DBTestCase {
         let triggerRelation = TriggerRelation()
         triggerRelation.onGetRowsCallback = {
             DispatchQueue.main.sync(execute: {
-                UpdateManager.currentInstance.registerAdd(r, row: ["n": 2])
-                UpdateManager.currentInstance.registerAdd(r, row: ["n": 5])
+                AsyncManager.currentInstance.registerAdd(r, row: ["n": 2])
+                AsyncManager.currentInstance.registerAdd(r, row: ["n": 5])
             })
             triggerRelation.onGetRowsCallback = {}
         }
@@ -561,23 +561,23 @@ class UpdateManagerTests: DBTestCase {
         
         let observer = TestAsyncContentCoalescedObserver()
         let remover = r.addAsyncObserver(observer, postprocessor: {
-            XCTAssertEqual(UpdateManager.currentInstance.state, .idle)
+            XCTAssertEqual(AsyncManager.currentInstance.state, .idle)
             return $0
         })
         
-        var observedStates: [UpdateManager.State] = [UpdateManager.currentInstance.state]
-        let stateObserverRemover = UpdateManager.currentInstance.addStateObserver({
+        var observedStates: [AsyncManager.State] = [AsyncManager.currentInstance.state]
+        let stateObserverRemover = AsyncManager.currentInstance.addStateObserver({
             observedStates.append($0)
         })
         
-        XCTAssertEqual(UpdateManager.currentInstance.state, .idle)
+        XCTAssertEqual(AsyncManager.currentInstance.state, .idle)
         
         r.asyncAdd(["n": 1])
-        XCTAssertEqual(UpdateManager.currentInstance.state, .pending)
+        XCTAssertEqual(AsyncManager.currentInstance.state, .pending)
         
         CFRunLoopRunOrFail()
         
-        XCTAssertEqual(UpdateManager.currentInstance.state, .idle)
+        XCTAssertEqual(AsyncManager.currentInstance.state, .idle)
         remover()
         stateObserverRemover()
         
@@ -588,7 +588,7 @@ class UpdateManagerTests: DBTestCase {
         let r = MakeRelation(["n"], [1], [2], [3])
         
         let runloop = CFRunLoopGetCurrent()!
-        let manager = UpdateManager.currentInstance
+        let manager = AsyncManager.currentInstance
         
         XCTAssertEqual(manager.state, .idle)
         
@@ -644,8 +644,8 @@ class UpdateManagerTests: DBTestCase {
         
         remover()
         
-        while UpdateManager.currentInstance.state != .idle {
-            let remover = UpdateManager.currentInstance.addStateObserver({ _ in CFRunLoopStop(CFRunLoopGetCurrent()) })
+        while AsyncManager.currentInstance.state != .idle {
+            let remover = AsyncManager.currentInstance.addStateObserver({ _ in CFRunLoopStop(CFRunLoopGetCurrent()) })
             CFRunLoopRunOrFail()
             remover()
         }

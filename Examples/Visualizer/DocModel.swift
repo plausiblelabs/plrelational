@@ -31,8 +31,8 @@ class DocModel {
             orderAttr: DB.DocItem.Order.a,
             tag: Box(DocOutlineSectionID.relations))
         
-        // Observe the UpdateManager state and handle enqueued selection changes
-        let stateObserverRemover = UpdateManager.currentInstance.addStateObserver({
+        // Observe the AsyncManager state and handle enqueued selection changes
+        let stateObserverRemover = AsyncManager.currentInstance.addStateObserver({
             if $0 == .idle {
                 if let path = self.pendingSelectionPath {
                     // Update the database with the enqueued selection change

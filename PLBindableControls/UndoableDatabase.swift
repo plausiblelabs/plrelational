@@ -79,7 +79,7 @@ public class UndoableDatabase {
                 // An alternative approach would be to await completion of the original application of
                 // `transactionFunc`, create a snapshot, and then use that snapshot for future "forward"
                 // operations when registering the change with UndoManager.  This approach works as long
-                // as we assume that no other operations will be queued up while UpdateManager is busy,
+                // as we assume that no other operations will be queued up while AsyncManager is busy,
                 // which is currently a valid assumption.
                 transactionFunc()
             },

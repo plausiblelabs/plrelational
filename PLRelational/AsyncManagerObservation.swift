@@ -39,7 +39,7 @@ public protocol AsyncRelationChangeObserver {
     func relationDidChange(_ relation: Relation)
 }
 
-extension UpdateManager {
+extension AsyncManager {
     public func observe(_ relation: Relation, observer: AsyncRelationChangeCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
         class ShimObserver: AsyncRelationChangeObserver {
             let coalescedObserver: DispatchContextWrapped<AsyncRelationChangeCoalescedObserver>
@@ -85,12 +85,12 @@ public protocol AsyncRelationChangeCoalescedObserver {
 }
 
 public extension Relation {
-    func addAsyncObserver(_ observer: AsyncRelationChangeObserver) -> UpdateManager.ObservationRemover {
-        return UpdateManager.currentInstance.observe(self, observer: observer)
+    func addAsyncObserver(_ observer: AsyncRelationChangeObserver) -> AsyncManager.ObservationRemover {
+        return AsyncManager.currentInstance.observe(self, observer: observer)
     }
     
-    func addAsyncObserver(_ observer: AsyncRelationChangeCoalescedObserver) -> UpdateManager.ObservationRemover {
-        return UpdateManager.currentInstance.observe(self, observer: observer)
+    func addAsyncObserver(_ observer: AsyncRelationChangeCoalescedObserver) -> AsyncManager.ObservationRemover {
+        return AsyncManager.currentInstance.observe(self, observer: observer)
     }
 }
 
@@ -101,7 +101,7 @@ public protocol AsyncRelationContentObserver {
     func relationDidChange(_ relation: Relation)
 }
 
-extension UpdateManager {
+extension AsyncManager {
     public func observe<T: AsyncRelationContentCoalescedObserver>(_ relation: Relation, observer: T, context: DispatchContext? = nil, postprocessor: @escaping (Set<Row>) -> T.PostprocessingOutput) -> ObservationRemover {
         
         let wrappedObserver = DispatchContextWrapped(context: context ?? defaultObserverDispatchContext(), wrapped: observer)
@@ -119,26 +119,26 @@ public protocol AsyncRelationContentCoalescedObserver {
 
 
 public extension Relation {
-    func addAsyncObserver(_ observer: AsyncRelationContentObserver) -> UpdateManager.ObservationRemover {
-        return UpdateManager.currentInstance.observe(self, observer: observer)
+    func addAsyncObserver(_ observer: AsyncRelationContentObserver) -> AsyncManager.ObservationRemover {
+        return AsyncManager.currentInstance.observe(self, observer: observer)
     }
     
     /// If desired, this method can be used to supply a postprocessor function which runs in the background after the rows
     /// are accumulated but before results are sent to the observer. This postprocessor can, for example, sort the rows and
     /// produce an array which is then passed to the observer.
-    func addAsyncObserver<T: AsyncRelationContentCoalescedObserver>(_ observer: T, postprocessor: @escaping (Set<Row>) -> T.PostprocessingOutput) -> UpdateManager.ObservationRemover {
-        return UpdateManager.currentInstance.observe(self, observer: observer, postprocessor: postprocessor)
+    func addAsyncObserver<T: AsyncRelationContentCoalescedObserver>(_ observer: T, postprocessor: @escaping (Set<Row>) -> T.PostprocessingOutput) -> AsyncManager.ObservationRemover {
+        return AsyncManager.currentInstance.observe(self, observer: observer, postprocessor: postprocessor)
     }
     
     /// This method may be used when the observer just wants a raw set of rows to be delivered, without any postprocessing.
-    func addAsyncObserver<T: AsyncRelationContentCoalescedObserver>(_ observer: T) -> UpdateManager.ObservationRemover where T.PostprocessingOutput == Set<Row> {
-        return UpdateManager.currentInstance.observe(self, observer: observer, postprocessor: { $0 })
+    func addAsyncObserver<T: AsyncRelationContentCoalescedObserver>(_ observer: T) -> AsyncManager.ObservationRemover where T.PostprocessingOutput == Set<Row> {
+        return AsyncManager.currentInstance.observe(self, observer: observer, postprocessor: { $0 })
     }
 }
 
 public extension Relation {
     func asyncUpdate(_ query: SelectExpression, newValues: Row) {
-        UpdateManager.currentInstance.registerUpdate(self, query: query, newValues: newValues)
+        AsyncManager.currentInstance.registerUpdate(self, query: query, newValues: newValues)
     }
 }
 

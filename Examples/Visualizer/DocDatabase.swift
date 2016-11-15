@@ -202,7 +202,7 @@ class DocDatabase {
     
     /// Resolves to true when the underlying transactional database is busy updating relations.
     var isBusy: Bool {
-        return UpdateManager.currentInstance.state != .idle
+        return AsyncManager.currentInstance.state != .idle
     }
     
     /// Resolves to true when the underlying transactional database is *not* busy updating relations, i.e.,
@@ -725,7 +725,7 @@ class DocDatabase {
 
         // XXX: Wait for async updates to finish before we continue
         let runloop = CFRunLoopGetCurrent()
-        let stateObserverRemover = UpdateManager.currentInstance.addStateObserver({
+        let stateObserverRemover = AsyncManager.currentInstance.addStateObserver({
             if $0 == .idle {
                 CFRunLoopStop(runloop)
             }

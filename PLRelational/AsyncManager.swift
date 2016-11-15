@@ -6,7 +6,7 @@
 import Foundation
 
 
-public final class UpdateManager: PerThreadInstance {
+public final class AsyncManager: PerThreadInstance {
     public typealias ObservationRemover = (Void) -> Void
     
     private var pendingActions: [Action] = []
@@ -21,13 +21,13 @@ public final class UpdateManager: PerThreadInstance {
     }
     
     public enum State {
-        /// Nothing is happening, no updates have been registered.
+        /// Nothing is happening, no actionss have been registered.
         case idle
         
-        /// Updates have been registered but are not yet running.
+        /// Actions have been registered but are not yet running.
         case pending
         
-        /// Updates are actively running.
+        /// Actions are actively running.
         case running
     }
     
@@ -80,7 +80,7 @@ public final class UpdateManager: PerThreadInstance {
     }
     
     /// Register an observer for a Relation. The observer will receive all changes made to the relation
-    /// through the UpdateManager.
+    /// through the AsyncManager.
     public func observe(_ relation: Relation, observer: AsyncRelationChangeObserver, context: DispatchContext? = nil) -> ObservationRemover {
         guard let obj = asObject(relation) else { return {} }
         
@@ -95,7 +95,7 @@ public final class UpdateManager: PerThreadInstance {
         }
     }
     
-    /// Register an observer for a Relation. When the Relation is changed through the UpdateManager,
+    /// Register an observer for a Relation. When the Relation is changed through the AsyncManager,
     /// the observer receives the Relation's new contents.
     public func observe(_ relation: Relation, observer: AsyncRelationContentObserver, context: DispatchContext? = nil) -> ObservationRemover {
         guard let obj = asObject(relation) else { return {} }
@@ -183,14 +183,14 @@ public final class UpdateManager: PerThreadInstance {
     }
     
     fileprivate func executeBody() {
-        // Apply all pending updates asynchronously. Update work is done in the background, with callbacks onto
+        // Apply all pending actions asynchronously. Work is done in the background, with callbacks onto
         // this runloop for synchronization and notifying observers.
-        let updates = pendingActions
+        let actions = pendingActions
         pendingActions = []
         
         let observedInfo = self.observedInfo
         
-        // Run updates in the background.
+        // Run actions in the background.
         DispatchQueue.global().async(execute: {
             // Walk through all the observers. Observe changes on all relevant variables and update
             // observer derivatives with those changes as they come in. Also locate all
@@ -228,10 +228,10 @@ public final class UpdateManager: PerThreadInstance {
                 db.beginTransaction()
             }
             
-            // Apply the actual updates to the relations.
-            for update in updates {
+            // Apply the actual updates to the relations. Ignore queries.
+            for action in actions {
                 let error: RelationError?
-                switch update {
+                switch action {
                 case .update(let relation, let query, let newValues):
                     var mutableRelation = relation
                     let result = mutableRelation.update(query, newValues: newValues)
@@ -350,8 +350,8 @@ public final class UpdateManager: PerThreadInstance {
             }
             
             // Make any requested queries.
-            for update in updates {
-                if case .query(let relation, let callback) = update {
+            for action in actions {
+                if case .query(let relation, let callback) = action {
                     doneGroup.enter()
                     queryManager.registerQuery(relation, callback: DirectDispatchContext().wrap({ result in
                         callback.withWrapped({
@@ -375,8 +375,8 @@ public final class UpdateManager: PerThreadInstance {
             // when all the iteration above is complete.
             doneGroup.notify(queue: DispatchQueue.global(), execute: {
                 self.runloop.async({
-                    // If new pending updates came in while we were doing our thing, then go back to the top
-                    // and start over, applying those updates too.
+                    // If new pending actions came in while we were doing our thing, then go back to the top
+                    // and start over, performing those actions too.
                     if !self.pendingActions.isEmpty {
                         // All content observers currently being worked on need a didChange followed by a willChange
                         // so that they know they're getting new content, not additional content.
@@ -424,7 +424,7 @@ public final class UpdateManager: PerThreadInstance {
     }
 }
 
-extension UpdateManager {
+extension AsyncManager {
     fileprivate struct QueryManager {
         var pendingQueries: [(Relation, DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>)] = []
         
@@ -449,7 +449,7 @@ extension UpdateManager {
     }
 }
 
-extension UpdateManager {
+extension AsyncManager {
     fileprivate enum Action {
         case update(Relation, SelectExpression, Row)
         case add(MutableRelation, Row)
@@ -489,10 +489,10 @@ extension UpdateManager {
 
 public extension MutableRelation {
     func asyncAdd(_ row: Row) {
-        UpdateManager.currentInstance.registerAdd(self, row: row)
+        AsyncManager.currentInstance.registerAdd(self, row: row)
     }
     
     func asyncDelete(_ query: SelectExpression) {
-        UpdateManager.currentInstance.registerDelete(self, query: query)
+        AsyncManager.currentInstance.registerDelete(self, query: query)
     }
 }

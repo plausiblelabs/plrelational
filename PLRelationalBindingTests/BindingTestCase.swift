@@ -68,21 +68,21 @@ class BindingTestCase: XCTestCase {
         return TreePath(parent: parent, index: index)
     }
 
-    /// Synchronously waits for UpdateManager to process the given work and return to an `idle` state.
+    /// Synchronously waits for AsyncManager to process the given work and return to an `idle` state.
     func awaitCompletion(_ f: () -> Void) {
         f()
         awaitIdle()
     }
     
-    /// Synchronously waits for UpdateManager to return to an `idle` state.
+    /// Synchronously waits for AsyncManager to return to an `idle` state.
     func awaitIdle() {
-        if UpdateManager.currentInstance.state == .idle {
+        if AsyncManager.currentInstance.state == .idle {
             return
         }
         
         let runloop = CFRunLoopGetCurrent()
         var wentIdle = false
-        let stateObserverRemover = UpdateManager.currentInstance.addStateObserver({
+        let stateObserverRemover = AsyncManager.currentInstance.addStateObserver({
             if $0 == .idle {
                 wentIdle = true
                 CFRunLoopStop(runloop)

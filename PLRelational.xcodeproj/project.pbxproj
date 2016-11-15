@@ -236,12 +236,12 @@
 		C2B6E26C1D805E230039923C /* Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E26B1D805E230039923C /* Crypto.swift */; };
 		C2B6E26E1D806B390039923C /* PlistDirectoryRelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E26D1D806B390039923C /* PlistDirectoryRelationTests.swift */; };
 		C2B6E2701D80AA6A0039923C /* NSURLConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E26F1D80AA6A0039923C /* NSURLConvenience.swift */; };
-		C2BA22981D3FD65F00DCCE72 /* UpdateManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */; };
+		C2BA22981D3FD65F00DCCE72 /* AsyncManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22971D3FD65F00DCCE72 /* AsyncManagerTests.swift */; };
 		C2BA229A1D3FD70200DCCE72 /* RelationObservationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */; };
 		C2C2586A1D0203CC0066EB82 /* RelationOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C258691D0203CC0066EB82 /* RelationOperators.swift */; };
-		C2C6308B1D35553F00AD44C1 /* UpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C6308A1D35553F00AD44C1 /* UpdateManager.swift */; };
+		C2C6308B1D35553F00AD44C1 /* AsyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C6308A1D35553F00AD44C1 /* AsyncManager.swift */; };
 		C2C6308D1D355B7500AD44C1 /* PerThreadInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C6308C1D355B7500AD44C1 /* PerThreadInstance.swift */; };
-		C2CA46191D3FF1870082E2D2 /* UpdateManagerObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CA46181D3FF1870082E2D2 /* UpdateManagerObservation.swift */; };
+		C2CA46191D3FF1870082E2D2 /* AsyncManagerObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CA46181D3FF1870082E2D2 /* AsyncManagerObservation.swift */; };
 		C2CE513C1D4693DC0011C554 /* InlineMutableData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CE513B1D4693DC0011C554 /* InlineMutableData.swift */; };
 		C2CE513E1D469EF10011C554 /* InlineMutableDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CE513D1D469EF10011C554 /* InlineMutableDataTests.swift */; };
 		C2CFC3591D7F336F00389373 /* PlistFileRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */; };
@@ -779,12 +779,12 @@
 		C2B6E26B1D805E230039923C /* Crypto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Crypto.swift; sourceTree = "<group>"; };
 		C2B6E26D1D806B390039923C /* PlistDirectoryRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistDirectoryRelationTests.swift; path = PLRelationalTests/PlistDirectoryRelationTests.swift; sourceTree = SOURCE_ROOT; };
 		C2B6E26F1D80AA6A0039923C /* NSURLConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSURLConvenience.swift; sourceTree = "<group>"; };
-		C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UpdateManagerTests.swift; path = PLRelationalTests/UpdateManagerTests.swift; sourceTree = SOURCE_ROOT; };
+		C2BA22971D3FD65F00DCCE72 /* AsyncManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncManagerTests.swift; path = PLRelationalTests/AsyncManagerTests.swift; sourceTree = SOURCE_ROOT; };
 		C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationObservationTests.swift; path = PLRelationalTests/RelationObservationTests.swift; sourceTree = SOURCE_ROOT; };
 		C2C258691D0203CC0066EB82 /* RelationOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationOperators.swift; sourceTree = "<group>"; };
-		C2C6308A1D35553F00AD44C1 /* UpdateManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateManager.swift; sourceTree = "<group>"; };
+		C2C6308A1D35553F00AD44C1 /* AsyncManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncManager.swift; sourceTree = "<group>"; };
 		C2C6308C1D355B7500AD44C1 /* PerThreadInstance.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PerThreadInstance.swift; sourceTree = "<group>"; };
-		C2CA46181D3FF1870082E2D2 /* UpdateManagerObservation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateManagerObservation.swift; sourceTree = "<group>"; };
+		C2CA46181D3FF1870082E2D2 /* AsyncManagerObservation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncManagerObservation.swift; sourceTree = "<group>"; };
 		C2CE513B1D4693DC0011C554 /* InlineMutableData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InlineMutableData.swift; sourceTree = "<group>"; };
 		C2CE513D1D469EF10011C554 /* InlineMutableDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = InlineMutableDataTests.swift; path = PLRelationalTests/InlineMutableDataTests.swift; sourceTree = SOURCE_ROOT; };
 		C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistFileRelation.swift; sourceTree = "<group>"; };
@@ -1075,9 +1075,9 @@
 		374AE9671D91B5F5007D1366 /* Update Management */ = {
 			isa = PBXGroup;
 			children = (
-				C2C6308A1D35553F00AD44C1 /* UpdateManager.swift */,
-				C2CA46181D3FF1870082E2D2 /* UpdateManagerObservation.swift */,
-				C2BA22971D3FD65F00DCCE72 /* UpdateManagerTests.swift */,
+				C2C6308A1D35553F00AD44C1 /* AsyncManager.swift */,
+				C2CA46181D3FF1870082E2D2 /* AsyncManagerObservation.swift */,
+				C2BA22971D3FD65F00DCCE72 /* AsyncManagerTests.swift */,
 			);
 			name = "Update Management";
 			sourceTree = "<group>";
@@ -2602,7 +2602,7 @@
 				C2B6E2691D804D5E0039923C /* PlistDirectoryRelation.swift in Sources */,
 				C23AAF4E1CF8E3F8009E28E0 /* SequenceFind.swift in Sources */,
 				C22877431CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift in Sources */,
-				C2C6308B1D35553F00AD44C1 /* UpdateManager.swift in Sources */,
+				C2C6308B1D35553F00AD44C1 /* AsyncManager.swift in Sources */,
 				C2B6E2701D80AA6A0039923C /* NSURLConvenience.swift in Sources */,
 				C204A1541D088B6300DF297F /* ObjectMap.swift in Sources */,
 				C277E8031CDB9D3400B7B8F6 /* GeneratorConcat.swift in Sources */,
@@ -2625,7 +2625,7 @@
 				C2B53CBB1D197814006B6278 /* RWLock.swift in Sources */,
 				C22AC5241D1061FB00224091 /* Row.swift in Sources */,
 				C277E8121CE4FAD400B7B8F6 /* SelectExpressionOperators.swift in Sources */,
-				C2CA46191D3FF1870082E2D2 /* UpdateManagerObservation.swift in Sources */,
+				C2CA46191D3FF1870082E2D2 /* AsyncManagerObservation.swift in Sources */,
 				C2B6E26C1D805E230039923C /* Crypto.swift in Sources */,
 				C2CFC35B1D7F36DE00389373 /* RowPlist.swift in Sources */,
 				C29C28361D872BEA001E20E7 /* UnsafePointerReadWrite.swift in Sources */,
@@ -2670,7 +2670,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C2BA22981D3FD65F00DCCE72 /* UpdateManagerTests.swift in Sources */,
+				C2BA22981D3FD65F00DCCE72 /* AsyncManagerTests.swift in Sources */,
 				C2BA229A1D3FD70200DCCE72 /* RelationObservationTests.swift in Sources */,
 				C2B6E26E1D806B390039923C /* PlistDirectoryRelationTests.swift in Sources */,
 				C2CE513E1D469EF10011C554 /* InlineMutableDataTests.swift in Sources */,
