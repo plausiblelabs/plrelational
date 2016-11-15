@@ -297,7 +297,7 @@ class EditorView: BackgroundView {
                 let textProperty = relation
                     .select(idAttr *== rowID)
                     .project(attribute)
-                    .asyncProperty(initialValue: initialStringValue, { $0.oneValueOrNil($1)?.description ?? "" })
+                    .property(initialValue: initialStringValue, { $0.oneValueOrNil($1)?.description ?? "" })
                 return .asyncReadOnly(textProperty)
             }
         )

@@ -79,7 +79,7 @@ class DocModel {
     /// The current history item for the active tab.
     lazy var activeTabCurrentHistoryItem: AsyncReadableProperty<HistoryItem?> = {
         return self.db.selectedTabCurrentHistoryItem
-            .asyncProperty{
+            .property{
                 $0.oneValueFromRow($1, { row in
                     return HistoryItem.fromRow(row)
                 })

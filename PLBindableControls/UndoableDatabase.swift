@@ -17,7 +17,7 @@ public class UndoableDatabase {
         self.undoManager = undoManager
     }
     
-    public func performUndoableAsyncAction(_ name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: @escaping (Void) -> Void) {
+    public func performUndoableAction(_ name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: @escaping (Void) -> Void) {
         let before = before ?? db.takeSnapshot()
         transactionFunc()
         
@@ -42,27 +42,26 @@ public class UndoableDatabase {
         )
     }
 
-    public func asyncBidiProperty<T>(action: String, initialValue: T?, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
-        let config = asyncMutationConfig(action, update)
-        return config.asyncProperty(initialValue: initialValue, signal: signal)
+    public func bidiProperty<T>(action: String, initialValue: T?, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
+        let config = mutationConfig(action, update)
+        return config.property(initialValue: initialValue, signal: signal)
     }
 
-    public func asyncBidiProperty<T>(action: String, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
-        let config = asyncMutationConfig(action, update)
-        return config.asyncProperty(signal: signal)
+    public func bidiProperty<T>(action: String, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
+        let config = mutationConfig(action, update)
+        return config.property(signal: signal)
     }
     
-    private func asyncMutationConfig<T>(_ action: String, _ update: @escaping (T) -> Void) -> RelationMutationConfig<T> {
+    private func mutationConfig<T>(_ action: String, _ update: @escaping (T) -> Void) -> RelationMutationConfig<T> {
         return RelationMutationConfig(
             snapshot: {
                 return self.db.takeSnapshot()
             },
             update: { newValue in
-                // TODO: Need explicit transaction here
                 update(newValue)
             },
             commit: { before, newValue in
-                self.performUndoableAsyncAction(action, before: before, {
+                self.performUndoableAction(action, before: before, {
                     update(newValue)
                 })
             }

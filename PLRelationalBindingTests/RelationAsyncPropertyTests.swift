@@ -27,7 +27,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         }
 
         let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
-        let property = nameRelation.asyncProperty{ $0.oneString($1) }
+        let property = nameRelation.property{ $0.oneString($1) }
         let removal = property.signal.observe(SignalObserver(
             valueWillChange: {
                 willChangeCount += 1
@@ -97,7 +97,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         }
         
         let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
-        let property = nameRelation.asyncProperty(initialValue: "cow", { $0.oneString($1) })
+        let property = nameRelation.property(initialValue: "cow", { $0.oneString($1) })
         let removal = property.signal.observe(SignalObserver(
             valueWillChange: {
                 willChangeCount += 1
@@ -171,7 +171,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         
         // Create an async r/w property from the relation
         let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
-        let nameProperty = nameRelation.asyncProperty(config: nameConfig, { $0.signal{ $0.oneString($1) } })
+        let nameProperty = nameRelation.property(config: nameConfig, { $0.signal{ $0.oneString($1) } })
         let nameObserverRemoval = nameProperty.signal.observe(SignalObserver(
             valueWillChange: {
                 nameWillChangeCount += 1

@@ -156,15 +156,15 @@ class DocDatabase {
         if isBusy {
             print("WARNING: Performing action `\(name)` while database is busy; are you sure this is safe?")
         }
-        undoableDB.performUndoableAsyncAction(name, before: before, transactionFunc)
+        undoableDB.performUndoableAction(name, before: before, transactionFunc)
     }
     
     func undoableBidiProperty<T>(action: String, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
-        return undoableDB.asyncBidiProperty(action: action, signal: signal, update: update)
+        return undoableDB.bidiProperty(action: action, signal: signal, update: update)
     }
     
     func undoableBidiProperty<T>(action: String, initialValue: T?, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
-        return undoableDB.asyncBidiProperty(action: action, initialValue: initialValue, signal: signal, update: update)
+        return undoableDB.bidiProperty(action: action, initialValue: initialValue, signal: signal, update: update)
     }
     
     /// Saves the database to a new location, overwriting and/or deleting any existing files as needed.
@@ -556,7 +556,7 @@ class DocDatabase {
         return self.objects
             .select(DB.Object.ID.a *== objectID.relationValue)
             .project(DB.Object.Name.a)
-            .asyncProperty(initialValue: initialValue, { $0.oneStringOrNil($1) })
+            .property(initialValue: initialValue, { $0.oneStringOrNil($1) })
     }
     
     func objectNameReadWriteProperty(objectID: ObjectID, initialValue: String?) -> AsyncReadWriteProperty<String?> {
