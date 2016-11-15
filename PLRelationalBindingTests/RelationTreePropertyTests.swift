@@ -43,13 +43,6 @@ class RelationTreePropertyTests: BindingTestCase {
         addCollection(6, name: "Child2", parentID: 2, order: 2.0)
         addCollection(7, name: "Group2", parentID: nil, order: 2.0)
         
-        let runloop = CFRunLoopGetCurrent()
-        
-        func awaitCompletion(f: () -> Void) {
-            f()
-            CFRunLoopRun()
-        }
-        
         var willChangeCount = 0
         var didChangeCount = 0
         var changes: [Change] = []
@@ -64,7 +57,6 @@ class RelationTreePropertyTests: BindingTestCase {
             },
             valueDidChange: {
                 didChangeCount += 1
-                CFRunLoopStop(runloop)
             }
         ))
         
@@ -89,8 +81,6 @@ class RelationTreePropertyTests: BindingTestCase {
         XCTAssertEqual(didChangeCount, 1)
         // TODO
         //XCTAssertEqual(changes, [])
-        
-        removal()
     }
     
     func testInsertMoveDelete() {
@@ -100,13 +90,6 @@ class RelationTreePropertyTests: BindingTestCase {
         let db = TransactionalDatabase(loggingDB)
         let r = db["collection"]
 
-        let runloop = CFRunLoopGetCurrent()
-        
-        func awaitCompletion(f: () -> Void) {
-            f()
-            CFRunLoopRun()
-        }
-        
         var willChangeCount = 0
         var didChangeCount = 0
         var changes: [Change] = []
@@ -121,7 +104,6 @@ class RelationTreePropertyTests: BindingTestCase {
             },
             valueDidChange: {
                 didChangeCount += 1
-                CFRunLoopStop(runloop)
             }
         ))
 

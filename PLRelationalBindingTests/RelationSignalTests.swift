@@ -19,13 +19,6 @@ class RelationSignalTests: BindingTestCase {
         var didChangeCount = 0
         var changes: [String] = []
         
-        let runloop = CFRunLoopGetCurrent()
-
-        func awaitCompletion(_ f: () -> Void) {
-            f()
-            CFRunLoopRun()
-        }
-        
         let signal = r.select(Attribute("id") *== 1).project(["name"]).signal{ $0.oneString($1) }
         _ = signal.observe(SignalObserver(
             valueWillChange: {
@@ -34,7 +27,6 @@ class RelationSignalTests: BindingTestCase {
             valueChanging: { newValue, _ in changes.append(newValue) },
             valueDidChange: {
                 didChangeCount += 1
-                CFRunLoopStop(runloop)
             }
         ))
         

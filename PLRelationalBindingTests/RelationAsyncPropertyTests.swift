@@ -19,13 +19,6 @@ class RelationAsyncPropertyTests: BindingTestCase {
         var didChangeCount = 0
         var changes: [String] = []
 
-        let runloop = CFRunLoopGetCurrent()
-
-        func awaitCompletion(_ f: () -> Void) {
-            f()
-            CFRunLoopRun()
-        }
-
         let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
         let property = nameRelation.asyncProperty{ $0.oneString($1) }
         let removal = property.signal.observe(SignalObserver(
@@ -37,7 +30,6 @@ class RelationAsyncPropertyTests: BindingTestCase {
             },
             valueDidChange: {
                 didChangeCount += 1
-                CFRunLoopStop(runloop)
             }
         ))
 
@@ -89,13 +81,6 @@ class RelationAsyncPropertyTests: BindingTestCase {
         var didChangeCount = 0
         var changes: [String] = []
         
-        let runloop = CFRunLoopGetCurrent()
-        
-        func awaitCompletion(_ f: () -> Void) {
-            f()
-            CFRunLoopRun()
-        }
-        
         let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
         let property = nameRelation.asyncProperty(initialValue: "cow", { $0.oneString($1) })
         let removal = property.signal.observe(SignalObserver(
@@ -107,7 +92,6 @@ class RelationAsyncPropertyTests: BindingTestCase {
             },
             valueDidChange: {
                 didChangeCount += 1
-                CFRunLoopStop(runloop)
             }
         ))
         
@@ -144,8 +128,6 @@ class RelationAsyncPropertyTests: BindingTestCase {
         var nameDidChangeCount = 0
         var nameChanges: [String] = []
         
-        let runloop = CFRunLoopGetCurrent()
-
         func updateName(_ newValue: String) {
             r.asyncUpdate(Attribute("id") *== 1, newValues: ["name": RelationValue(newValue)])
         }
@@ -181,7 +163,6 @@ class RelationAsyncPropertyTests: BindingTestCase {
             },
             valueDidChange: {
                 nameDidChangeCount += 1
-                CFRunLoopStop(runloop)
             }
         ))
 
@@ -197,7 +178,6 @@ class RelationAsyncPropertyTests: BindingTestCase {
             },
             onUnlock: {
                 lhsUnlockCount += 1
-                CFRunLoopStop(runloop)
             }
         )
         var lhsDidSetValues: [String] = []
@@ -276,7 +256,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         XCTAssertEqual(lhsLockCount, 1)
         XCTAssertEqual(lhsUnlockCount, 0)
 
-        CFRunLoopRun()
+        awaitIdle()
         XCTAssertEqual(nameProperty.value, "")
         XCTAssertEqual(nameWillChangeCount, 1)
         XCTAssertEqual(nameDidChangeCount, 1)
@@ -305,7 +285,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         XCTAssertEqual(lhsLockCount, 2)
         XCTAssertEqual(lhsUnlockCount, 1)
 
-        CFRunLoopRun()
+        awaitIdle()
         XCTAssertEqual(nameProperty.value, "cat")
         XCTAssertEqual(nameWillChangeCount, 2)
         XCTAssertEqual(nameDidChangeCount, 2)
@@ -336,7 +316,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         XCTAssertEqual(lhsLockCount, 2)
         XCTAssertEqual(lhsUnlockCount, 2)
 
-        CFRunLoopRun()
+        awaitIdle()
         XCTAssertEqual(nameProperty.value, "lhs cat")
         XCTAssertEqual(nameWillChangeCount, 3)
         XCTAssertEqual(nameDidChangeCount, 3)
@@ -363,7 +343,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         XCTAssertEqual(lhsLockCount, 2)
         XCTAssertEqual(lhsUnlockCount, 2)
         
-        CFRunLoopRun()
+        awaitIdle()
         XCTAssertEqual(nameProperty.value, "lhs kat")
         XCTAssertEqual(nameWillChangeCount, 4)
         XCTAssertEqual(nameDidChangeCount, 4)
