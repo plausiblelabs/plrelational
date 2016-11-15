@@ -561,7 +561,7 @@ class UpdateManagerTests: DBTestCase {
         
         let observer = TestAsyncContentCoalescedObserver()
         let remover = r.addAsyncObserver(observer, postprocessor: {
-            XCTAssertEqual(UpdateManager.currentInstance.state, .running)
+            XCTAssertEqual(UpdateManager.currentInstance.state, .idle)
             return $0
         })
         
@@ -592,7 +592,7 @@ class UpdateManagerTests: DBTestCase {
         
         XCTAssertEqual(manager.state, .idle)
         
-        let remover = manager.addStateObserver({ _ in runloop.async({ CFRunLoopStop(runloop) }) })
+        let remover = manager.addStateObserver({ _ in CFRunLoopStop(runloop) })
         
         var didRun = false
         r.asyncAllRows({ result in
@@ -614,6 +614,41 @@ class UpdateManagerTests: DBTestCase {
         XCTAssertEqual(manager.state, .idle)
         
         remover()
+    }
+    
+    func testQueryInDidChangeCallback() {
+        let r = MakeRelation(["n"])
+        
+        class Observer: AsyncRelationChangeObserver {
+            func relationWillChange(_ relation: Relation) {}
+            func relationAddedRows(_ relation: Relation, rows: Set<Row>) {}
+            func relationRemovedRows(_ relation: Relation, rows: Set<Row>) {}
+            
+            func relationError(_ relation: Relation, error: RelationError) {
+                XCTFail("Got unexpected error \(error)")
+            }
+            
+            func relationDidChange(_ relation: Relation) {
+                relation.asyncAllRows({ result in
+                    XCTAssertNil(result.err)
+                    XCTAssertEqual(result.ok, [["n": 1]])
+                    CFRunLoopStop(CFRunLoopGetCurrent())
+                })
+            }
+        }
+        
+        let remover = r.addAsyncObserver(Observer())
+        
+        r.asyncAdd(["n": 1])
+        CFRunLoopRunOrFail()
+        
+        remover()
+        
+        while UpdateManager.currentInstance.state != .idle {
+            let remover = UpdateManager.currentInstance.addStateObserver({ _ in CFRunLoopStop(CFRunLoopGetCurrent()) })
+            CFRunLoopRunOrFail()
+            remover()
+        }
     }
 }
 

@@ -394,23 +394,25 @@ public final class UpdateManager: PerThreadInstance {
                         self.executeBody()
                     } else {
                         // Otherwise, terminate the execution. Reset observers and send didChange to them.
+                        var entriesWithWillChange: [(Relation, ObservedRelationInfo.ObserverEntry)] = []
                         for (observedRelationObj, info) in observedInfo {
                             info.derivative.clearVariables()
                             
                             let relation = observedRelationObj as! Relation
-                            var entriesWithWillChange: [ObservedRelationInfo.ObserverEntry] = []
                             info.observers.mutatingForEach({
                                 if $0.didSendWillChange {
                                     $0.didSendWillChange = false
-                                    entriesWithWillChange.append($0)
+                                    entriesWithWillChange.append((relation, $0))
                                 }
                             })
-                            for entry in entriesWithWillChange {
-                                entry.relationObserver?.withWrapped({ $0.relationDidChange(relation) })
-                                entry.updateObserver?.withWrapped({ $0.relationDidChange(relation) })
-                            }
                         }
+                        
                         self.state = .idle
+                        
+                        for (relation, entry) in entriesWithWillChange {
+                            entry.relationObserver?.withWrapped({ $0.relationDidChange(relation) })
+                            entry.updateObserver?.withWrapped({ $0.relationDidChange(relation) })
+                        }
                     }
                 })
             })
