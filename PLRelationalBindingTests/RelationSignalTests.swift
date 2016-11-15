@@ -19,12 +19,17 @@ class RelationSignalTests: BindingTestCase {
         var didChangeCount = 0
         var changes: [String] = []
         
-        let signal = r.select(Attribute("id") *== 1).project(["name"]).signal{ $0.oneString($1) }
+        let signal = r
+            .select(Attribute("id") *== 1)
+            .project(["name"])
+            .oneString()
         _ = signal.observe(SignalObserver(
             valueWillChange: {
                 willChangeCount += 1
             },
-            valueChanging: { newValue, _ in changes.append(newValue) },
+            valueChanging: { newValue, _ in
+                changes.append(newValue)
+            },
             valueDidChange: {
                 didChangeCount += 1
             }

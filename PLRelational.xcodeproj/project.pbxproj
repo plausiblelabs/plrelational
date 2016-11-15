@@ -113,8 +113,8 @@
 		37A1CED91D1354DD0067870D /* Property.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED81D1354DD0067870D /* Property.swift */; };
 		37A1CEDC1D1358670067870D /* CheckState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEDB1D1358670067870D /* CheckState.swift */; };
 		37A1CEDE1D1469720067870D /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEDD1D1469720067870D /* Signal.swift */; };
-		37A1CEE31D147ACA0067870D /* RelationAsTypedValue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE21D147ACA0067870D /* RelationAsTypedValue.swift */; };
-		37A1CEE51D147B0E0067870D /* RelationAsTypedValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE41D147B0E0067870D /* RelationAsTypedValueTests.swift */; };
+		37A1CEE31D147ACA0067870D /* RelationExtractTyped.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE21D147ACA0067870D /* RelationExtractTyped.swift */; };
+		37A1CEE51D147B0E0067870D /* RelationExtractTypedTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE41D147B0E0067870D /* RelationExtractTypedTests.swift */; };
 		37A1CEE71D147BD80067870D /* RelationMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE61D147BD80067870D /* RelationMutation.swift */; };
 		37A1CEE91D147C190067870D /* RelationMutationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE81D147C190067870D /* RelationMutationTests.swift */; };
 		37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEEA1D1480120067870D /* PropertyTests.swift */; };
@@ -637,8 +637,8 @@
 		37A1CED81D1354DD0067870D /* Property.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Property.swift; sourceTree = "<group>"; };
 		37A1CEDB1D1358670067870D /* CheckState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckState.swift; sourceTree = "<group>"; };
 		37A1CEDD1D1469720067870D /* Signal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Signal.swift; sourceTree = "<group>"; };
-		37A1CEE21D147ACA0067870D /* RelationAsTypedValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationAsTypedValue.swift; sourceTree = "<group>"; };
-		37A1CEE41D147B0E0067870D /* RelationAsTypedValueTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationAsTypedValueTests.swift; path = PLRelationalBindingTests/RelationAsTypedValueTests.swift; sourceTree = SOURCE_ROOT; };
+		37A1CEE21D147ACA0067870D /* RelationExtractTyped.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationExtractTyped.swift; sourceTree = "<group>"; };
+		37A1CEE41D147B0E0067870D /* RelationExtractTypedTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationExtractTypedTests.swift; path = PLRelationalBindingTests/RelationExtractTypedTests.swift; sourceTree = SOURCE_ROOT; };
 		37A1CEE61D147BD80067870D /* RelationMutation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationMutation.swift; sourceTree = "<group>"; };
 		37A1CEE81D147C190067870D /* RelationMutationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationMutationTests.swift; path = PLRelationalBindingTests/RelationMutationTests.swift; sourceTree = SOURCE_ROOT; };
 		37A1CEEA1D1480120067870D /* PropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyTests.swift; path = PLRelationalBindingTests/PropertyTests.swift; sourceTree = SOURCE_ROOT; };
@@ -1328,8 +1328,8 @@
 		37A1CEE11D147A970067870D /* Relation Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				37A1CEE21D147ACA0067870D /* RelationAsTypedValue.swift */,
-				37A1CEE41D147B0E0067870D /* RelationAsTypedValueTests.swift */,
+				37A1CEE21D147ACA0067870D /* RelationExtractTyped.swift */,
+				37A1CEE41D147B0E0067870D /* RelationExtractTypedTests.swift */,
 				37A1CEE61D147BD80067870D /* RelationMutation.swift */,
 				37A1CEE81D147C190067870D /* RelationMutationTests.swift */,
 				37A4A2431D259BB7005CAEA5 /* RelationChangeParts.swift */,
@@ -2381,7 +2381,7 @@
 				37A1CEDE1D1469720067870D /* Signal.swift in Sources */,
 				37941D8C1DB811BF00F5508F /* AsyncPropertyOperations.swift in Sources */,
 				372707BB1CFE240E00710C80 /* RelationTreeProperty.swift in Sources */,
-				37A1CEE31D147ACA0067870D /* RelationAsTypedValue.swift in Sources */,
+				37A1CEE31D147ACA0067870D /* RelationExtractTyped.swift in Sources */,
 				372707C01CFE24F600710C80 /* RelationValuePlistable.swift in Sources */,
 				37CA0EF11D8F664700843A1F /* RowCollectionElement.swift in Sources */,
 				37A4A29F1D35B09E005CAEA5 /* RelationSignal.swift in Sources */,
@@ -2394,7 +2394,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37A1CEE51D147B0E0067870D /* RelationAsTypedValueTests.swift in Sources */,
+				37A1CEE51D147B0E0067870D /* RelationExtractTypedTests.swift in Sources */,
 				372707DC1CFE267700710C80 /* DBTestCase.swift in Sources */,
 				37A4A2951D357DF2005CAEA5 /* AsyncPropertyTests.swift in Sources */,
 				37A4A2851D307AF3005CAEA5 /* ChangeHandlerTests.swift in Sources */,
