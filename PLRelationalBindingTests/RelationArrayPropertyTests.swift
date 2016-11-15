@@ -31,13 +31,6 @@ class RelationArrayPropertyTests: BindingTestCase {
         addPage(2, name: "Page2", order: 2.0)
         addPage(4, name: "Page4", order: 4.0)
         
-        let runloop = CFRunLoopGetCurrent()
-        
-        func awaitCompletion(_ f: () -> Void) {
-            f()
-            CFRunLoopRun()
-        }
-        
         var willChangeCount = 0
         var didChangeCount = 0
         var changes: [Change] = []
@@ -52,7 +45,6 @@ class RelationArrayPropertyTests: BindingTestCase {
             },
             valueDidChange: {
                 didChangeCount += 1
-                CFRunLoopStop(runloop)
             }
         ))
         
@@ -85,13 +77,6 @@ class RelationArrayPropertyTests: BindingTestCase {
         let db = TransactionalDatabase(loggingDB)
         let r = db["page"]
         
-        let runloop = CFRunLoopGetCurrent()
-        
-        func awaitCompletion(_ f: () -> Void) {
-            f()
-            CFRunLoopRun()
-        }
-        
         var willChangeCount = 0
         var didChangeCount = 0
         var changes: [Change] = []
@@ -106,7 +91,6 @@ class RelationArrayPropertyTests: BindingTestCase {
             },
             valueDidChange: {
                 didChangeCount += 1
-                CFRunLoopStop(runloop)
             }
         ))
         
@@ -277,13 +261,6 @@ class RelationArrayPropertyTests: BindingTestCase {
         addPerson(3, "Carlos")
         addPerson(4, "Bob")
         
-        let runloop = CFRunLoopGetCurrent()
-        
-        func awaitCompletion(_ f: () -> Void) {
-            f()
-            CFRunLoopRun()
-        }
-        
         var willChangeCount = 0
         var didChangeCount = 0
         var changes: [Change] = []
@@ -298,7 +275,6 @@ class RelationArrayPropertyTests: BindingTestCase {
             },
             valueDidChange: {
                 didChangeCount += 1
-                CFRunLoopStop(runloop)
             }
         ))
         
@@ -331,13 +307,6 @@ class RelationArrayPropertyTests: BindingTestCase {
         let db = TransactionalDatabase(loggingDB)
         let r = db["person"]
         
-        let runloop = CFRunLoopGetCurrent()
-        
-        func awaitCompletion(_ f: () -> Void) {
-            f()
-            CFRunLoopRun()
-        }
-        
         var willChangeCount = 0
         var didChangeCount = 0
         var changes: [Change] = []
@@ -352,7 +321,6 @@ class RelationArrayPropertyTests: BindingTestCase {
             },
             valueDidChange: {
                 didChangeCount += 1
-                CFRunLoopStop(runloop)
             }
         ))
         

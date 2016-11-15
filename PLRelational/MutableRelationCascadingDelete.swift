@@ -88,7 +88,7 @@ fileprivate class CascadingDeleter {
     
     func run() {
         let runloop = CFRunLoopGetCurrent()!
-        let updateManager = UpdateManager.currentInstance
+        let asyncManager = AsyncManager.currentInstance
         let group = DispatchGroup()
         
         let currentPendingDeletes = pendingDeletes
@@ -102,7 +102,7 @@ fileprivate class CascadingDeleter {
             let query = queries.combined(with: *||)!
             
             group.enter()
-            updateManager.registerQuery(
+            asyncManager.registerQuery(
                 relation.select(query),
                 callback: runloop.wrap({ result in
                     switch result {
@@ -136,7 +136,7 @@ fileprivate class CascadingDeleter {
                 for update in pendingUpdates {
                     group.enter()
                     var allRows: Set<Row> = []
-                    updateManager.registerQuery(
+                    asyncManager.registerQuery(
                         update.fromRelation,
                         callback: runloop.wrap({ result in
                             switch result {

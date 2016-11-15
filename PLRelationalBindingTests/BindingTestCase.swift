@@ -67,4 +67,30 @@ class BindingTestCase: XCTestCase {
         let parent = parentID.flatMap{ tree.nodeForID(RelationValue($0)) }
         return TreePath(parent: parent, index: index)
     }
+
+    /// Synchronously waits for AsyncManager to process the given work and return to an `idle` state.
+    func awaitCompletion(_ f: () -> Void) {
+        f()
+        awaitIdle()
+    }
+    
+    /// Synchronously waits for AsyncManager to return to an `idle` state.
+    func awaitIdle() {
+        if AsyncManager.currentInstance.state == .idle {
+            return
+        }
+        
+        let runloop = CFRunLoopGetCurrent()
+        var wentIdle = false
+        let stateObserverRemover = AsyncManager.currentInstance.addStateObserver({
+            if $0 == .idle {
+                wentIdle = true
+                CFRunLoopStop(runloop)
+            }
+        })
+        while !wentIdle {
+            CFRunLoopRun()
+        }
+        stateObserverRemover()
+    }
 }

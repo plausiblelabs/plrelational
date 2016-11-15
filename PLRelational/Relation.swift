@@ -157,13 +157,13 @@ extension Relation {
     /// Fetch rows and invoke a callback as they come in. Each call is passed one or more rows, or an error.
     /// If no error occurs, the sequence of calls is terminated by a final call which passes zero rows.
     public func asyncBulkRows(_ callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
-        RunloopQueryManager.currentInstance.registerQuery(self, callback: callback)
+        AsyncManager.currentInstance.registerQuery(self, callback: callback)
     }
     
     /// Fetch rows and invoke a callback as they come in. Each call is passed one or more rows, or an error.
     /// If no error occurs, the sequence of calls is terminated by a final call which passes zero rows.
     public func asyncBulkRows(_ callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
-        RunloopQueryManager.currentInstance.registerQuery(self, callback: callback)
+        AsyncManager.currentInstance.registerQuery(self, callback: DispatchContextWrapped(context: CFRunLoopGetCurrent(), wrapped: callback))
     }
     
     /// Fetch all rows and invoke a callback when complete.

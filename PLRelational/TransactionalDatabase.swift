@@ -138,7 +138,7 @@ open class TransactionalDatabase {
     }
     
     open func asyncRestoreSnapshot(_ snapshot: ChangeLoggingDatabaseSnapshot) {
-        UpdateManager.currentInstance.registerRestoreSnapshot(self, snapshot: snapshot)
+        AsyncManager.currentInstance.registerRestoreSnapshot(self, snapshot: snapshot)
     }
     
     open func transaction(_ transactionFunction: (Void) -> Void) {

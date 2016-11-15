@@ -72,14 +72,6 @@ class RelationMutationTests: BindingTestCase {
         _ = r.add(["id": 1, "name": "cat", "friendly": 1, "age": 5])
         _ = r.add(["id": 2, "name": "dog", "friendly": 0, "age": 3])
 
-        func awaitCompletion(_ f: () -> Void) {
-            f()
-            CFRunLoopRun()
-        }
-        
-        let observer = ContentCoalescedRunLoopStoppingObserver()
-        let remover = r.addAsyncObserver(observer)
-
         let name = r.project(["name"])
         let a1name = r.select(Attribute("id") *== 1).project(["name"])
         
@@ -124,8 +116,6 @@ class RelationMutationTests: BindingTestCase {
             ["id", "name", "friendly", "age"],
             [1,    "ant",  1,          8],
             [2,    "ant",  1,          8]))
-        
-        remover()
     }
     
     func testReplaceValues() {
@@ -156,14 +146,6 @@ class RelationMutationTests: BindingTestCase {
         let db = TransactionalDatabase(sqliteDB)
         let r = db["animal"]
         
-        func awaitCompletion(_ f: () -> Void) {
-            f()
-            CFRunLoopRun()
-        }
-        
-        let observer = ContentCoalescedRunLoopStoppingObserver()
-        let remover = r.addAsyncObserver(observer)
-        
         awaitCompletion{ r.asyncReplaceValues(["cat", "dog"]) }
         AssertEqual(r, MakeRelation(
             ["name"],
@@ -179,16 +161,5 @@ class RelationMutationTests: BindingTestCase {
         awaitCompletion{ r.asyncReplaceValues([]) }
         AssertEqual(r, MakeRelation(
             ["name"]))
-        
-        remover()
-    }
-}
-
-private class ContentCoalescedRunLoopStoppingObserver: AsyncRelationContentCoalescedObserver {
-    func relationWillChange(_ relation: Relation) {
-    }
-    
-    func relationDidChange(_ relation: Relation, result: Result<Set<Row>, RelationError>) {
-        CFRunLoopStop(CFRunLoopGetCurrent())
     }
 }
