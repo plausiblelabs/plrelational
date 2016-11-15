@@ -273,7 +273,7 @@ public final class UpdateManager: PerThreadInstance {
             }
             
             // Set up a QueryManager to run all the queries together.
-            let queryManager = QueryManager()
+            var queryManager = QueryManager()
             
             // We'll be doing a bunch of async work to notify observers. Use a dispatch group to figure out when it's all done.
             let doneGroup = DispatchGroup()
@@ -421,6 +421,31 @@ public final class UpdateManager: PerThreadInstance {
     
     func defaultObserverDispatchContext() -> DispatchContext {
         return RunLoopDispatchContext(runloop: self.runloop, executeReentrantImmediately: true)
+    }
+}
+
+extension UpdateManager {
+    fileprivate struct QueryManager {
+        var pendingQueries: [(Relation, DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>)] = []
+        
+        mutating func registerQuery(_ relation: Relation, callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
+            pendingQueries.append((relation, callback))
+        }
+        
+        mutating func execute() {
+            let planner = QueryPlanner(roots: pendingQueries)
+            let runner = QueryRunner(planner: planner)
+            
+            while !runner.done {
+                runner.pump()
+            }
+            
+            if !runner.didError {
+                for (_, callback) in pendingQueries {
+                    callback.withWrapped({ $0(.Ok([])) })
+                }
+            }
+        }
     }
 }
 
