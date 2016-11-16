@@ -561,7 +561,7 @@ class AsyncManagerTests: DBTestCase {
         
         let observer = TestAsyncContentCoalescedObserver()
         let remover = r.addAsyncObserver(observer, postprocessor: {
-            XCTAssertEqual(AsyncManager.currentInstance.state, .idle)
+            XCTAssertEqual(AsyncManager.currentInstance.state, .stopping)
             return $0
         })
         
@@ -581,7 +581,7 @@ class AsyncManagerTests: DBTestCase {
         remover()
         stateObserverRemover()
         
-        XCTAssertEqual(observedStates, [.idle, .pending, .running, .idle])
+        XCTAssertEqual(observedStates, [.idle, .pending, .running, .stopping, .idle])
     }
     
     func testStatesWithQuery() {

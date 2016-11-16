@@ -29,6 +29,9 @@ public final class AsyncManager: PerThreadInstance {
         
         /// Actions are actively running.
         case running
+        
+        /// Actions have been run and didChange observers are being notified before returning back to idle.
+        case stopping
     }
     
     private var stateObservers: [UInt64: (State) -> Void] = [:]
@@ -51,30 +54,46 @@ public final class AsyncManager: PerThreadInstance {
     }
     
     public func registerUpdate(_ relation: Relation, query: SelectExpression, newValues: Row) {
-        pendingActions.append(.update(relation, query, newValues))
-        registerChange(relation)
+        register(action: .update(relation, query, newValues))
     }
     
     public func registerAdd(_ relation: MutableRelation, row: Row) {
-        pendingActions.append(.add(relation, row))
-        registerChange(relation)
+        register(action: .add(relation, row))
     }
     
     public func registerDelete(_ relation: MutableRelation, query: SelectExpression) {
-        pendingActions.append(.delete(relation, query))
-        registerChange(relation)
+        register(action: .delete(relation, query))
     }
     
     public func registerRestoreSnapshot(_ database: TransactionalDatabase, snapshot: ChangeLoggingDatabaseSnapshot) {
-        pendingActions.append(.restoreSnapshot(database, snapshot))
-        for (_, relation) in database.relations {
-            registerChange(relation)
-        }
+        register(action: .restoreSnapshot(database, snapshot))
     }
     
     public func registerQuery(_ relation: Relation, callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
-        pendingActions.append(.query(relation, callback))
-        if state != .running {
+        register(action: .query(relation, callback))
+    }
+    
+    private func register(action: Action, atBeginning: Bool = false) {
+        if atBeginning {
+            pendingActions.insert(action, at: 0)
+        } else {
+            pendingActions.append(action)
+        }
+        
+        switch action {
+        case .add(let relation, _), .delete(let relation, _):
+            registerChange(relation)
+        case .update(let relation, _, _):
+            registerChange(relation)
+        case .restoreSnapshot(let database, _):
+            for (_, relation) in database.relations {
+                registerChange(relation)
+            }
+        case .query:
+            break
+        }
+        
+        if state == .idle {
             scheduleExecutionIfNeeded()
         }
     }
@@ -393,7 +412,10 @@ public final class AsyncManager: PerThreadInstance {
                         self.sendWillChangeForAllPendingActions()
                         self.executeBody()
                     } else {
-                        // Otherwise, terminate the execution. Reset observers and send didChange to them.
+                        // Otherwise, terminate the execution.
+                        self.state = .stopping
+                        
+                        // Reset observers and send didChange to them.
                         var entriesWithWillChange: [(Relation, ObservedRelationInfo.ObserverEntry)] = []
                         for (observedRelationObj, info) in observedInfo {
                             info.derivative.clearVariables()
@@ -407,11 +429,20 @@ public final class AsyncManager: PerThreadInstance {
                             })
                         }
                         
-                        self.state = .idle
-                        
                         for (relation, entry) in entriesWithWillChange {
                             entry.relationObserver?.withWrapped({ $0.relationDidChange(relation) })
                             entry.updateObserver?.withWrapped({ $0.relationDidChange(relation) })
+                        }
+                        
+                        // Suck out any pending actions that were queued up by didChange calls so we
+                        // can add them back in after changing state.
+                        let pendingActions = self.pendingActions
+                        self.pendingActions.removeAll()
+                        
+                        self.state = .idle
+                        
+                        for action in pendingActions {
+                            self.register(action: action, atBeginning: true)
                         }
                     }
                 })
