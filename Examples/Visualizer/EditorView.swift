@@ -79,18 +79,21 @@ class EditorView: BackgroundView {
         let contentLoadID = UUID()
         currentContentLoadID = contentLoadID
         let contentRelation = docModel.relationModelPlistData(objectID: docOutlinePath.objectID)
-        contentRelation.asyncAllRows{ result in
-            // Only set the loaded data if our content load ID matches
-            if self.currentContentLoadID != contentLoadID {
-                return
+        contentRelation.asyncAllRows(
+            postprocessor: { rows -> RelationModel? in
+                // TODO: Show error message if any step fails here
+                guard let plistBlob = contentRelation.extractOneBlobOrNil(from: AnyIterator(rows.makeIterator())) else { return nil }
+                return RelationModel.fromPlistData(Data(bytes: plistBlob))
+            },
+            completion: { result in
+                // Only set the loaded data if our content load ID matches
+                if self.currentContentLoadID != contentLoadID {
+                    return
+                }
+                guard let model = result.ok ?? nil else { return }
+                self.addRelationTables(fromModel: model, toView: chainView)
             }
-            // TODO: Show error message if any step fails here
-            guard let rows = result.ok else { return }
-            // TODO: Perform extraction step in postprocessor
-            guard let plistBlob = contentRelation.extractOneBlobOrNil(from: AnyIterator(rows.makeIterator())) else { return }
-            guard let model = RelationModel.fromPlistData(Data(bytes: plistBlob)) else { return }
-            self.addRelationTables(fromModel: model, toView: chainView)
-        }
+        )
     }
 
     private func addRelationTables(fromModel model: RelationModel, toView parent: NSView) {
@@ -137,17 +140,20 @@ class EditorView: BackgroundView {
         for objectID in referencedObjectIDs {
             let contentRelation = docModel.relationModelPlistData(objectID: objectID)
             group.enter()
-            contentRelation.asyncAllRows{ result in
-                defer {
-                    group.leave()
+            contentRelation.asyncAllRows(
+                postprocessor: { rows -> RelationModel? in
+                    // TODO: Show error message if any step fails here
+                    guard let plistBlob = contentRelation.extractOneBlobOrNil(from: AnyIterator(rows.makeIterator())) else { return nil }
+                    return RelationModel.fromPlistData(Data(bytes: plistBlob))
+                },
+                completion: { result in
+                    defer {
+                        group.leave()
+                    }
+                    guard let model = result.ok ?? nil else { return }
+                    referencedRelationModels[objectID] = model
                 }
-                // TODO: Show error message if any step fails here
-                guard let rows = result.ok else { return }
-                // TODO: Perform extraction step in postprocessor
-                guard let plistBlob = contentRelation.extractOneBlobOrNil(from: AnyIterator(rows.makeIterator())) else { return }
-                guard let model = RelationModel.fromPlistData(Data(bytes: plistBlob)) else { return }
-                referencedRelationModels[objectID] = model
-            }
+            )
         }
         
         struct Accum {
