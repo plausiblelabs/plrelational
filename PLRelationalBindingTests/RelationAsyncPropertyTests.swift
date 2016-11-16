@@ -11,7 +11,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
     
     func testAsyncReadOnlyProperty() {
         let sqliteDB = makeDB().db
-        let sqlr = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
+        _ = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
         let db = TransactionalDatabase(sqliteDB)
         let r = db["animal"]
 
@@ -19,8 +19,11 @@ class RelationAsyncPropertyTests: BindingTestCase {
         var didChangeCount = 0
         var changes: [String] = []
 
-        let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
-        let property = nameRelation.asyncProperty{ $0.oneString($1) }
+        let property = r
+            .select(Attribute("id") *== 1)
+            .project(["name"])
+            .oneString()
+            .property()
         let removal = property.signal.observe(SignalObserver(
             valueWillChange: {
                 willChangeCount += 1
@@ -73,7 +76,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
     
     func testAsyncReadOnlyPropertyWithInitialValue() {
         let sqliteDB = makeDB().db
-        let sqlr = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
+        _ = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
         let db = TransactionalDatabase(sqliteDB)
         let r = db["animal"]
         
@@ -81,8 +84,11 @@ class RelationAsyncPropertyTests: BindingTestCase {
         var didChangeCount = 0
         var changes: [String] = []
         
-        let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
-        let property = nameRelation.asyncProperty(initialValue: "cow", { $0.oneString($1) })
+        let property = r
+            .select(Attribute("id") *== 1)
+            .project(["name"])
+            .oneString()
+            .property(initialValue: "cow")
         let removal = property.signal.observe(SignalObserver(
             valueWillChange: {
                 willChangeCount += 1
@@ -136,7 +142,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         var nameUpdateCount = 0
         var nameCommitCount = 0
         
-        let nameConfig: RelationMutationConfig<String> = RelationMutationConfig(
+        let nameMutator: RelationMutationConfig<String> = RelationMutationConfig(
             snapshot: {
                 nameSnapshotCount += 1
                 return db.takeSnapshot()
@@ -152,8 +158,11 @@ class RelationAsyncPropertyTests: BindingTestCase {
         )
         
         // Create an async r/w property from the relation
-        let nameRelation = r.select(Attribute("id") *== 1).project(["name"])
-        let nameProperty = nameRelation.asyncProperty(config: nameConfig, { $0.signal{ $0.oneString($1) } })
+        let nameProperty = r
+            .select(Attribute("id") *== 1)
+            .project(["name"])
+            .oneString()
+            .property(mutator: nameMutator)
         let nameObserverRemoval = nameProperty.signal.observe(SignalObserver(
             valueWillChange: {
                 nameWillChangeCount += 1

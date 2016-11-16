@@ -86,7 +86,8 @@ class EditorView: BackgroundView {
             }
             // TODO: Show error message if any step fails here
             guard let rows = result.ok else { return }
-            guard let plistBlob = contentRelation.oneBlobOrNil(AnyIterator(rows.makeIterator())) else { return }
+            // TODO: Perform extraction step in postprocessor
+            guard let plistBlob = contentRelation.extractOneBlobOrNil(from: AnyIterator(rows.makeIterator())) else { return }
             guard let model = RelationModel.fromPlistData(Data(bytes: plistBlob)) else { return }
             self.addRelationTables(fromModel: model, toView: chainView)
         }
@@ -142,7 +143,8 @@ class EditorView: BackgroundView {
                 }
                 // TODO: Show error message if any step fails here
                 guard let rows = result.ok else { return }
-                guard let plistBlob = contentRelation.oneBlobOrNil(AnyIterator(rows.makeIterator())) else { return }
+                // TODO: Perform extraction step in postprocessor
+                guard let plistBlob = contentRelation.extractOneBlobOrNil(from: AnyIterator(rows.makeIterator())) else { return }
                 guard let model = RelationModel.fromPlistData(Data(bytes: plistBlob)) else { return }
                 referencedRelationModels[objectID] = model
             }
@@ -297,7 +299,8 @@ class EditorView: BackgroundView {
                 let textProperty = relation
                     .select(idAttr *== rowID)
                     .project(attribute)
-                    .asyncProperty(initialValue: initialStringValue, { $0.oneValueOrNil($1)?.description ?? "" })
+                    .oneValue({ $0.description }, orDefault: "")
+                    .property(initialValue: initialStringValue)
                 return .asyncReadOnly(textProperty)
             }
         )

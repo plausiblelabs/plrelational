@@ -66,9 +66,7 @@ class DocModel {
     lazy var activeTabID: AsyncReadWriteProperty<RelationValue?> = {
         return self.db.undoableBidiProperty(
             action: "Change Tab",
-            signal: self.db.selectedTab.signal{
-                return $0.oneValueOrNil($1)
-            },
+            signal: self.db.selectedTab.oneRelationValueOrNil(),
             update: { id in
                 let tabID = id.flatMap(TabID.fromNullable)
                 self.db.setSelectedTab(tabID: tabID)
@@ -79,11 +77,8 @@ class DocModel {
     /// The current history item for the active tab.
     lazy var activeTabCurrentHistoryItem: AsyncReadableProperty<HistoryItem?> = {
         return self.db.selectedTabCurrentHistoryItem
-            .asyncProperty{
-                $0.oneValueFromRow($1, { row in
-                    return HistoryItem.fromRow(row)
-                })
-        }
+            .valueFromOneRow{ HistoryItem.fromRow($0) }
+            .property()
     }()
     
     /// The path(s) for the active tab's selected outline item.  Currently we assume either zero

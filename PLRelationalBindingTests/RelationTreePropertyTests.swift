@@ -81,6 +81,8 @@ class RelationTreePropertyTests: BindingTestCase {
         XCTAssertEqual(didChangeCount, 1)
         // TODO
         //XCTAssertEqual(changes, [])
+        
+        removal()
     }
     
     func testInsertMoveDelete() {

@@ -112,3 +112,10 @@ open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
         fatalError("Must be implemented by subclasses")
     }
 }
+
+extension SignalType {
+    /// Lifts this signal into an AsyncReadableProperty.
+    public func property(initialValue: Self.Value? = nil) -> AsyncReadableProperty<Self.Value> {
+        return AsyncReadableProperty(initialValue: initialValue, signal: self.signal)
+    }
+}
