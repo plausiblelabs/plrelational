@@ -552,13 +552,6 @@ class DocDatabase {
     
     // MARK: Undoable actions
     
-    func objectNameReadOnlyProperty(objectID: ObjectID, initialValue: String?) -> AsyncReadableProperty<String?> {
-        return self.objects
-            .select(DB.Object.ID.a *== objectID.relationValue)
-            .project(DB.Object.Name.a)
-            .property(initialValue: initialValue, { $0.oneStringOrNil($1) })
-    }
-    
     func objectNameReadWriteProperty(objectID: ObjectID, initialValue: String?) -> AsyncReadWriteProperty<String?> {
         let relation = self.objects
             .select(Object.ID.a *== objectID.relationValue)
@@ -567,7 +560,7 @@ class DocDatabase {
         return undoableBidiProperty(
             action: "Rename Item",
             initialValue: initialValue,
-            signal: relation.signal{ $0.oneStringOrNil($1) },
+            signal: relation.oneStringOrNil(),
             update: { relation.asyncUpdateNullableString($0) }
         )
     }

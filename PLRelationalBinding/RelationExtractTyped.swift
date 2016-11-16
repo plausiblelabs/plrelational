@@ -155,6 +155,24 @@ extension Relation {
         return signal{ $0.extractOneValueOrNil(from: $1, transform) }
     }
 
+    /// Returns a single transformed value if there is exactly one row in the given set, otherwise returns the
+    /// given default value.
+    public func extractOneValue<V>(from rows: AnyIterator<Row>, _ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V) -> V {
+        return extractOneValueOrNil(from: rows, transform) ?? defaultValue
+    }
+
+    /// Returns a single transformed value if there is exactly one row in the relation, otherwise returns the
+    /// given default value.
+    public func extractOneValue<V>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V) -> V {
+        return extractOneValue(from: okRows(), transform, orDefault: defaultValue)
+    }
+
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers the given default value.
+    public func oneValue<V>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V) -> Signal<V> {
+        return signal{ $0.extractOneValue(from: $1, transform, orDefault: defaultValue) }
+    }
+
     /// Returns a single RelationValue if there is exactly one row in the given set, otherwise returns nil.
     public func extractOneRelationValueOrNil(from rows: AnyIterator<Row>) -> RelationValue? {
         return extractOneValueOrNil(from: rows, { $0 })
