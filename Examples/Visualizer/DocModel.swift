@@ -139,13 +139,6 @@ class DocModel {
         return db.selectDocOutlineItem(tabID: TabID(currentTabID), path: path, currentPosition: currentPosition)
     }
     
-    /// Returns a Relation that contains the relation model for the given object.
-    private func relationModelPlistData(objectID: ObjectID) -> Relation {
-        return db.relationModelData
-            .select(DB.RelationModelData.ObjectID.a *== objectID.relationValue)
-            .project(DB.RelationModelData.Plist.a)
-    }
-    
     /// Asynchronously loads the RelationViewModel for the given object.
     // TODO: Allow for cancellation
     private func loadRelationViewModel(objectID: ObjectID, completion: @escaping (RelationViewModel?) -> Void) {
@@ -173,63 +166,87 @@ class DocModel {
                 }
             },
             completionCallback: { result in
-                // TODO: Convert RelationModels -> RelationViewModel
-                completion(nil)
+                // Convert RelationModels -> RelationViewModel
+                if let models = result.ok {
+                    // Convert RelationValue identifier keys -> ObjectID
+                    let modelDict = Dictionary(models.map{ (key, value) in (ObjectID(key), value) })
+                    let viewModel = RelationViewModel(rootID: objectID, models: modelDict)
+                    completion(viewModel)
+                } else {
+                    // TODO: Return error result
+                    completion(nil)
+                }
             }
         )
     }
     
     /// The RelationViewModel for the active tab's selected outline item.
-    lazy var selectedRelationViewModel: AsyncReadableProperty<AsyncState<RelationViewModel?>> = {
-        // TODO: Do we need to explicitly start this underlying property here?
-        self.activeTabCurrentHistoryItem.start()
-
+    lazy var selectedObjectRelationViewModel: AsyncReadableProperty<AsyncState<RelationViewModel?>> = {
         // XXX: This is a unique identifier that allows for determining whether an async query is still valid
-        // i.e., whether the content should be set
+        // i.e., whether the loaded content should be delivered or discarded
         var currentContentLoadID: UUID?
+
+        var latestAsyncState: AsyncState<RelationViewModel?> = .idle(nil)
         
-//        let contentLoadID = UUID()
-//        currentContentLoadID = contentLoadID
-//        let contentRelation = docModel.relationModelPlistData(objectID: docOutlinePath.objectID)
-//        contentRelation.asyncAllRows(
-//            postprocessor: { rows -> RelationModel? in
-//                // TODO: Show error message if any step fails here
-//                guard let plistBlob = contentRelation.extractOneBlobOrNil(from: AnyIterator(rows.makeIterator())) else { return nil }
-//                return RelationModel.fromPlistData(Data(bytes: plistBlob))
-//            },
-//            completion: { result in
-//                // Only set the loaded data if our content load ID matches
-//                if self.currentContentLoadID != contentLoadID {
-//                    return
-//                }
-//                guard let model = result.ok ?? nil else { return }
-//                self.addRelationTables(fromModel: model, toView: chainView)
-//            }
-//        )
+        // Create a new signal that will deliver the AsyncState changes
+        let currentHistoryItemSignal = self.activeTabCurrentHistoryItem.signal
+        let (signal, notify) = Signal<AsyncState<RelationViewModel?>>.pipe(initialChangeCount: currentHistoryItemSignal.changeCount)
+
+        func loadViewModel(_ objectID: ObjectID) {
+            let contentLoadID = UUID()
+            currentContentLoadID = contentLoadID
+            self.loadRelationViewModel(objectID: objectID, completion: { model in
+                // Only deliver the loaded data if our content load ID matches
+                if currentContentLoadID != contentLoadID { return }
+                // Only deliver if we are in a loading state
+                if case .idle = latestAsyncState { return }
+                // Only deliver if model was successfully loaded
+                guard let model = model else { return }
+                notify.valueWillChange()
+                notify.valueChanging(.idle(model))
+                notify.valueDidChange()
+            })
+        }
         
-        return self.activeTabCurrentHistoryItem.signal
-            .map{ historyItem in
-                if let historyItem = historyItem {
+        // Observe the signal for the currently selected object.  When the selected object changes,
+        // we deliver a `loading` state change prior to initiating the async query, and then deliver
+        // the fully realized view model upon completion.
+        let removal = currentHistoryItemSignal.observe(SignalObserver(
+            valueWillChange: {
+                notify.valueWillChange()
+            },
+            valueChanging: { [weak self] change, _ in
+                let asyncState: AsyncState<RelationViewModel?>
+                if let historyItem = change {
                     let docOutlinePath = historyItem.outlinePath
                     switch docOutlinePath.type {
                     case .storedRelation, .sharedRelation:
                         // Asynchronously load the relation model data
-                        // TODO
-                        return AsyncState.loading
+                        loadViewModel(docOutlinePath.objectID)
+                        asyncState = .loading
                     default:
                         // Selected item is not a relation object
-                        return AsyncState.idle(nil)
+                        asyncState = .idle(nil)
                     }
                 } else {
                     // No item is selected
-                    return AsyncState.idle(nil)
+                    asyncState = .idle(nil)
                 }
+                latestAsyncState = asyncState
+                notify.valueChanging(asyncState)
+            },
+            valueDidChange: {
+                notify.valueDidChange()
             }
-            .property()
+        ))
+        self.observerRemovals.append(removal)
+        
+        // TODO: Compute initial value based on activeTabCurrentHistoryItem.value
+        return signal.property()
     }()
 }
 
 // XXX: Placeholder error type
-public struct DocModelError: Error {
+private struct DocModelError: Error {
     let message: String
 }

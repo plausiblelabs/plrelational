@@ -44,21 +44,24 @@ class EditorView: BackgroundView {
         
         super.init(frame: frame)
         
-        let activeItemRemoval = model.activeTabCurrentHistoryItem.signal.observe{ historyItem, _ in
-            if let historyItem = historyItem {
-                let docOutlinePath = historyItem.outlinePath
-                switch docOutlinePath.type {
-                case .storedRelation, .sharedRelation:
-                    self.setRelationContent(docOutlinePath)
-                default:
+        let currentViewModelRemoval = model.selectedObjectRelationViewModel.signal.observe{ asyncState, _ in
+            switch asyncState {
+            case .loading:
+                // Clear view while new model is being loaded
+                // TODO: Show progress indicator, maybe
+                self.prepareForNewContent()
+            case .idle(let viewModel):
+                if let viewModel = viewModel {
+                    // Display the tables for the loaded view model
+                    self.setRelationContent(viewModel)
+                } else {
+                    // Nothing selected (or the model failed to load); clear the view
                     self.prepareForNewContent()
                 }
-            } else {
-                self.prepareForNewContent()
             }
         }
-        observerRemovals.append(activeItemRemoval)
-        model.activeTabCurrentHistoryItem.start()
+        observerRemovals.append(currentViewModelRemoval)
+        model.selectedObjectRelationViewModel.start()
     }
     
     required init?(coder: NSCoder) {
@@ -75,7 +78,7 @@ class EditorView: BackgroundView {
         tableViews.removeAll()
     }
     
-    private func setRelationContent(_ docOutlinePath: DocOutlinePath) {
+    private func setRelationContent(_ viewModel: RelationViewModel) {
         prepareForNewContent()
 
         // Add the content view
@@ -85,37 +88,23 @@ class EditorView: BackgroundView {
         addSubview(chainView)
         self.contentView = chainView
         
-        // Load the relation model asynchronously
-        let contentLoadID = UUID()
-        currentContentLoadID = contentLoadID
-//        let contentRelation = docModel.relationModelPlistData(objectID: docOutlinePath.objectID)
-//        contentRelation.asyncAllRows(
-//            postprocessor: { rows -> RelationModel? in
-//                // TODO: Show error message if any step fails here
-//                guard let plistBlob = contentRelation.extractOneBlobOrNil(from: AnyIterator(rows.makeIterator())) else { return nil }
-//                return RelationModel.fromPlistData(Data(bytes: plistBlob))
-//            },
-//            completion: { result in
-//                // Only set the loaded data if our content load ID matches
-//                if self.currentContentLoadID != contentLoadID {
-//                    return
-//                }
-//                guard let model = result.ok ?? nil else { return }
-//                self.addRelationTables(fromModel: model, toView: chainView)
-//            }
-//        )
-    }
-
-    private func addRelationTables(fromModel model: RelationModel, toView parent: NSView) {
-        switch model {
+        // Display the tables
+        guard let rootModel = viewModel.models[viewModel.rootID] else {
+            // TODO: Show error message
+            Swift.print("ERROR: No model data found for root")
+            return
+        }
+        switch rootModel {
         case .stored(let storedModel):
-            addStoredRelationTable(fromModel: storedModel, toView: parent, x: startX, y: startY)
+            addStoredRelationTable(fromModel: storedModel, toView: chainView, x: startX, y: startY)
         case .shared(let sharedModel):
-            addSharedRelationTables(fromModel: sharedModel, toView: parent)
+            addSharedRelationTables(fromModel: sharedModel, referencedRelationModels: viewModel.models, toView: chainView)
         }
     }
 
-    private func addStoredRelationTable(fromModel model: StoredRelationModel, toView parent: NSView, x: CGFloat, y: CGFloat) {
+    private func addStoredRelationTable(fromModel model: StoredRelationModel,
+                                        toView parent: NSView, x: CGFloat, y: CGFloat)
+    {
         addTableView(
             to: parent,
             x: x, y: y,
@@ -124,179 +113,128 @@ class EditorView: BackgroundView {
             orderedAttrs: model.attributes)
     }
     
-    private func addSharedRelationTables(fromModel model: SharedRelationModel, toView parent: NSView) {
-//        // Determine which relations are referenced in this SharedRelationModel
-//        var referencedObjectIDs: Set<ObjectID> = []
-//
-//        func processInput(_ input: SharedRelationInput) {
-//            referencedObjectIDs.insert(input.objectID)
-//        }
-//        
-//        processInput(model.input)
-//        for stage in model.stages {
-//            if let op = stage.op {
-//                switch op {
-//                case .filter:
-//                    break
-//                case .combine(let binaryOp):
-//                    processInput(binaryOp.rhs)
-//                }
-//            }
-//        }
-//
-//        // Asynchronously load the model for each of those relations
-//        let group = DispatchGroup()
-//        var referencedRelationModels: [ObjectID: RelationModel] = [:]
-//        for objectID in referencedObjectIDs {
-//            let contentRelation = docModel.relationModelPlistData(objectID: objectID)
-//            group.enter()
-//            contentRelation.asyncAllRows(
-//                postprocessor: { rows -> RelationModel? in
-//                    // TODO: Show error message if any step fails here
-//                    guard let plistBlob = contentRelation.extractOneBlobOrNil(from: AnyIterator(rows.makeIterator())) else { return nil }
-//                    return RelationModel.fromPlistData(Data(bytes: plistBlob))
-//                },
-//                completion: { result in
-//                    defer {
-//                        group.leave()
-//                    }
-//                    guard let model = result.ok ?? nil else { return }
-//                    referencedRelationModels[objectID] = model
-//                }
-//            )
-//        }
-//        
-//        struct Accum {
-//            let relation: Relation
-//            let idAttr: Attribute
-//            let orderedAttrs: [Attribute]
-//        }
-//        
-//        func displayTables() {
-//            var x: CGFloat = startX
-//            var y: CGFloat = startY
-//            let padX: CGFloat = 40
-//            let padY: CGFloat = 40
-//            
-//            func addTableForInput(_ input: SharedRelationInput, x: CGFloat, y: CGFloat) -> RelationModel {
-//                guard let relationModel = referencedRelationModels[input.objectID] else {
-//                    fatalError()
-//                }
-//                switch relationModel {
-//                case .stored(let model):
-//                    // TODO: Take projection into account
-//                    self.addStoredRelationTable(fromModel: model, toView: parent, x: x, y: y)
-//                case .shared:
-//                    fatalError("Not yet implemented")
-//                }
-//                return relationModel
-//            }
-//
-//            // Add the root input
-//            let initialModel = addTableForInput(model.input, x: x, y: y)
-//            var accum: Accum
-//            switch initialModel {
-//            case .stored(let model):
-//                // TODO: Take initial projection into account
-//                accum = Accum(
-//                    relation: model.toRelation(),
-//                    idAttr: model.idAttr,
-//                    orderedAttrs: model.attributes
-//                )
-//            case .shared:
-//                fatalError("Not yet implemented")
-//            }
-//
-//            for stage in model.stages {
-//                // TODO: Handle the case where there is a projection without an op
-//                guard let op = stage.op else { continue }
-//                
-//                switch op {
-//                case .filter(let unaryOp):
-//                    // Derive the relation that results from the filter operation
-//                    // TODO: Take projection into account
-//                    switch unaryOp {
-//                    case let .selectEq(attr, value):
-//                        accum = Accum(
-//                            relation: accum.relation.select(attr *== value),
-//                            idAttr: accum.idAttr,
-//                            orderedAttrs: accum.orderedAttrs
-//                        )
-//                    case .count:
-//                        accum = Accum(
-//                            relation: accum.relation.count(),
-//                            idAttr: "count",
-//                            orderedAttrs: ["count"]
-//                        )
-//                    }
-//
-//                case .combine(let binaryOp):
-//                    // Add a table to the right side that shows the relation being combined
-//                    let rhsModel = addTableForInput(binaryOp.rhs, x: x + tableW + padX, y: y)
-//                    guard case .stored(let rhsStoredModel) = rhsModel else {
-//                        fatalError("Not yet implemented")
-//                    }
-//                    
-//                    // Derive the relation that results from the combine operation
-//                    let lhsRelation = accum.relation
-//                    let rhsRelation = rhsModel.toRelation()
-//                    let combined: Relation
-//                    switch binaryOp {
-//                    case .join:
-//                        combined = lhsRelation.join(rhsRelation)
-//                    case .union:
-//                        combined = lhsRelation.union(rhsRelation)
-//                    }
-//                    
-//                    if let projectedAttrs = stage.projection {
-//                        // XXX: For now, take the first projected attribute as the idAttr; need to
-//                        // figure out a way to make the ArrayProperty/TableView code less dependent
-//                        // on a unique identifier
-//                        accum = Accum(
-//                            relation: combined.project(Scheme(attributes: Set(projectedAttrs))),
-//                            idAttr: projectedAttrs.first!,
-//                            orderedAttrs: projectedAttrs
-//                        )
-//                    } else {
-//                        // TODO: Determine idAttr for the combined relation (for now we'll take the
-//                        // one from the LHS always, but later when we handle projections, this may no
-//                        // longer be valid)
-//                        var orderedAttrs = accum.orderedAttrs
-//                        for attr in rhsStoredModel.attributes {
-//                            if !orderedAttrs.contains(attr) {
-//                                orderedAttrs.append(attr)
-//                            }
-//                        }
-//                        accum = Accum(
-//                            relation: combined,
-//                            idAttr: accum.idAttr,
-//                            orderedAttrs: orderedAttrs
-//                        )
-//                    }
-//                }
-//                
-//                // Add a table below the last one that displays the result of the operation
-//                y += tableH + padY
-//                self.addTableView(
-//                    to: parent,
-//                    x: x, y: y,
-//                    relation: accum.relation,
-//                    idAttr: accum.idAttr,
-//                    orderedAttrs: accum.orderedAttrs)
-//            }
-//        }
-//        
-//        // When all model data is loaded, prepare the relation tables for display
-//        group.notify(queue: DispatchQueue.main, execute: {
-//            if referencedRelationModels.count != referencedObjectIDs.count {
-//                // Failed to load all the referenced models
-//                // TODO: We should be able to gracefully handle gaps in the data
-//                return
-//            }
-//            
-//            // Display the relation tables
-//            displayTables()
-//        })
+    private func addSharedRelationTables(fromModel model: SharedRelationModel,
+                                         referencedRelationModels: [ObjectID: RelationModel],
+                                         toView parent: NSView)
+    {
+        // TODO: Move all accumulation logic to RelationViewModel
+        struct Accum {
+            let relation: Relation
+            let idAttr: Attribute
+            let orderedAttrs: [Attribute]
+        }
+        
+        var x: CGFloat = startX
+        var y: CGFloat = startY
+        let padX: CGFloat = 40
+        let padY: CGFloat = 40
+        
+        func addTableForInput(_ input: SharedRelationInput, x: CGFloat, y: CGFloat) -> RelationModel {
+            guard let relationModel = referencedRelationModels[input.objectID] else {
+                fatalError()
+            }
+            switch relationModel {
+            case .stored(let model):
+                // TODO: Take projection into account
+                self.addStoredRelationTable(fromModel: model, toView: parent, x: x, y: y)
+            case .shared:
+                fatalError("Not yet implemented")
+            }
+            return relationModel
+        }
+
+        // Add the root input
+        let initialModel = addTableForInput(model.input, x: x, y: y)
+        var accum: Accum
+        switch initialModel {
+        case .stored(let model):
+            // TODO: Take initial projection into account
+            accum = Accum(
+                relation: model.toRelation(),
+                idAttr: model.idAttr,
+                orderedAttrs: model.attributes
+            )
+        case .shared:
+            fatalError("Not yet implemented")
+        }
+
+        for stage in model.stages {
+            // TODO: Handle the case where there is a projection without an op
+            guard let op = stage.op else { continue }
+            
+            switch op {
+            case .filter(let unaryOp):
+                // Derive the relation that results from the filter operation
+                // TODO: Take projection into account
+                switch unaryOp {
+                case let .selectEq(attr, value):
+                    accum = Accum(
+                        relation: accum.relation.select(attr *== value),
+                        idAttr: accum.idAttr,
+                        orderedAttrs: accum.orderedAttrs
+                    )
+                case .count:
+                    accum = Accum(
+                        relation: accum.relation.count(),
+                        idAttr: "count",
+                        orderedAttrs: ["count"]
+                    )
+                }
+
+            case .combine(let binaryOp):
+                // Add a table to the right side that shows the relation being combined
+                let rhsModel = addTableForInput(binaryOp.rhs, x: x + tableW + padX, y: y)
+                guard case .stored(let rhsStoredModel) = rhsModel else {
+                    fatalError("Not yet implemented")
+                }
+                
+                // Derive the relation that results from the combine operation
+                let lhsRelation = accum.relation
+                let rhsRelation = rhsModel.toRelation()
+                let combined: Relation
+                switch binaryOp {
+                case .join:
+                    combined = lhsRelation.join(rhsRelation)
+                case .union:
+                    combined = lhsRelation.union(rhsRelation)
+                }
+                
+                if let projectedAttrs = stage.projection {
+                    // XXX: For now, take the first projected attribute as the idAttr; need to
+                    // figure out a way to make the ArrayProperty/TableView code less dependent
+                    // on a unique identifier
+                    accum = Accum(
+                        relation: combined.project(Scheme(attributes: Set(projectedAttrs))),
+                        idAttr: projectedAttrs.first!,
+                        orderedAttrs: projectedAttrs
+                    )
+                } else {
+                    // TODO: Determine idAttr for the combined relation (for now we'll take the
+                    // one from the LHS always, but later when we handle projections, this may no
+                    // longer be valid)
+                    var orderedAttrs = accum.orderedAttrs
+                    for attr in rhsStoredModel.attributes {
+                        if !orderedAttrs.contains(attr) {
+                            orderedAttrs.append(attr)
+                        }
+                    }
+                    accum = Accum(
+                        relation: combined,
+                        idAttr: accum.idAttr,
+                        orderedAttrs: orderedAttrs
+                    )
+                }
+            }
+            
+            // Add a table below the last one that displays the result of the operation
+            y += tableH + padY
+            self.addTableView(
+                to: parent,
+                x: x, y: y,
+                relation: accum.relation,
+                idAttr: accum.idAttr,
+                orderedAttrs: accum.orderedAttrs)
+        }
     }
     
     private func addTableView(to parent: NSView, x: CGFloat, y: CGFloat, relation: Relation,

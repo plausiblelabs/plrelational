@@ -8,4 +8,10 @@ import PLRelational
 
 struct RelationViewModel {
     
+    let rootID: ObjectID
+    let models: [ObjectID: RelationModel]
+    
+//    init(rootID: ObjectID, models: [ObjectID: RelationModel]) {
+//        // TODO
+//    }
 }
