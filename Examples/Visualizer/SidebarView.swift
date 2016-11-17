@@ -43,11 +43,15 @@ class SidebarView: BackgroundView {
         contentView.addSubview(codeSegmentView)
         
         segmentedControl.setAction({ [weak self] control in
-            self?.contentView.subviews.forEach{ $0.removeFromSuperview() }
+            guard let strongSelf = self else { return }
+            guard let contentView = strongSelf.contentView else { return }
+            contentView.subviews.forEach{ $0.removeFromSuperview() }
             if control.selectedSegment == 0 {
-                self?.contentView.addSubview(codeSegmentView)
+                codeSegmentView.frame = contentView.bounds
+                contentView.addSubview(codeSegmentView)
             } else {
-                self?.contentView.addSubview(propsSegmentView)
+                propsSegmentView.frame = contentView.bounds
+                contentView.addSubview(propsSegmentView)
             }
         })
     }
@@ -98,6 +102,7 @@ class BaseSegmentView: BackgroundView {
         scrollView = ScrollView(frame: self.bounds)
         scrollView.drawsBackground = false
         scrollView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
+        scrollView.visible <~ model.itemSelected
         addSubview(scrollView)
         
         let noSelectionLabel = labelField("No Selection")

@@ -21,7 +21,11 @@ class SidebarModel {
         self.db = db
         self.selectedObjects = selectedObjects
     }
-    
+
+    lazy var itemSelected: AsyncReadableProperty<Bool> = {
+        return self.selectedObjects.nonEmpty.property()
+    }()
+
     lazy var itemNotSelected: AsyncReadableProperty<Bool> = {
         return self.selectedObjects.empty.property()
     }()

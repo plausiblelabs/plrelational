@@ -68,8 +68,8 @@ open class Signal<T>: SignalType {
         self.startFunc = startFunc
     }
     
-    public static func pipe() -> (Signal, Notify) {
-        let signal = Signal(changeCount: 0, startFunc: { _ in })
+    public static func pipe(initialChangeCount: Int = 0) -> (Signal, Notify) {
+        let signal = Signal(changeCount: initialChangeCount, startFunc: { _ in })
         let notify = SignalObserver(
             valueWillChange: signal.notifyWillChange,
             valueChanging: signal.notifyChanging,
