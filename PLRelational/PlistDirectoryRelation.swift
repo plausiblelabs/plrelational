@@ -18,6 +18,8 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    fileprivate var writeCache = WriteCache()
+    
     public static func withDirectory(_ url: URL?, scheme: Scheme, primaryKey: Attribute, createIfDoesntExist: Bool, codec: DataCodec? = nil) -> Result<PlistDirectoryRelation, RelationError> {
         if let url = url {
             // We have a URL, so we are either opening an existing relation or creating a new one at a specific location
@@ -81,6 +83,13 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
             return .Ok(false)
         }
         
+        if writeCache.toDelete.contains(.key(keyValue)) {
+            return .Ok(false)
+        }
+        if let pendingWriteRow = writeCache.toWrite[.key(keyValue)] {
+            return .Ok(pendingWriteRow == row)
+        }
+        
         let ourRow = readRow(primaryKey: keyValue)
         return ourRow.map({ $0 == row })
     }
@@ -100,12 +109,13 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
             let toDeleteKeys = toUpdateKeys - withUpdatesKeys
             
             for updatedRow in withUpdates {
-                let result = writeRow(updatedRow)
-                if result.err != nil { return result }
+                let url = plistURL(forRow: updatedRow)
+                let key = updatedRow[primaryKey]
+                writeCache.add(url: url, key: key, row: updatedRow)
             }
             for deleteKey in toDeleteKeys {
-                let result = deleteRow(primaryKey: deleteKey)
-                if result.err != nil { return result }
+                let url = plistURL(forKeyValue: deleteKey)
+                writeCache.delete(url: url, key: deleteKey)
             }
             
             return .Ok()
@@ -120,29 +130,29 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
             
             let removed = existingRow.map(ConcreteRelation.init)
             let added = ConcreteRelation(row)
-            return writeRow(row).map({
-                notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .directChange)
-                return 0
-            })
+            let url = plistURL(forRow: row)
+            let key = row[primaryKey]
+            writeCache.add(url: url, key: key, row: row)
+            notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .directChange)
+            
+            return .Ok(0)
         })
     }
     
     public func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         // TODO: for queries involving the primary key, be more efficient and don't scan everything.
         let keysToDelete = flatmapOk(rowGenerator(), { query.valueWithRow($0).boolValue ? $0[primaryKey] : nil })
+        
         return keysToDelete.then({
             for key in $0 {
-                let result = deleteRow(primaryKey: key)
-                if result.err != nil { return result }
+                let url = plistURL(forKeyValue: key)
+                writeCache.delete(url: url, key: key)
             }
             return .Ok()
         })
     }
     
     public func save() -> Result<Void, RelationError> {
-        // TODO: Currently we open+close the rowplist file for each change, so we don't need an additional save
-        // step here, but we should try to optimize things to reduce file I/O
-        
         // XXX: If there were no writes to this relation in the transaction, and the directory didn't already
         // exist, then we want to create it now, otherwise the relation won't open successfully next time around
         // due to the strict checks we have in `withDirectory` at the moment
@@ -153,6 +163,31 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
                 return .Err(error)
             }
         }
+        
+        for (urlOrKey, row) in writeCache.toWrite {
+            if case .key = urlOrKey {
+                // Only write out entries with keys, entries with URLs will be duplicates and may not exist.
+                let result = writeRow(row)
+                if result.err != nil {
+                    return result
+                }
+            }
+            // Don't delete anything we're writing or overwriting.
+            writeCache.toDelete.remove(urlOrKey)
+        }
+        
+        for url in writeCache.toDelete.lazy.flatMap({ $0.urlValue }) {
+            do {
+                try FileManager.default.removeItem(at: url)
+            } catch let error as NSError {
+                // Ignore NoSuchFileError, since we may legitimately try to delete files that don't exist
+                if error.domain != NSCocoaErrorDomain || error.code != NSFileNoSuchFileError {
+                    return .Err(error)
+                }
+            }
+        }
+        
+        writeCache = WriteCache()
 
         return .Ok(())
     }
@@ -162,17 +197,23 @@ extension PlistDirectoryRelation {
     fileprivate static let fileExtension = "rowplist"
     fileprivate static let filePrefixLength = 2
     
-    fileprivate func plistURL(forKeyValue value: RelationValue) -> URL {
+    fileprivate func plistURL(forKeyValue value: RelationValue) -> URL? {
+        guard let baseURL = self.url else { return nil }
+        
         let valueData = canonicalData(for: value)
         let hash = SHA256(valueData)
         let hexHash = hexString(hash, uppercase: false)
         
         let prefix = hexHash.substring(to: hexHash.characters.index(hexHash.startIndex, offsetBy: PlistDirectoryRelation.filePrefixLength))
         
-        return self.url!
+        return baseURL
             .appendingPathComponent(prefix)
             .appendingPathComponent(hexHash)
             .appendingPathExtension(PlistDirectoryRelation.fileExtension)
+    }
+    
+    fileprivate func plistURL(forRow row: Row) -> URL? {
+        return plistURL(forKeyValue: row[primaryKey])
     }
     
     fileprivate func canonicalData(for value: RelationValue) -> [UInt8] {
@@ -214,7 +255,7 @@ extension PlistDirectoryRelation {
             return .Ok(nil)
         }
         
-        let url = plistURL(forKeyValue: key)
+        guard let url = plistURL(forKeyValue: key) else { return .Ok(nil) }
         let result = readRow(url: url)
         switch result {
         case .Ok(let row):
@@ -232,8 +273,7 @@ extension PlistDirectoryRelation {
     
     fileprivate func writeRow(_ row: Row) -> Result<Void, RelationError> {
         do {
-            let primaryKeyValue = row[primaryKey]
-            let url = plistURL(forKeyValue: primaryKeyValue)
+            let url = plistURL(forRow: row)!
             let directory = url.deletingLastPathComponent()
             
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
@@ -247,26 +287,18 @@ extension PlistDirectoryRelation {
         }
     }
     
-    fileprivate func deleteRow(primaryKey key: RelationValue) -> Result<Void, RelationError> {
-        do {
-            let url = plistURL(forKeyValue: key)
-            try FileManager.default.removeItem(at: url)
-            return .Ok()
-        } catch {
-            return .Err(error)
-        }
-    }
-    
     fileprivate func rowURLs() -> AnyIterator<Result<URL, NSError>> {
+        // This should never be called in the first place if url is nil. That case is handled
+        // in the caller.
+        precondition(url != nil)
+        
         // XXX: enumerator(at:url) seems to crash if the directory does not exist, so let's avoid that; we need to find
         // a better solution that doesn't require constantly checking for its existence
         if let url = url {
             if !(url as NSURL).checkResourceIsReachableAndReturnError(nil) {
-                return AnyIterator{ nil }
+                // If the directory doesn't even exist, then just return URLs in the write cache.
+                return AnyIterator(writeCache.toWrite.keys.lazy.flatMap({ $0.urlValue }).map(Result.Ok).makeIterator())
             }
-        } else {
-            // Return an empty iterator for the case where a directory URL hasn't yet been set
-            return AnyIterator{ nil }
         }
         
         var enumerationError: NSError? = nil
@@ -276,7 +308,16 @@ extension PlistDirectoryRelation {
             return false
         })
         
+        var writeCacheURLIterator: Optional = writeCache.toWrite.keys.lazy.flatMap({ $0.urlValue }).makeIterator()
+        let writeCacheDeleted = writeCache.toDelete
+        
         return AnyIterator({
+            if let writeCacheURL = writeCacheURLIterator?.next() {
+                return .Ok(writeCacheURL)
+            } else {
+                writeCacheURLIterator = nil
+            }
+            
             while true {
                 if returnedError {
                     return nil
@@ -289,7 +330,9 @@ extension PlistDirectoryRelation {
                 } else if let url = url as? URL {
                     switch url.isDirectory {
                     case .Ok(let isDirectory):
-                        if !isDirectory && url.pathExtension == PlistDirectoryRelation.fileExtension {
+                        if !isDirectory &&
+                            url.pathExtension == PlistDirectoryRelation.fileExtension &&
+                            !writeCacheDeleted.contains(.url(url)) {
                             return .Ok(url)
                         }
                     case .Err(let error):
@@ -303,19 +346,36 @@ extension PlistDirectoryRelation {
     }
     
     fileprivate func rowGenerator() -> AnyIterator<Result<Row, RelationError>> {
-        let urlGenerator = rowURLs()
-        return AnyIterator({
-            return urlGenerator.next().map({ urlResult in
-                urlResult.mapErr({ $0 as RelationError }).then({
-                    let result = self.readRow(url: $0)
-                    return result
+        if url != nil {
+            let urlGenerator = rowURLs()
+            return AnyIterator({
+                return urlGenerator.next().map({ urlResult in
+                    urlResult.mapErr({ $0 as RelationError }).then({
+                        if let cacheRow = self.writeCache.toWrite[.url($0)] {
+                            return .Ok(cacheRow)
+                        } else {
+                            let result = self.readRow(url: $0)
+                            return result
+                        }
+                    })
                 })
             })
-        })
+        } else {
+            return AnyIterator(writeCache.toWrite.values.lazy.map(Result.Ok).makeIterator())
+        }
     }
     
     fileprivate func filteredRowGenerator(primaryKeyValues: [RelationValue]) -> AnyIterator<Result<Row, RelationError>> {
         let rows = primaryKeyValues.lazy.flatMap({ value -> Result<Row, RelationError>? in
+            if let url = self.plistURL(forKeyValue: value) {
+                if let toWriteRow = self.writeCache.toWrite[.url(url)] {
+                    return .Ok(toWriteRow)
+                }
+                if self.writeCache.toDelete.contains(.url(url)) {
+                    return nil
+                }
+            }
+            
             let result = self.readRow(primaryKey: value)
             switch result {
             case .Ok(nil):
@@ -327,5 +387,63 @@ extension PlistDirectoryRelation {
             }
         })
         return AnyIterator(rows.makeIterator())
+    }
+}
+
+extension PlistDirectoryRelation {
+    fileprivate struct WriteCache {
+        enum URLOrKey: Hashable {
+            case standardizedURL(URL)
+            case key(RelationValue)
+            
+            var hashValue: Int {
+                switch self {
+                case .standardizedURL(let url): return url.hashValue
+                case .key(let value): return ~value.hashValue
+                }
+            }
+            
+            static func url(_ url: URL) -> URLOrKey {
+                return .standardizedURL(url.standardizedFileURL)
+            }
+            
+            var urlValue: URL? {
+                switch self {
+                case .standardizedURL(let url): return url
+                case .key: return nil
+                }
+            }
+            
+            static func ==(lhs: URLOrKey, rhs: URLOrKey) -> Bool {
+                switch (lhs, rhs) {
+                case let (.standardizedURL(lhs), .standardizedURL(rhs)): return lhs == rhs
+                case let (.key(lhs), .key(rhs)): return lhs == rhs
+                default: return false
+                }
+            }
+        }
+        
+        var toWrite: [URLOrKey: Row] = [:]
+        var toDelete: Set<URLOrKey> = []
+        
+        mutating func add(url: URL?, key: RelationValue, row: Row) {
+            if let url = url {
+                toWrite[.url(url)] = row
+                toDelete.remove(.url(url))
+            }
+            
+            toWrite[.key(key)] = row
+            toDelete.remove(.key(key))
+        }
+        
+        mutating func delete(url: URL?, key: RelationValue) {
+            if let url = url {
+                toWrite.removeValue(forKey: .url(url))
+                toDelete.insert(.url(url))
+            }
+            
+            toWrite.removeValue(forKey: .key(key))
+            toDelete.insert(.key(key))
+        }
     }
 }

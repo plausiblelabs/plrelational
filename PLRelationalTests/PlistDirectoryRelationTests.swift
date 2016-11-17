@@ -57,6 +57,69 @@ class PlistDirectoryRelationTests: XCTestCase {
         AssertEqual(r1, r2)
     }
     
+    func testAddUpdateDelete() {
+        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", createIfDoesntExist: true).ok!
+        
+        AssertEqual(r, MakeRelation(["n"]))
+        
+        XCTAssertNil(r.add(["n": 1]).err)
+        AssertEqual(r, MakeRelation(["n"], [1]))
+        
+        XCTAssertNil(r.update(true, newValues: ["n": 2]).err)
+        AssertEqual(r, MakeRelation(["n"], [2]))
+        
+        XCTAssertNil(r.delete(true).err)
+        AssertEqual(r, MakeRelation(["n"]))
+    }
+    
+    func testAddUpdateDeleteSave() {
+        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", createIfDoesntExist: true).ok!
+        
+        XCTAssertNil(r.add(["n": 1]).err)
+        XCTAssertNil(r.update(true, newValues: ["n": 2]).err)
+        XCTAssertNil(r.delete(true).err)
+        XCTAssertNil(r.save().err)
+        AssertEqual(r, MakeRelation(["n"]))
+    }
+    
+    func testAddUpdateDeleteWithoutURL() {
+        let r = PlistDirectoryRelation.withDirectory(nil, scheme: ["n"], primaryKey: "n", createIfDoesntExist: true).ok!
+        
+        AssertEqual(r, MakeRelation(["n"]))
+        
+        XCTAssertNil(r.add(["n": 1]).err)
+        AssertEqual(r, MakeRelation(["n"], [1]))
+        
+        XCTAssertNil(r.update(true, newValues: ["n": 2]).err)
+        AssertEqual(r, MakeRelation(["n"], [2]))
+        
+        XCTAssertNil(r.delete(true).err)
+        AssertEqual(r, MakeRelation(["n"]))
+    }
+    
+    func testAddUpdateDeleteWithSave() {
+        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", createIfDoesntExist: true).ok!
+        
+        AssertEqual(r, MakeRelation(["n"]))
+        XCTAssertNil(r.save().err)
+        AssertEqual(r, MakeRelation(["n"]))
+        
+        XCTAssertNil(r.add(["n": 1]).err)
+        AssertEqual(r, MakeRelation(["n"], [1]))
+        XCTAssertNil(r.save().err)
+        AssertEqual(r, MakeRelation(["n"], [1]))
+        
+        XCTAssertNil(r.update(true, newValues: ["n": 2]).err)
+        AssertEqual(r, MakeRelation(["n"], [2]))
+        XCTAssertNil(r.save().err)
+        AssertEqual(r, MakeRelation(["n"], [2]))
+        
+        XCTAssertNil(r.delete(true).err)
+        AssertEqual(r, MakeRelation(["n"]))
+        XCTAssertNil(r.save().err)
+        AssertEqual(r, MakeRelation(["n"]))
+    }
+    
     func testDataRoundTrip() {
         let url = tmpURL()
         
@@ -78,6 +141,8 @@ class PlistDirectoryRelationTests: XCTestCase {
             let row = Row(values: Dictionary(zip(schemeAttributes, rowValues)))
             XCTAssertNil(r1.add(row).err)
         }
+        
+        XCTAssertNil(r1.save().err)
         
         let r2Result = PlistDirectoryRelation.withDirectory(url, scheme: r1.scheme, primaryKey: "first", createIfDoesntExist: true)
         XCTAssertNil(r2Result.err)
@@ -120,6 +185,8 @@ class PlistDirectoryRelationTests: XCTestCase {
             let row = Row(values: Dictionary(zip(schemeAttributes, rowValues)))
             XCTAssertNil(r1.add(row).err)
         }
+        
+        XCTAssertNil(r1.save().err)
         
         let r2Result = PlistDirectoryRelation.withDirectory(url, scheme: r1.scheme, primaryKey: "first", createIfDoesntExist: true, codec: PrefixCodec())
         XCTAssertNil(r2Result.err)
@@ -267,6 +334,7 @@ class PlistDirectoryRelationTests: XCTestCase {
         for row in initialValues.rows() {
             _ = dirR.add(row.ok!)
         }
+        XCTAssertNil(dirR.save().err)
         
         let toSubtract = MakeRelation(["id", "name"], [4, "Pat"])
         let toUnion = MakeRelation(["id", "name"], [6, "Sam"])
@@ -327,6 +395,7 @@ class PlistDirectoryRelationTests: XCTestCase {
         for row in initialValues.rows() {
             _ = dirR.add(row.ok!)
         }
+        XCTAssertNil(dirR.save().err)
         
         let toSubtract = MakeRelation(["id", "name"], [4, "Pat"])
         let toUnion = MakeRelation(["id", "name"], [6, "Sam"])
