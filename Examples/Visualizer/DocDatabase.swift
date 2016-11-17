@@ -677,6 +677,10 @@ class DocDatabase {
         let selectedStudentCourses = DocObject(.sharedRelation)
         let calculusStudentCount = DocObject(.sharedRelation)
 
+        // selectedPersons
+        //   .join(studentCourses)
+        //   .join(courses)
+        //   .project(["course_id", "title", "grade"])
         let selectedStudentCoursesModel = shared(
             input(selectedPersons),
             join(input(studentCourses)),
@@ -684,14 +688,18 @@ class DocDatabase {
             // relies on the presence of a unique identifier
             join(input(courses), projecting: ["course_id", "title", "grade"])
         )
-        
+
+        // courses
+        //   .select(Attribute("title") *== "Calculus")
+        //   .join(studentCourses)
+        //   .count()
         let calculusStudentCountModel = shared(
             input(courses),
             selectEq("title", "Calculus"),
             join(input(studentCourses)),
             count()
         )
-
+        
         func addDocObject(_ docObject: DocObject, name: String, parent: DocObject?, order: Double) {
             let parentDocItemID = parent?.docItemID
             self.addDocObject(docObject: docObject, name: name,

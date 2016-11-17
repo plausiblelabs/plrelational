@@ -26,6 +26,7 @@ class Document: NSDocument {
     
     private var docOutlineView: DocOutlineView!
     private var editorView: EditorView!
+    private var sidebarView: SidebarView!
     
     private var _undoManager: PLUndoManager!
     fileprivate var db: DocDatabase!
@@ -92,6 +93,9 @@ class Document: NSDocument {
         editorView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
         contentView.addSubview(editorView)
         
+        sidebarView = SidebarView(frame: rightSidebarView.bounds, model: docModel)
+        sidebarView.autoresizingMask = [.viewHeightSizable]
+        rightSidebarView.addSubview(sidebarView)
         rightSidebarView.visible <~ docModel.rightSidebarVisible
         
 //        backButton.clicks ~~> docModel.navigateBackProperty

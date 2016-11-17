@@ -49,17 +49,28 @@ class DocModel {
         // XXX: Eagerly start some properties that are dependencies of other actions
         self.activeTabID.start()
     }
+    
+    deinit {
+        observerRemovals.forEach{ $0() }
+    }
 
     lazy var leftSidebarVisible: MutableValueProperty<Bool> = {
         return mutableValueProperty(true)
     }()
     
     lazy var rightSidebarVisible: MutableValueProperty<Bool> = {
-        return mutableValueProperty(false)
+        return mutableValueProperty(true)
     }()
     
     lazy var docOutlineModel: DocOutlineModel = {
         return DocOutlineModel(docModel: self, db: self.db, docItems: self.docItemsTree)
+    }()
+    
+    lazy var sidebarModel: SidebarModel = {
+        return SidebarModel(
+            db: self.db,
+            selectedObjects: self.db.selectedTabCurrentObject
+        )
     }()
     
     /// The selected tab identifier.
@@ -70,7 +81,7 @@ class DocModel {
             update: { id in
                 let tabID = id.flatMap(TabID.fromNullable)
                 self.db.setSelectedTab(tabID: tabID)
-        }
+            }
         )
     }()
 
@@ -128,10 +139,97 @@ class DocModel {
         return db.selectDocOutlineItem(tabID: TabID(currentTabID), path: path, currentPosition: currentPosition)
     }
     
-    /// Returns a Relation that contains the relation model for the given identifier.
-    func relationModelPlistData(objectID: ObjectID) -> Relation {
+    /// Returns a Relation that contains the relation model for the given object.
+    private func relationModelPlistData(objectID: ObjectID) -> Relation {
         return db.relationModelData
             .select(DB.RelationModelData.ObjectID.a *== objectID.relationValue)
             .project(DB.RelationModelData.Plist.a)
     }
+    
+    /// Asynchronously loads the RelationViewModel for the given object.
+    // TODO: Allow for cancellation
+    private func loadRelationViewModel(objectID: ObjectID, completion: @escaping (RelationViewModel?) -> Void) {
+        db.relationModelData.recursiveSelect(
+            idAttr: DB.RelationModelData.ObjectID.a,
+            initialID: objectID.relationValue,
+            rowCallback: { row -> Result<(RelationModel, [RelationValue]), RelationError> in
+                guard let plistBlob: [UInt8] = row[DB.RelationModelData.Plist.a].get() else {
+                    return .Err(DocModelError(message: "Invalid plist data"))
+                }
+                if let model = RelationModel.fromPlistData(Data(bytes: plistBlob)) {
+                    let objectIDsToLoad: [RelationValue]
+                    switch model {
+                    case .stored:
+                        // There's just one relation, and we already loaded it
+                        objectIDsToLoad = []
+                    case .shared(let sharedRelationModel):
+                        // Determine all relations referenced by this model
+                        objectIDsToLoad = sharedRelationModel.referencedObjectIDs().map{ $0.relationValue }
+                    }
+                    let result: (RelationModel, [RelationValue]) = (model, objectIDsToLoad)
+                    return .Ok(result)
+                } else {
+                    return .Err(DocModelError(message: "Failed to decode RelationModel plist data"))
+                }
+            },
+            completionCallback: { result in
+                // TODO: Convert RelationModels -> RelationViewModel
+                completion(nil)
+            }
+        )
+    }
+    
+    /// The RelationViewModel for the active tab's selected outline item.
+    lazy var selectedRelationViewModel: AsyncReadableProperty<AsyncState<RelationViewModel?>> = {
+        // TODO: Do we need to explicitly start this underlying property here?
+        self.activeTabCurrentHistoryItem.start()
+
+        // XXX: This is a unique identifier that allows for determining whether an async query is still valid
+        // i.e., whether the content should be set
+        var currentContentLoadID: UUID?
+        
+//        let contentLoadID = UUID()
+//        currentContentLoadID = contentLoadID
+//        let contentRelation = docModel.relationModelPlistData(objectID: docOutlinePath.objectID)
+//        contentRelation.asyncAllRows(
+//            postprocessor: { rows -> RelationModel? in
+//                // TODO: Show error message if any step fails here
+//                guard let plistBlob = contentRelation.extractOneBlobOrNil(from: AnyIterator(rows.makeIterator())) else { return nil }
+//                return RelationModel.fromPlistData(Data(bytes: plistBlob))
+//            },
+//            completion: { result in
+//                // Only set the loaded data if our content load ID matches
+//                if self.currentContentLoadID != contentLoadID {
+//                    return
+//                }
+//                guard let model = result.ok ?? nil else { return }
+//                self.addRelationTables(fromModel: model, toView: chainView)
+//            }
+//        )
+        
+        return self.activeTabCurrentHistoryItem.signal
+            .map{ historyItem in
+                if let historyItem = historyItem {
+                    let docOutlinePath = historyItem.outlinePath
+                    switch docOutlinePath.type {
+                    case .storedRelation, .sharedRelation:
+                        // Asynchronously load the relation model data
+                        // TODO
+                        return AsyncState.loading
+                    default:
+                        // Selected item is not a relation object
+                        return AsyncState.idle(nil)
+                    }
+                } else {
+                    // No item is selected
+                    return AsyncState.idle(nil)
+                }
+            }
+            .property()
+    }()
+}
+
+// XXX: Placeholder error type
+public struct DocModelError: Error {
+    let message: String
 }

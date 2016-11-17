@@ -72,6 +72,29 @@ struct SharedRelationStage {
 struct SharedRelationModel {
     let input: SharedRelationInput
     let stages: [SharedRelationStage]
+
+    /// Returns the set of identifiers corresponding to the relation objects referenced in this model.
+    func referencedObjectIDs() -> Set<ObjectID> {
+        var ids: Set<ObjectID> = []
+        
+        func processInput(_ input: SharedRelationInput) {
+            ids.insert(input.objectID)
+        }
+
+        processInput(self.input)
+        for stage in self.stages {
+            if let op = stage.op {
+                switch op {
+                case .filter:
+                    break
+                case .combine(let binaryOp):
+                    processInput(binaryOp.rhs)
+                }
+            }
+        }
+        
+        return ids
+    }
 }
 
 // MARK: Plist conversion

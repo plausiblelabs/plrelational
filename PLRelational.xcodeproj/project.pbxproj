@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3710A68F1DDCF93C0070EC29 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A68E1DDCF93C0070EC29 /* SidebarView.swift */; };
+		3710A6911DDCFA330070EC29 /* SidebarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A6901DDCFA330070EC29 /* SidebarModel.swift */; };
+		3710A6931DDCFA770070EC29 /* NSControlSwiftAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A6921DDCFA770070EC29 /* NSControlSwiftAction.swift */; };
+		3710A6951DDCFA9C0070EC29 /* ObjectAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A6941DDCFA9C0070EC29 /* ObjectAttachment.swift */; };
+		3710A6971DDCFAD00070EC29 /* ScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A6961DDCFAD00070EC29 /* ScrollView.swift */; };
+		3710A69A1DDD16CA0070EC29 /* RelationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A6981DDD16A80070EC29 /* RelationViewModel.swift */; };
+		3710A69C1DDD18E10070EC29 /* AsyncState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A69B1DDD18E10070EC29 /* AsyncState.swift */; };
+		3710A69E1DDD29D90070EC29 /* RelationRecursiveSelect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A69D1DDD29D90070EC29 /* RelationRecursiveSelect.swift */; };
+		3710A6A11DDD6B300070EC29 /* RelationRecursiveSelectTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A6A01DDD6B300070EC29 /* RelationRecursiveSelectTests.swift */; };
 		371243B01D00B5D700E9BCFF /* collection18.png in Resources */ = {isa = PBXBuildFile; fileRef = 371243A81D00B5D700E9BCFF /* collection18.png */; };
 		371243B11D00B5D700E9BCFF /* collection18@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 371243A91D00B5D700E9BCFF /* collection18@2x.png */; };
 		371243B21D00B5D700E9BCFF /* group18.png in Resources */ = {isa = PBXBuildFile; fileRef = 371243AA1D00B5D700E9BCFF /* group18.png */; };
@@ -552,6 +561,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3710A68E1DDCF93C0070EC29 /* SidebarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		3710A6901DDCFA330070EC29 /* SidebarModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SidebarModel.swift; sourceTree = "<group>"; };
+		3710A6921DDCFA770070EC29 /* NSControlSwiftAction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSControlSwiftAction.swift; sourceTree = "<group>"; };
+		3710A6941DDCFA9C0070EC29 /* ObjectAttachment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectAttachment.swift; sourceTree = "<group>"; };
+		3710A6961DDCFAD00070EC29 /* ScrollView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScrollView.swift; sourceTree = "<group>"; };
+		3710A6981DDD16A80070EC29 /* RelationViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationViewModel.swift; sourceTree = "<group>"; };
+		3710A69B1DDD18E10070EC29 /* AsyncState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncState.swift; sourceTree = "<group>"; };
+		3710A69D1DDD29D90070EC29 /* RelationRecursiveSelect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationRecursiveSelect.swift; sourceTree = "<group>"; };
+		3710A6A01DDD6B300070EC29 /* RelationRecursiveSelectTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationRecursiveSelectTests.swift; path = PLRelationalTests/RelationRecursiveSelectTests.swift; sourceTree = SOURCE_ROOT; };
 		371243A51D00B06300E9BCFF /* ImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		371243A81D00B5D700E9BCFF /* collection18.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = collection18.png; path = Resources/collection18.png; sourceTree = "<group>"; };
 		371243A91D00B5D700E9BCFF /* collection18@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "collection18@2x.png"; path = "Resources/collection18@2x.png"; sourceTree = "<group>"; };
@@ -954,6 +972,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3710A69F1DDD29E60070EC29 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				C20F925C1D943C6D002F9125 /* MutableRelationCascadingDelete.swift */,
+				3710A69D1DDD29D90070EC29 /* RelationRecursiveSelect.swift */,
+				3710A6A01DDD6B300070EC29 /* RelationRecursiveSelectTests.swift */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
 		371243A71D00B5C100E9BCFF /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -1056,26 +1084,19 @@
 			name = "Stored Relations";
 			sourceTree = "<group>";
 		};
-		374AE9661D91B5E3007D1366 /* Query Management */ = {
+		374AE9671D91B5F5007D1366 /* Async Management */ = {
 			isa = PBXGroup;
 			children = (
+				C2C6308A1D35553F00AD44C1 /* AsyncManager.swift */,
+				C2CA46181D3FF1870082E2D2 /* AsyncManagerObservation.swift */,
+				C2BA22971D3FD65F00DCCE72 /* AsyncManagerTests.swift */,
 				C23BC04F1D21AEDF00188F86 /* QueryOptimizer.swift */,
 				C23AAF471CF8CD89009E28E0 /* QueryPlanner.swift */,
 				C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */,
 				C23AAF4B1CF8DAED009E28E0 /* QueryRunner.swift */,
 				C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */,
 			);
-			name = "Query Management";
-			sourceTree = "<group>";
-		};
-		374AE9671D91B5F5007D1366 /* Update Management */ = {
-			isa = PBXGroup;
-			children = (
-				C2C6308A1D35553F00AD44C1 /* AsyncManager.swift */,
-				C2CA46181D3FF1870082E2D2 /* AsyncManagerObservation.swift */,
-				C2BA22971D3FD65F00DCCE72 /* AsyncManagerTests.swift */,
-			);
-			name = "Update Management";
+			name = "Async Management";
 			sourceTree = "<group>";
 		};
 		374AE9681D91B63A007D1366 /* Debugging Aids */ = {
@@ -1126,13 +1147,13 @@
 			children = (
 				C23AAF451CF76CFA009E28E0 /* IntermediateRelation.swift */,
 				3727076C1CEE60C900710C80 /* MutableRelation.swift */,
-				C20F925C1D943C6D002F9125 /* MutableRelationCascadingDelete.swift */,
 				C22BF1391CBC349400D3FE59 /* Relation.swift */,
 				C22921E71CD12CF100518184 /* RelationTests.swift */,
 				C257C74B1CBD835600234A89 /* RelationParts.swift */,
 				C22921A71CCE587900518184 /* RelationValue.swift */,
 				C22AC5231D1061FB00224091 /* Row.swift */,
 				C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */,
+				3710A69F1DDD29E60070EC29 /* Extensions */,
 				374AE96A1D91B742007D1366 /* Change Observation */,
 				374AE9691D91B6B3007D1366 /* Operators */,
 			);
@@ -1186,9 +1207,12 @@
 		375699441DCDACA000EA0D8C /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				3710A69B1DDD18E10070EC29 /* AsyncState.swift */,
 				375699451DCDACB600EA0D8C /* Box.swift */,
 				37B253901DCFE61E00E9311D /* Environment.swift */,
 				37B253891DCFDC6C00E9311D /* NSColor255.swift */,
+				3710A6921DDCFA770070EC29 /* NSControlSwiftAction.swift */,
+				3710A6941DDCFA9C0070EC29 /* ObjectAttachment.swift */,
 				37B2538E1DCFDE7400E9311D /* VisualizerColors.swift */,
 			);
 			name = Utilities;
@@ -1388,6 +1412,7 @@
 			isa = PBXGroup;
 			children = (
 				37B2538C1DCFDE4300E9311D /* OutlineRowView.swift */,
+				3710A6961DDCFAD00070EC29 /* ScrollView.swift */,
 			);
 			name = "Custom Views";
 			sourceTree = "<group>";
@@ -1530,6 +1555,7 @@
 			children = (
 				37B253851DCFD94800E9311D /* DocOutlineView.swift */,
 				37B253871DCFD99C00E9311D /* EditorView.swift */,
+				3710A68E1DDCF93C0070EC29 /* SidebarView.swift */,
 				37B2538B1DCFDE2C00E9311D /* Custom Views */,
 			);
 			name = View;
@@ -1540,6 +1566,8 @@
 			children = (
 				375699471DCDAD1B00EA0D8C /* DocModel.swift */,
 				37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */,
+				3710A6901DDCFA330070EC29 /* SidebarModel.swift */,
+				3710A6981DDD16A80070EC29 /* RelationViewModel.swift */,
 			);
 			name = "View Model";
 			sourceTree = "<group>";
@@ -1636,8 +1664,7 @@
 				374AE96B1D91B7A3007D1366 /* Memory Relations */,
 				374AE9651D91B5B1007D1366 /* Stored Relations */,
 				C277E7FB1CDA908E00B7B8F6 /* Logging Relations */,
-				374AE9661D91B5E3007D1366 /* Query Management */,
-				374AE9671D91B5F5007D1366 /* Update Management */,
+				374AE9671D91B5F5007D1366 /* Async Management */,
 				C20F926B1D9587A3002F9125 /* Data Codec */,
 				374AE9681D91B63A007D1366 /* Debugging Aids */,
 				C2BD298F1CD250B30081FD05 /* Utilities */,
@@ -2435,18 +2462,25 @@
 			files = (
 				37B253861DCFD94800E9311D /* DocOutlineView.swift in Sources */,
 				37B2538F1DCFDE7400E9311D /* VisualizerColors.swift in Sources */,
+				3710A68F1DDCF93C0070EC29 /* SidebarView.swift in Sources */,
 				37B2538A1DCFDC6C00E9311D /* NSColor255.swift in Sources */,
+				3710A69A1DDD16CA0070EC29 /* RelationViewModel.swift in Sources */,
 				37E05C351DCAF59B005CBFE2 /* ItemType.swift in Sources */,
 				37F1DA5E1DD39519004D4AAD /* RelationModel.swift in Sources */,
 				37B2538D1DCFDE4300E9311D /* OutlineRowView.swift in Sources */,
 				37E05C391DCAF7B9005CBFE2 /* HistoryItem.swift in Sources */,
+				3710A6911DDCFA330070EC29 /* SidebarModel.swift in Sources */,
+				3710A69C1DDD18E10070EC29 /* AsyncState.swift in Sources */,
 				37E05C491DCDA33F005CBFE2 /* DocOutlineModel.swift in Sources */,
 				37504B3D1DC6995100CEE4D4 /* Document.swift in Sources */,
+				3710A6971DDCFAD00070EC29 /* ScrollView.swift in Sources */,
 				375699461DCDACB600EA0D8C /* Box.swift in Sources */,
 				37E05C301DCAF00E005CBFE2 /* DocDatabaseError.swift in Sources */,
 				37504B3B1DC6995100CEE4D4 /* AppDelegate.swift in Sources */,
 				37B253881DCFD99C00E9311D /* EditorView.swift in Sources */,
 				375699481DCDAD1B00EA0D8C /* DocModel.swift in Sources */,
+				3710A6931DDCFA770070EC29 /* NSControlSwiftAction.swift in Sources */,
+				3710A6951DDCFA9C0070EC29 /* ObjectAttachment.swift in Sources */,
 				37E05C321DCAF4FB005CBFE2 /* Identifiers.swift in Sources */,
 				37E05C2E1DCAEFC7005CBFE2 /* DocDatabase.swift in Sources */,
 				37E05C371DCAF764005CBFE2 /* DocObject.swift in Sources */,
@@ -2635,6 +2669,7 @@
 				C23AAF461CF76CFA009E28E0 /* IntermediateRelation.swift in Sources */,
 				C22921D11CD12A8700518184 /* Result.swift in Sources */,
 				C2C6308D1D355B7500AD44C1 /* PerThreadInstance.swift in Sources */,
+				3710A69E1DDD29D90070EC29 /* RelationRecursiveSelect.swift in Sources */,
 				C22921D21CD12A8700518184 /* SetPowerSet.swift in Sources */,
 				C22921D31CD12A8700518184 /* SimpleDatabase.swift in Sources */,
 				C2B53CB51D1862ED006B6278 /* Mutex.swift in Sources */,
@@ -2675,6 +2710,7 @@
 				C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */,
 				C277E8051CDBD2A000B7B8F6 /* DBTestCase.swift in Sources */,
 				C22921E81CD12CF100518184 /* RelationTests.swift in Sources */,
+				3710A6A11DDD6B300070EC29 /* RelationRecursiveSelectTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
