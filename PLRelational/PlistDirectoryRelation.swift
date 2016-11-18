@@ -19,6 +19,7 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     fileprivate var writeCache = WriteCache()
+    fileprivate var readCache = ReadCache()
     
     public static func withDirectory(_ url: URL?, scheme: Scheme, primaryKey: Attribute, createIfDoesntExist: Bool, codec: DataCodec? = nil) -> Result<PlistDirectoryRelation, RelationError> {
         if let url = url {
@@ -238,11 +239,22 @@ extension PlistDirectoryRelation {
     
     fileprivate func readRow(url: URL) -> Result<Row, RelationError> {
         do {
+            let modDate = flatten(try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)
+            if let entry = readCache[url] {
+                if modDate == entry.date {
+                    return .Ok(entry.row)
+                }
+            }
+            
             let data = try Data(contentsOf: url, options: [])
             let decodedDataResult = codec?.decode(data) ?? .Ok(data)
             return try decodedDataResult.then({
                 let plist = try PropertyListSerialization.propertyList(from: $0, options: [], format: nil)
-                return Row.fromPlist(plist)
+                let row = Row.fromPlist(plist)
+                if let modDate = modDate, let row = row.ok {
+                    readCache[url] = (modDate, row)
+                }
+                return row
             })
         } catch {
             return .Err(error)
@@ -444,6 +456,31 @@ extension PlistDirectoryRelation {
             
             toWrite.removeValue(forKey: .key(key))
             toDelete.insert(.key(key))
+        }
+    }
+}
+
+extension PlistDirectoryRelation {
+    fileprivate struct ReadCache {
+        typealias Entry = (date: Date, row: Row)
+        
+        let cache = NSCache<NSURL, AnyObject>()
+        
+        subscript(url: URL) -> Entry? {
+            get {
+                return cache.object(forKey: standardized(url: url)) as? Entry
+            }
+            set {
+                if let newValue = newValue {
+                    cache.setObject(newValue as AnyObject, forKey: standardized(url: url))
+                } else {
+                    cache.removeObject(forKey: standardized(url: url))
+                }
+            }
+        }
+        
+        func standardized(url: URL) -> NSURL {
+            return url.standardizedFileURL as NSURL
         }
     }
 }

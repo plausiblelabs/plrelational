@@ -303,20 +303,6 @@ class PlistDirectoryRelationTests: XCTestCase {
     func testJoinPerformance() {
         let url = tmpURL()
         
-        class LoggingCodec: DataCodec {
-            var encoded: [Data] = []
-            var decoded: [Data] = []
-            
-            func encode(_ data: Data) -> Result<Data, RelationError> {
-                encoded.append(data)
-                return .Ok(data)
-            }
-            
-            func decode(_ data: Data) -> Result<Data, RelationError> {
-                decoded.append(data)
-                return .Ok(data)
-            }
-        }
         let loggingCodec = LoggingCodec()
         
         let initialValues = MakeRelation(
@@ -364,20 +350,6 @@ class PlistDirectoryRelationTests: XCTestCase {
     func testSelectPerformance() {
         let url = tmpURL()
         
-        class LoggingCodec: DataCodec {
-            var encoded: [Data] = []
-            var decoded: [Data] = []
-            
-            func encode(_ data: Data) -> Result<Data, RelationError> {
-                encoded.append(data)
-                return .Ok(data)
-            }
-            
-            func decode(_ data: Data) -> Result<Data, RelationError> {
-                decoded.append(data)
-                return .Ok(data)
-            }
-        }
         let loggingCodec = LoggingCodec()
         
         let initialValues = MakeRelation(
@@ -416,5 +388,37 @@ class PlistDirectoryRelationTests: XCTestCase {
         loggingCodec.decoded = []
         AssertEqual(combined.select(Attribute("id") *== 12345), MakeRelation(["id", "name"]))
         XCTAssertEqual(loggingCodec.decoded.count, 0)
+    }
+    
+    func testReadCache() {
+        let loggingCodec = LoggingCodec()
+        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", createIfDoesntExist: true, codec: loggingCodec).ok!
+        
+        XCTAssertNil(r.add(["n": 1]).err)
+        XCTAssertNil(r.save().err)
+        
+        loggingCodec.encoded = []
+        loggingCodec.decoded = []
+        for _ in 0 ..< 100 {
+            AssertEqual(r, MakeRelation(["n"], [1]))
+        }
+        XCTAssertEqual(loggingCodec.encoded.count, 0)
+        XCTAssertTrue(loggingCodec.decoded.count > 0)
+        XCTAssertTrue(loggingCodec.decoded.count < 100)
+    }
+}
+
+fileprivate class LoggingCodec: DataCodec {
+    var encoded: [Data] = []
+    var decoded: [Data] = []
+    
+    func encode(_ data: Data) -> Result<Data, RelationError> {
+        encoded.append(data)
+        return .Ok(data)
+    }
+    
+    func decode(_ data: Data) -> Result<Data, RelationError> {
+        decoded.append(data)
+        return .Ok(data)
     }
 }
