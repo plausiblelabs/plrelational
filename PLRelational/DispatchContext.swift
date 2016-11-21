@@ -12,7 +12,12 @@ public protocol DispatchContext {
 
 extension CFRunLoop: DispatchContext {
     public func async(_ f: @escaping (Void) -> Void) {
-        CFRunLoopPerformBlock(self, CFRunLoopMode.commonModes.rawValue, f)
+        async(inModes: [.commonModes], f)
+    }
+    
+    public func async(inModes: [CFRunLoopMode], _ f: @escaping (Void) -> Void) {
+        let cfmodes = inModes.map({ $0.rawValue }) as CFArray
+        CFRunLoopPerformBlock(self, cfmodes, f)
         CFRunLoopWakeUp(self)
     }
 }
@@ -27,16 +32,19 @@ public struct RunLoopDispatchContext: DispatchContext {
     /// sometimes useful.
     var executeReentrantImmediately: Bool
     
-    public init(runloop: CFRunLoop = CFRunLoopGetCurrent(), executeReentrantImmediately: Bool = true) {
+    var modes: [CFRunLoopMode]
+    
+    public init(runloop: CFRunLoop = CFRunLoopGetCurrent(), executeReentrantImmediately: Bool = true, modes: [CFRunLoopMode] = [.commonModes]) {
         self.runloop = runloop
         self.executeReentrantImmediately = executeReentrantImmediately
+        self.modes = modes
     }
     
     public func async(_ f: @escaping (Void) -> Void) {
         if executeReentrantImmediately && CFRunLoopGetCurrent() === runloop {
             f()
         } else {
-            runloop.async(f)
+            runloop.async(inModes: modes, f)
         }
     }
 }
