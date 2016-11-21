@@ -220,6 +220,7 @@
 		C23BC0521D21C5B100188F86 /* CollectionConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */; };
 		C23BC0561D24629E00188F86 /* SmallInlineArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC0551D24629E00188F86 /* SmallInlineArray.swift */; };
 		C25D63411DDF5F3000135E20 /* OptionalFlatten.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25D63401DDF5F3000135E20 /* OptionalFlatten.swift */; };
+		C25D63431DDF88BA00135E20 /* AsyncRunloopHack.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25D63421DDF88BA00135E20 /* AsyncRunloopHack.swift */; };
 		C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C263BBF21CE51B51006B7662 /* UnaryOperator.swift */; };
 		C277E7FD1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */; };
 		C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */; };
@@ -770,6 +771,7 @@
 		C257C7511CBEBF6300234A89 /* SetPowerSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetPowerSet.swift; sourceTree = "<group>"; };
 		C257C7531CC017EB00234A89 /* SimpleDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleDatabase.swift; sourceTree = "<group>"; };
 		C25D63401DDF5F3000135E20 /* OptionalFlatten.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionalFlatten.swift; sourceTree = "<group>"; };
+		C25D63421DDF88BA00135E20 /* AsyncRunloopHack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncRunloopHack.swift; sourceTree = "<group>"; };
 		C263BBF21CE51B51006B7662 /* UnaryOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnaryOperator.swift; sourceTree = "<group>"; };
 		C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelation.swift; sourceTree = "<group>"; };
 		C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeLoggingDatabaseTests.swift; path = PLRelationalTests/ChangeLoggingDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
@@ -1092,6 +1094,7 @@
 				C2C6308A1D35553F00AD44C1 /* AsyncManager.swift */,
 				C2CA46181D3FF1870082E2D2 /* AsyncManagerObservation.swift */,
 				C2BA22971D3FD65F00DCCE72 /* AsyncManagerTests.swift */,
+				C25D63421DDF88BA00135E20 /* AsyncRunloopHack.swift */,
 				C23BC04F1D21AEDF00188F86 /* QueryOptimizer.swift */,
 				C23AAF471CF8CD89009E28E0 /* QueryPlanner.swift */,
 				C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */,
@@ -2676,6 +2679,7 @@
 				3710A69E1DDD29D90070EC29 /* RelationRecursiveSelect.swift in Sources */,
 				C22921D21CD12A8700518184 /* SetPowerSet.swift in Sources */,
 				C22921D31CD12A8700518184 /* SimpleDatabase.swift in Sources */,
+				C25D63431DDF88BA00135E20 /* AsyncRunloopHack.swift in Sources */,
 				C2B53CB51D1862ED006B6278 /* Mutex.swift in Sources */,
 				C22921D41CD12A8700518184 /* StringConvenience.swift in Sources */,
 				C22921D51CD12A8700518184 /* StringPad.swift in Sources */,
