@@ -6,6 +6,10 @@
 import Foundation
 import PLRelational
 
+// TODO: All the V:Equatable overloads below exist only to carry type information so that the appropriate
+// `isRepeat` function is selected.  It might be better to stop baking the `isRepeat` stuff into RelationSignal
+// and instead have a generic `skipRepeats` combinator extension for SignalType to make it more of an opt-in thing.
+
 extension Relation {
     
     /// Generates all non-error rows in the relation.
@@ -120,6 +124,12 @@ extension Relation {
         return signal{ $0.extractValueFromOneRow($1, transform) }
     }
 
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers nil.
+    public func valueFromOneRow<V: Equatable>(_ transform: @escaping (Row) -> V?) -> Signal<V?> {
+        return signal{ $0.extractValueFromOneRow($1, transform) }
+    }
+
     /// Returns a single transformed value if there is exactly one row in the given set, otherwise returns nil.
     public func extractValueFromOneRow<V>(_ rows: AnyIterator<Row>, _ transform: @escaping (Row) -> V?, orDefault defaultValue: V) -> V {
         return extractValueFromOneRow(rows, transform) ?? defaultValue
@@ -134,6 +144,12 @@ extension Relation {
     /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
     /// one row, otherwise delivers the given default value.
     public func valueFromOneRow<V>(_ transform: @escaping (Row) -> V?, orDefault defaultValue: V) -> Signal<V> {
+        return signal{ $0.extractValueFromOneRow($1, transform, orDefault: defaultValue) }
+    }
+
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers the given default value.
+    public func valueFromOneRow<V: Equatable>(_ transform: @escaping (Row) -> V?, orDefault defaultValue: V) -> Signal<V> {
         return signal{ $0.extractValueFromOneRow($1, transform, orDefault: defaultValue) }
     }
 
@@ -155,6 +171,12 @@ extension Relation {
         return signal{ $0.extractOneValueOrNil(from: $1, transform) }
     }
 
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers nil.
+    public func oneValueOrNil<V: Equatable>(_ transform: @escaping (RelationValue) -> V?) -> Signal<V?> {
+        return signal{ $0.extractOneValueOrNil(from: $1, transform) }
+    }
+
     /// Returns a single transformed value if there is exactly one row in the given set, otherwise returns the
     /// given default value.
     public func extractOneValue<V>(from rows: AnyIterator<Row>, _ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V) -> V {
@@ -170,6 +192,12 @@ extension Relation {
     /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
     /// one row, otherwise delivers the given default value.
     public func oneValue<V>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V) -> Signal<V> {
+        return signal{ $0.extractOneValue(from: $1, transform, orDefault: defaultValue) }
+    }
+
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers the given default value.
+    public func oneValue<V: Equatable>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V) -> Signal<V> {
         return signal{ $0.extractOneValue(from: $1, transform, orDefault: defaultValue) }
     }
 
