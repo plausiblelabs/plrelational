@@ -13,6 +13,7 @@ public final class AsyncManager: PerThreadInstance {
     private var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
     
     private let runloop: CFRunLoop
+    private var runloopModes: [CFRunLoopMode] = [.commonModes]
     
     private var executionTimer: CFRunLoopTimer?
     
@@ -43,6 +44,12 @@ public final class AsyncManager: PerThreadInstance {
                 observer(state)
             }
         }
+    }
+    
+    /// Add a runloop mode where this AsyncManager will run its non-async code.
+    /// By default, it runs on the common runloop modes.
+    public func addRunloopMode(_ mode: CFRunLoopMode) {
+        runloopModes.append(mode)
     }
     
     public func addStateObserver(_ observer: @escaping (State) -> Void) -> ObservationRemover {
@@ -189,7 +196,9 @@ public final class AsyncManager: PerThreadInstance {
             executionTimer = CFRunLoopTimerCreateWithHandler(nil, 0, 0, 0, 0, { _ in
                 self.execute()
             })
-            CFRunLoopAddTimer(runloop, executionTimer, CFRunLoopMode.commonModes)
+            for mode in runloopModes {
+                CFRunLoopAddTimer(runloop, executionTimer, mode)
+            }
             state = .pending
         }
     }
@@ -393,7 +402,7 @@ public final class AsyncManager: PerThreadInstance {
             // Wait until done. If there are no changes then this will execute immediately. Otherwise it will execute
             // when all the iteration above is complete.
             doneGroup.notify(queue: DispatchQueue.global(), execute: {
-                self.runloop.async({
+                self.runloop.async(inModes: self.runloopModes, {
                     // If new pending actions came in while we were doing our thing, then go back to the top
                     // and start over, performing those actions too.
                     if !self.pendingActions.isEmpty {
@@ -451,7 +460,9 @@ public final class AsyncManager: PerThreadInstance {
     }
     
     func defaultObserverDispatchContext() -> DispatchContext {
-        return RunLoopDispatchContext(runloop: self.runloop, executeReentrantImmediately: true)
+        return RunLoopDispatchContext(runloop: self.runloop,
+                                      executeReentrantImmediately: true,
+                                      modes: self.runloopModes)
     }
 }
 
