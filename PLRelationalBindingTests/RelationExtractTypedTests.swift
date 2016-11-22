@@ -36,6 +36,23 @@ class RelationAsTypedValueTests: BindingTestCase {
             Set(["cats", "dogs"]))
     }
     
+    func testAllValuesSignal() {
+        let r = MakeRelation(
+            ["id", "name"],
+            [1,    "cat"],
+            [2,    "dog"],
+            [3,    "fish"])
+        
+        let p = r.project("name").allRelationValues().property()
+        XCTAssertEqual(p.value, nil)
+        
+        awaitCompletion{ p.start() }
+        XCTAssertEqual(p.value, Set(["cat", "dog", "fish"].map{ RelationValue($0) }))
+        
+        awaitCompletion{ _ = r.asyncAdd(["id": 4, "name": "bird"]) }
+        XCTAssertEqual(p.value, Set(["cat", "dog", "fish", "bird"].map{ RelationValue($0) }))
+    }
+    
     func testExtractOneValue() {
         let empty = MakeRelation(
             ["id", "name", "friendly", "age", "pulse"])
@@ -97,6 +114,106 @@ class RelationAsTypedValueTests: BindingTestCase {
         XCTAssertNil(multi.project(["pulse"]).extractOneDoubleOrNil())
     }
     
+    func testOneStringOrNilSignal() {
+        let r = MakeRelation(
+            ["id", "name", "friendly", "age", "pulse"],
+            [1,    "cat",  1,          5,     2.0],
+            [2,    "cat",  1,          5,     2.0])
+        
+        var changes: [String?] = []
+        let p = r.project("name").oneStringOrNil().property()
+        _ = p.signal.observe{ v, _ in changes.append(v) }
+        AssertValueUnset(p)
+        XCTAssertTrue(changes == [])
+        
+        awaitCompletion{ p.start() }
+        AssertValueEqual(p, "cat")
+        XCTAssertTrue(changes == ["cat"])
+        
+        awaitCompletion{ _ = r.asyncUpdate(true, newValues: ["name": "kat"]) }
+        AssertValueEqual(p, "kat")
+        XCTAssertTrue(changes == ["cat", "kat"])
+        
+        awaitCompletion{ _ = r.asyncAdd(["id": 3, "name": "dog", "friendly": 0, "age": 6, "pulse": 3.0]) }
+        AssertValueEqual(p, nil)
+        XCTAssertTrue(changes == ["cat", "kat", nil])
+    }
+    
+    func testOneStringOrNilSignalWithInitialValue() {
+        let r = MakeRelation(
+            ["id", "name", "friendly", "age", "pulse"],
+            [1,    "cat",  1,          5,     2.0],
+            [2,    "cat",  1,          5,     2.0])
+        
+        var changes: [String?] = []
+        let p = r.project("name").oneStringOrNil(initialValue: "cat").property()
+        _ = p.signal.observe{ v, _ in changes.append(v) }
+        AssertValueEqual(p, "cat")
+        XCTAssertTrue(changes == [])
+        
+        awaitCompletion{ p.start() }
+        AssertValueEqual(p, "cat")
+        XCTAssertTrue(changes == [])
+        
+        awaitCompletion{ _ = r.asyncUpdate(true, newValues: ["name": "kat"]) }
+        AssertValueEqual(p, "kat")
+        XCTAssertTrue(changes == ["kat"])
+        
+        awaitCompletion{ _ = r.asyncAdd(["id": 3, "name": "dog", "friendly": 0, "age": 6, "pulse": 3.0]) }
+        AssertValueEqual(p, nil)
+        XCTAssertTrue(changes == ["kat", nil])
+    }
+    
+    func testOneStringSignal() {
+        let r = MakeRelation(
+            ["id", "name", "friendly", "age", "pulse"],
+            [1,    "cat",  1,          5,     2.0],
+            [2,    "cat",  1,          5,     2.0])
+        
+        var changes: [String] = []
+        let p = r.project("name").oneString().property()
+        _ = p.signal.observe{ v, _ in changes.append(v) }
+        XCTAssertEqual(p.value, nil)
+        XCTAssertTrue(changes == [])
+        
+        awaitCompletion{ p.start() }
+        XCTAssertEqual(p.value, "cat")
+        XCTAssertTrue(changes == ["cat"])
+        
+        awaitCompletion{ _ = r.asyncUpdate(true, newValues: ["name": "kat"]) }
+        XCTAssertEqual(p.value, "kat")
+        XCTAssertTrue(changes == ["cat", "kat"])
+        
+        awaitCompletion{ _ = r.asyncAdd(["id": 3, "name": "dog", "friendly": 0, "age": 6, "pulse": 3.0]) }
+        XCTAssertEqual(p.value, "")
+        XCTAssertTrue(changes == ["cat", "kat", ""])
+    }
+    
+    func testOneStringSignalWithInitialValue() {
+        let r = MakeRelation(
+            ["id", "name", "friendly", "age", "pulse"],
+            [1,    "cat",  1,          5,     2.0],
+            [2,    "cat",  1,          5,     2.0])
+        
+        var changes: [String] = []
+        let p = r.project("name").oneString(initialValue: "cat").property()
+        _ = p.signal.observe{ v, _ in changes.append(v) }
+        XCTAssertEqual(p.value, "cat")
+        XCTAssertTrue(changes == [])
+        
+        awaitCompletion{ p.start() }
+        XCTAssertEqual(p.value, "cat")
+        XCTAssertTrue(changes == [])
+        
+        awaitCompletion{ _ = r.asyncUpdate(true, newValues: ["name": "kat"]) }
+        XCTAssertEqual(p.value, "kat")
+        XCTAssertTrue(changes == ["kat"])
+        
+        awaitCompletion{ _ = r.asyncAdd(["id": 3, "name": "dog", "friendly": 0, "age": 6, "pulse": 3.0]) }
+        XCTAssertEqual(p.value, "")
+        XCTAssertTrue(changes == ["kat", ""])
+    }
+    
     func testExtractCommonValue() {
         let empty = MakeRelation(
             ["id", "name", "friendly", "count"])
@@ -127,4 +244,30 @@ class RelationAsTypedValueTests: BindingTestCase {
         XCTAssertEqual(one.project(["age"]).extractCommonValue(asInt), CommonValue.one(5))
         XCTAssertEqual(multi.project(["age"]).extractCommonValue(asInt), CommonValue.multi)
     }
+}
+
+private func AssertValueUnset<P: AsyncReadablePropertyType, T: Equatable>(_ prop: P, file: StaticString = #file, line: UInt = #line)
+    where P.Value == T?
+{
+    if prop.value != nil {
+        XCTFail(file: file, line: line)
+    }
+}
+
+private func AssertValueEqual<P: AsyncReadablePropertyType, T: Equatable>(_ prop: P, _ expected: T?, file: StaticString = #file, line: UInt = #line)
+    where P.Value == T?
+{
+    if let value = prop.value {
+        XCTAssertEqual(value, expected, file: file, line: line)
+    } else {
+        XCTFail(file: file, line: line)
+    }
+}
+
+func ==<T: Equatable>(lhs: [T?], rhs: [T?]) -> Bool {
+    if lhs.count != rhs.count { return false }
+    for (l,r) in zip(lhs,rhs) {
+        if l != r { return false }
+    }
+    return true
 }

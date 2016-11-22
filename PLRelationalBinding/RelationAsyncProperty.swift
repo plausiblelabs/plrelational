@@ -68,7 +68,16 @@ private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
 
 extension SignalType {
     /// Lifts this signal into an AsyncReadWriteProperty that writes values back to a relation via the given mutator.
-    public func property(mutator: RelationMutationConfig<Self.Value>, initialValue: Self.Value? = nil) -> AsyncReadWriteProperty<Self.Value> {
-        return RelationAsyncReadWriteProperty(initialValue: initialValue, config: mutator, signal: self.signal)
+    public func property(mutator: RelationMutationConfig<Value>) -> AsyncReadWriteProperty<Value> {
+        // XXX: This is awful; might be slightly less awful if we had a more formal notion of a Signal that
+        // provides access to its latest value
+        let signal = self.signal
+        let initialValue: Value?
+        if let relationSignal = signal as? RelationSignal<Self.Value> {
+            initialValue = relationSignal.latestValue
+        } else {
+            initialValue = nil
+        }
+        return RelationAsyncReadWriteProperty(initialValue: initialValue, config: mutator, signal: signal)
     }
 }

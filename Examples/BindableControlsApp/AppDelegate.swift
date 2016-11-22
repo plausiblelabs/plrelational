@@ -105,10 +105,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         addObject("Fred", editable: false, day: nil, color: nil, rocks: 17)
         addObject("Wilma", editable: true, day: "Friday", color: Color.blue, rocks: 42)
 
-        func nameProperty(_ relation: Relation) -> AsyncReadWriteProperty<String?> {
-            return undoableDB.asyncBidiProperty(
+        func nameProperty(_ relation: Relation, initialValue: String??) -> AsyncReadWriteProperty<String?> {
+            return undoableDB.bidiProperty(
                 action: "Rename Person",
-                signal: relation.signal{ $0.oneStringOrNil($1) },
+                signal: relation.oneStringOrNil(initialValue: initialValue),
                 update: {
                     relation.asyncUpdateNullableString($0)
                 }
@@ -116,9 +116,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         }
         
         func listSelectionProperty(_ relation: TransactionalRelation) -> AsyncReadWriteProperty<Set<RelationValue>> {
-            return undoableDB.asyncBidiProperty(
+            return undoableDB.bidiProperty(
                 action: "Change Selection",
-                signal: relation.signal{ $0.allValues($1) },
+                signal: relation.allRelationValues(),
                 update: { relation.asyncReplaceValues(Array($0)) }
             )
         }
@@ -131,8 +131,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             cellIdentifier: { _ in "PageCell" },
             cellText: { row in
                 let rowID = row["id"]
+                let initialValue: String? = row["name"].get()
                 let nameRelation = objects.select(Attribute("id") *== rowID).project(["name"])
-                return .asyncReadWriteOpt(nameProperty(nameRelation))
+                return .asyncReadWriteOpt(nameProperty(nameRelation, initialValue: initialValue))
             },
             cellImage: nil
         )
@@ -165,7 +166,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         
         // Set up the bindings between controls and view model
         textField.deliverTransientChanges = true
-        _ = textField.optString <~> nameProperty(selectedObjectsName)
+        _ = textField.optString <~> nameProperty(selectedObjectsName, initialValue: nil)
         //_ = textField.placeholder <~ selectedObjectsName.stringWhenMulti("Multiple Values")
 
 //        checkbox.checked <~> undoableDB.bidiProperty(

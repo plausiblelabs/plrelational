@@ -49,6 +49,9 @@ public protocol SignalType: class {
     
     /// Registers the given observer, which will be notified when the signal delivers new values.
     func observe(_ observer: SignalObserver<Value>) -> ObserverRemoval
+    
+    /// Lifts this signal into an AsyncReadableProperty.
+    func property() -> AsyncReadableProperty<Value>
 }
 
 open class Signal<T>: SignalType {
@@ -80,6 +83,10 @@ open class Signal<T>: SignalType {
 
     public var signal: Signal<T> {
         return self
+    }
+    
+    open func property() -> AsyncReadableProperty<T> {
+        return AsyncReadableProperty(initialValue: nil, signal: self)
     }
 
     public final func start(deliverInitial: Bool) {

@@ -115,7 +115,7 @@ open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
 
 extension SignalType {
     /// Lifts this signal into an AsyncReadableProperty.
-    public func property(initialValue: Self.Value? = nil) -> AsyncReadableProperty<Self.Value> {
-        return AsyncReadableProperty(initialValue: initialValue, signal: self.signal)
+    public func property() -> AsyncReadableProperty<Self.Value> {
+        return AsyncReadableProperty(initialValue: nil, signal: self.signal)
     }
 }

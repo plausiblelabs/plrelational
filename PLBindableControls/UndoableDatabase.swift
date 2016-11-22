@@ -42,11 +42,6 @@ public class UndoableDatabase {
         )
     }
 
-    public func bidiProperty<T>(action: String, initialValue: T?, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
-        let config = mutationConfig(action, update)
-        return signal.property(mutator: config, initialValue: initialValue)
-    }
-
     public func bidiProperty<T>(action: String, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
         let config = mutationConfig(action, update)
         return signal.property(mutator: config)
