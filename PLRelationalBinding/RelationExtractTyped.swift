@@ -191,14 +191,14 @@ extension Relation {
 
     /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
     /// one row, otherwise delivers the given default value.
-    public func oneValue<V>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V) -> Signal<V> {
-        return signal(initialValue: nil, { $0.extractOneValue(from: $1, transform, orDefault: defaultValue) })
+    public func oneValue<V>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V, initialValue: V? = nil) -> Signal<V> {
+        return signal(initialValue: initialValue, { $0.extractOneValue(from: $1, transform, orDefault: defaultValue) })
     }
 
     /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
     /// one row, otherwise delivers the given default value.
-    public func oneValue<V: Equatable>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V) -> Signal<V> {
-        return signal(initialValue: nil, { $0.extractOneValue(from: $1, transform, orDefault: defaultValue) })
+    public func oneValue<V: Equatable>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V, initialValue: V? = nil) -> Signal<V> {
+        return signal(initialValue: initialValue, { $0.extractOneValue(from: $1, transform, orDefault: defaultValue) })
     }
 
     /// Returns a single RelationValue if there is exactly one row in the given set, otherwise returns nil.

@@ -163,10 +163,6 @@ class DocDatabase {
         return undoableDB.bidiProperty(action: action, signal: signal, update: update)
     }
     
-    func undoableBidiProperty<T>(action: String, initialValue: T?, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
-        return undoableDB.bidiProperty(action: action, initialValue: initialValue, signal: signal, update: update)
-    }
-    
     /// Saves the database to a new location, overwriting and/or deleting any existing files as needed.
     func save(to url: URL) -> Result<(), DocDatabaseError> {
         self.url = url
@@ -552,15 +548,14 @@ class DocDatabase {
     
     // MARK: Undoable actions
     
-    func objectNameReadWriteProperty(objectID: ObjectID, initialValue: String?) -> AsyncReadWriteProperty<String?> {
+    func objectNameReadWriteProperty(objectID: ObjectID, initialValue: String??) -> AsyncReadWriteProperty<String?> {
         let relation = self.objects
             .select(Object.ID.a *== objectID.relationValue)
             .project(Object.Name.a)
         // TODO: s/Item/type.name/
         return undoableBidiProperty(
             action: "Rename Item",
-            initialValue: initialValue,
-            signal: relation.oneStringOrNil(),
+            signal: relation.oneStringOrNil(initialValue: initialValue),
             update: { relation.asyncUpdateNullableString($0) }
         )
     }
