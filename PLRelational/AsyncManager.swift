@@ -89,14 +89,15 @@ public final class AsyncManager: PerThreadInstance {
         }
         
         switch action {
-        case .add(let relation, _),
-             .delete(let relation, _):
-            registerChange(relation)
-        case .update(let relation, _, _):
-            registerChange(relation)
+        case .add(let relation, let row):
+            registerChange(relation, predicate: SelectExpressionFromRow(row))
+        case .delete(let relation, let query):
+            registerChange(relation, predicate: query)
+        case .update(let relation, let query, _):
+            registerChange(relation, predicate: query)
         case .restoreSnapshot(let database, _):
             for (_, relation) in database.relations {
-                registerChange(relation)
+                registerChange(relation, predicate: true)
             }
         case .query:
             break
@@ -139,19 +140,22 @@ public final class AsyncManager: PerThreadInstance {
         }
     }
     
-    fileprivate func registerChange(_ relation: Relation) {
+    fileprivate func registerChange(_ relation: Relation, predicate: SelectExpression) {
         if state != .running {
-            sendWillChange(relation)
+            sendWillChange(relation, predicate: predicate)
             scheduleExecutionIfNeeded()
         }
     }
     
-    fileprivate func sendWillChange(_ relation: Relation) {
+    fileprivate func sendWillChange(_ relation: Relation, predicate: SelectExpression) {
         QueryPlanner.visitRelationTree([(relation, ())], { relation, _, _ in
             guard let relationObject = asObject(relation), !(relation is IntermediateRelation) else { return }
             
             if let entries = variableInfo[relationObject] {
                 for entry in entries {
+                    if let filter = entry.filter, canProveInconsistent(predicate, filter) {
+                        continue
+                    }
                     var willChangeRelationObservers: [DispatchContextWrapped<AsyncRelationChangeObserver>] = []
                     var willChangeUpdateObservers: [DispatchContextWrapped<AsyncRelationContentObserver>] = []
                     entry.observedRelationInfo.observers.mutatingForEach({
@@ -175,15 +179,15 @@ public final class AsyncManager: PerThreadInstance {
     fileprivate func sendWillChangeForAllPendingActions() {
         for action in pendingActions {
             switch action {
-            case .add(let relation, _):
-                sendWillChange(relation)
-            case .delete(let relation, _):
-                sendWillChange(relation)
-            case .update(let relation, _, _):
-                sendWillChange(relation)
+            case .add(let relation, let row):
+                sendWillChange(relation, predicate: SelectExpressionFromRow(row))
+            case .delete(let relation, let query):
+                sendWillChange(relation, predicate: query)
+            case .update(let relation, let query, _):
+                sendWillChange(relation, predicate: query)
             case .restoreSnapshot(let database, _):
                 for (_, relation) in database.relations {
-                    registerChange(relation)
+                    registerChange(relation, predicate: true)
                 }
             case .query:
                 break
@@ -529,17 +533,55 @@ extension AsyncManager {
     }
     
     fileprivate func infoForObservee(_ relationObject: AnyObject) -> ObservedRelationInfo {
-        return observedInfo.getOrCreate(relationObject, defaultValue: makeInfoForObservee(relationObject as! Relation))
+        return observedInfo.getOrCreate(relationObject, defaultValue: makeInfoForObservee(relationObject as! Relation & AnyObject))
     }
     
-    fileprivate func makeInfoForObservee(_ relation: Relation) -> ObservedRelationInfo {
+    fileprivate func makeInfoForObservee(_ relation: Relation & AnyObject) -> ObservedRelationInfo {
         let derivative = RelationDifferentiator(relation: relation).computeDerivative()
         let info = ObservedRelationInfo(derivative: derivative)
-        for variable in derivative.allVariables {
-            let entry = VariableEntry(observedRelation: relation, observedRelationInfo: info)
+        let filters = relationFilters(relation)
+        for (variable, filter) in filters {
+            let entry = VariableEntry(observedRelation: relation, observedRelationInfo: info, filter: filter)
+            variableInfo[variable, defaultValue: []].append(entry)
+        }
+        
+        let filtered = ObjectSet<AnyObject>(filters.map({ $0.0 }))
+        for variable in derivative.allVariables where !filtered.contains(variable) {
+            let entry = VariableEntry(observedRelation: relation, observedRelationInfo: info, filter: nil)
             variableInfo[variable, defaultValue: []].append(entry)
         }
         return info
+    }
+    
+    fileprivate func relationFilters(_ relation: Relation & AnyObject) -> [(RelationDerivative.Variable, SelectExpression)] {
+        guard let relation = relation as? IntermediateRelation else { return [] }
+        
+        var pending: ObjectSet<IntermediateRelation> = [relation]
+        var result: ObjectDictionary<AnyObject, SelectExpression?> = [:]
+        
+        while !pending.isEmpty {
+            let r = pending.removeFirst()
+            for child in r.operands {
+                switch child {
+                case let child as IntermediateRelation:
+                    pending.insert(child)
+                case let child as RelationDerivative.Variable:
+                    if case .select(let expression) = r.op {
+                        if case .none = result[child] {
+                            result[child] = expression
+                        } else {
+                            result[child] = nil
+                        }
+                    } else {
+                        result[child] = nil
+                    }
+                default:
+                    break
+                }
+            }
+        }
+        
+        return result.filter({ $1 != nil }).map({ ($0 as! RelationDerivative.Variable, $1!) })
     }
 }
 
@@ -548,6 +590,43 @@ extension AsyncManager {
         // TODO: weak reference?
         var observedRelation: Relation
         var observedRelationInfo: ObservedRelationInfo
+        var filter: SelectExpression?
+    }
+    
+    /// Try to (cheaply) see if a and b are inconsistent, i.e. can never both be true simultaneously.
+    /// The function returns true if so. If it returns false, they may still be inconsistent, it
+    /// just couldn't prove that. Right now the check is extremely basic.
+    fileprivate func canProveInconsistent(_ a: SelectExpression, _ b: SelectExpression) -> Bool {
+        // For now, just check to see if they're both equality with the same attribute
+        // on one side, and different values on the other side.
+        if let (attributeA, valueA) = equalityAttributeAndValue(a),
+            let (attributeB, valueB) = equalityAttributeAndValue(b),
+            attributeA == attributeB && valueA.relationValue != valueB.relationValue
+        {
+            return true
+        }
+        
+        return false
+    }
+    
+    fileprivate func equalityAttributeAndValue(_ expression: SelectExpression) -> (Attribute, SelectExpressionConstantValue)? {
+        switch equalityOperands(expression) {
+        case let .some(attr as Attribute, value as SelectExpressionConstantValue):
+            return (attr, value)
+        case let .some(value as SelectExpressionConstantValue, attr as Attribute):
+            return (attr, value)
+        default:
+            return nil
+        }
+        
+    }
+    
+    fileprivate func equalityOperands(_ expression: SelectExpression) -> (SelectExpression, SelectExpression)? {
+        if let eq = expression as? SelectExpressionBinaryOperator, eq.op is EqualityComparator {
+            return (eq.lhs, eq.rhs)
+        } else {
+            return nil
+        }
     }
 }
 

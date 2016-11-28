@@ -650,6 +650,72 @@ class AsyncManagerTests: DBTestCase {
             remover()
         }
     }
+    
+    func testDeleteNotificationsWithSelect() {
+        let sqliteDB = makeDB().db
+        XCTAssertNil(sqliteDB.getOrCreateRelation("person", scheme: ["id", "name"]).err)
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["person"]
+        
+        XCTAssertNil(r.add(["id": 1, "name": "Alf"]).err)
+        XCTAssertNil(r.add(["id": 2, "name": "Tina"]).err)
+        XCTAssertNil(r.add(["id": 3, "name": "Tony"]).err)
+        XCTAssertNil(r.add(["id": 4, "name": "Mr. T"]).err)
+        
+        let rObserver = TestAsyncChangeObserver()
+        let rRemover = r.addAsyncObserver(rObserver)
+        
+        let oneName = r.select(Attribute("id") *== 4).project(["name"])
+        
+        let oneNameObserver = TestAsyncChangeObserver()
+        let oneNameRemover = oneName.addAsyncObserver(oneNameObserver)
+        
+        r.asyncDelete(Attribute("id") *== 2)
+        CFRunLoopRunOrFail()
+        
+        XCTAssertEqual(rObserver.willChangeCount, 1)
+        XCTAssertEqual(rObserver.addedRows ?? [], [])
+        XCTAssertEqual(rObserver.removedRows, [["id": 2, "name": "Tina"]])
+        XCTAssertNil(rObserver.error)
+        XCTAssertEqual(rObserver.didChangeCount, 1)
+        
+        XCTAssertEqual(oneNameObserver.willChangeCount, 0)
+        XCTAssertEqual(oneNameObserver.addedRows ?? [], [])
+        XCTAssertEqual(oneNameObserver.removedRows ?? [], [])
+        XCTAssertNil(oneNameObserver.error)
+        XCTAssertEqual(oneNameObserver.didChangeCount, 0)
+        
+        rObserver.willChangeCount = 0
+        rObserver.addedRows = nil
+        rObserver.removedRows = nil
+        rObserver.error = nil
+        rObserver.didChangeCount = 0
+        
+        oneNameObserver.willChangeCount = 0
+        oneNameObserver.addedRows = nil
+        oneNameObserver.removedRows = nil
+        oneNameObserver.error = nil
+        oneNameObserver.didChangeCount = 0
+        
+        r.asyncDelete(Attribute("id") *== 4)
+        CFRunLoopRunOrFail()
+        
+        XCTAssertEqual(rObserver.willChangeCount, 1)
+        XCTAssertEqual(rObserver.addedRows ?? [], [])
+        XCTAssertEqual(rObserver.removedRows, [["id": 4, "name": "Mr. T"]])
+        XCTAssertNil(rObserver.error)
+        XCTAssertEqual(rObserver.didChangeCount, 1)
+        
+        XCTAssertEqual(oneNameObserver.willChangeCount, 1)
+        XCTAssertEqual(oneNameObserver.addedRows ?? [], [])
+        XCTAssertEqual(oneNameObserver.removedRows, [["name": "Mr. T"]])
+        XCTAssertNil(oneNameObserver.error)
+        XCTAssertEqual(oneNameObserver.didChangeCount, 1)
+        
+        rRemover()
+        oneNameRemover()
+    }
 }
 
 private class TestAsyncChangeObserver: AsyncRelationChangeObserver {
