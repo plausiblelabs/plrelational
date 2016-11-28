@@ -84,17 +84,7 @@ public struct SelectExpressionUnaryOperator: SelectExpression {
 /// that value, and the whole mess will be ANDed together.
 func SelectExpressionFromRow(_ row: Row) -> SelectExpression {
     let equalityExpressions = row.map({ $0 *== $1 })
-    if equalityExpressions.isEmpty {
-        return RelationValue.integer(1)
-    } else if equalityExpressions.count == 1 {
-        return equalityExpressions.first!
-    } else {
-        var expressionSoFar = equalityExpressions[0] *&& equalityExpressions[1]
-        for expr in equalityExpressions.dropFirst(2) {
-            expressionSoFar = expressionSoFar *&& expr
-        }
-        return expressionSoFar
-    }
+    return equalityExpressions.combined(with: *&&) ?? RelationValue.integer(1)
 }
 
 extension SelectExpression {
