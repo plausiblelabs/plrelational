@@ -10,7 +10,8 @@ public final class AsyncManager: PerThreadInstance {
     public typealias ObservationRemover = (Void) -> Void
     
     private var pendingActions: [Action] = []
-    private var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
+    fileprivate var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
+    fileprivate var variableInfo: ObjectDictionary<AnyObject, [VariableEntry]> = [:]
     
     private let runloop: CFRunLoop
     private var runloopModes: [CFRunLoopMode] = [.commonModes]
@@ -88,7 +89,8 @@ public final class AsyncManager: PerThreadInstance {
         }
         
         switch action {
-        case .add(let relation, _), .delete(let relation, _):
+        case .add(let relation, _),
+             .delete(let relation, _):
             registerChange(relation)
         case .update(let relation, _, _):
             registerChange(relation)
@@ -110,7 +112,7 @@ public final class AsyncManager: PerThreadInstance {
     public func observe(_ relation: Relation, observer: AsyncRelationChangeObserver, context: DispatchContext? = nil) -> ObservationRemover {
         guard let obj = asObject(relation) else { return {} }
         
-        let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
+        let info = infoForObservee(obj)
         let id = info.addObserver(observer, context: context ?? defaultObserverDispatchContext())
         
         return {
@@ -126,7 +128,7 @@ public final class AsyncManager: PerThreadInstance {
     public func observe(_ relation: Relation, observer: AsyncRelationContentObserver, context: DispatchContext? = nil) -> ObservationRemover {
         guard let obj = asObject(relation) else { return {} }
         
-        let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
+        let info = infoForObservee(obj)
         let id = info.addObserver(observer, context: context ?? defaultObserverDispatchContext())
         
         return {
@@ -148,24 +150,22 @@ public final class AsyncManager: PerThreadInstance {
         QueryPlanner.visitRelationTree([(relation, ())], { relation, _, _ in
             guard let relationObject = asObject(relation), !(relation is IntermediateRelation) else { return }
             
-            for (observedRelation, info) in observedInfo {
-                for variable in info.derivative.allVariables {
-                    if relationObject === variable {
-                        var willChangeRelationObservers: [DispatchContextWrapped<AsyncRelationChangeObserver>] = []
-                        var willChangeUpdateObservers: [DispatchContextWrapped<AsyncRelationContentObserver>] = []
-                        info.observers.mutatingForEach({
-                            if !$0.didSendWillChange {
-                                $0.didSendWillChange = true
-                                willChangeRelationObservers.appendNonNil($0.relationObserver)
-                                willChangeUpdateObservers.appendNonNil($0.updateObserver)
-                            }
-                        })
-                        for observer in willChangeRelationObservers {
-                            observer.withWrapped({ $0.relationWillChange(observedRelation as! Relation) })
+            if let entries = variableInfo[relationObject] {
+                for entry in entries {
+                    var willChangeRelationObservers: [DispatchContextWrapped<AsyncRelationChangeObserver>] = []
+                    var willChangeUpdateObservers: [DispatchContextWrapped<AsyncRelationContentObserver>] = []
+                    entry.observedRelationInfo.observers.mutatingForEach({
+                        if !$0.didSendWillChange {
+                            $0.didSendWillChange = true
+                            willChangeRelationObservers.appendNonNil($0.relationObserver)
+                            willChangeUpdateObservers.appendNonNil($0.updateObserver)
                         }
-                        for observer in willChangeUpdateObservers {
-                            observer.withWrapped({ $0.relationWillChange(observedRelation as! Relation) })
-                        }
+                    })
+                    for observer in willChangeRelationObservers {
+                        observer.withWrapped({ $0.relationWillChange(entry.observedRelation) })
+                    }
+                    for observer in willChangeUpdateObservers {
+                        observer.withWrapped({ $0.relationWillChange(entry.observedRelation) })
                     }
                 }
             }
@@ -526,6 +526,28 @@ extension AsyncManager {
             observers[currentObserverID] = ObserverEntry(relationObserver: nil, updateObserver: DispatchContextWrapped(context: context, wrapped: observer), didSendWillChange: false)
             return currentObserverID
         }
+    }
+    
+    fileprivate func infoForObservee(_ relationObject: AnyObject) -> ObservedRelationInfo {
+        return observedInfo.getOrCreate(relationObject, defaultValue: makeInfoForObservee(relationObject as! Relation))
+    }
+    
+    fileprivate func makeInfoForObservee(_ relation: Relation) -> ObservedRelationInfo {
+        let derivative = RelationDifferentiator(relation: relation).computeDerivative()
+        let info = ObservedRelationInfo(derivative: derivative)
+        for variable in derivative.allVariables {
+            let entry = VariableEntry(observedRelation: relation, observedRelationInfo: info)
+            variableInfo[variable, defaultValue: []].append(entry)
+        }
+        return info
+    }
+}
+
+extension AsyncManager {
+    fileprivate struct VariableEntry {
+        // TODO: weak reference?
+        var observedRelation: Relation
+        var observedRelationInfo: ObservedRelationInfo
     }
 }
 
