@@ -5,14 +5,14 @@
 
 import Foundation
 
-extension Relation {
+extension Relation where Self: AnyObject {
     /// Perform a recursive `select` query on this relation.  This is modeled after `cascadingDelete`.
     public func recursiveSelect<T>(
         initialQueryAttr: Attribute,
         initialQueryValue: RelationValue,
         initialValue: T,
-        rowCallback: @escaping (Relation & AnyObject, Row, T) -> Result<(T, [RecursiveQuery]), RelationError>,
-        filterCallback: @escaping (T, [RecursiveQuery]) -> [RecursiveQuery],
+        rowCallback: @escaping (RelationObject, Row, T) -> Result<(T, [RecursiveQuery]), RelationError>,
+        filterCallback: @escaping (T, Set<RecursiveQuery>) -> Set<RecursiveQuery>,
         completionCallback: @escaping (Result<T, RelationError>) -> Void)
     {
         let initialQuery = RecursiveQuery(relation: self, attr: initialQueryAttr, value: initialQueryValue)
@@ -26,9 +26,9 @@ extension Relation {
     }
 }
 
-public struct RecursiveQuery {
+public struct RecursiveQuery: Hashable {
     /// The relation to query.
-    public let relation: Relation
+    public let relation: RelationObject
     
     /// The attribute part of the select expression.
     public let attr: Attribute
@@ -36,28 +36,36 @@ public struct RecursiveQuery {
     /// The value part of the select expression.
     public let value: RelationValue
     
-    public init(relation: Relation, attr: Attribute, value: RelationValue) {
+    public init(relation: RelationObject, attr: Attribute, value: RelationValue) {
         self.relation = relation
         self.attr = attr
         self.value = value
     }
+    
+    public var hashValue: Int {
+        return attr.hashValue ^ value.hashValue
+    }
+}
+
+public func ==(a: RecursiveQuery, b: RecursiveQuery) -> Bool {
+    return a.relation === b.relation && a.attr == b.attr && a.value == b.value
 }
 
 private class RecursiveSelectOp<T> {
     
-    private let rowCallback: (Relation & AnyObject, Row, T) -> Result<(T, [RecursiveQuery]), RelationError>
-    private let filterCallback: (T, [RecursiveQuery]) -> [RecursiveQuery]
+    private let rowCallback: (RelationObject, Row, T) -> Result<(T, [RecursiveQuery]), RelationError>
+    private let filterCallback: (T, Set<RecursiveQuery>) -> Set<RecursiveQuery>
     private let completionCallback: (Result<T, RelationError>) -> Void
     
     /// The keys are actually Relations but we're not allowed to say so.
-    private var pendingQueries: ObjectDictionary<AnyObject, [RecursiveQuery]>
+    private var pendingQueries: ObjectDictionary<AnyObject, Set<RecursiveQuery>>
     private var accum: T
     private var error: RelationError? = nil
     
     init(initialQuery: RecursiveQuery,
          initialValue: T,
-         rowCallback: @escaping (Relation & AnyObject, Row, T) -> Result<(T, [RecursiveQuery]), RelationError>,
-         filterCallback: @escaping (T, [RecursiveQuery]) -> [RecursiveQuery],
+         rowCallback: @escaping (RelationObject, Row, T) -> Result<(T, [RecursiveQuery]), RelationError>,
+         filterCallback: @escaping (T, Set<RecursiveQuery>) -> Set<RecursiveQuery>,
          completionCallback: @escaping (Result<T, RelationError>) -> Void)
     {
         self.pendingQueries = [initialQuery.relation as AnyObject: [initialQuery]]
@@ -76,13 +84,13 @@ private class RecursiveSelectOp<T> {
         pendingQueries = [:]
 
         for (relationObj, queries) in currentPendingQueries {
-            let relation = relationObj as! MutableRelation
+            let relation = relationObj as! RelationObject
 
-            // Only include identifiers for which we don't already have a stored value
-            // TODO: Apply filter so that we don't make redundant queries
-            let query = queries
+            // Apply filter so that we don't query redundantly (like if we already fetched and stored a value)
+            let combinedQuery = self.filterCallback(self.accum, queries)
                 .map{ $0.attr *== $0.value }
-                .combined(with: *||)!
+                .combined(with: *||)
+            guard let query = combinedQuery else { continue }
         
             group.enter()
             asyncManager.registerQuery(
@@ -95,11 +103,11 @@ private class RecursiveSelectOp<T> {
                             let rowCallbackResult = self.rowCallback(relation, row, self.accum).ok!
                             self.accum = rowCallbackResult.0
                             for query in rowCallbackResult.1 {
-                                let queryRelation = query.relation as AnyObject
+                                let queryRelation = query.relation
                                 if self.pendingQueries[queryRelation] == nil {
                                     self.pendingQueries[queryRelation] = [query]
                                 } else {
-                                    self.pendingQueries[queryRelation]!.append(query)
+                                    self.pendingQueries[queryRelation]!.insert(query)
                                 }
                             }
                         }
