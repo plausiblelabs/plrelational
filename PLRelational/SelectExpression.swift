@@ -65,6 +65,18 @@ public struct SelectExpressionBinaryOperator: SelectExpression {
     }
 }
 
+public extension SelectExpression {
+    /// If the expression is a SelectExpressionBinaryOperator and the operator is an
+    /// instance of the given type, then return the two operands. Otherwise return nil.
+    func binaryOperands<T: BinaryOperator>(_ op: T.Type) -> (SelectExpression, SelectExpression)? {
+        if let cast = self as? SelectExpressionBinaryOperator, cast.op is T {
+            return (cast.lhs, cast.rhs)
+        } else {
+            return nil
+        }
+    }
+}
+
 public struct SelectExpressionUnaryOperator: SelectExpression {
     public var op: UnaryOperator
     public var expr: SelectExpression
@@ -91,7 +103,7 @@ extension SelectExpression {
     /// Walk the entire expression tree, calling a map function at each node.
     /// Child nodes are mapped first, and then the map function is called on
     /// the parent node after the new values are substituted in.
-    func mapTree(_ f: (SelectExpression) -> SelectExpression) -> SelectExpression{
+    func mapTree(_ f: (SelectExpression) -> SelectExpression) -> SelectExpression {
         switch self {
         case let binary as SelectExpressionBinaryOperator:
             let substituted = SelectExpressionBinaryOperator(
@@ -108,6 +120,21 @@ extension SelectExpression {
             return f(self)
         }
     }
+    
+    /// Walk the entire expression tree, calling a function at each node.
+    func iterateTree(_ f: (SelectExpression) -> Void) {
+        f(self)
+        
+        switch self {
+        case let binary as SelectExpressionBinaryOperator:
+            binary.lhs.iterateTree(f)
+            binary.rhs.iterateTree(f)
+        case let unary as SelectExpressionUnaryOperator:
+            unary.expr.iterateTree(f)
+        default:
+            break
+        }
+    }
 }
 
 extension SelectExpression {
@@ -120,6 +147,17 @@ extension SelectExpression {
                 return $0
             }
         })
+    }
+    
+    /// Get all attributes in the expression.
+    func allAttributes() -> Set<Attribute> {
+        var result: Set<Attribute> = []
+        self.iterateTree({
+            if let attribute = $0 as? Attribute {
+                result.insert(attribute)
+            }
+        })
+        return result
     }
 }
 
