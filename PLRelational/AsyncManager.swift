@@ -9,7 +9,7 @@ import Foundation
 public final class AsyncManager: PerThreadInstance {
     public typealias ObservationRemover = (Void) -> Void
     
-    private var pendingActions: [Action] = []
+    fileprivate var pendingActions: [Action] = []
     fileprivate var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
     fileprivate var variableInfo: ObjectDictionary<AnyObject, [VariableEntry]> = [:]
     
@@ -757,13 +757,31 @@ extension AsyncManager {
     /// or returns the cache from a CachingRelation if it's that.
     private func efficientRows(fromRelation: Relation) -> Set<Row>? {
         switch fromRelation {
-        case let r as MemoryTableRelation:
+        case let r as MemoryTableRelation where !hasPendingChanges(forRelation: r):
             return r.values
         case let r as CachingRelation:
             return r.cache
         default:
             return nil
         }
+    }
+    
+    /// Check whether the given relation (but not its children!) has any pending changes
+    /// in `pendingActions`.
+    private func hasPendingChanges(forRelation: Relation) -> Bool {
+        guard let obj = asObject(forRelation) else { return false }
+        
+        for change in pendingActions {
+            switch change {
+            case .update(let r, _, _): if obj === asObject(r) { return true }
+            case .add(let r, _): if obj === r { return true }
+            case .delete(let r, _): if obj === r { return true }
+                
+            default: break
+            }
+        }
+        
+        return false
     }
 }
 

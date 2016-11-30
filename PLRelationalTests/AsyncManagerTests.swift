@@ -981,6 +981,76 @@ class AsyncManagerTests: DBTestCase {
         selectedRemover()
         oneNameRemover()
     }
+    
+    func testUpdateNotificationsWithMemoryTableJoinMultipleEnqueuedUpdates() {
+        let sqliteDB = makeDB().db
+        XCTAssertNil(sqliteDB.getOrCreateRelation("person", scheme: ["id", "name"]).err)
+        XCTAssertNil(sqliteDB.getOrCreateRelation("selected", scheme: ["id"]).err)
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let person = db["person"]
+        
+        let selected = MemoryTableRelation(scheme: ["id"])
+        
+        XCTAssertNil(selected.add(["id": 1]).err)
+        
+        XCTAssertNil(person.add(["id": 1, "name": "Alf"]).err)
+        XCTAssertNil(person.add(["id": 2, "name": "Tina"]).err)
+        XCTAssertNil(person.add(["id": 3, "name": "Tony"]).err)
+        XCTAssertNil(person.add(["id": 4, "name": "Mr. T"]).err)
+        
+        let selectedName = person.join(selected)
+        
+        let personObserver = TestAsyncChangeObserver()
+        let personRemover = person.addAsyncObserver(personObserver)
+        
+        let selectedObserver = TestAsyncChangeObserver()
+        let selectedRemover = selected.addAsyncObserver(selectedObserver)
+        
+        let oneName = person.select(Attribute("id") *== 4).project(["name"])
+        
+        let oneNameObserver = TestAsyncChangeObserver()
+        let oneNameRemover = oneName.addAsyncObserver(oneNameObserver)
+        
+        func reset() {
+            func reset(_ observer: TestAsyncChangeObserver) {
+                observer.willChangeCount = 0
+                observer.addedRows = nil
+                observer.removedRows = nil
+                observer.error = nil
+                observer.didChangeCount = 0
+            }
+            
+            reset(personObserver)
+            reset(oneNameObserver)
+            reset(selectedObserver)
+        }
+        
+        selectedName.asyncUpdate(true, newValues: ["name": "Alfonzo"])
+        CFRunLoopRunOrFail()
+        
+        reset()
+        
+        selected.asyncUpdate(true, newValues: ["id": 4])
+        selectedName.asyncUpdate(true, newValues: ["name": "Mr. Trombone"])
+        CFRunLoopRunOrFail()
+        
+        XCTAssertEqual(personObserver.willChangeCount, 1)
+        XCTAssertEqual(personObserver.addedRows, [["id": 4, "name": "Mr. Trombone"]])
+        XCTAssertEqual(personObserver.removedRows, [["id": 4, "name": "Mr. T"]])
+        XCTAssertNil(personObserver.error)
+        XCTAssertEqual(personObserver.didChangeCount, 1)
+        
+        XCTAssertEqual(oneNameObserver.willChangeCount, 1)
+        XCTAssertEqual(oneNameObserver.addedRows, [["name": "Mr. Trombone"]])
+        XCTAssertEqual(oneNameObserver.removedRows, [["name": "Mr. T"]])
+        XCTAssertNil(oneNameObserver.error)
+        XCTAssertEqual(oneNameObserver.didChangeCount, 1)
+        
+        personRemover()
+        selectedRemover()
+        oneNameRemover()
+    }
 }
 
 private class TestAsyncChangeObserver: AsyncRelationChangeObserver {
