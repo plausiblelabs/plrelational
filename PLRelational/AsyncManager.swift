@@ -739,9 +739,9 @@ extension AsyncManager {
                        (matching.reversed, rhs, lhs)]
         
         for (matching, simpleCandidate, other) in toCheck {
-            if let cachingR = simpleCandidate as? CachingRelation, let cache = cachingR.cache {
+            if let simpleRows = efficientRows(fromRelation: simpleCandidate) {
                 if predicateAttributes.isSubset(of: other.scheme.attributes) && newValuesAttributes.isSubset(of: other.scheme.attributes) {
-                    let cachePredicate = cache.map(SelectExpressionFromRow).combined(with: *||)
+                    let cachePredicate = simpleRows.map(SelectExpressionFromRow).combined(with: *||)
                     let mappedPredicate = cachePredicate?.withRenamedAttributes(matching)
                     let combinedPredicate = mappedPredicate.map({ $0 *&& predicate }) ?? predicate
                     return (other as? RelationDerivative.Variable, combinedPredicate)
@@ -750,6 +750,20 @@ extension AsyncManager {
         }
         
         return nil
+    }
+    
+    /// Try to efficiently get the rows of a Relation, and return nil if it can't be done.
+    /// Currently checks to see if it's a MemoryTableRelation and returns the values if so,
+    /// or returns the cache from a CachingRelation if it's that.
+    private func efficientRows(fromRelation: Relation) -> Set<Row>? {
+        switch fromRelation {
+        case let r as MemoryTableRelation:
+            return r.values
+        case let r as CachingRelation:
+            return r.cache
+        default:
+            return nil
+        }
     }
 }
 
