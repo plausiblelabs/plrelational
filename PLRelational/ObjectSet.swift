@@ -16,6 +16,10 @@ struct ObjectSet<T: AnyObject>: Sequence {
         return AnyIterator(gen)
     }
     
+    var isEmpty: Bool {
+        return set.isEmpty
+    }
+    
     mutating func insert(_ obj: T) {
         set.insert(ObjectSetWrapper(object: obj))
     }
@@ -30,6 +34,10 @@ struct ObjectSet<T: AnyObject>: Sequence {
     
     var any: T? {
         return set.first?.object
+    }
+    
+    mutating func removeFirst() -> T {
+        return set.removeFirst().object
     }
 }
 

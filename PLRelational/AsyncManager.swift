@@ -9,8 +9,9 @@ import Foundation
 public final class AsyncManager: PerThreadInstance {
     public typealias ObservationRemover = (Void) -> Void
     
-    private var pendingActions: [Action] = []
-    private var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
+    fileprivate var pendingActions: [Action] = []
+    fileprivate var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
+    fileprivate var variableInfo: ObjectDictionary<AnyObject, [VariableEntry]> = [:]
     
     private let runloop: CFRunLoop
     private var runloopModes: [CFRunLoopMode] = [.commonModes]
@@ -88,13 +89,15 @@ public final class AsyncManager: PerThreadInstance {
         }
         
         switch action {
-        case .add(let relation, _), .delete(let relation, _):
-            registerChange(relation)
-        case .update(let relation, _, _):
-            registerChange(relation)
+        case .add(let relation, let row):
+            registerChange(relation, predicate: SelectExpressionFromRow(row), newValues: row)
+        case .delete(let relation, let query):
+            registerChange(relation, predicate: query, newValues: nil)
+        case .update(let relation, let query, let newValues):
+            registerChange(relation, predicate: query, newValues: newValues)
         case .restoreSnapshot(let database, _):
             for (_, relation) in database.relations {
-                registerChange(relation)
+                registerChange(relation, predicate: true, newValues: nil)
             }
         case .query:
             break
@@ -110,7 +113,7 @@ public final class AsyncManager: PerThreadInstance {
     public func observe(_ relation: Relation, observer: AsyncRelationChangeObserver, context: DispatchContext? = nil) -> ObservationRemover {
         guard let obj = asObject(relation) else { return {} }
         
-        let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
+        let info = infoForObservee(obj)
         let id = info.addObserver(observer, context: context ?? defaultObserverDispatchContext())
         
         return {
@@ -126,7 +129,7 @@ public final class AsyncManager: PerThreadInstance {
     public func observe(_ relation: Relation, observer: AsyncRelationContentObserver, context: DispatchContext? = nil) -> ObservationRemover {
         guard let obj = asObject(relation) else { return {} }
         
-        let info = observedInfo.getOrCreate(obj, defaultValue: ObservedRelationInfo(derivative: RelationDifferentiator(relation: relation).computeDerivative()))
+        let info = infoForObservee(obj)
         let id = info.addObserver(observer, context: context ?? defaultObserverDispatchContext())
         
         return {
@@ -137,53 +140,54 @@ public final class AsyncManager: PerThreadInstance {
         }
     }
     
-    fileprivate func registerChange(_ relation: Relation) {
+    fileprivate func registerChange(_ relation: Relation, predicate: SelectExpression, newValues: Row?) {
         if state != .running {
-            sendWillChange(relation)
+            sendWillChange(relation, predicate: predicate, newValues: newValues)
             scheduleExecutionIfNeeded()
         }
     }
     
-    fileprivate func sendWillChange(_ relation: Relation) {
-        QueryPlanner.visitRelationTree([(relation, ())], { relation, _, _ in
-            guard let relationObject = asObject(relation), !(relation is IntermediateRelation) else { return }
+    fileprivate func sendWillChange(_ relation: Relation, predicate: SelectExpression, newValues: Row?) {
+        for (variable, predicate) in getUpdatePredicates(forRelation: relation, predicate: predicate, newValues: newValues) {
+            if variable is IntermediateRelation { continue }
             
-            for (observedRelation, info) in observedInfo {
-                for variable in info.derivative.allVariables {
-                    if relationObject === variable {
-                        var willChangeRelationObservers: [DispatchContextWrapped<AsyncRelationChangeObserver>] = []
-                        var willChangeUpdateObservers: [DispatchContextWrapped<AsyncRelationContentObserver>] = []
-                        info.observers.mutatingForEach({
-                            if !$0.didSendWillChange {
-                                $0.didSendWillChange = true
-                                willChangeRelationObservers.appendNonNil($0.relationObserver)
-                                willChangeUpdateObservers.appendNonNil($0.updateObserver)
-                            }
-                        })
-                        for observer in willChangeRelationObservers {
-                            observer.withWrapped({ $0.relationWillChange(observedRelation as! Relation) })
+            if let entries = variableInfo[variable] {
+                for entry in entries {
+                    if let filter = entry.filter, let predicate = predicate, canProveInconsistent(predicate, filter) {
+                        continue
+                    }
+                    var willChangeRelationObservers: [DispatchContextWrapped<AsyncRelationChangeObserver>] = []
+                    var willChangeUpdateObservers: [DispatchContextWrapped<AsyncRelationContentObserver>] = []
+                    entry.observedRelationInfo.observers.mutatingForEach({
+                        if !$0.didSendWillChange {
+                            $0.didSendWillChange = true
+                            willChangeRelationObservers.appendNonNil($0.relationObserver)
+                            willChangeUpdateObservers.appendNonNil($0.updateObserver)
                         }
-                        for observer in willChangeUpdateObservers {
-                            observer.withWrapped({ $0.relationWillChange(observedRelation as! Relation) })
-                        }
+                    })
+                    for observer in willChangeRelationObservers {
+                        observer.withWrapped({ $0.relationWillChange(entry.observedRelation) })
+                    }
+                    for observer in willChangeUpdateObservers {
+                        observer.withWrapped({ $0.relationWillChange(entry.observedRelation) })
                     }
                 }
             }
-        })
+        }
     }
     
     fileprivate func sendWillChangeForAllPendingActions() {
         for action in pendingActions {
             switch action {
-            case .add(let relation, _):
-                sendWillChange(relation)
-            case .delete(let relation, _):
-                sendWillChange(relation)
-            case .update(let relation, _, _):
-                sendWillChange(relation)
+            case .add(let relation, let row):
+                sendWillChange(relation, predicate: SelectExpressionFromRow(row), newValues: row)
+            case .delete(let relation, let query):
+                sendWillChange(relation, predicate: query, newValues: nil)
+            case .update(let relation, let query, let newValues):
+                sendWillChange(relation, predicate: query, newValues: newValues)
             case .restoreSnapshot(let database, _):
                 for (_, relation) in database.relations {
-                    registerChange(relation)
+                    registerChange(relation, predicate: true, newValues: nil)
                 }
             case .query:
                 break
@@ -526,6 +530,258 @@ extension AsyncManager {
             observers[currentObserverID] = ObserverEntry(relationObserver: nil, updateObserver: DispatchContextWrapped(context: context, wrapped: observer), didSendWillChange: false)
             return currentObserverID
         }
+    }
+    
+    fileprivate func infoForObservee(_ relationObject: AnyObject) -> ObservedRelationInfo {
+        return observedInfo.getOrCreate(relationObject, defaultValue: makeInfoForObservee(relationObject as! Relation & AnyObject))
+    }
+    
+    fileprivate func makeInfoForObservee(_ relation: Relation & AnyObject) -> ObservedRelationInfo {
+        let derivative = RelationDifferentiator(relation: relation).computeDerivative()
+        let info = ObservedRelationInfo(derivative: derivative)
+        let filters = relationFilters(relation)
+        for (variable, filter) in filters {
+            let entry = VariableEntry(observedRelation: relation, observedRelationInfo: info, filter: filter)
+            variableInfo[variable, defaultValue: []].append(entry)
+        }
+        
+        let filtered = ObjectSet<AnyObject>(filters.map({ $0.0 }))
+        for variable in derivative.allVariables where !filtered.contains(variable) {
+            let entry = VariableEntry(observedRelation: relation, observedRelationInfo: info, filter: nil)
+            variableInfo[variable, defaultValue: []].append(entry)
+        }
+        return info
+    }
+    
+    fileprivate func relationFilters(_ relation: Relation & AnyObject) -> [(RelationDerivative.Variable, SelectExpression)] {
+        guard let relation = relation as? IntermediateRelation else { return [] }
+        
+        var pending: ObjectSet<IntermediateRelation> = [relation]
+        var result: ObjectDictionary<AnyObject, SelectExpression?> = [:]
+        
+        while !pending.isEmpty {
+            let r = pending.removeFirst()
+            for child in r.operands {
+                switch child {
+                case let child as IntermediateRelation:
+                    pending.insert(child)
+                case let child as RelationDerivative.Variable:
+                    if case .select(let expression) = r.op {
+                        if case .none = result[child] {
+                            result[child] = expression
+                        } else {
+                            result[child] = nil
+                        }
+                    } else {
+                        result[child] = nil
+                    }
+                default:
+                    break
+                }
+            }
+        }
+        
+        return result.filter({ $1 != nil }).map({ ($0 as! RelationDerivative.Variable, $1!) })
+    }
+}
+
+extension AsyncManager {
+    fileprivate struct VariableEntry {
+        // TODO: weak reference?
+        var observedRelation: Relation
+        var observedRelationInfo: ObservedRelationInfo
+        var filter: SelectExpression?
+    }
+    
+    /// Try to (cheaply) see if a and b are inconsistent, i.e. can never both be true simultaneously.
+    /// The function returns true if so. If it returns false, they may still be inconsistent, it
+    /// just couldn't prove that. Right now the check is extremely basic.
+    fileprivate func canProveInconsistent(_ a: SelectExpression, _ b: SelectExpression) -> Bool {
+        // If one of the expressions is an AND, then inconsistency with either operand
+        // results in inconsistency of the whole.
+        if let (lhs, rhs) = a.binaryOperands(AndComparator.self) {
+            return canProveInconsistent(lhs, b) || canProveInconsistent(rhs, b)
+        }
+        if let (lhs, rhs) = b.binaryOperands(AndComparator.self) {
+            return canProveInconsistent(a, lhs) || canProveInconsistent(a, rhs)
+        }
+        
+        // If one of the expressions is an OR, then inconsistency with BOTH operands
+        // results in inconsistency of the whole.
+        if let (lhs, rhs) = a.binaryOperands(OrComparator.self) {
+            return canProveInconsistent(lhs, b) && canProveInconsistent(rhs, b)
+        }
+        if let (lhs, rhs) = b.binaryOperands(OrComparator.self) {
+            return canProveInconsistent(a, lhs) && canProveInconsistent(a, rhs)
+        }
+        
+        // If they both require equality between an attribute and a value, and it's the
+        // same attribute and a different value, then they're inconsistent.
+        if let (attributeA, valueA) = equalityAttributeAndValue(a),
+            let (attributeB, valueB) = equalityAttributeAndValue(b),
+            attributeA == attributeB && valueA.relationValue != valueB.relationValue
+        {
+            return true
+        }
+        
+        // We tested all we could, and we couldn't prove it inconsistent.
+        return false
+    }
+    
+    private func equalityAttributeAndValue(_ expression: SelectExpression) -> (Attribute, SelectExpressionConstantValue)? {
+        switch expression.binaryOperands(EqualityComparator.self) {
+        case let .some(attr as Attribute, value as SelectExpressionConstantValue):
+            return (attr, value)
+        case let .some(value as SelectExpressionConstantValue, attr as Attribute):
+            return (attr, value)
+        default:
+            return nil
+        }
+        
+    }
+}
+
+extension AsyncManager {
+    /// Chase down all relation children that need notifications sent for an update.
+    /// The return value is an array of variable/predicate pairs. The predicate indicates
+    /// how the variable may be filtered, and if no filter is computed, it will be nil.
+    fileprivate func getUpdatePredicates(forRelation relation: Relation, predicate: SelectExpression, newValues: Row?) -> [(RelationDerivative.Variable, SelectExpression?)] {
+        let initial = linearGetUpdatePredicates(forRelation: relation, predicate: predicate, newValues: newValues)
+        
+        let followingStart = initial.last!.0
+        var remaining = getAllChildren(ofRelation: followingStart)
+        remaining.remove(followingStart)
+        
+        return initial.map({ ($0, $1) }) + remaining.map({ ($0 as! RelationDerivative.Variable, nil) })
+    }
+    
+    /// Chase down Relation children we can compute predicates for. Right now, this has to follow
+    /// a single path down the tree (thus "linear") and can only work through a few Relation
+    /// types. It will iterate through unions with a single child, projects, selects, renames,
+    /// and it will work through equijoins when the change applies only to one side of the
+    /// join, and the other side is a CachingRelation with a cache set.
+    private func linearGetUpdatePredicates(forRelation relation: Relation, predicate: SelectExpression, newValues: Row?) -> [(RelationDerivative.Variable, SelectExpression)] {
+        var currentRelation = asObject(relation)
+        var currentPredicate = predicate
+        var currentValues = newValues
+        
+        var result: [(RelationDerivative.Variable, SelectExpression)] = []
+        
+        loop: while let currentRelationNonNil = currentRelation {
+            result.append((currentRelationNonNil as! RelationDerivative.Variable, currentPredicate))
+            
+            if let intermediate = currentRelationNonNil as? IntermediateRelation {
+                switch intermediate.op {
+                case .union where intermediate.operands.count == 1:
+                    currentRelation = asObject(intermediate.operands[0])
+                    continue
+                case .project:
+                    currentRelation = asObject(intermediate.operands[0])
+                case .select(let expression):
+                    currentRelation = asObject(intermediate.operands[0])
+                    currentPredicate = currentPredicate *&& expression
+                case .rename(let mapping):
+                    currentRelation = asObject(intermediate.operands[0])
+                    currentPredicate = currentPredicate.withRenamedAttributes(mapping.reversed)
+                    currentValues = currentValues?.renameAttributes(mapping.reversed)
+                case .equijoin(let matching):
+                    if let result = evaluateEquijoin(lhs: intermediate.operands[0], rhs: intermediate.operands[1], matching: matching, predicate: currentPredicate, newValues: currentValues) {
+                        currentRelation = result.0
+                        currentPredicate = result.1
+                    } else {
+                        break loop
+                    }
+                default:
+                    break loop
+                }
+            } else {
+                break loop
+            }
+        }
+        
+        return result
+    }
+    
+    /// Return all object children of the given relation, including the given relation.
+    private func getAllChildren(ofRelation relation: Relation) -> ObjectSet<AnyObject> {
+        guard let relationObj = asObject(relation) else { return [] }
+        
+        var visited: ObjectSet<AnyObject> = []
+        var toVisit: ObjectSet<AnyObject> = [relationObj]
+        
+        while !toVisit.isEmpty {
+            let r = toVisit.removeFirst()
+            visited.insert(r)
+            
+            if let r = r as? IntermediateRelation {
+                for child in r.operands {
+                    if let obj = asObject(child), !visited.contains(obj) {
+                        toVisit.insert(obj)
+                    }
+                }
+            }
+        }
+        
+        return visited
+    }
+    
+    /// Check whether a predicate can be efficiently computed through an equijoin. If the predicate
+    /// and new values apply to one side of the join, and if the other side of the join is a 
+    /// CachingRelation with the cache set, this will return the other child and return a predicate
+    /// derived from the predicate passed in and from the other side of the join.
+    private func evaluateEquijoin(lhs: Relation, rhs: Relation, matching: [Attribute: Attribute], predicate: SelectExpression, newValues: Row?) -> (RelationDerivative.Variable?, SelectExpression)? {
+        guard let newValues = newValues else { return nil }
+        
+        let predicateAttributes = predicate.allAttributes()
+        let newValuesAttributes = Set(newValues.attributes)
+        
+        let toCheck = [(matching, lhs, rhs),
+                       (matching.reversed, rhs, lhs)]
+        
+        for (matching, simpleCandidate, other) in toCheck {
+            if let simpleRows = efficientRows(fromRelation: simpleCandidate) {
+                if predicateAttributes.isSubset(of: other.scheme.attributes) && newValuesAttributes.isSubset(of: other.scheme.attributes) {
+                    let cachePredicate = simpleRows.map(SelectExpressionFromRow).combined(with: *||)
+                    let mappedPredicate = cachePredicate?.withRenamedAttributes(matching)
+                    let combinedPredicate = mappedPredicate.map({ $0 *&& predicate }) ?? predicate
+                    return (other as? RelationDerivative.Variable, combinedPredicate)
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    /// Try to efficiently get the rows of a Relation, and return nil if it can't be done.
+    /// Currently checks to see if it's a MemoryTableRelation and returns the values if so,
+    /// or returns the cache from a CachingRelation if it's that.
+    private func efficientRows(fromRelation: Relation) -> Set<Row>? {
+        switch fromRelation {
+        case let r as MemoryTableRelation where !hasPendingChanges(forRelation: r):
+            return r.values
+        case let r as CachingRelation:
+            return r.cache
+        default:
+            return nil
+        }
+    }
+    
+    /// Check whether the given relation (but not its children!) has any pending changes
+    /// in `pendingActions`.
+    private func hasPendingChanges(forRelation: Relation) -> Bool {
+        guard let obj = asObject(forRelation) else { return false }
+        
+        for change in pendingActions {
+            switch change {
+            case .update(let r, _, _): if obj === asObject(r) { return true }
+            case .add(let r, _): if obj === r { return true }
+            case .delete(let r, _): if obj === r { return true }
+                
+            default: break
+            }
+        }
+        
+        return false
     }
 }
 
