@@ -9,6 +9,8 @@ import Foundation
 /// Silly placeholder until we figure out what the error type should actually look like.
 public typealias RelationError = Error
 
+public typealias RelationObject = Relation & AnyObject
+
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     
