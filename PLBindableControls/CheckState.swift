@@ -4,6 +4,7 @@
 //
 
 import Cocoa
+import PLRelationalBinding
 
 public enum CheckState: String { case
     on = "On",
@@ -18,6 +19,17 @@ public enum CheckState: String { case
             self = .off
         case .some(true):
             self = .on
+        }
+    }
+
+    public init(commonValue: CommonValue<Bool>) {
+        switch commonValue {
+        case .none:
+            self = .off
+        case .one(let b):
+            self = b ? .on : .off
+        case .multi:
+            self = .mixed
         }
     }
     
@@ -42,6 +54,17 @@ public enum CheckState: String { case
             return false
         case .mixed:
             preconditionFailure("Cannot represent mixed state as a boolean")
+        }
+    }
+    
+    public var commonValue: CommonValue<Bool> {
+        switch self {
+        case .on:
+            return .one(true)
+        case .off:
+            return .one(false)
+        case .mixed:
+            return .multi
         }
     }
     
