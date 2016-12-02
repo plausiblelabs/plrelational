@@ -80,3 +80,21 @@ extension CommonValue { // where T: Equatable {
         }
     }
 }
+
+extension CommonValue {
+    /// Returns the CommonValue that would result if the given value was added to the current one.
+    public func adding(_ value: T) -> CommonValue<T> {
+        switch self {
+        case .none:
+            return .one(value)
+        case .one(let v):
+            if v == value {
+                return self
+            } else {
+                return .multi
+            }
+        case .multi:
+            return self
+        }
+    }
+}
