@@ -33,10 +33,6 @@ class EditorView: BackgroundView {
     private var contentView: NSView?
     private var tableViews: [RelationTableView] = []
     
-    // XXX: This is a unique identifier that allows for determining whether an async query is still valid
-    // i.e., whether the content should be set
-    private var currentContentLoadID: UUID?
-
     private var observerRemovals: [ObserverRemoval] = []
     
     init(frame: NSRect, model: DocModel) {
