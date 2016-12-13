@@ -384,7 +384,7 @@ open class QueryRunner {
             
             let smallerAttributes = smallerInput == 0 ? matching.keys : matching.values
             let largerAttributes = smallerInput == 0 ? matching.values : matching.keys
-            let largerToSmallerRenaming = smallerInput == 0 ? matching.reversed : matching
+            let largerToSmallerRenaming = smallerInput == 0 ? matching.inverted : matching
             
             // It's common to join identical attributes, so filter out any renames which "rename"
             // to the same attribute. This speeds things up and will allow skipping rename work

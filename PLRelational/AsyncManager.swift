@@ -682,8 +682,8 @@ extension AsyncManager {
                     currentPredicate = currentPredicate *&& expression
                 case .rename(let mapping):
                     currentRelation = asObject(intermediate.operands[0])
-                    currentPredicate = currentPredicate.withRenamedAttributes(mapping.reversed)
-                    currentValues = currentValues?.renameAttributes(mapping.reversed)
+                    currentPredicate = currentPredicate.withRenamedAttributes(mapping.inverted)
+                    currentValues = currentValues?.renameAttributes(mapping.inverted)
                 case .equijoin(let matching):
                     if let result = evaluateEquijoin(lhs: intermediate.operands[0], rhs: intermediate.operands[1], matching: matching, predicate: currentPredicate, newValues: currentValues) {
                         currentRelation = result.0
@@ -736,7 +736,7 @@ extension AsyncManager {
         let newValuesAttributes = Set(newValues.attributes)
         
         let toCheck = [(matching, lhs, rhs),
-                       (matching.reversed, rhs, lhs)]
+                       (matching.inverted, rhs, lhs)]
         
         for (matching, simpleCandidate, other) in toCheck {
             if let simpleRows = efficientRows(fromRelation: simpleCandidate) {

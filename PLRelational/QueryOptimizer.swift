@@ -110,7 +110,7 @@ class QueryOptimizer {
         let otherChildIndex = 1 - thisChildIndex
         let otherChild = nodes[equijoin].childIndexes[otherChildIndex]
         
-        let newMatching = thisChildIndex == 0 ? matching.reversed : matching
+        let newMatching = thisChildIndex == 0 ? matching.inverted : matching
         nodes[selectableGenerator].op = .equijoinedSelectableGenerator(newMatching, generatorGetter)
         nodes[selectableGenerator].childIndexes = [otherChild]
         

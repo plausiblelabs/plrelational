@@ -276,7 +276,7 @@ extension IntermediateRelation {
     }
     
     func renameContains(_ row: Row, renames: [Attribute: Attribute]) -> Result<Bool, RelationError> {
-        let renamedRow = row.renameAttributes(renames.reversed)
+        let renamedRow = row.renameAttributes(renames.inverted)
         return operands[0].contains(renamedRow)
     }
     
@@ -440,7 +440,7 @@ extension IntermediateRelation {
     }
     
     func renameUpdate(_ query: SelectExpression, newValues: Row, renames: [Attribute: Attribute]) -> Result<Void, RelationError> {
-        let reverseRenames = renames.reversed
+        let reverseRenames = renames.inverted
         let renamedQuery = query.withRenamedAttributes(reverseRenames)
         let renamedNewValues = newValues.renameAttributes(reverseRenames)
         return operands[0].update(renamedQuery, newValues: renamedNewValues)

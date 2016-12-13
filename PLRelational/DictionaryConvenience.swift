@@ -4,13 +4,13 @@
 //
 
 extension Dictionary where Value: Hashable {
-    var reversed: [Value: Key] {
+    public var inverted: [Value: Key] {
         return Dictionary<Value, Key>(self.map({ ($1, $0) }))
     }
 }
 
 extension Dictionary {
-    mutating func getOrCreate(_ key: Key, defaultValue: @autoclosure (Void) -> Value) -> Value {
+    public mutating func getOrCreate(_ key: Key, defaultValue: @autoclosure (Void) -> Value) -> Value {
         if let value = self[key] {
             return value
         } else {
@@ -23,7 +23,7 @@ extension Dictionary {
 
 /// Combine a dictionary and some collection of key/value pairs, which may be a second dictionary.
 /// Any keys that exist in both will have the value from the second parameter in the result.
-func +<K: Hashable, V, Seq: Sequence>(a: [K: V], b: Seq) -> [K: V] where Seq.Iterator.Element == (K, V) {
+public func +<K: Hashable, V, Seq: Sequence>(a: [K: V], b: Seq) -> [K: V] where Seq.Iterator.Element == (K, V) {
     var result = a
     for (k, v) in b {
         result[k] = v
@@ -33,7 +33,7 @@ func +<K: Hashable, V, Seq: Sequence>(a: [K: V], b: Seq) -> [K: V] where Seq.Ite
 
 extension Dictionary {
     /// Initialize a dictionary with an array of key/value pairs.
-    init(_ pairs: [(Key, Value)]) {
+    public init(_ pairs: [(Key, Value)]) {
         self.init(minimumCapacity: pairs.count)
         
         for (k, v) in pairs {
