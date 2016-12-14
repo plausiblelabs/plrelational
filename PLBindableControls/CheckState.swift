@@ -68,8 +68,8 @@ public enum CheckState: String { case
         }
     }
     
-    // Int value is used to set NSButton.state
-    var nsValue: Int {
+    /// The Cocoa-defined integer value that corresponds to this CheckState (NSOnState, NSOffState, or NSMixedState).
+    public var nsValue: Int {
         switch self {
         case .on:
             return NSOnState
