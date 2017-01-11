@@ -219,6 +219,7 @@
 		C23BC0501D21AEDF00188F86 /* QueryOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC04F1D21AEDF00188F86 /* QueryOptimizer.swift */; };
 		C23BC0521D21C5B100188F86 /* CollectionConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */; };
 		C23BC0561D24629E00188F86 /* SmallInlineArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC0551D24629E00188F86 /* SmallInlineArray.swift */; };
+		C24C4A651E255D4000482726 /* ChangeLoggingRelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C24C4A641E255D4000482726 /* ChangeLoggingRelationTests.swift */; };
 		C24C4A681E26740C00482726 /* BookmarkableGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = C24C4A671E26740C00482726 /* BookmarkableGraph.swift */; };
 		C24C4A6A1E26940400482726 /* BookmarkableGraphTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C24C4A691E26940400482726 /* BookmarkableGraphTests.swift */; };
 		C25D63411DDF5F3000135E20 /* OptionalFlatten.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25D63401DDF5F3000135E20 /* OptionalFlatten.swift */; };
@@ -768,6 +769,7 @@
 		C23BC04F1D21AEDF00188F86 /* QueryOptimizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryOptimizer.swift; sourceTree = "<group>"; };
 		C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionConvenience.swift; sourceTree = "<group>"; };
 		C23BC0551D24629E00188F86 /* SmallInlineArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmallInlineArray.swift; sourceTree = "<group>"; };
+		C24C4A641E255D4000482726 /* ChangeLoggingRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelationTests.swift; sourceTree = "<group>"; };
 		C24C4A671E26740C00482726 /* BookmarkableGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarkableGraph.swift; sourceTree = "<group>"; };
 		C24C4A691E26940400482726 /* BookmarkableGraphTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarkableGraphTests.swift; sourceTree = "<group>"; };
 		C257C7491CBD7F4500234A89 /* BinaryOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BinaryOperator.swift; sourceTree = "<group>"; };
@@ -1703,6 +1705,7 @@
 				C277E8061CDBDCC600B7B8F6 /* ChangeLoggingDatabase.swift */,
 				C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */,
 				C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */,
+				C24C4A641E255D4000482726 /* ChangeLoggingRelationTests.swift */,
 				C2FE9B981CEE15720004E635 /* TransactionalDatabase.swift */,
 				C2FE9B9A1CEE3A810004E635 /* TransactionalDatabaseTests.swift */,
 			);
@@ -2736,6 +2739,7 @@
 				374AE97A1D9205DC007D1366 /* PlistDatabaseTests.swift in Sources */,
 				C2CFC35D1D7F49D800389373 /* PlistFileRelationTests.swift in Sources */,
 				C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */,
+				C24C4A651E255D4000482726 /* ChangeLoggingRelationTests.swift in Sources */,
 				C277E8051CDBD2A000B7B8F6 /* DBTestCase.swift in Sources */,
 				C22921E81CD12CF100518184 /* RelationTests.swift in Sources */,
 				3710A6A11DDD6B300070EC29 /* RelationRecursiveSelectTests.swift in Sources */,

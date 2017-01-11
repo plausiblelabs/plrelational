@@ -131,7 +131,7 @@ extension ChangeLoggingDatabase {
         let snapshottedRelations = Set(snapshot.relationSnapshots.map({ ObjectIdentifier($0.0) }))
         for (_, relation) in changeLoggingRelations {
             if !snapshottedRelations.contains(ObjectIdentifier(relation)) {
-                let change = relation.rawRestoreSnapshot(ChangeLoggingRelationSnapshot(savedLog: []))
+                let change = relation.rawRestoreSnapshot(ChangeLoggingRelationSnapshot(bookmark: relation.baseBookmark))
                 switch change {
                 case .Ok(let change):
                     changes.append((relation, change))

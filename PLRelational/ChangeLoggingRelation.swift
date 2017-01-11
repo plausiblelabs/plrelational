@@ -9,11 +9,6 @@ enum ChangeLoggingRelationChange {
     case update(SelectExpression, Row)
 }
 
-struct ChangeLoggingRelationLogEntry {
-    var forward: ChangeLoggingRelationChange
-    var backward: [ChangeLoggingRelationChange]
-}
-
 private struct ChangeLoggingRelationCurrentChange {
     var added: MemoryTableRelation
     var removed: MemoryTableRelation
@@ -24,13 +19,17 @@ private struct ChangeLoggingRelationCurrentChange {
 }
 
 public struct ChangeLoggingRelationSnapshot {
-    var savedLog: [ChangeLoggingRelationLogEntry]
+    var bookmark: ChangeLoggingRelation.Graph.Bookmark
 }
 
 public class ChangeLoggingRelation {
+    fileprivate typealias Graph = BookmarkableGraph<[ChangeLoggingRelationChange]>
+    
     fileprivate var baseRelation: MutableRelation
     
-    fileprivate var log: [ChangeLoggingRelationLogEntry] = []
+    fileprivate let changeGraph: Graph
+    var baseBookmark: Graph.Bookmark
+    var currentBookmark: Graph.Bookmark
     
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
@@ -42,8 +41,15 @@ public class ChangeLoggingRelation {
     
     fileprivate var fullUnderlyingRelation: Relation
     
-    public init(baseRelation: MutableRelation) {
+    public convenience init(baseRelation: MutableRelation) {
+        self.init(baseRelation: baseRelation, changeGraph: Graph())
+    }
+    
+    fileprivate init(baseRelation: MutableRelation, changeGraph: Graph) {
         self.baseRelation = baseRelation
+        self.changeGraph = changeGraph
+        self.baseBookmark = changeGraph.addEmptyNode()
+        self.currentBookmark = baseBookmark
         currentChange = ChangeLoggingRelationCurrentChange(
             added: MemoryTableRelation(scheme: baseRelation.scheme),
             removed: MemoryTableRelation(scheme: baseRelation.scheme))
@@ -73,7 +79,7 @@ public class ChangeLoggingRelation {
             if let removed = $0.removed , removed.isEmpty.ok != true {
                 reverse.append(.union(removed))
             }
-            log.append(ChangeLoggingRelationLogEntry(forward: change, backward: reverse))
+            currentBookmark = changeGraph.addNode(fromBookmark: currentBookmark, outboundData: [change], inboundData: reverse)
             
             notifyChangeObservers($0, kind: .directChange)
             
@@ -100,10 +106,9 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
         case .Ok(let contains):
             if !contains {
                 let change = ChangeLoggingRelationChange.union(ConcreteRelation(row))
-                let logEntry = ChangeLoggingRelationLogEntry(
-                    forward: change,
-                    backward: [.select(*!SelectExpressionFromRow(row))])
-                log.append(logEntry)
+                let reverse = ChangeLoggingRelationChange.select(*!SelectExpressionFromRow(row))
+                currentBookmark = changeGraph.addNode(fromBookmark: currentBookmark, outboundData: [change], inboundData: [reverse])
+                
                 let result = self.applyLogToCurrentRelationAndGetChanges([change])
                 return result.map({
                     notifyChangeObservers($0, kind: .directChange)
@@ -120,10 +125,9 @@ extension ChangeLoggingRelation: MutableRelation, RelationDefaultChangeObserverI
     public func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         return ConcreteRelation.copyRelation(self.select(query)).then({ rowsToDelete in
             let change = ChangeLoggingRelationChange.select(*!query)
-            let logEntry = ChangeLoggingRelationLogEntry(
-                forward: change,
-                backward: [.union(rowsToDelete)])
-            log.append(logEntry)
+            let reverse = ChangeLoggingRelationChange.union(rowsToDelete)
+            currentBookmark = changeGraph.addNode(fromBookmark: currentBookmark, outboundData: [change], inboundData: [reverse])
+            
             let result = self.applyLogToCurrentRelationAndGetChanges([change])
             return result.map({
                 notifyChangeObservers($0, kind: .directChange)
@@ -217,7 +221,8 @@ extension ChangeLoggingRelation {
     /// Since we're likely to be saving multiple tables at once, the transaction takes place
     /// in that code to ensure everything is done together.
     public func save() -> Result<Void, RelationError> {
-        let change = ChangeLoggingRelation.computeChangeFromLog(self.log.lazy.map({ $0.forward }), baseRelation: self.baseRelation)
+        let log = changeGraph.computePath(from: baseBookmark, to: currentBookmark).joined()
+        let change = ChangeLoggingRelation.computeChangeFromLog(log, baseRelation: self.baseRelation)
         
         return change.copy().then({ change in
             if let removed = change.removed {
@@ -247,6 +252,7 @@ extension ChangeLoggingRelation {
                 }
             }
             
+            baseBookmark = currentBookmark
             return .Ok()
         })
     }
@@ -254,7 +260,7 @@ extension ChangeLoggingRelation {
 
 extension ChangeLoggingRelation {
     public func takeSnapshot() -> ChangeLoggingRelationSnapshot {
-        return ChangeLoggingRelationSnapshot(savedLog: self.log)
+        return ChangeLoggingRelationSnapshot(bookmark: currentBookmark)
     }
     
     public func restoreSnapshot(_ snapshot: ChangeLoggingRelationSnapshot) -> Result<Void, RelationError> {
@@ -266,25 +272,15 @@ extension ChangeLoggingRelation {
     
     /// Restore a snapshot and compute the changes that this causes. Does not notify observers.
     func rawRestoreSnapshot(_ snapshot: ChangeLoggingRelationSnapshot) -> Result<RelationChange, RelationError> {
-        // Note: right now we assume that the snapshot's log is a prefix of ours, or vice versa. We don't support
-        // tree snapshots (yet?).
-        if snapshot.savedLog.count > self.log.count {
-            // The snapshot is ahead. Advance our state by the snapshot's log.
-            let log = snapshot.savedLog.suffix(from: self.log.count)
-            self.log = snapshot.savedLog
-            return applyLogToCurrentRelationAndGetChanges(log.lazy.map({ $0.forward }))
-        } else {
-            // The snapshot is behind. Reverse our state by our backwards log.
-            let log = self.log.suffix(from: snapshot.savedLog.count)
-            self.log = snapshot.savedLog
-            let backwardsLog = log.flatMap({ $0.backward }).reversed()
-            return applyLogToCurrentRelationAndGetChanges(backwardsLog)
-        }
+        let log = changeGraph.computePath(from: currentBookmark, to: snapshot.bookmark).joined()
+        currentBookmark = snapshot.bookmark
+        return applyLogToCurrentRelationAndGetChanges(log)
     }
     
     func deriveChangeLoggingRelation() -> ChangeLoggingRelation {
-        let relation = ChangeLoggingRelation(baseRelation: self.baseRelation)
-        relation.log = self.log
+        let relation = ChangeLoggingRelation(baseRelation: self.baseRelation, changeGraph: changeGraph)
+        relation.baseBookmark = baseBookmark
+        relation.currentBookmark = currentBookmark
         relation.currentChange = self.currentChange.copy()
         return relation
     }
