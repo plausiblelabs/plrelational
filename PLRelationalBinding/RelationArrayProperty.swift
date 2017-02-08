@@ -24,6 +24,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
     private let tag: AnyObject?
     
     private var removal: ObserverRemoval?
+    private var started = false
 
     fileprivate init(relation: Relation, idAttr: Attribute, orderAttr: Attribute, tag: AnyObject?) {
         precondition(relation.scheme.attributes.isSuperset(of: [idAttr, orderAttr]))
@@ -42,6 +43,10 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
     }
     
     override func start() {
+        if started {
+            return
+        }
+        
         removal = relation.addAsyncObserver(self)
         
         notify.valueWillChange()
@@ -60,6 +65,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
                 self.notify.valueDidChange()
             }
         )
+        started = true
     }
     
     private func onInsert(_ rows: [Row], changes: inout [Change]) {
