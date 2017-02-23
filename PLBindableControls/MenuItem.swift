@@ -32,6 +32,31 @@ public struct MenuItem<T> {
         self.type = type
         self.visible = visible
     }
+    
+    /// Returns the content object if this is a `normal` or `momentary` item, otherwise returns nil.
+    public var object: T? {
+        switch type {
+        case .normal(let content):
+            return content.object
+        case .momentary(let content, _):
+            return content.object
+        case .separator:
+            return nil
+        }
+    }
+}
+
+extension MenuItem: CustomStringConvertible {
+    public var description: String {
+        switch type {
+        case .normal(let content):
+            return "MenuItem[normal: '\(content.title?.value ?? "")']"
+        case .momentary(let content, _):
+            return "MenuItem[momentary: '\(content.title?.value ?? "")']"
+        case .separator:
+            return "MenuItem[----]"
+        }
+    }
 }
 
 public func titledMenuItem(_ title: ReadableProperty<String>, object: String = "Default") -> MenuItem<String> {
