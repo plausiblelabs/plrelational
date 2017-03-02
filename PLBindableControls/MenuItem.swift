@@ -6,15 +6,28 @@
 import Cocoa
 import PLRelationalBinding
 
+public enum MenuItemTitle {
+    case sync(ReadableProperty<String>)
+    case async(AsyncReadableProperty<String>)
+}
+
 public struct MenuItemContent<T> {
     public let object: T
-    public let title: ReadableProperty<String>?
+    public let title: MenuItemTitle?
     public let image: ReadableProperty<Image>?
     
-    public init(object: T, title: ReadableProperty<String>?, image: ReadableProperty<Image>? = nil) {
+    public init(object: T, title: MenuItemTitle?, image: ReadableProperty<Image>? = nil) {
         self.object = object
         self.title = title
         self.image = image
+    }
+    
+    public init(object: T, title: ReadableProperty<String>, image: ReadableProperty<Image>? = nil) {
+        self.init(object: object, title: .sync(title), image: image)
+    }
+    
+    public init(object: T, title: AsyncReadableProperty<String>, image: ReadableProperty<Image>? = nil) {
+        self.init(object: object, title: .async(title), image: image)
     }
 }
 
@@ -90,8 +103,12 @@ class NativeMenuItem<T> {
         if let content = content {
             // TODO: Avoid cycle here
             nsitem.representedObject = self
-            if let t = content.title {
-                _ = title <~ t
+            switch content.title {
+            case .sync(let prop)?:
+                _ = title <~ prop
+            case .async(let prop)?:
+                _ = title <~ prop
+            default: break
             }
             if let i = content.image {
                 _ = image <~ i
