@@ -67,6 +67,21 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     }
 }
 
+private class ConstantValueAsyncProperty<T>: AsyncReadableProperty<T> {
+    init(_ value: T) {
+        // TODO: Use a no-op signal here
+        let (signal, _) = Signal<T>.pipe()
+        super.init(initialValue: value, signal: signal)
+    }
+}
+
+/// Returns an AsyncReadableProperty whose value never changes.  Note that since the value cannot change,
+/// observers will never be notified of changes.
+public func constantValueAsyncProperty<T>(_ value: T) -> AsyncReadableProperty<T> {
+    return ConstantValueAsyncProperty(value)
+}
+
+
 /// A concrete readable property whose value can be updated and fetched asynchronously.
 open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
