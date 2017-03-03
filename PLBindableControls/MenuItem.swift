@@ -11,6 +11,15 @@ public enum MenuItemTitle {
     case async(AsyncReadableProperty<String>)
 }
 
+extension MenuItemTitle {
+    public var value: String? {
+        switch self{
+        case .sync(let p): return p.value
+        case .async(let p): return p.value
+        }
+    }
+}
+
 public struct MenuItemContent<T> {
     public let object: T
     public let title: MenuItemTitle?
