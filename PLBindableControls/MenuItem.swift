@@ -6,13 +6,13 @@
 import Cocoa
 import PLRelationalBinding
 
-public enum MenuItemTitle {
-    case sync(ReadableProperty<String>)
-    case async(AsyncReadableProperty<String>)
+public enum MenuItemProperty<T> {
+    case sync(ReadableProperty<T>)
+    case async(AsyncReadableProperty<T>)
 }
 
-extension MenuItemTitle {
-    public var value: String? {
+extension MenuItemProperty {
+    public var value: T? {
         switch self{
         case .sync(let p): return p.value
         case .async(let p): return p.value
@@ -22,21 +22,21 @@ extension MenuItemTitle {
 
 public struct MenuItemContent<T> {
     public let object: T
-    public let title: MenuItemTitle?
-    public let image: ReadableProperty<Image>?
+    public let title: MenuItemProperty<String>?
+    public let image: MenuItemProperty<Image>?
     
-    public init(object: T, title: MenuItemTitle?, image: ReadableProperty<Image>? = nil) {
+    public init(object: T, title: MenuItemProperty<String>?, image: MenuItemProperty<Image>? = nil) {
         self.object = object
         self.title = title
         self.image = image
     }
     
     public init(object: T, title: ReadableProperty<String>, image: ReadableProperty<Image>? = nil) {
-        self.init(object: object, title: .sync(title), image: image)
+        self.init(object: object, title: .sync(title), image: image.map{ .sync($0) })
     }
     
     public init(object: T, title: AsyncReadableProperty<String>, image: ReadableProperty<Image>? = nil) {
-        self.init(object: object, title: .async(title), image: image)
+        self.init(object: object, title: .async(title), image: image.map{ .sync($0) })
     }
 }
 
@@ -137,15 +137,23 @@ class NativeMenuItem<T> {
         if let content = content {
             // TODO: Avoid cycle here
             nsitem.representedObject = self
+            
             switch content.title {
             case .sync(let prop)?:
                 _ = title <~ prop
             case .async(let prop)?:
                 _ = title <~ prop
-            default: break
+            default:
+                break
             }
-            if let i = content.image {
-                _ = image <~ i
+            
+            switch content.image {
+            case .sync(let prop)?:
+                _ = image <~ prop
+            case .async(let prop)?:
+                _ = image <~ prop
+            default:
+                break
             }
         }
     }
