@@ -67,15 +67,6 @@ open class TextField: NSTextField, NSTextFieldDelegate {
     /// delivered, and only a single commit change will be delivered when the user is done editing.
     public var deliverTransientChanges: Bool = false
     
-    /// When configured as a label, the TextField is non-editable and has no background or chrome.
-    public var isLabel: Bool = false {
-        didSet {
-            self.drawsBackground = !isLabel
-            self.isBezeled = !isLabel
-            self.isEditable = !isLabel
-        }
-    }
-    
     // XXX: For now we assume that either `string` or `optString` will be in use, but never both at the same time.
     private var usingOpt: Bool {
         return _optString.signal.observerCount > 0

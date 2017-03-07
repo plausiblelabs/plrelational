@@ -260,6 +260,7 @@
 		C2CFC3591D7F336F00389373 /* PlistFileRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */; };
 		C2CFC35B1D7F36DE00389373 /* RowPlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CFC35A1D7F36DE00389373 /* RowPlist.swift */; };
 		C2CFC35D1D7F49D800389373 /* PlistFileRelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */; };
+		C2D21C4C1E6F324000261764 /* Label.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2D21C4B1E6F324000261764 /* Label.swift */; };
 		C2D4A8531D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; };
 		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2DF2B9E1CFDD81100ED8695 /* ObjectDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */; };
@@ -816,6 +817,7 @@
 		C2CFC3581D7F336F00389373 /* PlistFileRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistFileRelation.swift; sourceTree = "<group>"; };
 		C2CFC35A1D7F36DE00389373 /* RowPlist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RowPlist.swift; sourceTree = "<group>"; };
 		C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistFileRelationTests.swift; path = PLRelationalTests/PlistFileRelationTests.swift; sourceTree = SOURCE_ROOT; };
+		C2D21C4B1E6F324000261764 /* Label.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Label.swift; sourceTree = "<group>"; };
 		C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswiftSwiftOnoneSupport.dylib; path = Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/libswiftSwiftOnoneSupport.dylib; sourceTree = DEVELOPER_DIR; };
 		C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectDictionary.swift; sourceTree = "<group>"; };
 		C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QueryRunnerTests.swift; path = PLRelationalTests/QueryRunnerTests.swift; sourceTree = SOURCE_ROOT; };
@@ -1307,6 +1309,7 @@
 				37A1CE621D0B25F40067870D /* ColorPanel.swift */,
 				37A1CE5C1D08C3110067870D /* ColorPickerView.swift */,
 				376A96371D09225900E696AE /* ComboBox.swift */,
+				C2D21C4B1E6F324000261764 /* Label.swift */,
 				3761369A1CF9523A00F572C5 /* PopUpButton.swift */,
 				3761369C1CFBA42100F572C5 /* StepperView.swift */,
 				37C611321CD7F80F001DAF59 /* TextField.swift */,
@@ -2567,6 +2570,7 @@
 				37A1CEB71D1083FD0067870D /* TextField.swift in Sources */,
 				37A1CEBC1D1083FD0067870D /* Color.swift in Sources */,
 				37A1CEB31D1083FD0067870D /* Image.swift in Sources */,
+				C2D21C4C1E6F324000261764 /* Label.swift in Sources */,
 				37A4A27E1D302738005CAEA5 /* UndoableDatabase.swift in Sources */,
 				37A1CEDC1D1358670067870D /* CheckState.swift in Sources */,
 				37A1CEBA1D1083FD0067870D /* StepperView.swift in Sources */,
