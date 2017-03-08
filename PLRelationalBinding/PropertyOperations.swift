@@ -19,6 +19,20 @@ extension ReadablePropertyType {
     }
 }
 
+extension ReadWriteProperty {
+    public func bidiMap<U: Equatable>(forward: @escaping (T) -> U?, reverse: @escaping (U?) -> T) -> ReadWriteProperty<U?> {
+        let newProperty = mutableValueProperty(forward(self.value), valueChanging: { $0 != $1 })
+        _ = self.connectBidi(newProperty, forward: { .change(forward($0)) }, reverse: { .change(reverse($0)) })
+        return newProperty
+    }
+    
+    public func bidiMap<U: Equatable>(forward: @escaping (T) -> U, reverse: @escaping (U) -> T) -> ReadWriteProperty<U> {
+        let newProperty = mutableValueProperty(forward(self.value))
+        _ = self.connectBidi(newProperty, forward: { .change(forward($0)) }, reverse: { .change(reverse($0)) })
+        return newProperty
+    }
+}
+
 /// Returns a ReadableProperty whose value is a tuple (pair) containing the `value` from
 /// each of the given properties.  The returned property's `value` will contain a fresh tuple
 /// any time the value of either input changes.
