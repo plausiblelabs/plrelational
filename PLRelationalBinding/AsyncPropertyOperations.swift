@@ -134,7 +134,6 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
     }
     
     fileprivate override func start() {
-        print("BOOL STARTING")
         underlying.start()
         startInitial?()
         startInitial = nil
