@@ -78,15 +78,26 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
         let initialMappedProperty = property.value.map(transform)
         let initialValue = initialMappedProperty?.value
 
-        self.startInitial = {
-            initialMappedProperty?.start()
-        }
-        
         // TODO: Do we need to take initialMappedProperty.signal's changeCount into account?
         let (signal, notify) = Signal<Q.Value>.pipe(initialChangeCount: property.signal.changeCount)
         
         super.init(initialValue: initialValue, signal: signal)
+
+        func observeMappedProperty(_ prop: Q) {
+            self.mappedRemoval = prop.signal.observe(SignalObserver(
+                valueWillChange: {
+                    notify.valueWillChange()
+                },
+                valueChanging: { mappedChange, mappedMetadata in
+                    notify.valueChanging(mappedChange, mappedMetadata)
+                },
+                valueDidChange: {
+                    notify.valueDidChange()
+                }
+            ))
+        }
         
+        // Observe the underlying property
         self.underlyingRemoval = property.signal.observe(SignalObserver(
             valueWillChange: {
                 notify.valueWillChange()
@@ -100,17 +111,7 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
                 let mappedProperty = transform(change)
 
                 // Observe the new property's signal
-                self?.mappedRemoval = mappedProperty.signal.observe(SignalObserver(
-                    valueWillChange: {
-                        notify.valueWillChange()
-                    },
-                    valueChanging: { mappedChange, mappedMetadata in
-                        notify.valueChanging(mappedChange, mappedMetadata)
-                    },
-                    valueDidChange: {
-                        notify.valueDidChange()
-                    }
-                ))
+                observeMappedProperty(mappedProperty)
                 
                 // Deliver the mapped property's initial value, if needed
                 if let initialValue = mappedProperty.value {
@@ -126,6 +127,16 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
                 notify.valueDidChange()
             }
         ))
+        
+        self.startInitial = {
+            if let initialProperty = initialMappedProperty {
+                // Observe the initial mapped property's signal
+                observeMappedProperty(initialProperty)
+                
+                // Start the initial mapped property
+                initialProperty.start()
+            }
+        }
     }
 
     deinit {

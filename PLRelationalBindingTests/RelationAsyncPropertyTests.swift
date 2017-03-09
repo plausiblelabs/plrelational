@@ -384,4 +384,9 @@ class RelationAsyncPropertyTests: BindingTestCase {
         
         XCTAssertEqual(nameProperty.signal.observerCount, 1)
     }
+    
+    func testAsyncFlatMap() {
+        // TODO: Test case where underlying property's initial value is non-nil, but initial mapped property's
+        // initial value is nil and the property is not yet started
+    }
 }
