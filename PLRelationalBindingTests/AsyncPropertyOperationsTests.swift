@@ -126,6 +126,32 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         changeObserved = false
     }
     
+    func testZipWithNonNilInitialValues() {
+        let (property1, notify1) = AsyncReadableProperty<Bool>.pipe(initialValue: false)
+        let (property2, notify2) = AsyncReadableProperty<String>.pipe(initialValue: "foo")
+        let zipped = zip(property1, property2)
+        var changeObserved = false
+        _ = zipped.signal.observe({ _ in changeObserved = true })
+        zipped.start()
+        
+        XCTAssertEqual(zipped.value?.0, false)
+        XCTAssertEqual(zipped.value?.1, "foo")
+        XCTAssertEqual(changeObserved, false)
+        changeObserved = false
+        
+        notify1.valueChanging(true, transient: false)
+        XCTAssertEqual(zipped.value?.0, true)
+        XCTAssertEqual(zipped.value?.1, "foo")
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+        
+        notify2.valueChanging("bar", transient: false)
+        XCTAssertEqual(zipped.value?.0, true)
+        XCTAssertEqual(zipped.value?.1, "bar")
+        XCTAssertEqual(changeObserved, true)
+        changeObserved = false
+    }
+    
     func testNot() {
         let (property, notify) = AsyncReadableProperty<Bool>.pipe(initialValue: false)
         let mapped = !property

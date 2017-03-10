@@ -66,8 +66,8 @@ private class MappedValueProperty<T>: AsyncReadableProperty<T> {
 
 private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
     private let underlying: AsyncPropertyType
-    private var startInitial: (() -> Void)?
-    private var underlyingRemoval: ObserverRemoval!
+    private var startFunc: (() -> Void)?
+    private var underlyingRemoval: ObserverRemoval?
     private var mappedRemoval: ObserverRemoval?
     
     init<P: AsyncReadablePropertyType, Q: AsyncReadablePropertyType>(property: P, transform: @escaping (P.Value) -> Q)
@@ -97,38 +97,41 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
             ))
         }
         
-        // Observe the underlying property
-        self.underlyingRemoval = property.signal.observe(SignalObserver(
-            valueWillChange: {
-                notify.valueWillChange()
-            },
-            valueChanging: { [weak self] change, metadata in
-                // Stop observing the previous mapped property
-                // TODO: Should we stop observing earlier (in valueWillChange)?
-                self?.mappedRemoval?()
-                
-                // Compute the new mapped property
-                let mappedProperty = transform(change)
-
-                // Observe the new property's signal
-                observeMappedProperty(mappedProperty)
-                
-                // Deliver the mapped property's initial value, if needed
-                if let initialValue = mappedProperty.value {
+        self.startFunc = {
+            // Observe the underlying property
+            self.underlyingRemoval = property.signal.observe(SignalObserver(
+                valueWillChange: {
                     notify.valueWillChange()
-                    notify.valueChanging(initialValue, transient: false)
+                },
+                valueChanging: { [weak self] change, metadata in
+                    // Stop observing the previous mapped property
+                    // TODO: Should we stop observing earlier (in valueWillChange)?
+                    self?.mappedRemoval?()
+                    
+                    // Compute the new mapped property
+                    let mappedProperty = transform(change)
+                    
+                    // Observe the new property's signal
+                    observeMappedProperty(mappedProperty)
+                    
+                    // Deliver the mapped property's initial value, if needed
+                    if let initialValue = mappedProperty.value {
+                        notify.valueWillChange()
+                        notify.valueChanging(initialValue, transient: false)
+                        notify.valueDidChange()
+                    }
+                    
+                    // Start the new property
+                    mappedProperty.start()
+                },
+                valueDidChange: {
                     notify.valueDidChange()
                 }
-                
-                // Start the new property
-                mappedProperty.start()
-            },
-            valueDidChange: {
-                notify.valueDidChange()
-            }
-        ))
-        
-        self.startInitial = {
+            ))
+
+            // Start the underlying property
+            property.start()
+            
             if let initialProperty = initialMappedProperty {
                 // Observe the initial mapped property's signal
                 observeMappedProperty(initialProperty)
@@ -140,14 +143,13 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
     }
 
     deinit {
-        underlyingRemoval()
+        underlyingRemoval?()
         mappedRemoval?()
     }
     
     fileprivate override func start() {
-        underlying.start()
-        startInitial?()
-        startInitial = nil
+        startFunc?()
+        startFunc = nil
         super.start()
     }
 }
@@ -155,25 +157,76 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
 private class BinaryOpValueProperty<T>: AsyncReadableProperty<T> {
     private let underlying1: AsyncPropertyType
     private let underlying2: AsyncPropertyType
-    
+    private var startFunc: (() -> Void)?
+    private var removal1: ObserverRemoval?
+    private var removal2: ObserverRemoval?
+
     init<LHS: AsyncReadablePropertyType, RHS: AsyncReadablePropertyType>(_ lhs: LHS, _ rhs: RHS, _ f: @escaping (LHS.Value, RHS.Value) -> T)
         where LHS.Value == LHS.SignalChange, RHS.Value == RHS.SignalChange
     {
         self.underlying1 = lhs
         self.underlying2 = rhs
         
+        let (signal, notify) = Signal<T>.pipe(initialChangeCount: lhs.signal.changeCount + rhs.signal.changeCount)
+        
+        // Note that we don't deliver a pair until both underlying values are defined
+        var lhsValue = lhs.value
+        var rhsValue = rhs.value
+        func notifyChanging(_ metadata: ChangeMetadata) {
+            if let lv = lhsValue, let rv = rhsValue {
+                notify.valueChanging(f(lv, rv), metadata)
+            }
+        }
+
         let initialValue: T?
-        if let l = lhs.value, let r = rhs.value {
-            initialValue = f(l, r)
+        if let lv = lhsValue, let rv = rhsValue {
+            initialValue = f(lv, rv)
         } else {
             initialValue = nil
         }
-        super.init(initialValue: initialValue, signal: BinaryOpSignal(lhs.signal, rhs.signal, f))
+        super.init(initialValue: initialValue, signal: signal)
+        
+        self.startFunc = {
+            // Observe the underlying signals
+            self.removal1 = lhs.signal.observe(SignalObserver(
+                valueWillChange: {
+                    notify.valueWillChange()
+                },
+                valueChanging: { change, metadata in
+                    lhsValue = change
+                    notifyChanging(metadata)
+                },
+                valueDidChange: {
+                    notify.valueDidChange()
+                }
+            ))
+            self.removal2 = rhs.signal.observe(SignalObserver(
+                valueWillChange: {
+                    notify.valueWillChange()
+                },
+                valueChanging: { change, metadata in
+                    rhsValue = change
+                    notifyChanging(metadata)
+                },
+                valueDidChange: {
+                    notify.valueDidChange()
+                }
+            ))
+            
+            // Start the underlying properties
+            lhs.start()
+            rhs.start()
+        }
+    }
+
+    deinit {
+        removal1?()
+        removal2?()
     }
     
     fileprivate override func start() {
-        underlying1.start()
-        underlying2.start()
+        startFunc?()
+        startFunc = nil
         super.start()
     }
 }
