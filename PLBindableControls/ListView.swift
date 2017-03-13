@@ -6,10 +6,6 @@
 import Cocoa
 import PLRelationalBinding
 
-// TODO: This needs to be configurable, or at least made unique so that only internal drag-and-drop
-// is allowed by default
-private let PasteboardType = "coop.plausible.vp.pasteboard.ListViewItem"
-
 public struct ListViewModel<E: ArrayElement> {
     public let data: ArrayProperty<E>
     public let contextMenu: ((E.Data) -> ContextMenu?)?
@@ -42,6 +38,9 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
 
     public let model: ListViewModel<E>
     private let outlineView: NSOutlineView
+
+    /// Private pasteboard type that limits drag and drop to this specific outline view.
+    private let pasteboardType: String
 
     private var elements: [E] {
         return model.data.elements
@@ -81,6 +80,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     public init(model: ListViewModel<E>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
+        self.pasteboardType = "PLBindableControls.ListView.pasteboard.\(ProcessInfo.processInfo.globallyUniqueString)"
 
         super.init()
         
@@ -95,7 +95,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         outlineView.dataSource = self
         
         // Enable drag-and-drop
-        outlineView.register(forDraggedTypes: [PasteboardType])
+        outlineView.register(forDraggedTypes: [pasteboardType])
         outlineView.verticalMotionCanBeginDrag = true
         
         // Load the initial data
@@ -127,14 +127,14 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         
         let element = item as! E
         let pboardItem = NSPasteboardItem()
-        pboardItem.setPropertyList(element.id.toPlist(), forType: PasteboardType)
+        pboardItem.setPropertyList(element.id.toPlist(), forType: pasteboardType)
         return pboardItem
     }
     
     open func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: Any?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyList(forType: PasteboardType) {
+        if let idPlist = pboard.propertyList(forType: pasteboardType) {
             let elementID = E.ID.fromPlist(idPlist as AnyObject)!
             if let srcIndex = model.data.indexForID(elementID) {
                 if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
@@ -149,7 +149,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     open func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyList(forType: PasteboardType), let move = model.move {
+        if let idPlist = pboard.propertyList(forType: pasteboardType), let move = model.move {
             let elementID = E.ID.fromPlist(idPlist as AnyObject)!
             if let srcIndex = model.data.indexForID(elementID) {
                 move(srcIndex, index)
