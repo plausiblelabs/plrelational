@@ -1,0 +1,11 @@
+module sqlite3 [system] {
+    header "module-sqlite3-include.h"
+    link "sqlite3"
+    export *
+}
+
+module CommonCrypto [system] {
+    header "module-commoncrypto-include.h"
+    link "System"
+    export *
+}

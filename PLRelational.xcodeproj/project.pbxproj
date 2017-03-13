@@ -742,7 +742,6 @@
 		C20F925C1D943C6D002F9125 /* MutableRelationCascadingDelete.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelationCascadingDelete.swift; sourceTree = "<group>"; };
 		C20F926C1D9587B2002F9125 /* DataCodec.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataCodec.swift; sourceTree = "<group>"; };
 		C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDefaultChangeObserverImplementation.swift; sourceTree = "<group>"; };
-		C22921911CC6CDCC00518184 /* makemodule.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = makemodule.sh; path = ../modules/makemodule.sh; sourceTree = "<group>"; };
 		C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteDatabase.swift; sourceTree = "<group>"; };
 		C22921961CC7E9E300518184 /* SQLiteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteRelation.swift; sourceTree = "<group>"; };
 		C22921A71CCE587900518184 /* RelationValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValue.swift; sourceTree = "<group>"; };
@@ -770,6 +769,9 @@
 		C23BC04F1D21AEDF00188F86 /* QueryOptimizer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryOptimizer.swift; sourceTree = "<group>"; };
 		C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionConvenience.swift; sourceTree = "<group>"; };
 		C23BC0551D24629E00188F86 /* SmallInlineArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmallInlineArray.swift; sourceTree = "<group>"; };
+		C2478CF81E773F0B00C3FB05 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = modules/module.modulemap; sourceTree = SOURCE_ROOT; };
+		C2478CF91E773F9300C3FB05 /* module-sqlite3-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "module-sqlite3-include.h"; path = "modules/module-sqlite3-include.h"; sourceTree = SOURCE_ROOT; };
+		C2478CFA1E773FEB00C3FB05 /* module-commoncrypto-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "module-commoncrypto-include.h"; path = "../modules/module-commoncrypto-include.h"; sourceTree = "<group>"; };
 		C24C4A641E255D4000482726 /* ChangeLoggingRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelationTests.swift; sourceTree = "<group>"; };
 		C24C4A671E26740C00482726 /* BookmarkableGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarkableGraph.swift; sourceTree = "<group>"; };
 		C24C4A691E26940400482726 /* BookmarkableGraphTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarkableGraphTests.swift; sourceTree = "<group>"; };
@@ -1623,7 +1625,9 @@
 		C22921951CC6D25100518184 /* Custom Module Map */ = {
 			isa = PBXGroup;
 			children = (
-				C22921911CC6CDCC00518184 /* makemodule.sh */,
+				C2478CF81E773F0B00C3FB05 /* module.modulemap */,
+				C2478CF91E773F9300C3FB05 /* module-sqlite3-include.h */,
+				C2478CFA1E773FEB00C3FB05 /* module-commoncrypto-include.h */,
 			);
 			name = "Custom Module Map";
 			sourceTree = "<group>";
@@ -2117,7 +2121,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = C22921C11CD12A7100518184 /* Build configuration list for PBXNativeTarget "PLRelational" */;
 			buildPhases = (
-				C22921E01CD12B5600518184 /* Generate modulemap */,
 				C22921B71CD12A7100518184 /* Sources */,
 				C22921B81CD12A7100518184 /* Frameworks */,
 				C22921B91CD12A7100518184 /* Headers */,
@@ -2398,23 +2401,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		C22921E01CD12B5600518184 /* Generate modulemap */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Generate modulemap";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = modules/makemodule.sh;
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		372707AA1CFE238700710C80 /* Sources */ = {
@@ -3444,6 +3430,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INCLUDE_PATHS = modules;
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -3461,6 +3448,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_INCLUDE_PATHS = modules;
 				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
