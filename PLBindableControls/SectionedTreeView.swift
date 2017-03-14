@@ -384,7 +384,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
 
 // XXX: This is a customized NSOutlineView implementation that fixes the way top-level nodes are indented when
 // not using a section-style cell.
-private class SectionedOutlineView: ExtOutlineView {
+public class SectionedOutlineView: ExtOutlineView {
     
     /// Returns the most distant ancestor item for the given item.  Note that the returned item will be the same
     /// as the input item if it is a root item.
@@ -415,7 +415,7 @@ private class SectionedOutlineView: ExtOutlineView {
         return false
     }
     
-    override func frameOfCell(atColumn column: Int, row: Int) -> NSRect {
+    public override func frameOfCell(atColumn column: Int, row: Int) -> NSRect {
         var frame = super.frameOfCell(atColumn: column, row: row)
         if needsExtraIndentationAtRow(row) {
             frame.origin.x += indentationPerLevel
@@ -424,7 +424,7 @@ private class SectionedOutlineView: ExtOutlineView {
         return frame
     }
     
-    override func frameOfOutlineCell(atRow row: Int) -> NSRect {
+    public override func frameOfOutlineCell(atRow row: Int) -> NSRect {
         var frame = super.frameOfOutlineCell(atRow: row)
         if needsExtraIndentationAtRow(row) {
             frame.origin.x += indentationPerLevel
@@ -439,7 +439,7 @@ private class SectionedOutlineView: ExtOutlineView {
         return frame
     }
     
-    override func scrollRowToVisible(_ row: Int) {
+    public override func scrollRowToVisible(_ row: Int) {
         // XXX: When navigating the outline view with the keyboard up/down keys, NSOutlineView internals seem
         // to call this method which results in the item getting scrolled to the top with a clunky animation.
         // For now we'll do nothing here to avoid the default behavior.  If we ever need to be able to make
