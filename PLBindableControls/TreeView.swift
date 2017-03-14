@@ -6,10 +6,6 @@
 import Cocoa
 import PLRelationalBinding
 
-// TODO: This needs to be configurable, or at least made unique so that only internal drag-and-drop
-// is allowed by default
-private let PasteboardType = "coop.plausible.vp.pasteboard.TreeViewItem"
-
 public struct TreeViewModel<N: TreeNode> {
     public let data: TreeProperty<N>
     public let allowsChildren: (N.Data) -> Bool
@@ -52,6 +48,9 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     private let model: TreeViewModel<N>
     private let outlineView: NSOutlineView
     
+    /// Private pasteboard type that limits drag and drop to this specific outline view.
+    private let pasteboardType: String
+
     private lazy var selection: MutableValueProperty<Set<N.ID>> = mutableValueProperty(Set(), { [unowned self] selectedIDs, _ in
         self.selectItems(selectedIDs)
     })
@@ -68,6 +67,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     public init(model: TreeViewModel<N>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
+        self.pasteboardType = "PLBindableControls.TreeView.pasteboard.\(ProcessInfo.processInfo.globallyUniqueString)"
         
         super.init()
         
@@ -83,7 +83,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
         outlineView.dataSource = self
         
         // Enable drag-and-drop
-        outlineView.register(forDraggedTypes: [PasteboardType])
+        outlineView.register(forDraggedTypes: [pasteboardType])
         outlineView.verticalMotionCanBeginDrag = true
         
         // Load the initial data
@@ -134,14 +134,14 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
         
         let node = item as! N
         let pboardItem = NSPasteboardItem()
-        pboardItem.setPropertyList(node.id.toPlist(), forType: PasteboardType)
+        pboardItem.setPropertyList(node.id.toPlist(), forType: pasteboardType)
         return pboardItem
     }
     
     open func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: Any?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyList(forType: PasteboardType) {
+        if let idPlist = pboard.propertyList(forType: pasteboardType) {
             let nodeID = N.ID.fromPlist(idPlist as AnyObject)!
             let currentParent = model.data.parentForID(nodeID)
             let proposedParent = proposedItem as? N
@@ -180,7 +180,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     open func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyList(forType: PasteboardType), let move = model.move {
+        if let idPlist = pboard.propertyList(forType: pasteboardType), let move = model.move {
             let nodeID = N.ID.fromPlist(idPlist as AnyObject)!
             
             let currentParent = model.data.parentForID(nodeID)
