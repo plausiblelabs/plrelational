@@ -12,14 +12,18 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     fileprivate var values: Set<Row>
     public internal(set) var url: URL?
     
+    /// Whether the relation is transient (in which case, no changes are stored to disk).
+    fileprivate let isTransient: Bool
+    
     fileprivate let codec: DataCodec?
     
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    fileprivate init(scheme: Scheme, url: URL?, codec: DataCodec?) {
+    fileprivate init(scheme: Scheme, url: URL?, codec: DataCodec?, isTransient: Bool) {
         self.scheme = scheme
         self.values = []
         self.url = url
+        self.isTransient = isTransient
         self.codec = codec
     }
     
@@ -87,7 +91,7 @@ extension PlistFileRelation {
                         let relationValueResults = array.map({ Row.fromPlist($0) })
                         let relationValuesResult = mapOk(relationValueResults, { $0 })
                         return relationValuesResult.map({
-                            let r = PlistFileRelation(scheme: scheme, url: url, codec: codec)
+                            let r = PlistFileRelation(scheme: scheme, url: url, codec: codec, isTransient: false)
                             r.values = Set($0)
                             return r
                         })
@@ -100,10 +104,19 @@ extension PlistFileRelation {
             // We have no URL, so we are creating a new relation; we will defer file creation until the first save
             precondition(createIfDoesntExist)
         }
-        return .Ok(PlistFileRelation(scheme: scheme, url: url, codec: codec))
+        return .Ok(PlistFileRelation(scheme: scheme, url: url, codec: codec, isTransient: false))
+    }
+    
+    /// Returns a new transient plist-backed relation (stored in memory only).
+    public static func transient(scheme: Scheme, codec: DataCodec? = nil) -> PlistFileRelation {
+        return PlistFileRelation(scheme: scheme, url: nil, codec: codec, isTransient: true)
     }
     
     public func save() -> Result<Void, RelationError> {
+        if isTransient {
+            return .Ok(())
+        }
+        
         guard let url = url else { fatalError("URL must be set prior to save") }
         
         let plistValues = values.map({ $0.toPlist() })
