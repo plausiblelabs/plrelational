@@ -37,11 +37,11 @@ public class UndoManager {
     
     public func registerChange(name: String, perform: Bool, forward: @escaping () -> Void, backward: @escaping () -> Void) {
         // First register the change
-        let f = nsmanager.registerChange(name, forwards: forward, backwards: backward)
+        nsmanager.registerChange(name, forwards: forward, backwards: backward)
         
         if perform {
             // Then invoke the `forward` function if requested
-            f()
+            forward()
         }
     }
     
@@ -149,17 +149,18 @@ protocol SPUndoManagerAction {
     var description: String { get }
 }
 
-class SPUndoManagerStandardAction : SPUndoManagerAction {
+class SPUndoManagerStandardAction : SPUndoManagerAction, CustomStringConvertible {
     
     /// Assumes action already performed
-    init(description: String, forwards: @escaping Closure, backwards: @escaping Closure) {
-        
+    init(undoManager: SPUndoManager, description: String, forwards: @escaping Closure, backwards: @escaping Closure) {
+        self.undoManager = undoManager
         self.forwards = forwards
         self.backwards = backwards
         self.description = description
         self.done = true
     }
     
+    weak var undoManager: SPUndoManager?
     var done: Bool
     var backwards: Closure
     var forwards: Closure
@@ -175,6 +176,16 @@ class SPUndoManagerStandardAction : SPUndoManagerAction {
         assert(!done)
         forwards()
         done = true
+    }
+    
+    func perform() {
+        if undoManager?.isUndoing == true {
+            self.undo()
+        } else if undoManager?.isRedoing == true {
+            self.redo()
+        }
+        
+        undoManager?.register(action: self)
     }
 }
 
@@ -231,196 +242,30 @@ class SPUndoManagerGroupAction : SPUndoManagerAction {
 public typealias Closure = () -> Void
 
 open class SPUndoManager : Foundation.UndoManager {
-    
-    public override init() {
-        super.init()
-    }
-    
-    var changes: [SPUndoManagerAction] = []
-    var pendingGroups: [SPUndoManagerGroupAction] = []
-    var stateIndex = -1
-    
     weak var delegate: UndoManagerDelegate?
     
-    // MARK: Registering changes
-    
     /// Add a change to be undone with separate forwards and backwards transformers.
-    ///
-    /// If an undo grouping has been started, the action will be added to that group.
-    open func registerChange(_ description: String, forwards: @escaping Closure, backwards: @escaping Closure) -> Closure {
-        
-        let standardAction = SPUndoManagerStandardAction(description: description, forwards: forwards, backwards: backwards)
-        
-        addAction(standardAction)
-        
-        return forwards
+    open func registerChange(_ description: String, forwards: @escaping Closure, backwards: @escaping Closure) {
+        let action = SPUndoManagerStandardAction(undoManager: self, description: description, forwards: forwards, backwards: backwards)
+        register(action: action)
     }
     
-    /// Add a super cool undoable action which always returns an undoable version
-    /// of itself upon undoing or redoing (both are classed as undo)
-    open func registerChange(_ undoable: Undoable) {
-        
-        addAction(SPUndoManagerSuperDynamicAction(undoable: undoable))
+    fileprivate func register(action: SPUndoManagerStandardAction) {
+        registerUndo(withTarget: self, selector: #selector(performStandardAction), object: action)
     }
     
-    // MARK: Grouping
-    
-    open override var groupingLevel: Int {
-        return pendingGroups.count
-    }
-    
-    open func beginUndoGrouping(_ description: String) {
-        let newGroup = SPUndoManagerGroupAction(description: description)
-        
-        addAction(newGroup)
-        
-        pendingGroups += [newGroup]
-        
-        NotificationCenter.default.post(name: NSNotification.Name.NSUndoManagerCheckpoint, object: self)
-        NotificationCenter.default.post(name: NSNotification.Name.NSUndoManagerDidOpenUndoGroup, object: self)
-    }
-    
-    open override func beginUndoGrouping() {
-        beginUndoGrouping("Multiple Changes")
-    }
-    
-    open func cancelUndoGrouping() {
-        assert(!pendingGroups.isEmpty && pendingGroups.last!.done == false, "Attempting to cancel an undo grouping that was never started")
-        
-        let cancelled = pendingGroups.removeLast()
-        cancelled.done = true
-        cancelled.undo()
-        
-        removeLastAction()
-    }
-    
-    open override func endUndoGrouping() {
-        assert(!pendingGroups.isEmpty, "Attempting to end an undo grouping that was never started")
-        
-        let grouping = pendingGroups.removeLast()
-        grouping.done = true
-        
-        NotificationCenter.default.post(name: NSNotification.Name.NSUndoManagerCheckpoint, object: self)
-        NotificationCenter.default.post(name: NSNotification.Name.NSUndoManagerDidCloseUndoGroup, object: self)
-    }
-    
-    open override func undoNestedGroup() {
-        fatalError("Unimplemented")
-    }
-    
-    // MARK: Removing changes
-    
-    open override func removeAllActions() {
-        stateIndex = -1
-        changes = []
-        pendingGroups = []
-    }
-    
-    open override func removeAllActions(withTarget target: Any) {
-        fatalError("Not implemented")
-    }
-    
-    // MARK: Undo/redo
-    
-    open override func undo() {
-        while !pendingGroups.isEmpty {
-            endUndoGrouping()
-        }
-        
-        NotificationCenter.default.post(name: NSNotification.Name.NSUndoManagerWillUndoChange, object: self)
-        
-        _undoing = true
-        
-        let change = changes[stateIndex]
-        change.undo()
-        stateIndex -= 1
-        
-        _undoing = false
-        
-        NotificationCenter.default.post(name: NSNotification.Name.NSUndoManagerDidUndoChange, object: self)
-        
-    }
-    
-    open override func redo() {
-        NotificationCenter.default.post(name: NSNotification.Name.NSUndoManagerWillRedoChange, object: self)
-        
-        _redoing = true
-        
-        let change = changes[stateIndex + 1]
-        change.redo()
-        stateIndex += 1
-        
-        _redoing = false
-        
-        NotificationCenter.default.post(name: NSNotification.Name.NSUndoManagerDidRedoChange, object: self)
-    }
-    
-    open override var undoActionName: String {
-        return changes.atIndex(stateIndex)?.description ?? ""
-    }
-    
-    open override var redoActionName: String {
-        return changes.atIndex(stateIndex + 1)?.description ?? ""
+    @objc func performStandardAction(_ action: Any?) {
+        (action as? SPUndoManagerStandardAction)?.perform()
     }
     
     open override var canUndo: Bool {
         let safeToUndo = delegate?.safeToUndo() ?? true
-        return safeToUndo && changes.count > 0 && stateIndex >= 0
+        return safeToUndo && super.canUndo
     }
-    
+
     open override var canRedo: Bool {
         let safeToRedo = delegate?.safeToRedo() ?? true
-        return safeToRedo && changes.count > 0 && stateIndex < changes.count - 1
-    }
-    
-    var _undoing: Bool = false
-    var _redoing: Bool = false
-    
-    open override var isUndoing: Bool {
-        return _undoing
-    }
-    
-    open override var isRedoing: Bool {
-        return _redoing
-    }
-    
-    // MARK: Private
-    
-    func addAction(_ action: SPUndoManagerAction) {
-        if isUndoing || isRedoing || !isUndoRegistrationEnabled {
-            return
-        }
-        
-        if pendingGroups.isEmpty {
-            
-            clearRedoAfterState()
-            
-            while levelsOfUndo > 0 && changes.count >= levelsOfUndo {
-                changes.remove(at: 0)
-                stateIndex -= 1
-            }
-            
-            changes += [action]
-            stateIndex += 1
-            
-            NotificationCenter.default.post(name: NSNotification.Name.NSUndoManagerDidCloseUndoGroup, object: self)
-        }
-        else {
-            pendingGroups.last!.nestedActions += [action]
-        }
-    }
-    
-    func clearRedoAfterState() {
-        changes.removeSubrange(min(stateIndex + 1, changes.count) ..< changes.count)
-    }
-    
-    func removeLastAction() {
-        if pendingGroups.isEmpty {
-            changes.removeLast()
-        }
-        else {
-            pendingGroups.last!.nestedActions.removeLast()
-        }
+        return safeToRedo && super.canRedo
     }
 }
 
