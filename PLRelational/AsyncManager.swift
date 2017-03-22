@@ -73,12 +73,20 @@ public final class AsyncManager: PerThreadInstance {
         register(action: .delete(relation, query))
     }
     
-    public func registerRestoreSnapshot(_ database: TransactionalDatabase, snapshot: ChangeLoggingDatabaseSnapshot) {
+    public func registerRestoreSnapshot(_ database: TransactionalDatabase, snapshot: TransactionalDatabaseSnapshot) {
         register(action: .restoreSnapshot(database, snapshot))
+    }
+    
+    public func registerApplyDelta(_ database: TransactionalDatabase, delta: TransactionalDatabaseDelta) {
+        register(action: .applyDelta(database, delta))
     }
     
     public func registerQuery(_ relation: Relation, callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
         register(action: .query(relation, callback))
+    }
+    
+    public func registerCheckpoint(_ checkpoint: @escaping (Void) -> Void) {
+        register(action: .checkpoint(checkpoint))
     }
     
     private func register(action: Action, atBeginning: Bool = false) {
@@ -95,11 +103,11 @@ public final class AsyncManager: PerThreadInstance {
             registerChange(relation, predicate: query, newValues: nil)
         case .update(let relation, let query, let newValues):
             registerChange(relation, predicate: query, newValues: newValues)
-        case .restoreSnapshot(let database, _):
+        case .restoreSnapshot(let database, _), .applyDelta(let database, _):
             for (_, relation) in database.relations {
                 registerChange(relation, predicate: true, newValues: nil)
             }
-        case .query:
+        case .query, .checkpoint:
             break
         }
         
@@ -185,11 +193,11 @@ public final class AsyncManager: PerThreadInstance {
                 sendWillChange(relation, predicate: query, newValues: nil)
             case .update(let relation, let query, let newValues):
                 sendWillChange(relation, predicate: query, newValues: newValues)
-            case .restoreSnapshot(let database, _):
+            case .restoreSnapshot(let database, _), .applyDelta(let database, _):
                 for (_, relation) in database.relations {
                     registerChange(relation, predicate: true, newValues: nil)
                 }
-            case .query:
+            case .query, .checkpoint:
                 break
             }
         }
@@ -278,13 +286,19 @@ public final class AsyncManager: PerThreadInstance {
                     if databases.contains(database) {
                         // TODO: check for errors?
                         _ = database.endTransaction()
-                        database.restoreSnapshot(snapshot)
+                        _ = database.restoreSnapshot(snapshot)
                         database.beginTransaction()
                     } else {
-                        database.restoreSnapshot(snapshot)
+                        _ = database.restoreSnapshot(snapshot)
                     }
                     error = nil
+                case .applyDelta(let database, let delta):
+                    // Do we need transaction games?
+                    error = database.apply(delta: delta).err
                 case .query:
+                    error = nil
+                case .checkpoint(let call):
+                    call()
                     error = nil
                 }
                 
@@ -500,8 +514,10 @@ extension AsyncManager {
         case update(Relation, SelectExpression, Row)
         case add(MutableRelation, Row)
         case delete(MutableRelation, SelectExpression)
-        case restoreSnapshot(TransactionalDatabase, ChangeLoggingDatabaseSnapshot)
+        case restoreSnapshot(TransactionalDatabase, TransactionalDatabaseSnapshot)
+        case applyDelta(TransactionalDatabase, TransactionalDatabaseDelta)
         case query(Relation, DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>)
+        case checkpoint((Void) -> Void)
     }
     
     fileprivate class ObservedRelationInfo {

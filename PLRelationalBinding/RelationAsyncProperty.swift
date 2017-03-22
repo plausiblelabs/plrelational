@@ -6,14 +6,14 @@
 import PLRelational
 
 public struct RelationMutationConfig<T> {
-    public let snapshot: () -> ChangeLoggingDatabaseSnapshot
+    public let snapshot: () -> TransactionalDatabaseSnapshot
     public let update: (_ newValue: T) -> Void
-    public let commit: (_ before: ChangeLoggingDatabaseSnapshot, _ newValue: T) -> Void
+    public let commit: (_ before: TransactionalDatabaseSnapshot, _ newValue: T) -> Void
 
     public init(
-        snapshot: @escaping () -> ChangeLoggingDatabaseSnapshot,
+        snapshot: @escaping () -> TransactionalDatabaseSnapshot,
         update: @escaping (_ newValue: T) -> Void,
-        commit: @escaping (_ before: ChangeLoggingDatabaseSnapshot, _ newValue: T) -> Void)
+        commit: @escaping (_ before: TransactionalDatabaseSnapshot, _ newValue: T) -> Void)
     {
         self.snapshot = snapshot
         self.update = update
@@ -25,7 +25,7 @@ private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
     private let config: RelationMutationConfig<T>
     private var mutableValue: T?
     private var removal: ObserverRemoval?
-    private var before: ChangeLoggingDatabaseSnapshot?
+    private var before: TransactionalDatabaseSnapshot?
 
     init(initialValue: T?, config: RelationMutationConfig<T>, signal: Signal<T>) {
         self.mutableValue = initialValue

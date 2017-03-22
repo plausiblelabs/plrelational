@@ -118,27 +118,88 @@ open class TransactionalDatabase {
         return underlying.restoreFromChangeLoggingRelation(transaction)
     }
     
-    open func takeSnapshot() -> ChangeLoggingDatabaseSnapshot {
-        return changeLoggingDatabase.takeSnapshot()
+    open func takeSnapshot() -> TransactionalDatabaseSnapshot {
+        let snapshots = relations.values.map({ ($0, $0.takeSnapshot()) })
+        return TransactionalDatabaseSnapshot(relationSnapshots: Array(snapshots))
     }
     
-    open func restoreSnapshot(_ snapshot: ChangeLoggingDatabaseSnapshot) {
+    open func restoreSnapshot(_ snapshot: TransactionalDatabaseSnapshot) -> Result<Void, RelationError> {
         precondition(!inTransaction, "Can't restore a snapshot while in a transaction")
         
         for (_, r) in relations {
             r.notifyObserversTransactionBegan(.directChange)
         }
         
-        // TODO: error checking?
-        _ = changeLoggingDatabase.restoreSnapshot(snapshot)
-        
-        for (_, r) in relations {
-            r.notifyObserversTransactionEnded(.directChange)
+        defer {
+            for (_, r) in relations {
+                r.notifyObserversTransactionEnded(.directChange)
+            }
         }
+        
+        var changes: [(TransactionalRelation, RelationChange)] = []
+        
+        // Restore all the snapshotted relations.
+        for (relation, snapshot) in snapshot.relationSnapshots {
+            let change = relation.rawRestoreSnapshot(snapshot)
+            switch change {
+            case .Ok(let change):
+                changes.append((relation, change))
+            case .Err(let err):
+                return .Err(err)
+            }
+        }
+        
+        // Any relations that were created after the snapshot was taken won't be captured.
+        // Figure out what those are, if any, and restore them to emptiness. This is sorta ugly!
+        let snapshottedRelations = Set(snapshot.relationSnapshots.map({ ObjectIdentifier($0.0) }))
+        for relation in relations.values {
+            if !snapshottedRelations.contains(ObjectIdentifier(relation)) {
+                let change = relation.rawRestoreSnapshot(ChangeLoggingRelationSnapshot(bookmark: relation.underlyingRelationForQueryExecution.baseBookmark))
+                switch change {
+                case .Ok(let change):
+                    changes.append((relation, change))
+                case .Err(let err):
+                    return .Err(err)
+                }
+            }
+        }
+        
+        for (relation, change) in changes {
+            relation.notifyChangeObservers(change, kind: .directChange)
+        }
+        
+        return .Ok()
     }
     
-    open func asyncRestoreSnapshot(_ snapshot: ChangeLoggingDatabaseSnapshot) {
+    open func asyncRestoreSnapshot(_ snapshot: TransactionalDatabaseSnapshot) {
         AsyncManager.currentInstance.registerRestoreSnapshot(self, snapshot: snapshot)
+    }
+    
+    open func computeDelta(from: TransactionalDatabaseSnapshot, to: TransactionalDatabaseSnapshot) -> TransactionalDatabaseDelta {
+        let fromDict = ObjectDictionary(from.relationSnapshots)
+        
+        let result = to.relationSnapshots.map({ relation, toSnapshot -> (TransactionalRelation, ChangeLoggingRelationDelta) in
+            let fromSnapshot = fromDict[relation] ?? ChangeLoggingRelationSnapshot(bookmark: relation.underlyingRelationForQueryExecution.zeroBookmark)
+            let delta = relation.computeDelta(from: fromSnapshot, to: toSnapshot)
+            print("Delta for \(relation.scheme) is \(delta)")
+            return (relation, delta)
+        })
+        print("Delta is \(result.map({ ($0.scheme, $1) }))")
+        return .init(relationDeltas: result)
+    }
+    
+    open func apply(delta: TransactionalDatabaseDelta) -> Result<Void, RelationError> {
+        for (relation, delta) in delta.relationDeltas {
+            let result = relation.apply(delta: delta)
+            if case .Err = result {
+                return result
+            }
+        }
+        return .Ok()
+    }
+    
+    open func asyncApply(delta: TransactionalDatabaseDelta) {
+        AsyncManager.currentInstance.registerApplyDelta(self, delta: delta)
     }
     
     open func transaction(_ transactionFunction: (Void) -> Void) {
@@ -148,7 +209,7 @@ open class TransactionalDatabase {
         _ = endTransaction()
     }
     
-    open func transactionWithSnapshots(_ transactionFunction: (Void) -> Void) -> (before: ChangeLoggingDatabaseSnapshot, after: ChangeLoggingDatabaseSnapshot) {
+    open func transactionWithSnapshots(_ transactionFunction: (Void) -> Void) -> (before: TransactionalDatabaseSnapshot, after: TransactionalDatabaseSnapshot) {
         let before = takeSnapshot()
         transaction(transactionFunction)
         let after = takeSnapshot()
@@ -181,7 +242,7 @@ public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserv
         return .underlying(underlyingRelationForQueryExecution)
     }
     
-    open var underlyingRelationForQueryExecution: Relation {
+    open var underlyingRelationForQueryExecution: ChangeLoggingRelation {
         if let db = db , !db.inTransactionThread {
             return underlyingRelation
         } else {
@@ -222,6 +283,51 @@ public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserv
             return f()
         } else {
             return f()
+        }
+    }
+}
+
+extension TransactionalRelation {
+    public func takeSnapshot() -> ChangeLoggingRelationSnapshot {
+        return underlyingRelationForQueryExecution.takeSnapshot()
+    }
+    
+    public func rawRestoreSnapshot(_ snapshot: ChangeLoggingRelationSnapshot) -> Result<RelationChange, RelationError> {
+        return underlyingRelationForQueryExecution.rawRestoreSnapshot(snapshot)
+    }
+    
+    public func computeDelta(from: ChangeLoggingRelationSnapshot, to: ChangeLoggingRelationSnapshot) -> ChangeLoggingRelationDelta {
+        return underlyingRelationForQueryExecution.computeDelta(from: from, to: to)
+    }
+    
+    public func apply(delta: ChangeLoggingRelationDelta) -> Result<Void, RelationError> {
+        print("========")
+        print("Applying a delta to \(self)")
+        print("  delta is \(delta)")
+        let result = underlyingRelationForQueryExecution.apply(delta: delta)
+        print("  After applying, we are \(self)")
+        return result
+    }
+}
+
+public struct TransactionalDatabaseSnapshot {
+    var relationSnapshots: [(TransactionalRelation, ChangeLoggingRelationSnapshot)]
+}
+
+public struct TransactionalDatabaseDelta {
+    var relationDeltas: [(TransactionalRelation, ChangeLoggingRelationDelta)]
+    
+    public var reversed: TransactionalDatabaseDelta {
+        return .init(relationDeltas: relationDeltas.map({
+            ($0, $1.reversed)
+        }))
+    }
+}
+
+extension TransactionalDatabase {
+    public func dump() {
+        for r in relations.values {
+            print(r)
         }
     }
 }

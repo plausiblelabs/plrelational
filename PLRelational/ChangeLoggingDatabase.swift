@@ -7,6 +7,16 @@ public struct ChangeLoggingDatabaseSnapshot {
     var relationSnapshots: [(ChangeLoggingRelation, ChangeLoggingRelationSnapshot)]
 }
 
+public struct ChangeLoggingDatabaseDelta {
+    var relationDeltas: [(ChangeLoggingRelation, ChangeLoggingRelationDelta)]
+    
+    public var reversed: ChangeLoggingDatabaseDelta {
+        return ChangeLoggingDatabaseDelta(relationDeltas: relationDeltas.map({
+            ($0, $1.reversed)
+        }))
+    }
+}
+
 public class ChangeLoggingDatabase {
     fileprivate let storedDatabase: StoredDatabase
     
@@ -155,5 +165,26 @@ extension ChangeLoggingDatabase {
         _ = transaction(transactionFunction)
         let after = takeSnapshot()
         return (before, after)
+    }
+    
+    public func computeDelta(from: ChangeLoggingDatabaseSnapshot, to: ChangeLoggingDatabaseSnapshot) -> ChangeLoggingDatabaseDelta {
+        let fromDict = ObjectDictionary(from.relationSnapshots)
+        
+        let result = to.relationSnapshots.map({ relation, toSnapshot -> (ChangeLoggingRelation, ChangeLoggingRelationDelta) in
+            let fromSnapshot = fromDict[relation] ?? ChangeLoggingRelationSnapshot(bookmark: relation.zeroBookmark)
+            let delta = relation.computeDelta(from: fromSnapshot, to: toSnapshot)
+            return (relation, delta)
+        })
+        return ChangeLoggingDatabaseDelta(relationDeltas: result)
+    }
+    
+    public func apply(delta: ChangeLoggingDatabaseDelta) -> Result<Void, RelationError> {
+        for (relation, delta) in delta.relationDeltas {
+            let result = relation.apply(delta: delta)
+            if case .Err = result {
+                return result
+            }
+        }
+        return .Ok()
     }
 }

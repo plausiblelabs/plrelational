@@ -22,12 +22,22 @@ public struct ChangeLoggingRelationSnapshot {
     var bookmark: ChangeLoggingRelation.Graph.Bookmark
 }
 
+public struct ChangeLoggingRelationDelta {
+    var forward: [ChangeLoggingRelationChange]
+    var reverse: [ChangeLoggingRelationChange]
+    
+    public var reversed: ChangeLoggingRelationDelta {
+        return ChangeLoggingRelationDelta(forward: reverse, reverse: forward)
+    }
+}
+
 public class ChangeLoggingRelation {
     fileprivate typealias Graph = BookmarkableGraph<[ChangeLoggingRelationChange]>
     
     fileprivate var baseRelation: MutableRelation
     
     fileprivate let changeGraph: Graph
+    let zeroBookmark: Graph.Bookmark
     var baseBookmark: Graph.Bookmark
     var currentBookmark: Graph.Bookmark
     
@@ -48,7 +58,8 @@ public class ChangeLoggingRelation {
     fileprivate init(baseRelation: MutableRelation, changeGraph: Graph) {
         self.baseRelation = baseRelation
         self.changeGraph = changeGraph
-        self.baseBookmark = changeGraph.addEmptyNode()
+        self.zeroBookmark = changeGraph.addEmptyNode()
+        self.baseBookmark = zeroBookmark
         self.currentBookmark = baseBookmark
         currentChange = ChangeLoggingRelationCurrentChange(
             added: MemoryTableRelation(scheme: baseRelation.scheme),
@@ -266,6 +277,20 @@ extension ChangeLoggingRelation {
     public func restoreSnapshot(_ snapshot: ChangeLoggingRelationSnapshot) -> Result<Void, RelationError> {
         let change = rawRestoreSnapshot(snapshot)
         return change.map({
+            notifyChangeObservers($0, kind: .directChange)
+        })
+    }
+    
+    public func computeDelta(from: ChangeLoggingRelationSnapshot, to: ChangeLoggingRelationSnapshot) -> ChangeLoggingRelationDelta {
+        let forward = changeGraph.computePath(from: from.bookmark, to: to.bookmark).joined()
+        let reverse = changeGraph.computePath(from: to.bookmark, to: from.bookmark).joined()
+        return ChangeLoggingRelationDelta(forward: Array(forward), reverse: Array(reverse))
+    }
+    
+    public func apply(delta: ChangeLoggingRelationDelta) -> Result<Void, RelationError> {
+        let changes = applyLogToCurrentRelationAndGetChanges(delta.forward)
+        return changes.map({
+            currentBookmark = changeGraph.addNode(fromBookmark: currentBookmark, outboundData: delta.forward, inboundData: delta.reverse)
             notifyChangeObservers($0, kind: .directChange)
         })
     }

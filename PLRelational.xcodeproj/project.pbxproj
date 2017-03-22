@@ -233,6 +233,8 @@
 		C277E80C1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E80B1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift */; };
 		C277E8101CE4EF5400B7B8F6 /* SelectExpression.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */; };
 		C277E8121CE4FAD400B7B8F6 /* SelectExpressionOperators.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */; };
+		C283FFAE1E8032DD000CDED9 /* AsyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C6308A1D35553F00AD44C1 /* AsyncManager.swift */; };
+		C283FFD01E805101000CDED9 /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = C283FFCF1E805101000CDED9 /* Promise.swift */; };
 		C28BFEF11D81F7C4005F07A0 /* ObjectCasting.swift in Sources */ = {isa = PBXBuildFile; fileRef = C28BFEF01D81F7C4005F07A0 /* ObjectCasting.swift */; };
 		C29739DC1DEDFF0E00C79DB1 /* CachingRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C29739DB1DEDFF0E00C79DB1 /* CachingRelation.swift */; };
 		C29C28361D872BEA001E20E7 /* UnsafePointerReadWrite.swift in Sources */ = {isa = PBXBuildFile; fileRef = C29C28351D872BEA001E20E7 /* UnsafePointerReadWrite.swift */; };
@@ -791,6 +793,7 @@
 		C277E80B1CE10F0A00B7B8F6 /* SQLiteDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SQLiteDatabaseTests.swift; path = PLRelationalTests/SQLiteDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
 		C277E80F1CE4EF5400B7B8F6 /* SelectExpression.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpression.swift; sourceTree = "<group>"; };
 		C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpressionOperators.swift; sourceTree = "<group>"; };
+		C283FFCF1E805101000CDED9 /* Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
 		C28BFEF01D81F7C4005F07A0 /* ObjectCasting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectCasting.swift; sourceTree = "<group>"; };
 		C29739DB1DEDFF0E00C79DB1 /* CachingRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CachingRelation.swift; sourceTree = "<group>"; };
 		C29C28351D872BEA001E20E7 /* UnsafePointerReadWrite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnsafePointerReadWrite.swift; sourceTree = "<group>"; };
@@ -1747,6 +1750,7 @@
 				C25D63401DDF5F3000135E20 /* OptionalFlatten.swift */,
 				C2C6308C1D355B7500AD44C1 /* PerThreadInstance.swift */,
 				C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */,
+				C283FFCF1E805101000CDED9 /* Promise.swift */,
 				C2B53CBA1D197814006B6278 /* RWLock.swift */,
 				C257C7511CBEBF6300234A89 /* SetPowerSet.swift */,
 				C23AAF4D1CF8E3F8009E28E0 /* SequenceFind.swift */,
@@ -2442,6 +2446,7 @@
 				37A4A2851D307AF3005CAEA5 /* ChangeHandlerTests.swift in Sources */,
 				37A4A2A11D35B0B7005CAEA5 /* RelationSignalTests.swift in Sources */,
 				372707D91CFE25D400710C80 /* ArrayBinarySearchTests.swift in Sources */,
+				C283FFAE1E8032DD000CDED9 /* AsyncManager.swift in Sources */,
 				37A1CEEB1D1480120067870D /* PropertyTests.swift in Sources */,
 				37941D8E1DB8191200F5508F /* AsyncPropertyOperationsTests.swift in Sources */,
 				372707D81CFE25D400710C80 /* RelationTreePropertyTests.swift in Sources */,
@@ -2664,6 +2669,7 @@
 				C22921C71CD12A8700518184 /* ConcreteRelation.swift in Sources */,
 				C20F926D1D9587B2002F9125 /* DataCodec.swift in Sources */,
 				C22921C81CD12A8700518184 /* DictionaryConvenience.swift in Sources */,
+				C283FFD01E805101000CDED9 /* Promise.swift in Sources */,
 				C22921C91CD12A8700518184 /* DictionaryCreation.swift in Sources */,
 				C2DF2BA21D006E1C00ED8695 /* RelationDifferentiator.swift in Sources */,
 				C2FE9B991CEE15720004E635 /* TransactionalDatabase.swift in Sources */,

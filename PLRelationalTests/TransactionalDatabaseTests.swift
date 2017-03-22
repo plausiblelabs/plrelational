@@ -122,7 +122,7 @@ class TransactionalDatabaseTests: DBTestCase {
                         ["Smith", "Chicago"],
                         ["Johnson", "Seattle"]))
         
-        db.restoreSnapshot(before)
+        _ = db.restoreSnapshot(before)
         
         AssertEqual(flights,
                     MakeRelation(
@@ -131,7 +131,7 @@ class TransactionalDatabaseTests: DBTestCase {
                     MakeRelation(
                         ["name", "home"]))
         
-        db.restoreSnapshot(after)
+        _ = db.restoreSnapshot(after)
         
         AssertEqual(flights,
                     MakeRelation(
@@ -156,7 +156,7 @@ class TransactionalDatabaseTests: DBTestCase {
                         ["Smith", "Chicago"],
                         ["Johnson", "Seattle"]))
         
-        db.restoreSnapshot(after)
+        _ = db.restoreSnapshot(after)
         
         AssertEqual(pilots,
                     MakeRelation(
@@ -216,7 +216,7 @@ class TransactionalDatabaseTests: DBTestCase {
                         [1, "One"]))
         changes.removeAll()
 
-        db.restoreSnapshot(preDelete)
+        _ = db.restoreSnapshot(preDelete)
 
         XCTAssertEqual(changes.count, 1)
         AssertEqual(changes[0].added,
@@ -494,5 +494,135 @@ class TransactionalDatabaseTests: DBTestCase {
                     MakeRelation(
                         ["n"],
                         [1]))
+    }
+    
+    func testDeltas() {
+        let sqlite = makeDB().db
+        XCTAssertNil(sqlite.getOrCreateRelation("a", scheme: ["n"]).err)
+        
+        let db = TransactionalDatabase(sqlite)
+        let a = db["a"]
+        
+        let snap1 = db.takeSnapshot()
+        _ = a.add(["n": 1])
+        let snap2 = db.takeSnapshot()
+        let delta1 = db.computeDelta(from: snap1, to: snap2)
+        
+        _ = a.add(["n": 2])
+        let snap3 = db.takeSnapshot()
+        let delta2 = db.computeDelta(from: snap2, to: snap3)
+        
+        _ = db.apply(delta: delta1.reversed)
+        AssertEqual(a, MakeRelation(["n"], [2]))
+        
+        _ = db.apply(delta: delta2.reversed)
+        AssertEqual(a, nil)
+        
+        _ = db.apply(delta: delta1)
+        AssertEqual(a, MakeRelation(["n"], [1]))
+        
+        _ = db.apply(delta: delta2)
+        AssertEqual(a, MakeRelation(["n"], [1], [2]))
+    }
+    
+    func testAsyncDeltas() {
+        let runloop = CFRunLoopGetCurrent()
+        
+        let sqlite = makeDB().db
+        XCTAssertNil(sqlite.getOrCreateRelation("a", scheme: ["n"]).err)
+        
+        let db = TransactionalDatabase(sqlite)
+        let a = db["a"]
+        
+        var snap1: TransactionalDatabaseSnapshot!
+        AsyncManager.currentInstance.registerCheckpoint({ snap1 = db.takeSnapshot() })
+        a.asyncAdd(["n": 1])
+        
+        var snap2: TransactionalDatabaseSnapshot!
+        let delta1Promise = Promise<TransactionalDatabaseDelta>()
+        AsyncManager.currentInstance.registerCheckpoint({ snap2 = db.takeSnapshot() })
+        AsyncManager.currentInstance.registerCheckpoint({ delta1Promise.fulfill(db.computeDelta(from: snap1, to: snap2)) })
+        
+        a.asyncAdd(["n": 2])
+        
+        var snap3: TransactionalDatabaseSnapshot!
+        let delta2Promise = Promise<TransactionalDatabaseDelta>()
+        AsyncManager.currentInstance.registerCheckpoint({ snap3 = db.takeSnapshot() })
+        AsyncManager.currentInstance.registerCheckpoint({ delta2Promise.fulfill(db.computeDelta(from: snap2, to: snap3)) })
+        
+        AsyncManager.currentInstance.registerCheckpoint({ AssertEqual(a, MakeRelation(["n"], [1], [2])) })
+        
+        AsyncManager.currentInstance.registerCheckpoint({ CFRunLoopStop(runloop) })
+        CFRunLoopRun()
+        
+        db.asyncApply(delta: delta1Promise.get().reversed)
+        AsyncManager.currentInstance.registerCheckpoint({ AssertEqual(a, MakeRelation(["n"], [2])) })
+        
+        db.asyncApply(delta: delta2Promise.get().reversed)
+        AsyncManager.currentInstance.registerCheckpoint({ AssertEqual(a, MakeRelation(["n"])) })
+        
+        db.asyncApply(delta: delta1Promise.get())
+        AsyncManager.currentInstance.registerCheckpoint({ AssertEqual(a, MakeRelation(["n"], [1])) })
+        
+        db.asyncApply(delta: delta2Promise.get())
+        AsyncManager.currentInstance.registerCheckpoint({ AssertEqual(a, MakeRelation(["n"], [1], [2])) })
+        
+        AsyncManager.currentInstance.registerCheckpoint({ CFRunLoopStop(runloop) })
+        CFRunLoopRun()
+    }
+    
+    func testAsyncDeltasWithObservers() {
+        let runloop = CFRunLoopGetCurrent()
+        
+        let sqlite = makeDB().db
+        XCTAssertNil(sqlite.getOrCreateRelation("a", scheme: ["n"]).err)
+        
+        let db = TransactionalDatabase(sqlite)
+        let a = db["a"]
+        
+        class DummyObserver: AsyncRelationChangeCoalescedObserver {
+            func relationWillChange(_ relation: Relation) {}
+            func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {}
+        }
+        
+        let remover = a.addAsyncObserver(DummyObserver())
+        
+        var snap1: TransactionalDatabaseSnapshot!
+        AsyncManager.currentInstance.registerCheckpoint({ snap1 = db.takeSnapshot() })
+        a.asyncAdd(["n": 1])
+        
+        var snap2: TransactionalDatabaseSnapshot!
+        let delta1Promise = Promise<TransactionalDatabaseDelta>()
+        AsyncManager.currentInstance.registerCheckpoint({ snap2 = db.takeSnapshot() })
+        AsyncManager.currentInstance.registerCheckpoint({ delta1Promise.fulfill(db.computeDelta(from: snap1, to: snap2)) })
+        
+        a.asyncAdd(["n": 2])
+        
+        var snap3: TransactionalDatabaseSnapshot!
+        let delta2Promise = Promise<TransactionalDatabaseDelta>()
+        AsyncManager.currentInstance.registerCheckpoint({ snap3 = db.takeSnapshot() })
+        AsyncManager.currentInstance.registerCheckpoint({ delta2Promise.fulfill(db.computeDelta(from: snap2, to: snap3)) })
+        
+        AsyncManager.currentInstance.registerCheckpoint({ AssertEqual(a, MakeRelation(["n"], [1], [2])) })
+        
+        AsyncManager.currentInstance.registerCheckpoint({ CFRunLoopStop(runloop) })
+        CFRunLoopRun()
+        
+        db.asyncApply(delta: delta1Promise.get().reversed)
+        AsyncManager.currentInstance.registerCheckpoint({ AssertEqual(a, MakeRelation(["n"], [2])) })
+        
+        db.asyncApply(delta: delta2Promise.get().reversed)
+        AsyncManager.currentInstance.registerCheckpoint({ AssertEqual(a, MakeRelation(["n"])) })
+        
+        db.asyncApply(delta: delta1Promise.get())
+        AsyncManager.currentInstance.registerCheckpoint({ AssertEqual(a, MakeRelation(["n"], [1])) })
+        
+        db.asyncApply(delta: delta2Promise.get())
+        AsyncManager.currentInstance.registerCheckpoint({ AssertEqual(a, MakeRelation(["n"], [1], [2])) })
+        
+        AsyncManager.currentInstance.registerCheckpoint({ CFRunLoopStop(runloop) })
+        CFRunLoopRun()
+        
+        remover()
     }
 }
