@@ -225,6 +225,10 @@
 		C25D63411DDF5F3000135E20 /* OptionalFlatten.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25D63401DDF5F3000135E20 /* OptionalFlatten.swift */; };
 		C25D63431DDF88BA00135E20 /* AsyncRunloopHack.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25D63421DDF88BA00135E20 /* AsyncRunloopHack.swift */; };
 		C263BBF31CE51B51006B7662 /* UnaryOperator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C263BBF21CE51B51006B7662 /* UnaryOperator.swift */; };
+		C276C9821E82EC4E00EC536C /* libPLBindableControls.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 37A1CE9E1D1081FC0067870D /* libPLBindableControls.dylib */; };
+		C276C9881E82EC8A00EC536C /* UndoableDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C276C9771E82E97C00EC536C /* UndoableDatabaseTests.swift */; };
+		C276C9891E82ECAD00EC536C /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
+		C276C98A1E82ECCA00EC536C /* libPLRelational.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C22921BB1CD12A7100518184 /* libPLRelational.dylib */; };
 		C277E7FD1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */; };
 		C277E7FF1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */; };
 		C277E8031CDB9D3400B7B8F6 /* GeneratorConcat.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */; };
@@ -514,6 +518,13 @@
 			remoteGlobalIDString = C22921BA1CD12A7100518184;
 			remoteInfo = PLRelational;
 		};
+		C276C9831E82EC4E00EC536C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37A1CE9D1D1081FC0067870D;
+			remoteInfo = PLBindableControls;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -785,6 +796,9 @@
 		C25D63401DDF5F3000135E20 /* OptionalFlatten.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionalFlatten.swift; sourceTree = "<group>"; };
 		C25D63421DDF88BA00135E20 /* AsyncRunloopHack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncRunloopHack.swift; sourceTree = "<group>"; };
 		C263BBF21CE51B51006B7662 /* UnaryOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnaryOperator.swift; sourceTree = "<group>"; };
+		C276C9771E82E97C00EC536C /* UndoableDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UndoableDatabaseTests.swift; sourceTree = "<group>"; };
+		C276C97D1E82EC4E00EC536C /* PLBindableControlsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PLBindableControlsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C276C9811E82EC4E00EC536C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelation.swift; sourceTree = "<group>"; };
 		C277E7FE1CDA960400B7B8F6 /* ChangeLoggingDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeLoggingDatabaseTests.swift; path = PLRelationalTests/ChangeLoggingDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
 		C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratorConcat.swift; sourceTree = "<group>"; };
@@ -985,6 +999,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				C22921EA1CD12CF100518184 /* libPLRelational.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C276C97A1E82EC4E00EC536C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C276C9821E82EC4E00EC536C /* libPLBindableControls.dylib in Frameworks */,
+				C276C98A1E82ECCA00EC536C /* libPLRelational.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1491,6 +1514,7 @@
 			children = (
 				37C611411CD94784001DAF59 /* UndoManager.swift */,
 				372707791CF7B2CB00710C80 /* UndoableDatabase.swift */,
+				C276C9771E82E97C00EC536C /* UndoableDatabaseTests.swift */,
 			);
 			name = Undo;
 			sourceTree = "<group>";
@@ -1651,6 +1675,7 @@
 				372707B31CFE23CA00710C80 /* PLRelationalBinding */,
 				37A1CE9F1D1081FC0067870D /* PLBindableControls */,
 				37F1D9B41DCD3D1C004D4AAD /* Example Apps */,
+				C276C97E1E82EC4E00EC536C /* PLBindableControlsTests */,
 				C22BF12D1CBC348500D3FE59 /* Products */,
 				C2D4A8491D88789A001D9971 /* Swift library workaround */,
 			);
@@ -1677,6 +1702,7 @@
 				37504B381DC6995100CEE4D4 /* Visualizer.app */,
 				37504B4B1DC6995100CEE4D4 /* VisualizerTests.xctest */,
 				37504B561DC6995100CEE4D4 /* VisualizerUITests.xctest */,
+				C276C97D1E82EC4E00EC536C /* PLBindableControlsTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1707,6 +1733,14 @@
 				C24C4A691E26940400482726 /* BookmarkableGraphTests.swift */,
 			);
 			name = Graphs;
+			sourceTree = "<group>";
+		};
+		C276C97E1E82EC4E00EC536C /* PLBindableControlsTests */ = {
+			isa = PBXGroup;
+			children = (
+				C276C9811E82EC4E00EC536C /* Info.plist */,
+			);
+			path = PLBindableControlsTests;
 			sourceTree = "<group>";
 		};
 		C277E7FB1CDA908E00B7B8F6 /* Logging Relations */ = {
@@ -2156,13 +2190,31 @@
 			productReference = C22921E51CD12CF100518184 /* PLRelationalTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		C276C97C1E82EC4E00EC536C /* PLBindableControlsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C276C9851E82EC4E00EC536C /* Build configuration list for PBXNativeTarget "PLBindableControlsTests" */;
+			buildPhases = (
+				C276C9791E82EC4E00EC536C /* Sources */,
+				C276C97A1E82EC4E00EC536C /* Frameworks */,
+				C276C97B1E82EC4E00EC536C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C276C9841E82EC4E00EC536C /* PBXTargetDependency */,
+			);
+			name = PLBindableControlsTests;
+			productName = PLBindableControlsTests;
+			productReference = C276C97D1E82EC4E00EC536C /* PLBindableControlsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		C22BF1241CBC348500D3FE59 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0800;
+				LastSwiftUpdateCheck = 0820;
 				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = mikeash;
 				TargetAttributes = {
@@ -2241,6 +2293,10 @@
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 0800;
 					};
+					C276C97C1E82EC4E00EC536C = {
+						CreatedOnToolsVersion = 8.2;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = C22BF1271CBC348500D3FE59 /* Build configuration list for PBXProject "PLRelational" */;
@@ -2261,6 +2317,7 @@
 				372707AD1CFE238700710C80 /* PLRelationalBinding */,
 				372707CA1CFE25AF00710C80 /* PLRelationalBindingTests */,
 				37A1CE9D1D1081FC0067870D /* PLBindableControls */,
+				C276C97C1E82EC4E00EC536C /* PLBindableControlsTests */,
 				372707E71CFE2C7E00710C80 /* BindableControlsApp */,
 				372707F51CFE2C7E00710C80 /* BindableControlsAppUITests */,
 				37C610FC1CD7EFAE001DAF59 /* SampleApp */,
@@ -2398,6 +2455,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C22921E31CD12CF100518184 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C276C97B1E82EC4E00EC536C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -2742,6 +2806,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C276C9791E82EC4E00EC536C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C276C9881E82EC8A00EC536C /* UndoableDatabaseTests.swift in Sources */,
+				C276C9891E82ECAD00EC536C /* DBTestCase.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -2914,6 +2987,11 @@
 			isa = PBXTargetDependency;
 			target = C22921BA1CD12A7100518184 /* PLRelational */;
 			targetProxy = C22921EB1CD12CF100518184 /* PBXContainerItemProxy */;
+		};
+		C276C9841E82EC4E00EC536C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37A1CE9D1D1081FC0067870D /* PLBindableControls */;
+			targetProxy = C276C9831E82EC4E00EC536C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -3567,6 +3645,40 @@
 			};
 			name = Release;
 		};
+		C276C9861E82EC4E00EC536C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = PLBindableControlsTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControlsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		C276C9871E82EC4E00EC536C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = PLBindableControlsTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControlsTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -3740,6 +3852,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		C276C9851E82EC4E00EC536C /* Build configuration list for PBXNativeTarget "PLBindableControlsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C276C9861E82EC4E00EC536C /* Debug */,
+				C276C9871E82EC4E00EC536C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
