@@ -85,8 +85,18 @@ public final class AsyncManager: PerThreadInstance {
         register(action: .query(relation, callback))
     }
     
+    /// Register a function to be called as part of the sequence of performing enqueued async actions.
+    /// This allows the sequence of execution to be monitored for e.g. computing deltas for operations.
     public func registerCheckpoint(_ checkpoint: @escaping (Void) -> Void) {
-        register(action: .checkpoint(checkpoint))
+        registerCustomAction(affectedRelations: [], { checkpoint(); return nil })
+    }
+    
+    /// Register a custom action. This allows asyncifying more complex operations than just update/add/delete/whatever.
+    /// In order for notifications to work, any relations that might be affected in the custom action must be passed in
+    /// to `affectedRelations`. It's acceptable to pass in a relation that ends up not being affected. This will generate
+    /// a spurious but harmless empty change notification.
+    public func registerCustomAction(affectedRelations: [MutableRelation], _ action: @escaping (Void) -> RelationError?) {
+        register(action: .customAction(action: action, affectedRelations: affectedRelations))
     }
     
     private func register(action: Action, atBeginning: Bool = false) {
@@ -107,8 +117,12 @@ public final class AsyncManager: PerThreadInstance {
             for (_, relation) in database.relations {
                 registerChange(relation, predicate: true, newValues: nil)
             }
-        case .query, .checkpoint:
+        case .query:
             break
+        case .customAction(_, let affectedRelations):
+            for relation in affectedRelations {
+                registerChange(relation, predicate: true, newValues: nil)
+            }
         }
         
         if state == .idle {
@@ -197,8 +211,12 @@ public final class AsyncManager: PerThreadInstance {
                 for (_, relation) in database.relations {
                     registerChange(relation, predicate: true, newValues: nil)
                 }
-            case .query, .checkpoint:
+            case .query:
                 break
+            case .customAction(_, let affectedRelations):
+                for relation in affectedRelations {
+                    registerChange(relation, predicate: true, newValues: nil)
+                }
             }
         }
     }
@@ -297,9 +315,8 @@ public final class AsyncManager: PerThreadInstance {
                     error = database.apply(delta: delta).err
                 case .query:
                     error = nil
-                case .checkpoint(let call):
-                    call()
-                    error = nil
+                case .customAction(let call, _):
+                    error = call()
                 }
                 
                 if let error = error {
@@ -517,7 +534,7 @@ extension AsyncManager {
         case restoreSnapshot(TransactionalDatabase, TransactionalDatabaseSnapshot)
         case applyDelta(TransactionalDatabase, TransactionalDatabaseDelta)
         case query(Relation, DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>)
-        case checkpoint((Void) -> Void)
+        case customAction(action: (Void) -> RelationError?, affectedRelations: [MutableRelation])
     }
     
     fileprivate class ObservedRelationInfo {

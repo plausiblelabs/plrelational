@@ -263,6 +263,7 @@ class AsyncManagerTests: DBTestCase {
 
             objects.cascadingDelete(
                 Attribute("obj_id") *== RelationValue(objID),
+                affectedRelations: [objects, historyItems, tabs],
                 cascade: { (relation, row) in
                     if relation === objects {
                         let rowObjID = row["obj_id"]

@@ -1255,6 +1255,7 @@ class RelationTests: DBTestCase {
         group.enter()
         r1.cascadingDelete(
             Attribute("id") *== 1 *|| Attribute("id") *== 2 *|| Attribute("id") *== 30,
+            affectedRelations: [r1, r2, r3],
             cascade: { (relation, row) in
                 if relation === r1 {
                     return [
@@ -1459,6 +1460,7 @@ class RelationTests: DBTestCase {
         group.enter()
         r1.cascadingDelete(
             Attribute("id") *== 1 *|| Attribute("id") *== 2 *|| Attribute("id") *== 30,
+            affectedRelations: [r1, r2, r3, r4],
             cascade: { (relation, row) in
                 if relation === r1 {
                     return [

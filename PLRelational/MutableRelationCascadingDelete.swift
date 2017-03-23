@@ -12,6 +12,11 @@ extension MutableRelation {
     /// to be deleted, `completionCallback` is called.
     ///
     /// - parameter query: The initial query for rows to delete on this relation.
+    /// - parameter affectedRelations: An array of all relations that this operation will affect.
+    ///                                This array must include all relations that will be updated
+    ///                                or deleted, otherwise notifications won't work right. It is
+    ///                                acceptable to pass in more than will actually be changed.
+    ///                                This will generate spurious but harmless change notifications.
     /// - parameter cascade: Called for each deleted row to get cascades. Must return an array of
     ///                      `(MutableRelation, SelectExpression)` pairs indicating what to delete next.
     ///                      The same relation can be specified to perform a cascading delete within the
@@ -22,11 +27,83 @@ extension MutableRelation {
     /// - parameter completionCallback: Called when the cascading delete completes.
     public func cascadingDelete(
         _ query: SelectExpression,
+        affectedRelations: [MutableRelation],
         cascade: @escaping (MutableRelation, Row) -> [(MutableRelation, SelectExpression)],
         update: @escaping (MutableRelation, Row) -> [CascadingUpdate] = { _ in [] },
         completionCallback: @escaping (Result<Void, RelationError>) -> Void) {
-        let deleter = CascadingDeleter(initialRelation: self, initialQuery: query, cascade: cascade, update: update, completionCallback: completionCallback)
-        deleter.run()
+        
+        let runloop = CFRunLoopGetCurrent()!
+        func callCompletion(_ result: Result<Void, RelationError>) {
+            runloop.async({
+                completionCallback(result)
+            })
+        }
+        
+        AsyncManager.currentInstance.registerCustomAction(affectedRelations: affectedRelations, {
+            // The keys are actually MutableRelations but we're not allowed to say so.
+            var pendingDeletes: ObjectDictionary<AnyObject, [SelectExpression]> = [self: [query]]
+            
+            while !pendingDeletes.isEmpty {
+                let currentPendingDeletes = pendingDeletes
+                pendingDeletes = [:]
+                
+                var pendingUpdates: [CascadingUpdate] = []
+                
+                for (relationObj, queries) in currentPendingDeletes {
+                    let relation = relationObj as! MutableRelation
+                    
+                    let query = queries.combined(with: *||)!
+                    for row in relation.select(query).rows() {
+                        switch row {
+                        case .Ok(let row):
+                            let cascades = cascade(relation, row)
+                            for (cascadeRelation, cascadeQuery) in cascades {
+                                if pendingDeletes[cascadeRelation] == nil {
+                                    pendingDeletes[cascadeRelation] = [cascadeQuery]
+                                } else {
+                                    pendingDeletes[cascadeRelation]!.append(cascadeQuery)
+                                }
+                            }
+                            let updates = update(relation, row)
+                            pendingUpdates.append(contentsOf: updates)
+                        case .Err(let err):
+                            callCompletion(.Err(err))
+                            return err
+                        }
+                    }
+                    let result = relation.delete(query)
+                    if let err = result.err {
+                        callCompletion(.Err(err))
+                        return err
+                    }
+                }
+                
+                for update in pendingUpdates {
+                    let rows = Array(update.fromRelation.rows().prefix(2))
+                    if !rows.isEmpty {
+                        if let err = rows.first?.err ?? rows.last?.err {
+                            callCompletion(.Err(err))
+                            return err
+                        } else if let row = rows
+                            .first?.ok, rows.count == 1 {
+                            // Update if we got exactly one row.
+                            let newValues = row.rowWithAttributes(update.attributes)
+                            
+                            // Work around `mutating` update
+                            var relation = update.relation
+                            precondition(asObject(relation) != nil, "Cannot update non-object Relation.")
+                            let result = relation.update(update.query, newValues: newValues)
+                            if let err = result.err {
+                                callCompletion(.Err(err))
+                                return err
+                            }
+                        }
+                    }
+                }
+            }
+            callCompletion(.Ok())
+            return nil
+        })
     }
     
     /// Do a tree deletion in the relation. This will delete all rows matching the query, as well as all rows whose
@@ -43,7 +120,7 @@ extension MutableRelation {
             let cascadingQuery = childAttribute *== cascadingValue
             return [(self, cascadingQuery)]
         }
-        cascadingDelete(query, cascade: cascade, update: update, completionCallback: completionCallback)
+        cascadingDelete(query, affectedRelations: [self], cascade: cascade, update: update, completionCallback: completionCallback)
     }
 }
 
@@ -66,108 +143,5 @@ public struct CascadingUpdate {
         self.query = query
         self.attributes = attributes
         self.fromRelation = fromRelation
-    }
-}
-
-/// This class implements the logic for cascadingDelete above. It got too hairy to express as a closure.
-fileprivate class CascadingDeleter {
-    /// The keys are actually MutableRelations but we're not allowed to say so.
-    var pendingDeletes: ObjectDictionary<AnyObject, [SelectExpression]>
-    
-    let cascade: (MutableRelation, Row) -> [(MutableRelation, SelectExpression)]
-    let update: (MutableRelation, Row) -> [CascadingUpdate]
-    let completionCallback: (Result<Void, RelationError>) -> Void
-    var error: RelationError? = nil
-    
-    init(initialRelation: MutableRelation, initialQuery: SelectExpression, cascade: @escaping (MutableRelation, Row) -> [(MutableRelation, SelectExpression)], update: @escaping (MutableRelation, Row) -> [CascadingUpdate], completionCallback: @escaping (Result<Void, RelationError>) -> Void) {
-        self.pendingDeletes = [initialRelation: [initialQuery]]
-        self.cascade = cascade
-        self.update = update
-        self.completionCallback = completionCallback
-    }
-    
-    func run() {
-        let runloop = CFRunLoopGetCurrent()!
-        let asyncManager = AsyncManager.currentInstance
-        let group = DispatchGroup()
-        
-        let currentPendingDeletes = pendingDeletes
-        pendingDeletes = [:]
-        
-        var pendingUpdates: [CascadingUpdate] = []
-        
-        for (relationObj, queries) in currentPendingDeletes {
-            let relation = relationObj as! MutableRelation
-            
-            let query = queries.combined(with: *||)!
-            
-            group.enter()
-            asyncManager.registerQuery(
-                relation.select(query),
-                callback: runloop.wrap({ result in
-                    switch result {
-                    case .Ok(let rows) where !rows.isEmpty:
-                        for row in rows {
-                            let cascades = self.cascade(relation, row)
-                            for (cascadeRelation, cascadeQuery) in cascades {
-                                if self.pendingDeletes[cascadeRelation] == nil {
-                                    self.pendingDeletes[cascadeRelation] = [cascadeQuery]
-                                } else {
-                                    self.pendingDeletes[cascadeRelation]!.append(cascadeQuery)
-                                }
-                            }
-                            let updates = self.update(relation, row)
-                            pendingUpdates.append(contentsOf: updates)
-                        }
-                        
-                    case .Ok: // When rows are empty
-                        relation.asyncDelete(query)
-                        group.leave()
-                    case .Err(let err):
-                        self.error = err
-                        group.leave()
-                        
-                    }
-                }))
-        }
-        
-        group.notify(queue: DispatchQueue.global(), execute: {
-            runloop.async({
-                for update in pendingUpdates {
-                    group.enter()
-                    var allRows: Set<Row> = []
-                    asyncManager.registerQuery(
-                        update.fromRelation,
-                        callback: runloop.wrap({ result in
-                            switch result {
-                            case .Ok(let rows) where !rows.isEmpty:
-                                allRows.formUnion(rows)
-                            case .Ok: // When rows are empty
-                                // Update if we got exactly one row.
-                                if let row = allRows.first, allRows.count == 1 {
-                                    let newValues = row.rowWithAttributes(update.attributes)
-                                    update.relation.asyncUpdate(update.query, newValues: newValues)
-                                }
-                                group.leave()
-                            case .Err(let err):
-                                self.error = err
-                                group.leave()
-                            }
-                        }))
-                }
-                
-                group.notify(queue: DispatchQueue.global(), execute: {
-                    runloop.async({
-                        if let error = self.error {
-                            self.completionCallback(.Err(error))
-                        } else if self.pendingDeletes.isEmpty {
-                            self.completionCallback(.Ok())
-                        } else {
-                            self.run()
-                        }
-                    })
-                })
-            })
-        })
     }
 }
