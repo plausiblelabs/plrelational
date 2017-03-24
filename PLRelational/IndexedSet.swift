@@ -80,7 +80,13 @@ extension IndexedSet {
     }
     
     fileprivate mutating func remove(indexedValue: Element.Value, element: Element, fromDictionary: inout [Element.Value: Set<Element>]) {
-        _ = fromDictionary[indexedValue]?.remove(element)
+        let removed = fromDictionary[indexedValue]?.remove(element)
+        
+        // If we removed the last value in the set, remove the entire set.
+        // This keeps empty entries from building up over a long time.
+        if removed != nil && fromDictionary[indexedValue]?.isEmpty == true {
+            fromDictionary.removeValue(forKey: indexedValue)
+        }
     }
 }
 
