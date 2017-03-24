@@ -46,7 +46,7 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     }
     
     public func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
-        let toUpdate = Set(values.filter({ query.valueWithRow($0).boolValue }))
+        let toUpdate = self.valuesMatching(expression: query)
         values.subtractInPlace(toUpdate)
         
         let updated = Set(toUpdate.map({ $0.rowWithUpdate(newValues) }))
@@ -69,7 +69,7 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     }
     
     public func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
-        let toDelete = Set(values.lazy.filter({ query.valueWithRow($0).boolValue }))
+        let toDelete = self.valuesMatching(expression: query)
         values.subtractInPlace(toDelete)
         notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .directChange)
         return .Ok()
@@ -164,5 +164,10 @@ private extension PlistFileRelation {
         } else {
             return nil
         }
+    }
+    
+    func valuesMatching(expression: SelectExpression) -> Set<Row> {
+        return efficientValuesSet(expression: expression)
+            ?? Set(values.filter({ expression.valueWithRow($0).boolValue }))
     }
 }
