@@ -9,7 +9,7 @@ import Foundation
 public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImplementation {
     public let scheme: Scheme
     
-    fileprivate var values: Set<Row>
+    fileprivate var values: IndexedSet<Row>
     public internal(set) var url: URL?
     
     /// Whether the relation is transient (in which case, no changes are stored to disk).
@@ -21,14 +21,24 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     fileprivate init(scheme: Scheme, url: URL?, codec: DataCodec?, isTransient: Bool) {
         self.scheme = scheme
-        self.values = []
+        self.values = IndexedSet(primaryKeys: scheme.attributes)
         self.url = url
         self.isTransient = isTransient
         self.codec = codec
     }
     
     public var contentProvider: RelationContentProvider {
-        return .set({ self.values })
+        return .efficientlySelectableGenerator({ expression in
+            if let rows = self.efficientValuesSet(expression: expression) {
+                return AnyIterator(rows.lazy.map({ .Ok($0) }).makeIterator())
+            } else {
+                let lazy = self.values.lazy
+                let filtered = lazy.filter({
+                    expression.valueWithRow($0).boolValue
+                })
+                return AnyIterator(filtered.map({ .Ok($0) }).makeIterator())
+            }
+        })
     }
     
     public func contains(_ row: Row) -> Result<Bool, RelationError> {
@@ -37,10 +47,10 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     public func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let toUpdate = Set(values.filter({ query.valueWithRow($0).boolValue }))
-        values.subtract(toUpdate)
+        values.subtractInPlace(toUpdate)
         
         let updated = Set(toUpdate.map({ $0.rowWithUpdate(newValues) }))
-        values.formUnion(updated)
+        values.unionInPlace(updated)
         
         let added = ConcreteRelation(scheme: self.scheme, values: updated - toUpdate)
         let removed = ConcreteRelation(scheme: self.scheme, values: toUpdate - updated)
@@ -52,7 +62,7 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     public func add(_ row: Row) -> Result<Int64, RelationError> {
         if !values.contains(row) {
-            values.insert(row)
+            values.add(element: row)
             notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .directChange)
         }
         return .Ok(0)
@@ -60,7 +70,7 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     public func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         let toDelete = Set(values.lazy.filter({ query.valueWithRow($0).boolValue }))
-        values.subtract(toDelete)
+        values.subtractInPlace(toDelete)
         notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .directChange)
         return .Ok()
     }
@@ -92,7 +102,7 @@ extension PlistFileRelation {
                         let relationValuesResult = mapOk(relationValueResults, { $0 })
                         return relationValuesResult.map({
                             let r = PlistFileRelation(scheme: scheme, url: url, codec: codec, isTransient: false)
-                            r.values = Set($0)
+                            r.values.unionInPlace($0)
                             return r
                         })
                     })
@@ -127,6 +137,32 @@ extension PlistFileRelation {
             return try encodedDataResult.map({ try $0.write(to: url, options: .atomicWrite) })
         } catch {
             return .Err(error)
+        }
+    }
+}
+
+private extension PlistFileRelation {
+    func primaryKeyEquality(expression: SelectExpression) -> (Attribute, RelationValue)? {
+        if case let op as SelectExpressionBinaryOperator = expression, op.op is EqualityComparator {
+            if let attr = op.lhs as? Attribute, let value = op.rhs as? SelectExpressionConstantValue, values.primaryKeys.contains(attr) {
+                return (attr, value.relationValue)
+            }
+            if let attr = op.rhs as? Attribute, let value = op.lhs as? SelectExpressionConstantValue, values.primaryKeys.contains(attr) {
+                return (attr, value.relationValue)
+            }
+        }
+        return nil
+    }
+    
+    func efficientValuesSet(expression: SelectExpression) -> Set<Row>? {
+        // TODO: we probably also want to handle cases where the expression is
+        // multiple primary key values ORed together.
+        if expression as? Bool == false {
+            return []
+        } else if let (attribute, value) = primaryKeyEquality(expression: expression) {
+            return values.values(matchingKey: attribute, value: value)
+        } else {
+            return nil
         }
     }
 }
