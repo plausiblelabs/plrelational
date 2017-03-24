@@ -136,4 +136,52 @@ class PlistFileRelationTests: XCTestCase {
         let contents = try! Data(contentsOf: url)
         XCTAssertTrue(contents.starts(with: PrefixCodec.prefix.utf8))
     }
+    
+    func testSelectPerformance() {
+        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], createIfDoesntExist: true).ok!
+        
+        let max: Int64 = 1000
+        
+        for i in 0 ..< max {
+            _ = r.add(["a": RelationValue(i), "b": RelationValue(-i)])
+        }
+        
+        measure({
+            for i in 0 ..< max {
+                let rows = r.select(Attribute("a") *== RelationValue(i)).rows()
+                XCTAssertEqual(Array(rows).count, 1)
+            }
+        })
+    }
+    
+    func testUpdatePerformance() {
+        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], createIfDoesntExist: true).ok!
+        
+        let max: Int64 = 1000
+        
+        for i in 0 ..< max {
+            _ = r.add(["a": RelationValue(i), "b": RelationValue(-i)])
+        }
+        measure({
+            for i in 0 ..< max {
+                _ = r.update(Attribute("a") *== RelationValue(i), newValues: ["b": RelationValue(-i - 1)])
+            }
+        })
+    }
+    
+    func testDeletePerformance() {
+        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], createIfDoesntExist: true).ok!
+        
+        let max: Int64 = 1000
+        
+        for i in 0 ..< max {
+            _ = r.add(["a": RelationValue(i), "b": RelationValue(-i)])
+        }
+        
+        measure({
+            for i in 0 ..< max {
+                _ = r.delete(Attribute("a") *== RelationValue(i))
+            }
+        })
+    }
 }
