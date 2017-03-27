@@ -242,7 +242,6 @@
 		37B440701E899A3300C8C336 /* AsyncRunloopHack.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25D63421DDF88BA00135E20 /* AsyncRunloopHack.swift */; };
 		37B440711E899A3300C8C336 /* QueryOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC04F1D21AEDF00188F86 /* QueryOptimizer.swift */; };
 		37B440721E899A3300C8C336 /* QueryPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF471CF8CD89009E28E0 /* QueryPlanner.swift */; };
-		37B440731E899A3300C8C336 /* QueryPlannerDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */; };
 		37B440741E899A3300C8C336 /* QueryRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF4B1CF8DAED009E28E0 /* QueryRunner.swift */; };
 		37B440751E899A3900C8C336 /* AsyncManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2BA22971D3FD65F00DCCE72 /* AsyncManagerTests.swift */; };
 		37B440761E899A3900C8C336 /* QueryRunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */; };
@@ -257,7 +256,6 @@
 		37B4407F1E899A4F00C8C336 /* RelationActivityLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF3F1CF49AFE009E28E0 /* RelationActivityLogging.swift */; };
 		37B440801E899A4F00C8C336 /* RelationDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B339DD1CEA54E7008568E9 /* RelationDump.swift */; };
 		37B440811E899A5100C8C336 /* RelationActivityLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF3F1CF49AFE009E28E0 /* RelationActivityLogging.swift */; };
-		37B440821E899A5100C8C336 /* RelationDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B339DD1CEA54E7008568E9 /* RelationDump.swift */; };
 		37B440831E899A7200C8C336 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		37B440841E899A7200C8C336 /* CollectionConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */; };
 		37B440851E899A7200C8C336 /* ConsistentPRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */; };
@@ -315,7 +313,6 @@
 		37B440B91E899A7300C8C336 /* ObserverSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921B51CD10BA800518184 /* ObserverSet.swift */; };
 		37B440BA1E899A7300C8C336 /* OptionalFlatten.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25D63401DDF5F3000135E20 /* OptionalFlatten.swift */; };
 		37B440BB1E899A7300C8C336 /* PerThreadInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C6308C1D355B7500AD44C1 /* PerThreadInstance.swift */; };
-		37B440BC1E899A7300C8C336 /* PlaygroundMonospace.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */; };
 		37B440BD1E899A7300C8C336 /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = C283FFCF1E805101000CDED9 /* Promise.swift */; };
 		37B440BE1E899A7300C8C336 /* RWLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CBA1D197814006B6278 /* RWLock.swift */; };
 		37B440BF1E899A7300C8C336 /* SetPowerSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7511CBEBF6300234A89 /* SetPowerSet.swift */; };
@@ -330,6 +327,9 @@
 		37B440C81E899A7700C8C336 /* ObjectMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */; };
 		37B440C91E899A7800C8C336 /* InlineMutableDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2CE513D1D469EF10011C554 /* InlineMutableDataTests.swift */; };
 		37B440CA1E899A7800C8C336 /* ObjectMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */; };
+		37B440CB1E899BB000C8C336 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
+		37B440CC1E899BB200C8C336 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
+		37B440CD1E899DB900C8C336 /* PlaygroundMonospace.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -2770,7 +2770,6 @@
 				37B440C21E899A7300C8C336 /* StringConvenience.swift in Sources */,
 				37B440B21E899A7200C8C336 /* Mutex.swift in Sources */,
 				37B440AC1E899A7200C8C336 /* DictionaryCreation.swift in Sources */,
-				37B440821E899A5100C8C336 /* RelationDump.swift in Sources */,
 				37B440B41E899A7200C8C336 /* NSURLConvenience.swift in Sources */,
 				37B4405F1E899A2000C8C336 /* ChangeLoggingRelation.swift in Sources */,
 				37B440B61E899A7300C8C336 /* ObjectDictionary.swift in Sources */,
@@ -2783,10 +2782,10 @@
 				37B440BB1E899A7300C8C336 /* PerThreadInstance.swift in Sources */,
 				37B4404B1E899A0A00C8C336 /* PlistDatabase.swift in Sources */,
 				37B4406E1E899A3300C8C336 /* AsyncManager.swift in Sources */,
-				37B440BC1E899A7300C8C336 /* PlaygroundMonospace.swift in Sources */,
 				37B440B01E899A7200C8C336 /* InlineMutableData.swift in Sources */,
 				37B440261E8999DC00C8C336 /* RelationRecursiveSelect.swift in Sources */,
 				37B440421E8999FD00C8C336 /* SimpleDatabase.swift in Sources */,
+				37B440CD1E899DB900C8C336 /* PlaygroundMonospace.swift in Sources */,
 				37B440701E899A3300C8C336 /* AsyncRunloopHack.swift in Sources */,
 				37B4401E1E8999D200C8C336 /* RelationValue.swift in Sources */,
 				37B4404D1E899A0A00C8C336 /* PlistFileRelation.swift in Sources */,
@@ -2821,7 +2820,6 @@
 				37B4401F1E8999D200C8C336 /* Row.swift in Sources */,
 				37B440B81E899A7300C8C336 /* ObjectSet.swift in Sources */,
 				37B440301E8999EB00C8C336 /* RelationDerivative.swift in Sources */,
-				37B440731E899A3300C8C336 /* QueryPlannerDump.swift in Sources */,
 				37B440AF1E899A7200C8C336 /* IndexedSet.swift in Sources */,
 				37B440B51E899A7300C8C336 /* ObjectCasting.swift in Sources */,
 				37B440251E8999DC00C8C336 /* MutableRelationCascadingDelete.swift in Sources */,
@@ -2861,6 +2859,7 @@
 				37B440CA1E899A7800C8C336 /* ObjectMapTests.swift in Sources */,
 				37B4407E1E899A4900C8C336 /* BookmarkableGraphTests.swift in Sources */,
 				37B440521E899A0F00C8C336 /* PlistDatabaseTests.swift in Sources */,
+				37B440CC1E899BB200C8C336 /* DBTestCase.swift in Sources */,
 				37B4405A1E899A1800C8C336 /* SQLiteDatabaseTests.swift in Sources */,
 				37B440531E899A0F00C8C336 /* PlistDirectoryRelationTests.swift in Sources */,
 			);
@@ -2968,6 +2967,7 @@
 				37B440C81E899A7700C8C336 /* ObjectMapTests.swift in Sources */,
 				37B4407D1E899A4800C8C336 /* BookmarkableGraphTests.swift in Sources */,
 				37B4404F1E899A0E00C8C336 /* PlistDatabaseTests.swift in Sources */,
+				37B440CB1E899BB000C8C336 /* DBTestCase.swift in Sources */,
 				37B440591E899A1800C8C336 /* SQLiteDatabaseTests.swift in Sources */,
 				37B440501E899A0E00C8C336 /* PlistDirectoryRelationTests.swift in Sources */,
 			);
@@ -3607,6 +3607,7 @@
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_INCLUDE_PATHS = modules;
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -3636,6 +3637,7 @@
 				PRODUCT_NAME = PLRelational;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SWIFT_INCLUDE_PATHS = modules;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -3710,6 +3712,7 @@
 				PRODUCT_NAME = PLRelational;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_INCLUDE_PATHS = modules;
 				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -3737,6 +3740,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelational;
 				PRODUCT_NAME = PLRelational;
 				SKIP_INSTALL = YES;
+				SWIFT_INCLUDE_PATHS = modules;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 3.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -4101,6 +4105,7 @@
 				37B43F2E1E898BAD00C8C336 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37B43F321E898BAD00C8C336 /* Build configuration list for PBXNativeTarget "PLRelational-iOSTests" */ = {
 			isa = XCConfigurationList;
@@ -4109,6 +4114,7 @@
 				37B43F301E898BAD00C8C336 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37B4400B1E8997EB00C8C336 /* Build configuration list for PBXNativeTarget "PLRelational-macOS" */ = {
 			isa = XCConfigurationList;
@@ -4117,6 +4123,7 @@
 				37B4400D1E8997EB00C8C336 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37B4400E1E8997EB00C8C336 /* Build configuration list for PBXNativeTarget "PLRelational-macOSTests" */ = {
 			isa = XCConfigurationList;
@@ -4125,6 +4132,7 @@
 				37B440101E8997EB00C8C336 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37C611281CD7EFAE001DAF59 /* Build configuration list for PBXNativeTarget "SampleApp" */ = {
 			isa = XCConfigurationList;
