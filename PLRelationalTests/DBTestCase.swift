@@ -79,7 +79,7 @@ class DBTestCase: XCTestCase {
     
     func makePlistDB(_ relationName: String, _ scheme: Scheme) -> PlistDatabase {
         return makePlistDB(specs: [
-            .file(name: relationName, path: "\(relationName).plist", scheme: scheme)
+            .file(name: relationName, path: "\(relationName).plist", scheme: scheme, primaryKeys: Array(scheme.attributes))
         ])
     }
 }

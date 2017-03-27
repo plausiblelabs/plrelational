@@ -28,7 +28,7 @@ class PlistDatabaseTests: XCTestCase {
     
     func testErrorOnNonexistentFile() {
         let specs: [PlistDatabase.RelationSpec] = [
-            .file(name: "a", path: "a.plist", scheme: ["a"])
+            .file(name: "a", path: "a.plist", scheme: ["a"], primaryKeys: ["a"])
         ]
         let result = PlistDatabase.open(tmpURL(), specs)
         XCTAssertNotNil(result.err)
@@ -37,8 +37,8 @@ class PlistDatabaseTests: XCTestCase {
     func testRoundtrip() {
         let root = tmpURL()
         let specs: [PlistDatabase.RelationSpec] = [
-            .file(name: "object", path: "objects.plist", scheme: ["id", "name"]),
-            .file(name: "doc_item", path: "doc_items.plist", scheme: ["id", "parent", "order"]),
+            .file(name: "object", path: "objects.plist", scheme: ["id", "name"], primaryKeys: ["id"]),
+            .file(name: "doc_item", path: "doc_items.plist", scheme: ["id", "parent", "order"], primaryKeys: ["id"]),
             .directory(name: "object_data", path: "object_data", scheme: ["id", "value"], primaryKey: "id")
         ]
         

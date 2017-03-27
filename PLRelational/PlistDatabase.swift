@@ -13,15 +13,15 @@ protocol PlistRelation: StoredRelation {
 public class PlistDatabase: StoredDatabase {
 
     public enum RelationSpec {
-        case transient(name: String, scheme: Scheme)
-        case file(name: String, path: String, scheme: Scheme)
+        case transient(name: String, scheme: Scheme, primaryKeys: [Attribute])
+        case file(name: String, path: String, scheme: Scheme, primaryKeys: [Attribute])
         case directory(name: String, path: String, scheme: Scheme, primaryKey: Attribute)
         
         public func url(withRoot root: URL?) -> URL? {
             switch self {
             case .transient:
                 return nil
-            case let .file(_, path, _):
+            case let .file(_, path, _, _):
                 return root?.appendingPathComponent(path, isDirectory: false)
             case let .directory(_, path, _, _):
                 return root?.appendingPathComponent(path, isDirectory: true)
@@ -44,11 +44,11 @@ public class PlistDatabase: StoredDatabase {
         func prepareRelation(_ spec: RelationSpec) -> Result<(String, ManagedRelation), RelationError> {
             let url = spec.url(withRoot: root)
             switch spec {
-            case let .transient(name, scheme):
-                let relation = PlistFileRelation.transient(scheme: scheme, codec: codec) as PlistRelation
+            case let .transient(name, scheme, primaryKeys):
+                let relation = PlistFileRelation.transient(scheme: scheme, primaryKeys: primaryKeys, codec: codec) as PlistRelation
                 return .Ok((name, (spec: spec, relation: relation)))
-            case let .file(name, _, scheme):
-                let result = PlistFileRelation.withFile(url, scheme: scheme, createIfDoesntExist: createIfDoesntExist, codec: codec)
+            case let .file(name, _, scheme, primaryKeys):
+                let result = PlistFileRelation.withFile(url, scheme: scheme, primaryKeys: primaryKeys, createIfDoesntExist: createIfDoesntExist, codec: codec)
                 return result.map{ (name, (spec: spec, relation: $0)) }
             case let .directory(name, _, scheme, primaryKey):
                 let result = PlistDirectoryRelation.withDirectory(url, scheme: scheme, primaryKey: primaryKey, createIfDoesntExist: createIfDoesntExist, codec: codec)

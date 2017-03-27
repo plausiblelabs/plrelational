@@ -19,9 +19,9 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
-    fileprivate init(scheme: Scheme, url: URL?, codec: DataCodec?, isTransient: Bool) {
+    fileprivate init(scheme: Scheme, primaryKeys: [Attribute], url: URL?, codec: DataCodec?, isTransient: Bool) {
         self.scheme = scheme
-        self.values = IndexedSet(primaryKeys: scheme.attributes)
+        self.values = IndexedSet(primaryKeys: primaryKeys)
         self.url = url
         self.isTransient = isTransient
         self.codec = codec
@@ -83,7 +83,7 @@ extension PlistFileRelation {
         case unknownValuesObject(unknownObject: Any)
     }
     
-    public static func withFile(_ url: URL?, scheme: Scheme, createIfDoesntExist: Bool, codec: DataCodec? = nil) -> Result<PlistFileRelation, RelationError> {
+    public static func withFile(_ url: URL?, scheme: Scheme, primaryKeys: [Attribute], createIfDoesntExist: Bool, codec: DataCodec? = nil) -> Result<PlistFileRelation, RelationError> {
         if let url = url {
             // We have a URL, so we are either opening an existing relation or creating a new one at a specific location;
             if !createIfDoesntExist {
@@ -101,7 +101,7 @@ extension PlistFileRelation {
                         let relationValueResults = array.map({ Row.fromPlist($0) })
                         let relationValuesResult = mapOk(relationValueResults, { $0 })
                         return relationValuesResult.map({
-                            let r = PlistFileRelation(scheme: scheme, url: url, codec: codec, isTransient: false)
+                            let r = PlistFileRelation(scheme: scheme, primaryKeys: primaryKeys, url: url, codec: codec, isTransient: false)
                             r.values.unionInPlace($0)
                             return r
                         })
@@ -114,12 +114,12 @@ extension PlistFileRelation {
             // We have no URL, so we are creating a new relation; we will defer file creation until the first save
             precondition(createIfDoesntExist)
         }
-        return .Ok(PlistFileRelation(scheme: scheme, url: url, codec: codec, isTransient: false))
+        return .Ok(PlistFileRelation(scheme: scheme, primaryKeys: primaryKeys, url: url, codec: codec, isTransient: false))
     }
     
     /// Returns a new transient plist-backed relation (stored in memory only).
-    public static func transient(scheme: Scheme, codec: DataCodec? = nil) -> PlistFileRelation {
-        return PlistFileRelation(scheme: scheme, url: nil, codec: codec, isTransient: true)
+    public static func transient(scheme: Scheme, primaryKeys: [Attribute], codec: DataCodec? = nil) -> PlistFileRelation {
+        return PlistFileRelation(scheme: scheme, primaryKeys: primaryKeys, url: nil, codec: codec, isTransient: true)
     }
     
     public func save() -> Result<Void, RelationError> {

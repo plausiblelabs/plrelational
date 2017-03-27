@@ -636,8 +636,8 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         verifyTransactions(sqliteDB, sqliteFlights, sqlitePilots)
         
         let plistDB = makePlistDB(specs: [
-            .file(name: "flights", path: "flights.plist", scheme: flightsScheme),
-            .file(name: "pilots", path: "pilots.plist", scheme: pilotsScheme)
+            .file(name: "flights", path: "flights.plist", scheme: flightsScheme, primaryKeys: ["number"]),
+            .file(name: "pilots", path: "pilots.plist", scheme: pilotsScheme, primaryKeys: [])
         ])
         verifyTransactions(plistDB, plistDB["flights"]!, plistDB["pilots"]!)
     }
