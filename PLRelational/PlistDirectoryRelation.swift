@@ -56,9 +56,9 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
             } else {
                 let lazy = self.rowGenerator().lazy
                 let filtered = lazy.filter({
-                $0.ok.map({
-                    expression.valueWithRow($0).boolValue
-                }) ?? true
+                    $0.ok.map({
+                        expression.valueWithRow($0).boolValue
+                    }) ?? true
                 })
                 let wrapped = AnyIterator(filtered.makeIterator())
                 return wrapped
