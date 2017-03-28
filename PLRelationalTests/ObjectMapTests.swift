@@ -13,15 +13,25 @@ class ObjectMapTests: XCTestCase {
     func testStress() {
         let testMap = ObjectMap<String>()
         var currentEntries: Set<NSNumber> = []
+        var numberObjects: [Int: NSNumber] = [:]
+        func numberObject(_ x: Int) -> NSNumber {
+            if let obj = numberObjects[x] {
+                return obj
+            } else {
+                let obj = NSNumber(value: x)
+                numberObjects[x] = obj
+                return obj
+            }
+        }
         
         func add() {
-            let value = NSNumber(value: rand.next(1000))
+            let value = numberObject(rand.next(1000))
             testMap[value] = String(value.intValue)
             currentEntries.insert(value)
         }
         
         func getOrCreate() {
-            let value = NSNumber(value: rand.next(1000))
+            let value = numberObject(rand.next(1000))
             _ = testMap.getOrCreate(value, defaultValue: {
                 currentEntries.insert(value)
                 return String(value.intValue)
