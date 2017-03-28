@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0800"
+   LastUpgradeVersion = "0820"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "37A1CE9D1D1081FC0067870D"
-               BuildableName = "libPLBindableControls.dylib"
-               BlueprintName = "PLBindableControls"
+               BlueprintIdentifier = "37B43F1B1E898BAD00C8C336"
+               BuildableName = "PLRelational.framework"
+               BlueprintName = "PLRelational-iOS"
                ReferencedContainer = "container:PLRelational.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,7 +28,26 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "37B43F231E898BAD00C8C336"
+               BuildableName = "PLRelationalTests.xctest"
+               BlueprintName = "PLRelational-iOSTests"
+               ReferencedContainer = "container:PLRelational.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
+      <MacroExpansion>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "37B43F1B1E898BAD00C8C336"
+            BuildableName = "PLRelational.framework"
+            BlueprintName = "PLRelational-iOS"
+            ReferencedContainer = "container:PLRelational.xcodeproj">
+         </BuildableReference>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </TestAction>
@@ -45,9 +64,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "37A1CE9D1D1081FC0067870D"
-            BuildableName = "libPLBindableControls.dylib"
-            BlueprintName = "PLBindableControls"
+            BlueprintIdentifier = "37B43F1B1E898BAD00C8C336"
+            BuildableName = "PLRelational.framework"
+            BlueprintName = "PLRelational-iOS"
             ReferencedContainer = "container:PLRelational.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -63,9 +82,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "37A1CE9D1D1081FC0067870D"
-            BuildableName = "libPLBindableControls.dylib"
-            BlueprintName = "PLBindableControls"
+            BlueprintIdentifier = "37B43F1B1E898BAD00C8C336"
+            BuildableName = "PLRelational.framework"
+            BlueprintName = "PLRelational-iOS"
             ReferencedContainer = "container:PLRelational.xcodeproj">
          </BuildableReference>
       </MacroExpansion>

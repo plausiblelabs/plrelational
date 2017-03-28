@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "372707E71CFE2C7E00710C80"
-               BuildableName = "BindableControlsApp.app"
-               BlueprintName = "BindableControlsApp"
+               BlueprintIdentifier = "37B440EE1E899FB700C8C336"
+               BuildableName = "PLRelationalBinding.framework"
+               BlueprintName = "PLRelationalBinding-iOS"
                ReferencedContainer = "container:PLRelational.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -32,9 +32,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "372707F51CFE2C7E00710C80"
-               BuildableName = "BindableControlsAppUITests.xctest"
-               BlueprintName = "BindableControlsAppUITests"
+               BlueprintIdentifier = "37B440F61E899FB700C8C336"
+               BuildableName = "PLRelationalBindingTests.xctest"
+               BlueprintName = "PLRelationalBinding-iOSTests"
                ReferencedContainer = "container:PLRelational.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -42,9 +42,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "372707E71CFE2C7E00710C80"
-            BuildableName = "BindableControlsApp.app"
-            BlueprintName = "BindableControlsApp"
+            BlueprintIdentifier = "37B440EE1E899FB700C8C336"
+            BuildableName = "PLRelationalBinding.framework"
+            BlueprintName = "PLRelationalBinding-iOS"
             ReferencedContainer = "container:PLRelational.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -61,16 +61,15 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "372707E71CFE2C7E00710C80"
-            BuildableName = "BindableControlsApp.app"
-            BlueprintName = "BindableControlsApp"
+            BlueprintIdentifier = "37B440EE1E899FB700C8C336"
+            BuildableName = "PLRelationalBinding.framework"
+            BlueprintName = "PLRelationalBinding-iOS"
             ReferencedContainer = "container:PLRelational.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -80,16 +79,15 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
+      <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "372707E71CFE2C7E00710C80"
-            BuildableName = "BindableControlsApp.app"
-            BlueprintName = "BindableControlsApp"
+            BlueprintIdentifier = "37B440EE1E899FB700C8C336"
+            BuildableName = "PLRelationalBinding.framework"
+            BlueprintName = "PLRelationalBinding-iOS"
             ReferencedContainer = "container:PLRelational.xcodeproj">
          </BuildableReference>
-      </BuildableProductRunnable>
+      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

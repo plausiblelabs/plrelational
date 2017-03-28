@@ -3689,7 +3689,7 @@
 				INFOPLIST_FILE = PLRelational/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelational;
 				PRODUCT_NAME = PLRelational;
 				SKIP_INSTALL = YES;
@@ -3718,7 +3718,7 @@
 				INFOPLIST_FILE = PLRelational/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelational;
 				PRODUCT_NAME = PLRelational;
 				SKIP_INSTALL = YES;
@@ -3783,7 +3783,7 @@
 				INFOPLIST_FILE = PLRelationalBinding/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBinding;
 				PRODUCT_NAME = PLRelationalBinding;
 				SKIP_INSTALL = YES;
@@ -3811,7 +3811,7 @@
 				INFOPLIST_FILE = PLRelationalBinding/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBinding;
 				PRODUCT_NAME = PLRelationalBinding;
 				SKIP_INSTALL = YES;
@@ -3973,7 +3973,7 @@
 				INFOPLIST_FILE = PLBindableControls/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControls;
 				PRODUCT_NAME = PLBindableControls;
 				SKIP_INSTALL = YES;
@@ -4001,7 +4001,7 @@
 				INFOPLIST_FILE = PLBindableControls/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControls;
 				PRODUCT_NAME = PLBindableControls;
 				SKIP_INSTALL = YES;
@@ -4344,6 +4344,7 @@
 				37B440E61E899F7600C8C336 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37B440E71E899F7600C8C336 /* Build configuration list for PBXNativeTarget "PLRelationalBinding-macOSTests" */ = {
 			isa = XCConfigurationList;
@@ -4352,6 +4353,7 @@
 				37B440E91E899F7600C8C336 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37B441001E899FB700C8C336 /* Build configuration list for PBXNativeTarget "PLRelationalBinding-iOS" */ = {
 			isa = XCConfigurationList;
@@ -4360,6 +4362,7 @@
 				37B441021E899FB700C8C336 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37B441031E899FB700C8C336 /* Build configuration list for PBXNativeTarget "PLRelationalBinding-iOSTests" */ = {
 			isa = XCConfigurationList;
@@ -4368,6 +4371,7 @@
 				37B441051E899FB700C8C336 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37B441721E89A49B00C8C336 /* Build configuration list for PBXNativeTarget "PLBindableControls-macOS" */ = {
 			isa = XCConfigurationList;
@@ -4376,6 +4380,7 @@
 				37B441741E89A49B00C8C336 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37B441751E89A49B00C8C336 /* Build configuration list for PBXNativeTarget "PLBindableControls-macOSTests" */ = {
 			isa = XCConfigurationList;
@@ -4384,6 +4389,7 @@
 				37B441771E89A49B00C8C336 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		37C611281CD7EFAE001DAF59 /* Build configuration list for PBXNativeTarget "SampleApp" */ = {
 			isa = XCConfigurationList;
