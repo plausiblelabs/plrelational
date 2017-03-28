@@ -53,7 +53,9 @@ class ObjectMap<Value> {
         // Objects are 16-byte aligned, so shift off the last four bits to get a better hash value.
         // If this ends up being wrong this code will still work, but hash collisions will be more
         // frequent so performance will suffer.
-        let hash = key >> 4
+        // Perform the shift as an unsigned number, to avoid producing indexes with
+        // negative values.
+        let hash = Int(bitPattern: UInt(bitPattern: key) >> 4)
         var index = hash % capacity
         var firstDead: Int? = nil
         while table[index].key != key && table[index].key != EMPTY {
