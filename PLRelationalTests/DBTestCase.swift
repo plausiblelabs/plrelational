@@ -36,7 +36,7 @@ func AssertEqual(_ a: Relation?, _ b: Relation?, file: StaticString = #file, lin
 func AssertEqual(_ a: AnyIterator<Result<Set<Row>, RelationError>>, _ b: Relation?, file: StaticString = #file, line: UInt = #line) {
     let result = mapOk(a, { $0 })
     guard let rows = result.ok?.joined() else {
-        XCTFail("Got error iterating rows: \(result.err)", file: file, line: line)
+        XCTFail("Got error iterating rows: \(String(describing: result.err))", file: file, line: line)
         return
     }
     

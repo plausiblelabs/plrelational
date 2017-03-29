@@ -165,8 +165,7 @@ extension ObjectMap: CustomDebugStringConvertible {
                 return String(format: "[%ld] DEAD", i)
             } else {
                 let bucketString = String(describing: bucket.value) as NSString
-                let keyPtr = unsafeBitCast(key, to: Int.self)
-                return String(format: "[%ld] %p = %@ (%@)", i, key, bucketString, keyPtr)
+                return String(format: "[%ld] %p = %@ (%@)", i, key, bucketString, key)
             }
         })
         
