@@ -368,6 +368,9 @@
 		37B441B21E89AAB800C8C336 /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611321CD7F80F001DAF59 /* TextField.swift */; };
 		37B441B31E89AAB800C8C336 /* ContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611521CE3A942001DAF59 /* ContextMenu.swift */; };
 		37B441B41E89AAB800C8C336 /* MenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE591D08A2240067870D /* MenuItem.swift */; };
+		37C48D381E8C375C000BDE70 /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43F1C1E898BAD00C8C336 /* PLRelational.framework */; };
+		37C48D391E8C375C000BDE70 /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440EF1E899FB700C8C336 /* PLRelationalBinding.framework */; };
+		37C48D3A1E8C37C9000BDE70 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -493,6 +496,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 37B440D21E899F7600C8C336;
 			remoteInfo = "PLRelationalBinding-macOS";
+		};
+		37C48D341E8C374C000BDE70 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B440EE1E899FB700C8C336;
+			remoteInfo = "PLRelationalBinding-iOS";
+		};
+		37C48D361E8C3751000BDE70 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B43F1B1E898BAD00C8C336;
+			remoteInfo = "PLRelational-iOS";
 		};
 		37C611111CD7EFAE001DAF59 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -622,7 +639,7 @@
 		3761369C1CFBA42100F572C5 /* StepperView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StepperView.swift; sourceTree = "<group>"; };
 		376A96371D09225900E696AE /* ComboBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ComboBox.swift; sourceTree = "<group>"; };
 		3777D5C51E8C199C006D147D /* PLBindableControls.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PLBindableControls.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3777D5CD1E8C199D006D147D /* PLBindableControls-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PLBindableControls-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3777D5CD1E8C199D006D147D /* PLBindableControlsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PLBindableControlsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		37832EB91CFCE63C00256DB1 /* PropertiesModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertiesModel.swift; sourceTree = "<group>"; };
 		37832EBB1CFCF17800256DB1 /* TextObjectPropertiesView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextObjectPropertiesView.swift; sourceTree = "<group>"; };
 		37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncPropertyOperations.swift; sourceTree = "<group>"; };
@@ -871,6 +888,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37C48D381E8C375C000BDE70 /* PLRelational.framework in Frameworks */,
+				37C48D391E8C375C000BDE70 /* PLRelationalBinding.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1767,7 +1786,7 @@
 				37B441611E89A49A00C8C336 /* PLBindableControls.framework */,
 				37B441691E89A49B00C8C336 /* PLBindableControlsTests.xctest */,
 				3777D5C51E8C199C006D147D /* PLBindableControls.framework */,
-				3777D5CD1E8C199D006D147D /* PLBindableControls-iOSTests.xctest */,
+				3777D5CD1E8C199D006D147D /* PLBindableControlsTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2037,6 +2056,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				37C48D371E8C3751000BDE70 /* PBXTargetDependency */,
+				37C48D351E8C374C000BDE70 /* PBXTargetDependency */,
 			);
 			name = "PLBindableControls-iOS";
 			productName = "PLBindableControls-iOS";
@@ -2058,7 +2079,7 @@
 			);
 			name = "PLBindableControls-iOSTests";
 			productName = "PLBindableControls-iOSTests";
-			productReference = 3777D5CD1E8C199D006D147D /* PLBindableControls-iOSTests.xctest */;
+			productReference = 3777D5CD1E8C199D006D147D /* PLBindableControlsTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		37A1CE6A1D1081980067870D /* SearchApp */ = {
@@ -2820,6 +2841,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				374DAEC31E8C28FC00FF245B /* UndoableDatabaseTests.swift in Sources */,
+				37C48D3A1E8C37C9000BDE70 /* DBTestCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3339,6 +3361,16 @@
 			target = 37B440D21E899F7600C8C336 /* PLRelationalBinding-macOS */;
 			targetProxy = 37B441941E89A7BF00C8C336 /* PBXContainerItemProxy */;
 		};
+		37C48D351E8C374C000BDE70 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B440EE1E899FB700C8C336 /* PLRelationalBinding-iOS */;
+			targetProxy = 37C48D341E8C374C000BDE70 /* PBXContainerItemProxy */;
+		};
+		37C48D371E8C3751000BDE70 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B43F1B1E898BAD00C8C336 /* PLRelational-iOS */;
+			targetProxy = 37C48D361E8C3751000BDE70 /* PBXContainerItemProxy */;
+		};
 		37C611121CD7EFAE001DAF59 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 37C610FC1CD7EFAE001DAF59 /* SampleApp */;
@@ -3652,11 +3684,11 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				INFOPLIST_FILE = "PLBindableControls-iOSTests/Info.plist";
+				INFOPLIST_FILE = PLBindableControlsTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "coop.plausible.PLBindableControls-iOSTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControlsTests;
+				PRODUCT_NAME = PLBindableControlsTests;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 3.0;
@@ -3671,11 +3703,11 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				INFOPLIST_FILE = "PLBindableControls-iOSTests/Info.plist";
+				INFOPLIST_FILE = PLBindableControlsTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = "coop.plausible.PLBindableControls-iOSTests";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControlsTests;
+				PRODUCT_NAME = PLBindableControlsTests;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 3.0;
