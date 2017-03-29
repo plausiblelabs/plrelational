@@ -41,6 +41,12 @@ extension Int: SelectExpressionConstantValue {
     }
 }
 
+extension Int64: SelectExpressionConstantValue {
+    public var relationValue: RelationValue {
+        return RelationValue(self)
+    }
+}
+
 extension Bool: SelectExpressionConstantValue {
     public var relationValue: RelationValue {
         return RelationValue.boolValue(self)

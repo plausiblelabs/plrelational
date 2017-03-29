@@ -79,7 +79,7 @@ open class ObserverSet<Parameters>: CustomStringConvertible {
             entry in
             (entry.object === self
                 ? "\(entry.f)"
-                : "\(entry.object) \(entry.f)")
+                : "\(String(describing: entry.object)) \(entry.f)")
         }
         let joined = strings.joined(separator: ", ")
         

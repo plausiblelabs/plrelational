@@ -487,7 +487,7 @@ class TransactionalDatabaseTests: DBTestCase {
         case .some(.Err(QueryRunner.Error.mutatedDuringEnumeration)):
             break
         default:
-            XCTFail("Unexpected row result: \(row)")
+            XCTFail("Unexpected row result: \(String(describing: row))")
         }
         
         AssertEqual(a,

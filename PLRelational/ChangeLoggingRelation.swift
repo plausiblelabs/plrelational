@@ -32,7 +32,7 @@ public struct ChangeLoggingRelationDelta {
 }
 
 public class ChangeLoggingRelation {
-    fileprivate typealias Graph = BookmarkableGraph<[ChangeLoggingRelationChange]>
+    typealias Graph = BookmarkableGraph<[ChangeLoggingRelationChange]>
     
     fileprivate var baseRelation: MutableRelation
     

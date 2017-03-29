@@ -308,7 +308,7 @@ extension Relation {
                     print("])\n")
                     
                 case .aggregate(let attribute, let initialValue, _):
-                    print("r\(numbers[0]).someAggregateFunction(\(attribute), \(initialValue))\n")
+                    print("r\(numbers[0]).someAggregateFunction(\(attribute), \(initialValue?.description ?? "nil"))\n")
                     
                 case .otherwise:
                     print("r\(numbers[0]).otherwise(r\(numbers[1]))\n")
