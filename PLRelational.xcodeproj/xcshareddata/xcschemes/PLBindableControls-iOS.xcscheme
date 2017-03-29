@@ -33,7 +33,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "3777D5CC1E8C199D006D147D"
-               BuildableName = "PLBindableControls-iOSTests.xctest"
+               BuildableName = "PLBindableControlsTests.xctest"
                BlueprintName = "PLBindableControls-iOSTests"
                ReferencedContainer = "container:PLRelational.xcodeproj">
             </BuildableReference>
