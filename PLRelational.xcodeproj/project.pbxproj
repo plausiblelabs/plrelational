@@ -371,6 +371,8 @@
 		37C48D381E8C375C000BDE70 /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43F1C1E898BAD00C8C336 /* PLRelational.framework */; };
 		37C48D391E8C375C000BDE70 /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440EF1E899FB700C8C336 /* PLRelationalBinding.framework */; };
 		37C48D3A1E8C37C9000BDE70 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
+		37C48DAA1E8C676A000BDE70 /* TextProperty.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2411D21A613005CAEA5 /* TextProperty.swift */; };
+		37C48DAC1E8C6787000BDE70 /* TreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C48DAB1E8C6787000BDE70 /* TreeView.swift */; };
 		37C611001CD7EFAE001DAF59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */; };
 		37C611021CD7EFAE001DAF59 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611011CD7EFAE001DAF59 /* Document.swift */; };
 		37C611051CD7EFAE001DAF59 /* Document.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37C611031CD7EFAE001DAF59 /* Document.xib */; };
@@ -713,6 +715,7 @@
 		37B441611E89A49A00C8C336 /* PLBindableControls.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PLBindableControls.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		37B441691E89A49B00C8C336 /* PLBindableControlsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PLBindableControlsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		37B4419B1E89AA7E00C8C336 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		37C48DAB1E8C6787000BDE70 /* TreeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeView.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		37C611011CD7EFAE001DAF59 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
@@ -1302,7 +1305,7 @@
 		3777D5DC1E8C1A14006D147D /* UIKit */ = {
 			isa = PBXGroup;
 			children = (
-				3777D5DE1E8C1B1F006D147D /* Table View */,
+				3777D5DE1E8C1B1F006D147D /* Outline Views */,
 			);
 			path = UIKit;
 			sourceTree = "<group>";
@@ -1310,16 +1313,18 @@
 		3777D5DD1E8C1A22006D147D /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				37A4A2411D21A613005CAEA5 /* TextProperty.swift */,
 				37C611401CD94772001DAF59 /* Undo */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
 		};
-		3777D5DE1E8C1B1F006D147D /* Table View */ = {
+		3777D5DE1E8C1B1F006D147D /* Outline Views */ = {
 			isa = PBXGroup;
 			children = (
+				37C48DAB1E8C6787000BDE70 /* TreeView.swift */,
 			);
-			name = "Table View";
+			name = "Outline Views";
 			sourceTree = "<group>";
 		};
 		37A1CE6C1D1081980067870D /* SearchApp */ = {
@@ -1398,7 +1403,6 @@
 		37A1CEAF1D10827F0067870D /* Outline Views */ = {
 			isa = PBXGroup;
 			children = (
-				37A4A2411D21A613005CAEA5 /* TextProperty.swift */,
 				37C611351CD7FB07001DAF59 /* ListView.swift */,
 				37C611501CE10770001DAF59 /* TreeView.swift */,
 				37E05C4A1DCDA39F005CBFE2 /* SectionedTreeView.swift */,
@@ -2831,7 +2835,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37C48DAC1E8C6787000BDE70 /* TreeView.swift in Sources */,
 				374DAEBF1E8C28EA00FF245B /* UndoableDatabase.swift in Sources */,
+				37C48DAA1E8C676A000BDE70 /* TextProperty.swift in Sources */,
 				374DAEBE1E8C28E700FF245B /* UndoManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

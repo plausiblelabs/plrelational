@@ -27,6 +27,7 @@ public enum TextProperty { case
     }
 }
 
+#if os(macOS)
 extension TextField {
     public func bind(_ property: TextProperty?) {
         string.unbindAll()
@@ -56,3 +57,4 @@ extension TextField {
         }
     }
 }
+#endif
