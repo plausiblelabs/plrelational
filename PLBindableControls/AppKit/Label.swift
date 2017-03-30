@@ -17,7 +17,7 @@ open class Label: NSTextField {
         setup()
     }
     
-    public private(set) lazy var string: WriteOnlyProperty<String> = WriteOnlyProperty(set: { [weak self] in
+    public private(set) lazy var string: BindableProperty<String> = WriteOnlyProperty(set: { [weak self] in
         self?.stringValue = $0.0
     })
 }

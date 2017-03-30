@@ -6,6 +6,32 @@
 import UIKit
 import PLRelationalBinding
 
+public enum LabelText {
+    case readOnly(ReadableProperty<String>)
+    case asyncReadOnly(AsyncReadableProperty<String>)
+    case readOnlyOpt(ReadableProperty<String?>)
+    case asyncReadOnlyOpt(AsyncReadableProperty<String?>)
+}
+
+extension UILabel {
+    func bind(_ text: LabelText?) {
+        // TODO: Hmm, with this `bindable` extension approach, there's no way to explicitly unbind existing bindings
+        // since each access of `bindable.text` returns a fresh property instance
+        if let text = text {
+            switch text {
+            case .readOnly(let prop):
+                bindable.text <~ prop
+            case .asyncReadOnly(let prop):
+                bindable.text <~ prop
+            case .readOnlyOpt(let prop):
+                bindable.optText <~ prop
+            case .asyncReadOnlyOpt(let prop):
+                bindable.optText <~ prop
+            }
+        }
+    }
+}
+
 public struct TreeViewModel<N: TreeNode> {
     public let data: TreeProperty<N>
     public let allowsChildren: (N.Data) -> Bool
@@ -14,7 +40,7 @@ public struct TreeViewModel<N: TreeNode> {
     public let move: ((_ srcPath: TreePath<N>, _ dstPath: TreePath<N>) -> Void)?
     //public let selection: AsyncReadWriteProperty<Set<N.ID>>
     public let cellIdentifier: (N.Data) -> String
-    public let cellText: (N.Data) -> TextProperty
+    public let cellText: (N.Data) -> LabelText
     
     public init(
         data: TreeProperty<N>,
@@ -23,7 +49,7 @@ public struct TreeViewModel<N: TreeNode> {
         move: ((_ srcPath: TreePath<N>, _ dstPath: TreePath<N>) -> Void)?,
         //selection: AsyncReadWriteProperty<Set<N.ID>>,
         cellIdentifier: @escaping (N.Data) -> String,
-        cellText: @escaping (N.Data) -> TextProperty)
+        cellText: @escaping (N.Data) -> LabelText)
     {
         self.data = data
         self.isSection = isSection
@@ -71,6 +97,33 @@ open class TreeView<N: TreeNode>: NSObject, UITableViewDataSource, UITableViewDe
     deinit {
         treeObserverRemoval?()
     }
+
+    private func node(for indexPath: IndexPath) -> N {
+        // TODO: This is way inefficient; need to cache index -> node mappings
+        let rowToFind = indexPath.row
+        var index = 0
+        
+        func visit(_ node: N) -> N? {
+            if index == rowToFind {
+                return node
+            }
+            index += 1
+            for child in node.children {
+                if let found = visit(child) {
+                    return found
+                }
+            }
+            return nil
+        }
+        
+        for node in model.data.root.children {
+            if let found = visit(node) {
+                return found
+            }
+        }
+        
+        fatalError("Invalid index path")
+    }
     
     // MARK: - UITableViewDataSource
 
@@ -100,41 +153,45 @@ open class TreeView<N: TreeNode>: NSObject, UITableViewDataSource, UITableViewDe
     }
     
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        switch item {
-//        case nil:
-//            return model.data.value!.children[index]
-//        case let node as N:
-//            return node.children[index]
-//        default:
-//            fatalError("Unexpected item type")
-//        }
+        let node = self.node(for: indexPath)
+        let identifier = model.cellIdentifier(node.data)
+        let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath)
         
-//        let node = item as! N
-//        let identifier = model.cellIdentifier(node.data)
-        // TODO
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        cell.textLabel!.text = "TODO \(indexPath.row)"
+        let text = model.cellText(node.data)
+        cell.textLabel?.bind(text)
+        
         return cell
-
-//        
-//        let view = outlineView.make(withIdentifier: identifier, owner: self) as! NSTableCellView
-//        if let textField = view.textField as? TextField {
-//            let cellText = model.cellText(node.data)
-//            textField.bind(cellText)
-//        }
-//        if let imageView = view.imageView as? ImageView {
-//            imageView.img.unbindAll()
-//            if let image = model.cellImage?(node.data) {
-//                _ = imageView.img <~ image
-//            }
-//        }
-//        return view
     }
     
     // MARK: - UITableViewDelegate
     
     open func tableView(_ tableView: UITableView, indentationLevelForRowAt indexPath: IndexPath) -> Int {
-        // TODO
+        // TODO: This is way inefficient; need to cache index -> level mappings
+        let rowToFind = indexPath.row
+        var index = 0
+        var level = 0
+        
+        func visit(_ node: N) -> Int? {
+            if index == rowToFind {
+                return level
+            }
+            index += 1
+            level += 1
+            for child in node.children {
+                if let found = visit(child) {
+                    return found
+                }
+            }
+            level -= 1
+            return nil
+        }
+        
+        for node in model.data.root.children {
+            if let found = visit(node) {
+                return found
+            }
+        }
+        
         return 0
     }
     
