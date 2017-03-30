@@ -579,21 +579,24 @@ extension QueryRunner {
 }
 
 extension QueryRunner {
-    struct Buffer {
+    // This is a struct rather than a class, because it gets stored into SmallInlineArray.
+    // When that happens and it's a struct, `rows` is effectively nested in the array,
+    // which prevents in-place mutations.
+    class Buffer {
         var rows: [Row] = []
         var eof = false
         
-        mutating func pop() -> Row? {
+        func pop() -> Row? {
             return rows.popLast()
         }
         
-        mutating func popAll() -> [Row] {
+        func popAll() -> [Row] {
             let ret = rows
             rows = []
             return ret
         }
         
-        mutating func add<S: Sequence>(_ seq: S) where S.Iterator.Element == Row {
+        func add<S: Sequence>(_ seq: S) where S.Iterator.Element == Row {
             rows.append(contentsOf: seq)
         }
     }
