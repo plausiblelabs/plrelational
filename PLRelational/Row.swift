@@ -41,13 +41,22 @@ public struct Row: Hashable, Sequence {
     
     /// Create a new row containing only the values whose attributes are also in the attributes parameter.
     public func rowWithAttributes<Seq: Sequence>(_ attributes: Seq) -> Row where Seq.Iterator.Element == Attribute {
-        return Row(values: Dictionary(attributes.flatMap({
-            if let value = inlineRow[$0] {
-                return ($0, value)
-            } else {
-                return nil
-            }
-        })))
+        return rowWithAttributes(Set(attributes))
+    }
+    
+    /// Create a new row containing only the values whose attributes are also in the attributes parameter.
+    public func rowWithAttributes(_ attributes: Set<Attribute>) -> Row {
+        if inlineRow.attributesEqual(attributes) {
+            return self
+        } else {
+            return Row(values: Dictionary(attributes.flatMap({
+                if let value = inlineRow[$0] {
+                    return ($0, value)
+                } else {
+                    return nil
+                }
+            })))
+        }
     }
     
     /// Produce a new Row by applying updated values to this Row. Any attributes that exist in `newValues`
@@ -160,6 +169,33 @@ final class InlineRow: InlineMutableData {
                 })
             })
         })
+    }
+    
+    func attributeAtIndex(index: Int) -> Attribute {
+        let count = self.count
+        precondition(index >= 0 && index < count)
+        
+        return withUnsafeMutablePointers({ valuePtr, elementPtr in
+            let raw = UnsafeRawPointer(elementPtr)
+            let offsetIndex = index * 2 + 1
+            let attributeOffset = raw.load(fromByteOffset: offsetIndex * MemoryLayout<Int>.size, as: Int.self)
+            let valueOffset = raw.load(fromByteOffset: (offsetIndex + 1) * MemoryLayout<Int>.size, as: Int.self)
+            
+            let attribute = self.deserializeAttribute(elementPtr, start: attributeOffset, end: valueOffset)
+            return attribute
+        })
+    }
+    
+    func attributesEqual(_ attributes: Set<Attribute>) -> Bool {
+        let count = self.count
+        if count != attributes.count { return false }
+        
+        for i in 0 ..< count {
+            if !attributes.contains(attributeAtIndex(index: i)) {
+                return false
+            }
+        }
+        return true
     }
 }
 
