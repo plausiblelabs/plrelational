@@ -3,6 +3,9 @@
 // All rights reserved.
 //
 
+import Foundation
+
+
 /// Values which can be stored in a Relation. These are just the SQLite data types,
 /// Plus a "not found" value for when an attribute doesn't exist at all.
 /// We might want to do our own thing and not hew so closely to SQLite's way....
@@ -104,6 +107,13 @@ extension RelationValue {
     
     public init(_ blob: [UInt8]) {
         self = .blob(blob)
+    }
+    
+    public init(_ data: Data) {
+        let count = data.count
+        self = data.withUnsafeBytes({
+            .blob(Array(UnsafeBufferPointer(start: $0, count: count)))
+        })
     }
     
     public init<Seq: Sequence>(_ sequence: Seq) where Seq.Iterator.Element == UInt8 {
