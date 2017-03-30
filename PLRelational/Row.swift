@@ -9,8 +9,8 @@ import Foundation
 public struct Row: Hashable, Sequence {
     var inlineRow: InlineRow
     
-    public init(values: [Attribute: RelationValue]) {
-        inlineRow = InlineRow.intern(values)
+    public init<S: Sequence>(values: S) where S.Iterator.Element == (key: Attribute, value: RelationValue) {
+        inlineRow = InlineRow.internSequence(values)
     }
     
     public var hashValue: Int {
@@ -24,7 +24,7 @@ public struct Row: Hashable, Sequence {
         set {
             var d = Dictionary(inlineRow)
             d[attribute] = newValue
-            inlineRow = InlineRow.intern(d)
+            inlineRow = InlineRow.internSequence(d)
         }
     }
     
@@ -54,7 +54,9 @@ public struct Row: Hashable, Sequence {
     /// but not `self` will be added. Any attributes that exist in both will be set to the new value.
     /// Attributes only in `self` are left alone.
     public func rowWithUpdate(_ newValues: Row) -> Row {
-        let updatedValues = Dictionary(self) + newValues
+        let updatedValues = self.map({
+            (key: $0, value: newValues.inlineRow[$0] ?? $1)
+        })
         return Row(values: updatedValues)
     }
     
@@ -85,7 +87,7 @@ public struct Row: Hashable, Sequence {
 
 extension Row: ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (Attribute, RelationValue)...) {
-        self.init(values: Dictionary(elements))
+        self.init(values: elements.map({ (key: $0, value: $1) }))
     }
 }
 
@@ -182,8 +184,8 @@ extension InlineRow: Sequence {
 }
 
 extension InlineRow {
-    static func buildFrom(_ valuesDict: [Attribute: RelationValue]) -> InlineRow {
-        let values = valuesDict.sorted(by: { $0.0 < $1.0 })
+    static func buildFrom<S: Sequence>(_ valuesSequence: S) -> InlineRow where S.Iterator.Element == (key: Attribute, value: RelationValue) {
+        let values = valuesSequence.sorted(by: { $0.key < $1.key })
         let estimatedSize = 100 // DO THIS BETTER
         
         var obj = self.make(estimatedSize)
@@ -289,7 +291,7 @@ extension InlineRow {
         }(), capacity: 0))
     
     
-    static func intern(_ row: InlineRow) -> InlineRow {
+    static func internRow(_ row: InlineRow) -> InlineRow {
         return extantRows.withValue({
             if let extantRow = $0.member(row) {
                 return extantRow as! InlineRow
@@ -300,8 +302,8 @@ extension InlineRow {
         })
     }
     
-    static func intern(_ values: [Attribute: RelationValue]) -> InlineRow {
-        return intern(self.buildFrom(values))
+    static func internSequence<S: Sequence>(_ values: S) -> InlineRow where S.Iterator.Element == (key: Attribute, value: RelationValue) {
+        return internRow(self.buildFrom(values))
     }
 }
 
