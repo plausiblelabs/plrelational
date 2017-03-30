@@ -389,6 +389,7 @@
 		37E05C491DCDA33F005CBFE2 /* DocOutlineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */; };
 		37F1DA5E1DD39519004D4AAD /* RelationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1DA5D1DD39519004D4AAD /* RelationModel.swift */; };
 		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		C2F13CE31E8D4ECD001376D8 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -843,6 +844,7 @@
 		C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiator.swift; sourceTree = "<group>"; };
 		C2EC76FC1D4BAEFB00A374B1 /* Debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
 		C2EC76FE1D4FD75A00A374B1 /* DispatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DispatchContext.swift; sourceTree = "<group>"; };
+		C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableBox.swift; sourceTree = "<group>"; };
 		C2FE9B961CEE02BC0004E635 /* RelationChange.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationChange.swift; sourceTree = "<group>"; };
 		C2FE9B981CEE15720004E635 /* TransactionalDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionalDatabase.swift; sourceTree = "<group>"; };
 		C2FE9B9A1CEE3A810004E635 /* TransactionalDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TransactionalDatabaseTests.swift; path = PLRelationalTests/TransactionalDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
@@ -1858,6 +1860,7 @@
 				C2CE513B1D4693DC0011C554 /* InlineMutableData.swift */,
 				C2CE513D1D469EF10011C554 /* InlineMutableDataTests.swift */,
 				C23AAF411CF61890009E28E0 /* MirrorChildren.swift */,
+				C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */,
 				C2B53CB41D1862ED006B6278 /* Mutex.swift */,
 				C2AC82631D3980E2005D39C9 /* NegativeSet.swift */,
 				C2B6E26F1D80AA6A0039923C /* NSURLConvenience.swift */,
@@ -3001,6 +3004,7 @@
 				37B440891E899A7200C8C336 /* DictionaryConvenience.swift in Sources */,
 				37B4408F1E899A7200C8C336 /* MirrorChildren.swift in Sources */,
 				37B440351E8999F700C8C336 /* BinaryOperator.swift in Sources */,
+				C2F13CE31E8D4ECD001376D8 /* MutableBox.swift in Sources */,
 				37B440A01E899A7200C8C336 /* StringConvenience.swift in Sources */,
 				37B440901E899A7200C8C336 /* Mutex.swift in Sources */,
 				37B4408A1E899A7200C8C336 /* DictionaryCreation.swift in Sources */,

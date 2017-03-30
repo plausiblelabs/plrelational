@@ -137,6 +137,17 @@ class PlistFileRelationTests: XCTestCase {
         XCTAssertTrue(contents.starts(with: PrefixCodec.prefix.utf8))
     }
     
+    func testInsertPerformance() {
+        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], createIfDoesntExist: true).ok!
+        
+        let max: Int64 = 1000
+        
+        measure {
+            for i in 0 ..< max {
+                _ = r.add(["a": RelationValue(i), "b": RelationValue(-i)])
+            }
+        }
+    }
     func testSelectPerformance() {
         let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], createIfDoesntExist: true).ok!
         

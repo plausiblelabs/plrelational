@@ -10,7 +10,10 @@
 public struct IndexedSet<Element: IndexableValue> {
     public let primaryKeys: Set<Element.Index>
     
-    fileprivate var index: [Element.Index: [Element.Value: Set<Element>]]
+    // MutableBox is used here to allow for in-place mutation of the Set. Swift is currently not smart enough
+    // to do that when the Set is placed directly in the Dictionary, which results in atrocious performance.
+    // Boxing it in a class fixes that. Hopefully this will be fixed in Swift 4 and then we can remove this.
+    fileprivate var index: [Element.Index: [Element.Value: MutableBox<Set<Element>>]]
     fileprivate var allValues: Set<Element>
 }
 
@@ -34,7 +37,7 @@ extension IndexedSet {
     /// otherwise the call will crash.
     /// If no elements have the given value for the given key, the empty set is returned.
     public func values(matchingKey: Element.Index, value: Element.Value) -> Set<Element> {
-        return index[matchingKey]![value] ?? []
+        return index[matchingKey]![value]?.value ?? []
     }
     
     public mutating func add(element: Element) {
@@ -71,20 +74,21 @@ extension IndexedSet: Sequence {
 }
 
 extension IndexedSet {
-    fileprivate mutating func add(indexedValue: Element.Value, element: Element, toDictionary: inout [Element.Value: Set<Element>]) {
-        if toDictionary[indexedValue] == nil {
-            toDictionary[indexedValue] = [element]
+    fileprivate mutating func add(indexedValue: Element.Value, element: Element, toDictionary: inout [Element.Value: MutableBox<Set<Element>>]) {
+        if let box = toDictionary[indexedValue] {
+            box.value.insert(element)
         } else {
-            toDictionary[indexedValue]!.insert(element)
+            toDictionary[indexedValue] = MutableBox([element])
         }
     }
     
-    fileprivate mutating func remove(indexedValue: Element.Value, element: Element, fromDictionary: inout [Element.Value: Set<Element>]) {
-        let removed = fromDictionary[indexedValue]?.remove(element)
+    fileprivate mutating func remove(indexedValue: Element.Value, element: Element, fromDictionary: inout [Element.Value: MutableBox<Set<Element>>]) {
+        let box = fromDictionary[indexedValue]
+        let removed = box?.value.remove(element)
         
         // If we removed the last value in the set, remove the entire set.
         // This keeps empty entries from building up over a long time.
-        if removed != nil && fromDictionary[indexedValue]?.isEmpty == true {
+        if removed != nil && box?.value.isEmpty == true {
             fromDictionary.removeValue(forKey: indexedValue)
         }
     }
