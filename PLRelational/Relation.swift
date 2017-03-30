@@ -222,7 +222,7 @@ extension Relation {
     /// Returns a projection of this Relation that includes only those attributes that appear in this Relation's
     /// scheme but not in the given scheme.
     public func project(dropping scheme: Scheme) -> Relation {
-        return project(Scheme(attributes: self.scheme.attributes.subtracting(scheme.attributes)))
+        return project(Scheme(attributes: self.scheme.attributes.fastSubtracting(scheme.attributes)))
     }
 
     public func project(_ attribute: Attribute) -> Relation {
@@ -250,7 +250,7 @@ extension Relation {
     }
     
     public func divide(_ other: Relation) -> Relation {
-        let resultingScheme = Scheme(attributes: self.scheme.attributes.subtracting(other.scheme.attributes))
+        let resultingScheme = Scheme(attributes: self.scheme.attributes.fastSubtracting(other.scheme.attributes))
         let allCombinations = self.project(resultingScheme).join(other)
         let subtracted = allCombinations.difference(self)
         let projected = subtracted.project(resultingScheme)

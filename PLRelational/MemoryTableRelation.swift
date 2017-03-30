@@ -54,7 +54,7 @@ open class MemoryTableRelation: Relation, MutableRelation, RelationDefaultChange
     
     open func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         let toDelete = Set(values.lazy.filter({ query.valueWithRow($0).boolValue }))
-        values.subtract(toDelete)
+        values.fastSubtract(toDelete)
         notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .directChange)
         return .Ok()
     }

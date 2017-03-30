@@ -556,7 +556,7 @@ extension QueryRunner {
                 outputForUniquing = rowsSet
                 return rowsSet
             } else {
-                rowsSet.subtract(outputForUniquing!)
+                rowsSet.fastSubtract(outputForUniquing!)
                 outputForUniquing!.formUnion(rowsSet)
                 return rowsSet
             }

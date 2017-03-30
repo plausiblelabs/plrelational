@@ -390,6 +390,7 @@
 		37F1DA5E1DD39519004D4AAD /* RelationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1DA5D1DD39519004D4AAD /* RelationModel.swift */; };
 		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2F13CE31E8D4ECD001376D8 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
+		C2F13CE51E8D7F8D001376D8 /* SetSubtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -845,6 +846,7 @@
 		C2EC76FC1D4BAEFB00A374B1 /* Debug.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Debug.swift; sourceTree = "<group>"; };
 		C2EC76FE1D4FD75A00A374B1 /* DispatchContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DispatchContext.swift; sourceTree = "<group>"; };
 		C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableBox.swift; sourceTree = "<group>"; };
+		C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SetSubtraction.swift; sourceTree = "<group>"; };
 		C2FE9B961CEE02BC0004E635 /* RelationChange.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationChange.swift; sourceTree = "<group>"; };
 		C2FE9B981CEE15720004E635 /* TransactionalDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransactionalDatabase.swift; sourceTree = "<group>"; };
 		C2FE9B9A1CEE3A810004E635 /* TransactionalDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TransactionalDatabaseTests.swift; path = PLRelationalTests/TransactionalDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
@@ -1876,6 +1878,7 @@
 				C283FFCF1E805101000CDED9 /* Promise.swift */,
 				C2B53CBA1D197814006B6278 /* RWLock.swift */,
 				C257C7511CBEBF6300234A89 /* SetPowerSet.swift */,
+				C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */,
 				C23AAF4D1CF8E3F8009E28E0 /* SequenceFind.swift */,
 				C23BC0551D24629E00188F86 /* SmallInlineArray.swift */,
 				C257C74D1CBD8A9400234A89 /* StringConvenience.swift */,
@@ -3073,6 +3076,7 @@
 				37B4402C1E8999EA00C8C336 /* RelationDifferentiator.swift in Sources */,
 				37B440831E899A7200C8C336 /* ArrayHashing.swift in Sources */,
 				37B440141E8999D200C8C336 /* Relation.swift in Sources */,
+				C2F13CE51E8D7F8D001376D8 /* SetSubtraction.swift in Sources */,
 				37B4406D1E899A3100C8C336 /* QueryRunner.swift in Sources */,
 				37B440361E8999F700C8C336 /* RelationOperators.swift in Sources */,
 				37B440951E899A7200C8C336 /* ObjectMap.swift in Sources */,
