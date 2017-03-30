@@ -208,8 +208,8 @@ extension PlistDirectoryRelation {
         let prefix = hexHash.substring(to: hexHash.characters.index(hexHash.startIndex, offsetBy: PlistDirectoryRelation.filePrefixLength))
         
         return baseURL
-            .appendingPathComponent(prefix)
-            .appendingPathComponent(hexHash)
+            .appendingPathComponent(prefix, isDirectory: true)
+            .appendingPathComponent(hexHash, isDirectory: false)
             .appendingPathExtension(PlistDirectoryRelation.fileExtension)
     }
     
