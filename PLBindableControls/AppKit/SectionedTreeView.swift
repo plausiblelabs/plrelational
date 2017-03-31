@@ -305,10 +305,6 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     
     // MARK: SectionedTreeViewModelDelegate protocol
     
-    func sectionedTreeViewModelShouldIgnoreSelectionChanges() -> Bool {
-        return false
-    }
-    
     func sectionedTreeViewModelTreeChanged(_ changes: [SectionedTreeChange]) {
         let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : NSTableViewAnimationOptions()
         

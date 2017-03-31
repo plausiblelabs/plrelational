@@ -6,32 +6,6 @@
 import UIKit
 import PLRelationalBinding
 
-public enum LabelText {
-    case readOnly(ReadableProperty<String>)
-    case asyncReadOnly(AsyncReadableProperty<String>)
-    case readOnlyOpt(ReadableProperty<String?>)
-    case asyncReadOnlyOpt(AsyncReadableProperty<String?>)
-}
-
-extension UILabel {
-    func bind(_ text: LabelText?) {
-        // TODO: Hmm, with this `bindable` extension approach, there's no way to explicitly unbind existing bindings
-        // since each access of `bindable.text` returns a fresh property instance
-        if let text = text {
-            switch text {
-            case .readOnly(let prop):
-                bindable.text <~ prop
-            case .asyncReadOnly(let prop):
-                bindable.text <~ prop
-            case .readOnlyOpt(let prop):
-                bindable.optText <~ prop
-            case .asyncReadOnlyOpt(let prop):
-                bindable.optText <~ prop
-            }
-        }
-    }
-}
-
 public struct TreeViewModel<N: TreeNode> {
     public let data: TreeProperty<N>
     public let allowsChildren: (N.Data) -> Bool
@@ -66,7 +40,7 @@ open class TreeView<N: TreeNode>: NSObject, UITableViewDataSource, UITableViewDe
     private let model: TreeViewModel<N>
     private let tableView: UITableView
     
-    private lazy var selection: MutableValueProperty<Set<N.ID>> = mutableValueProperty(Set(), { [unowned self] selectedIDs, _ in
+    private lazy var selection: MutableValueProperty<Set<N.ID>> = mutableValueProperty(Set(), { selectedIDs, _ in
         self.selectItems(selectedIDs)
     })
     
@@ -98,6 +72,7 @@ open class TreeView<N: TreeNode>: NSObject, UITableViewDataSource, UITableViewDe
         treeObserverRemoval?()
     }
 
+    /// Returns the node that corresponds to the given index path.
     private func node(for indexPath: IndexPath) -> N {
         // TODO: This is way inefficient; need to cache index -> node mappings
         let rowToFind = indexPath.row
@@ -123,6 +98,32 @@ open class TreeView<N: TreeNode>: NSObject, UITableViewDataSource, UITableViewDe
         }
         
         fatalError("Invalid index path")
+    }
+    
+    private func indexPath(for nodeID: N.ID) -> IndexPath? {
+        // TODO: This is way inefficient; need to cache node -> index mappings
+        var row = 0
+        
+        func visit(_ node: N) -> IndexPath? {
+            if node.id == nodeID {
+                return IndexPath(row: row, section: 0)
+            }
+            row += 1
+            for child in node.children {
+                if let found = visit(child) {
+                    return found
+                }
+            }
+            return nil
+        }
+        
+        for node in model.data.root.children {
+            if let found = visit(node) {
+                return found
+            }
+        }
+
+        return nil
     }
     
     // MARK: - UITableViewDataSource
@@ -195,42 +196,46 @@ open class TreeView<N: TreeNode>: NSObject, UITableViewDataSource, UITableViewDe
         return 0
     }
     
-//    open func outlineViewSelectionDidChange(_ notification: Notification) {
-//        if selfInitiatedSelectionChange {
-//            return
-//        }
-//        
-//        selfInitiatedSelectionChange = true
-//        selection.change(selectedItemIDs(), transient: false)
-//        selfInitiatedSelectionChange = false
-//    }
+    open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        Swift.print("SELECTED: \(indexPath.row)")
+        if selfInitiatedSelectionChange {
+            return
+        }
+        
+        selfInitiatedSelectionChange = true
+        selection.change(selectedItemIDs(), transient: false)
+        selfInitiatedSelectionChange = false
+    }
     
     /// Returns the set of node IDs corresponding to the view's current selection state.
     private func selectedItemIDs() -> Set<N.ID> {
         var itemIDs: [N.ID] = []
-//        for index in self.outlineView.selectedRowIndexes {
-//            if let node = self.outlineView.item(atRow: index) as? N {
-//                itemIDs.append(node.id)
-//            }
-//        }
+        if let indexPaths = self.tableView.indexPathsForSelectedRows {
+            for indexPath in indexPaths {
+                let node = self.node(for: indexPath)
+                itemIDs.append(node.id)
+            }
+        }
         return Set(itemIDs)
     }
     
     /// Selects the rows corresponding to the given set of node IDs.
     private func selectItems(_ ids: Set<N.ID>) {
-//        let indexes = NSMutableIndexSet()
-//        for id in ids {
-//            if let node = self.model.data.nodeForID(id) {
-//                // TODO: This is inefficient
-//                let index = self.outlineView.row(forItem: node)
-//                if index >= 0 {
-//                    indexes.add(index)
-//                }
-//            }
-//        }
-//        selfInitiatedSelectionChange = true
-//        self.outlineView.selectRowIndexes(indexes as IndexSet, byExtendingSelection: false)
-//        selfInitiatedSelectionChange = false
+        var indexPaths: [IndexPath] = []
+        for id in ids {
+            if let indexPath = self.indexPath(for: id) {
+                indexPaths.append(indexPath)
+            }
+        }
+        // TODO: The selectRow() spec says calling it does not cause the delegate to receive didSelect events,
+        // so probably the selfInitiatedSelectionChange guards are not needed for UIKit
+        selfInitiatedSelectionChange = true
+        // TODO: Is this a valid way to handle multiple selection?
+        self.tableView.selectRow(at: nil, animated: false, scrollPosition: .none)
+        for indexPath in indexPaths {
+            self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
+        }
+        selfInitiatedSelectionChange = false
     }
     
     // MARK: - Property observers
