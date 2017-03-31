@@ -725,7 +725,7 @@ class AsyncManagerTests: DBTestCase {
         let db = TransactionalDatabase(sqliteDB)
         let r = db["person"]
         
-        let cachingR = CachingRelation(r, limit: 2)
+        let cachingR = r.cache(upTo: 2)
         
         let derived = cachingR.project(["name"])
         let observer = TestAsyncContentCoalescedObserver()
@@ -774,7 +774,7 @@ class AsyncManagerTests: DBTestCase {
         XCTAssertNil(person.add(["id": 3, "name": "Tony"]).err)
         XCTAssertNil(person.add(["id": 4, "name": "Mr. T"]).err)
         
-        let selectedName = person.join(CachingRelation(selected, limit: 2))
+        let selectedName = person.join(selected.cache(upTo: 2))
         
         let personObserver = TestAsyncChangeObserver()
         let personRemover = person.addAsyncObserver(personObserver)

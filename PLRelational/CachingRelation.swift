@@ -49,3 +49,9 @@ open class CachingRelation: IntermediateRelation {
     }
 }
 
+extension Relation {
+    /// Return a new CachingRelation that caches `self` up to the specified limit
+    public func cache(upTo: Int) -> CachingRelation {
+        return CachingRelation(self, limit: upTo)
+    }
+}
