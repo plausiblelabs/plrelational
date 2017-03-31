@@ -388,6 +388,9 @@
 		37E05C391DCAF7B9005CBFE2 /* HistoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C381DCAF7B9005CBFE2 /* HistoryItem.swift */; };
 		37E05C491DCDA33F005CBFE2 /* DocOutlineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */; };
 		37F1DA5E1DD39519004D4AAD /* RelationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1DA5D1DD39519004D4AAD /* RelationModel.swift */; };
+		C22B160B1E8E98E70053AD9D /* InternedUTF8String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */; };
+		C22B160D1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */; };
+		C22B160E1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */; };
 		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2F13CE31E8D4ECD001376D8 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
 		C2F13CE51E8D7F8D001376D8 /* SetSubtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */; };
@@ -770,6 +773,8 @@
 		C22921E71CD12CF100518184 /* RelationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RelationTests.swift; path = PLRelationalTests/RelationTests.swift; sourceTree = SOURCE_ROOT; };
 		C22921E91CD12CF100518184 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C22AC5231D1061FB00224091 /* Row.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Row.swift; sourceTree = "<group>"; };
+		C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InternedUTF8String.swift; sourceTree = "<group>"; };
+		C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InternedUTF8StringTests.swift; sourceTree = "<group>"; };
 		C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryConvenience.swift; sourceTree = "<group>"; };
 		C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryCreation.swift; sourceTree = "<group>"; };
 		C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaygroundMonospace.swift; sourceTree = "<group>"; };
@@ -1861,6 +1866,8 @@
 				C2402BC91E856F37001EB905 /* IndexedSet.swift */,
 				C2CE513B1D4693DC0011C554 /* InlineMutableData.swift */,
 				C2CE513D1D469EF10011C554 /* InlineMutableDataTests.swift */,
+				C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */,
+				C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */,
 				C23AAF411CF61890009E28E0 /* MirrorChildren.swift */,
 				C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */,
 				C2B53CB41D1862ED006B6278 /* Mutex.swift */,
@@ -2981,6 +2988,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37B440781E899A3A00C8C336 /* QueryRunnerTests.swift in Sources */,
+				C22B160E1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift in Sources */,
 				37B440611E899A2400C8C336 /* ChangeLoggingDatabaseTests.swift in Sources */,
 				37B440541E899A0F00C8C336 /* PlistFileRelationTests.swift in Sources */,
 				37B440281E8999E100C8C336 /* RelationRecursiveSelectTests.swift in Sources */,
@@ -3019,6 +3027,7 @@
 				37B4406B1E899A3100C8C336 /* QueryPlanner.swift in Sources */,
 				37B4407A1E899A4300C8C336 /* BookmarkableGraph.swift in Sources */,
 				37B4405B1E899A2000C8C336 /* ChangeLoggingDatabase.swift in Sources */,
+				C22B160B1E8E98E70053AD9D /* InternedUTF8String.swift in Sources */,
 				37B440851E899A7200C8C336 /* ConsistentPRNG.swift in Sources */,
 				37B440181E8999D200C8C336 /* SelectExpression.swift in Sources */,
 				37B440991E899A7200C8C336 /* PerThreadInstance.swift in Sources */,
@@ -3091,6 +3100,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37B440761E899A3900C8C336 /* QueryRunnerTests.swift in Sources */,
+				C22B160D1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift in Sources */,
 				37B440641E899A2500C8C336 /* ChangeLoggingDatabaseTests.swift in Sources */,
 				37B440511E899A0E00C8C336 /* PlistFileRelationTests.swift in Sources */,
 				37B440271E8999E000C8C336 /* RelationRecursiveSelectTests.swift in Sources */,

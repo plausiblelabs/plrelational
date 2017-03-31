@@ -291,8 +291,13 @@ extension InlineRow {
         return String(bytes: buf, encoding: String.Encoding.utf8)!
     }
     
+    func deserializeInternedString(_ ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> InternedUTF8String {
+        let data = InternedUTF8String.Data(ptr: ptr + start, length: end - start)
+        return InternedUTF8String.get(data)
+    }
+    
     func deserializeAttribute(_ ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> Attribute {
-        return Attribute(deserializeString(ptr, start: start, end: end))
+        return Attribute(deserializeInternedString(ptr, start: start, end: end))
     }
     
     func deserializeValue(_ ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> RelationValue {
