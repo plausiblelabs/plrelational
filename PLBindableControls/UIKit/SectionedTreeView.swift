@@ -72,7 +72,7 @@ public protocol SectionedTreeViewModel: class {
     func sectionCount() -> Int
     func rowCount(forSection section: Int) -> Int
     func cellIdentifier(_ indexPath: IndexPath) -> String
-    //func cellText(_ item: Any) -> LabelText
+    func cellText(_ indexPath: IndexPath) -> LabelText
 }
 
 open class SectionedTreeView<M: SectionedTreeViewModel> {
@@ -122,12 +122,13 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
     }
 
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        // TODO: Rework this so that the model doesn't need to do two separate lookups (first identifier then cell text
+        // and eventually other things)
         let identifier = model.cellIdentifier(indexPath)
         let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath)
         
-        //let text = model.cellText(node.data)
-        //cell.textLabel?.bind(text)
-        cell.textLabel?.text = "TODO"
+        let text = model.cellText(indexPath)
+        cell.textLabel?.bind(text)
         
         return cell
     }
