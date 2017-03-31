@@ -181,10 +181,8 @@ open class TransactionalDatabase {
         let result = to.relationSnapshots.map({ relation, toSnapshot -> (TransactionalRelation, ChangeLoggingRelationDelta) in
             let fromSnapshot = fromDict[relation] ?? ChangeLoggingRelationSnapshot(bookmark: relation.underlyingRelationForQueryExecution.zeroBookmark)
             let delta = relation.computeDelta(from: fromSnapshot, to: toSnapshot)
-            print("Delta for \(relation.scheme) is \(delta)")
             return (relation, delta)
         })
-        print("Delta is \(result.map({ ($0.scheme, $1) }))")
         return .init(relationDeltas: result)
     }
     
