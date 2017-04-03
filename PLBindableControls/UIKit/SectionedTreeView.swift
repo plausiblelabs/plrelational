@@ -74,6 +74,7 @@ public protocol SectionedTreeViewModel: class {
     
     func title(forSection section: Int) -> String?
     
+    func cellIndentationLevel(_ indexPath: IndexPath) -> Int
     func cellIdentifier(_ indexPath: IndexPath) -> String
     func cellText(_ indexPath: IndexPath) -> LabelText
 }
@@ -143,8 +144,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
     // MARK: - UITableViewDelegate
     
     func tableView(_ tableView: UITableView, indentationLevelForRowAt indexPath: IndexPath) -> Int {
-        // TODO
-        return 0
+        return model.cellIndentationLevel(indexPath)
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
