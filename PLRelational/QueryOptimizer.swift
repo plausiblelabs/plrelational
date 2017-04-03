@@ -74,34 +74,33 @@ class QueryOptimizer {
     }
     
     private func optimizeSelectableGenerator(_ index: Int, generatorGetter: @escaping (SelectExpression) -> AnyIterator<Result<Row, RelationError>>) {
-        let heightLimit = 10
-        
-        var parents: [Int] = []
-        parents.reserveCapacity(heightLimit)
-        
         if nodes[index].parentCount != 1 {
             return
         }
         
-        var cursorCameFrom = index
-        var cursor = nodes[index].parentIndexes.first!
-        for _ in 0 ..< heightLimit {
-            switch nodes[cursor].op {
-            case .equijoin(let matching):
-                addFilterTo(selectableGenerator: index, generatorGetter: generatorGetter, equijoin: cursor, equijoinChild: cursorCameFrom, matching: matching)
-                return
-            case .select(let expression):
-                addFilterTo(selectableGenerator: index, generatorGetter: generatorGetter, selectExpression: expression)
-                return
-            case .project, .rename, .update, .aggregate, .otherwise, .unique:
-                // These may make the early filtering invalid, so bail out.
-                return
-            case _ where nodes[cursor].parentCount != 1:
-                return
-            default:
-                cursorCameFrom = cursor
-                cursor = nodes[cursor].parentIndexes.first!
-            }
+        optimizeSelectableGenerator(index, previousCursor: index, cursor: nodes[index].parentIndexes[0], height: 0, generatorGetter: generatorGetter)
+    }
+    
+    private func optimizeSelectableGenerator(_ index: Int, previousCursor: Int, cursor: Int, height: Int, generatorGetter: @escaping (SelectExpression) -> AnyIterator<Result<Row, RelationError>>) {
+        let heightLimit = 10
+        if height >= heightLimit {
+            return
+        }
+        
+        switch nodes[cursor].op {
+        case .equijoin(let matching):
+            addFilterTo(selectableGenerator: index, generatorGetter: generatorGetter, equijoin: cursor, equijoinChild: previousCursor, matching: matching)
+            return
+        case .select(let expression):
+            addFilterTo(selectableGenerator: index, generatorGetter: generatorGetter, selectExpression: expression)
+            return
+        case .project, .rename, .update, .aggregate, .otherwise, .unique:
+            // These may make the early filtering invalid, so bail out.
+            return
+        case _ where nodes[cursor].parentCount != 1:
+            return
+        default:
+            optimizeSelectableGenerator(index, previousCursor: cursor, cursor: nodes[cursor].parentIndexes[0], height: height + 1, generatorGetter: generatorGetter)
         }
     }
     
