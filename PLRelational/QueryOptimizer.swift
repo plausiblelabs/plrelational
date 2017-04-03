@@ -6,8 +6,15 @@
 class QueryOptimizer {
     var nodes: [QueryPlanner.Node]
     
+    private struct NodeOptimizationState {
+        var didFilterEquijoin = false
+    }
+    
+    private var optimizationStates: [NodeOptimizationState]
+    
     init(nodes: [QueryPlanner.Node]) {
         self.nodes = nodes
+        optimizationStates = Array(repeating: .init(), count: nodes.count)
         
         optimize()
     }
@@ -114,6 +121,11 @@ class QueryOptimizer {
     }
     
     private func addFilterTo(selectableGenerator: Int, generatorGetter: @escaping (SelectExpression) -> AnyIterator<Result<Row, RelationError>>, equijoin: Int, equijoinChild: Int, matching: [Attribute: Attribute]) {
+        // We only want to optimize a given equijoin once. If we do it twice, then both sides end up pointing at each other, which
+        // can lead to no data being provided, or infinite loops.
+        if optimizationStates[equijoin].didFilterEquijoin { return }
+        optimizationStates[equijoin].didFilterEquijoin = true
+        
         let thisChildIndex = nodes[equijoin].childIndexes.index(of: equijoinChild)!
         let otherChildIndex = 1 - thisChildIndex
         let otherChild = nodes[equijoin].childIndexes[otherChildIndex]

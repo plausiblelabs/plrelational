@@ -33,6 +33,13 @@ class QueryOptimizerTests: XCTestCase {
         instrumented.rowsProvided = 0
     }
     
+    func testEquijoinOptimizationInfiniteLoop() {
+        let r1 = InstrumentedSelectableRelation(scheme: ["n"], values: [["n": 1]])
+        let r2 = InstrumentedSelectableRelation(scheme: ["n"], values: [["n": 1]])
+        let r = r1.renameAttributes(["n": "m"]).join(r2.renameAttributes(["n": "m"]))
+        AssertEqual(r, MakeRelation(["m"], [1]))
+    }
+    
     func testEquijoinOptimizationWithRename() {
         let instrumented = InstrumentedSelectableRelation(scheme: ["n"], values: [
             ["n": 1],
