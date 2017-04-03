@@ -71,6 +71,9 @@ public protocol SectionedTreeViewModel: class {
     
     func sectionCount() -> Int
     func rowCount(forSection section: Int) -> Int
+    
+    func title(forSection section: Int) -> String?
+    
     func cellIdentifier(_ indexPath: IndexPath) -> String
     func cellText(_ indexPath: IndexPath) -> LabelText
 }
@@ -113,15 +116,15 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
     
     // MARK: - UITableViewDataSource
     
-    open func numberOfSections(in tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return model.sectionCount()
     }
     
-    open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return model.rowCount(forSection: section)
     }
 
-    open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // TODO: Rework this so that the model doesn't need to do two separate lookups (first identifier then cell text
         // and eventually other things)
         let identifier = model.cellIdentifier(indexPath)
@@ -131,6 +134,10 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
         cell.textLabel?.bind(text)
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return model.title(forSection: section)
     }
 
     // MARK: - UITableViewDelegate
