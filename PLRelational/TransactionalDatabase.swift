@@ -299,12 +299,7 @@ extension TransactionalRelation {
     }
     
     public func apply(delta: ChangeLoggingRelationDelta) -> Result<Void, RelationError> {
-        print("========")
-        print("Applying a delta to \(self)")
-        print("  delta is \(delta)")
-        let result = underlyingRelationForQueryExecution.apply(delta: delta)
-        print("  After applying, we are \(self)")
-        return result
+        return underlyingRelationForQueryExecution.apply(delta: delta)
     }
 }
 
