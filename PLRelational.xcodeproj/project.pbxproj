@@ -391,6 +391,8 @@
 		C22B160B1E8E98E70053AD9D /* InternedUTF8String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */; };
 		C22B160D1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */; };
 		C22B160E1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */; };
+		C22B16101E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */; };
+		C22B16111E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */; };
 		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2F13CE31E8D4ECD001376D8 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
 		C2F13CE51E8D7F8D001376D8 /* SetSubtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */; };
@@ -775,6 +777,7 @@
 		C22AC5231D1061FB00224091 /* Row.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Row.swift; sourceTree = "<group>"; };
 		C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InternedUTF8String.swift; sourceTree = "<group>"; };
 		C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InternedUTF8StringTests.swift; sourceTree = "<group>"; };
+		C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryOptimizerTests.swift; sourceTree = "<group>"; };
 		C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryConvenience.swift; sourceTree = "<group>"; };
 		C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryCreation.swift; sourceTree = "<group>"; };
 		C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaygroundMonospace.swift; sourceTree = "<group>"; };
@@ -1172,6 +1175,7 @@
 				C2BA22971D3FD65F00DCCE72 /* AsyncManagerTests.swift */,
 				C25D63421DDF88BA00135E20 /* AsyncRunloopHack.swift */,
 				C23BC04F1D21AEDF00188F86 /* QueryOptimizer.swift */,
+				C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */,
 				C23AAF471CF8CD89009E28E0 /* QueryPlanner.swift */,
 				C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */,
 				C23AAF4B1CF8DAED009E28E0 /* QueryRunner.swift */,
@@ -2993,6 +2997,7 @@
 				37B440541E899A0F00C8C336 /* PlistFileRelationTests.swift in Sources */,
 				37B440281E8999E100C8C336 /* RelationRecursiveSelectTests.swift in Sources */,
 				37B440771E899A3A00C8C336 /* AsyncManagerTests.swift in Sources */,
+				C22B16111E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */,
 				37B440221E8999D800C8C336 /* RelationTests.swift in Sources */,
 				37B440341E8999EF00C8C336 /* RelationObservationTests.swift in Sources */,
 				37B440C91E899A7800C8C336 /* InlineMutableDataTests.swift in Sources */,
@@ -3105,6 +3110,7 @@
 				37B440511E899A0E00C8C336 /* PlistFileRelationTests.swift in Sources */,
 				37B440271E8999E000C8C336 /* RelationRecursiveSelectTests.swift in Sources */,
 				37B440751E899A3900C8C336 /* AsyncManagerTests.swift in Sources */,
+				C22B16101E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */,
 				37B440211E8999D700C8C336 /* RelationTests.swift in Sources */,
 				37B440331E8999EE00C8C336 /* RelationObservationTests.swift in Sources */,
 				37B440C71E899A7700C8C336 /* InlineMutableDataTests.swift in Sources */,

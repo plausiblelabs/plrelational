@@ -87,6 +87,10 @@ class QueryOptimizer {
             return
         }
         
+        let recurse = {
+            self.optimizeSelectableGenerator(index, previousCursor: cursor, cursor: self.nodes[cursor].parentIndexes[0], height: height + 1, generatorGetter: $0)
+        }
+        
         switch nodes[cursor].op {
         case .equijoin(let matching):
             addFilterTo(selectableGenerator: index, generatorGetter: generatorGetter, equijoin: cursor, equijoinChild: previousCursor, matching: matching)
@@ -94,13 +98,18 @@ class QueryOptimizer {
         case .select(let expression):
             addFilterTo(selectableGenerator: index, generatorGetter: generatorGetter, selectExpression: expression)
             return
-        case .project, .rename, .update, .aggregate, .otherwise, .unique:
+        case .rename(let renaming):
+            recurse({
+                let renamed = $0.withRenamedAttributes(renaming.inverted)
+                return generatorGetter(renamed)
+            })
+        case .project, .update, .aggregate, .otherwise, .unique:
             // These may make the early filtering invalid, so bail out.
             return
         case _ where nodes[cursor].parentCount != 1:
             return
         default:
-            optimizeSelectableGenerator(index, previousCursor: cursor, cursor: nodes[cursor].parentIndexes[0], height: height + 1, generatorGetter: generatorGetter)
+            recurse(generatorGetter)
         }
     }
     
