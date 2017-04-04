@@ -27,6 +27,9 @@ extension QueryPlanner {
                 let childIndexString = childIndex.map(String.init) ?? "UNKNOWN CHILD INDEX"
                 print("\(nodename(index)) -> \(nodename(parentIndex)) [label=\"child \(childIndexString)\"]")
             }
+            for childIndex in node.childIndexes {
+                print("\(nodename(index)) -> \(nodename(childIndex)) [style=dotted arrowhead=none constraint=false]")
+            }
         }
         
         print("}")
