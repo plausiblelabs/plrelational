@@ -139,6 +139,11 @@ extension QueryPlanner {
         var op: Operation
         var outputCallbacks: [OutputCallback]?
         
+        var parentIndexes: [Int] = []
+        
+        /// All children of this node.
+        var childIndexes: [Int] = []
+        
         var childCount: Int {
             return childIndexes.count
         }
@@ -146,11 +151,6 @@ extension QueryPlanner {
         var parentCount: Int {
             return parentIndexes.count
         }
-        
-        var parentIndexes: [Int] = []
-        
-        /// All children of this node.
-        var childIndexes: [Int] = []
         
         init(op: Operation) {
             self.op = op
