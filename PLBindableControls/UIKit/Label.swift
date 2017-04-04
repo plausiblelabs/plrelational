@@ -14,7 +14,7 @@ public enum LabelText {
 }
 
 extension UILabel {
-    func bind(_ text: LabelText?) {
+    public func bind(_ text: LabelText?) {
         // TODO: Hmm, with this `bindable` extension approach, there's no way to explicitly unbind existing bindings
         // since each access of `bindable.text` returns a fresh property instance
         if let text = text {
