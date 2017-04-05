@@ -27,7 +27,7 @@ open class MemoryTableRelation: Relation, MutableRelation, RelationDefaultChange
     }
     
     open var contentProvider: RelationContentProvider {
-        return .set({ self.values })
+        return .set({ self.values }, approximateCount: Double(self.values.count))
     }
     
     open func contains(_ row: Row) -> Result<Bool, RelationError> {

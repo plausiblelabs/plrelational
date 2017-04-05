@@ -63,7 +63,7 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
                 let wrapped = AnyIterator(filtered.makeIterator())
                 return wrapped
             }
-        })
+        }, approximateCount: nil)
     }
     
     private func primaryKeyEquality(expression: SelectExpression) -> RelationValue? {

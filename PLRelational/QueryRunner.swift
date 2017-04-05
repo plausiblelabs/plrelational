@@ -23,7 +23,16 @@ open class QueryRunner {
         self.nodes = nodes
         self.outputCallbacks = planner.allOutputCallbacks
         
-        activeInitiatorIndexes = planner.initiatorIndexes
+        activeInitiatorIndexes = planner.initiatorIndexes.sorted(by: {
+            // Put the smallest initiators where they will be used first. Initiators are
+            // read from the end of `activeInitiatorIndexes` and then popped as they're
+            // drained, so the smallest ones should go at the end.
+            
+            // Initiators with no count are considered to be larger than anything with a count.
+            let count0 = nodes[$0].approximateCount ?? .infinity
+            let count1 = nodes[$1].approximateCount ?? .infinity
+            return count0 > count1
+        })
         nodeStates = Array()
         nodeStates.reserveCapacity(nodes.count)
         for index in nodes.indices {
@@ -31,6 +40,7 @@ open class QueryRunner {
         }
         computeParentChildIndexes()
         computeTransactionalDatabases(planner.transactionalDatabases)
+        propagateSelects()
     }
     
     /// Fill out each NodeState's `parentChildIndexes` array by scanning their parents.
@@ -60,6 +70,19 @@ open class QueryRunner {
                 
                 while parentIndexesIndex < parentIndexesCount && parentIndex == parentIndexes[parentIndexesIndex] {
                     parentIndexesIndex += 1
+                }
+            }
+        }
+    }
+    
+    /// Scan the nodes for any select operations, and propagate them to their children.
+    /// This allows children to efficiently select stuff out of backing stores that support it.
+    fileprivate func propagateSelects() {
+        for nodeIndex in nodeStates.indices {
+            if case .select(let expression) = nodes[nodeIndex].op {
+                nodeStates[nodeIndex].parentalSelectPropagationDisabled = true
+                for child in nodes[nodeIndex].childIndexes {
+                    addSelect(node: child, expression: expression)
                 }
             }
         }
@@ -128,15 +151,11 @@ open class QueryRunner {
             && !intermediateWillBecomeInitiator(index)
     }
     
-    /// Return whether a given intermediate node will become an initiator. Right now, only
-    /// equijoinedSelectableGenerator does this. It starts out as an intermediate node, then
-    /// turns into an initiator node once it collects its input.
+    /// Return whether a given intermediate node will become an initiator. Right now, nothing
+    /// does this. We might want to ditch this functionality altogether. I'm keeping it just
+    /// for the moment in case I change my mind.
     private func intermediateWillBecomeInitiator(_ index: Int) -> Bool {
-        if case .equijoinedSelectableGenerator = nodes[index].op {
-            return true
-        } else {
-            return false
-        }
+        return false
     }
     
     /// Process an active initiator node. If there are no active initiator nodes, sets the `done` property
@@ -172,7 +191,9 @@ open class QueryRunner {
                 markDone(nodeIndex)
             }
         case .selectableGenerator(let generatorGetter):
-            let row = getRowGeneratorRow(nodeIndex, { generatorGetter(true) })
+            let row = getRowGeneratorRow(nodeIndex, {
+                return generatorGetter(nodeStates[nodeIndex].parentalSelects ?? true)
+            })
             switch row {
             case .some(.Err(let err)):
                 return .Err(err)
@@ -186,18 +207,6 @@ open class QueryRunner {
             writeOutput(rowGetter(), fromNode: nodeIndex)
             activeInitiatorIndexes.removeLast()
             markDone(nodeIndex)
-        case .equijoinedSelectableGenerator:
-            let iterator = nodeStates[nodeIndex].extraState as! AnyIterator<Result<Row, RelationError>>
-            let row = iterator.next()
-            switch row {
-            case .some(.Err(let err)):
-                return .Err(err)
-            case .some(.Ok(let row)):
-                writeOutput([row], fromNode: nodeIndex)
-            case .none:
-                activeInitiatorIndexes.removeLast()
-                markDone(nodeIndex)
-            }
         default:
             // These shenanigans let us print the operation without descending into an infinite recursion
             // from trying to print the contents of Relations contained within. We cut off subsequent lines
@@ -240,6 +249,73 @@ open class QueryRunner {
         }
     }
     
+    /// Add a dynamic select expression to a node. If propagation is still enabled, `expression` is ORed
+    /// with the existing `parentalSelects`, if any. If all parents have added, then the final expression
+    /// is propagated to children.
+    fileprivate func addSelect(node: Int, expression: SelectExpression) {
+        if nodeStates[node].parentalSelectPropagationDisabled { return }
+        
+        let combinedExpression = nodeStates[node].parentalSelects.map({ $0 *|| expression }) ?? expression
+        nodeStates[node].parentalSelects = combinedExpression
+        
+        nodeStates[node].parentalSelectsRemaining -= 1
+        precondition(nodeStates[node].parentalSelectsRemaining >= 0, "Added more selects to node \(node) than it has parents, which should never happen")
+        if nodeStates[node].parentalSelectsRemaining == 0 {
+            nodeStates[node].parentalSelectPropagationDisabled = true
+            for childIndex in nodes[node].childIndexes {
+                if let derivedExpression = derivedSelect(node: node, child: childIndex) {
+                    addSelect(node: childIndex, expression: derivedExpression)
+                }
+            }
+        }
+    }
+    
+    /// Compute a propagated select for a node's children.
+    /// For simple things like unions, it returns the node's own select.
+    /// For joins it tries to compute the portion that applies to each child.
+    /// For ones that are too difficult, it'll just give up.
+    fileprivate func derivedSelect(node: Int, child: Int) -> SelectExpression? {
+        guard let thisSelect = nodeStates[node].parentalSelects else { return nil }
+        
+        switch nodes[node].op {
+        case .rowGenerator, .selectableGenerator, .rowSet:
+            // These shouldn't even have children
+            return nil
+        case .union, .intersection, .difference:
+            return thisSelect
+        case .project:
+            // Project just reduces the scheme so the same select will still apply
+            return thisSelect
+        case .select(let expression):
+            return expression *&& thisSelect
+        case .equijoin:
+            // We could potentially be smarter about selects which have attributes from both sides.
+            // But for now, just pass them through only if they deal exclusively with the attributes
+            // of one side.
+            let childAttributes = nodes[child].scheme.attributes
+            let selectAttributes = thisSelect.allAttributes()
+            return selectAttributes.isSubset(of: childAttributes) ? thisSelect : nil
+            
+        case .rename(let renames):
+            return thisSelect.withRenamedAttributes(renames.inverted)
+            
+        case .update(let row):
+            // This can propagate iff the select does NOT deal with any of the updated values
+            let rowAttributes = row.attributes
+            let selectAttributes = thisSelect.allAttributes()
+            for attr in rowAttributes {
+                if selectAttributes.contains(attr) {
+                    return nil
+                }
+            }
+            return thisSelect
+            
+        case .aggregate, .otherwise, .unique:
+            // Don't even try
+            return nil
+        }
+    }
+    
     fileprivate func process(_ nodeIndex: Int, inputIndex: Int) {
         let op = nodes[nodeIndex].op
         switch op {
@@ -265,8 +341,6 @@ open class QueryRunner {
             processOtherwise(nodeIndex, inputIndex)
         case .unique(let attribute, let matching):
             processUnique(nodeIndex, inputIndex, attribute, matching)
-        case .equijoinedSelectableGenerator(let matching, let generatorGetter):
-            processEquijoinedSelectableGenerator(nodeIndex, inputIndex, matching, generatorGetter)
         default:
             fatalError("Don't know how to process operation \(op)")
         }
@@ -361,6 +435,10 @@ open class QueryRunner {
         // Accumulate data until at least one input is complete.
         guard nodeStates[nodeIndex].activeBuffers <= 1 else { return }
         
+        // If we get no more than this many rows on the smaller side, then
+        // we'll build a select out of them and pass that up the larger side.
+        let maxSelectSize = 10
+        
         // Track the keyed join target and the larger input index across calls.
         struct ExtraState {
             var keyed: [Row: [Row]]
@@ -398,6 +476,15 @@ open class QueryRunner {
                     keyed[joinKey]!.append(row)
                 } else {
                     keyed[joinKey] = [row]
+                }
+            }
+            
+            if !nodeStates[nodeIndex].parentalSelectPropagationDisabled && keyed.count <= maxSelectSize {
+                nodeStates[nodeIndex].parentalSelectPropagationDisabled = true
+                let select = keyed.keys.map(SelectExpressionFromRow).combined(with: *||) ?? false
+                for childIndex in nodes[nodeIndex].childIndexes {
+                    nodeStates[nodeIndex].parentalSelectsRemaining = .max
+                    addSelect(node: childIndex, expression: select)
                 }
             }
             
@@ -525,6 +612,23 @@ extension QueryRunner {
         
         var activeBuffers: Int
         
+        /// A select expression propagated from this node's parents. Nodes can optionally
+        /// push selects into their children to try to make things more efficient. If a
+        /// select propagates all the way to an efficientlySelectableGenerator and it hasn't
+        /// been started yet, then that select will be passed in when creating the generator.
+        /// This can make processing data much faster.
+        var parentalSelects: SelectExpression?
+        
+        /// The number of parental selects remaining before the built-up expression can be
+        /// propagated to children. This starts out equal to the number of parents this node
+        /// has, and decreases by one each time a parentalSelect is added.
+        var parentalSelectsRemaining: Int
+        
+        /// When set to true, propagation of parental selects is disabled. This is set when
+        /// selects are propagated to children, to avoid doing it twice for nodes that
+        /// do it independently rather than based purely on parent activity.
+        var parentalSelectPropagationDisabled = false
+        
         var transactionalDatabase: TransactionalDatabase? = nil
         
         var transactionalDatabaseTransactionID: UInt64 = 0
@@ -538,6 +642,7 @@ extension QueryRunner {
                 inputBuffers.append(Buffer())
             }
             activeBuffers = inputBuffers.count
+            parentalSelectsRemaining = nodes[nodeIndex].parentCount
         }
         
         mutating func setInputBufferEOF(_ index: Int) {

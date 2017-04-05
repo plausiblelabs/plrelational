@@ -222,7 +222,7 @@ private class InstrumentedSelectableRelation: Relation {
                 return .Ok(row)
             })
             return AnyIterator(mapped.makeIterator())
-        })
+        }, approximateCount: nil)
     }
     
     init(scheme: Scheme, values: Set<Row>) {

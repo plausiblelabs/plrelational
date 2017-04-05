@@ -51,9 +51,6 @@ class QueryOptimizer {
                 }
                 nodes[i].parentIndexes = []
                 
-            case .selectableGenerator(let generatorGetter):
-                optimizeSelectableGenerator(i, generatorGetter: generatorGetter)
-                
             default:
                 break
             }
@@ -78,108 +75,5 @@ class QueryOptimizer {
         } else {
             return false
         }
-    }
-    
-    private func optimizeSelectableGenerator(_ index: Int, generatorGetter: @escaping (SelectExpression) -> AnyIterator<Result<Row, RelationError>>) {
-        optimizeSelectableGenerator(children: [], cursor: index, height: 0, generatorGetter: generatorGetter)
-    }
-    
-    private func optimizeSelectableGenerator(children: [Int], cursor: Int, height: Int, generatorGetter: @escaping (SelectExpression) -> AnyIterator<Result<Row, RelationError>>) {
-        let heightLimit = 10
-        if height >= heightLimit {
-            return
-        }
-        
-        func recurse(_ generatorGetter: @escaping (SelectExpression) -> AnyIterator<Result<Row, RelationError>>) {
-            let newChildren = children + [cursor]
-            for parent in nodes[cursor].parentIndexes {
-                optimizeSelectableGenerator(children: newChildren, cursor: parent, height: height + 1, generatorGetter: generatorGetter)
-            }
-        }
-        
-        switch nodes[cursor].op {
-        case .equijoin(let matching):
-            addFilterTo(children: children + [cursor], generatorGetter: generatorGetter, equijoin: cursor, equijoinChild: children.last!, matching: matching)
-            return
-        case .select(let expression):
-            addFilterTo(children: children + [cursor], generatorGetter: generatorGetter, selectExpression: expression)
-            return
-        case .rename(let renaming):
-            recurse({
-                let renamed = $0.withRenamedAttributes(renaming.inverted)
-                return generatorGetter(renamed)
-            })
-        case .project, .update, .aggregate, .otherwise, .unique:
-            // These may make the early filtering invalid, so bail out.
-            return
-        default:
-            recurse(generatorGetter)
-        }
-    }
-    
-    private func addFilterTo(children: [Int], generatorGetter: @escaping (SelectExpression) -> AnyIterator<Result<Row, RelationError>>, equijoin: Int, equijoinChild: Int, matching: [Attribute: Attribute]) {
-        // We only want to optimize a given equijoin once. If we do it twice, then both sides end up pointing at each other, which
-        // can lead to no data being provided, or infinite loops.
-        if optimizationStates[equijoin].didFilterEquijoin { return }
-        optimizationStates[equijoin].didFilterEquijoin = true
-        
-        let thisChildIndex = nodes[equijoin].childIndexes.index(of: equijoinChild)!
-        let otherChildIndex = 1 - thisChildIndex
-        let otherChild = nodes[equijoin].childIndexes[otherChildIndex]
-        
-        let newMatching = thisChildIndex == 0 ? matching.inverted : matching
-        let selectableGenerator = ensureSingleParents(children)
-        nodes[selectableGenerator].op = .equijoinedSelectableGenerator(newMatching, generatorGetter)
-        nodes[selectableGenerator].childIndexes = [otherChild]
-        
-        nodes[otherChild].parentIndexes.append(selectableGenerator)
-    }
-    
-    private func addFilterTo(children: [Int], generatorGetter:  @escaping (SelectExpression) -> AnyIterator<Result<Row, RelationError>>, selectExpression: SelectExpression) {
-        let selectableGenerator = ensureSingleParents(children)
-        nodes[selectableGenerator].op = .rowGenerator({ generatorGetter(selectExpression) })
-    }
-    
-    /// Given a chain of nodes, ensure that all nodes in the chain
-    /// have one parent, copying them if necessary. The return value
-    /// is the index of the first node in the chain. If no copying
-    /// happens then the return value is equal to nodeIndexes[0].
-    /// Otherwise it's the index of the newly copied node.
-    private func ensureSingleParents(_ nodeIndexes: [Int]) -> Int {
-        for i in nodeIndexes.indices.reversed().dropFirst() {
-            let nodeIndex = nodeIndexes[i]
-            if nodes[nodeIndex].parentCount > 1 {
-                return copyNodes(nodeIndexes[0 ... i], lastSingleParent: nodeIndexes[i + 1])
-            }
-        }
-        return nodeIndexes[0]
-    }
-    
-    private func copyNodes(_ nodeIndexes: ArraySlice<Int>, lastSingleParent: Int) -> Int {
-        var newNodeIndexes: [Int] = []
-        for nodeIndex in nodeIndexes {
-            newNodeIndexes.append(nodes.count)
-            nodes.append(nodes[nodeIndex])
-            optimizationStates.append(.init())
-        }
-        
-        let reversed = zip(newNodeIndexes, nodeIndexes).reversed()
-        let paired = zip(reversed, reversed.dropFirst())
-        for ((newIndex, oldIndex), (newChildIndex, oldChildIndex)) in paired {
-            nodes[newIndex].childIndexes.replace(oldChildIndex, with: newChildIndex)
-            nodes[newChildIndex].parentIndexes = [newIndex]
-            
-            for otherChildIndex in nodes[newIndex].childIndexes where otherChildIndex != newChildIndex {
-                nodes[otherChildIndex].parentIndexes.append(newIndex)
-            }
-            
-            // oldIndex isn't used, but it would be terribly confusing to replace it with _
-            _ = oldIndex
-        }
-        nodes[lastSingleParent].childIndexes.replace(nodeIndexes.last!, with: newNodeIndexes.last!)
-        nodes[nodeIndexes.last!].parentIndexes.remove(lastSingleParent)
-        nodes[newNodeIndexes.last!].parentIndexes = [lastSingleParent]
-        
-        return newNodeIndexes[0]
     }
 }

@@ -51,7 +51,7 @@ class AsyncManagerTests: DBTestCase {
                 return .set({
                     self.onGetRowsCallback()
                     return [["n": 1], ["n": 2], ["n": 3]]
-                })
+                }, approximateCount: nil)
             }
             
             func contains(_ row: Row) -> Result<Bool, RelationError> {
@@ -376,7 +376,7 @@ class AsyncManagerTests: DBTestCase {
                     .Ok(["n": 3]),
                     .Err(DummyError())
                 ]
-                return .generator({ AnyIterator(results.makeIterator()) })
+                return .generator({ AnyIterator(results.makeIterator()) }, approximateCount: nil)
             }
             
             func contains(_ row: Row) -> Result<Bool, RelationError> {

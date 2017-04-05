@@ -48,7 +48,7 @@ public struct ConcreteRelation: Relation {
     }
     
     public var contentProvider: RelationContentProvider {
-        return .set({ self.values })
+        return .set({ self.values }, approximateCount: Double(values.count))
     }
     
     public mutating func add(_ row: Row) -> Result<Int64, RelationError> {

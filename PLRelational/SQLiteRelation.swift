@@ -52,7 +52,7 @@ open class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementation
     }
     
     open var contentProvider: RelationContentProvider {
-        return .generator({ self.rawGenerateRows() })
+        return .generator({ self.rawGenerateRows() }, approximateCount: nil)
     }
     
     open func contains(_ row: Row) -> Result<Bool, RelationError> {

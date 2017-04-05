@@ -64,9 +64,9 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
 }
 
 public enum RelationContentProvider {
-    case generator((Void) -> AnyIterator<Result<Row, RelationError>>)
-    case efficientlySelectableGenerator((SelectExpression) -> AnyIterator<Result<Row, RelationError>>)
-    case set((Void) -> Swift.Set<Row>)
+    case generator((Void) -> AnyIterator<Result<Row, RelationError>>, approximateCount: Double?)
+    case efficientlySelectableGenerator((SelectExpression) -> AnyIterator<Result<Row, RelationError>>, approximateCount: Double?)
+    case set((Void) -> Swift.Set<Row>, approximateCount: Double?)
     case intermediate(IntermediateRelation.Operator, [Relation])
     case underlying(Relation)
 }

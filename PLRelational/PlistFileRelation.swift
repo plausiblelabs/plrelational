@@ -38,7 +38,7 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
                 })
                 return AnyIterator(filtered.map({ .Ok($0) }).makeIterator())
             }
-        })
+        }, approximateCount: Double(values.values.count))
     }
     
     public func contains(_ row: Row) -> Result<Bool, RelationError> {
