@@ -394,6 +394,7 @@
 		37E05C371DCAF764005CBFE2 /* DocObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C361DCAF764005CBFE2 /* DocObject.swift */; };
 		37E05C391DCAF7B9005CBFE2 /* HistoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C381DCAF7B9005CBFE2 /* HistoryItem.swift */; };
 		37E05C491DCDA33F005CBFE2 /* DocOutlineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */; };
+		37ED180F1E9433AF00935D39 /* BarButtonItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37ED180D1E94335900935D39 /* BarButtonItem.swift */; };
 		37F1DA5E1DD39519004D4AAD /* RelationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1DA5D1DD39519004D4AAD /* RelationModel.swift */; };
 		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -761,6 +762,7 @@
 		37E05C381DCAF7B9005CBFE2 /* HistoryItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoryItem.swift; sourceTree = "<group>"; };
 		37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocOutlineModel.swift; sourceTree = "<group>"; };
 		37E05C4A1DCDA39F005CBFE2 /* SectionedTreeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SectionedTreeView.swift; sourceTree = "<group>"; };
+		37ED180D1E94335900935D39 /* BarButtonItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarButtonItem.swift; sourceTree = "<group>"; };
 		37F1DA5D1DD39519004D4AAD /* RelationModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationModel.swift; sourceTree = "<group>"; };
 		37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationTreePropertyTests.swift; path = PLRelationalBindingTests/RelationTreePropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		47701CA01CF764CD00E3549D /* Checkbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
@@ -1652,6 +1654,7 @@
 		37D6F08A1E8D6C40003255FE /* Controls */ = {
 			isa = PBXGroup;
 			children = (
+				37ED180D1E94335900935D39 /* BarButtonItem.swift */,
 				37D6F08B1E8D6CD4003255FE /* Label.swift */,
 			);
 			name = Controls;
@@ -2856,6 +2859,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				37ED180F1E9433AF00935D39 /* BarButtonItem.swift in Sources */,
 				370F88081E8F004C0043B903 /* ListView.swift in Sources */,
 				37C48DAC1E8C6787000BDE70 /* TreeView.swift in Sources */,
 				37D6F0931E8ECDB0003255FE /* SectionedTreeView.swift in Sources */,
