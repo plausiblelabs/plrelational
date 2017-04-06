@@ -131,6 +131,10 @@ extension Color {
     public var nscolor: NSColor {
         return components.nscolor
     }
+    
+    public var native: NSColor {
+        return nscolor
+    }
 #else
     public init?(_ uicolor: UIColor) {
         guard let components = Components(uicolor) else { return nil }
@@ -140,8 +144,12 @@ extension Color {
     public var uicolor: UIColor {
         return components.uicolor
     }
-#endif
     
+    public var native: UIColor {
+        return uicolor
+    }
+#endif
+
     public static let black = Color(r: 0, g: 0, b: 0)
     public static let white = Color(r: 1, g: 1, b: 1)
     public static let clear = Color(r: 0, g: 0, b: 0)
