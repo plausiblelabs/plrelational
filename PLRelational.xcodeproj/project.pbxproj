@@ -395,6 +395,8 @@
 		37E05C391DCAF7B9005CBFE2 /* HistoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C381DCAF7B9005CBFE2 /* HistoryItem.swift */; };
 		37E05C491DCDA33F005CBFE2 /* DocOutlineModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */; };
 		37ED180F1E9433AF00935D39 /* BarButtonItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37ED180D1E94335900935D39 /* BarButtonItem.swift */; };
+		37ED18121E95B1CA00935D39 /* CheckState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEDB1D1358670067870D /* CheckState.swift */; };
+		37ED181C1E95B60100935D39 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE5F1D08C70D0067870D /* Color.swift */; };
 		37F1DA5E1DD39519004D4AAD /* RelationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1DA5D1DD39519004D4AAD /* RelationModel.swift */; };
 		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -1326,6 +1328,8 @@
 			isa = PBXGroup;
 			children = (
 				37D6F08D1E8D7862003255FE /* Bindable.swift */,
+				37A1CEDB1D1358670067870D /* CheckState.swift */,
+				37A1CE5F1D08C70D0067870D /* Color.swift */,
 				37A4A2411D21A613005CAEA5 /* TextProperty.swift */,
 				37C611401CD94772001DAF59 /* Undo */,
 			);
@@ -1402,8 +1406,6 @@
 			children = (
 				37A1CED11D10B8690067870D /* Button.swift */,
 				47701CA01CF764CD00E3549D /* Checkbox.swift */,
-				37A1CEDB1D1358670067870D /* CheckState.swift */,
-				37A1CE5F1D08C70D0067870D /* Color.swift */,
 				37A1CE621D0B25F40067870D /* ColorPanel.swift */,
 				37A1CE5C1D08C3110067870D /* ColorPickerView.swift */,
 				376A96371D09225900E696AE /* ComboBox.swift */,
@@ -2861,6 +2863,8 @@
 			files = (
 				37ED180F1E9433AF00935D39 /* BarButtonItem.swift in Sources */,
 				370F88081E8F004C0043B903 /* ListView.swift in Sources */,
+				37ED181C1E95B60100935D39 /* Color.swift in Sources */,
+				37ED18121E95B1CA00935D39 /* CheckState.swift in Sources */,
 				37C48DAC1E8C6787000BDE70 /* TreeView.swift in Sources */,
 				37D6F0931E8ECDB0003255FE /* SectionedTreeView.swift in Sources */,
 				374DAEBF1E8C28EA00FF245B /* UndoableDatabase.swift in Sources */,

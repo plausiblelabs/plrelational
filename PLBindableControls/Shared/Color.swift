@@ -3,7 +3,11 @@
 // All rights reserved.
 //
 
-import Cocoa
+#if os(macOS)
+import AppKit
+#else
+import UIKit
+#endif
 
 public struct Color: Hashable {
     
@@ -74,6 +78,7 @@ public struct Color: Hashable {
     }
 }
 
+#if os(macOS)
 extension Color.Components {
     init?(_ nscolor: NSColor) {
         guard let converted = nscolor.usingColorSpace(NSColorSpace.genericRGB) else { return nil }
@@ -89,6 +94,24 @@ extension Color.Components {
         return NSColor(calibratedRed: r, green: g, blue: b, alpha: a)
     }
 }
+#else
+extension Color.Components {
+    init?(_ uicolor: UIColor) {
+        var r: CGFloat = 0.0
+        var g: CGFloat = 0.0
+        var b: CGFloat = 0.0
+        var a: CGFloat = 0.0
+        if !uicolor.getRed(&r, green: &g, blue: &b, alpha: &a) {
+            return nil
+        }
+        self.init(r: r, g: g, b: b, a: a)
+    }
+    
+    public var uicolor: UIColor {
+        return UIColor(red: r, green: g, blue: b, alpha: a)
+    }
+}
+#endif
 
 public func ==(a: Color.Components, b: Color.Components) -> Bool {
     return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a
@@ -99,6 +122,7 @@ public func ==(a: Color, b: Color) -> Bool {
 }
 
 extension Color {
+#if os(macOS)
     public init?(_ nscolor: NSColor) {
         guard let components = Components(nscolor) else { return nil }
         self.components = components
@@ -107,15 +131,34 @@ extension Color {
     public var nscolor: NSColor {
         return components.nscolor
     }
+#else
+    public init?(_ uicolor: UIColor) {
+        guard let components = Components(uicolor) else { return nil }
+        self.components = components
+    }
+    
+    public var uicolor: UIColor {
+        return components.uicolor
+    }
+#endif
     
     public static let black = Color(r: 0, g: 0, b: 0)
     public static let white = Color(r: 1, g: 1, b: 1)
     public static let clear = Color(r: 0, g: 0, b: 0)
-    
+
+#if os(macOS)
     public static let red    = Color(NSColor.red)!
     public static let orange = Color(NSColor.orange)!
     public static let yellow = Color(NSColor.yellow)!
     public static let green  = Color(NSColor.green)!
     public static let blue   = Color(NSColor.blue)!
     public static let purple = Color(NSColor.purple)!
+#else
+    public static let red    = Color(UIColor.red)!
+    public static let orange = Color(UIColor.orange)!
+    public static let yellow = Color(UIColor.yellow)!
+    public static let green  = Color(UIColor.green)!
+    public static let blue   = Color(UIColor.blue)!
+    public static let purple = Color(UIColor.purple)!
+#endif
 }

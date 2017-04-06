@@ -3,7 +3,9 @@
 // All rights reserved.
 //
 
+#if os(macOS)
 import Cocoa
+#endif
 import PLRelationalBinding
 
 public enum CheckState: String { case
@@ -33,6 +35,7 @@ public enum CheckState: String { case
         }
     }
     
+#if os(macOS)
     init(_ nsValue: Int) {
         switch nsValue {
         case NSMixedState:
@@ -45,6 +48,7 @@ public enum CheckState: String { case
             preconditionFailure("Must be one of {NSMixedState, NSOnState, NSOffState}")
         }
     }
+#endif
     
     public var boolValue: Bool {
         switch self {
@@ -68,6 +72,7 @@ public enum CheckState: String { case
         }
     }
     
+#if os(macOS)
     /// The Cocoa-defined integer value that corresponds to this CheckState (NSOnState, NSOffState, or NSMixedState).
     public var nsValue: Int {
         switch self {
@@ -79,4 +84,5 @@ public enum CheckState: String { case
             return NSMixedState
         }
     }
+#endif
 }
