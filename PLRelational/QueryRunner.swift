@@ -256,7 +256,7 @@ open class QueryRunner {
         if nodeStates[node].parentalSelectPropagationDisabled { return }
         
         let combinedExpression = nodeStates[node].parentalSelects.map({ $0 *|| expression }) ?? expression
-        nodeStates[node].parentalSelects = combinedExpression
+        nodeStates[node].parentalSelects = combinedExpression.deepSimplify()
         
         nodeStates[node].parentalSelectsRemaining -= 1
         precondition(nodeStates[node].parentalSelectsRemaining >= 0, "Added more selects to node \(node) than it has parents, which should never happen")
