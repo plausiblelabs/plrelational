@@ -29,7 +29,9 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     public var contentProvider: RelationContentProvider {
         return .efficientlySelectableGenerator({ expression in
-            if let rows = self.efficientValuesSet(expression: expression) {
+            if expression as? Bool == false {
+                return AnyIterator([].makeIterator())
+            } else if let rows = self.efficientValuesSet(expression: expression) {
                 return AnyIterator(rows.lazy.map({ .Ok($0) }).makeIterator())
             } else {
                 let lazy = self.values.lazy
