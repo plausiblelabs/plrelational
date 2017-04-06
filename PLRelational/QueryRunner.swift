@@ -4,7 +4,7 @@
 //
 
 open class QueryRunner {
-    fileprivate var nodes: [QueryPlanner.Node]
+    var nodes: [QueryPlanner.Node]
     fileprivate var outputCallbacks: [QueryPlanner.OutputCallback]
     
     fileprivate var activeInitiatorIndexes: [Int]
@@ -13,7 +13,7 @@ open class QueryRunner {
     
     fileprivate var intermediatesToProcess: [IntermediateToProcess] = []
     
-    fileprivate var nodeStates: [NodeState]
+    var nodeStates: [NodeState]
     
     open fileprivate(set) var done = false
     open fileprivate(set) var didError = false
