@@ -164,8 +164,8 @@ extension QueryPlanner {
     }
     
     enum Operation {
-        case rowGenerator((Void) -> AnyIterator<Result<Row, RelationError>>)
-        case selectableGenerator((SelectExpression) -> AnyIterator<Result<Row, RelationError>>)
+        case rowGenerator((Void) -> AnyIterator<Result<Set<Row>, RelationError>>)
+        case selectableGenerator((SelectExpression) -> AnyIterator<Result<Set<Row>, RelationError>>)
         case rowSet((Void) -> Set<Row>)
         
         case union

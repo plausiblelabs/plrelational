@@ -33,14 +33,16 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
         return .efficientlySelectableGenerator({ expression in
             if expression as? Bool == false {
                 return AnyIterator([].makeIterator())
+            } else if expression as? Bool == true {
+                return AnyIterator([.Ok(self.values.values)].makeIterator())
             } else if let rows = self.efficientValuesSet(expression: expression) {
-                return AnyIterator(rows.lazy.map({ .Ok($0) }).makeIterator())
+                return AnyIterator([.Ok(rows)].makeIterator())
             } else {
                 let lazy = self.values.lazy
                 let filtered = lazy.filter({
                     expression.valueWithRow($0).boolValue
                 })
-                return AnyIterator(filtered.map({ .Ok($0) }).makeIterator())
+                return AnyIterator(filtered.map({ .Ok([$0]) }).makeIterator())
             }
         }, approximateCount: Double(values.values.count))
     }

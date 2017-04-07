@@ -62,8 +62,7 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
                         expression.valueWithRow($0).boolValue
                     }) ?? true
                 })
-                let wrapped = AnyIterator(filtered.makeIterator())
-                return wrapped
+                return AnyIterator(filtered.map({ $0.map({ [$0] }) }).makeIterator())
             }
         }, approximateCount: nil)
     }
@@ -379,11 +378,11 @@ extension PlistDirectoryRelation {
         }
     }
     
-    fileprivate func filteredRowGenerator(primaryKeyValues: [RelationValue]) -> AnyIterator<Result<Row, RelationError>> {
-        let rows = primaryKeyValues.lazy.flatMap({ value -> Result<Row, RelationError>? in
+    fileprivate func filteredRowGenerator(primaryKeyValues: [RelationValue]) -> AnyIterator<Result<Set<Row>, RelationError>> {
+        let rows = primaryKeyValues.lazy.flatMap({ value -> Result<Set<Row>, RelationError>? in
             if let url = self.plistURL(forKeyValue: value) {
                 if let toWriteRow = self.writeCache.toWrite[.url(url)] {
-                    return .Ok(toWriteRow)
+                    return .Ok([toWriteRow])
                 }
                 if self.writeCache.toDelete.contains(.url(url)) {
                     return nil
@@ -395,7 +394,7 @@ extension PlistDirectoryRelation {
             case .Ok(nil):
                 return nil
             case .Ok(.some(let row)):
-                return .Ok(row)
+                return .Ok([row])
             case .Err(let err):
                 return .Err(err)
             }

@@ -9,7 +9,7 @@ open class QueryRunner {
     
     fileprivate var activeInitiatorIndexes: [Int]
     
-    fileprivate var initiatorGenerators: Dictionary<Int, AnyIterator<Result<Row, RelationError>>> = [:]
+    fileprivate var initiatorGenerators: Dictionary<Int, AnyIterator<Result<Set<Row>, RelationError>>> = [:]
     
     fileprivate var intermediatesToProcess: [IntermediateToProcess] = []
     
@@ -180,25 +180,25 @@ open class QueryRunner {
         let op = nodes[nodeIndex].op
         switch op {
         case .rowGenerator(let generatorGetter):
-            let row = getRowGeneratorRow(nodeIndex, generatorGetter)
-            switch row {
+            let rows = getRowGeneratorRows(nodeIndex, generatorGetter)
+            switch rows {
             case .some(.Err(let err)):
                 return .Err(err)
-            case .some(.Ok(let row)):
-                writeOutput([row], fromNode: nodeIndex)
+            case .some(.Ok(let rows)):
+                writeOutput(rows, fromNode: nodeIndex)
             case .none:
                 activeInitiatorIndexes.removeLast()
                 markDone(nodeIndex)
             }
         case .selectableGenerator(let generatorGetter):
-            let row = getRowGeneratorRow(nodeIndex, {
+            let rows = getRowGeneratorRows(nodeIndex, {
                 return generatorGetter(nodeStates[nodeIndex].parentalSelects ?? true)
             })
-            switch row {
+            switch rows {
             case .some(.Err(let err)):
                 return .Err(err)
-            case .some(.Ok(let row)):
-                writeOutput([row], fromNode: nodeIndex)
+            case .some(.Ok(let rows)):
+                writeOutput(rows, fromNode: nodeIndex)
             case .none:
                 activeInitiatorIndexes.removeLast()
                 markDone(nodeIndex)
@@ -220,7 +220,7 @@ open class QueryRunner {
         return .Ok()
     }
     
-    fileprivate func getRowGeneratorRow(_ initiatorIndex: Int, _ generatorGetter: (Void) -> AnyIterator<Result<Row, RelationError>>) -> Result<Row, RelationError>? {
+    fileprivate func getRowGeneratorRows(_ initiatorIndex: Int, _ generatorGetter: (Void) -> AnyIterator<Result<Set<Row>, RelationError>>) -> Result<Set<Row>, RelationError>? {
         let generator = initiatorGenerators.getOrCreate(initiatorIndex, defaultValue: generatorGetter())
         return generator.next()
     }

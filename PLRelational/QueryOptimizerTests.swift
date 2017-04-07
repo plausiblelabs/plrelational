@@ -219,9 +219,9 @@ private class InstrumentedSelectableRelation: Relation {
     var contentProvider: RelationContentProvider {
         return .efficientlySelectableGenerator({ expression in
             let filtered = self.values.lazy.filter({ expression.valueWithRow($0).boolValue })
-            let mapped = filtered.map({ row -> Result<Row, RelationError> in
+            let mapped = filtered.map({ row -> Result<Set<Row>, RelationError> in
                 self.rowsProvided += 1
-                return .Ok(row)
+                return .Ok([row])
             })
             return AnyIterator(mapped.makeIterator())
         }, approximateCount: nil)

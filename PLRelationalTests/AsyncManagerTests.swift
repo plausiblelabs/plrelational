@@ -374,10 +374,10 @@ class AsyncManagerTests: DBTestCase {
             var debugName: String?
             
             var contentProvider: RelationContentProvider {
-                let results: [Result<Row, RelationError>] = [
-                    .Ok(["n": 1]),
-                    .Ok(["n": 2]),
-                    .Ok(["n": 3]),
+                let results: [Result<Set<Row>, RelationError>] = [
+                    .Ok([["n": 1]]),
+                    .Ok([["n": 2]]),
+                    .Ok([["n": 3]]),
                     .Err(DummyError())
                 ]
                 return .generator({ AnyIterator(results.makeIterator()) }, approximateCount: nil)
