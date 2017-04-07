@@ -15,6 +15,8 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     
     var contentProvider: RelationContentProvider { get }
+    
+    var debugName: String? { get set }
 
     func contains(_ row: Row) -> Result<Bool, RelationError>
     
@@ -77,6 +79,16 @@ public enum RelationObservationKind {
     
     /// A change due to something in a dependency of an intermediate relation, not the Relation itself.
     case dependentChange
+}
+
+extension Relation {
+    /// Set the debug name and return self, for convenient chaining.
+    /// Value-type relations return a new one rather than mutating in place.
+    public func setDebugName(_ name: String) -> Self {
+        var result = self
+        result.debugName = name
+        return result
+    }
 }
 
 extension Relation {

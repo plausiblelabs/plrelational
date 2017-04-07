@@ -36,6 +36,7 @@ public class PlistDatabase: StoredDatabase {
 
     private init(root: URL?, relations: [String: ManagedRelation]) {
         self.root = root
+        relations.forEach({ _ = $1.1.setDebugName($0) })
         self.relations = Mutexed(relations)
     }
 

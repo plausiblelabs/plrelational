@@ -7,6 +7,8 @@ public struct ConcreteRelation: Relation {
     public var scheme: Scheme
     public var values: Set<Row>
     
+    public var debugName: String?
+    
     var defaultSort: Attribute?
     
     public init(scheme: Scheme, values: Set<Row> = [], defaultSort: Attribute? = nil) {

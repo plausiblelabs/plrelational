@@ -19,6 +19,8 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    public var debugName: String?
+    
     fileprivate init(scheme: Scheme, primaryKeys: [Attribute], url: URL?, codec: DataCodec?, isTransient: Bool) {
         self.scheme = scheme
         self.values = IndexedSet(primaryKeys: primaryKeys)

@@ -18,6 +18,8 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    public var debugName: String?
+    
     fileprivate var writeCache = WriteCache()
     fileprivate var readCache = ReadCache()
     

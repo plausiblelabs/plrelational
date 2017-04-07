@@ -65,7 +65,8 @@ class QueryPlanner {
     }
     
     fileprivate func relationToNodeIndex(_ r: Relation) -> Int {
-        let node = relationToNode(r)
+        var node = relationToNode(r)
+        node.debugName = r.debugName
         let index = nodes.count
         nodes.append(node)
         return index
@@ -136,6 +137,7 @@ class QueryPlanner {
 
 extension QueryPlanner {
     struct Node {
+        var debugName: String?
         var op: Operation
         var scheme: Scheme
         var outputCallbacks: [OutputCallback]?

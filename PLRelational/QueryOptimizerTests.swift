@@ -200,6 +200,8 @@ private class InstrumentedSelectableRelation: Relation {
     
     var values: Set<Row>
     
+    var debugName: String?
+    
     var rowsProvided = 0
     
     func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void) {

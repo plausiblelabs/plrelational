@@ -34,6 +34,8 @@ public struct ChangeLoggingRelationDelta {
 public class ChangeLoggingRelation {
     typealias Graph = BookmarkableGraph<[ChangeLoggingRelationChange]>
     
+    public var debugName: String?
+    
     fileprivate var baseRelation: MutableRelation
     
     fileprivate let changeGraph: Graph

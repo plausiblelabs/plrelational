@@ -226,6 +226,8 @@ public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserv
     
     open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    public var debugName: String?
+    
     init(db: TransactionalDatabase, underlyingRelation: ChangeLoggingRelation) {
         self.db = db
         self.underlyingRelation = underlyingRelation

@@ -41,6 +41,8 @@ class AsyncManagerTests: DBTestCase {
         let r = db["n"]
         
         class TriggerRelation: Relation {
+            var debugName: String?
+            
             var onGetRowsCallback: (Void) -> Void = {}
             
             var scheme: Scheme {
@@ -368,6 +370,8 @@ class AsyncManagerTests: DBTestCase {
         struct DummyError: Error {}
         class ErroringRelation: Relation {
             var scheme: Scheme { return ["n"] }
+            
+            var debugName: String?
             
             var contentProvider: RelationContentProvider {
                 let results: [Result<Row, RelationError>] = [

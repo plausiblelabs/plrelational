@@ -18,6 +18,8 @@ open class IntermediateRelation: Relation, RelationDefaultChangeObserverImplemen
     
     open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    public var debugName: String?
+    
     var derivative: RelationDerivative?
     var inTransaction = 0 // Like a refcount, incremented for begin, decremented for end, action at 0
     

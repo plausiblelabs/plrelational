@@ -13,6 +13,8 @@ open class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementation
     
     open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    public var debugName: String?
+    
     var tableNameForQuery: String {
         return db.escapeIdentifier(tableName)
     }

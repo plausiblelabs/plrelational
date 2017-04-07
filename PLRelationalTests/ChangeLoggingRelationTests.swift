@@ -32,6 +32,8 @@ private class LoggingTestRelation: MutableRelation, RelationDefaultChangeObserve
     
     var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    var debugName: String?
+    
     var adds: [Row] = []
     var deletes: [SelectExpression] = []
     var updates: [(SelectExpression, Row)] = []

@@ -14,6 +14,8 @@ open class MemoryTableRelation: Relation, MutableRelation, RelationDefaultChange
     
     open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    public var debugName: String?
+    
     public init(scheme: Scheme) {
         self.scheme = scheme
     }
