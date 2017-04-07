@@ -19,7 +19,7 @@ private func graphvizDump(nodes: [QueryPlanner.Node], showChildPointers: Bool = 
             opLines = opLines.prefix(10) + ["..."]
         }
         let opString = opLines.joined(separator: "\n")
-        let label = [nodename(index), node.debugName, node.approximateCount.map({ "~\($0) rows" }), opString].flatMap({ $0 }).joined(separator: " ")
+        let label = [nodename(index), node.debugName.map({ "NAME: \($0)" }), node.approximateCount.map({ "~\($0) rows" }), opString].flatMap({ $0 }).joined(separator: " ")
         let aux = auxNodeInfo(index).map({ "\n\($0)" }) ?? ""
         print("\(nodename(index)) [label=\"\(label)\(aux)\"]")
         for parentIndex in node.parentIndexes {
