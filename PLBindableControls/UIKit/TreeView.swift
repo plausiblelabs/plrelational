@@ -37,7 +37,7 @@ public struct TreeViewModel<N: TreeNode> {
 
 open class TreeView<N: TreeNode>: NSObject, UITableViewDataSource, UITableViewDelegate {
     
-    private let model: TreeViewModel<N>
+    public let model: TreeViewModel<N>
     private let tableView: UITableView
     
     private lazy var selection: MutableValueProperty<Set<N.ID>> = mutableValueProperty(Set(), { selectedIDs, _ in

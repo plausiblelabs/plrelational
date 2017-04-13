@@ -28,7 +28,7 @@ public struct ListViewModel<E: ArrayElement> {
 
 open class ListView<E: ArrayElement>: NSObject, UITableViewDataSource, UITableViewDelegate {
     
-    private let model: ListViewModel<E>
+    public let model: ListViewModel<E>
     private let tableView: UITableView
     
     private lazy var selection: MutableValueProperty<Set<E.ID>> = mutableValueProperty(Set(), { selectedIDs, _ in
