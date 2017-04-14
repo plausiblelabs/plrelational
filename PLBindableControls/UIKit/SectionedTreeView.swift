@@ -64,6 +64,10 @@ public protocol SectionedTreeViewModel: class {
     var selection: AsyncReadWriteProperty<Set<Path>> { get }
     var selectionExclusiveMode: Bool { get set }
     
+    // XXX: This exists only to allow the model to see selection events for momentary-style
+    // cells, like menu items
+    var didSelectRowAt: ((IndexPath) -> Void)? { get set }
+    
     func start()
     
     func indexPathForItemPath(_ itemPath: Path) -> IndexPath?
@@ -152,6 +156,8 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
         if selfInitiatedSelectionChange {
             return
         }
+        
+        model.didSelectRowAt?(indexPath)
         
         selfInitiatedSelectionChange = true
         selection.change(selectedItemPaths(), transient: false)
