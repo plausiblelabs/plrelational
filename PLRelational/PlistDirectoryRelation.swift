@@ -23,10 +23,28 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     fileprivate var writeCache = WriteCache()
     fileprivate var readCache = ReadCache()
     
-    public static func withDirectory(_ url: URL?, scheme: Scheme, primaryKey: Attribute, createIfDoesntExist: Bool, codec: DataCodec? = nil) -> Result<PlistDirectoryRelation, RelationError> {
+    /// Create a new relation with a given directory.
+    ///
+    /// - Parameters:
+    ///   - url: The URL to the directory to use. If nil, the relation is held in memory
+    ///          and the `url` property must be set before calling save().
+    ///   - scheme: The relation scheme.
+    ///   - primaryKey: The primary key to use for the relation. A row's value for the primary
+    ///                 key is used to derive the filename it's stored under. Joins/selects
+    ///                 that use the primary key will avoid scanning the entire directory.
+    ///   - create: If false, then a URL must be provided and an accessible directory must exist
+    ///             in that location. If no URL is provided, that is a precondition failure. If the
+    ///             URL is provided but no directory exists there or isn't accessible, an error
+    ///             is returned. If `create` is true, then the directory can be nonexistent and
+    ///             the url can be nil. If the directory does exist, then its contents will be
+    ///             returned as part of the relation's contents. Existing data is not deleted
+    ///             just because `create: true`.
+    ///   - codec: A DataCodec used to encode and decode individual Row plists on disk.
+    /// - Returns: The newly created directory relation, or an error if creation failed.
+    public static func withDirectory(_ url: URL?, scheme: Scheme, primaryKey: Attribute, create: Bool, codec: DataCodec? = nil) -> Result<PlistDirectoryRelation, RelationError> {
         if let url = url {
             // We have a URL, so we are either opening an existing relation or creating a new one at a specific location
-            if !createIfDoesntExist {
+            if !create {
                 // We are opening a relation, so let's require its existence at init time
                 if !(url as NSURL).checkResourceIsReachableAndReturnError(nil) {
                     return .Err(NSError(domain: NSCocoaErrorDomain, code: NSFileReadNoSuchFileError, userInfo: nil))
@@ -34,7 +52,7 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
             }
         } else {
             // We have no URL, so we are creating a new relation; we will defer file creation until the first write
-            precondition(createIfDoesntExist)
+            precondition(create)
         }
         return .Ok(PlistDirectoryRelation(scheme: scheme, primaryKey: primaryKey, url: url, codec: codec))
     }

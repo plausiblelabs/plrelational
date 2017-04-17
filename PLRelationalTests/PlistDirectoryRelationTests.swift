@@ -27,18 +27,18 @@ class PlistDirectoryRelationTests: XCTestCase {
     }
     
     func testErrorOnNonexistentFile() {
-        let result = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["a"], primaryKey: "a", createIfDoesntExist: false)
+        let result = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["a"], primaryKey: "a", create: false)
         XCTAssertNotNil(result.err)
     }
     
     func testEmptyRoundTrip() {
         let url = tmpURL()
         
-        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: ["a"], primaryKey: "a", createIfDoesntExist: true)
+        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: ["a"], primaryKey: "a", create: true)
         XCTAssertNil(r1Result.err)
         let r1 = r1Result.ok!
         
-        let r2Result = PlistDirectoryRelation.withDirectory(url, scheme: ["a"], primaryKey: "a", createIfDoesntExist: true)
+        let r2Result = PlistDirectoryRelation.withDirectory(url, scheme: ["a"], primaryKey: "a", create: true)
         XCTAssertNil(r2Result.err)
         let r2 = r2Result.ok!
         
@@ -46,11 +46,11 @@ class PlistDirectoryRelationTests: XCTestCase {
     }
     
     func testEmptyRoundTripWithUnsetURL() {
-        let r1Result = PlistDirectoryRelation.withDirectory(nil, scheme: ["a"], primaryKey: "a", createIfDoesntExist: true)
+        let r1Result = PlistDirectoryRelation.withDirectory(nil, scheme: ["a"], primaryKey: "a", create: true)
         XCTAssertNil(r1Result.err)
         let r1 = r1Result.ok!
         
-        let r2Result = PlistDirectoryRelation.withDirectory(nil, scheme: ["a"], primaryKey: "a", createIfDoesntExist: true)
+        let r2Result = PlistDirectoryRelation.withDirectory(nil, scheme: ["a"], primaryKey: "a", create: true)
         XCTAssertNil(r2Result.err)
         let r2 = r2Result.ok!
         
@@ -58,7 +58,7 @@ class PlistDirectoryRelationTests: XCTestCase {
     }
     
     func testAddUpdateDelete() {
-        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", createIfDoesntExist: true).ok!
+        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", create: true).ok!
         
         AssertEqual(r, MakeRelation(["n"]))
         
@@ -73,7 +73,7 @@ class PlistDirectoryRelationTests: XCTestCase {
     }
     
     func testAddUpdateDeleteSave() {
-        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", createIfDoesntExist: true).ok!
+        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", create: true).ok!
         
         XCTAssertNil(r.add(["n": 1]).err)
         XCTAssertNil(r.update(true, newValues: ["n": 2]).err)
@@ -83,7 +83,7 @@ class PlistDirectoryRelationTests: XCTestCase {
     }
     
     func testAddUpdateDeleteWithoutURL() {
-        let r = PlistDirectoryRelation.withDirectory(nil, scheme: ["n"], primaryKey: "n", createIfDoesntExist: true).ok!
+        let r = PlistDirectoryRelation.withDirectory(nil, scheme: ["n"], primaryKey: "n", create: true).ok!
         
         AssertEqual(r, MakeRelation(["n"]))
         
@@ -98,7 +98,7 @@ class PlistDirectoryRelationTests: XCTestCase {
     }
     
     func testAddUpdateDeleteWithSave() {
-        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", createIfDoesntExist: true).ok!
+        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", create: true).ok!
         
         AssertEqual(r, MakeRelation(["n"]))
         XCTAssertNil(r.save().err)
@@ -124,7 +124,7 @@ class PlistDirectoryRelationTests: XCTestCase {
         let url = tmpURL()
         
         let schemeAttributes: [Attribute] = ["first", "last", "job"]
-        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", createIfDoesntExist: true)
+        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", create: true)
         XCTAssertNil(r1Result.err)
         let r1 = r1Result.ok!
         
@@ -144,7 +144,7 @@ class PlistDirectoryRelationTests: XCTestCase {
         
         XCTAssertNil(r1.save().err)
         
-        let r2Result = PlistDirectoryRelation.withDirectory(url, scheme: r1.scheme, primaryKey: "first", createIfDoesntExist: true)
+        let r2Result = PlistDirectoryRelation.withDirectory(url, scheme: r1.scheme, primaryKey: "first", create: true)
         XCTAssertNil(r2Result.err)
         let r2 = r2Result.ok!
         
@@ -168,7 +168,7 @@ class PlistDirectoryRelationTests: XCTestCase {
         let url = tmpURL()
         
         let schemeAttributes: [Attribute] = ["first", "last", "job"]
-        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", createIfDoesntExist: true, codec: PrefixCodec())
+        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", create: true, codec: PrefixCodec())
         XCTAssertNil(r1Result.err)
         let r1 = r1Result.ok!
         
@@ -188,7 +188,7 @@ class PlistDirectoryRelationTests: XCTestCase {
         
         XCTAssertNil(r1.save().err)
         
-        let r2Result = PlistDirectoryRelation.withDirectory(url, scheme: r1.scheme, primaryKey: "first", createIfDoesntExist: true, codec: PrefixCodec())
+        let r2Result = PlistDirectoryRelation.withDirectory(url, scheme: r1.scheme, primaryKey: "first", create: true, codec: PrefixCodec())
         XCTAssertNil(r2Result.err)
         let r2 = r2Result.ok!
         
@@ -208,7 +208,7 @@ class PlistDirectoryRelationTests: XCTestCase {
         let url = tmpURL()
         
         let schemeAttributes: [Attribute] = ["first", "last", "job"]
-        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", createIfDoesntExist: true)
+        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", create: true)
         XCTAssertNil(r1Result.err)
         let r1 = r1Result.ok!
         
@@ -251,7 +251,7 @@ class PlistDirectoryRelationTests: XCTestCase {
     
     func testContainsWithEmptyRelationAndUnsetURL() {
         let schemeAttributes: [Attribute] = ["first", "last", "job"]
-        let r1Result = PlistDirectoryRelation.withDirectory(nil, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", createIfDoesntExist: true)
+        let r1Result = PlistDirectoryRelation.withDirectory(nil, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", create: true)
         XCTAssertNil(r1Result.err)
         let r1 = r1Result.ok!
         
@@ -262,7 +262,7 @@ class PlistDirectoryRelationTests: XCTestCase {
         let url = tmpURL()
         
         let schemeAttributes: [Attribute] = ["first", "last", "job"]
-        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", createIfDoesntExist: true)
+        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKey: "first", create: true)
         XCTAssertNil(r1Result.err)
         let r1 = r1Result.ok!
         
@@ -313,7 +313,7 @@ class PlistDirectoryRelationTests: XCTestCase {
             [4, "Pat"],
             [5, "Steve"]
         )
-        let dirRResult = PlistDirectoryRelation.withDirectory(url, scheme: initialValues.scheme, primaryKey: "id", createIfDoesntExist: true, codec: loggingCodec)
+        let dirRResult = PlistDirectoryRelation.withDirectory(url, scheme: initialValues.scheme, primaryKey: "id", create: true, codec: loggingCodec)
         XCTAssertNil(dirRResult.err)
         let dirR = dirRResult.ok!
         
@@ -360,7 +360,7 @@ class PlistDirectoryRelationTests: XCTestCase {
             [4, "Pat"],
             [5, "Steve"]
         )
-        let dirRResult = PlistDirectoryRelation.withDirectory(url, scheme: initialValues.scheme, primaryKey: "id", createIfDoesntExist: true, codec: loggingCodec)
+        let dirRResult = PlistDirectoryRelation.withDirectory(url, scheme: initialValues.scheme, primaryKey: "id", create: true, codec: loggingCodec)
         XCTAssertNil(dirRResult.err)
         let dirR = dirRResult.ok!
         
@@ -392,7 +392,7 @@ class PlistDirectoryRelationTests: XCTestCase {
     
     func testReadCache() {
         let loggingCodec = LoggingCodec()
-        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", createIfDoesntExist: true, codec: loggingCodec).ok!
+        let r = PlistDirectoryRelation.withDirectory(tmpURL(), scheme: ["n"], primaryKey: "n", create: true, codec: loggingCodec).ok!
         
         XCTAssertNil(r.add(["n": 1]).err)
         XCTAssertNil(r.save().err)
@@ -409,13 +409,13 @@ class PlistDirectoryRelationTests: XCTestCase {
     
     func testSchemeMismatch() {
         let url = tmpURL()
-        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: ["n"], primaryKey: "n", createIfDoesntExist: true)
+        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: ["n"], primaryKey: "n", create: true)
         XCTAssertNil(r1Result.err)
         
         XCTAssertNil(r1Result.ok?.add(["n": 1]).err)
         XCTAssertNil(r1Result.ok?.save().err)
         
-        let r2Result = PlistDirectoryRelation.withDirectory(url, scheme: ["m"], primaryKey: "m", createIfDoesntExist: true)
+        let r2Result = PlistDirectoryRelation.withDirectory(url, scheme: ["m"], primaryKey: "m", create: true)
         XCTAssertNil(r2Result.err)
         XCTAssertNotNil(r2Result.ok?.rows().first(where: { _ in true })?.err)
     }

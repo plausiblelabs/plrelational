@@ -27,20 +27,20 @@ class PlistFileRelationTests: XCTestCase {
     }
     
     func testErrorOnNonexistentFile() {
-        let result = PlistFileRelation.withFile(tmpURL(), scheme: ["a"], primaryKeys: ["a"], createIfDoesntExist: false)
+        let result = PlistFileRelation.withFile(tmpURL(), scheme: ["a"], primaryKeys: ["a"], create: false)
         XCTAssertNotNil(result.err)
     }
     
     func testEmptyRoundTrip() {
         let url = tmpURL()
         
-        let r1Result = PlistFileRelation.withFile(url, scheme: ["a"], primaryKeys: ["a"], createIfDoesntExist: true)
+        let r1Result = PlistFileRelation.withFile(url, scheme: ["a"], primaryKeys: ["a"], create: true)
         XCTAssertNil(r1Result.err)
         let r1 = r1Result.ok!
         
         XCTAssertNil(r1.save().err)
         
-        let r2Result = PlistFileRelation.withFile(url, scheme: ["a"], primaryKeys: ["a"], createIfDoesntExist: true)
+        let r2Result = PlistFileRelation.withFile(url, scheme: ["a"], primaryKeys: ["a"], create: true)
         XCTAssertNil(r2Result.err)
         let r2 = r2Result.ok!
         
@@ -48,11 +48,11 @@ class PlistFileRelationTests: XCTestCase {
     }
     
     func testEmptyRoundTripWithUnsetURL() {
-        let r1Result = PlistFileRelation.withFile(nil, scheme: ["a"], primaryKeys: ["a"], createIfDoesntExist: true)
+        let r1Result = PlistFileRelation.withFile(nil, scheme: ["a"], primaryKeys: ["a"], create: true)
         XCTAssertNil(r1Result.err)
         let r1 = r1Result.ok!
         
-        let r2Result = PlistFileRelation.withFile(nil, scheme: ["a"], primaryKeys: ["a"], createIfDoesntExist: true)
+        let r2Result = PlistFileRelation.withFile(nil, scheme: ["a"], primaryKeys: ["a"], create: true)
         XCTAssertNil(r2Result.err)
         let r2 = r2Result.ok!
         
@@ -63,7 +63,7 @@ class PlistFileRelationTests: XCTestCase {
         let url = tmpURL()
         
         let schemeAttributes: [Attribute] = ["first", "last", "job"]
-        let r1Result = PlistFileRelation.withFile(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKeys: [], createIfDoesntExist: true)
+        let r1Result = PlistFileRelation.withFile(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKeys: [], create: true)
         XCTAssertNil(r1Result.err)
         let r1 = r1Result.ok!
         
@@ -83,7 +83,7 @@ class PlistFileRelationTests: XCTestCase {
         
         XCTAssertNil(r1.save().err)
         
-        let r2Result = PlistFileRelation.withFile(url, scheme: r1.scheme, primaryKeys: [], createIfDoesntExist: false)
+        let r2Result = PlistFileRelation.withFile(url, scheme: r1.scheme, primaryKeys: [], create: false)
         XCTAssertNil(r2Result.err)
         let r2 = r2Result.ok!
         
@@ -107,7 +107,7 @@ class PlistFileRelationTests: XCTestCase {
         let url = tmpURL()
         
         let schemeAttributes: [Attribute] = ["first", "last", "job"]
-        let r1Result = PlistFileRelation.withFile(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKeys: [], createIfDoesntExist: true, codec: PrefixCodec())
+        let r1Result = PlistFileRelation.withFile(url, scheme: Scheme(attributes: Set(schemeAttributes)), primaryKeys: [], create: true, codec: PrefixCodec())
         XCTAssertNil(r1Result.err)
         let r1 = r1Result.ok!
         
@@ -127,7 +127,7 @@ class PlistFileRelationTests: XCTestCase {
         
         XCTAssertNil(r1.save().err)
         
-        let r2Result = PlistFileRelation.withFile(url, scheme: r1.scheme, primaryKeys: [], createIfDoesntExist: false, codec: PrefixCodec())
+        let r2Result = PlistFileRelation.withFile(url, scheme: r1.scheme, primaryKeys: [], create: false, codec: PrefixCodec())
         XCTAssertNil(r2Result.err)
         let r2 = r2Result.ok!
         
@@ -139,18 +139,18 @@ class PlistFileRelationTests: XCTestCase {
     
     func testSchemeMismatch() {
         let url = tmpURL()
-        let r1Result = PlistFileRelation.withFile(url, scheme: ["n"], primaryKeys: [], createIfDoesntExist: true)
+        let r1Result = PlistFileRelation.withFile(url, scheme: ["n"], primaryKeys: [], create: true)
         XCTAssertNil(r1Result.err)
         
         XCTAssertNil(r1Result.ok?.add(["n": 1]).err)
         XCTAssertNil(r1Result.ok?.save().err)
         
-        let r2Result = PlistFileRelation.withFile(url, scheme: ["m"], primaryKeys: [], createIfDoesntExist: false)
+        let r2Result = PlistFileRelation.withFile(url, scheme: ["m"], primaryKeys: [], create: false)
         XCTAssertNotNil(r2Result.err)
     }
     
     func testInsertPerformance() {
-        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], createIfDoesntExist: true).ok!
+        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], create: true).ok!
         
         let max: Int64 = 1000
         
@@ -161,7 +161,7 @@ class PlistFileRelationTests: XCTestCase {
         }
     }
     func testSelectPerformance() {
-        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], createIfDoesntExist: true).ok!
+        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], create: true).ok!
         
         let max: Int64 = 1000
         
@@ -178,7 +178,7 @@ class PlistFileRelationTests: XCTestCase {
     }
     
     func testUpdatePerformance() {
-        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], createIfDoesntExist: true).ok!
+        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], create: true).ok!
         
         let max: Int64 = 1000
         
@@ -193,7 +193,7 @@ class PlistFileRelationTests: XCTestCase {
     }
     
     func testDeletePerformance() {
-        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], createIfDoesntExist: true).ok!
+        let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], create: true).ok!
         
         let max: Int64 = 1000
         
