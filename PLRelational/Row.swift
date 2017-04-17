@@ -85,6 +85,10 @@ public struct Row: Hashable, Sequence {
         return self.lazy.map({ $0.0 })
     }
     
+    public var scheme: Scheme {
+        return Scheme(attributes: Set(attributes))
+    }
+    
     public var count: Int {
         return inlineRow.count
     }

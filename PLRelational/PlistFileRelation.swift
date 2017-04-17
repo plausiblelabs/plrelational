@@ -83,10 +83,11 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
 }
 
 extension PlistFileRelation {
-    enum Error: Swift.Error {
+    public enum Error: Swift.Error {
         case unknownTopLevelObject(unknownObject: Any)
         case missingValues
         case unknownValuesObject(unknownObject: Any)
+        case schemeMismatch(foundScheme: Scheme)
     }
     
     public static func withFile(_ url: URL?, scheme: Scheme, primaryKeys: [Attribute], createIfDoesntExist: Bool, codec: DataCodec? = nil) -> Result<PlistFileRelation, RelationError> {
@@ -104,7 +105,13 @@ extension PlistFileRelation {
                         guard let values = dict["values"] else { return .Err(Error.missingValues) }
                         guard let array = values as? NSArray else { return .Err(Error.unknownValuesObject(unknownObject: values)) }
                         
-                        let relationValueResults = array.map({ Row.fromPlist($0) })
+                        let relationValueResults = array.map({
+                            Row.fromPlist($0).then({
+                                return $0.scheme == scheme
+                                    ? .Ok($0)
+                                    : .Err(Error.schemeMismatch(foundScheme: $0.scheme))
+                            })
+                        })
                         let relationValuesResult = mapOk(relationValueResults, { $0 })
                         return relationValuesResult.map({
                             let r = PlistFileRelation(scheme: scheme, primaryKeys: primaryKeys, url: url, codec: codec, isTransient: false)

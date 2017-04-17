@@ -251,7 +251,11 @@ extension PlistDirectoryRelation {
             let decodedDataResult = codec?.decode(data) ?? .Ok(data)
             return try decodedDataResult.then({
                 let plist = try PropertyListSerialization.propertyList(from: $0, options: [], format: nil)
-                let row = Row.fromPlist(plist)
+                let row = Row.fromPlist(plist).then({
+                    return $0.scheme == self.scheme
+                        ? .Ok($0)
+                        : .Err(Error.schemeMismatch(foundScheme: $0.scheme))
+                })
                 if let modDate = modDate, let row = row.ok {
                     readCache[url] = (modDate, row)
                 }
@@ -483,5 +487,11 @@ extension PlistDirectoryRelation {
         func standardized(url: URL) -> NSURL {
             return url.standardizedFileURL as NSURL
         }
+    }
+}
+
+extension PlistDirectoryRelation {
+    public enum Error: Swift.Error {
+        case schemeMismatch(foundScheme: Scheme)
     }
 }

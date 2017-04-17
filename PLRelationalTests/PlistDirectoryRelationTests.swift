@@ -406,6 +406,19 @@ class PlistDirectoryRelationTests: XCTestCase {
         XCTAssertTrue(loggingCodec.decoded.count > 0)
         XCTAssertTrue(loggingCodec.decoded.count < 100)
     }
+    
+    func testSchemeMismatch() {
+        let url = tmpURL()
+        let r1Result = PlistDirectoryRelation.withDirectory(url, scheme: ["n"], primaryKey: "n", createIfDoesntExist: true)
+        XCTAssertNil(r1Result.err)
+        
+        XCTAssertNil(r1Result.ok?.add(["n": 1]).err)
+        XCTAssertNil(r1Result.ok?.save().err)
+        
+        let r2Result = PlistDirectoryRelation.withDirectory(url, scheme: ["m"], primaryKey: "m", createIfDoesntExist: true)
+        XCTAssertNil(r2Result.err)
+        XCTAssertNotNil(r2Result.ok?.rows().first(where: { _ in true })?.err)
+    }
 }
 
 fileprivate class LoggingCodec: DataCodec {

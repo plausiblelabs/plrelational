@@ -137,6 +137,18 @@ class PlistFileRelationTests: XCTestCase {
         XCTAssertTrue(contents.starts(with: PrefixCodec.prefix.utf8))
     }
     
+    func testSchemeMismatch() {
+        let url = tmpURL()
+        let r1Result = PlistFileRelation.withFile(url, scheme: ["n"], primaryKeys: [], createIfDoesntExist: true)
+        XCTAssertNil(r1Result.err)
+        
+        XCTAssertNil(r1Result.ok?.add(["n": 1]).err)
+        XCTAssertNil(r1Result.ok?.save().err)
+        
+        let r2Result = PlistFileRelation.withFile(url, scheme: ["m"], primaryKeys: [], createIfDoesntExist: false)
+        XCTAssertNotNil(r2Result.err)
+    }
+    
     func testInsertPerformance() {
         let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], createIfDoesntExist: true).ok!
         
