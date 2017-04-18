@@ -9,9 +9,15 @@ import Foundation
 public struct Row: Hashable, Sequence {
     var inlineRow: InlineRow
     
+    private init(inlineRow: InlineRow) {
+        self.inlineRow = inlineRow
+    }
+    
     public init<S: Sequence>(values: S) where S.Iterator.Element == (key: Attribute, value: RelationValue) {
         inlineRow = InlineRow.internSequence(values)
     }
+    
+    public static var empty = Row(values: [])
     
     public var hashValue: Int {
         return ObjectIdentifier(inlineRow).hashValue
@@ -46,10 +52,12 @@ public struct Row: Hashable, Sequence {
     
     /// Create a new row containing only the values whose attributes are also in the attributes parameter.
     public func rowWithAttributes(_ attributes: Set<Attribute>) -> Row {
-        if inlineRow.attributesEqual(attributes) {
+        if attributes.isEmpty {
+            return .empty
+        } else if inlineRow.attributesEqual(attributes) {
             return self
         } else {
-            return Row(values: self.filter({ attributes.contains($0.0) }).map({ (key: $0, value: $1) }))
+            return Row(inlineRow: inlineRow.rowWithAttributes(attributes))
         }
     }
     
@@ -112,8 +120,16 @@ extension Row: CustomStringConvertible {
     }
 }
 
+typealias InlineRowHeader = (count: Int, hash: Int)
+typealias InlineRowElement = (Attribute, RelationValue)
 
-final class InlineRow: ManagedBuffer<(count: Int, hash: Int), (Attribute, RelationValue)> {
+final class InlineRow: ManagedBuffer<InlineRowHeader, InlineRowElement> {
+    deinit {
+        withUnsafeMutablePointers({ headerPtr, elementsPtr in
+            _ = elementsPtr.deinitialize(count: headerPtr.pointee.count)
+        })
+    }
+    
     var count: Int {
         return withUnsafeMutablePointers({
             return $0.0.pointee.count
@@ -159,6 +175,20 @@ final class InlineRow: ManagedBuffer<(count: Int, hash: Int), (Attribute, Relati
         }
         return true
     }
+    
+    func rowWithAttributes(_ attributes: Set<Attribute>) -> InlineRow {
+        let row = InlineRow.create(capacity: attributes.count)
+        self.withUnsafeMutablePointers({ myHeaderPtr, myElementsPtr in
+            row.withUnsafeMutablePointers({ targetHeaderPtr, targetElementsPtr in
+                for i in 0 ..< myHeaderPtr.pointee.count {
+                    if attributes.contains(myElementsPtr[i].0) {
+                        InlineRow.add(myElementsPtr[i], headerPtr: targetHeaderPtr, elementsPtr: targetElementsPtr)
+                    }
+                }
+            })
+        })
+        return InlineRow.internRow(row)
+    }
 }
 
 extension InlineRow: Sequence {
@@ -182,24 +212,51 @@ extension InlineRow: Sequence {
 }
 
 extension InlineRow {
+    /// Create a new, empty InlineRow with enough capacity for the given number of pairs.
+    ///
+    /// - Parameter capacity: The maximum number of pairs the resulting object can store.
+    /// - Returns: An empty InlineRow object with the given capacity. You may then call
+    ///            add() up to that many times on the resulting object's pointers.
+    static func create(capacity: Int) -> InlineRow {
+        let obj = create(minimumCapacity: capacity, makingHeaderWith: { _ in (count: 0, hash: 5381) })
+        return obj as! InlineRow
+    }
+    
+    /// Add an Attribute/RelationValue pair to the given header/elements pointer. Pairs *must* be added in sorted order.
+    /// The elements pointer *must* have sufficient storage allocated ahead of time to hold all pairs that will be added.
+    /// This method does *not* reallocate any storage.
+    ///
+    /// - Parameters:
+    ///   - pair: The pair to add.
+    ///   - headerPtr: A pointer to the object's header.
+    ///   - elementsPtr: A pointer to the object's elements.
+    static func add(_ pair: (Attribute, RelationValue), headerPtr: UnsafeMutablePointer<InlineRowHeader>, elementsPtr: UnsafeMutablePointer<InlineRowElement>) {
+        func combineHash(_ existing: inout Int, _ new: Int) {
+            // DJB hash function, adapted from http://stackoverflow.com/questions/31438210/how-to-implement-the-hashable-protocol-in-swift-for-an-int-array-a-custom-strin
+            existing = (existing << 5) &+ existing &+ new
+        }
+        
+        (elementsPtr + headerPtr.pointee.count).initialize(to: pair)
+        combineHash(&headerPtr.pointee.hash, pair.0.hashValue)
+        combineHash(&headerPtr.pointee.hash, pair.1.hashValue)
+        headerPtr.pointee.count += 1
+    }
+    
+    /// Build a new InlineRow instance from the given sequence of Attribute/RelationValue pairs.
+    ///
+    /// - Parameter valuesSequence: The sequence of value pairs.
+    /// - Returns: The new InlineRow object.
     static func buildFrom<S: Sequence>(_ valuesSequence: S) -> InlineRow where S.Iterator.Element == (key: Attribute, value: RelationValue) {
         let values = valuesSequence.sorted(by: { $0.key < $1.key })
         let count = values.count
         
-        let obj = create(minimumCapacity: count, makingHeaderWith: { _ in (count: count, hash: 5381) })
+        let obj = create(capacity: count)
         obj.withUnsafeMutablePointers({ headerPtr, elementsPtr in
-            func combineHash(_ existing: inout Int, _ new: Int) {
-                // DJB hash function, adapted from http://stackoverflow.com/questions/31438210/how-to-implement-the-hashable-protocol-in-swift-for-an-int-array-a-custom-strin
-                existing = (existing << 5) &+ existing &+ new
-            }
             for i in 0 ..< count {
-                let (attribute, value) = values[i]
-                (elementsPtr + i).initialize(to: (attribute, value))
-                combineHash(&headerPtr.pointee.hash, attribute.hashValue)
-                combineHash(&headerPtr.pointee.hash, value.hashValue)
+                add(values[i], headerPtr: headerPtr, elementsPtr: elementsPtr)
             }
         })
-        return obj as! InlineRow
+        return obj
     }
 }
 
