@@ -145,7 +145,7 @@ public final class AsyncManager: PerThreadInstance {
         guard let obj = asObject(relation) else { return {} }
         
         let info = infoForObservee(obj)
-        let id = info.addObserver(observer, context: context ?? defaultObserverDispatchContext())
+        let id = info.addObserver(observer, context: context ?? runloopDispatchContext())
         
         return {
             info.observers[id] = nil
@@ -161,7 +161,7 @@ public final class AsyncManager: PerThreadInstance {
         guard let obj = asObject(relation) else { return {} }
         
         let info = infoForObservee(obj)
-        let id = info.addObserver(observer, context: context ?? defaultObserverDispatchContext())
+        let id = info.addObserver(observer, context: context ?? runloopDispatchContext())
         
         return {
             info.observers[id] = nil
@@ -503,7 +503,8 @@ public final class AsyncManager: PerThreadInstance {
         })
     }
     
-    func defaultObserverDispatchContext() -> DispatchContext {
+    /// Return a dispatch context that uses the AsyncManager's runloop and runloop modes.
+    public func runloopDispatchContext() -> DispatchContext {
         return RunLoopDispatchContext(runloop: self.runloop,
                                       executeReentrantImmediately: true,
                                       modes: self.runloopModes)

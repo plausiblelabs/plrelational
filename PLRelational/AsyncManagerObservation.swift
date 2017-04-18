@@ -73,7 +73,7 @@ extension AsyncManager {
             }
         }
         
-        let wrappedObserver = DispatchContextWrapped(context: context ?? defaultObserverDispatchContext(), wrapped: observer)
+        let wrappedObserver = DispatchContextWrapped(context: context ?? runloopDispatchContext(), wrapped: observer)
         let shimObserver = ShimObserver(coalescedObserver: wrappedObserver)
         return self.observe(relation, observer: shimObserver, context: DirectDispatchContext())
     }
@@ -104,7 +104,7 @@ public protocol AsyncRelationContentObserver {
 extension AsyncManager {
     public func observe<T: AsyncRelationContentCoalescedObserver>(_ relation: Relation, observer: T, context: DispatchContext? = nil, postprocessor: @escaping (Set<Row>) -> T.PostprocessingOutput) -> ObservationRemover {
         
-        let wrappedObserver = DispatchContextWrapped(context: context ?? defaultObserverDispatchContext(), wrapped: observer)
+        let wrappedObserver = DispatchContextWrapped(context: context ?? runloopDispatchContext(), wrapped: observer)
         let shimObserver = ShimContentObserver(coalescedObserver: wrappedObserver, postprocessor: postprocessor)
         return self.observe(relation, observer: shimObserver, context: DirectDispatchContext())
     }

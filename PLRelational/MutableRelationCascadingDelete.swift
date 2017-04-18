@@ -32,9 +32,9 @@ extension MutableRelation {
         update: @escaping (MutableRelation, Row) -> [CascadingUpdate] = { _ in [] },
         completionCallback: @escaping (Result<Void, RelationError>) -> Void) {
         
-        let runloop = CFRunLoopGetCurrent()!
+        let context = AsyncManager.currentInstance.runloopDispatchContext()
         func callCompletion(_ result: Result<Void, RelationError>) {
-            runloop.async({
+            context.async({
                 completionCallback(result)
             })
         }
