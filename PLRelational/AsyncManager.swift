@@ -14,7 +14,7 @@ public final class AsyncManager: PerThreadInstance {
     fileprivate var variableInfo: ObjectDictionary<AnyObject, [VariableEntry]> = [:]
     
     private let runloop: CFRunLoop
-    private var runloopModes: [CFRunLoopMode] = [.commonModes]
+    public private(set) var runloopModes: [CFRunLoopMode] = [.commonModes]
     
     private var executionTimer: CFRunLoopTimer?
     
@@ -51,6 +51,15 @@ public final class AsyncManager: PerThreadInstance {
     /// By default, it runs on the common runloop modes.
     public func addRunloopMode(_ mode: CFRunLoopMode) {
         runloopModes.append(mode)
+    }
+    
+    /// Set the runloop modes where this AsyncManager will run its non-async code.
+    /// This wipes out any existing modes and so should be used with care.
+    /// (Probably just in tests.)
+    public func setRunloopModes(_ modes: [CFRunLoopMode]) -> [CFRunLoopMode] {
+        let old = runloopModes
+        runloopModes = modes
+        return old
     }
     
     public func addStateObserver(_ observer: @escaping (State) -> Void) -> ObservationRemover {
