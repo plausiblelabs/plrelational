@@ -60,9 +60,13 @@ public class AsyncRunloopHack {
             didSpin = true
             
             let startTime = now()
-            while manager.state != .idle && (0 ..< timeToWait).contains(now() - startTime) {
-                debugLog("Waiting for \(timeToWait)s")
-                let result = CFRunLoopRunInMode(runloopMode, timeToWait, true)
+            while manager.state != .idle {
+                let remainingTime = timeToWait - (now() - startTime)
+                if remainingTime <= 0 {
+                    break
+                }
+                debugLog("Waiting for \(remainingTime)s")
+                let result = CFRunLoopRunInMode(runloopMode, remainingTime, true)
                 debugLog("Result of waiting is \(result.rawValue)")
             }
             debugLog("Leaving")
