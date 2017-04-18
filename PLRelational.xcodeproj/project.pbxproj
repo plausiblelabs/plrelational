@@ -30,6 +30,10 @@
 		372707ED1CFE2C7E00710C80 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 372707EC1CFE2C7E00710C80 /* Assets.xcassets */; };
 		372707F01CFE2C7E00710C80 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 372707EE1CFE2C7E00710C80 /* MainMenu.xib */; };
 		372707FB1CFE2C7E00710C80 /* BindableControlsAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707FA1CFE2C7E00710C80 /* BindableControlsAppUITests.swift */; };
+		374363001EA673F3004982B0 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
+		374363011EA673FC004982B0 /* InternedUTF8String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */; };
+		374363021EA6741C004982B0 /* SetSubtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */; };
+		374363031EA67432004982B0 /* SelectExpressionAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB823B1E96A67D00B80CAE /* SelectExpressionAnalysis.swift */; };
 		374DAEBE1E8C28E700FF245B /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
 		374DAEBF1E8C28EA00FF245B /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
 		374DAEC21E8C28FC00FF245B /* UndoableDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374DAEBC1E8C28E100FF245B /* UndoableDatabaseTests.swift */; };
@@ -2915,6 +2919,7 @@
 				37B440AB1E899A7200C8C336 /* DictionaryConvenience.swift in Sources */,
 				37B440B11E899A7200C8C336 /* MirrorChildren.swift in Sources */,
 				37B440391E8999F700C8C336 /* BinaryOperator.swift in Sources */,
+				374363021EA6741C004982B0 /* SetSubtraction.swift in Sources */,
 				37B440C21E899A7300C8C336 /* StringConvenience.swift in Sources */,
 				37B440B21E899A7200C8C336 /* Mutex.swift in Sources */,
 				37B440AC1E899A7200C8C336 /* DictionaryCreation.swift in Sources */,
@@ -2967,8 +2972,11 @@
 				37B440451E899A0200C8C336 /* StoredDatabase.swift in Sources */,
 				37B4401F1E8999D200C8C336 /* Row.swift in Sources */,
 				37B440B81E899A7300C8C336 /* ObjectSet.swift in Sources */,
+				374363001EA673F3004982B0 /* MutableBox.swift in Sources */,
 				37B440301E8999EB00C8C336 /* RelationDerivative.swift in Sources */,
+				374363011EA673FC004982B0 /* InternedUTF8String.swift in Sources */,
 				37B440AF1E899A7200C8C336 /* IndexedSet.swift in Sources */,
+				374363031EA67432004982B0 /* SelectExpressionAnalysis.swift in Sources */,
 				37B440B51E899A7300C8C336 /* ObjectCasting.swift in Sources */,
 				37B440251E8999DC00C8C336 /* MutableRelationCascadingDelete.swift in Sources */,
 				37B4406F1E899A3300C8C336 /* AsyncManagerObservation.swift in Sources */,
