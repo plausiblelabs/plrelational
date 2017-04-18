@@ -21,7 +21,7 @@ class QueryPlanner {
     }
     
     var initiatorIndexes: [Int] {
-        return (nodes.indices).filter({
+        return nodes.indices.filter({
             switch nodes[$0].op {
             case .rowGenerator, .selectableGenerator, .rowSet:
                 return true
@@ -65,7 +65,8 @@ class QueryPlanner {
     }
     
     fileprivate func relationToNodeIndex(_ r: Relation) -> Int {
-        let node = relationToNode(r)
+        var node = relationToNode(r)
+        node.debugName = r.debugName
         let index = nodes.count
         nodes.append(node)
         return index
@@ -73,45 +74,45 @@ class QueryPlanner {
     
     fileprivate func relationToNode(_ r: Relation) -> Node {
         switch r.contentProvider {
-        case .generator(let generatorGetter):
-            return Node(op: .rowGenerator(generatorGetter))
-        case .efficientlySelectableGenerator(let generatorGetter):
-            return Node(op: .selectableGenerator(generatorGetter))
-        case .set(let setGetter):
-            return Node(op: .rowSet(setGetter))
+        case .generator(let generatorGetter, let approximateCount):
+            return Node(op: .rowGenerator(generatorGetter), scheme: r.scheme, approximateCount: approximateCount)
+        case .efficientlySelectableGenerator(let generatorGetter, let approximateCount):
+            return Node(op: .selectableGenerator(generatorGetter), scheme: r.scheme, approximateCount: approximateCount)
+        case .set(let setGetter, let approximateCount):
+            return Node(op: .rowSet(setGetter), scheme: r.scheme, approximateCount: approximateCount)
         case .intermediate(let op, let operands):
-            return intermediateRelationToNode(op, operands)
+            return intermediateRelationToNode(r, op, operands)
         case .underlying:
             fatalError("Underlying should never show up in QueryPlanner")
         }
     }
     
-    fileprivate func intermediateRelationToNode(_ op: IntermediateRelation.Operator, _ operands: [Relation]) -> Node {
+    fileprivate func intermediateRelationToNode(_ r: Relation, _ op: IntermediateRelation.Operator, _ operands: [Relation]) -> Node {
         switch op {
         case .union:
-            return Node(op: .union)
+            return Node(op: .union, scheme: r.scheme)
         case .intersection:
-            return Node(op: .intersection)
+            return Node(op: .intersection, scheme: r.scheme)
         case .difference:
-            return Node(op: .difference)
+            return Node(op: .difference, scheme: r.scheme)
         case .project(let scheme):
-            return Node(op: .project(scheme))
+            return Node(op: .project(scheme), scheme: r.scheme)
         case .select(let expression):
-            return Node(op: .select(expression))
+            return Node(op: .select(expression), scheme: r.scheme)
         case .mutableSelect(let expression):
-            return Node(op: .select(expression))
+            return Node(op: .select(expression), scheme: r.scheme)
         case .equijoin(let matching):
-            return Node(op: .equijoin(matching))
+            return Node(op: .equijoin(matching), scheme: r.scheme)
         case .rename(let renames):
-            return Node(op: .rename(renames))
+            return Node(op: .rename(renames), scheme: r.scheme)
         case .update(let newValues):
-            return Node(op: .update(newValues))
+            return Node(op: .update(newValues), scheme: r.scheme)
         case .aggregate(let attribute, let initialValue, let aggregateFunction):
-            return Node(op: .aggregate(attribute, initialValue, aggregateFunction))
+            return Node(op: .aggregate(attribute, initialValue, aggregateFunction), scheme: r.scheme)
         case .otherwise:
-            return Node(op: .otherwise)
+            return Node(op: .otherwise, scheme: r.scheme)
         case .unique(let attribute, let value):
-            return Node(op: .unique(attribute, value))
+            return Node(op: .unique(attribute, value), scheme: r.scheme)
         }
     }
     
@@ -136,8 +137,16 @@ class QueryPlanner {
 
 extension QueryPlanner {
     struct Node {
+        var debugName: String?
         var op: Operation
+        var scheme: Scheme
         var outputCallbacks: [OutputCallback]?
+        var approximateCount: Double?
+        
+        var parentIndexes: [Int] = []
+        
+        /// All children of this node.
+        var childIndexes: [Int] = []
         
         var childCount: Int {
             return childIndexes.count
@@ -147,19 +156,16 @@ extension QueryPlanner {
             return parentIndexes.count
         }
         
-        var parentIndexes: [Int] = []
-        
-        /// All children of this node.
-        var childIndexes: [Int] = []
-        
-        init(op: Operation) {
+        init(op: Operation, scheme: Scheme, approximateCount: Double? = nil) {
             self.op = op
+            self.scheme = scheme
+            self.approximateCount = approximateCount
         }
     }
     
     enum Operation {
-        case rowGenerator((Void) -> AnyIterator<Result<Row, RelationError>>)
-        case selectableGenerator((SelectExpression) -> AnyIterator<Result<Row, RelationError>>)
+        case rowGenerator((Void) -> AnyIterator<Result<Set<Row>, RelationError>>)
+        case selectableGenerator((SelectExpression) -> AnyIterator<Result<Set<Row>, RelationError>>)
         case rowSet((Void) -> Set<Row>)
         
         case union
@@ -174,8 +180,6 @@ extension QueryPlanner {
         
         case otherwise
         case unique(Attribute, RelationValue)
-        
-        case equijoinedSelectableGenerator([Attribute: Attribute], (SelectExpression) -> AnyIterator<Result<Row, RelationError>>)
     }
 }
 

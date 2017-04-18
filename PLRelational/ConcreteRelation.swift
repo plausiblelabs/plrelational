@@ -7,6 +7,8 @@ public struct ConcreteRelation: Relation {
     public var scheme: Scheme
     public var values: Set<Row>
     
+    public var debugName: String?
+    
     var defaultSort: Attribute?
     
     public init(scheme: Scheme, values: Set<Row> = [], defaultSort: Attribute? = nil) {
@@ -48,7 +50,7 @@ public struct ConcreteRelation: Relation {
     }
     
     public var contentProvider: RelationContentProvider {
-        return .set({ self.values })
+        return .set({ self.values }, approximateCount: Double(values.count))
     }
     
     public mutating func add(_ row: Row) -> Result<Int64, RelationError> {

@@ -73,16 +73,14 @@ class InlineMutableData: ManagedBuffer<(length: Int, capacity: Int, hash: UInt64
 extension InlineMutableData: Hashable {
     var hashValue: Int {
         return withUnsafeMutablePointers({ headerPtr, elementPtr in
+            // No thread safety. Will still work correctly, but may redundantly calculate
+            // the hash more than once if multiple threads hit this simultaneously.
             if headerPtr.pointee.hash == 0 {
-                objc_sync_enter(self)
-                if headerPtr.pointee.hash == 0 {
-                    var newHash: UInt64 = 14695981039346656037
-                    self.updateHash(&newHash, pointer: elementPtr, length: headerPtr.pointee.length)
-                    headerPtr.pointee.hash = newHash
-                }
+                var newHash: UInt64 = 14695981039346656037
+                self.updateHash(&newHash, pointer: elementPtr, length: headerPtr.pointee.length)
+                headerPtr.pointee.hash = newHash
             }
-            objc_sync_exit(self)
-            return Int(bitPattern: UInt(truncatingBitPattern: headerPtr.pointee.hash))
+            return Int(truncatingBitPattern: headerPtr.pointee.hash)
         })
     }
 }

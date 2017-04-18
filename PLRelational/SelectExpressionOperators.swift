@@ -52,3 +52,7 @@ prefix operator *!
 public prefix func *!(expr: SelectExpression) -> SelectExpression {
     return SelectExpressionUnaryOperator(op: NotOperator(), expr: expr)
 }
+
+public func ~=(pattern: Bool, value: SelectExpression) -> Bool {
+    return value as? Bool == pattern
+}

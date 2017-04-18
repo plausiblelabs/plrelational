@@ -19,6 +19,8 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     public var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    public var debugName: String?
+    
     fileprivate init(scheme: Scheme, primaryKeys: [Attribute], url: URL?, codec: DataCodec?, isTransient: Bool) {
         self.scheme = scheme
         self.values = IndexedSet(primaryKeys: primaryKeys)
@@ -29,16 +31,20 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     public var contentProvider: RelationContentProvider {
         return .efficientlySelectableGenerator({ expression in
-            if let rows = self.efficientValuesSet(expression: expression) {
-                return AnyIterator(rows.lazy.map({ .Ok($0) }).makeIterator())
+            if expression as? Bool == false {
+                return AnyIterator([].makeIterator())
+            } else if expression as? Bool == true {
+                return AnyIterator([.Ok(self.values.values)].makeIterator())
+            } else if let rows = self.efficientValuesSet(expression: expression) {
+                return AnyIterator([.Ok(rows)].makeIterator())
             } else {
                 let lazy = self.values.lazy
                 let filtered = lazy.filter({
                     expression.valueWithRow($0).boolValue
                 })
-                return AnyIterator(filtered.map({ .Ok($0) }).makeIterator())
+                return AnyIterator(filtered.map({ .Ok([$0]) }).makeIterator())
             }
-        })
+        }, approximateCount: Double(values.values.count))
     }
     
     public func contains(_ row: Row) -> Result<Bool, RelationError> {
@@ -77,16 +83,34 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
 }
 
 extension PlistFileRelation {
-    enum Error: Swift.Error {
+    public enum Error: Swift.Error {
         case unknownTopLevelObject(unknownObject: Any)
         case missingValues
         case unknownValuesObject(unknownObject: Any)
+        case schemeMismatch(foundScheme: Scheme)
     }
     
-    public static func withFile(_ url: URL?, scheme: Scheme, primaryKeys: [Attribute], createIfDoesntExist: Bool, codec: DataCodec? = nil) -> Result<PlistFileRelation, RelationError> {
+    /// Create a new relation with the given file.
+    ///
+    /// - Parameters:
+    ///   - url: The URL to the file to use. If nil, the relation starts out empty, and
+    ///          the `url` property must be set before calling `save()`.
+    ///   - scheme: The relation scheme.
+    ///   - primaryKeys: The primary keys to use for the relation. Queries involving these
+    ///                  keys can be resolved without scanning every row in the relation.
+    ///                  Each primary key involves extra bookkeeping time and space, so
+    ///                  it is not always desirable to put every key in the scheme in.
+    ///   - create: If false, then a URL must be provided and it must point to an existing
+    ///             file. If no URL is provided, this is a precondition failure. If an URL
+    ///             is provided but the file doesn't exist or isn't readable, this is an error.
+    ///             If true, then the file doesn't have to exist. If it does exist, its contents
+    ///             are ignored and will be overwritten when saving.
+    ///   - codec: A DataCodec used to encode and decode the plist on disk.
+    /// - Returns: The newly created file relation, or an error if creation failed.
+    public static func withFile(_ url: URL?, scheme: Scheme, primaryKeys: [Attribute], create: Bool, codec: DataCodec? = nil) -> Result<PlistFileRelation, RelationError> {
         if let url = url {
             // We have a URL, so we are either opening an existing relation or creating a new one at a specific location;
-            if !createIfDoesntExist {
+            if !create {
                 // We are opening a relation, so let's require its existence at init time
                 do {
                     let data = try Data(contentsOf: url, options: [])
@@ -98,7 +122,13 @@ extension PlistFileRelation {
                         guard let values = dict["values"] else { return .Err(Error.missingValues) }
                         guard let array = values as? NSArray else { return .Err(Error.unknownValuesObject(unknownObject: values)) }
                         
-                        let relationValueResults = array.map({ Row.fromPlist($0) })
+                        let relationValueResults = array.map({
+                            Row.fromPlist($0).then({
+                                return $0.scheme == scheme
+                                    ? .Ok($0)
+                                    : .Err(Error.schemeMismatch(foundScheme: $0.scheme))
+                            })
+                        })
                         let relationValuesResult = mapOk(relationValueResults, { $0 })
                         return relationValuesResult.map({
                             let r = PlistFileRelation(scheme: scheme, primaryKeys: primaryKeys, url: url, codec: codec, isTransient: false)
@@ -112,7 +142,7 @@ extension PlistFileRelation {
             }
         } else {
             // We have no URL, so we are creating a new relation; we will defer file creation until the first save
-            precondition(createIfDoesntExist)
+            precondition(create)
         }
         return .Ok(PlistFileRelation(scheme: scheme, primaryKeys: primaryKeys, url: url, codec: codec, isTransient: false))
     }

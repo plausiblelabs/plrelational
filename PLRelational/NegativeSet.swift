@@ -16,15 +16,15 @@ public struct NegativeSet<T: Hashable> {
     }
     
     public mutating func unionInPlace(_ set: Set<T>) {
-        let new = set.subtracting(removed)
+        let new = set.fastSubtracting(removed)
         added.formUnion(new)
-        removed.subtract(set)
+        removed.fastSubtract(set)
     }
     
     public mutating func subtractInPlace(_ set: Set<T>) {
-        let gone = set.subtracting(added)
+        let gone = set.fastSubtracting(added)
         removed.formUnion(gone)
-        added.subtract(set)
+        added.fastSubtract(set)
     }
     
     public mutating func removeAll() {

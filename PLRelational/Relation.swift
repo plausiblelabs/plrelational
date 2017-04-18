@@ -15,6 +15,8 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     var scheme: Scheme { get }
     
     var contentProvider: RelationContentProvider { get }
+    
+    var debugName: String? { get set }
 
     func contains(_ row: Row) -> Result<Bool, RelationError>
     
@@ -64,9 +66,9 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
 }
 
 public enum RelationContentProvider {
-    case generator((Void) -> AnyIterator<Result<Row, RelationError>>)
-    case efficientlySelectableGenerator((SelectExpression) -> AnyIterator<Result<Row, RelationError>>)
-    case set((Void) -> Swift.Set<Row>)
+    case generator((Void) -> AnyIterator<Result<Set<Row>, RelationError>>, approximateCount: Double?)
+    case efficientlySelectableGenerator((SelectExpression) -> AnyIterator<Result<Set<Row>, RelationError>>, approximateCount: Double?)
+    case set((Void) -> Swift.Set<Row>, approximateCount: Double?)
     case intermediate(IntermediateRelation.Operator, [Relation])
     case underlying(Relation)
 }
@@ -77,6 +79,16 @@ public enum RelationObservationKind {
     
     /// A change due to something in a dependency of an intermediate relation, not the Relation itself.
     case dependentChange
+}
+
+extension Relation {
+    /// Set the debug name and return self, for convenient chaining.
+    /// Value-type relations return a new one rather than mutating in place.
+    public func setDebugName(_ name: String) -> Self {
+        var result = self
+        result.debugName = name
+        return result
+    }
 }
 
 extension Relation {
@@ -222,7 +234,7 @@ extension Relation {
     /// Returns a projection of this Relation that includes only those attributes that appear in this Relation's
     /// scheme but not in the given scheme.
     public func project(dropping scheme: Scheme) -> Relation {
-        return project(Scheme(attributes: self.scheme.attributes.subtracting(scheme.attributes)))
+        return project(Scheme(attributes: self.scheme.attributes.fastSubtracting(scheme.attributes)))
     }
 
     public func project(_ attribute: Attribute) -> Relation {
@@ -250,7 +262,7 @@ extension Relation {
     }
     
     public func divide(_ other: Relation) -> Relation {
-        let resultingScheme = Scheme(attributes: self.scheme.attributes.subtracting(other.scheme.attributes))
+        let resultingScheme = Scheme(attributes: self.scheme.attributes.fastSubtracting(other.scheme.attributes))
         let allCombinations = self.project(resultingScheme).join(other)
         let subtracted = allCombinations.difference(self)
         let projected = subtracted.project(resultingScheme)

@@ -4,25 +4,37 @@
 //
 
 public struct Attribute {
-    public var name: String
+    /// Note: since InternedUTF8String never deallocates strings,
+    /// the number of distinct attributes used in a program must
+    /// be bounded. If that ever becomes unacceptable, we'll have
+    /// to rework this.
+    public var internedName: InternedUTF8String
     
+    public var name: String {
+        return internedName.string
+    }
+    
+    public init(_ internedName: InternedUTF8String) {
+        self.internedName = internedName
+    }
+
     public init(_ name: String) {
-        self.name = name
+        self.internedName = .get(name)
     }
 }
 
 extension Attribute: Hashable, Comparable {
     public var hashValue: Int {
-        return name.hashValue
+        return internedName.hashValue
     }
 }
 
 public func ==(a: Attribute, b: Attribute) -> Bool {
-    return a.name == b.name
+    return a.internedName == b.internedName
 }
 
 public func <(a: Attribute, b: Attribute) -> Bool {
-    return a.name < b.name
+    return a.internedName < b.internedName
 }
 
 extension Attribute: CustomStringConvertible {
@@ -33,15 +45,15 @@ extension Attribute: CustomStringConvertible {
 
 extension Attribute: ExpressibleByStringLiteral {
     public init(extendedGraphemeClusterLiteral value: String) {
-        name = value
+        self.init(value)
     }
     
     public init(unicodeScalarLiteral value: String) {
-        name = value
+        self.init(value)
     }
     
     public init(stringLiteral value: String) {
-        name = value
+        self.init(value)
     }
 }
 

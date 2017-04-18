@@ -41,6 +41,8 @@ class AsyncManagerTests: DBTestCase {
         let r = db["n"]
         
         class TriggerRelation: Relation {
+            var debugName: String?
+            
             var onGetRowsCallback: (Void) -> Void = {}
             
             var scheme: Scheme {
@@ -51,7 +53,7 @@ class AsyncManagerTests: DBTestCase {
                 return .set({
                     self.onGetRowsCallback()
                     return [["n": 1], ["n": 2], ["n": 3]]
-                })
+                }, approximateCount: nil)
             }
             
             func contains(_ row: Row) -> Result<Bool, RelationError> {
@@ -369,14 +371,16 @@ class AsyncManagerTests: DBTestCase {
         class ErroringRelation: Relation {
             var scheme: Scheme { return ["n"] }
             
+            var debugName: String?
+            
             var contentProvider: RelationContentProvider {
-                let results: [Result<Row, RelationError>] = [
-                    .Ok(["n": 1]),
-                    .Ok(["n": 2]),
-                    .Ok(["n": 3]),
+                let results: [Result<Set<Row>, RelationError>] = [
+                    .Ok([["n": 1]]),
+                    .Ok([["n": 2]]),
+                    .Ok([["n": 3]]),
                     .Err(DummyError())
                 ]
-                return .generator({ AnyIterator(results.makeIterator()) })
+                return .generator({ AnyIterator(results.makeIterator()) }, approximateCount: nil)
             }
             
             func contains(_ row: Row) -> Result<Bool, RelationError> {
@@ -725,7 +729,7 @@ class AsyncManagerTests: DBTestCase {
         let db = TransactionalDatabase(sqliteDB)
         let r = db["person"]
         
-        let cachingR = CachingRelation(r, limit: 2)
+        let cachingR = r.cache(upTo: 2)
         
         let derived = cachingR.project(["name"])
         let observer = TestAsyncContentCoalescedObserver()
@@ -774,7 +778,7 @@ class AsyncManagerTests: DBTestCase {
         XCTAssertNil(person.add(["id": 3, "name": "Tony"]).err)
         XCTAssertNil(person.add(["id": 4, "name": "Mr. T"]).err)
         
-        let selectedName = person.join(CachingRelation(selected, limit: 2))
+        let selectedName = person.join(selected.cache(upTo: 2))
         
         let personObserver = TestAsyncChangeObserver()
         let personRemover = person.addAsyncObserver(personObserver)

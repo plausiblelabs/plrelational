@@ -181,10 +181,8 @@ open class TransactionalDatabase {
         let result = to.relationSnapshots.map({ relation, toSnapshot -> (TransactionalRelation, ChangeLoggingRelationDelta) in
             let fromSnapshot = fromDict[relation] ?? ChangeLoggingRelationSnapshot(bookmark: relation.underlyingRelationForQueryExecution.zeroBookmark)
             let delta = relation.computeDelta(from: fromSnapshot, to: toSnapshot)
-            print("Delta for \(relation.scheme) is \(delta)")
             return (relation, delta)
         })
-        print("Delta is \(result.map({ ($0.scheme, $1) }))")
         return .init(relationDeltas: result)
     }
     
@@ -227,6 +225,8 @@ public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserv
     var transactionRelation: ChangeLoggingRelation?
     
     open var changeObserverData = RelationDefaultChangeObserverImplementationData()
+    
+    public var debugName: String?
     
     init(db: TransactionalDatabase, underlyingRelation: ChangeLoggingRelation) {
         self.db = db
@@ -301,12 +301,7 @@ extension TransactionalRelation {
     }
     
     public func apply(delta: ChangeLoggingRelationDelta) -> Result<Void, RelationError> {
-        print("========")
-        print("Applying a delta to \(self)")
-        print("  delta is \(delta)")
-        let result = underlyingRelationForQueryExecution.apply(delta: delta)
-        print("  After applying, we are \(self)")
-        return result
+        return underlyingRelationForQueryExecution.apply(delta: delta)
     }
 }
 

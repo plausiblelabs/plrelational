@@ -13,6 +13,8 @@ open class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementation
     
     open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    public var debugName: String?
+    
     var tableNameForQuery: String {
         return db.escapeIdentifier(tableName)
     }
@@ -31,19 +33,19 @@ open class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementation
         precondition(queryToSQL(query) != nil, "Query terms must be SQL compatible!")
     }
     
-    fileprivate func rawGenerateRows() -> AnyIterator<Result<Row, RelationError>> {
+    fileprivate func rawGenerateRows() -> AnyIterator<Result<Set<Row>, RelationError>> {
         let data = LogRelationIterationBegin(self)
         var queryGenerator: AnyIterator<Result<Row, RelationError>>? = nil
         return LogRelationIterationReturn(data, AnyIterator({
             if let queryGenerator = queryGenerator {
-                return queryGenerator.next()
+                return queryGenerator.next()?.map({ [$0] })
             } else {
                 let (sql, parameters) = self.queryToSQL(self.query)!
                 let result = self.db.executeQuery("SELECT * FROM (\(self.tableNameForQuery)) WHERE \(sql)", parameters)
                 switch result {
                 case .Ok(let generator):
                     queryGenerator = generator
-                    return generator.next()
+                    return generator.next()?.map({ [$0] })
                 case .Err(let error):
                     return .Err(error)
                 }
@@ -52,7 +54,7 @@ open class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementation
     }
     
     open var contentProvider: RelationContentProvider {
-        return .generator({ self.rawGenerateRows() })
+        return .generator({ self.rawGenerateRows() }, approximateCount: nil)
     }
     
     open func contains(_ row: Row) -> Result<Bool, RelationError> {

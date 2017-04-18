@@ -126,5 +126,5 @@ public func +<T: Hashable>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
 }
 
 public func -<T: Hashable>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
-    return lhs.subtracting(rhs)
+    return lhs.fastSubtracting(rhs)
 }

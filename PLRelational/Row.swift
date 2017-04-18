@@ -9,8 +9,8 @@ import Foundation
 public struct Row: Hashable, Sequence {
     var inlineRow: InlineRow
     
-    public init(values: [Attribute: RelationValue]) {
-        inlineRow = InlineRow.intern(values)
+    public init<S: Sequence>(values: S) where S.Iterator.Element == (key: Attribute, value: RelationValue) {
+        inlineRow = InlineRow.internSequence(values)
     }
     
     public var hashValue: Int {
@@ -24,7 +24,7 @@ public struct Row: Hashable, Sequence {
         set {
             var d = Dictionary(inlineRow)
             d[attribute] = newValue
-            inlineRow = InlineRow.intern(d)
+            inlineRow = InlineRow.internSequence(d)
         }
     }
     
@@ -41,20 +41,31 @@ public struct Row: Hashable, Sequence {
     
     /// Create a new row containing only the values whose attributes are also in the attributes parameter.
     public func rowWithAttributes<Seq: Sequence>(_ attributes: Seq) -> Row where Seq.Iterator.Element == Attribute {
-        return Row(values: Dictionary(attributes.flatMap({
-            if let value = inlineRow[$0] {
-                return ($0, value)
-            } else {
-                return nil
-            }
-        })))
+        return rowWithAttributes(Set(attributes))
+    }
+    
+    /// Create a new row containing only the values whose attributes are also in the attributes parameter.
+    public func rowWithAttributes(_ attributes: Set<Attribute>) -> Row {
+        if inlineRow.attributesEqual(attributes) {
+            return self
+        } else {
+            return Row(values: Dictionary(attributes.flatMap({
+                if let value = inlineRow[$0] {
+                    return ($0, value)
+                } else {
+                    return nil
+                }
+            })))
+        }
     }
     
     /// Produce a new Row by applying updated values to this Row. Any attributes that exist in `newValues`
     /// but not `self` will be added. Any attributes that exist in both will be set to the new value.
     /// Attributes only in `self` are left alone.
     public func rowWithUpdate(_ newValues: Row) -> Row {
-        let updatedValues = Dictionary(self) + newValues
+        let updatedValues = self.map({
+            (key: $0, value: newValues.inlineRow[$0] ?? $1)
+        })
         return Row(values: updatedValues)
     }
     
@@ -74,6 +85,10 @@ public struct Row: Hashable, Sequence {
         return self.lazy.map({ $0.0 })
     }
     
+    public var scheme: Scheme {
+        return Scheme(attributes: Set(attributes))
+    }
+    
     public var count: Int {
         return inlineRow.count
     }
@@ -85,7 +100,7 @@ public struct Row: Hashable, Sequence {
 
 extension Row: ExpressibleByDictionaryLiteral {
     public init(dictionaryLiteral elements: (Attribute, RelationValue)...) {
-        self.init(values: Dictionary(elements))
+        self.init(values: elements.map({ (key: $0, value: $1) }))
     }
 }
 
@@ -104,60 +119,51 @@ extension Row: CustomStringConvertible {
 }
 
 
-final class InlineRow: InlineMutableData {
-    // Internal structure:
-    //
-    // Int: number of attribute/value pairs.
-    // repeating:
-    //    Int: absolute offset of attribute string beginning
-    //    Int: absolute offset of value beginning
-    // Followed by all serialized string/value data.
-    
+final class InlineRow: ManagedBuffer<(count: Int, hash: Int), (Attribute, RelationValue)> {
     var count: Int {
-        return withUnsafeMutablePointerToElements({
-            return UnsafeRawPointer($0).load(fromByteOffset: 0, as: Int.self)
+        return withUnsafeMutablePointers({
+            return $0.0.pointee.count
         })
     }
     
     subscript(index: Int) -> (Attribute, RelationValue) {
-        let count = self.count
-        precondition(index >= 0 && index < count)
-        
-        return withUnsafeMutablePointers({ valuePtr, elementPtr in
-            let raw = UnsafeRawPointer(elementPtr)
-            let offsetIndex = index * 2 + 1
-            let attributeOffset = raw.load(fromByteOffset: offsetIndex * MemoryLayout<Int>.size, as: Int.self)
-            let valueOffset = raw.load(fromByteOffset: (offsetIndex + 1) * MemoryLayout<Int>.size, as: Int.self)
-            let endOffset = (index < count - 1)
-                ? raw.load(fromByteOffset: (offsetIndex + 2) * MemoryLayout<Int>.size, as: Int.self)
-                : valuePtr.pointee.length
+        return withUnsafeMutablePointers({ headerPtr, elementPtr in
+            let count = headerPtr.pointee.count
+            precondition(index >= 0 && index < count)
             
-            let attribute = self.deserializeAttribute(elementPtr, start: attributeOffset, end: valueOffset)
-            let value = self.deserializeValue(elementPtr, start: valueOffset, end: endOffset)
-            return (attribute, value)
+            return elementPtr[index]
         })
     }
     
     subscript(attribute: Attribute) -> RelationValue? {
-        return attribute.name.withCString({ attrPtr in
-            let attrLen = Int(strlen(attrPtr))
-            let count = self.count
-            return withUnsafeMutablePointers({ valuePtr, elementPtr in
-                elementPtr.withMemoryRebound(to: Int.self, capacity: count * 2 + 1, { header in
-                    let count = header[0]
-                    for i in 0 ..< count {
-                        let headerOffset = i * 2 + 1
-                        let attributeOffset = header[headerOffset]
-                        let valueOffset = header[headerOffset + 1]
-                        if attrLen == valueOffset - attributeOffset && memcmp(attrPtr, elementPtr + attributeOffset, attrLen) == 0 {
-                            let endOffset = (i < count - 1) ? header[headerOffset + 2] : valuePtr.pointee.length
-                            return self.deserializeValue(elementPtr, start: valueOffset, end: endOffset)
-                        }
-                    }
-                    return nil
-                })
-            })
+        for i in 0 ..< count {
+            let (attr, value) = self[i]
+            if attribute == attr {
+                return value
+            }
+        }
+        return nil
+    }
+    
+    func attributeAtIndex(index: Int) -> Attribute {
+        return withUnsafeMutablePointers({ headerPtr, elementPtr in
+            let count = headerPtr.pointee.count
+            precondition(index >= 0 && index < count)
+            
+            return elementPtr[index].0
         })
+    }
+    
+    func attributesEqual(_ attributes: Set<Attribute>) -> Bool {
+        let count = self.count
+        if count != attributes.count { return false }
+        
+        for i in 0 ..< count {
+            if !attributes.contains(attributeAtIndex(index: i)) {
+                return false
+            }
+        }
+        return true
     }
 }
 
@@ -182,101 +188,59 @@ extension InlineRow: Sequence {
 }
 
 extension InlineRow {
-    static func buildFrom(_ valuesDict: [Attribute: RelationValue]) -> InlineRow {
-        let values = valuesDict.sorted(by: { $0.0 < $1.0 })
-        let estimatedSize = 100 // DO THIS BETTER
+    static func buildFrom<S: Sequence>(_ valuesSequence: S) -> InlineRow where S.Iterator.Element == (key: Attribute, value: RelationValue) {
+        let values = valuesSequence.sorted(by: { $0.key < $1.key })
+        let count = values.count
         
-        var obj = self.make(estimatedSize)
-        
-        // Reserve space for the count and the offsets. Don't set their values yet, we'll do that at the end.
-        obj = append(obj, pointer: nil, length: (1 + values.count * 2) * MemoryLayout<Int>.size)
-        
-        var offsets: [Int] = []
-        offsets.reserveCapacity(values.count * 2)
-        
-        for (attribute, value) in values {
-            offsets.append(serialize(&obj, attribute))
-            offsets.append(serialize(&obj, value))
-        }
-        
-        obj.withUnsafeMutablePointerToElements({ ptr in
-            let raw = UnsafeMutableRawPointer(ptr)
-            raw.storeBytes(of: values.count, as: Int.self)
-            memcpy(raw + MemoryLayout<Int>.size, offsets, offsets.count * MemoryLayout<Int>.size)
+        let obj = create(minimumCapacity: count, makingHeaderWith: { _ in (count: count, hash: 5381) })
+        obj.withUnsafeMutablePointers({ headerPtr, elementsPtr in
+            func combineHash(_ existing: inout Int, _ new: Int) {
+                // DJB hash function, adapted from http://stackoverflow.com/questions/31438210/how-to-implement-the-hashable-protocol-in-swift-for-an-int-array-a-custom-strin
+                existing = (existing << 5) &+ existing &+ new
+            }
+            for i in 0 ..< count {
+                let (attribute, value) = values[i]
+                (elementsPtr + i).initialize(to: (attribute, value))
+                combineHash(&headerPtr.pointee.hash, attribute.hashValue)
+                combineHash(&headerPtr.pointee.hash, value.hashValue)
+            }
         })
-        
-        return obj
-    }
-    
-    static func serialize(_ obj: inout InlineRow, _ string: String) -> Int {
-        let offset = obj.length
-        string.withCString({
-            let len = Int(strlen($0))
-            obj = append(obj, pointer: UnsafePointer($0), length: len)
-        })
-        return offset
-    }
-    
-    static func serialize(_ obj: inout InlineRow, _ attribute: Attribute) -> Int {
-        return serialize(&obj, attribute.name)
-    }
-    
-    static func serialize(_ obj: inout InlineRow, _ value: RelationValue) -> Int {
-        let offset = obj.length
-        
-        switch value {
-        case .null:
-            obj = append(obj, pointer: [0] as [UInt8], length: 1)
-        case .integer(var value):
-            obj = append(obj, pointer: [1] as [UInt8], length: 1)
-            obj = append(obj, untypedPointer: &value, length: MemoryLayout.size(ofValue: value))
-        case .real(var value):
-            obj = append(obj, pointer: [2] as [UInt8], length: 1)
-            obj = append(obj, untypedPointer: &value, length: MemoryLayout.size(ofValue: value))
-        case .text(let string):
-            obj = append(obj, pointer: [3] as [UInt8], length: 1)
-            _ = serialize(&obj, string)
-        case .blob(let data):
-            obj = append(obj, pointer: [4] as [UInt8], length: 1)
-            obj = append(obj, pointer: data, length: data.count)
-        case .notFound:
-            obj = append(obj, pointer: [5] as [UInt8], length: 1)
-        }
-        
-        return offset
+        return obj as! InlineRow
     }
 }
 
-extension InlineRow {
-    func deserializeString(_ ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> String {
-        let buf = UnsafeBufferPointer(start: ptr + start, count: end - start)
-        return String(bytes: buf, encoding: String.Encoding.utf8)!
-    }
-    
-    func deserializeAttribute(_ ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> Attribute {
-        return Attribute(deserializeString(ptr, start: start, end: end))
-    }
-    
-    func deserializeValue(_ ptr: UnsafePointer<UInt8>, start: Int, end: Int) -> RelationValue {
-        switch ptr[start] {
-        case 0:
-            return .null
-        case 1:
-            return .integer(ptr.unalignedLoad(fromByteOffset: start + 1))
-        case 2:
-            return .real(ptr.unalignedLoad(fromByteOffset: start + 1))
-        case 3:
-            let value = deserializeString(ptr, start: start + 1, end: end)
-            return .text(value)
-        case 4:
-            let buf = UnsafeBufferPointer(start: ptr + start + 1, count: end - start - 1)
-            let value = Array(buf)
-            return .blob(value)
-        case 5:
-            return .notFound
-        default:
-            fatalError("Unknown tag byte \(ptr[start])")
+extension InlineRow: Hashable {
+    static func ==(lhs: InlineRow, rhs: InlineRow) -> Bool {
+        if lhs.count != rhs.count || lhs.hashValue != rhs.hashValue {
+            return false
         }
+        
+        // Scan attributes and values separately, because checking attributes for equality should be much faster
+        for i in 0 ..< lhs.count {
+            let lhsAttr = lhs.attributeAtIndex(index: i)
+            let rhsAttr = rhs.attributeAtIndex(index: i)
+            if lhsAttr != rhsAttr {
+                print("Collided hash: \(lhs.hashValue) \(rhs.hashValue)")
+                return false
+            }
+        }
+        
+        for i in 0 ..< lhs.count {
+            let lhsValue = lhs[i].1
+            let rhsValue = rhs[i].1
+            if lhsValue != rhsValue {
+                print("Collided hash: \(lhs.hashValue) \(rhs.hashValue)")
+                return false
+            }
+        }
+        
+        return true
+    }
+    
+    var hashValue: Int {
+        return withUnsafeMutablePointers({
+            $0.0.pointee.hash
+        })
     }
 }
 
@@ -289,7 +253,7 @@ extension InlineRow {
         }(), capacity: 0))
     
     
-    static func intern(_ row: InlineRow) -> InlineRow {
+    static func internRow(_ row: InlineRow) -> InlineRow {
         return extantRows.withValue({
             if let extantRow = $0.member(row) {
                 return extantRow as! InlineRow
@@ -300,8 +264,8 @@ extension InlineRow {
         })
     }
     
-    static func intern(_ values: [Attribute: RelationValue]) -> InlineRow {
-        return intern(self.buildFrom(values))
+    static func internSequence<S: Sequence>(_ values: S) -> InlineRow where S.Iterator.Element == (key: Attribute, value: RelationValue) {
+        return internRow(self.buildFrom(values))
     }
 }
 

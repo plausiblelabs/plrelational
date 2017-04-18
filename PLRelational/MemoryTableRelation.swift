@@ -14,6 +14,8 @@ open class MemoryTableRelation: Relation, MutableRelation, RelationDefaultChange
     
     open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
+    public var debugName: String?
+    
     public init(scheme: Scheme) {
         self.scheme = scheme
     }
@@ -27,7 +29,7 @@ open class MemoryTableRelation: Relation, MutableRelation, RelationDefaultChange
     }
     
     open var contentProvider: RelationContentProvider {
-        return .set({ self.values })
+        return .set({ self.values }, approximateCount: Double(self.values.count))
     }
     
     open func contains(_ row: Row) -> Result<Bool, RelationError> {
@@ -54,7 +56,7 @@ open class MemoryTableRelation: Relation, MutableRelation, RelationDefaultChange
     
     open func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         let toDelete = Set(values.lazy.filter({ query.valueWithRow($0).boolValue }))
-        values.subtract(toDelete)
+        values.fastSubtract(toDelete)
         notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .directChange)
         return .Ok()
     }

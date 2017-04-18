@@ -10,7 +10,11 @@
 public struct IndexedSet<Element: IndexableValue> {
     public let primaryKeys: Set<Element.Index>
     
-    fileprivate var index: [Element.Index: [Element.Value: Set<Element>]]
+    // MutableBox is used here to allow for in-place mutation of the nested containers. Swift is currently
+    // not smart enough to do that when the containers are placed directly in the Dictionary, which results
+    // in atrocious performance. Boxing it in a class fixes that. Hopefully this will be fixed in Swift 4
+    // and then we can remove this.
+    fileprivate var index: [Element.Index: MutableBox<[Element.Value: MutableBox<Set<Element>>]>]
     fileprivate var allValues: Set<Element>
 }
 
@@ -19,7 +23,7 @@ extension IndexedSet {
     /// and elements with matching values for those keys can be quickly retrieved.
     public init<S: Sequence>(primaryKeys: S) where S.Iterator.Element == Element.Index {
         self.primaryKeys = Set(primaryKeys)
-        index = .init(primaryKeys.map({ ($0, [:]) }))
+        index = Dictionary(primaryKeys.map({ ($0, MutableBox([:])) }))
         allValues = []
     }
     
@@ -34,20 +38,20 @@ extension IndexedSet {
     /// otherwise the call will crash.
     /// If no elements have the given value for the given key, the empty set is returned.
     public func values(matchingKey: Element.Index, value: Element.Value) -> Set<Element> {
-        return index[matchingKey]![value] ?? []
+        return index[matchingKey]!.value[value]?.value ?? []
     }
     
     public mutating func add(element: Element) {
         allValues.insert(element)
         for indexKey in index.keys {
-            add(indexedValue: element.value(index: indexKey), element: element, toDictionary: &index[indexKey]!)
+            add(indexedValue: element.value(index: indexKey), element: element, toDictionary: &index[indexKey]!.value)
         }
     }
     
     public mutating func remove(element: Element) {
         allValues.remove(element)
         for indexKey in index.keys {
-            remove(indexedValue: element.value(index: indexKey), element: element, fromDictionary: &index[indexKey]!)
+            remove(indexedValue: element.value(index: indexKey), element: element, fromDictionary: &index[indexKey]!.value)
         }
     }
     
@@ -71,20 +75,21 @@ extension IndexedSet: Sequence {
 }
 
 extension IndexedSet {
-    fileprivate mutating func add(indexedValue: Element.Value, element: Element, toDictionary: inout [Element.Value: Set<Element>]) {
-        if toDictionary[indexedValue] == nil {
-            toDictionary[indexedValue] = [element]
+    fileprivate mutating func add(indexedValue: Element.Value, element: Element, toDictionary: inout [Element.Value: MutableBox<Set<Element>>]) {
+        if let box = toDictionary[indexedValue] {
+            box.value.insert(element)
         } else {
-            toDictionary[indexedValue]!.insert(element)
+            toDictionary[indexedValue] = MutableBox([element])
         }
     }
     
-    fileprivate mutating func remove(indexedValue: Element.Value, element: Element, fromDictionary: inout [Element.Value: Set<Element>]) {
-        let removed = fromDictionary[indexedValue]?.remove(element)
+    fileprivate mutating func remove(indexedValue: Element.Value, element: Element, fromDictionary: inout [Element.Value: MutableBox<Set<Element>>]) {
+        let box = fromDictionary[indexedValue]
+        let removed = box?.value.remove(element)
         
         // If we removed the last value in the set, remove the entire set.
         // This keeps empty entries from building up over a long time.
-        if removed != nil && fromDictionary[indexedValue]?.isEmpty == true {
+        if removed != nil && box?.value.isEmpty == true {
             fromDictionary.removeValue(forKey: indexedValue)
         }
     }
