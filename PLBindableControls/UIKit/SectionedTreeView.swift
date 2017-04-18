@@ -64,14 +64,16 @@ public protocol SectionedTreeViewModel: class {
     var selection: AsyncReadWriteProperty<Set<Path>> { get }
     var selectionExclusiveMode: Bool { get set }
     
-    // XXX: This exists only to allow the model to see selection events for momentary-style
-    // cells, like menu items
-    var didSelectRowAt: ((IndexPath) -> Void)? { get set }
-    
     func start()
     
     func indexPathForItemPath(_ itemPath: Path) -> IndexPath?
-    func itemPathForIndexPath(_ indexPath: IndexPath) -> Path?
+
+    /// Called when a row at the given path has been selected.  The view will update the
+    /// `selection` property using the value returned by this function.  This gives the model
+    /// an opportunity to handle momentary-style cell selection.  For example, the model can
+    /// initiate some action when a cell is selected then return `nil` to prevent `selection`
+    /// being set to that item's path.
+    func itemPathForSelectedRow(_ indexPath: IndexPath) -> Path?
     
     func sectionCount() -> Int
     func rowCount(forSection section: Int) -> Int
@@ -83,10 +85,20 @@ public protocol SectionedTreeViewModel: class {
     func cellText(_ indexPath: IndexPath) -> LabelText
 }
 
+public protocol SectionedTreeViewDelegate: class {
+    func willDisplayCell(_ cell: UITableViewCell, indexPath: IndexPath)
+}
+
 open class SectionedTreeView<M: SectionedTreeViewModel> {
     
     private let impl: Impl<M>
+    private weak var delegate: SectionedTreeViewDelegate?
     
+    public var viewDelegate: SectionedTreeViewDelegate? {
+        get { return impl.viewDelegate }
+        set { impl.viewDelegate = newValue }
+    }
+
     public init(model: M, tableView: UITableView) {
         self.impl = Impl(model: model, tableView: tableView)
     }
@@ -97,6 +109,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
     
     private let model: M
     private let tableView: UITableView
+    fileprivate weak var viewDelegate: SectionedTreeViewDelegate?
     
     private lazy var selection: MutableValueProperty<Set<M.Path>> = mutableValueProperty(Set(), { selectedPaths, _ in
         self.selectItems(selectedPaths)
@@ -151,25 +164,30 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
         return model.cellIndentationLevel(indexPath)
     }
     
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        viewDelegate?.willDisplayCell(cell, indexPath: indexPath)
+    }
+    
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        Swift.print("SELECTED: \(indexPath.row)")
         if selfInitiatedSelectionChange {
             return
         }
         
-        model.didSelectRowAt?(indexPath)
-        
+        let paths = selectedItemPaths()
         selfInitiatedSelectionChange = true
-        selection.change(selectedItemPaths(), transient: false)
+        selection.change(paths, transient: false)
         selfInitiatedSelectionChange = false
     }
     
     /// Returns the set of item paths corresponding to the view's current selection state.
+    /// Note that the model may return nil for one or more index paths, indicating that it
+    /// handled the selection event but does not want that path included when changing
+    /// the state of the `selection` property.
     private func selectedItemPaths() -> Set<M.Path> {
         var itemPaths: [M.Path] = []
         if let indexPaths = self.tableView.indexPathsForSelectedRows {
             for indexPath in indexPaths {
-                if let itemPath = self.model.itemPathForIndexPath(indexPath) {
+                if let itemPath = self.model.itemPathForSelectedRow(indexPath) {
                     itemPaths.append(itemPath)
                 }
             }

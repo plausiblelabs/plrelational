@@ -7,7 +7,7 @@ import UIKit
 import PLRelationalBinding
 
 // TODO: Convert this to Bindable extension
-public class BarButtonItem: UIBarButtonItem {
+open class BarButtonItem: UIBarButtonItem {
     
     public lazy var bindable_enabled: BindableProperty<Bool> = {
         return WriteOnlyProperty(set: { [weak self] value, _ in
