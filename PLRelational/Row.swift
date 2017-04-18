@@ -49,13 +49,7 @@ public struct Row: Hashable, Sequence {
         if inlineRow.attributesEqual(attributes) {
             return self
         } else {
-            return Row(values: Dictionary(attributes.flatMap({
-                if let value = inlineRow[$0] {
-                    return ($0, value)
-                } else {
-                    return nil
-                }
-            })))
+            return Row(values: self.filter({ attributes.contains($0.0) }).map({ (key: $0, value: $1) }))
         }
     }
     
