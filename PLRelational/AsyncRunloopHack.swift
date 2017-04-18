@@ -43,6 +43,12 @@ public class AsyncRunloopHack {
                 self.didSpin = false
             }
         })
+        
+        // Make a dummy runloop source and add it to our private mode, so that CFRunLoopRun doesn't return immediately.
+        var dummySourceContext = CFRunLoopSourceContext()
+        dummySourceContext.perform = { _ in }
+        let dummySource = CFRunLoopSourceCreate(nil, 0, &dummySourceContext)
+        CFRunLoopAddSource(CFRunLoopGetCurrent(), dummySource, runloopMode)
     }
     
     private func beforeWaiting() {
@@ -54,8 +60,14 @@ public class AsyncRunloopHack {
             didSpin = true
             
             let startTime = now()
-            while manager.state != .idle && (0 ..< timeToWait).contains(now() - startTime) {
-                CFRunLoopRunInMode(runloopMode, timeToWait, true)
+            while manager.state != .idle {
+                let remainingTime = timeToWait - (now() - startTime)
+                if remainingTime <= 0 {
+                    break
+                }
+                debugLog("Waiting for \(remainingTime)s")
+                let result = CFRunLoopRunInMode(runloopMode, remainingTime, true)
+                debugLog("Result of waiting is \(result.rawValue)")
             }
             debugLog("Leaving")
         }
