@@ -177,7 +177,7 @@ extension Relation {
     /// Fetch rows and invoke a callback as they come in. Each call is passed one or more rows, or an error.
     /// If no error occurs, the sequence of calls is terminated by a final call which passes zero rows.
     public func asyncBulkRows(_ callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
-        AsyncManager.currentInstance.registerQuery(self, callback: DispatchContextWrapped(context: CFRunLoopGetCurrent(), wrapped: callback))
+        AsyncManager.currentInstance.registerQuery(self, callback: DispatchContextWrapped(context: callbackContext(), wrapped: callback))
     }
     
     /// Fetch all rows and invoke a callback when complete.
@@ -201,16 +201,20 @@ extension Relation {
     
     /// Fetch all rows and invoke a callback on the current runloop when complete.
     public func asyncAllRows(_ callback: @escaping (Result<Set<Row>, RelationError>) -> Void) {
-        asyncAllRows(CFRunLoopGetCurrent().wrap(callback))
+        asyncAllRows(callbackContext().wrap(callback))
     }
     
     /// Fetch all rows and invoke a callback on the current runloop when complete. The postprocessor is run on the background first.
     public func asyncAllRows<T>(postprocessor: @escaping (Set<Row>) -> T, completion: @escaping (Result<T, RelationError>) -> Void) {
-        let runloop = CFRunLoopGetCurrent()!
+        let context = callbackContext()
         asyncAllRows(DirectDispatchContext().wrap({
             let postprocessedResult = $0.map(postprocessor)
-            runloop.async({ completion(postprocessedResult) })
+            context.async({ completion(postprocessedResult) })
         }))
+    }
+    
+    private func callbackContext() -> DispatchContext {
+        return RunLoopDispatchContext(runloop: CFRunLoopGetCurrent(), executeReentrantImmediately: true, modes: AsyncManager.currentInstance.runloopModes)
     }
 }
 
