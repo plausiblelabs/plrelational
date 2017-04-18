@@ -238,6 +238,22 @@ extension InlineRow: Hashable {
     }
 }
 
+extension InlineRow: CustomDebugStringConvertible {
+    var debugDescription: String {
+        var result = ""
+        
+        withUnsafeMutablePointers({ headerPtr, elementsPtr in
+            result.append(String(format: "<InlineRow %p count:%ld hash: %lx>", UInt(bitPattern: ObjectIdentifier(self)), headerPtr.pointee.count, headerPtr.pointee.hash))
+            for i in 0 ..< headerPtr.pointee.count {
+                let (attribute, value) = elementsPtr[i]
+                result.append("\n    \(attribute): \(value)")
+            }
+        })
+        
+        return result
+    }
+}
+
 extension InlineRow {
     static let extantRows = Mutexed<NSHashTable<AnyObject>>(NSHashTable(pointerFunctions: { () -> NSPointerFunctions in
         let pf = NSPointerFunctions(options: [.weakMemory])
