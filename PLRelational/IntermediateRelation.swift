@@ -68,7 +68,14 @@ extension IntermediateRelation {
         case equijoin([Attribute: Attribute])
         case rename([Attribute: Attribute])
         case update(Row)
-        case aggregate(Attribute, RelationValue?, (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>)
+        
+        /// An arbitrary aggreagte function.
+        /// The first associated value is the attribute that the final value will be stored under.
+        /// The second associated value is the initial value that will be passed in the the function.
+        /// The third associated value is the aggregate function itself. It receives the current
+        /// value (either the initial value or what was returned by its last call) and an array of new
+        /// rows to aggregate. This array is guaranteed to be nonempty.
+        case aggregate(Attribute, RelationValue?, (RelationValue?, [Row]) -> Result<RelationValue, RelationError>)
         
         case otherwise
         case unique(Attribute, RelationValue)
@@ -96,13 +103,22 @@ extension IntermediateRelation {
     /// compare two values. If the initial value is nil, then the aggregate of an empty relation
     /// is empty, the aggregate of a relation containing a single row is the value stored in
     /// that row. The aggregate function is only called if there are two or more rows, and the
-    /// first two call will pass in the values of the first two rows.
+    /// first two calls will pass in the values of the first two rows.
     static func aggregate(_ relation: Relation, attribute: Attribute, initial: RelationValue?, agg: @escaping (RelationValue, RelationValue) -> RelationValue) -> Relation {
-        return IntermediateRelation(op: .aggregate(attribute, initial, { (a, b) -> Result<RelationValue, RelationError> in
-            if let a = a {
-                return .Ok(agg(a, b))
+        return IntermediateRelation(op: .aggregate(attribute, initial, { (currentValue, rows) -> Result<RelationValue, RelationError> in
+            if let currentValue = currentValue {
+                return .Ok(rows.reduce(currentValue, { agg($0, $1[attribute]) }))
             } else {
-                return .Ok(b)
+                var value: RelationValue? = nil
+                for row in rows {
+                    let newValue = row[attribute]
+                    if let unwrappedValue = value {
+                        value = agg(unwrappedValue, newValue)
+                    } else {
+                        value = newValue
+                    }
+                }
+                return .Ok(value!)
             }
         }), operands: [relation])
     }

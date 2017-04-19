@@ -291,9 +291,9 @@ extension Relation {
     }
     
     public func count() -> Relation {
-        func count(_ count: RelationValue?, currentValueIgnore: RelationValue) -> Result<RelationValue, RelationError> {
+        func count(_ count: RelationValue?, rows: [Row]) -> Result<RelationValue, RelationError> {
             let countInt: Int64 = count!.get()!
-            return .Ok(RelationValue.integer(countInt + 1))
+            return .Ok(RelationValue.integer(countInt + Int64(rows.count)))
         }
         return IntermediateRelation(op: .aggregate("count", 0, count), operands: [self])
     }

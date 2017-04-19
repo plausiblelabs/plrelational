@@ -176,7 +176,7 @@ extension QueryPlanner {
         case equijoin([Attribute: Attribute])
         case rename([Attribute: Attribute])
         case update(Row)
-        case aggregate(Attribute, RelationValue?, (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>)
+        case aggregate(Attribute, RelationValue?, (RelationValue?, [Row]) -> Result<RelationValue, RelationError>)
         
         case otherwise
         case unique(Attribute, RelationValue)

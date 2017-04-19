@@ -523,11 +523,11 @@ open class QueryRunner {
         writeOutput(nodeStates[nodeIndex].uniq(Set(updated)), fromNode: nodeIndex)
     }
     
-    func processAggregate(_ nodeIndex: Int, _ inputIndex: Int, _ attribute: Attribute, _ initialValue: RelationValue?, _ agg: (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) {
+    func processAggregate(_ nodeIndex: Int, _ inputIndex: Int, _ attribute: Attribute, _ initialValue: RelationValue?, _ agg: (RelationValue?, [Row]) -> Result<RelationValue, RelationError>) {
         var soFar = nodeStates[nodeIndex].getExtraState({ initialValue })
-        for row in nodeStates[nodeIndex].inputBuffers[inputIndex].popAll() {
-            let newValue = row[attribute]
-            let aggregated = agg(soFar, newValue)
+        let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
+        if !rows.isEmpty {
+            let aggregated = agg(soFar, rows)
             switch aggregated {
             case .Ok(let value):
                 soFar = value
