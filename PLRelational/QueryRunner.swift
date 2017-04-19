@@ -460,6 +460,9 @@ open class QueryRunner {
                 smallerInput = 1
             }
             
+            // The larger input is the other one.
+            let largerInput = smallerInput == 0 ? 1 : 0
+            
             let smallerAttributes = smallerInput == 0 ? matching.keys : matching.values
             let largerAttributes = smallerInput == 0 ? matching.values : matching.keys
             let largerToSmallerRenaming = smallerInput == 0 ? matching.inverted : matching
@@ -482,10 +485,15 @@ open class QueryRunner {
             if !nodeStates[nodeIndex].parentalSelectPropagationDisabled && keyed.count <= maxSelectSize {
                 nodeStates[nodeIndex].parentalSelectPropagationDisabled = true
                 let select = keyed.keys.map(SelectExpressionFromRow).combined(with: *||) ?? false
-                for childIndex in nodes[nodeIndex].childIndexes {
-                    nodeStates[nodeIndex].parentalSelectsRemaining = .max
-                    addSelect(node: childIndex, expression: select)
-                }
+                
+                // The select derived above would apply to the smaller side. We need to rename
+                // the keys in order for it to apply correctly to the larger side.
+                let smallerToLargerRenaming = largerInput == 0 ? matching.inverted : matching
+                let renamedSelect = select.withRenamedAttributes(smallerToLargerRenaming)
+                
+                let childIndex = nodes[nodeIndex].childIndexes[largerInput]
+                nodeStates[nodeIndex].parentalSelectsRemaining = .max
+                addSelect(node: childIndex, expression: renamedSelect)
             }
             
             return ExtraState(
