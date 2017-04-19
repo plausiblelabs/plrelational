@@ -76,7 +76,7 @@ private class RecursiveSelectOp<T> {
     }
     
     func run() {
-        let runloop = CFRunLoopGetCurrent()!
+        let context = AsyncManager.currentInstance.runloopDispatchContext()
         let asyncManager = AsyncManager.currentInstance
         let group = DispatchGroup()
         
@@ -95,7 +95,7 @@ private class RecursiveSelectOp<T> {
             group.enter()
             asyncManager.registerQuery(
                 relation.select(query),
-                callback: runloop.wrap({ result in
+                callback: context.wrap({ result in
                     switch result {
                     case .Ok(let rows) where !rows.isEmpty:
                         for row in rows {
@@ -122,7 +122,7 @@ private class RecursiveSelectOp<T> {
         }
         
         group.notify(queue: DispatchQueue.global(), execute: {
-            runloop.async({
+            context.async({
                 if let error = self.error {
                     self.completionCallback(.Err(error))
                 } else if self.pendingQueries.isEmpty {
