@@ -81,7 +81,7 @@ extension QueryPlanner {
 }
 
 extension QueryRunner {
-    func graphvizDump() {
+    func graphvizDumpAndOpen() {
         internalGraphvizDumpAndOpen(object: self, nodes: self.nodes, auxNodeInfo: { index in
             let selectString: String? = nodeStates[index].parentalSelects.map({
                 let selectString = wordWrap("\($0)", width: 40)
