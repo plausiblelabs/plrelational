@@ -692,7 +692,7 @@ extension QueryRunner {
 }
 
 extension QueryRunner {
-    // This is a struct rather than a class, because it gets stored into SmallInlineArray.
+    // This is a class rather than a struct, because it gets stored into SmallInlineArray.
     // When that happens and it's a struct, `rows` is effectively nested in the array,
     // which prevents in-place mutations.
     class Buffer {
