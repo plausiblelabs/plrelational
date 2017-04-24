@@ -698,6 +698,7 @@ extension QueryRunner {
     class Buffer {
         var rows: [Row] = []
         var eof = false
+        var rowsAdded = 0
         
         func pop() -> Row? {
             return rows.popLast()
@@ -710,7 +711,9 @@ extension QueryRunner {
         }
         
         func add<S: Sequence>(_ seq: S) where S.Iterator.Element == Row {
+            let beforeCount = rows.count
             rows.append(contentsOf: seq)
+            rowsAdded = rowsAdded &+ (rows.count - beforeCount)
         }
     }
 }

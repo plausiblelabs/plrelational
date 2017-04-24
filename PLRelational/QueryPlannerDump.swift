@@ -103,7 +103,8 @@ extension QueryRunner {
                 let selectString = wordWrap("\($0)", width: 40)
                 return "Parental select: \(selectString) - \(nodeStates[index].parentalSelectsRemaining) remaining\n"
             })
-            let buffersString = "Active buffers: \(nodeStates[index].activeBuffers)"
+            let allRowsAdded = nodeStates[index].inputBuffers.reduce(0, { $0 &+ $1.rowsAdded })
+            let buffersString = "Active buffers: \(nodeStates[index].activeBuffers) - Rows input: \(allRowsAdded)"
             return (selectString ?? "") + buffersString
         })
     }
