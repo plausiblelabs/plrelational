@@ -6,6 +6,22 @@
 import AppKit
 
 
+private let colors = [
+    "firebrick",
+    "darkorange",
+    "black",
+    "bisque4",
+    "blue",
+    "blueviolet",
+    "goldenrod",
+    "green4",
+    "yellow3",
+]
+
+private func randomColor() -> String {
+    return colors[Int(arc4random_uniform(UInt32(colors.count)))]
+}
+
 private func graphvizDump(nodes: [QueryPlanner.Node], showChildPointers: Bool = false, auxNodeInfo: (Int) -> String? = { _ in nil }, printer print: (String) -> Void = { print($0) }) {
     print("digraph query_planner_graph {")
     
@@ -25,7 +41,7 @@ private func graphvizDump(nodes: [QueryPlanner.Node], showChildPointers: Bool = 
         for parentIndex in node.parentIndexes {
             let childIndex = nodes[parentIndex].childIndexes.index(of: index)
             let childIndexString = childIndex.map(String.init) ?? "UNKNOWN CHILD INDEX"
-            print("\(nodename(index)) -> \(nodename(parentIndex)) [label=\"child \(childIndexString)\"]")
+            print("\(nodename(index)) -> \(nodename(parentIndex)) [label=\"child \(childIndexString)\" color=\(randomColor())]")
         }
         if showChildPointers {
             for childIndex in node.childIndexes {
