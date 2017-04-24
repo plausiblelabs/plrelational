@@ -82,7 +82,13 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
                 })
                 return AnyIterator(filtered.map({ $0.map({ [$0] }) }).makeIterator())
             }
-        }, approximateCount: nil)
+        }, approximateCount: {
+            if self.primaryKeyEquality(expression: $0) != nil {
+                return 1.0
+            } else {
+                return nil
+            }
+        })
     }
     
     private func primaryKeyEquality(expression: SelectExpression) -> RelationValue? {

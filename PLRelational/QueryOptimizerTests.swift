@@ -193,6 +193,27 @@ class QueryOptimizerTests: XCTestCase {
         AssertEqual(final, MakeRelation(["n"], [2], [3]))
         XCTAssertEqual(instrumented.rowsProvided, 2)
     }
+    
+    func testJoinedJoinOptimization() {
+        func makeR(size: Int) -> InstrumentedSelectableRelation {
+            return InstrumentedSelectableRelation(scheme: ["n"], values: Set((0 ..< size).map({ ["n": RelationValue.integer(Int64($0))] })))
+        }
+        
+        let small = makeR(size: 1)
+        let medium = makeR(size: 10)
+        let large = makeR(size: 100)
+        
+        // The naive method of running sources in order of their original size will run
+        // small, medium, large. This will cause medium to iterate its whole content
+        // because no select gets pushed down to it. A select does get pushed down
+        // to large, so it really should go first. This test ensures that the system
+        // notices this and runs small, large, medium, which is more efficient.
+        let r = small.join(large).join(medium)
+        AssertEqual(r, makeR(size: 1))
+        XCTAssertEqual(small.rowsProvided, 1)
+        XCTAssertEqual(medium.rowsProvided, 1)
+        XCTAssertEqual(large.rowsProvided, 1)
+    }
 }
 
 private class InstrumentedSelectableRelation: Relation {
@@ -216,15 +237,21 @@ private class InstrumentedSelectableRelation: Relation {
         return .Ok(values.contains(row))
     }
 
+    private func filteredValues(_ expression: SelectExpression) -> [Row] {
+        return values.filter({ expression.valueWithRow($0).boolValue })
+    }
+    
     var contentProvider: RelationContentProvider {
         return .efficientlySelectableGenerator({ expression in
-            let filtered = self.values.lazy.filter({ expression.valueWithRow($0).boolValue })
+            let filtered = self.filteredValues(expression)
             let mapped = filtered.map({ row -> Result<Set<Row>, RelationError> in
                 self.rowsProvided += 1
                 return .Ok([row])
             })
             return AnyIterator(mapped.makeIterator())
-        }, approximateCount: nil)
+        }, approximateCount: {
+            Double(self.filteredValues($0).count)
+        })
     }
     
     init(scheme: Scheme, values: Set<Row>) {

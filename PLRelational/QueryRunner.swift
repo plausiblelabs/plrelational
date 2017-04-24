@@ -9,6 +9,8 @@ open class QueryRunner {
     
     fileprivate var activeInitiatorIndexes: [Int]
     
+    fileprivate var currentInitiatorIndex: Int?
+    
     fileprivate var initiatorGenerators: Dictionary<Int, AnyIterator<Result<Set<Row>, RelationError>>> = [:]
     
     fileprivate var intermediatesToProcess: [IntermediateToProcess] = []
@@ -23,16 +25,7 @@ open class QueryRunner {
         self.nodes = nodes
         self.outputCallbacks = planner.allOutputCallbacks
         
-        activeInitiatorIndexes = planner.initiatorIndexes.sorted(by: {
-            // Put the smallest initiators where they will be used first. Initiators are
-            // read from the end of `activeInitiatorIndexes` and then popped as they're
-            // drained, so the smallest ones should go at the end.
-            
-            // Initiators with no count are considered to be larger than anything with a count.
-            let count0 = nodes[$0].approximateCount ?? .infinity
-            let count1 = nodes[$1].approximateCount ?? .infinity
-            return count0 > count1
-        })
+        activeInitiatorIndexes = planner.initiatorIndexes
         nodeStates = Array()
         nodeStates.reserveCapacity(nodes.count)
         for index in nodes.indices {
@@ -158,10 +151,46 @@ open class QueryRunner {
         return false
     }
     
+    private func approximateCount(nodeIndex: Int) -> Double {
+        if nodeStates[nodeIndex].parentalSelectsRemaining == 0, let select = nodeStates[nodeIndex].parentalSelects {
+            return nodes[nodeIndex].approximateCount(select) ?? .infinity
+        } else {
+            return nodes[nodeIndex].approximateCount(true) ?? .infinity
+        }
+    }
+    
+    private func popInitiatorIndex() -> Int? {
+        // Use the smallest initiators first based on the approximate count.
+        let indexesAndCounts = activeInitiatorIndexes.map({
+            return (approximateCount(nodeIndex: $0), $0)
+        })
+        if let (index, (_, result)) = indexesAndCounts.enumerated().min(by: {
+            $0.1.0 < $1.1.0
+        }) {
+            activeInitiatorIndexes.remove(at: index)
+            return result
+        } else {
+            return nil
+        }
+    }
+    
+    private func getInitiatorIndex() -> Int? {
+        if let current = currentInitiatorIndex {
+            return current
+        } else {
+            currentInitiatorIndex = popInitiatorIndex()
+            return currentInitiatorIndex
+        }
+    }
+    
+    private func endCurrentInitiator() {
+        currentInitiatorIndex = nil
+    }
+    
     /// Process an active initiator node. If there are no active initiator nodes, sets the `done` property
     /// to true. If the initiator node produces an error instead of a row, this method returns that error.
     fileprivate func pumpInitiator() -> Result<Void, RelationError> {
-        guard let nodeIndex = activeInitiatorIndexes.last else {
+        guard let nodeIndex = getInitiatorIndex() else {
             done = true
             return .Ok()
         }
@@ -187,7 +216,7 @@ open class QueryRunner {
             case .some(.Ok(let rows)):
                 writeOutput(rows, fromNode: nodeIndex)
             case .none:
-                activeInitiatorIndexes.removeLast()
+                endCurrentInitiator()
                 markDone(nodeIndex)
             }
         case .selectableGenerator(let generatorGetter):
@@ -200,12 +229,12 @@ open class QueryRunner {
             case .some(.Ok(let rows)):
                 writeOutput(rows, fromNode: nodeIndex)
             case .none:
-                activeInitiatorIndexes.removeLast()
+                endCurrentInitiator()
                 markDone(nodeIndex)
             }
         case .rowSet(let rowGetter):
             writeOutput(rowGetter(), fromNode: nodeIndex)
-            activeInitiatorIndexes.removeLast()
+            endCurrentInitiator()
             markDone(nodeIndex)
         default:
             // These shenanigans let us print the operation without descending into an infinite recursion

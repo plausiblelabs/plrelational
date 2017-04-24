@@ -44,7 +44,11 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
                 })
                 return AnyIterator(filtered.map({ .Ok([$0]) }).makeIterator())
             }
-        }, approximateCount: Double(values.values.count))
+        }, approximateCount: {
+            // TODO: efficientValuesSet may become less efficient for complex selects,
+            // so we might want to change this then.
+            return Double(self.efficientValuesSet(expression: $0)?.count ?? self.values.values.count)
+        })
     }
     
     public func contains(_ row: Row) -> Result<Bool, RelationError> {

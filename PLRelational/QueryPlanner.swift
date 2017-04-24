@@ -75,11 +75,11 @@ class QueryPlanner {
     fileprivate func relationToNode(_ r: Relation) -> Node {
         switch r.contentProvider {
         case .generator(let generatorGetter, let approximateCount):
-            return Node(op: .rowGenerator(generatorGetter), scheme: r.scheme, approximateCount: approximateCount)
+            return Node(op: .rowGenerator(generatorGetter), scheme: r.scheme, approximateCount: { _ in approximateCount })
         case .efficientlySelectableGenerator(let generatorGetter, let approximateCount):
             return Node(op: .selectableGenerator(generatorGetter), scheme: r.scheme, approximateCount: approximateCount)
         case .set(let setGetter, let approximateCount):
-            return Node(op: .rowSet(setGetter), scheme: r.scheme, approximateCount: approximateCount)
+            return Node(op: .rowSet(setGetter), scheme: r.scheme, approximateCount: { _ in approximateCount })
         case .intermediate(let op, let operands):
             return intermediateRelationToNode(r, op, operands)
         case .underlying:
@@ -141,7 +141,7 @@ extension QueryPlanner {
         var op: Operation
         var scheme: Scheme
         var outputCallbacks: [OutputCallback]?
-        var approximateCount: Double?
+        var approximateCount: (SelectExpression) -> Double?
         
         var parentIndexes: [Int] = []
         
@@ -156,7 +156,7 @@ extension QueryPlanner {
             return parentIndexes.count
         }
         
-        init(op: Operation, scheme: Scheme, approximateCount: Double? = nil) {
+        init(op: Operation, scheme: Scheme, approximateCount: @escaping (SelectExpression) -> Double? = { _ in nil }) {
             self.op = op
             self.scheme = scheme
             self.approximateCount = approximateCount
