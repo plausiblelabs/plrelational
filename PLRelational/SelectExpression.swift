@@ -53,6 +53,14 @@ extension Bool: SelectExpressionConstantValue {
     }
 }
 
+extension SelectExpression {
+    /// If the SelectExpression is a SelectExpressionConstantValue, returns its boolean value.
+    /// Otherwise returns nil.
+    public var constantBoolValue: Bool? {
+        return (self as? SelectExpressionConstantValue)?.relationValue.boolValue
+    }
+}
+
 public struct SelectExpressionBinaryOperator: SelectExpression {
     public var lhs: SelectExpression
     public var op: BinaryOperator

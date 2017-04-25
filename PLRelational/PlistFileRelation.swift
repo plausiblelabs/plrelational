@@ -43,9 +43,9 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     public var contentProvider: RelationContentProvider {
         return .efficientlySelectableGenerator({ expression in
-            if expression as? Bool == false {
+            if expression.constantBoolValue == false {
                 return AnyIterator([].makeIterator())
-            } else if expression as? Bool == true {
+            } else if expression.constantBoolValue == true {
                 return AnyIterator([.Ok(self.values.values)].makeIterator())
             } else if let rows = self.efficientValuesSet(expression: expression) {
                 return AnyIterator([.Ok(rows)].makeIterator())

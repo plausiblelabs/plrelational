@@ -78,7 +78,7 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     
     public var contentProvider: RelationContentProvider {
         return .efficientlySelectableGenerator({ expression in
-            if expression as? Bool == false {
+            if expression.constantBoolValue == false {
                 return AnyIterator([].makeIterator())
             } else if let value = self.primaryKeyEquality(expression: expression) {
                 // TODO: we probably also want to handle cases where the expression is
