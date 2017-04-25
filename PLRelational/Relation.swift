@@ -271,13 +271,15 @@ extension Relation {
     
     public func leftOuterJoin(_ other: Relation) -> Relation {
         // TODO: Optimize this
-        let joined = self.join(other)
-        let projected = joined.project(self.scheme)
-        let difference = self.difference(projected)
+        let debugPrefix = (self.debugName ?? "<unknown>") + " leftOuterJoin"
+        
+        let joined = self.join(other).setDebugName("\(debugPrefix) initial join")
+        let projected = joined.project(self.scheme).setDebugName("\(debugPrefix) projected")
+        let difference = self.difference(projected).setDebugName("\(debugPrefix) difference")
         let attrsUniqueToOther = joined.scheme.attributes.symmetricDifference(self.scheme.attributes)
-        let otherNulls = MakeRelation(Array(attrsUniqueToOther), Array(repeating: .null, count: attrsUniqueToOther.count))
-        let differenceWithNulls = difference.join(otherNulls)
-        return differenceWithNulls.union(joined)
+        let otherNulls = MakeRelation(Array(attrsUniqueToOther), Array(repeating: .null, count: attrsUniqueToOther.count)).setDebugName("\(debugPrefix) otherNulls")
+        let differenceWithNulls = difference.join(otherNulls).setDebugName("\(debugPrefix) differenceWithNulls")
+        return differenceWithNulls.union(joined).setDebugName(debugPrefix)
     }
 }
 

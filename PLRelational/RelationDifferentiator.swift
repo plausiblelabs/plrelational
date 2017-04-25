@@ -140,7 +140,12 @@ extension RelationDifferentiator {
         if let obj = asObject(relation) {
             return derivativeMap.getOrCreate(obj, defaultValue: rawDerivativeOf(relation))
         } else {
-            return rawDerivativeOf(relation)
+            let derivative = rawDerivativeOf(relation)
+            if let debugName = relation.debugName {
+                _ = derivative.added?.setDebugName("Added component of derivative of \(debugName)")
+                _ = derivative.removed?.setDebugName("Added component of derivative of \(debugName)")
+            }
+            return derivative
         }
     }
     
