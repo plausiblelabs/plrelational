@@ -38,8 +38,7 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
             } else if let rows = self.efficientValuesSet(expression: expression) {
                 return AnyIterator([.Ok(rows)].makeIterator())
             } else {
-                let lazy = self.values.lazy
-                let filtered = lazy.filter({
+                let filtered = self.values.filter({
                     expression.valueWithRow($0).boolValue
                 })
                 return AnyIterator(filtered.map({ .Ok([$0]) }).makeIterator())
@@ -176,13 +175,23 @@ extension PlistFileRelation {
 }
 
 private extension PlistFileRelation {
-    func primaryKeyEquality(expression: SelectExpression) -> (Attribute, RelationValue)? {
-        if case let op as SelectExpressionBinaryOperator = expression, op.op is EqualityComparator {
-            if let attr = op.lhs as? Attribute, let value = op.rhs as? SelectExpressionConstantValue, values.primaryKeys.contains(attr) {
-                return (attr, value.relationValue)
-            }
-            if let attr = op.rhs as? Attribute, let value = op.lhs as? SelectExpressionConstantValue, values.primaryKeys.contains(attr) {
-                return (attr, value.relationValue)
+    func primaryKeyEquality(expression: SelectExpression) -> [(attribute: Attribute, value: RelationValue)]? {
+        if case let op as SelectExpressionBinaryOperator = expression {
+            switch op.op {
+            case is EqualityComparator:
+                if let attr = op.lhs as? Attribute, let value = op.rhs as? SelectExpressionConstantValue, values.primaryKeys.contains(attr) {
+                    return [(attr, value.relationValue)]
+                }
+                if let attr = op.rhs as? Attribute, let value = op.lhs as? SelectExpressionConstantValue, values.primaryKeys.contains(attr) {
+                    return [(attr, value.relationValue)]
+                }
+                
+            case is OrComparator:
+                if let lhsEquality = primaryKeyEquality(expression: op.lhs), let rhsEquality = primaryKeyEquality(expression: op.rhs) {
+                    return lhsEquality + rhsEquality
+                }
+                
+            default: break
             }
         }
         return nil
@@ -193,8 +202,12 @@ private extension PlistFileRelation {
         // multiple primary key values ORed together.
         if expression as? Bool == false {
             return []
-        } else if let (attribute, value) = primaryKeyEquality(expression: expression) {
-            return values.values(matchingKey: attribute, value: value)
+        } else if let equality = primaryKeyEquality(expression: expression) {
+            var result = Set<Row>()
+            for (attribute, value) in equality {
+                result.formUnion(values.values(matchingKey: attribute, value: value))
+            }
+            return result
         } else {
             return nil
         }
