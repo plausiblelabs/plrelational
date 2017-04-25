@@ -140,28 +140,29 @@ extension RelationDifferentiator {
         if let obj = asObject(relation) {
             return derivativeMap.getOrCreate(obj, defaultValue: rawDerivativeOf(relation))
         } else {
-            let derivative = rawDerivativeOf(relation)
-            if let debugName = relation.debugName {
-                _ = derivative.added?.setDebugName("Added component of derivative of \(debugName)")
-                _ = derivative.removed?.setDebugName("Added component of derivative of \(debugName)")
-            }
-            return derivative
+            return rawDerivativeOf(relation)
         }
     }
     
     fileprivate func rawDerivativeOf(_ relation: Relation) -> RelationChange {
+        let change: RelationChange
         switch relation {
         case let intermediate as IntermediateRelation:
             // Intermediate relations require more smarts. Do that elsewhere.
-            return intermediateDerivative(intermediate)
+            change = intermediateDerivative(intermediate)
         case let obj as RelationDerivative.Variable:
             // Variables use their placeholders as derivatives.
             let placeholders = derivative.placeholdersForVariable(obj)
-            return RelationChange(added: placeholders.added, removed: placeholders.removed)
+            change = RelationChange(added: placeholders.added, removed: placeholders.removed)
         default:
             // Other non-intermediate relations are constant in the face of changes, so we're just nil.
-            return RelationChange(added: nil, removed: nil)
+            change = RelationChange(added: nil, removed: nil)
         }
+        if let debugName = relation.debugName {
+            _ = change.added?.setDebugName("Added component of derivative of \(debugName)")
+            _ = change.removed?.setDebugName("Removed component of derivative of \(debugName)")
+        }
+        return change
     }
 }
 
