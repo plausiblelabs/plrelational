@@ -8,6 +8,17 @@ import Foundation
 import CommonCrypto
 
 
+private let logInefficientScans = false
+
+private func logInefficientScan(_ r: PlistDirectoryRelation, _ expression: SelectExpression) {
+    guard logInefficientScans else { return }
+    
+    print("Inefficiently scanning directory for \(expression)")
+    
+    // Dummy call to primaryKeyEquality so we can step into it in the debugger.
+    _ = r.primaryKeyEquality(expression: expression)
+}
+
 public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserverImplementation {
     public let scheme: Scheme
     public let primaryKey: Attribute
@@ -74,6 +85,7 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
                 // multiple primary key values ORed together.
                 return self.filteredRowGenerator(primaryKeyValues: [value])
             } else {
+                logInefficientScan(self, expression)
                 let lazy = self.rowGenerator().lazy
                 let filtered = lazy.filter({
                     $0.ok.map({
@@ -91,7 +103,7 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
         })
     }
     
-    private func primaryKeyEquality(expression: SelectExpression) -> RelationValue? {
+    fileprivate func primaryKeyEquality(expression: SelectExpression) -> RelationValue? {
         if case let op as SelectExpressionBinaryOperator = expression, op.op is EqualityComparator {
             if op.lhs as? Attribute == primaryKey, let value = op.rhs as? SelectExpressionConstantValue {
                 return value.relationValue

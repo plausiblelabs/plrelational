@@ -6,6 +6,18 @@
 import Foundation
 
 
+private let logInefficientScans = false
+
+private func logInefficientScan(_ r: PlistFileRelation, _ expression: SelectExpression) {
+    guard logInefficientScans else { return }
+    
+    print("Inefficiently scanning \(r.values.values.count) rows for \(expression)")
+    
+    // Dummy call to efficientValuesSet so we can step into it in the debugger.
+    _ = r.efficientValuesSet(expression: expression)
+}
+
+
 public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImplementation {
     public let scheme: Scheme
     
@@ -38,6 +50,7 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
             } else if let rows = self.efficientValuesSet(expression: expression) {
                 return AnyIterator([.Ok(rows)].makeIterator())
             } else {
+                logInefficientScan(self, expression)
                 let filtered = self.values.filter({
                     expression.valueWithRow($0).boolValue
                 })
