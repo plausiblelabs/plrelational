@@ -240,6 +240,16 @@ class QueryOptimizerTests: XCTestCase {
         XCTAssertEqual(rm.rowsProvided, 2)
         XCTAssertEqual(rn.rowsProvided, 2)
     }
+    
+    func testJoinedJoinWithOneRelationOptimization() {
+        let instrumented = InstrumentedSelectableRelation(scheme: ["n"], values: Set((0 ..< 100).map({ ["n": .integer($0)] })))
+        let tiny = MakeRelation(["n"], [1])
+        
+        let j1 = tiny.join(instrumented)
+        let j2 = j1.join(instrumented)
+        AssertEqual(j2, MakeRelation(["n"], [1]))
+        XCTAssertEqual(instrumented.rowsProvided, 1)
+    }
 }
 
 private class InstrumentedSelectableRelation: Relation {
