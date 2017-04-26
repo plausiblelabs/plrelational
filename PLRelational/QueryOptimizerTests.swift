@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import PLRelational
+@testable import PLRelational
 
 class QueryOptimizerTests: XCTestCase {
     func testEquijoinOptimization() {
@@ -213,6 +213,32 @@ class QueryOptimizerTests: XCTestCase {
         XCTAssertEqual(small.rowsProvided, 1)
         XCTAssertEqual(medium.rowsProvided, 1)
         XCTAssertEqual(large.rowsProvided, 1)
+    }
+    
+    func testJoinDerivativeOptimization() {
+        let rm = InstrumentedSelectableRelation(scheme: ["m"], values: Set((1 ... 20).map({ ["m": .integer($0)] })))
+            .setDebugName("rm")
+        let rn = InstrumentedSelectableRelation(scheme: ["n"], values: Set((10 ... 30).map({ ["n": .integer($0)] })))
+            .setDebugName("rn")
+        let joined = rm.equijoin(rn, matching: ["m": "n"])
+            .setDebugName("joined")
+        
+        let differentiator = RelationDifferentiator(relation: joined)
+        let derivative = differentiator.computeDerivative()
+        
+        derivative.addChange(RelationChange(
+            added: MakeRelation(["m"], [1], [10]),
+            removed: MakeRelation(["m"], [0], [21])), toVariable: rm)
+        
+        derivative.addChange(RelationChange(
+            added: MakeRelation(["n"], [20], [30]),
+            removed: MakeRelation(["n"], [9], [31])), toVariable: rn)
+        
+        AssertEqual(derivative.change.added, MakeRelation(["m", "n"], [10, 10], [20, 20]))
+        AssertEqual(derivative.change.removed, MakeRelation(["m", "n"], [9, 9], [21, 21]))
+        
+        XCTAssertEqual(rm.rowsProvided, 2)
+        XCTAssertEqual(rn.rowsProvided, 2)
     }
 }
 
