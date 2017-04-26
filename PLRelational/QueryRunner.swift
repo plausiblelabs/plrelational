@@ -221,7 +221,10 @@ open class QueryRunner {
             }
         case .selectableGenerator(let generatorGetter):
             let rows = getRowGeneratorRows(nodeIndex, {
-                return generatorGetter(nodeStates[nodeIndex].parentalSelects ?? true)
+                let select = nodeStates[nodeIndex].parentalSelectsRemaining == 0
+                    ? nodeStates[nodeIndex].parentalSelects ?? true
+                    : true
+                return generatorGetter(select)
             })
             switch rows {
             case .some(.Err(let err)):
