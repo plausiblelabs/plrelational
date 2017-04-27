@@ -22,12 +22,7 @@ class QueryPlanner {
     
     var initiatorIndexes: [Int] {
         return nodes.indices.filter({
-            switch nodes[$0].op {
-            case .rowGenerator, .selectableGenerator, .rowSet:
-                return true
-            default:
-                return false
-            }
+            QueryPlanner.isInitiator(op: nodes[$0].op)
         })
     }
     
@@ -38,8 +33,10 @@ class QueryPlanner {
     fileprivate func computeNodes() {
         QueryPlanner.visitRelationTree(rootRelations, { relation, underlyingRelation, outputCallback in
             noteTransactionalDatabases(relation, nodeIndex: 0)
-            let children = QueryPlanner.relationChildren(underlyingRelation)
             let parentNodeIndex = getOrCreateNodeIndex(underlyingRelation)
+            let children = QueryPlanner.isInitiator(op: nodes[parentNodeIndex].op)
+                ? []
+                : QueryPlanner.relationChildren(underlyingRelation)
             
             if let outputCallback = outputCallback {
                 if nodes[parentNodeIndex].outputCallbacks == nil {
@@ -75,11 +72,11 @@ class QueryPlanner {
     fileprivate func relationToNode(_ r: Relation) -> Node {
         switch r.contentProvider {
         case .generator(let generatorGetter, let approximateCount):
-            return Node(op: .rowGenerator(generatorGetter), scheme: r.scheme, approximateCount: approximateCount)
+            return Node(op: .rowGenerator(generatorGetter), scheme: r.scheme, approximateCount: { _ in approximateCount })
         case .efficientlySelectableGenerator(let generatorGetter, let approximateCount):
             return Node(op: .selectableGenerator(generatorGetter), scheme: r.scheme, approximateCount: approximateCount)
         case .set(let setGetter, let approximateCount):
-            return Node(op: .rowSet(setGetter), scheme: r.scheme, approximateCount: approximateCount)
+            return Node(op: .rowSet(setGetter), scheme: r.scheme, approximateCount: { _ in approximateCount })
         case .intermediate(let op, let operands):
             return intermediateRelationToNode(r, op, operands)
         case .underlying:
@@ -141,7 +138,7 @@ extension QueryPlanner {
         var op: Operation
         var scheme: Scheme
         var outputCallbacks: [OutputCallback]?
-        var approximateCount: Double?
+        var approximateCount: (SelectExpression) -> Double?
         
         var parentIndexes: [Int] = []
         
@@ -156,7 +153,7 @@ extension QueryPlanner {
             return parentIndexes.count
         }
         
-        init(op: Operation, scheme: Scheme, approximateCount: Double? = nil) {
+        init(op: Operation, scheme: Scheme, approximateCount: @escaping (SelectExpression) -> Double? = { _ in nil }) {
             self.op = op
             self.scheme = scheme
             self.approximateCount = approximateCount
@@ -176,10 +173,16 @@ extension QueryPlanner {
         case equijoin([Attribute: Attribute])
         case rename([Attribute: Attribute])
         case update(Row)
-        case aggregate(Attribute, RelationValue?, (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>)
+        case aggregate(Attribute, RelationValue?, (RelationValue?, [Row]) -> Result<RelationValue, RelationError>)
         
         case otherwise
         case unique(Attribute, RelationValue)
+        
+        /// A dummy operation used for nodes which have been removed
+        /// after initial planning. Removing nodes from the array
+        /// would cause indexes to shift, and would also cause some
+        /// inefficient copying, so instead we just mark them as dead.
+        case dead
     }
 }
 
@@ -193,12 +196,15 @@ extension QueryPlanner {
         while true {
             let relation: Relation
             let auxiliaryData: AuxiliaryData?
+            let canSkip: Bool
             if let (r, callback) = rootsToVisit.popLast() {
                 relation = r
                 auxiliaryData = callback
+                canSkip = false
             } else if let r = othersToVisit.popLast() {
                 relation = r
                 auxiliaryData = nil
+                canSkip = true
             } else {
                 break
             }
@@ -207,7 +213,7 @@ extension QueryPlanner {
             iterationCount += 1
             if let obj = asObject(realR) {
                 let retrievedCount = visited.getOrCreate(obj, defaultValue: iterationCount)
-                if retrievedCount != iterationCount {
+                if canSkip && retrievedCount != iterationCount {
                     continue
                 }
             }
@@ -222,6 +228,15 @@ extension QueryPlanner {
             return r.operands
         default:
             return []
+        }
+    }
+    
+    fileprivate static func isInitiator(op: Operation) -> Bool {
+        switch op {
+        case .rowGenerator, .selectableGenerator, .rowSet:
+            return true
+        default:
+            return false
         }
     }
 }

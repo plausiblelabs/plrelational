@@ -145,18 +145,24 @@ extension RelationDifferentiator {
     }
     
     fileprivate func rawDerivativeOf(_ relation: Relation) -> RelationChange {
+        let change: RelationChange
         switch relation {
         case let intermediate as IntermediateRelation:
             // Intermediate relations require more smarts. Do that elsewhere.
-            return intermediateDerivative(intermediate)
+            change = intermediateDerivative(intermediate)
         case let obj as RelationDerivative.Variable:
             // Variables use their placeholders as derivatives.
             let placeholders = derivative.placeholdersForVariable(obj)
-            return RelationChange(added: placeholders.added, removed: placeholders.removed)
+            change = RelationChange(added: placeholders.added, removed: placeholders.removed)
         default:
             // Other non-intermediate relations are constant in the face of changes, so we're just nil.
-            return RelationChange(added: nil, removed: nil)
+            change = RelationChange(added: nil, removed: nil)
         }
+        if let debugName = relation.debugName {
+            _ = change.added?.setDebugName("Added component of derivative of \(debugName)")
+            _ = change.removed?.setDebugName("Removed component of derivative of \(debugName)")
+        }
+        return change
     }
 }
 
@@ -291,12 +297,22 @@ extension RelationDifferentiator {
     }
     
     fileprivate func equijoinDerivative(_ r: IntermediateRelation, matching: [Attribute: Attribute]) -> RelationChange {
-        // TODO: if we apply some brainpower we may be able to figure out how to compute this derivative without running
-        // the entire join multiple times just to compute the before/after differences.
-        let prejoin = preChangeRelation(r.operands[0]).equijoin(preChangeRelation(r.operands[1]), matching: matching)
-        let added = r - prejoin
-        let removed = prejoin - r
-        return RelationChange(added: added, removed: removed)
+        let A = r.operands[0]
+        let B = r.operands[1]
+        let dA = derivativeOf(A)
+        let dB = derivativeOf(B)
+        
+        // When a row is added to A, then matching it with B is added to the join itself.
+        // When a row is removed from A, then matching it with B or with rows removed from B will be what is removed from the join.
+        // Likewise in reverse.
+        
+        let addsFromA = dA.added?.equijoin(B, matching: matching)
+        let removesFromA = dA.removed?.equijoin(B + dB.removed, matching: matching)
+        
+        let addsFromB = dB.added.map({ A.equijoin($0, matching: matching) })
+        let removesFromB = dB.removed.map({ (A + dA.removed).equijoin($0, matching: matching) })
+        
+        return RelationChange(added: addsFromA + addsFromB, removed: removesFromA + removesFromB)
     }
     
     fileprivate func renameDerivative(_ r: IntermediateRelation, renames: [Attribute: Attribute]) -> RelationChange {
@@ -313,15 +329,18 @@ extension RelationDifferentiator {
         let untouchedScheme = Scheme(attributes: Set(r.operands[0].scheme.attributes.subtracting(newValues.attributes)))
         let projectionDerivative = self.projectionDerivative(r, scheme: untouchedScheme)
         return RelationChange(added: projectionDerivative.added?.join(ConcreteRelation(newValues)),
-                                  removed: projectionDerivative.removed?.join(ConcreteRelation(newValues)))
+                              removed: projectionDerivative.removed?.join(ConcreteRelation(newValues)))
     }
     
-    fileprivate func aggregateDerivative(_ r: IntermediateRelation, attribute: Attribute, initialValue: RelationValue?, aggregateFunction: @escaping (RelationValue?, RelationValue) -> Result<RelationValue, RelationError>) -> RelationChange {
+    fileprivate func aggregateDerivative(_ r: IntermediateRelation, attribute: Attribute, initialValue: RelationValue?, aggregateFunction: @escaping (RelationValue?, [Row]) -> Result<RelationValue, RelationError>) -> RelationChange {
         // Do a brute before/after difference.
         // A' = (new A) - (old A)
         // We called this approach "dumb and inefficient"; is there a better way here?
+        let debugName = r.debugName ?? "<unknown>"
         let preChangeRelation = self.preChangeRelation(r.operands[0])
+            .setDebugName("aggregateDerivative preChangeRelation for \(debugName)")
         let previousAgg = IntermediateRelation(op: .aggregate(attribute, initialValue, aggregateFunction), operands: [preChangeRelation])
+            .setDebugName("aggregateDerivative previousAgg for \(debugName)")
         return RelationChange(added: r.difference(previousAgg),
                                   removed: previousAgg.difference(r))
     }
@@ -329,8 +348,12 @@ extension RelationDifferentiator {
     fileprivate func otherwiseDerivative(_ r: IntermediateRelation) -> RelationChange {
         // Do another brute before/after difference.
         // A' = (new A) - (old A)
-        let preChangeRelations = r.operands.map(self.preChangeRelation)
+        let debugName = r.debugName ?? "<unknown>"
+        let preChangeRelations = r.operands.map(self.preChangeRelation).map({
+            $0.setDebugName("otherwiseDerivative preChangeRelation for \(debugName)")
+        })
         let previousOtherwise = IntermediateRelation(op: .otherwise, operands: preChangeRelations)
+            .setDebugName("otherwiseDerivative previousOtherwise for \(debugName)")
         return RelationChange(added: r.difference(previousOtherwise),
                               removed: previousOtherwise.difference(r))
     }
@@ -338,10 +361,14 @@ extension RelationDifferentiator {
     fileprivate func uniqueDerivative(_ r: IntermediateRelation) -> RelationChange {
         // Do another brute before/after difference.
         // A' = (new A) - (old A)
-        let preChangeRelations = r.operands.map(self.preChangeRelation)
-        let previousOtherwise = IntermediateRelation(op: r.op, operands: preChangeRelations)
-        return RelationChange(added: r.difference(previousOtherwise),
-                              removed: previousOtherwise.difference(r))
+        let debugName = r.debugName ?? "<unknown>"
+        let preChangeRelations = r.operands.map(self.preChangeRelation).map({
+            $0.setDebugName("otherwiseDerivative preChangeRelation for \(debugName)")
+        })
+        let previousUnique = IntermediateRelation(op: r.op, operands: preChangeRelations)
+            .setDebugName("uniqueDerivative previousUnique for \(debugName)")
+        return RelationChange(added: r.difference(previousUnique),
+                              removed: previousUnique.difference(r))
     }
 }
 

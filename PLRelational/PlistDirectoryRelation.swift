@@ -8,6 +8,17 @@ import Foundation
 import CommonCrypto
 
 
+private let logInefficientScans = false
+
+private func logInefficientScan(_ r: PlistDirectoryRelation, _ expression: SelectExpression) {
+    guard logInefficientScans else { return }
+    
+    print("Inefficiently scanning directory for \(expression)")
+    
+    // Dummy call to primaryKeyEquality so we can step into it in the debugger.
+    _ = r.primaryKeyEquality(expression: expression)
+}
+
 public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserverImplementation {
     public let scheme: Scheme
     public let primaryKey: Attribute
@@ -67,13 +78,14 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     
     public var contentProvider: RelationContentProvider {
         return .efficientlySelectableGenerator({ expression in
-            if expression as? Bool == false {
+            if expression.constantBoolValue == false {
                 return AnyIterator([].makeIterator())
             } else if let value = self.primaryKeyEquality(expression: expression) {
                 // TODO: we probably also want to handle cases where the expression is
                 // multiple primary key values ORed together.
                 return self.filteredRowGenerator(primaryKeyValues: [value])
             } else {
+                logInefficientScan(self, expression)
                 let lazy = self.rowGenerator().lazy
                 let filtered = lazy.filter({
                     $0.ok.map({
@@ -82,10 +94,16 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
                 })
                 return AnyIterator(filtered.map({ $0.map({ [$0] }) }).makeIterator())
             }
-        }, approximateCount: nil)
+        }, approximateCount: {
+            if self.primaryKeyEquality(expression: $0) != nil {
+                return 1.0
+            } else {
+                return nil
+            }
+        })
     }
     
-    private func primaryKeyEquality(expression: SelectExpression) -> RelationValue? {
+    fileprivate func primaryKeyEquality(expression: SelectExpression) -> RelationValue? {
         if case let op as SelectExpressionBinaryOperator = expression, op.op is EqualityComparator {
             if op.lhs as? Attribute == primaryKey, let value = op.rhs as? SelectExpressionConstantValue {
                 return value.relationValue

@@ -7,7 +7,7 @@
 //
 
 import XCTest
-import PLRelational
+@testable import PLRelational
 
 class QueryOptimizerTests: XCTestCase {
     func testEquijoinOptimization() {
@@ -193,6 +193,91 @@ class QueryOptimizerTests: XCTestCase {
         AssertEqual(final, MakeRelation(["n"], [2], [3]))
         XCTAssertEqual(instrumented.rowsProvided, 2)
     }
+    
+    func testJoinedJoinOptimization() {
+        func makeR(size: Int) -> InstrumentedSelectableRelation {
+            return InstrumentedSelectableRelation(scheme: ["n"], values: Set((0 ..< size).map({ ["n": RelationValue.integer(Int64($0))] })))
+        }
+        
+        let small = makeR(size: 1)
+        let medium = makeR(size: 10)
+        let large = makeR(size: 100)
+        
+        // The naive method of running sources in order of their original size will run
+        // small, medium, large. This will cause medium to iterate its whole content
+        // because no select gets pushed down to it. A select does get pushed down
+        // to large, so it really should go first. This test ensures that the system
+        // notices this and runs small, large, medium, which is more efficient.
+        let r = small.join(large).join(medium)
+        AssertEqual(r, makeR(size: 1))
+        XCTAssertEqual(small.rowsProvided, 1)
+        XCTAssertEqual(medium.rowsProvided, 1)
+        XCTAssertEqual(large.rowsProvided, 1)
+    }
+    
+    func testJoinDerivativeOptimization() {
+        let rm = InstrumentedSelectableRelation(scheme: ["m"], values: Set((1 ... 20).map({ ["m": .integer($0)] })))
+            .setDebugName("rm")
+        let rn = InstrumentedSelectableRelation(scheme: ["n"], values: Set((10 ... 30).map({ ["n": .integer($0)] })))
+            .setDebugName("rn")
+        let joined = rm.equijoin(rn, matching: ["m": "n"])
+            .setDebugName("joined")
+        
+        let differentiator = RelationDifferentiator(relation: joined)
+        let derivative = differentiator.computeDerivative()
+        
+        derivative.addChange(RelationChange(
+            added: MakeRelation(["m"], [1], [10]),
+            removed: MakeRelation(["m"], [0], [21])), toVariable: rm)
+        
+        derivative.addChange(RelationChange(
+            added: MakeRelation(["n"], [20], [30]),
+            removed: MakeRelation(["n"], [9], [31])), toVariable: rn)
+        
+        AssertEqual(derivative.change.added, MakeRelation(["m", "n"], [10, 10], [20, 20]))
+        AssertEqual(derivative.change.removed, MakeRelation(["m", "n"], [9, 9], [21, 21]))
+        
+        XCTAssertEqual(rm.rowsProvided, 2)
+        XCTAssertEqual(rn.rowsProvided, 2)
+    }
+    
+    func testJoinedJoinWithOneRelationOptimization() {
+        let instrumented = InstrumentedSelectableRelation(scheme: ["n"], values: Set((0 ..< 100).map({ ["n": .integer($0)] }))).setDebugName("instrumented")
+        let tiny = MakeRelation(["n"], [1]).setDebugName("tiny")
+        
+        let selected = instrumented.select(Attribute("n") *< 10).setDebugName("selected")
+        
+        // TODO: eventually it would be nice if the direct version of the multiple join
+        // would be fast on its own. For now, we need this cache to make it fast. When
+        // we get to fixing the direct case, we can take the cache out.
+        let cached = selected.cache(upTo: .max).setDebugName("cached")
+        let j1 = tiny.join(cached).setDebugName("j1")
+        let j2 = j1.join(instrumented).setDebugName("j2")
+        
+        j2.asyncAllRows({
+            XCTAssertNil($0.err)
+            XCTAssertEqual($0.ok, [["n": 1]])
+            CFRunLoopStop(CFRunLoopGetCurrent())
+            XCTAssertEqual(instrumented.rowsProvided, 100)
+        })
+        CFRunLoopRunOrFail()
+        
+        j2.asyncAllRows({
+            XCTAssertNil($0.err)
+            XCTAssertEqual($0.ok, [["n": 1]])
+            CFRunLoopStop(CFRunLoopGetCurrent())
+            XCTAssertEqual(instrumented.rowsProvided, 101)
+        })
+        CFRunLoopRunOrFail()
+        
+        j2.asyncAllRows({
+            XCTAssertNil($0.err)
+            XCTAssertEqual($0.ok, [["n": 1]])
+            CFRunLoopStop(CFRunLoopGetCurrent())
+            XCTAssertEqual(instrumented.rowsProvided, 102)
+        })
+        CFRunLoopRunOrFail()
+    }
 }
 
 private class InstrumentedSelectableRelation: Relation {
@@ -216,15 +301,21 @@ private class InstrumentedSelectableRelation: Relation {
         return .Ok(values.contains(row))
     }
 
+    private func filteredValues(_ expression: SelectExpression) -> [Row] {
+        return values.filter({ expression.valueWithRow($0).boolValue })
+    }
+    
     var contentProvider: RelationContentProvider {
         return .efficientlySelectableGenerator({ expression in
-            let filtered = self.values.lazy.filter({ expression.valueWithRow($0).boolValue })
+            let filtered = self.filteredValues(expression)
             let mapped = filtered.map({ row -> Result<Set<Row>, RelationError> in
                 self.rowsProvided += 1
                 return .Ok([row])
             })
             return AnyIterator(mapped.makeIterator())
-        }, approximateCount: nil)
+        }, approximateCount: {
+            Double(self.filteredValues($0).count)
+        })
     }
     
     init(scheme: Scheme, values: Set<Row>) {

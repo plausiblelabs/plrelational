@@ -6,6 +6,18 @@
 import Foundation
 
 
+private let logInefficientScans = false
+
+private func logInefficientScan(_ r: PlistFileRelation, _ expression: SelectExpression) {
+    guard logInefficientScans else { return }
+    
+    print("Inefficiently scanning \(r.values.values.count) rows for \(expression)")
+    
+    // Dummy call to efficientValuesSet so we can step into it in the debugger.
+    _ = r.efficientValuesSet(expression: expression)
+}
+
+
 public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImplementation {
     public let scheme: Scheme
     
@@ -31,20 +43,24 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     public var contentProvider: RelationContentProvider {
         return .efficientlySelectableGenerator({ expression in
-            if expression as? Bool == false {
+            if expression.constantBoolValue == false {
                 return AnyIterator([].makeIterator())
-            } else if expression as? Bool == true {
+            } else if expression.constantBoolValue == true {
                 return AnyIterator([.Ok(self.values.values)].makeIterator())
             } else if let rows = self.efficientValuesSet(expression: expression) {
                 return AnyIterator([.Ok(rows)].makeIterator())
             } else {
-                let lazy = self.values.lazy
-                let filtered = lazy.filter({
+                logInefficientScan(self, expression)
+                let filtered = self.values.filter({
                     expression.valueWithRow($0).boolValue
                 })
                 return AnyIterator(filtered.map({ .Ok([$0]) }).makeIterator())
             }
-        }, approximateCount: Double(values.values.count))
+        }, approximateCount: {
+            // TODO: efficientValuesSet may become less efficient for complex selects,
+            // so we might want to change this then.
+            return Double(self.efficientValuesSet(expression: $0)?.count ?? self.values.values.count)
+        })
     }
     
     public func contains(_ row: Row) -> Result<Bool, RelationError> {
@@ -172,13 +188,23 @@ extension PlistFileRelation {
 }
 
 private extension PlistFileRelation {
-    func primaryKeyEquality(expression: SelectExpression) -> (Attribute, RelationValue)? {
-        if case let op as SelectExpressionBinaryOperator = expression, op.op is EqualityComparator {
-            if let attr = op.lhs as? Attribute, let value = op.rhs as? SelectExpressionConstantValue, values.primaryKeys.contains(attr) {
-                return (attr, value.relationValue)
-            }
-            if let attr = op.rhs as? Attribute, let value = op.lhs as? SelectExpressionConstantValue, values.primaryKeys.contains(attr) {
-                return (attr, value.relationValue)
+    func primaryKeyEquality(expression: SelectExpression) -> [(attribute: Attribute, value: RelationValue)]? {
+        if case let op as SelectExpressionBinaryOperator = expression {
+            switch op.op {
+            case is EqualityComparator:
+                if let attr = op.lhs as? Attribute, let value = op.rhs as? SelectExpressionConstantValue, values.primaryKeys.contains(attr) {
+                    return [(attr, value.relationValue)]
+                }
+                if let attr = op.rhs as? Attribute, let value = op.lhs as? SelectExpressionConstantValue, values.primaryKeys.contains(attr) {
+                    return [(attr, value.relationValue)]
+                }
+                
+            case is OrComparator:
+                if let lhsEquality = primaryKeyEquality(expression: op.lhs), let rhsEquality = primaryKeyEquality(expression: op.rhs) {
+                    return lhsEquality + rhsEquality
+                }
+                
+            default: break
             }
         }
         return nil
@@ -189,8 +215,12 @@ private extension PlistFileRelation {
         // multiple primary key values ORed together.
         if expression as? Bool == false {
             return []
-        } else if let (attribute, value) = primaryKeyEquality(expression: expression) {
-            return values.values(matchingKey: attribute, value: value)
+        } else if let equality = primaryKeyEquality(expression: expression) {
+            var result = Set<Row>()
+            for (attribute, value) in equality {
+                result.formUnion(values.values(matchingKey: attribute, value: value))
+            }
+            return result
         } else {
             return nil
         }

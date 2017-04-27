@@ -40,13 +40,17 @@ class RelationDerivative {
     }
     
     func addChange(_ change: RelationChange, toVariable variable: Variable) {
+        let variableName = variable.debugName ?? "<unknown>"
+        
         let currentChange = changeForVariable(variable)
         
         let new = change.added - currentChange.removed
         let gone = change.removed - currentChange.added
         
-        let newAdded = currentChange.added + new - change.removed
-        let newRemoved = currentChange.removed + gone - change.added
+        let newAdded = (currentChange.added + new - change.removed)?
+            .setDebugName("Added variable for \(variableName)")
+        let newRemoved = (currentChange.removed + gone - change.added)?
+            .setDebugName("Removed variable for \(variableName)")
         
         let newChange = RelationChange(added: newAdded, removed: newRemoved)
         setChange(newChange, forVariable: variable)

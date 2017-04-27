@@ -67,7 +67,7 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
 
 public enum RelationContentProvider {
     case generator((Void) -> AnyIterator<Result<Set<Row>, RelationError>>, approximateCount: Double?)
-    case efficientlySelectableGenerator((SelectExpression) -> AnyIterator<Result<Set<Row>, RelationError>>, approximateCount: Double?)
+    case efficientlySelectableGenerator((SelectExpression) -> AnyIterator<Result<Set<Row>, RelationError>>, approximateCount: (SelectExpression) -> Double?)
     case set((Void) -> Swift.Set<Row>, approximateCount: Double?)
     case intermediate(IntermediateRelation.Operator, [Relation])
     case underlying(Relation)
@@ -271,13 +271,15 @@ extension Relation {
     
     public func leftOuterJoin(_ other: Relation) -> Relation {
         // TODO: Optimize this
-        let joined = self.join(other)
-        let projected = joined.project(self.scheme)
-        let difference = self.difference(projected)
+        let debugPrefix = (self.debugName ?? "<unknown>") + " leftOuterJoin"
+        
+        let joined = self.join(other).setDebugName("\(debugPrefix) initial join")
+        let projected = joined.project(self.scheme).setDebugName("\(debugPrefix) projected")
+        let difference = self.difference(projected).setDebugName("\(debugPrefix) difference")
         let attrsUniqueToOther = joined.scheme.attributes.symmetricDifference(self.scheme.attributes)
-        let otherNulls = MakeRelation(Array(attrsUniqueToOther), Array(repeating: .null, count: attrsUniqueToOther.count))
-        let differenceWithNulls = difference.join(otherNulls)
-        return differenceWithNulls.union(joined)
+        let otherNulls = MakeRelation(Array(attrsUniqueToOther), Array(repeating: .null, count: attrsUniqueToOther.count)).setDebugName("\(debugPrefix) otherNulls")
+        let differenceWithNulls = difference.join(otherNulls).setDebugName("\(debugPrefix) differenceWithNulls")
+        return differenceWithNulls.union(joined).setDebugName(debugPrefix)
     }
 }
 
@@ -291,9 +293,9 @@ extension Relation {
     }
     
     public func count() -> Relation {
-        func count(_ count: RelationValue?, currentValueIgnore: RelationValue) -> Result<RelationValue, RelationError> {
+        func count(_ count: RelationValue?, rows: [Row]) -> Result<RelationValue, RelationError> {
             let countInt: Int64 = count!.get()!
-            return .Ok(RelationValue.integer(countInt + 1))
+            return .Ok(RelationValue.integer(countInt + Int64(rows.count)))
         }
         return IntermediateRelation(op: .aggregate("count", 0, count), operands: [self])
     }
