@@ -193,12 +193,15 @@ extension QueryPlanner {
         while true {
             let relation: Relation
             let auxiliaryData: AuxiliaryData?
+            let canSkip: Bool
             if let (r, callback) = rootsToVisit.popLast() {
                 relation = r
                 auxiliaryData = callback
+                canSkip = false
             } else if let r = othersToVisit.popLast() {
                 relation = r
                 auxiliaryData = nil
+                canSkip = true
             } else {
                 break
             }
@@ -207,7 +210,7 @@ extension QueryPlanner {
             iterationCount += 1
             if let obj = asObject(realR) {
                 let retrievedCount = visited.getOrCreate(obj, defaultValue: iterationCount)
-                if retrievedCount != iterationCount {
+                if canSkip && retrievedCount != iterationCount {
                     continue
                 }
             }
