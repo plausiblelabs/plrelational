@@ -10,9 +10,9 @@ open class CachingRelation: IntermediateRelation {
     private var observer: Observer!
     private var remover: AsyncManager.ObservationRemover!
     
-    private let limit: Int
+    fileprivate let limit: Int
     
-    public private(set) var cache: Set<Row>?
+    public fileprivate(set) var cache: Set<Row>?
     
     /// Initialize a caching relation wrapping another relation. If the number of rows in
     /// the relation is equal to or lower than `limit`, then those rows will be cached in
@@ -24,13 +24,32 @@ open class CachingRelation: IntermediateRelation {
         
         observer = Observer(owner: self)
         remover = subRelation.addAsyncObserver(observer)
+        subRelation.asyncAllRows(self.setRows)
     }
     
     deinit {
         remover()
     }
     
-    private class Observer: AsyncRelationContentCoalescedObserver {
+    fileprivate func setRows(_ result: Result<Set<Row>, RelationError>) {
+        if let rows = result.ok, rows.count <= limit {
+            cache = rows
+        } else {
+            cache = nil
+        }
+    }
+    
+    open override var contentProvider: RelationContentProvider {
+        if let cache = cache {
+            return .set({ cache }, approximateCount: Double(cache.count))
+        } else {
+            return super.contentProvider
+        }
+    }
+}
+
+extension CachingRelation {
+    fileprivate class Observer: AsyncRelationContentCoalescedObserver {
         weak var owner: CachingRelation?
         
         init(owner: CachingRelation) {
@@ -42,9 +61,8 @@ open class CachingRelation: IntermediateRelation {
         }
         
         func relationDidChange(_ relation: Relation, result: Result<Set<Row>, RelationError>) {
-            if let rows = result.ok, let owner = owner, rows.count <= owner.limit {
-                owner.cache = rows
-            }
+            print("Relation did change to \(result)")
+            owner?.setRows(result)
         }
     }
 }

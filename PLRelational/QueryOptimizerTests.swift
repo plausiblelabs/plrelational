@@ -242,13 +242,41 @@ class QueryOptimizerTests: XCTestCase {
     }
     
     func testJoinedJoinWithOneRelationOptimization() {
-        let instrumented = InstrumentedSelectableRelation(scheme: ["n"], values: Set((0 ..< 100).map({ ["n": .integer($0)] })))
-        let tiny = MakeRelation(["n"], [1])
+        let instrumented = InstrumentedSelectableRelation(scheme: ["n"], values: Set((0 ..< 100).map({ ["n": .integer($0)] }))).setDebugName("instrumented")
+        let tiny = MakeRelation(["n"], [1]).setDebugName("tiny")
         
-        let j1 = tiny.join(instrumented)
-        let j2 = j1.join(instrumented)
-        AssertEqual(j2, MakeRelation(["n"], [1]))
-        XCTAssertEqual(instrumented.rowsProvided, 1)
+        let selected = instrumented.select(Attribute("n") *< 10).setDebugName("selected")
+        
+        // TODO: eventually it would be nice if the direct version of the multiple join
+        // would be fast on its own. For now, we need this cache to make it fast. When
+        // we get to fixing the direct case, we can take the cache out.
+        let cached = selected.cache(upTo: .max).setDebugName("cached")
+        let j1 = tiny.join(cached).setDebugName("j1")
+        let j2 = j1.join(instrumented).setDebugName("j2")
+        
+        j2.asyncAllRows({
+            XCTAssertNil($0.err)
+            XCTAssertEqual($0.ok, [["n": 1]])
+            CFRunLoopStop(CFRunLoopGetCurrent())
+            XCTAssertEqual(instrumented.rowsProvided, 100)
+        })
+        CFRunLoopRunOrFail()
+        
+        j2.asyncAllRows({
+            XCTAssertNil($0.err)
+            XCTAssertEqual($0.ok, [["n": 1]])
+            CFRunLoopStop(CFRunLoopGetCurrent())
+            XCTAssertEqual(instrumented.rowsProvided, 101)
+        })
+        CFRunLoopRunOrFail()
+        
+        j2.asyncAllRows({
+            XCTAssertNil($0.err)
+            XCTAssertEqual($0.ok, [["n": 1]])
+            CFRunLoopStop(CFRunLoopGetCurrent())
+            XCTAssertEqual(instrumented.rowsProvided, 102)
+        })
+        CFRunLoopRunOrFail()
     }
 }
 

@@ -22,12 +22,7 @@ class QueryPlanner {
     
     var initiatorIndexes: [Int] {
         return nodes.indices.filter({
-            switch nodes[$0].op {
-            case .rowGenerator, .selectableGenerator, .rowSet:
-                return true
-            default:
-                return false
-            }
+            QueryPlanner.isInitiator(op: nodes[$0].op)
         })
     }
     
@@ -38,8 +33,10 @@ class QueryPlanner {
     fileprivate func computeNodes() {
         QueryPlanner.visitRelationTree(rootRelations, { relation, underlyingRelation, outputCallback in
             noteTransactionalDatabases(relation, nodeIndex: 0)
-            let children = QueryPlanner.relationChildren(underlyingRelation)
             let parentNodeIndex = getOrCreateNodeIndex(underlyingRelation)
+            let children = QueryPlanner.isInitiator(op: nodes[parentNodeIndex].op)
+                ? []
+                : QueryPlanner.relationChildren(underlyingRelation)
             
             if let outputCallback = outputCallback {
                 if nodes[parentNodeIndex].outputCallbacks == nil {
@@ -180,6 +177,12 @@ extension QueryPlanner {
         
         case otherwise
         case unique(Attribute, RelationValue)
+        
+        /// A dummy operation used for nodes which have been removed
+        /// after initial planning. Removing nodes from the array
+        /// would cause indexes to shift, and would also cause some
+        /// inefficient copying, so instead we just mark them as dead.
+        case dead
     }
 }
 
@@ -225,6 +228,15 @@ extension QueryPlanner {
             return r.operands
         default:
             return []
+        }
+    }
+    
+    fileprivate static func isInitiator(op: Operation) -> Bool {
+        switch op {
+        case .rowGenerator, .selectableGenerator, .rowSet:
+            return true
+        default:
+            return false
         }
     }
 }

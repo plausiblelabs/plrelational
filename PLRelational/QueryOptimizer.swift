@@ -55,6 +55,8 @@ class QueryOptimizer {
                 break
             }
         }
+        
+        nodes.indices.forEach(garbageCollect)
     }
     
     fileprivate func shouldOptimizeNestedUnions(_ index: Int) -> Bool {
@@ -74,6 +76,24 @@ class QueryOptimizer {
             return true
         } else {
             return false
+        }
+    }
+    
+    /// Remove (really, detach and mark dead) any nodes which have no
+    /// output callbacks and no parents. Removal is done recursively.
+    fileprivate func garbageCollect(_ i: Int) {
+        // Avoid redundantly examining already dead nodes.
+        if case .dead = nodes[i].op {
+            return
+        }
+        
+        if nodes[i].outputCallbacks == nil && nodes[i].parentCount == 0 {
+            print("Garbage collecting node \(i)")
+            nodes[i].op = .dead
+            for childIndex in nodes[i].childIndexes {
+                nodes[childIndex].parentIndexes.remove(i)
+                garbageCollect(childIndex)
+            }
         }
     }
 }

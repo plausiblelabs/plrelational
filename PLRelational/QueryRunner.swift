@@ -345,6 +345,9 @@ open class QueryRunner {
         case .aggregate, .otherwise, .unique:
             // Don't even try
             return nil
+            
+        case .dead:
+            fatalError("Encountered a dead node while trying to derive a select expression")
         }
     }
     
