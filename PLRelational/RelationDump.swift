@@ -26,7 +26,7 @@ fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
 
 
 private struct FieldNameExclusions {
-    static let strings: Set = ["changeObserverData", "log", "cachedCurrentRelation"]
+    static let strings: Set = ["changeObserverData", "log", "cachedCurrentRelation", "values"]
 }
 
 extension Relation {
@@ -165,7 +165,10 @@ extension Relation {
         print("digraph relation_graph {")
         
         func visit(_ r: Relation, nonobjectID: String) -> String {
-            let supplemental = r.getFieldsForDump().map({ "\($0): \($1)" })
+            let supplemental: [String] = r.getFieldsForDump().map({
+                let valueString = String(describing: $1).replacingOccurrences(of: "\"", with: "\\\"")
+                return "\($0): \(valueString)"
+            })
             if let obj = asObject(r) {
                 let id = ObjectIdentifier(obj)
                 let idString = String(format: "_%lx", UInt(bitPattern: id))
