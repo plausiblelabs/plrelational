@@ -6,44 +6,42 @@
 import UIKit
 import PLRelationalBinding
 
-public struct ListViewModel<E: ArrayElement> {
-    public let data: ArrayProperty<E>
-    // Note: dstIndex is relative to the state of the array *before* the item is removed.
-    public let move: ((_ srcPath: Int, _ dstPath: Int) -> Void)?
-    public let cellIdentifier: (E.Data) -> String
-    public let cellText: (E.Data) -> LabelText
+public protocol ListViewModel: class {
+    associatedtype Element: ArrayElement
+
+    var data: ArrayProperty<Element> { get }
+    var selection: AsyncReadableProperty<Element.ID?> { get }
     
-    public init(
-        data: ArrayProperty<E>,
-        move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)?,
-        cellIdentifier: @escaping (E.Data) -> String,
-        cellText: @escaping (E.Data) -> LabelText)
-    {
-        self.data = data
-        self.move = move
-        self.cellIdentifier = cellIdentifier
-        self.cellText = cellText
-    }
+    func start()
+    
+    func cellIdentifier(_ data: Element.Data) -> String
+    func cellText(_ data: Element.Data) -> LabelText
+    
+    /// Called when a row with the given data has been selected.  If the model returns `true`,
+    /// the row will remain selected in the view, otherwise it will be deselected (i.e., a
+    /// momentary selection).
+    func rowSelected(_ data: Element.Data) -> Bool
 }
 
-open class ListView<E: ArrayElement>: NSObject, UITableViewDataSource, UITableViewDelegate {
+open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableViewDelegate {
     
-    public let model: ListViewModel<E>
+    public let model: M
     private let tableView: UITableView
     
-    private lazy var selection: MutableValueProperty<Set<E.ID>> = mutableValueProperty(Set(), { selectedIDs, _ in
-        self.selectItems(selectedIDs)
+    private lazy var selection: MutableValueProperty<M.Element.ID?> = mutableValueProperty(nil, { selectedID, _ in
+        self.selectItem(selectedID)
     })
     
     private var arrayObserverRemoval: ObserverRemoval?
-    private var selfInitiatedSelectionChange = false
     
-    public init(model: ListViewModel<E>, tableView: UITableView) {
+    public init(model: M, tableView: UITableView) {
         self.model = model
         self.tableView = tableView
         
         super.init()
         
+        self.selection <~ model.selection
+
         // TODO: Handle will/didChange
         arrayObserverRemoval = model.data.signal.observe(SignalObserver(
             valueWillChange: {},
@@ -85,51 +83,25 @@ open class ListView<E: ArrayElement>: NSObject, UITableViewDataSource, UITableVi
     
     // MARK: - UITableViewDelegate
     
-    open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if selfInitiatedSelectionChange {
-            return
+    open func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        let element = self.model.data.elements[indexPath.row]
+        if self.model.rowSelected(element.data) {
+            return indexPath
+        } else {
+            return nil
         }
-        
-        selfInitiatedSelectionChange = true
-        selection.change(selectedItemIDs(), transient: false)
-        selfInitiatedSelectionChange = false
     }
     
-    /// Returns the set of element IDs corresponding to the view's current selection state.
-    private func selectedItemIDs() -> Set<E.ID> {
-        var itemIDs: [E.ID] = []
-        if let indexPaths = self.tableView.indexPathsForSelectedRows {
-            for indexPath in indexPaths {
-                let element = self.model.data.elements[indexPath.row]
-                itemIDs.append(element.id)
-            }
-        }
-        return Set(itemIDs)
-    }
-    
-    /// Selects the rows corresponding to the given set of element IDs.
-    private func selectItems(_ ids: Set<E.ID>) {
-        var indexPaths: [IndexPath] = []
-        for id in ids {
-            if let index = self.model.data.indexForID(id) {
-                indexPaths.append(IndexPath(row: index, section: 0))
-            }
-        }
-        
-        // TODO: The selectRow() spec says calling it does not cause the delegate to receive didSelect events,
-        // so probably the selfInitiatedSelectionChange guards are not needed for UIKit
-        selfInitiatedSelectionChange = true
-        // TODO: Is this a valid way to handle multiple selection?
-        self.tableView.selectRow(at: nil, animated: false, scrollPosition: .none)
-        for indexPath in indexPaths {
-            self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
-        }
-        selfInitiatedSelectionChange = false
+    /// Selects the row corresponding to the given element ID.
+    private func selectItem(_ id: M.Element.ID?) {
+        let rowIndex = id.flatMap(self.model.data.indexForID)
+        let indexPath = rowIndex.map{ IndexPath(row: $0, section: 0) }
+        self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
     }
     
     // MARK: - Property observers
     
-    private func arrayChanged(_ changes: [ArrayChange<E>]) {
+    private func arrayChanged(_ changes: [ArrayChange<M.Element>]) {
         // TODO
         Swift.print("ARRAY CHANGED: \(changes)")
         self.tableView.reloadData()

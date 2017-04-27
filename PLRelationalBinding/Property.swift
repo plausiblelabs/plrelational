@@ -91,7 +91,7 @@ open class BindableProperty<T> {
     }
     
     /// Establishes a unidirectional binding between this property and the given signal.
-    /// When the other property's value changes, this property's value will be updated.
+    /// When the other signal's value changes, this property's value will be updated.
     /// Note that calling `bind` will cause this property to take on the given initial
     /// value immediately.
     fileprivate func bind(_ signal: Signal<T>, initialValue: T?, owner: AnyObject) -> Binding {
@@ -541,16 +541,35 @@ precedencegroup PropertyOperatorPrecedence {
     higherThan: AssignmentPrecedence
 }
 
+extension BindableProperty {
+    /// Establishes a unidirectional binding between this property and the given property.
+    /// When the other property's value changes, this property's value will be updated.
+    /// Note that calling `bind` will cause this property to take on the given initial
+    /// value immediately if non-nil, otherwise will take on the given property's value.
+    @discardableResult public func bind<RHS: ReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T, RHS.SignalChange == T {
+        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, owner: rhs)
+    }
+
+    /// Establishes a unidirectional binding between this property and the given property.
+    /// When the other property's value changes, this property's value will be updated.
+    /// Note that calling `bind` will `start` the other property and will cause this property
+    /// to take on the given initial value if non-nil, otherwise will take on the given
+    /// property's value (if defined).
+    @discardableResult public func bind<RHS: AsyncReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T, RHS.SignalChange == T {
+        rhs.start()
+        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, owner: rhs)
+    }
+}
+
 // This syntax is borrowed from ReactiveCocoa.
 infix operator <~ : PropertyOperatorPrecedence
 
 @discardableResult public func <~ <T, RHS: ReadablePropertyType>(lhs: BindableProperty<T>, rhs: RHS) -> Binding where RHS.Value == T, RHS.SignalChange == T {
-    return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
+    return lhs.bind(rhs)
 }
 
 @discardableResult public func <~ <T, RHS: AsyncReadablePropertyType>(lhs: BindableProperty<T>, rhs: RHS) -> Binding where RHS.Value == T, RHS.SignalChange == T {
-    rhs.start()
-    return lhs.bind(rhs.signal, initialValue: rhs.value, owner: rhs)
+    return lhs.bind(rhs)
 }
 
 // TODO: It seems that `~>` is defined somewhere already (not sure where exactly), so to avoid

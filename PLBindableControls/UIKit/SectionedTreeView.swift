@@ -61,20 +61,13 @@ public protocol SectionedTreeViewModel: class {
     associatedtype Path: Hashable
     
     weak var delegate: SectionedTreeViewModelDelegate? { get set }
-    var selection: AsyncReadWriteProperty<Set<Path>> { get }
+    var selection: AsyncReadableProperty<Path?> { get }
     var selectionExclusiveMode: Bool { get set }
     
     func start()
     
     func indexPathForItemPath(_ itemPath: Path) -> IndexPath?
 
-    /// Called when a row at the given path has been selected.  The view will update the
-    /// `selection` property using the value returned by this function.  This gives the model
-    /// an opportunity to handle momentary-style cell selection.  For example, the model can
-    /// initiate some action when a cell is selected then return `nil` to prevent `selection`
-    /// being set to that item's path.
-    func itemPathForSelectedRow(_ indexPath: IndexPath) -> Path?
-    
     func sectionCount() -> Int
     func rowCount(forSection section: Int) -> Int
     
@@ -83,6 +76,12 @@ public protocol SectionedTreeViewModel: class {
     func cellIndentationLevel(_ indexPath: IndexPath) -> Int
     func cellIdentifier(_ indexPath: IndexPath) -> String
     func cellText(_ indexPath: IndexPath) -> LabelText
+    func cellIsGroupStyle(_ indexPath: IndexPath) -> Bool
+
+    /// Called when a row at the given path has been selected.  If the model returns `true`,
+    /// the row will remain selected in the view, otherwise it will be deselected (i.e., a
+    /// momentary selection).
+    func handleRowSelected(at indexPath: IndexPath) -> Bool
 }
 
 public protocol SectionedTreeViewDelegate: class {
@@ -111,11 +110,9 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
     private let tableView: UITableView
     fileprivate weak var viewDelegate: SectionedTreeViewDelegate?
     
-    private lazy var selection: MutableValueProperty<Set<M.Path>> = mutableValueProperty(Set(), { selectedPaths, _ in
-        self.selectItems(selectedPaths)
+    private lazy var selection: MutableValueProperty<M.Path?> = mutableValueProperty(nil, { selectedPath, _ in
+        self.selectItem(selectedPath)
     })
-    
-    private var selfInitiatedSelectionChange = false
     
     init(model: M, tableView: UITableView) {
         self.model = model
@@ -124,7 +121,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
         super.init()
         
         self.model.delegate = self
-        self.selection <~> model.selection
+        self.selection <~ model.selection
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -151,6 +148,9 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
         let text = model.cellText(indexPath)
         cell.textLabel?.bind(text)
         
+        // TODO: For now we disable selection for group-style items, but eventually we might want to allow expand/collapse
+        cell.isUserInteractionEnabled = !model.cellIsGroupStyle(indexPath)
+        
         return cell
     }
     
@@ -168,63 +168,64 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
         viewDelegate?.willDisplayCell(cell, indexPath: indexPath)
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if selfInitiatedSelectionChange {
-            return
+    func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
+        if model.handleRowSelected(at: indexPath) {
+            return indexPath
+        } else {
+            return nil
         }
-        
-        let paths = selectedItemPaths()
-        selfInitiatedSelectionChange = true
-        selection.change(paths, transient: false)
-        selfInitiatedSelectionChange = false
     }
     
-    /// Returns the set of item paths corresponding to the view's current selection state.
-    /// Note that the model may return nil for one or more index paths, indicating that it
-    /// handled the selection event but does not want that path included when changing
-    /// the state of the `selection` property.
-    private func selectedItemPaths() -> Set<M.Path> {
-        var itemPaths: [M.Path] = []
-        if let indexPaths = self.tableView.indexPathsForSelectedRows {
-            for indexPath in indexPaths {
-                if let itemPath = self.model.itemPathForSelectedRow(indexPath) {
-                    itemPaths.append(itemPath)
-                }
-            }
-        }
-        return Set(itemPaths)
-    }
-    
-    /// Selects the rows corresponding to the given set of item paths.
-    private func selectItems(_ itemPaths: Set<M.Path>) {
+    /// Selects the row corresponding to the given item path.
+    private func selectItem(_ itemPath: M.Path?) {
         // XXX: Ignore external selection changes made while in exclusive mode
         if model.selectionExclusiveMode {
             return
         }
 
-        var indexPaths: [IndexPath] = []
-        for itemPath in itemPaths {
-            if let indexPath = self.model.indexPathForItemPath(itemPath) {
-                indexPaths.append(indexPath)
-            }
-        }
-        
-        // TODO: The selectRow() spec says calling it does not cause the delegate to receive didSelect events,
-        // so probably the selfInitiatedSelectionChange guards are not needed for UIKit
-        selfInitiatedSelectionChange = true
-        // TODO: Is this a valid way to handle multiple selection?
-        self.tableView.selectRow(at: nil, animated: false, scrollPosition: .none)
-        for indexPath in indexPaths {
-            self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
-        }
-        selfInitiatedSelectionChange = false
+        let indexPath = itemPath.flatMap(self.model.indexPathForItemPath)
+        self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
     }
     
     // MARK: - SectionedTreeViewModelDelegate protocol
     
     func sectionedTreeViewModelTreeChanged(_ changes: [SectionedTreeChange]) {
-        // TODO
         Swift.print("TREE CHANGED: \(changes)")
+        
+        // TODO: For now we just reload the whole thing
         self.tableView.reloadData()
+
+//        self.tableView.beginUpdates()
+//        
+//        for change in changes {
+//            switch change {
+//            case .initial:
+//                // TODO: Reload just this section
+//                break
+//            case .insert:
+//                // TODO
+//                if isSection {
+//                    self.tableView.insertSections(sections, with: .automatic)
+//                } else {
+//                    self.tableView.insertRows(at: indexPaths, with: .automatic)
+//                }
+//            case .delete:
+//                // TODO
+//                if isSection {
+//                    self.tableView.deleteSections(sections, with: .automatic)
+//                } else {
+//                    self.tableView.deleteRows(at: indexPaths, with: .automatic)
+//                }
+//            case .move:
+//                // TODO
+//                if isSection {
+//                    self.tableView.moveSection(srcIndex, toSection: dstIndex)
+//                } else {
+//                    self.tableView.moveRow(at: srcPath, to: dstPath)
+//                }
+//            }
+//        }
+//        
+//        self.tableView.endUpdates()
     }
 }
