@@ -88,7 +88,6 @@ class QueryOptimizer {
         }
         
         if nodes[i].outputCallbacks == nil && nodes[i].parentCount == 0 {
-            print("Garbage collecting node \(i)")
             nodes[i].op = .dead
             for childIndex in nodes[i].childIndexes {
                 nodes[childIndex].parentIndexes.remove(i)
