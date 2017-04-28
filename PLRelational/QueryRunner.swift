@@ -666,19 +666,20 @@ extension QueryRunner {
     func copyNodeTree(_ index: Int, parent: Int) -> Int {
         let firstNewIndex = nodes.count
         let result = copyNodeTreeNoStates(index)
+        
         nodes[result].parentIndexes = [parent]
-        nodes[parent].childIndexes.mutatingForEach({
-            if $0 == index {
-                nodes[$0].parentIndexes.remove(parent)
-                nodeStates[$0].parentalSelectsRemaining -= 1
-                $0 = result
-            }
-        })
+        nodes[parent].childIndexes.replace(index, with: result)
+        
+        let childParentIndex = nodes[index].parentIndexes.index(of: parent)!
+        nodes[index].parentIndexes.remove(at: childParentIndex)
+        nodeStates[index].parentChildIndexes.remove(at: childParentIndex)
+        nodeStates[index].parentalSelectsRemaining -= 1
         
         for i in firstNewIndex ..< nodes.count {
             nodeStates.append(NodeState(nodes: nodes, nodeIndex: i))
         }
         computeParentChildIndexes(firstNewIndex ..< nodes.count)
+        
         return result
     }
     
