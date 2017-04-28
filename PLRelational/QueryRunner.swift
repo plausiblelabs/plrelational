@@ -3,6 +3,8 @@
 // All rights reserved.
 //
 
+private let enableValidation = true
+
 open class QueryRunner {
     var nodes: [QueryPlanner.Node]
     fileprivate var outputCallbacks: [QueryPlanner.OutputCallback]
@@ -34,6 +36,7 @@ open class QueryRunner {
         computeParentChildIndexes(nodeStates.indices)
         computeTransactionalDatabases(planner.transactionalDatabases)
         propagateSelects()
+        validate()
     }
     
     /// Fill out each NodeState's `parentChildIndexes` array by scanning their parents.
@@ -677,6 +680,19 @@ extension QueryRunner {
         }
         computeParentChildIndexes(firstNewIndex ..< nodes.count)
         return result
+    }
+    
+    fileprivate func validate() {
+        guard enableValidation else { return }
+        
+        for i in nodes.indices {
+            for child in nodes[i].childIndexes {
+                precondition(nodes[child].parentIndexes.contains(i))
+            }
+            for (parent, parentIndex) in zip(nodes[i].parentIndexes, nodeStates[i].parentChildIndexes) {
+                precondition(nodes[parent].childIndexes[parentIndex] == i)
+            }
+        }
     }
     
     /// Copy a tree of nodes, ignoring node states. After this returns,

@@ -57,6 +57,7 @@ class QueryOptimizer {
         }
         
         nodes.indices.forEach(garbageCollect)
+        QueryPlanner.validate(nodes: nodes)
     }
     
     fileprivate func shouldOptimizeNestedUnions(_ index: Int) -> Bool {

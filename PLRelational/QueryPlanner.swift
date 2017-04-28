@@ -3,6 +3,8 @@
 // All rights reserved.
 //
 
+private let enableValidation = true
+
 class QueryPlanner {
     typealias OutputCallback = DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>
     
@@ -51,6 +53,8 @@ class QueryPlanner {
                 nodes[parentNodeIndex].childIndexes.append(childNodeIndex)
             }
         })
+        
+        validate()
     }
     
     fileprivate func getOrCreateNodeIndex(_ r: Relation) -> Int {
@@ -128,6 +132,23 @@ class QueryPlanner {
             return underlyingRelation(underlying)
         default:
             return r
+        }
+    }
+    
+    func validate() {
+        QueryPlanner.validate(nodes: nodes)
+    }
+    
+    static func validate(nodes: [Node]) {
+        guard enableValidation else { return }
+        
+        for i in nodes.indices {
+            for child in nodes[i].childIndexes {
+                precondition(nodes[child].parentIndexes.contains(i))
+            }
+            for parent in nodes[i].parentIndexes {
+                precondition(nodes[parent].childIndexes.contains(i))
+            }
         }
     }
 }
