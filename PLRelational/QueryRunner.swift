@@ -480,7 +480,7 @@ open class QueryRunner {
         
         // If we get no more than this many rows on the smaller side, then
         // we'll build a select out of them and pass that up the larger side.
-        let maxSelectSize = 10
+        let maxSelectSize = 100
         
         // Track the keyed join target and the larger input index across calls.
         struct ExtraState {
