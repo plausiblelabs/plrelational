@@ -33,20 +33,13 @@ class QueryPlanner {
     }
     
     fileprivate func computeNodes() {
-        QueryPlanner.visitRelationTree(rootRelations, { relation, underlyingRelation, outputCallback in
+        QueryPlanner.visitRelationTree(rootRelations.map({ $0.0 }), { relation, underlyingRelation in
             noteTransactionalDatabases(relation, nodeIndex: 0)
             let parentNodeIndex = getOrCreateNodeIndex(underlyingRelation)
             let children = QueryPlanner.isInitiator(op: nodes[parentNodeIndex].op)
                 ? []
                 : QueryPlanner.relationChildren(underlyingRelation)
             
-            if let outputCallback = outputCallback {
-                if nodes[parentNodeIndex].outputCallbacks == nil {
-                    nodes[parentNodeIndex].outputCallbacks = [outputCallback]
-                } else {
-                    nodes[parentNodeIndex].outputCallbacks?.append(outputCallback)
-                }
-            }
             for childRelation in children {
                 let childNodeIndex = getOrCreateNodeIndex(QueryPlanner.underlyingRelation(childRelation))
                 nodes[childNodeIndex].parentIndexes.append(parentNodeIndex)
@@ -55,6 +48,15 @@ class QueryPlanner {
         })
         
         validate()
+        
+        for (relation, callback) in rootRelations {
+            let index = getOrCreateNodeIndex(QueryPlanner.underlyingRelation(relation))
+            if nodes[index].outputCallbacks == nil {
+                nodes[index].outputCallbacks = [callback]
+            } else {
+                nodes[index].outputCallbacks?.append(callback)
+            }
+        }
     }
     
     fileprivate func getOrCreateNodeIndex(_ r: Relation) -> Int {
@@ -209,23 +211,17 @@ extension QueryPlanner {
 
 /// Tree walking utilities.
 extension QueryPlanner {
-    static func visitRelationTree<AuxiliaryData>(_ roots: [(Relation, AuxiliaryData)], _ f: (_ relation: Relation, _ underlyingRelation: Relation, _ auxiliaryData: AuxiliaryData?) -> Void) {
+    static func visitRelationTree(_ roots: [Relation], _ f: (_ relation: Relation, _ underlyingRelation: Relation) -> Void) {
         let visited = ObjectMap<Int>()
         var rootsToVisit = roots
         var othersToVisit: [Relation] = []
         var iterationCount = 0
         while true {
             let relation: Relation
-            let auxiliaryData: AuxiliaryData?
-            let canSkip: Bool
-            if let (r, callback) = rootsToVisit.popLast() {
+            if let r = rootsToVisit.popLast() {
                 relation = r
-                auxiliaryData = callback
-                canSkip = false
             } else if let r = othersToVisit.popLast() {
                 relation = r
-                auxiliaryData = nil
-                canSkip = true
             } else {
                 break
             }
@@ -234,11 +230,11 @@ extension QueryPlanner {
             iterationCount += 1
             if let obj = asObject(realR) {
                 let retrievedCount = visited.getOrCreate(obj, defaultValue: iterationCount)
-                if canSkip && retrievedCount != iterationCount {
+                if retrievedCount != iterationCount {
                     continue
                 }
             }
-            f(relation, realR, auxiliaryData)
+            f(relation, realR)
             othersToVisit.append(contentsOf: relationChildren(realR))
         }
     }
