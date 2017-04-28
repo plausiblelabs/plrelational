@@ -35,6 +35,7 @@ class QueryOptimizer {
                     nodes[parentIndex].childIndexes.replace(i, with: childIndex)
                 }
                 nodes[i].parentIndexes = []
+                nodes[i].childIndexes = []
                 
             case .union where shouldOptimizeNestedUnions(i):
                 // Unions whose parents are unions can fold their operands into their parents, reducing
@@ -50,6 +51,7 @@ class QueryOptimizer {
                     }
                 }
                 nodes[i].parentIndexes = []
+                nodes[i].childIndexes = []
                 
             default:
                 break
@@ -94,6 +96,7 @@ class QueryOptimizer {
                 nodes[childIndex].parentIndexes.remove(i)
                 garbageCollect(childIndex)
             }
+            nodes[i].childIndexes = []
         }
     }
 }
