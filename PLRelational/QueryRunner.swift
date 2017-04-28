@@ -529,7 +529,7 @@ open class QueryRunner {
                 }
             }
             
-            if !nodeStates[nodeIndex].parentalSelectPropagationDisabled && keyed.count <= maxSelectSize {
+            if !nodeStates[nodeIndex].parentalSelectPropagationDisabled && keyed.count <= maxSelectSize && keyed[.empty] == nil {
                 nodeStates[nodeIndex].parentalSelectPropagationDisabled = true
                 let select = keyed.keys.map(SelectExpressionFromRow).combined(with: *||) ?? false
                 
