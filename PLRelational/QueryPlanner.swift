@@ -231,7 +231,7 @@ extension QueryPlanner {
         }
     }
     
-    fileprivate static func isInitiator(op: Operation) -> Bool {
+    static func isInitiator(op: Operation) -> Bool {
         switch op {
         case .rowGenerator, .selectableGenerator, .rowSet:
             return true

@@ -31,7 +31,7 @@ open class QueryRunner {
         for index in nodes.indices {
             nodeStates.append(NodeState(nodes: nodes, nodeIndex: index))
         }
-        computeParentChildIndexes()
+        computeParentChildIndexes(nodeStates.indices)
         computeTransactionalDatabases(planner.transactionalDatabases)
         propagateSelects()
     }
@@ -39,8 +39,8 @@ open class QueryRunner {
     /// Fill out each NodeState's `parentChildIndexes` array by scanning their parents.
     /// This computes each child's index within the parent, which the other code needs
     /// in order to write data and propagate EOF info.
-    fileprivate func computeParentChildIndexes() {
-        for nodeIndex in nodeStates.indices {
+    fileprivate func computeParentChildIndexes(_ indexes: CountableRange<Int>) {
+        for nodeIndex in indexes {
             nodeStates[nodeIndex].parentChildIndexes.reserveCapacity(nodes[nodeIndex].parentIndexes.count)
             
             // This would be simple, except that it's possible for the same parent to be in `parentIndexes` more
@@ -74,8 +74,11 @@ open class QueryRunner {
         for nodeIndex in nodeStates.indices {
             if case .select(let expression) = nodes[nodeIndex].op {
                 nodeStates[nodeIndex].parentalSelectPropagationDisabled = true
-                for child in nodes[nodeIndex].childIndexes {
-                    addSelect(node: child, expression: expression)
+                for var childIndex in nodes[nodeIndex].childIndexes {
+                    if shouldCopyForParentalSelect(childIndex) {
+                        childIndex = copyNodeTree(childIndex, parent: nodeIndex)
+                    }
+                    addSelect(node: childIndex, expression: expression)
                 }
             }
         }
@@ -236,7 +239,8 @@ open class QueryRunner {
                 markDone(nodeIndex)
             }
         case .rowSet(let rowGetter):
-            writeOutput(rowGetter(), fromNode: nodeIndex)
+            let rows = rowGetter()
+            writeOutput(rows, fromNode: nodeIndex)
             endCurrentInitiator()
             markDone(nodeIndex)
         default:
@@ -286,6 +290,7 @@ open class QueryRunner {
     /// is propagated to children.
     fileprivate func addSelect(node: Int, expression: SelectExpression) {
         if nodeStates[node].parentalSelectPropagationDisabled { return }
+        if nodes[node].outputCallbacks != nil { return }
         
         let combinedExpression = nodeStates[node].parentalSelects.map({ $0 *|| expression }) ?? expression
         nodeStates[node].parentalSelects = combinedExpression.deepSimplify()
@@ -482,7 +487,11 @@ open class QueryRunner {
             var largerToSmallerRenaming: [Attribute: Attribute]
         }
         
-        let extraState = nodeStates[nodeIndex].getExtraState({ Void -> ExtraState in
+        // Can't use the getExtraState convenience, since nodeStates might be mutated.
+        let extraState: ExtraState
+        if let s = nodeStates[nodeIndex].extraState as? ExtraState {
+            extraState = s
+        } else {
             // Figure out which input is smaller. If only one is complete, assume that one is smaller.
             let smallerInput: Int
             if nodeStates[nodeIndex].inputBuffers[0].eof {
@@ -526,19 +535,24 @@ open class QueryRunner {
                 let smallerToLargerRenaming = largerInput == 0 ? matching.inverted : matching
                 let renamedSelect = select.withRenamedAttributes(smallerToLargerRenaming)
                 
-                let childIndex = nodes[nodeIndex].childIndexes[largerInput]
+                var childIndex = nodes[nodeIndex].childIndexes[largerInput]
                 nodeStates[nodeIndex].parentalSelectsRemaining = .max
+                if shouldCopyForParentalSelect(childIndex) {
+                    childIndex = copyNodeTree(childIndex, parent: nodeIndex)
+                }
                 addSelect(node: childIndex, expression: renamedSelect)
             }
             
-            return ExtraState(
+            extraState = ExtraState(
                 keyed: keyed,
                 largerIndex: 1 - smallerInput,
                 largerAttributes: Array(largerAttributes),
                 largerToSmallerRenaming: Dictionary(largerToSmallerRenamingWithoutNoops as [(Attribute, Attribute)])) // For some reason, Swift 3 currently fails to infer generic types without this pointless cast
-        })
+            nodeStates[nodeIndex].setExtraState(extraState)
+        }
         
-        let joined = nodeStates[nodeIndex].inputBuffers[extraState.largerIndex].popAll().flatMap({ row -> [Row] in
+        let rows = nodeStates[nodeIndex].inputBuffers[extraState.largerIndex].popAll()
+        let joined = rows.flatMap({ row -> [Row] in
             let joinKey = row.rowWithAttributes(extraState.largerAttributes).renameAttributes(extraState.largerToSmallerRenaming)
             guard let smallerRows = extraState.keyed[joinKey] else { return [] }
             return smallerRows.map({ $0 + row })
@@ -641,6 +655,97 @@ open class QueryRunner {
 }
 
 extension QueryRunner {
+    /// Copy a tree of nodes including the one passed in as the parameter and all
+    /// of its children. Note: this does *not* bother with child nodes that are
+    /// reachable by more than one path. Those will be copied more than once.
+    /// The parents of the returned node will be empty.
+    /// - returns: The index of the copied node.
+    func copyNodeTree(_ index: Int, parent: Int) -> Int {
+        let firstNewIndex = nodes.count
+        let result = copyNodeTreeNoStates(index)
+        nodes[result].parentIndexes = [parent]
+        nodes[parent].childIndexes.mutatingForEach({
+            if $0 == index {
+                nodes[$0].parentIndexes.remove(parent)
+                nodeStates[$0].parentalSelectsRemaining -= 1
+                $0 = result
+            }
+        })
+        
+        for i in firstNewIndex ..< nodes.count {
+            nodeStates.append(NodeState(nodes: nodes, nodeIndex: i))
+        }
+        computeParentChildIndexes(firstNewIndex ..< nodes.count)
+        return result
+    }
+    
+    /// Copy a tree of nodes, ignoring node states. After this returns,
+    /// all new nodes will be appended to the end of the `nodes` array,
+    /// but the `nodeStates` array will be unchanged. Node states must
+    /// be fixed up after making this call.
+    private func copyNodeTreeNoStates(_ index: Int) -> Int {
+        let newChildren = nodes[index].childIndexes.map(copyNodeTreeNoStates)
+        
+        let newIndex = nodes.count
+        for i in newChildren {
+            nodes[i].parentIndexes = [newIndex]
+        }
+        
+        nodes.append(QueryPlanner.Node(op: nodes[index].op, scheme: nodes[index].scheme, approximateCount: nodes[index].approximateCount))
+        nodes[newIndex].childIndexes = newChildren
+        if QueryPlanner.isInitiator(op: nodes[newIndex].op) {
+            activeInitiatorIndexes.append(newIndex)
+        }
+        
+        return newIndex
+    }
+    
+    /// Determine whether a given node should be copied when applying a parental select.
+    /// Copying a node will allow an efficient select to be performed on initiators
+    /// even if other parts of the graph which refer to it don't provide parental selects.
+    /// The criteria used are:
+    /// 1. Total number of children (double-counting anything that can be reached by
+    ///    more than one path) must be no more than a certain number (currently 100).
+    /// 2. Parental selects remaining must be at least 2. If 1 then no other parts of
+    ///    the graph point here, or they've already provided their selects. If 0 then
+    ///    something went wrong.
+    /// 3. There must be at least one selectable generator in the subtree (otherwise there
+    ///    is no point in doing all this work).
+    func shouldCopyForParentalSelect(_ index: Int) -> Bool {
+        let childCountLimit = 100
+        
+        if nodeStates[index].parentalSelectsRemaining < 2 {
+            return false
+        }
+        
+        var toSearch = [index]
+        var numberSearched = 0
+        
+        var sawSelectableGenerator = false
+        while let toExamine = toSearch.popLast() {
+            numberSearched += 1
+            if numberSearched > childCountLimit {
+                return false
+            }
+            
+            let op = nodes[toExamine].op
+            
+            // If any part of the subtree has started generating, don't even try.
+            if QueryPlanner.isInitiator(op: op) && initiatorGenerators[toExamine] != nil {
+                return false
+            }
+            
+            if case .selectableGenerator = nodes[toExamine].op {
+                sawSelectableGenerator = true
+            }
+            toSearch.append(contentsOf: nodes[toExamine].childIndexes)
+        }
+        
+        return sawSelectableGenerator
+    }
+}
+
+extension QueryRunner {
     struct NodeState {
         let nodeIndex: Int
         
@@ -715,7 +820,7 @@ extension QueryRunner {
                 return state as! T
             } else {
                 let state = calculate()
-                extraState = state
+                setExtraState(state)
                 return state
             }
         }

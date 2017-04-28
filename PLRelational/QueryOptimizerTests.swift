@@ -247,6 +247,40 @@ class QueryOptimizerTests: XCTestCase {
         
         let selected = instrumented.select(Attribute("n") *< 10).setDebugName("selected")
         
+        let j1 = tiny.join(selected).setDebugName("j1")
+        let j2 = j1.join(instrumented).setDebugName("j2")
+        
+        j2.asyncAllRows({
+            XCTAssertNil($0.err)
+            XCTAssertEqual($0.ok, [["n": 1]])
+            CFRunLoopStop(CFRunLoopGetCurrent())
+            XCTAssertEqual(instrumented.rowsProvided, 11)
+        })
+        CFRunLoopRunOrFail()
+        
+        j2.asyncAllRows({
+            XCTAssertNil($0.err)
+            XCTAssertEqual($0.ok, [["n": 1]])
+            CFRunLoopStop(CFRunLoopGetCurrent())
+            XCTAssertEqual(instrumented.rowsProvided, 22)
+        })
+        CFRunLoopRunOrFail()
+        
+        j2.asyncAllRows({
+            XCTAssertNil($0.err)
+            XCTAssertEqual($0.ok, [["n": 1]])
+            CFRunLoopStop(CFRunLoopGetCurrent())
+            XCTAssertEqual(instrumented.rowsProvided, 33)
+        })
+        CFRunLoopRunOrFail()
+    }
+    
+    func testCachedJoinedJoinWithOneRelationOptimization() {
+        let instrumented = InstrumentedSelectableRelation(scheme: ["n"], values: Set((0 ..< 100).map({ ["n": .integer($0)] }))).setDebugName("instrumented")
+        let tiny = MakeRelation(["n"], [1]).setDebugName("tiny")
+        
+        let selected = instrumented.select(Attribute("n") *< 10).setDebugName("selected")
+        
         // TODO: eventually it would be nice if the direct version of the multiple join
         // would be fast on its own. For now, we need this cache to make it fast. When
         // we get to fixing the direct case, we can take the cache out.
@@ -258,7 +292,7 @@ class QueryOptimizerTests: XCTestCase {
             XCTAssertNil($0.err)
             XCTAssertEqual($0.ok, [["n": 1]])
             CFRunLoopStop(CFRunLoopGetCurrent())
-            XCTAssertEqual(instrumented.rowsProvided, 100)
+            XCTAssertEqual(instrumented.rowsProvided, 11)
         })
         CFRunLoopRunOrFail()
         
@@ -266,7 +300,7 @@ class QueryOptimizerTests: XCTestCase {
             XCTAssertNil($0.err)
             XCTAssertEqual($0.ok, [["n": 1]])
             CFRunLoopStop(CFRunLoopGetCurrent())
-            XCTAssertEqual(instrumented.rowsProvided, 101)
+            XCTAssertEqual(instrumented.rowsProvided, 12)
         })
         CFRunLoopRunOrFail()
         
@@ -274,7 +308,7 @@ class QueryOptimizerTests: XCTestCase {
             XCTAssertNil($0.err)
             XCTAssertEqual($0.ok, [["n": 1]])
             CFRunLoopStop(CFRunLoopGetCurrent())
-            XCTAssertEqual(instrumented.rowsProvided, 102)
+            XCTAssertEqual(instrumented.rowsProvided, 13)
         })
         CFRunLoopRunOrFail()
     }
