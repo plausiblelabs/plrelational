@@ -32,6 +32,7 @@
 		372707F01CFE2C7E00710C80 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 372707EE1CFE2C7E00710C80 /* MainMenu.xib */; };
 		372707FB1CFE2C7E00710C80 /* BindableControlsAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707FA1CFE2C7E00710C80 /* BindableControlsAppUITests.swift */; };
 		373070B91EB6F9A000FC0E13 /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373070B81EB6F9A000FC0E13 /* TextField.swift */; };
+		373070FF1EB84F4200FC0E13 /* Switch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373070FE1EB84F4200FC0E13 /* Switch.swift */; };
 		374363001EA673F3004982B0 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
 		374363011EA673FC004982B0 /* InternedUTF8String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */; };
 		374363021EA6741C004982B0 /* SetSubtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */; };
@@ -635,6 +636,7 @@
 		372707FA1CFE2C7E00710C80 /* BindableControlsAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BindableControlsAppUITests.swift; sourceTree = "<group>"; };
 		372707FC1CFE2C7E00710C80 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		373070B81EB6F9A000FC0E13 /* TextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextField.swift; sourceTree = "<group>"; };
+		373070FE1EB84F4200FC0E13 /* Switch.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Switch.swift; sourceTree = "<group>"; };
 		374AE9711D91C2F0007D1366 /* StoredDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredDatabase.swift; sourceTree = "<group>"; };
 		374AE9731D91C2FC007D1366 /* StoredRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredRelation.swift; sourceTree = "<group>"; };
 		374AE9751D91DBC7007D1366 /* PlistDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDatabase.swift; sourceTree = "<group>"; };
@@ -1692,6 +1694,7 @@
 			children = (
 				37ED180D1E94335900935D39 /* BarButtonItem.swift */,
 				37D6F08B1E8D6CD4003255FE /* Label.swift */,
+				373070FE1EB84F4200FC0E13 /* Switch.swift */,
 				373070B81EB6F9A000FC0E13 /* TextField.swift */,
 			);
 			name = Controls;
@@ -2909,6 +2912,7 @@
 				37501AFA1EB7BE6D0085B281 /* Image.swift in Sources */,
 				37D6F0931E8ECDB0003255FE /* SectionedTreeView.swift in Sources */,
 				374DAEBF1E8C28EA00FF245B /* UndoableDatabase.swift in Sources */,
+				373070FF1EB84F4200FC0E13 /* Switch.swift in Sources */,
 				37D6F08F1E8D7862003255FE /* Bindable.swift in Sources */,
 				37C48DAA1E8C676A000BDE70 /* TextProperty.swift in Sources */,
 				37D6F08C1E8D6CD4003255FE /* Label.swift in Sources */,
