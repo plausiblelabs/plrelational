@@ -59,20 +59,17 @@ open class Signal<T>: SignalType {
     public typealias Observer = SignalObserver<T>
     public typealias Notify = SignalObserver<T>
 
-    public private(set) var changeCount: Int
-    private let startFunc: (Bool) -> Void
+    public private(set) var changeCount: Int = 0
     private var started = false
     
     private var observers: [UInt64: Observer] = [:]
     private var nextObserverID: UInt64 = 0
     
-    internal init(changeCount: Int, startFunc: @escaping (Bool) -> Void) {
-        self.changeCount = changeCount
-        self.startFunc = startFunc
+    internal init() {
     }
     
-    public static func pipe(initialChangeCount: Int = 0) -> (Signal, Notify) {
-        let signal = Signal(changeCount: initialChangeCount, startFunc: { _ in })
+    public static func pipe() -> (Signal, Notify) {
+        let signal = Signal()
         let notify = SignalObserver(
             valueWillChange: signal.notifyWillChange,
             valueChanging: signal.notifyChanging,
@@ -96,9 +93,8 @@ open class Signal<T>: SignalType {
         }
     }
     
-    /// Invokes the provided startFunc by default, but subclasses can override for custom start behavior.
+    /// Should be overridden by subclasses to perform custom start behavior (for example, starting an underlying signal).
     internal func startImpl(deliverInitial: Bool) {
-        startFunc(deliverInitial)
     }
     
     public func observe(_ observer: Observer) -> ObserverRemoval {
@@ -149,6 +145,11 @@ open class Signal<T>: SignalType {
         }
     }
 
+    // XXX: Dubious!
+    public func setChangeCount(_ changeCount: Int) {
+        self.changeCount = changeCount
+    }
+    
     /// For testing purposes only.
     public var observerCount: Int { return observers.count }
 }

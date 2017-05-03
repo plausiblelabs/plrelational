@@ -94,7 +94,7 @@ open class BindableProperty<T> {
     /// When the other signal's value changes, this property's value will be updated.
     /// Note that calling `bind` will cause this property to take on the given initial
     /// value immediately.
-    fileprivate func bind(_ signal: Signal<T>, initialValue: T?, owner: AnyObject) -> Binding {
+    fileprivate func bind(_ signal: Signal<T>, initialValue: T?, startProp: () -> Void, owner: AnyObject) -> Binding {
         
         if let initialValue = initialValue {
             // Make this property take on the given initial value
@@ -103,9 +103,6 @@ open class BindableProperty<T> {
             // TODO: Does metadata have meaning here?
             self.setValue(initialValue, ChangeMetadata(transient: true))
         }
-        
-        // Take on the given signal's change count
-        changeHandler.incrementCount(signal.changeCount)
         
         // Observe the given signal for changes
         let signalObserverRemoval = signal.observe(SignalObserver(
@@ -120,6 +117,13 @@ open class BindableProperty<T> {
                 self?.changeHandler.didChange()
             }
         ))
+
+        // Start the underlying property
+        startProp()
+        
+        // Take on the given signal's change count
+        // TODO: Ugh, don't do this if we have an initial value
+        changeHandler.incrementCount(signal.changeCount)
         
         // Save and return the binding
         let bindingID = nextBindingID
@@ -363,13 +367,17 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         otherInitiatedChange = true
         initial()
         otherInitiatedChange = false
-        
-        // Take on the given signal's change count
-        changeHandler.incrementCount(other.signal.changeCount)
 
         // Start the other property's signal
         other.start()
         
+        // Take on the given signal's change count; note that we only do this in the case where
+        // there wasn't an initial value, because otherwise deliverInitial will be true and
+        // the observer's valueWillChange will be called and omg this is so complicated
+        if other.value != nil {
+            changeHandler.incrementCount(other.signal.changeCount)
+        }
+
         // Save and return the binding
         let bindingID = nextBindingID
         let binding = Binding(signalOwner: other, removal: { [weak self] in
@@ -547,7 +555,7 @@ extension BindableProperty {
     /// Note that calling `bind` will cause this property to take on the given initial
     /// value immediately if non-nil, otherwise will take on the given property's value.
     @discardableResult public func bind<RHS: ReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T, RHS.SignalChange == T {
-        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, owner: rhs)
+        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, startProp: {}, owner: rhs)
     }
 
     /// Establishes a unidirectional binding between this property and the given property.
@@ -556,8 +564,7 @@ extension BindableProperty {
     /// to take on the given initial value if non-nil, otherwise will take on the given
     /// property's value (if defined).
     @discardableResult public func bind<RHS: AsyncReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T, RHS.SignalChange == T {
-        rhs.start()
-        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, owner: rhs)
+        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, startProp: { rhs.start() }, owner: rhs)
     }
 }
 
@@ -578,7 +585,7 @@ infix operator ~~> : PropertyOperatorPrecedence
 
 @discardableResult public func ~~> <T>(lhs: Signal<T>, rhs: ActionProperty<T>) -> Binding {
     // TODO: We invent an owner here; what if no one else owns the signal?
-    return rhs.bind(lhs, initialValue: nil, owner: "" as AnyObject)
+    return rhs.bind(lhs, initialValue: nil, startProp: {}, owner: "" as AnyObject)
 }
 
 infix operator <~> : PropertyOperatorPrecedence

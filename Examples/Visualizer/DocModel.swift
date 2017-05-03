@@ -190,7 +190,7 @@ class DocModel {
         
         // Create a new signal that will deliver the AsyncState changes
         let currentHistoryItemSignal = self.activeTabCurrentHistoryItem.signal
-        let (signal, notify) = Signal<AsyncState<RelationViewModel?>>.pipe(initialChangeCount: currentHistoryItemSignal.changeCount)
+        let (signal, notify) = Signal<AsyncState<RelationViewModel?>>.pipe()
 
         func loadViewModel(_ objectID: ObjectID) {
             let contentLoadID = UUID()

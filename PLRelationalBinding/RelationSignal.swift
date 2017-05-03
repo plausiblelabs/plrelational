@@ -18,7 +18,7 @@ class RelationSignal<T>: Signal<T> {
         self.isRepeat = isRepeat
         self.latestValue = initialValue
         
-        super.init(changeCount: 0, startFunc: { _ in })
+        super.init()
     }
     
     override func startImpl(deliverInitial: Bool) {

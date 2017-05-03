@@ -28,15 +28,22 @@ public protocol AsyncReadablePropertyType: class, AsyncPropertyType {
 open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
     public typealias SignalChange = T
-    
+
+    // Note that we observe our private `underlyingSignal` that was provided at init time, and then deliver `valueChanging` events
+    // *after* we update our `value`.  This allows code to observe this property's public `signal` and be guaranteed that `value`
+    // will contain the latest value before observers are notified.
+    private let underlyingSignal: Signal<T>
     public let signal: Signal<T>
+    private let notify: Signal<T>.Notify
+    
     public internal(set) var value: T?
     private var removal: ObserverRemoval?
     private var started = false
     
     public init(initialValue: T?, signal: Signal<T>) {
         self.value = initialValue
-        self.signal = signal
+        self.underlyingSignal = signal
+        (self.signal, self.notify) = Signal.pipe()
     }
     
     deinit {
@@ -51,11 +58,31 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
         // TODO: Need to make a SignalProducer like thing that can create a unique signal
         // each time start() is called; for now we'll assume it can be called only once
         if !started {
+            // Observe the underlying signal
             let deliverInitial = value == nil
-            removal = signal.observe({ [weak self] newValue, _ in
-                self?.value = newValue
-            })
-            signal.start(deliverInitial: deliverInitial)
+            removal = underlyingSignal.observe(SignalObserver(
+                valueWillChange: { [weak self] in
+                    self?.notify.valueWillChange()
+                },
+                valueChanging: { [weak self] newValue, metadata in
+                    self?.value = newValue
+                    self?.notify.valueChanging(newValue, metadata)
+                },
+                valueDidChange: { [weak self] in
+                    self?.notify.valueDidChange()
+                }
+            ))
+            
+            // The following isn't strictly needed, but just for clarity we'll start our public signal before starting
+            // the underlying signal (which is required)
+            signal.start(deliverInitial: false)
+            
+            // Start the underlying signal
+            underlyingSignal.start(deliverInitial: deliverInitial)
+            
+            // Take on underlying signal's change count
+            signal.setChangeCount(underlyingSignal.changeCount)
+
             started = true
         }
     }
@@ -91,6 +118,7 @@ open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
         return getValue()
     }
     
+    // TODO: Need to rework this to be more like AsyncReadableProperty, which now has a private `underlyingSignal` and a separate public `signal`
     public let signal: Signal<T>
     private var started = false
 

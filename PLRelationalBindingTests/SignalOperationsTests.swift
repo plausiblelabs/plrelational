@@ -23,6 +23,8 @@ class SignalOperationsTests: BindingTestCase {
             valueDidChange: { didChangeCount += 1 }
         ))
         
+        mapped.start(deliverInitial: false)
+        
         XCTAssertEqual(mappedValue, nil)
         XCTAssertEqual(willChangeCount, 0)
         XCTAssertEqual(didChangeCount, 0)
@@ -238,6 +240,7 @@ class SignalOperationsTests: BindingTestCase {
         let (signal, notify) = Signal<Bool>.pipe()
         
         let then = signal.then{ count += 1 }
+        then.start(deliverInitial: false)
         XCTAssertEqual(count, 0)
         
         notify.valueChanging(false)

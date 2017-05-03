@@ -39,7 +39,7 @@ class AsyncPropertyOperationsTests: BindingTestCase {
     func testFlatMap() {
         let (boolProperty, boolNotify) = AsyncReadableProperty<Bool>.pipe(initialValue: nil)
         
-        var stringNotify: SignalObserver<String>? = nil
+        var stringNotify: Signal<String>.Notify? = nil
         let mapped = boolProperty.flatMap{ value -> AsyncReadableProperty<String> in
             let (property, notify) = AsyncReadableProperty<String>.pipe(initialValue: "Loading for \(value)")
             stringNotify = notify

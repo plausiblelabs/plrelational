@@ -68,6 +68,7 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
     private let underlying: AsyncPropertyType
     private var startFunc: (() -> Void)?
     private var underlyingRemoval: ObserverRemoval?
+    private var mappedProperty: AsyncPropertyType?
     private var mappedRemoval: ObserverRemoval?
     
     init<P: AsyncReadablePropertyType, Q: AsyncReadablePropertyType>(property: P, transform: @escaping (P.Value) -> Q)
@@ -78,12 +79,12 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
         let initialMappedProperty = property.value.map(transform)
         let initialValue = initialMappedProperty?.value
 
-        // TODO: Do we need to take initialMappedProperty.signal's changeCount into account?
-        let (signal, notify) = Signal<Q.Value>.pipe(initialChangeCount: property.signal.changeCount)
+        let (signal, notify) = Signal<Q.Value>.pipe()
         
         super.init(initialValue: initialValue, signal: signal)
 
         func observeMappedProperty(_ prop: Q) {
+            self.mappedProperty = prop
             self.mappedRemoval = prop.signal.observe(SignalObserver(
                 valueWillChange: {
                     notify.valueWillChange()
@@ -107,6 +108,7 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
                     // Stop observing the previous mapped property
                     // TODO: Should we stop observing earlier (in valueWillChange)?
                     self?.mappedRemoval?()
+                    self?.mappedProperty = nil
                     
                     // Compute the new mapped property
                     let mappedProperty = transform(change)
@@ -139,6 +141,8 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
                 // Start the initial mapped property
                 initialProperty.start()
             }
+            
+            // TODO: Take on the change count of the underlying signal(s)!!!!!
         }
     }
 
@@ -167,7 +171,7 @@ private class BinaryOpValueProperty<T>: AsyncReadableProperty<T> {
         self.underlying1 = lhs
         self.underlying2 = rhs
         
-        let (signal, notify) = Signal<T>.pipe(initialChangeCount: lhs.signal.changeCount + rhs.signal.changeCount)
+        let (signal, notify) = Signal<T>.pipe()
         
         // Note that we don't deliver a pair until both underlying values are defined
         var lhsValue = lhs.value
@@ -216,6 +220,9 @@ private class BinaryOpValueProperty<T>: AsyncReadableProperty<T> {
             // Start the underlying properties
             lhs.start()
             rhs.start()
+            
+            // Take on the combined change count of the underlying signals
+            signal.setChangeCount(lhs.signal.changeCount + rhs.signal.changeCount)
         }
     }
 
