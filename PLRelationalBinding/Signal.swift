@@ -41,17 +41,14 @@ public protocol SignalType: class {
     /// Converts this instance into a concrete `Signal`.
     var signal: Signal<Value> { get }
     
-    /// The current change count (incremented by will-change and decremented by did-change).
-    var changeCount: Int { get }
-    
-    /// Causes the underlying signal to start delivering values.
-    func start(deliverInitial: Bool)
-    
     /// Registers the given observer, which will be notified when the signal delivers new values.
     func observe(_ observer: SignalObserver<Value>) -> ObserverRemoval
     
     /// Lifts this signal into an AsyncReadableProperty.
     func property() -> AsyncReadableProperty<Value>
+    
+    /// For testing purposes only.
+    var observerCount: Int { get }
 }
 
 open class Signal<T>: SignalType {
@@ -59,17 +56,11 @@ open class Signal<T>: SignalType {
     public typealias Observer = SignalObserver<T>
     public typealias Notify = SignalObserver<T>
 
-    public private(set) var changeCount: Int = 0
-    private var started = false
-    
-    private var observers: [UInt64: Observer] = [:]
-    private var nextObserverID: UInt64 = 0
-    
     internal init() {
     }
     
-    public static func pipe() -> (Signal, Notify) {
-        let signal = Signal()
+    public static func pipe() -> (PipeSignal<T>, Notify) {
+        let signal = PipeSignal<T>()
         let notify = SignalObserver(
             valueWillChange: signal.notifyWillChange,
             valueChanging: signal.notifyChanging,
@@ -86,22 +77,12 @@ open class Signal<T>: SignalType {
         return AsyncReadableProperty(initialValue: nil, signal: self)
     }
 
-    public final func start(deliverInitial: Bool) {
-        if !started {
-            started = true
-            startImpl(deliverInitial: deliverInitial)
-        }
-    }
-    
-    /// Should be overridden by subclasses to perform custom start behavior (for example, starting an underlying signal).
-    internal func startImpl(deliverInitial: Bool) {
-    }
-    
+    /// Adds the given observer to the set of observers that are notified when this signal's value has changed.
+    /// If the given observer is the first one to be added for this signal, the underlying signal source will
+    /// be brought to action.  If the signal source has a value available, the given observer will have its
+    /// `valueWillChange`, `valueChanging`, and `valueDidChange` handlers called before `observe` returns.
     public func observe(_ observer: Observer) -> ObserverRemoval {
-        let id = nextObserverID
-        nextObserverID += 1
-        observers[id] = observer
-        return { self.observers.removeValue(forKey: id) }
+        fatalError("Must be implemented by subclass")
     }
 
     /// Convenience form of `observe` that builds an Observer whose `valueWillChange` and `valueDidChange`
@@ -123,35 +104,83 @@ open class Signal<T>: SignalType {
             valueDidChange: {}
         ))
     }
+    
+    public var observerCount: Int {
+        fatalError("Must be implemented by subclass")
+    }
+}
 
+open class SourceSignal<T>: Signal<T> {
+    
+    private var observers: [UInt64: Observer] = [:]
+    private var nextObserverID: UInt64 = 0
+    
+    internal override init() {
+    }
+    
+    /// Should be overridden by subclasses to perform custom observe behavior (for example, starting the underlying
+    /// signal source).
+    internal func observeImpl(_ observer: Observer) {
+        // TODO: Need to make this public if we eventually want to support arbitrary signal sources defined
+        // outside this library
+    }
+    
+    public override func observe(_ observer: Observer) -> ObserverRemoval {
+        let id = nextObserverID
+        nextObserverID += 1
+        observers[id] = observer
+        
+        observeImpl(observer)
+        
+        return { self.observers.removeValue(forKey: id) }
+    }
+    
     internal func notifyWillChange() {
-        changeCount += 1
         for (_, observer) in observers {
             observer.valueWillChange()
         }
     }
-
+    
     internal func notifyChanging(_ change: T, metadata: ChangeMetadata) {
         for (_, observer) in observers {
             observer.valueChanging(change, metadata)
         }
     }
-
+    
     internal func notifyDidChange() {
-        precondition(changeCount > 0)
-        changeCount -= 1
         for (_, observer) in observers {
             observer.valueDidChange()
         }
     }
+    
+    public override var observerCount: Int {
+        return observers.count
+    }
+}
 
-    // XXX: Dubious!
-    public func setChangeCount(_ changeCount: Int) {
-        self.changeCount = changeCount
+/// A SourceSignal that delivers a constant value when an observer is attached.
+internal class ConstantSignal<T>: SourceSignal<T> {
+    private let value: T
+    
+    init(_ value: T) {
+        self.value = value
     }
     
-    /// For testing purposes only.
-    public var observerCount: Int { return observers.count }
+    override func observeImpl(_ observer: Observer) {
+        observer.valueWillChange()
+        observer.valueChanging(value)
+        observer.valueDidChange()
+    }
+}
+
+/// A SourceSignal used in the implementation of `pipe`.  Allows for a function to be called
+/// when an observer is attached.
+public class PipeSignal<T>: SourceSignal<T> {
+    public var onObserve: ((Observer) -> Void)?
+    
+    override func observeImpl(_ observer: Observer) {
+        onObserve?(observer)
+    }
 }
 
 internal func isRepeat<T>(_ v0: T, v1: T) -> Bool {

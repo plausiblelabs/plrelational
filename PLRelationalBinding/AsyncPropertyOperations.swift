@@ -9,7 +9,8 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
     /// Returns an AsyncReadableProperty whose value is derived from this property's `value`.
     /// The given `transform` will be applied whenever this property's value changes.
     public func map<U>(_ transform: @escaping (Self.Value) -> U) -> AsyncReadableProperty<U> {
-        return MappedValueProperty(property: self, transform: transform)
+        let initialValue = self.value.map(transform)
+        return AsyncReadableProperty(initialValue: initialValue, signal: self.signal.map(transform))
     }
     
     /// Returns an AsyncReadableProperty whose value is derived from the given property's `value`.
@@ -44,24 +45,6 @@ public prefix func !<P: AsyncReadablePropertyType>(property: P) -> AsyncReadable
     where P.Value == Bool, P.SignalChange == Bool
 {
     return not(property)
-}
-
-private class MappedValueProperty<T>: AsyncReadableProperty<T> {
-    private let underlying: AsyncPropertyType
-    
-    init<P: AsyncReadablePropertyType>(property: P, transform: @escaping (P.Value) -> T)
-        where P.Value == P.SignalChange
-    {
-        self.underlying = property
-
-        let initialValue = property.value.map(transform)
-        super.init(initialValue: initialValue, signal: property.signal.map(transform))
-    }
-    
-    fileprivate override func start() {
-        underlying.start()
-        super.start()
-    }
 }
 
 private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
@@ -116,33 +99,31 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
                     // Observe the new property's signal
                     observeMappedProperty(mappedProperty)
                     
-                    // Deliver the mapped property's initial value, if needed
-                    if let initialValue = mappedProperty.value {
-                        notify.valueWillChange()
-                        notify.valueChanging(initialValue, transient: false)
-                        notify.valueDidChange()
-                    }
+//                    // Deliver the mapped property's initial value, if needed
+//                    if let initialValue = mappedProperty.value {
+//                        notify.valueWillChange()
+//                        notify.valueChanging(initialValue, transient: false)
+//                        notify.valueDidChange()
+//                    }
                     
-                    // Start the new property
-                    mappedProperty.start()
+//                    // Start the new property
+//                    mappedProperty.start()
                 },
                 valueDidChange: {
                     notify.valueDidChange()
                 }
             ))
 
-            // Start the underlying property
-            property.start()
+//            // Start the underlying property
+//            property.start()
             
             if let initialProperty = initialMappedProperty {
                 // Observe the initial mapped property's signal
                 observeMappedProperty(initialProperty)
                 
-                // Start the initial mapped property
-                initialProperty.start()
+//                // Start the initial mapped property
+//                initialProperty.start()
             }
-            
-            // TODO: Take on the change count of the underlying signal(s)!!!!!
         }
     }
 
@@ -151,11 +132,11 @@ private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
         mappedRemoval?()
     }
     
-    fileprivate override func start() {
-        startFunc?()
-        startFunc = nil
-        super.start()
-    }
+//    fileprivate override func start() {
+//        startFunc?()
+//        startFunc = nil
+//        super.start()
+//    }
 }
 
 private class BinaryOpValueProperty<T>: AsyncReadableProperty<T> {
@@ -221,8 +202,8 @@ private class BinaryOpValueProperty<T>: AsyncReadableProperty<T> {
             lhs.start()
             rhs.start()
             
-            // Take on the combined change count of the underlying signals
-            signal.setChangeCount(lhs.signal.changeCount + rhs.signal.changeCount)
+//            // Take on the combined change count of the underlying signals
+//            signal.setChangeCount(lhs.signal.changeCount + rhs.signal.changeCount)
         }
     }
 
@@ -230,10 +211,10 @@ private class BinaryOpValueProperty<T>: AsyncReadableProperty<T> {
         removal1?()
         removal2?()
     }
-    
-    fileprivate override func start() {
-        startFunc?()
-        startFunc = nil
-        super.start()
-    }
+//    
+//    fileprivate override func start() {
+//        startFunc?()
+//        startFunc = nil
+//        super.start()
+//    }
 }

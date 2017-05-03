@@ -32,40 +32,37 @@ extension SignalType where Value == Bool {
 }
 
 private class MappedSignal<T>: Signal<T> {
-    private var startFunc: ((Bool) -> Void)?
-    private var removal: ObserverRemoval?
+    private let observeFunc: (Observer) -> ObserverRemoval
+    private let countFunc: () -> Int
     
     init<S: SignalType>(underlying: S, transform: @escaping (S.Value) -> T) {
-        super.init()
-        
-        self.startFunc = { deliverInitial in
+        self.observeFunc = { observer in
             // Observe the underlying signal
-            self.removal = underlying.observe(SignalObserver(
-                valueWillChange: { [weak self] in
-                    self?.notifyWillChange()
+            return underlying.observe(SignalObserver(
+                valueWillChange: {
+                    observer.valueWillChange()
                 },
-                valueChanging: { [weak self] change, metadata in
-                    self?.notifyChanging(transform(change), metadata: metadata)
+                valueChanging: { change, metadata in
+                    observer.valueChanging(transform(change), metadata)
                 },
-                valueDidChange: { [weak self] in
-                    self?.notifyDidChange()
+                valueDidChange: {
+                    observer.valueDidChange()
                 }
             ))
-            
-            // Start the underlying signal
-            underlying.start(deliverInitial: deliverInitial)
-            
-            // Take on the change count of the underlying signal
-            self.setChangeCount(underlying.changeCount)
         }
+        
+        self.countFunc = {
+            return underlying.observerCount
+        }
+        
+        super.init()
     }
 
-    override func startImpl(deliverInitial: Bool) {
-        startFunc?(deliverInitial)
-        startFunc = nil
+    override func observe(_ observer: Observer) -> ObserverRemoval {
+        return observeFunc(observer)
     }
-
-    deinit {
-        removal?()
+    
+    override var observerCount: Int {
+        return countFunc()
     }
 }

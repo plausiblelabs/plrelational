@@ -149,19 +149,19 @@ class RelationAsTypedValueTests: BindingTestCase {
         let p = r.project("name").oneStringOrNil(initialValue: "cat").property()
         _ = p.signal.observe{ v, _ in changes.append(v) }
         AssertValueEqual(p, "cat")
-        XCTAssertTrue(changes == [])
+        XCTAssertTrue(changes == ["cat"])
         
         awaitCompletion{ p.start() }
         AssertValueEqual(p, "cat")
-        XCTAssertTrue(changes == [])
+        XCTAssertTrue(changes == ["cat"])
         
         awaitCompletion{ _ = r.asyncUpdate(true, newValues: ["name": "kat"]) }
         AssertValueEqual(p, "kat")
-        XCTAssertTrue(changes == ["kat"])
+        XCTAssertTrue(changes == ["cat", "kat"])
         
         awaitCompletion{ _ = r.asyncAdd(["id": 3, "name": "dog", "friendly": 0, "age": 6, "pulse": 3.0]) }
         AssertValueEqual(p, nil)
-        XCTAssertTrue(changes == ["kat", nil])
+        XCTAssertTrue(changes == ["cat", "kat", nil])
     }
     
     func testOneStringSignal() {

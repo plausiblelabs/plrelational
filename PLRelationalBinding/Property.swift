@@ -40,21 +40,35 @@ public protocol ReadablePropertyType: class {
     var signal: Signal<SignalChange> { get }
 }
 
-/// A concrete property that is readable and observable.
+///// A concrete property that is readable and observable.
 open class ReadableProperty<T>: ReadablePropertyType {
     public typealias Value = T
     public typealias Change = T
     
     public private(set) var value: T
     public let signal: Signal<T>
-    fileprivate let notify: Signal<T>.Notify
-    fileprivate let changing: (T, T) -> Bool
+    private let notify: Signal<T>.Notify
+    private let changing: (T, T) -> Bool
     
-    public init(initialValue: T, signal: Signal<T>, notify: Signal<T>.Notify, changing: @escaping (T, T) -> Bool) {
+    public init(initialValue: T, changing: @escaping (T, T) -> Bool) {
         self.value = initialValue
-        self.signal = signal
-        self.notify = notify
         self.changing = changing
+        
+        let pipeSignal = PipeSignal<T>()
+        self.signal = pipeSignal
+        self.notify = SignalObserver(
+            valueWillChange: pipeSignal.notifyWillChange,
+            valueChanging: pipeSignal.notifyChanging,
+            valueDidChange: pipeSignal.notifyDidChange
+        )
+        
+        // Deliver the current value when an observer attaches to our signal
+        pipeSignal.onObserve = { [weak self] observer in
+            guard let strongSelf = self else { return }
+            observer.valueWillChange()
+            observer.valueChanging(strongSelf.value, transient: false)
+            observer.valueDidChange()
+        }
     }
     
     internal func setValue(_ newValue: T, _ metadata: ChangeMetadata) {
@@ -92,21 +106,18 @@ open class BindableProperty<T> {
     
     /// Establishes a unidirectional binding between this property and the given signal.
     /// When the other signal's value changes, this property's value will be updated.
-    /// Note that calling `bind` will cause this property to take on the given initial
-    /// value immediately.
-    fileprivate func bind(_ signal: Signal<T>, initialValue: T?, startProp: () -> Void, owner: AnyObject) -> Binding {
+    /// Note that calling `bind` will cause this property to take on the initial value
+    /// of the other property if it is available.
+    fileprivate func bind(_ signal: Signal<T>, initialValue: T?, owner: AnyObject) -> Binding {
+        // TODO: initialValue is unused!!!!!
         
-        if let initialValue = initialValue {
-            // Make this property take on the given initial value
-            // TODO: Maybe only do this if this is the first thing being bound (i.e., when
-            // the set of bindings is empty)
-            // TODO: Does metadata have meaning here?
-            self.setValue(initialValue, ChangeMetadata(transient: true))
-        }
+        // Keep track of Will/DidChange events for this binding
+        var changeCount = 0
         
         // Observe the given signal for changes
         let signalObserverRemoval = signal.observe(SignalObserver(
             valueWillChange: { [weak self] in
+                changeCount += 1
                 self?.changeHandler.willChange()
             },
             valueChanging: { [weak self] value, metadata in
@@ -114,27 +125,19 @@ open class BindableProperty<T> {
                 strongSelf.setValue(value, metadata)
             },
             valueDidChange: { [weak self] in
+                changeCount -= 1
                 self?.changeHandler.didChange()
             }
         ))
 
-        // Start the underlying property
-        startProp()
-        
-        // Take on the given signal's change count
-        // TODO: Ugh, don't do this if we have an initial value
-        changeHandler.incrementCount(signal.changeCount)
-        
         // Save and return the binding
         let bindingID = nextBindingID
-        let binding = Binding(signalOwner: owner, removal: { [weak self, weak signal] in
+        let binding = Binding(signalOwner: owner, removal: { [weak self] in
             signalObserverRemoval()
             if let strongSelf = self {
                 if let binding = strongSelf.bindings.removeValue(forKey: bindingID) {
                     binding.unbind()
-                    if let signal = signal {
-                        strongSelf.changeHandler.decrementCount(signal.changeCount)
-                    }
+                    strongSelf.changeHandler.decrementCount(changeCount)
                 }
             }
         })
@@ -180,10 +183,20 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     public let signal: Signal<T>
     fileprivate let notify: Signal<T>.Notify
     
-    internal init(signal: Signal<T>, notify: Signal<T>.Notify, changeHandler: ChangeHandler) {
-        self.signal = signal
-        self.notify = notify
+    internal override init(changeHandler: ChangeHandler) {
+        let (pipeSignal, pipeNotify) = Signal<T>.pipe()
+        self.signal = pipeSignal
+        self.notify = pipeNotify
+
         super.init(changeHandler: changeHandler)
+        
+        // Deliver the current value when an observer attaches to our signal
+        pipeSignal.onObserve = { [weak self] observer in
+            guard let strongSelf = self else { return }
+            observer.valueWillChange()
+            observer.valueChanging(strongSelf.value, transient: false)
+            observer.valueDidChange()
+        }
     }
 
     /// Returns the current value.  This must be overridden by subclasses and is intended to be
@@ -245,7 +258,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         
         // Make the other property observe this property's signal
         let signalObserverRemoval2 = signal.observe(SignalObserver(
-            // TODO: How to deal with ChangeHandler here?
+            // TODO: Should we be attempting to modify other's ChangeHandler?
             valueWillChange: {},
             valueChanging: { [weak other] value, metadata in
                 if selfInitiatedChange { return }
@@ -255,7 +268,6 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
                     selfInitiatedChange = false
                 }
             },
-            // TODO: How to deal with ChangeHandler here?
             valueDidChange: {}
         ))
         
@@ -368,15 +380,15 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         initial()
         otherInitiatedChange = false
 
-        // Start the other property's signal
-        other.start()
+//        // Start the other property's signal
+//        other.start()
         
         // Take on the given signal's change count; note that we only do this in the case where
         // there wasn't an initial value, because otherwise deliverInitial will be true and
         // the observer's valueWillChange will be called and omg this is so complicated
-        if other.value != nil {
-            changeHandler.incrementCount(other.signal.changeCount)
-        }
+//        if other.value != nil {
+//            changeHandler.incrementCount(other.signal.changeCount)
+//        }
 
         // Save and return the binding
         let bindingID = nextBindingID
@@ -391,18 +403,9 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     }
 }
 
-private class ConstantValueProperty<T>: ReadableProperty<T> {
-    fileprivate init(_ value: T) {
-        // TODO: Use a no-op signal here
-        let (signal, notify) = Signal<T>.pipe()
-        super.init(initialValue: value, signal: signal, notify: notify, changing: { _ in false })
-    }
-}
-
-/// Returns a ValueProperty whose value never changes.  Note that since the value cannot change,
-/// observers will never be notified of changes.
+/// Returns a ReadableProperty whose value never changes.
 public func constantValueProperty<T>(_ value: T) -> ReadableProperty<T> {
-    return ConstantValueProperty(value)
+    return ReadableProperty(initialValue: value, changing: { _ in false })
 }
 
 public final class MutableValueProperty<T>: ReadWriteProperty<T> {
@@ -415,13 +418,8 @@ public final class MutableValueProperty<T>: ReadWriteProperty<T> {
         self.valueChanging = valueChanging
         self.didSet = didSet
         self.mutableValue = initialValue
-
-        let (signal, notify) = Signal<T>.pipe()
-        super.init(
-            signal: signal,
-            notify: notify,
-            changeHandler: changeHandler
-        )
+        
+        super.init(changeHandler: changeHandler)
     }
     
     /// Called to update the underlying value and notify observers that the value has been changed.
@@ -500,17 +498,11 @@ public final class ExternalValueProperty<T>: ReadWriteProperty<T> {
     private let get: Getter
     private let set: Setter
     
-    // TODO: Drop the default changeHandler value (to make sure all clients are properly migrated to the new system)
     public init(get: @escaping Getter, set: @escaping Setter, changeHandler: ChangeHandler = ChangeHandler()) {
         self.get = get
         self.set = set
         
-        let (signal, notify) = Signal<T>.pipe()
-        super.init(
-            signal: signal,
-            notify: notify,
-            changeHandler: changeHandler
-        )
+        super.init(changeHandler: changeHandler)
     }
     
     /// Called to notify observers that the underlying external value has been changed.
@@ -555,7 +547,7 @@ extension BindableProperty {
     /// Note that calling `bind` will cause this property to take on the given initial
     /// value immediately if non-nil, otherwise will take on the given property's value.
     @discardableResult public func bind<RHS: ReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T, RHS.SignalChange == T {
-        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, startProp: {}, owner: rhs)
+        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, owner: rhs)
     }
 
     /// Establishes a unidirectional binding between this property and the given property.
@@ -564,7 +556,7 @@ extension BindableProperty {
     /// to take on the given initial value if non-nil, otherwise will take on the given
     /// property's value (if defined).
     @discardableResult public func bind<RHS: AsyncReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T, RHS.SignalChange == T {
-        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, startProp: { rhs.start() }, owner: rhs)
+        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, owner: rhs)
     }
 }
 

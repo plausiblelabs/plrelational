@@ -6,6 +6,35 @@
 import XCTest
 @testable import PLRelationalBinding
 
+class TestObserver<T> {
+    var willChangeCount = 0
+    var didChangeCount = 0
+    var changes: [T] = []
+    
+    func observe(_ signal: Signal<T>) -> ObserverRemoval {
+        return signal.observe(SignalObserver(
+            valueWillChange: {
+                self.willChangeCount += 1
+            },
+            valueChanging: { newValue, _ in
+                self.changes.append(newValue)
+            },
+            valueDidChange: {
+                self.didChangeCount += 1
+            }
+        ))
+    }
+}
+
+typealias StringObserver = TestObserver<String>
+typealias BoolObserver = TestObserver<Bool>
+
+func verify<T: Equatable>(_ observer: TestObserver<T>, changes: [T], willChangeCount: Int, didChangeCount: Int, file: StaticString = #file, line: UInt = #line) {
+    XCTAssertEqual(observer.changes, changes, file: file, line: line)
+    XCTAssertEqual(observer.willChangeCount, willChangeCount, file: file, line: line)
+    XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
+}
+
 class SignalOperationsTests: BindingTestCase {
     
     private func verifyUnary<T, U: Equatable>(notify: Signal<T>.Notify, mapped: Signal<U>, values: [T], expected: [U], file: StaticString = #file, line: UInt = #line) {
@@ -17,36 +46,31 @@ class SignalOperationsTests: BindingTestCase {
         _ = mapped.observe(SignalObserver(
             valueWillChange: { willChangeCount += 1 },
             valueChanging: { newValue, _ in
-                changingCount = mapped.changeCount
+                changingCount += 1
                 mappedValue = newValue
             },
             valueDidChange: { didChangeCount += 1 }
         ))
         
-        mapped.start(deliverInitial: false)
-        
         XCTAssertEqual(mappedValue, nil)
         XCTAssertEqual(willChangeCount, 0)
-        XCTAssertEqual(didChangeCount, 0)
         XCTAssertEqual(changingCount, 0)
-        XCTAssertEqual(mapped.changeCount, 1)
-        
+        XCTAssertEqual(didChangeCount, 0)
+
         notify.valueChanging(values[0])
         notify.valueDidChange()
         XCTAssertEqual(mappedValue, expected[0])
         XCTAssertEqual(willChangeCount, 0)
-        XCTAssertEqual(didChangeCount, 1)
         XCTAssertEqual(changingCount, 1)
-        XCTAssertEqual(mapped.changeCount, 0)
+        XCTAssertEqual(didChangeCount, 1)
         
         notify.valueWillChange()
         notify.valueChanging(values[1])
         notify.valueDidChange()
         XCTAssertEqual(mappedValue, expected[1])
         XCTAssertEqual(willChangeCount, 1)
+        XCTAssertEqual(changingCount, 2)
         XCTAssertEqual(didChangeCount, 2)
-        XCTAssertEqual(changingCount, 1)
-        XCTAssertEqual(mapped.changeCount, 0)
     }
     
 //    private func verifyBinary<T1, T2, U: Equatable>(notify1: Signal<T1>.Notify, notify2: Signal<T2>.Notify, mapped: Signal<U>, values1: [T1], values2: [T2], expected: [U], file: StaticString = #file, line: UInt = #line) {
@@ -234,28 +258,28 @@ class SignalOperationsTests: BindingTestCase {
 //            expected: [false, true]
 //        )
 //    }
-    
-    func testThen() {
-        var count = 0
-        let (signal, notify) = Signal<Bool>.pipe()
-        
-        let then = signal.then{ count += 1 }
-        then.start(deliverInitial: false)
-        XCTAssertEqual(count, 0)
-        
-        notify.valueChanging(false)
-        XCTAssertEqual(count, 0)
-        
-        notify.valueChanging(true)
-        XCTAssertEqual(count, 1)
-        
-        notify.valueChanging(true)
-        XCTAssertEqual(count, 2)
-        
-        // TODO: This is only to keep a strong reference to `then`; hmm
-        XCTAssertEqual(then.changeCount, 0)
-    }
-    
+//    
+//    func testThen() {
+//        var count = 0
+//        let (signal, notify) = Signal<Bool>.pipe()
+//        
+//        let then = signal.then{ count += 1 }
+//        then.start(deliverInitial: false)
+//        XCTAssertEqual(count, 0)
+//        
+//        notify.valueChanging(false)
+//        XCTAssertEqual(count, 0)
+//        
+//        notify.valueChanging(true)
+//        XCTAssertEqual(count, 1)
+//        
+//        notify.valueChanging(true)
+//        XCTAssertEqual(count, 2)
+//        
+//        // TODO: This is only to keep a strong reference to `then`; hmm
+//        XCTAssertEqual(then.changeCount, 0)
+//    }
+//    
 //    func testEq() {
 //        let (signal1, notify1) = Signal<Bool>.pipe()
 //        let (signal2, notify2) = Signal<Bool>.pipe()

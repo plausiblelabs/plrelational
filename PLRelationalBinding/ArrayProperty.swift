@@ -111,8 +111,8 @@ private class FullArrayProperty<Element: ArrayElement>: AsyncReadableProperty<[E
         super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.elements })
     }
     
-    fileprivate override func start() {
-        underlying.start()
-        super.start()
-    }
+//    fileprivate override func start() {
+//        underlying.start()
+//        super.start()
+//    }
 }
