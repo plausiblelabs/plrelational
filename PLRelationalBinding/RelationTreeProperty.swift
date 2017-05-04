@@ -60,7 +60,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         removal?()
     }
     
-    override func start() {
+    /*override*/ func start() {
         if started {
             return
         }

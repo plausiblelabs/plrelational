@@ -67,7 +67,7 @@ class RelationTreePropertyTests: BindingTestCase {
         XCTAssertEqual(changes, [])
         
         // Verify that in-memory array structure was built correctly after property/signal was started
-        awaitCompletion{ property.start() }
+//        awaitCompletion{ property.start() }
         verifyTree(property, [
             "Group1",
             "  Collection1",
@@ -172,7 +172,7 @@ class RelationTreePropertyTests: BindingTestCase {
         XCTAssertEqual(changes, [])
 
         // Verify that in-memory tree structure is empty after property/signal was started
-        awaitCompletion{ property.start() }
+//        awaitCompletion{ property.start() }
         XCTAssertEqual(property.value!.children.count, 0)
         XCTAssertEqual(willChangeCount, 1)
         XCTAssertEqual(didChangeCount, 1)

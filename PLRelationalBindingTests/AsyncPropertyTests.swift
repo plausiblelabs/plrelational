@@ -43,7 +43,7 @@ class AsyncPropertyTests: BindingTestCase {
     func testLiftSynchronousPropertyToAsync() {
         let syncProperty = mutableValueProperty("1")
         let asyncProperty = syncProperty.async()
-        asyncProperty.start()
+//        asyncProperty.start()
         XCTAssertEqual(syncProperty.value, "1")
         XCTAssertEqual(asyncProperty.value, "1")
         

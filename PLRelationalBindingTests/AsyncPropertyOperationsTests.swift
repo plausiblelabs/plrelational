@@ -13,7 +13,7 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         let mapped = property.map{ $0 ? 1 : 0 }
         var changeObserved = false
         _ = mapped.signal.observe({ _ in changeObserved = true })
-        mapped.start()
+//        mapped.start()
         
         XCTAssertEqual(mapped.value, 0)
         XCTAssertEqual(changeObserved, false)
@@ -48,7 +48,7 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         
         var changeObserved = false
         _ = mapped.signal.observe({ _ in changeObserved = true })
-        mapped.start()
+//        mapped.start()
         
         XCTAssertEqual(mapped.value, nil)
         XCTAssertNil(stringNotify)
@@ -100,7 +100,7 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         let zipped = zip(property1, property2)
         var changeObserved = false
         _ = zipped.signal.observe({ _ in changeObserved = true })
-        zipped.start()
+//        zipped.start()
         
         XCTAssertEqual(zipped.value?.0, nil)
         XCTAssertEqual(zipped.value?.1, nil)
@@ -132,7 +132,7 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         let zipped = zip(property1, property2)
         var changeObserved = false
         _ = zipped.signal.observe({ _ in changeObserved = true })
-        zipped.start()
+//        zipped.start()
         
         XCTAssertEqual(zipped.value?.0, false)
         XCTAssertEqual(zipped.value?.1, "foo")
@@ -157,7 +157,7 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         let mapped = !property
         var changeObserved = false
         _ = mapped.signal.observe({ _ in changeObserved = true })
-        mapped.start()
+//        mapped.start()
         
         XCTAssertEqual(mapped.value, true)
         XCTAssertEqual(changeObserved, false)

@@ -12,11 +12,10 @@ extension SignalType {
     }
 }
 
-// TODO: BinaryOpSignal captures the latest value delivered by each underlying signal and doesn't deliver
-// a pair until it sees a change from *both* signals.  This can lead to surprising behavior if the BinaryOpSignal
-// is created after one or both of the underlying signals have already delivered their initial value.  For the
-// time being we will comment out the affected operations, and hopefully we can re-expose them once we have
-// a more refined system.
+/// Returns a Signal that creates a fresh tuple (pair) any time there is a new value in either input.
+public func zip<LHS: SignalType, RHS: SignalType>(_ lhs: LHS, _ rhs: RHS) -> Signal<(LHS.Value, RHS.Value)> {
+    return BinaryOpSignal(lhs, rhs, { ($0, $1) })
+}
 
 /// Returns a Signal whose value is the negation of the given boolean signal.
 public func not(_ signal: Signal<Bool>) -> Signal<Bool> {
@@ -24,11 +23,40 @@ public func not(_ signal: Signal<Bool>) -> Signal<Bool> {
 }
 
 extension SignalType where Value == Bool {
+    /// Returns a Signal whose value resolves to the logical OR of this signal and the other input signal.
+    public func or(_ other: Self) -> Signal<Bool> {
+        return BinaryOpSignal(self, other, { $0 || $1 })
+    }
+
+    /// Returns a Signal whose value resolves to the logical AND of the values delivered on this signal
+    /// and the other input signal.
+    public func and(_ other: Self) -> Signal<Bool> {
+        return BinaryOpSignal(self, other, { $0 && $1 })
+    }
     
     /// Returns a Signal that invokes the given function whenever this signal's value resolves to `true`.
     public func then(_ f: @escaping () -> Void) -> Signal<()> {
         return self.map{ if $0 { f() } }
     }
+}
+
+// TODO: This syntax is same as SelectExpression operators; maybe we should use something different
+infix operator *|| : LogicalDisjunctionPrecedence
+
+infix operator *&& : LogicalConjunctionPrecedence
+
+public func *||(lhs: Signal<Bool>, rhs: Signal<Bool>) -> Signal<Bool> {
+    return lhs.or(rhs)
+}
+
+public func *&&(lhs: Signal<Bool>, rhs: Signal<Bool>) -> Signal<Bool> {
+    return lhs.and(rhs)
+}
+
+infix operator *== : ComparisonPrecedence
+
+public func *==<S: SignalType>(lhs: S, rhs: S) -> Signal<Bool> where S.Value: Equatable {
+    return BinaryOpSignal(lhs, rhs, { $0 == $1 })
 }
 
 private class MappedSignal<T>: Signal<T> {
@@ -58,6 +86,72 @@ private class MappedSignal<T>: Signal<T> {
         super.init()
     }
 
+    override func observe(_ observer: Observer) -> ObserverRemoval {
+        return observeFunc(observer)
+    }
+    
+    override var observerCount: Int {
+        return countFunc()
+    }
+}
+
+private class BinaryOpSignal<T>: Signal<T> {
+    
+    private let observeFunc: (Observer) -> ObserverRemoval
+    private let countFunc: () -> Int
+    
+    init<LHS: SignalType, RHS: SignalType>(_ lhs: LHS, _ rhs: RHS, _ f: @escaping (LHS.Value, RHS.Value) -> T) {
+        self.observeFunc = { observer in
+            var lhsValue: LHS.Value?
+            var rhsValue: RHS.Value?
+            
+            func notify(_ metadata: ChangeMetadata) {
+                if let lv = lhsValue, let rv = rhsValue {
+                    observer.valueChanging(f(lv, rv), metadata)
+                }
+            }
+            
+            // Observe the lhs signal
+            let lhsRemoval = lhs.observe(SignalObserver(
+                valueWillChange: {
+                    observer.valueWillChange()
+                },
+                valueChanging: { change, metadata in
+                    lhsValue = change
+                    notify(metadata)
+                },
+                valueDidChange: {
+                    observer.valueDidChange()
+                }
+            ))
+            
+            // Observe the rhs signal
+            let rhsRemoval = rhs.observe(SignalObserver(
+                valueWillChange: {
+                    observer.valueWillChange()
+                },
+                valueChanging: { change, metadata in
+                    rhsValue = change
+                    notify(metadata)
+                },
+                valueDidChange: {
+                    observer.valueDidChange()
+                }
+            ))
+            
+            return {
+                lhsRemoval()
+                rhsRemoval()
+            }
+        }
+        
+        self.countFunc = {
+            return lhs.observerCount + rhs.observerCount
+        }
+        
+        super.init()
+    }
+    
     override func observe(_ observer: Observer) -> ObserverRemoval {
         return observeFunc(observer)
     }

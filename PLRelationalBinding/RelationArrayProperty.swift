@@ -42,7 +42,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         removal?()
     }
     
-    override func start() {
+    /*override*/ func start() {
         if started {
             return
         }

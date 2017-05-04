@@ -198,9 +198,9 @@ private class BinaryOpValueProperty<T>: AsyncReadableProperty<T> {
                 }
             ))
             
-            // Start the underlying properties
-            lhs.start()
-            rhs.start()
+//            // Start the underlying properties
+//            lhs.start()
+//            rhs.start()
             
 //            // Take on the combined change count of the underlying signals
 //            signal.setChangeCount(lhs.signal.changeCount + rhs.signal.changeCount)

@@ -22,23 +22,6 @@ class RelationSignal<T>: SourceSignal<T> {
         super.init()
     }
 
-    // don't start until someone starts observing
-    
-    // Signal.observe(SignalObserver)
-    // Property.observe(SignalObserver)?
-
-    // need to differentiate between notifying just the observer (in observe), vs notifying
-    // all observers (when something changes)
-    
-    // if !started (i.e., this is the first signal observer), add relation observer and
-    // perform async query to get initial value (or if we already have an initial value,
-    // just deliver that to the signal observer being registered)
-
-    // if started (e.g. this is the second signal observer), and we already have a value,
-    // deliver it to just the observer being registered (willChange / changing / didChange)
-
-    // this should be sufficient to provide an initial value to a property, maybe
-    
     override func observeImpl(_ observer: Observer) {
         func convertRowsToValue(rows: Set<Row>) -> T {
             return self.rowsToValue(self.relation, AnyIterator(rows.makeIterator()))
@@ -77,13 +60,6 @@ class RelationSignal<T>: SourceSignal<T> {
             }
         }
     }
-
-    // TODO: Let's see if we can get away without this
-//    // The base implemention does not provide an initial value; we override it here and supply an initial
-//    // value if one was provided at init time.
-//    override func property() -> AsyncReadableProperty<T> {
-//        return AsyncReadableProperty(initialValue: self.latestValue, signal: self)
-//    }
 
     fileprivate func isRepeat(_ newValue: T) -> Bool {
         if let latest = latestValue {

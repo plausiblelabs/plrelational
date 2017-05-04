@@ -55,7 +55,7 @@ class RelationArrayPropertyTests: BindingTestCase {
         XCTAssertEqual(changes, [])
 
         // Verify that in-memory array structure was built correctly after property/signal was started
-        awaitCompletion{ property.start() }
+//        awaitCompletion{ property.start() }
         verifyArray(property, [
             "Page1",
             "Page2",
@@ -145,7 +145,7 @@ class RelationArrayPropertyTests: BindingTestCase {
         XCTAssertEqual(changes, [])
 
         // Verify that in-memory array structure is empty after property/signal was started
-        awaitCompletion{ property.start() }
+//        awaitCompletion{ property.start() }
         XCTAssertEqual(willChangeCount, 1)
         XCTAssertEqual(didChangeCount, 1)
         verifyArray(property, [])
@@ -285,7 +285,7 @@ class RelationArrayPropertyTests: BindingTestCase {
         XCTAssertEqual(changes, [])
         
         // Verify that in-memory array structure was built correctly after property/signal was started
-        awaitCompletion{ property.start() }
+//        awaitCompletion{ property.start() }
         verifyArray(property, [
             "Alice",
             "Bob",
@@ -363,7 +363,7 @@ class RelationArrayPropertyTests: BindingTestCase {
         XCTAssertEqual(changes, [])
         
         // Verify that in-memory array structure is empty after property/signal was started
-        awaitCompletion{ property.start() }
+//        awaitCompletion{ property.start() }
         XCTAssertEqual(willChangeCount, 1)
         XCTAssertEqual(didChangeCount, 1)
         verifyArray(property, [])

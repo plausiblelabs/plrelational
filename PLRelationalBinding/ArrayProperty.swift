@@ -56,7 +56,7 @@ open class ArrayProperty<Element: ArrayElement>: AsyncReadablePropertyType {
         self.notify = notify
     }
     
-    open func start() {
+    open func startX() {
     }
     
     public var property: AsyncReadableProperty<[Element]> {

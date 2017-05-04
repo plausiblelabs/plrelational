@@ -34,47 +34,54 @@ open class Binding {
 
 public protocol ReadablePropertyType: class {
     associatedtype Value
-    associatedtype SignalChange = Value
     
     var value: Value { get }
-    var signal: Signal<SignalChange> { get }
+    var signal: Signal<Value> { get }
 }
 
 ///// A concrete property that is readable and observable.
 open class ReadableProperty<T>: ReadablePropertyType {
     public typealias Value = T
-    public typealias Change = T
     
     public private(set) var value: T
+    private let underlyingSignal: Signal<T>
+    private var underlyingRemoval: ObserverRemoval?
     public let signal: Signal<T>
-    private let notify: Signal<T>.Notify
     private let changing: (T, T) -> Bool
     
-    public init(initialValue: T, changing: @escaping (T, T) -> Bool) {
+    public init(initialValue: T, signal: Signal<T>, changing: @escaping (T, T) -> Bool) {
         self.value = initialValue
         self.changing = changing
-        
+
         let pipeSignal = PipeSignal<T>()
         self.signal = pipeSignal
-        self.notify = SignalObserver(
-            valueWillChange: pipeSignal.notifyWillChange,
-            valueChanging: pipeSignal.notifyChanging,
-            valueDidChange: pipeSignal.notifyDidChange
-        )
-        
+        self.underlyingSignal = signal
+
         // Deliver the current value when an observer attaches to our signal
-        pipeSignal.onObserve = { [weak self] observer in
-            guard let strongSelf = self else { return }
-            observer.valueWillChange()
-            observer.valueChanging(strongSelf.value, transient: false)
-            observer.valueDidChange()
-        }
-    }
-    
-    internal func setValue(_ newValue: T, _ metadata: ChangeMetadata) {
-        if changing(value, newValue) {
-            value = newValue
-            notify.valueChanging(newValue, metadata)
+        pipeSignal.onObserve = { observer in
+            if self.underlyingRemoval == nil {
+                // Observe the underlying signal the first time someone observes our public signal
+                self.underlyingRemoval = self.underlyingSignal.observe(SignalObserver(
+                    valueWillChange: {
+                        pipeSignal.notifyWillChange()
+                    },
+                    valueChanging: { [weak self] newValue, metadata in
+                        guard let strongSelf = self else { return }
+                        if strongSelf.underlyingRemoval == nil || changing(strongSelf.value, newValue) {
+                            strongSelf.value = newValue
+                            pipeSignal.notifyChanging(newValue, metadata: metadata)
+                        }
+                    },
+                    valueDidChange: {
+                        pipeSignal.notifyDidChange()
+                    }
+                ))
+            } else {
+                // For subsequent observers, deliver our current value to just the observer being attached
+                observer.valueWillChange()
+                observer.valueChanging(self.value, transient: false)
+                observer.valueDidChange()
+            }
         }
     }
 }
@@ -405,7 +412,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
 
 /// Returns a ReadableProperty whose value never changes.
 public func constantValueProperty<T>(_ value: T) -> ReadableProperty<T> {
-    return ReadableProperty(initialValue: value, changing: { _ in false })
+    return ReadableProperty(initialValue: value, signal: PipeSignal<T>(), changing: { _ in false })
 }
 
 public final class MutableValueProperty<T>: ReadWriteProperty<T> {
@@ -546,7 +553,7 @@ extension BindableProperty {
     /// When the other property's value changes, this property's value will be updated.
     /// Note that calling `bind` will cause this property to take on the given initial
     /// value immediately if non-nil, otherwise will take on the given property's value.
-    @discardableResult public func bind<RHS: ReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T, RHS.SignalChange == T {
+    @discardableResult public func bind<RHS: ReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T {
         return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, owner: rhs)
     }
 
@@ -563,7 +570,7 @@ extension BindableProperty {
 // This syntax is borrowed from ReactiveCocoa.
 infix operator <~ : PropertyOperatorPrecedence
 
-@discardableResult public func <~ <T, RHS: ReadablePropertyType>(lhs: BindableProperty<T>, rhs: RHS) -> Binding where RHS.Value == T, RHS.SignalChange == T {
+@discardableResult public func <~ <T, RHS: ReadablePropertyType>(lhs: BindableProperty<T>, rhs: RHS) -> Binding where RHS.Value == T {
     return lhs.bind(rhs)
 }
 
@@ -577,7 +584,7 @@ infix operator ~~> : PropertyOperatorPrecedence
 
 @discardableResult public func ~~> <T>(lhs: Signal<T>, rhs: ActionProperty<T>) -> Binding {
     // TODO: We invent an owner here; what if no one else owns the signal?
-    return rhs.bind(lhs, initialValue: nil, startProp: {}, owner: "" as AnyObject)
+    return rhs.bind(lhs, initialValue: nil, owner: "" as AnyObject)
 }
 
 infix operator <~> : PropertyOperatorPrecedence

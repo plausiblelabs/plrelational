@@ -190,7 +190,7 @@ extension SignalType {
     }
 }
 
-extension ReadablePropertyType where Value == SignalChange {
+extension ReadablePropertyType {
     /// Returns an AsyncReadableProperty that is derived from this synchronous property's signal.
     public func async() -> AsyncReadableProperty<Value> {
         return AsyncReadableProperty(initialValue: self.value, signal: self.signal)

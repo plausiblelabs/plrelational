@@ -81,7 +81,7 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
         return fullTree()
     }
     
-    open func start() {
+    open func startX() {
     }
     
     internal func notifyObservers(treeChanges: [TreeChange<Node>]) {
@@ -219,8 +219,8 @@ private class FullTreeProperty<Node: TreeNode>: AsyncReadableProperty<Node> {
         super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.root })
     }
     
-    fileprivate override func start() {
-        underlying.start()
-        super.start()
-    }
+//    fileprivate override func start() {
+//        underlying.start()
+//        super.start()
+//    }
 }
