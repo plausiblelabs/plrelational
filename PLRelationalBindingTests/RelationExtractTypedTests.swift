@@ -46,7 +46,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         let p = r.project("name").allRelationValues().property()
         XCTAssertEqual(p.value, nil)
         
-//        awaitCompletion{ p.start() }
+        //awaitCompletion{ p.start() }
         XCTAssertEqual(p.value, Set(["cat", "dog", "fish"].map{ RelationValue($0) }))
         
         awaitCompletion{ _ = r.asyncAdd(["id": 4, "name": "bird"]) }

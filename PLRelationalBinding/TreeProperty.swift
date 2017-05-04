@@ -81,8 +81,8 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
         return fullTree()
     }
     
-    open func startX() {
-    }
+//    open func startX() {
+//    }
     
     internal func notifyObservers(treeChanges: [TreeChange<Node>]) {
         let metadata = ChangeMetadata(transient: false)

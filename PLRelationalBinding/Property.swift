@@ -412,7 +412,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
 
 /// Returns a ReadableProperty whose value never changes.
 public func constantValueProperty<T>(_ value: T) -> ReadableProperty<T> {
-    return ReadableProperty(initialValue: value, signal: PipeSignal<T>(), changing: { _ in false })
+    return ReadableProperty(initialValue: value, signal: ConstantSignal<T>(value), changing: { _ in false })
 }
 
 public final class MutableValueProperty<T>: ReadWriteProperty<T> {

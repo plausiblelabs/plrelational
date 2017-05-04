@@ -24,6 +24,16 @@ public protocol AsyncReadablePropertyType: class, AsyncPropertyType {
     var value: Value? { get }
 }
 
+extension AsyncReadablePropertyType {
+    /// A convenience for putting the underlying source signal into action.  Normally that
+    /// will occur the first time an observer begins observing this property's signal, but
+    /// in some cases no observation is needed and the caller just wants this property to
+    /// start delivering values.  This is a shorthand for `signal.observe` with a no-op observer.
+    public func startX() {
+        _ = self.signal.observe({ _ in })
+    }
+}
+
 /// A concrete readable property whose value is fetched asynchronously.
 open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
@@ -90,13 +100,13 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
         return self
     }
     
-    /// A convenience for putting the underlying source signal into action.  Normally that
-    /// will occur the first time an observer begins observing this property's signal, but
-    /// in some cases no observation is needed and the caller just wants this property to
-    /// start delivering values.  This is a shorthand for `signal.observe` with a no-op observer.
-    public func startX() {
-        _ = self.signal.observe({ _ in })
-    }
+//    /// A convenience for putting the underlying source signal into action.  Normally that
+//    /// will occur the first time an observer begins observing this property's signal, but
+//    /// in some cases no observation is needed and the caller just wants this property to
+//    /// start delivering values.  This is a shorthand for `signal.observe` with a no-op observer.
+//    public func startX() {
+//        _ = self.signal.observe({ _ in })
+//    }
     
     public static func pipe(initialValue: T? = nil) -> (AsyncReadableProperty<T>, Signal<T>.Notify) {
         let (signal, notify) = Signal<T>.pipe()
@@ -116,66 +126,9 @@ public func constantValueAsyncProperty<T>(_ value: T) -> AsyncReadableProperty<T
     return ConstantValueAsyncProperty(value)
 }
 
-
 /// A concrete readable property whose value can be updated and fetched asynchronously.
 open class AsyncReadWriteProperty<T>: AsyncReadableProperty<T> {
-//    // TODO: This implementation is getting very close to that of AsyncReadableProperty, maybe it
-//    // makes sense to subclass that instead
-//    
-//    public typealias Value = T
-//    public typealias SignalChange = T
-//
-//    private var mutableValue: T?
-//
-//    public var value: T? {
-//        return mutableValue
-//    }
-//    
-//    // Note that we observe our private `underlyingSignal` that was provided at init time, and then deliver `valueChanging` events
-//    // *after* we update our `value`.  This allows code to observe this property's public `signal` and be guaranteed that `value`
-//    // will contain the latest value before observers are notified.
-//    private let underlyingSignal: Signal<T>
-//    private var underlyingRemoval: ObserverRemoval?
-//    public let signal: Signal<T>
-//
-//    internal init(initialValue: T?, signal: Signal<T>) {
-//        self.mutableValue = initialValue
-//        self.underlyingSignal = signal
-//
-//        let pipeSignal = PipeSignal<T>()
-//        self.signal = pipeSignal
-//        
-//        pipeSignal.onObserve = { observer in
-//            if self.underlyingRemoval == nil {
-//                // Observe the underlying signal the first time someone observes our public signal
-//                guard self.underlyingRemoval == nil else { return }
-//                self.underlyingRemoval = self.underlyingSignal.observe(SignalObserver(
-//                    valueWillChange: {
-//                        pipeSignal.notifyWillChange()
-//                    },
-//                    valueChanging: { [weak self] newValue, metadata in
-//                        self?.mutableValue = newValue
-//                        pipeSignal.notifyChanging(newValue, metadata: metadata)
-//                    },
-//                    valueDidChange: {
-//                        pipeSignal.notifyDidChange()
-//                    }
-//                ))
-//            } else {
-//                // For subsequent observers, deliver our current value to just the observer being attached
-//                if let value = self.value {
-//                    observer.valueWillChange()
-//                    observer.valueChanging(value)
-//                    observer.valueDidChange()
-//                }
-//            }
-//        }
-//    }
-//    
-//    deinit {
-//        underlyingRemoval?()
-//    }
-    
+
     /// Sets the new value.  This must be overridden by subclasses and is intended to be
     /// called by the `bind` implementations only, not by external callers.
     internal func setValue(_ value: T, _ metadata: ChangeMetadata) {

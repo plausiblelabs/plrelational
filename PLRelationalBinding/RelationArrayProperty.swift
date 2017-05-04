@@ -16,15 +16,15 @@ private typealias Element = RowArrayElement
 private typealias Pos = ArrayPos<Element>
 private typealias Change = ArrayChange<Element>
 
-class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChangeCoalescedObserver {
+class RelationArrayProperty: ArrayProperty<RowArrayElement> {
     
     private let relation: Relation
-    private let idAttr: Attribute
+    fileprivate let idAttr: Attribute
     private let orderAttr: Attribute
     private let tag: AnyObject?
+    fileprivate let notify: Signal<SignalChange>.Notify
     
-    private var removal: ObserverRemoval?
-    private var started = false
+    private var relationObserverRemoval: ObserverRemoval?
 
     fileprivate init(relation: Relation, idAttr: Attribute, orderAttr: Attribute, tag: AnyObject?) {
         precondition(relation.scheme.attributes.isSuperset(of: [idAttr, orderAttr]))
@@ -34,41 +34,58 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         self.orderAttr = orderAttr
         self.tag = tag
 
-        let (signal, notify) = Signal<SignalChange>.pipe()
-        super.init(signal: signal, notify: notify)
+        let (pipeSignal, pipeNotify) = Signal<SignalChange>.pipe()
+        self.notify = pipeNotify
+        
+        super.init(signal: pipeSignal)
+
+        // TODO: There is a possibility (however unlikely) that the underlying relation is already
+        // in an async update, i.e., it has already delivered a relationWillChange.  If that happens,
+        // setting changeCount to zero here will be incorrect.
+        //var changeCount = 0
+        pipeSignal.onObserve = { observer in
+            if self.relationObserverRemoval == nil {
+                // Observe the underlying relation the first time someone observes our public signal
+                self.relationObserverRemoval = relation.addAsyncObserver(self)
+                
+                // Perform an async query to compute the initial array
+                pipeNotify.valueWillChange()
+                relation.asyncAllRows(
+                    postprocessor: { rows -> [RowArrayElement] in
+                        let sortedRows = rows.sorted{ $0[self.orderAttr] < $1[self.orderAttr] }
+                        return sortedRows.map{
+                            RowArrayElement(id: $0[self.idAttr], data: $0, tag: self.tag)
+                        }
+                    },
+                    completion: { result in
+                        if let sortedElements = result.ok {
+                            self.elements = sortedElements
+                            self.notify.valueChanging([.initial(sortedElements)], transient: false)
+                        }
+                        self.notify.valueDidChange()
+                    }
+                )
+            } else {
+                // For subsequent observers, deliver our current value to just the observer being attached
+//                for _ in 0..<changeCount {
+//                    // If the underlying relation is in an asynchronous change (delivered WillChange before
+//                    // this observer was attached), we need to give this new observer the corresponding
+//                    // number of WillChange notifications so that it is correctly balanced when the
+//                    // DidChange notification(s) come in later
+//                    observer.valueWillChange()
+//                }
+                observer.valueWillChange()
+                observer.valueChanging([.initial(self.elements)], transient: false)
+                observer.valueDidChange()
+            }
+        }
     }
     
     deinit {
-        removal?()
+        relationObserverRemoval?()
     }
     
-    /*override*/ func start() {
-        if started {
-            return
-        }
-        
-        removal = relation.addAsyncObserver(self)
-        
-        notify.valueWillChange()
-        relation.asyncAllRows(
-            postprocessor: { rows -> [RowArrayElement] in
-                let sortedRows = rows.sorted{ $0[self.orderAttr] < $1[self.orderAttr] }
-                return sortedRows.map{
-                    RowArrayElement(id: $0[self.idAttr], data: $0, tag: self.tag)
-                }
-            },
-            completion: { result in
-                if let sortedElements = result.ok {
-                    self.elements = sortedElements
-                    self.notifyObservers(arrayChanges: [.initial(sortedElements)])
-                }
-                self.notify.valueDidChange()
-            }
-        )
-        started = true
-    }
-    
-    private func onInsert(_ rows: [Row], changes: inout [Change]) {
+    fileprivate func onInsert(_ rows: [Row], changes: inout [Change]) {
 
         func insertElement(_ element: Element) -> Int {
             return elements.insertSorted(element, { $0.data[orderAttr] })
@@ -86,7 +103,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         }
     }
 
-    private func onDelete(_ ids: [RelationValue], changes: inout [Change]) {
+    fileprivate func onDelete(_ ids: [RelationValue], changes: inout [Change]) {
         for id in ids {
             if let index = elements.index(where: { $0.id == id }) {
                 elements.remove(at: index)
@@ -95,7 +112,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         }
     }
 
-    private func onUpdate(_ rows: [Row], changes: inout [Change]) {
+    fileprivate func onUpdate(_ rows: [Row], changes: inout [Change]) {
         for row in rows {
             let id = row[idAttr]
             if let element = elementForID(id) {
@@ -184,6 +201,9 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
         let (prev, next) = adjacentElementsForIndex(dstIndex, notMatching: element)
         return orderForElementBetween(prev, next)
     }
+}
+
+extension RelationArrayProperty: AsyncRelationChangeCoalescedObserver {
 
     func relationWillChange(_ relation: Relation) {
         notify.valueWillChange()
@@ -200,7 +220,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement>, AsyncRelationChange
                 self.onUpdate(parts.updatedRows, changes: &arrayChanges)
                 self.onDelete(parts.deletedIDs, changes: &arrayChanges)
                 if arrayChanges.count > 0 {
-                    self.notifyObservers(arrayChanges: arrayChanges)
+                    self.notify.valueChanging(arrayChanges, transient: false)
                 }
             }
             self.notify.valueDidChange()
