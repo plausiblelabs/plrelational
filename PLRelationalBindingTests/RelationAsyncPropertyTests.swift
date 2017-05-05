@@ -174,8 +174,22 @@ class RelationAsyncPropertyTests: BindingTestCase {
             XCTAssertEqual(lhsProperty.value, value, file: file, line: line)
             XCTAssertEqual(lhsObserver.changes, changes, file: file, line: line)
             XCTAssertEqual(lhsDidSetValues, didSetValues, file: file, line: line)
-            XCTAssertEqual(lhsLockCount, lockCount, file: file, line: line)
-            XCTAssertEqual(lhsUnlockCount, unlockCount, file: file, line: line)
+            XCTAssertEqual(lhsLockCount, lockCount, "Incorrect lockCount", file: file, line: line)
+            XCTAssertEqual(lhsUnlockCount, unlockCount, "Incorrect unlockCount", file: file, line: line)
+        }
+        
+        func resetNameObserver() {
+            nameObserver.reset()
+            nameSnapshotCount = 0
+            nameUpdateCount = 0
+            nameCommitCount = 0
+        }
+        
+        func resetLHSObserver() {
+            lhsObserver.reset()
+            lhsDidSetValues = []
+            lhsLockCount = 0
+            lhsUnlockCount = 0
         }
         
         // Verify that name property value remains nil until it is bound
@@ -196,136 +210,65 @@ class RelationAsyncPropertyTests: BindingTestCase {
         XCTAssertEqual(nameProperty.signal.observerCount, 1)
         
         // Bidirectionally bind lhs property to the async name property
-        print("ABOUT TO BIND")
         _ = lhsProperty <~> nameProperty
 
-        // Look at the observer counts to verify that lhsProperty is observing nameProperty and vice versa
+        // Look at the observer counts to verify that lhsProperty has started observing nameProperty (note that nameProperty doesn't
+        // start observing lhsProperty until the initial name value has been computed)
+        XCTAssertEqual(lhsProperty.signal.observerCount, 1)
         XCTAssertEqual(nameProperty.signal.observerCount, 2)
-        XCTAssertEqual(lhsProperty.signal.observerCount, 2)
         
         // Verify that name property's value is loaded asynchronously and that lhs property's value is
         // updated when the rhs value is ready
-        verifyName(value: nil, changes: [], willChangeCount: 2, didChangeCount: 0, snapshotCount: 0, updateCount: 0, commitCount: 0)
+        verifyName(value: nil, changes: [], willChangeCount: 1, didChangeCount: 0, snapshotCount: 0, updateCount: 0, commitCount: 0)
         verifyLHS(value: "initial lhs value", changes: ["initial lhs value"], didSetValues: [], lockCount: 1, unlockCount: 0)
-
         awaitIdle()
-//        XCTAssertEqual(nameProperty.value, "")
-//        XCTAssertEqual(nameWillChangeCount, 1)
-//        XCTAssertEqual(nameDidChangeCount, 1)
-//        XCTAssertEqual(nameChanges, [""])
-//        XCTAssertEqual(nameSnapshotCount, 0)
-//        XCTAssertEqual(nameUpdateCount, 0)
-//        XCTAssertEqual(nameCommitCount, 0)
-//        XCTAssertEqual(lhsProperty.value, "")
-//        XCTAssertEqual(lhsChanges, [""])
-//        XCTAssertEqual(lhsDidSetValues, [""])
-//        XCTAssertEqual(lhsLockCount, 1)
-//        XCTAssertEqual(lhsUnlockCount, 1)
-//
-//        // Update the underlying name relation and verify that changes are reflected in lhs property
-//        r.asyncAdd(["id": 1, "name": "cat"])
-//        XCTAssertEqual(nameProperty.value, "")
-//        XCTAssertEqual(nameWillChangeCount, 2)
-//        XCTAssertEqual(nameDidChangeCount, 1)
-//        XCTAssertEqual(nameChanges, [""])
-//        XCTAssertEqual(nameSnapshotCount, 0)
-//        XCTAssertEqual(nameUpdateCount, 0)
-//        XCTAssertEqual(nameCommitCount, 0)
-//        XCTAssertEqual(lhsProperty.value, "")
-//        XCTAssertEqual(lhsChanges, [""])
-//        XCTAssertEqual(lhsDidSetValues, [""])
-//        XCTAssertEqual(lhsLockCount, 2)
-//        XCTAssertEqual(lhsUnlockCount, 1)
-//
-//        awaitIdle()
-//        XCTAssertEqual(nameProperty.value, "cat")
-//        XCTAssertEqual(nameWillChangeCount, 2)
-//        XCTAssertEqual(nameDidChangeCount, 2)
-//        XCTAssertEqual(nameChanges, ["", "cat"])
-//        XCTAssertEqual(nameSnapshotCount, 0)
-//        XCTAssertEqual(nameUpdateCount, 0)
-//        XCTAssertEqual(nameCommitCount, 0)
-//        XCTAssertEqual(lhsProperty.value, "cat")
-//        XCTAssertEqual(lhsChanges, ["", "cat"])
-//        XCTAssertEqual(lhsDidSetValues, ["", "cat"])
-//        XCTAssertEqual(lhsLockCount, 2)
-//        XCTAssertEqual(lhsUnlockCount, 2)
-//
-//        // Update the lhs property value and verify that async property value is updated
-//        lhsProperty.change("lhs cat", transient: true)
-//        XCTAssertEqual(nameProperty.value, "cat")
-//        XCTAssertEqual(nameWillChangeCount, 3)
-//        XCTAssertEqual(nameDidChangeCount, 2)
-//        XCTAssertEqual(nameChanges, ["", "cat"])
-//        XCTAssertEqual(nameSnapshotCount, 1)
-//        XCTAssertEqual(nameUpdateCount, 1)
-//        XCTAssertEqual(nameCommitCount, 0)
-//        XCTAssertEqual(lhsProperty.value, "lhs cat")
-//        // Note: lhsValues isn't updated here because that only happens when didSet is invoked after
-//        // the bound name property has updated its value; not sure that really makes sense but that's
-//        // how it works for now
-//        XCTAssertEqual(lhsDidSetValues, ["", "cat"])
-//        XCTAssertEqual(lhsLockCount, 2)
-//        XCTAssertEqual(lhsUnlockCount, 2)
-//
-//        awaitIdle()
-//        XCTAssertEqual(nameProperty.value, "lhs cat")
-//        XCTAssertEqual(nameWillChangeCount, 3)
-//        XCTAssertEqual(nameDidChangeCount, 3)
-//        XCTAssertEqual(nameChanges, ["", "cat", "lhs cat"])
-//        XCTAssertEqual(nameSnapshotCount, 1)
-//        XCTAssertEqual(nameUpdateCount, 1)
-//        XCTAssertEqual(nameCommitCount, 0)
-//        XCTAssertEqual(lhsProperty.value, "lhs cat")
-//        XCTAssertEqual(lhsDidSetValues, ["", "cat"])
-//        XCTAssertEqual(lhsLockCount, 2)
-//        XCTAssertEqual(lhsUnlockCount, 2)
-//
-//        // Commit the lhs property value and verify that async property value is committed
-//        lhsProperty.change("lhs kat", transient: false)
-//        XCTAssertEqual(nameProperty.value, "lhs cat")
-//        XCTAssertEqual(nameWillChangeCount, 4)
-//        XCTAssertEqual(nameDidChangeCount, 3)
-//        XCTAssertEqual(nameChanges, ["", "cat", "lhs cat"])
-//        XCTAssertEqual(nameSnapshotCount, 1)
-//        XCTAssertEqual(nameUpdateCount, 1)
-//        XCTAssertEqual(nameCommitCount, 1)
-//        XCTAssertEqual(lhsProperty.value, "lhs kat")
-//        XCTAssertEqual(lhsDidSetValues, ["", "cat"])
-//        XCTAssertEqual(lhsLockCount, 2)
-//        XCTAssertEqual(lhsUnlockCount, 2)
-//        
-//        awaitIdle()
-//        XCTAssertEqual(nameProperty.value, "lhs kat")
-//        XCTAssertEqual(nameWillChangeCount, 4)
-//        XCTAssertEqual(nameDidChangeCount, 4)
-//        XCTAssertEqual(nameChanges, ["", "cat", "lhs cat", "lhs kat"])
-//        XCTAssertEqual(nameSnapshotCount, 1)
-//        XCTAssertEqual(nameUpdateCount, 1)
-//        XCTAssertEqual(nameCommitCount, 1)
-//        XCTAssertEqual(lhsProperty.value, "lhs kat")
-//        XCTAssertEqual(lhsDidSetValues, ["", "cat"])
-//        XCTAssertEqual(lhsLockCount, 2)
-//        XCTAssertEqual(lhsUnlockCount, 2)
-//        
-//        // Nil out the lhs property and verify that the async property is unbound
-//        lhsProperty = nil
-//        XCTAssertEqual(nameProperty.value, "lhs kat")
-//        XCTAssertEqual(nameWillChangeCount, 4)
-//        XCTAssertEqual(nameDidChangeCount, 4)
-//        XCTAssertEqual(nameChanges, ["", "cat", "lhs cat", "lhs kat"])
-//        XCTAssertEqual(nameSnapshotCount, 1)
-//        XCTAssertEqual(nameUpdateCount, 1)
-//        XCTAssertEqual(nameCommitCount, 1)
-//        XCTAssertEqual(lhsDidSetValues, ["", "cat"])
-//        XCTAssertEqual(lhsLockCount, 2)
-//        XCTAssertEqual(lhsUnlockCount, 2)
-//        XCTAssertEqual(nameProperty.signal.observerCount, 2)
-//
+        verifyName(value: "", changes: [""], willChangeCount: 1, didChangeCount: 1, snapshotCount: 0, updateCount: 0, commitCount: 0)
+        verifyLHS(value: "", changes: ["initial lhs value", ""], didSetValues: [""], lockCount: 1, unlockCount: 1)
+        resetNameObserver()
+        resetLHSObserver()
+
+        // Verify that nameProperty has started observing lhsProperty
+        XCTAssertEqual(lhsProperty.signal.observerCount, 2)
+        XCTAssertEqual(nameProperty.signal.observerCount, 2)
+
+        // Update the underlying name relation and verify that changes are reflected in lhs property
+        r.asyncAdd(["id": 1, "name": "cat"])
+        verifyName(value: "", changes: [], willChangeCount: 1, didChangeCount: 0, snapshotCount: 0, updateCount: 0, commitCount: 0)
+        verifyLHS(value: "", changes: [], didSetValues: [], lockCount: 1, unlockCount: 0)
+        awaitIdle()
+        verifyName(value: "cat", changes: ["cat"], willChangeCount: 1, didChangeCount: 1, snapshotCount: 0, updateCount: 0, commitCount: 0)
+        verifyLHS(value: "cat", changes: ["cat"], didSetValues: ["cat"], lockCount: 1, unlockCount: 1)
+        resetNameObserver()
+        resetLHSObserver()
+
+        // Update the lhs property value and verify that async property value is updated
+        lhsProperty.change("lhs cat", transient: true)
+        verifyName(value: "cat", changes: [], willChangeCount: 1, didChangeCount: 0, snapshotCount: 1, updateCount: 1, commitCount: 0)
+        verifyLHS(value: "lhs cat", changes: ["lhs cat"], didSetValues: [], lockCount: 0, unlockCount: 0)
+        awaitIdle()
+        verifyName(value: "lhs cat", changes: ["lhs cat"], willChangeCount: 1, didChangeCount: 1, snapshotCount: 1, updateCount: 1, commitCount: 0)
+        verifyLHS(value: "lhs cat", changes: ["lhs cat"], didSetValues: [], lockCount: 0, unlockCount: 0)
+        resetNameObserver()
+        resetLHSObserver()
+        
+        // Commit the lhs property value and verify that async property value is committed
+        lhsProperty.change("lhs kat", transient: false)
+        verifyName(value: "lhs cat", changes: [], willChangeCount: 1, didChangeCount: 0, snapshotCount: 0, updateCount: 0, commitCount: 1)
+        verifyLHS(value: "lhs kat", changes: ["lhs kat"], didSetValues: [], lockCount: 0, unlockCount: 0)
+        awaitIdle()
+        verifyName(value: "lhs kat", changes: ["lhs kat"], willChangeCount: 1, didChangeCount: 1, snapshotCount: 0, updateCount: 0, commitCount: 1)
+        verifyLHS(value: "lhs kat", changes: ["lhs kat"], didSetValues: [], lockCount: 0, unlockCount: 0)
+        resetNameObserver()
+        resetLHSObserver()
+
+        // Nil out the lhs property and verify that the async property is unbound
+        lhsProperty = nil
+        XCTAssertEqual(nameProperty.signal.observerCount, 1)
+
         nameObserverRemoval()
         lhsObserverRemoval()
-//
-//        XCTAssertEqual(nameProperty.signal.observerCount, 1)
+
+        XCTAssertEqual(nameProperty.signal.observerCount, 0)
     }
     
     func testAsyncFlatMap() {
