@@ -33,6 +33,13 @@ public struct SignalObserver<T> {
     public func valueChanging(_ change: T, transient: Bool = false) {
         valueChanging(change, ChangeMetadata(transient: transient))
     }
+    
+    /// Shorthand for `valueWillChange`, `valueChanging` (transient=false), and `valueDidChange` in series.
+    public func changed(_ value: T) {
+        valueWillChange()
+        valueChanging(value, transient: false)
+        valueDidChange()
+    }
 }
 
 public protocol SignalType: class {

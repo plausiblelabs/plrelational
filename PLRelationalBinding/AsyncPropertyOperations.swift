@@ -29,7 +29,8 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
 public func zip<LHS: AsyncReadablePropertyType, RHS: AsyncReadablePropertyType>(_ lhs: LHS, _ rhs: RHS) -> AsyncReadableProperty<(LHS.Value, RHS.Value)>
     where LHS.Value == LHS.SignalChange, RHS.Value == RHS.SignalChange
 {
-    return BinaryOpValueProperty(lhs, rhs, { ($0, $1) })
+    // TODO: initialValue?
+    return AsyncReadableProperty(initialValue: nil, signal: zip(lhs.signal, rhs.signal))
 }
 
 /// Returns an AsyncReadableProperty whose value is the negation of the boolean value of the given property.

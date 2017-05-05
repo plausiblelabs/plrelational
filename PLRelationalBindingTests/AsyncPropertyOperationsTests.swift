@@ -26,16 +26,12 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         let removal = observer.observe(mapped.signal)
         verify(value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
 
-        notify.valueWillChange()
-        notify.valueChanging(true, transient: false)
-        notify.valueDidChange()
+        notify.changed(true)
         verify(value: 1, changes: [1], willChangeCount: 1, didChangeCount: 1)
 
         // TODO: Use isRepeat to avoid duplicates?
         
-        notify.valueWillChange()
-        notify.valueChanging(false, transient: false)
-        notify.valueDidChange()
+        notify.changed(false)
         verify(value: 0, changes: [1, 0], willChangeCount: 2, didChangeCount: 2)
 
         removal()
@@ -103,81 +99,85 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         let (property1, notify1) = AsyncReadableProperty<Bool>.pipe(initialValue: nil)
         let (property2, notify2) = AsyncReadableProperty<Bool>.pipe(initialValue: nil)
         let zipped = zip(property1, property2)
-        var changeObserved = false
-        _ = zipped.signal.observe({ _ in changeObserved = true })
-//        zipped.start()
+        let observer = TestObserver<(Bool, Bool)>()
         
-        XCTAssertEqual(zipped.value?.0, nil)
-        XCTAssertEqual(zipped.value?.1, nil)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
+        func verify(value: (Bool, Bool)?, changes: [(Bool, Bool)], willChangeCount: Int, didChangeCount: Int, file: StaticString = #file, line: UInt = #line) {
+            XCTAssertEqual(zipped.value?.0, value?.0, file: file, line: line)
+            XCTAssertEqual(zipped.value?.1, value?.1, file: file, line: line)
+            XCTAssertEqual(observer.changes.map{ $0.0 }, changes.map{ $0.0 }, file: file, line: line)
+            XCTAssertEqual(observer.changes.map{ $0.1 }, changes.map{ $0.1 }, file: file, line: line)
+            XCTAssertEqual(observer.willChangeCount, willChangeCount, file: file, line: line)
+            XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
+        }
         
-        notify1.valueChanging(false, transient: false)
-        XCTAssertEqual(zipped.value?.0, nil)
-        XCTAssertEqual(zipped.value?.1, nil)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-
-        notify2.valueChanging(true, transient: false)
-        XCTAssertEqual(zipped.value?.0, false)
-        XCTAssertEqual(zipped.value?.1, true)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
-
-        notify1.valueChanging(true, transient: false)
-        XCTAssertEqual(zipped.value?.0, true)
-        XCTAssertEqual(zipped.value?.1, true)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
+        verify(value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
+        
+        // TODO: Use PipeSignal.onObserve to simulate initial async load when first observer attached
+        let removal = observer.observe(zipped.signal)
+        verify(value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
+        
+        notify1.changed(true)
+        verify(value: nil, changes: [], willChangeCount: 1, didChangeCount: 1)
+        
+        notify2.changed(false)
+        verify(value: (true, false), changes: [(true, false)], willChangeCount: 2, didChangeCount: 2)
+        
+        notify2.changed(true)
+        verify(value: (true, true), changes: [(true, false), (true, true)], willChangeCount: 3, didChangeCount: 3)
+        
+        removal()
     }
     
-    func testZipWithNonNilInitialValues() {
-        let (property1, notify1) = AsyncReadableProperty<Bool>.pipe(initialValue: false)
-        let (property2, notify2) = AsyncReadableProperty<String>.pipe(initialValue: "foo")
-        let zipped = zip(property1, property2)
-        var changeObserved = false
-        _ = zipped.signal.observe({ _ in changeObserved = true })
-//        zipped.start()
-        
-        XCTAssertEqual(zipped.value?.0, false)
-        XCTAssertEqual(zipped.value?.1, "foo")
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-        
-        notify1.valueChanging(true, transient: false)
-        XCTAssertEqual(zipped.value?.0, true)
-        XCTAssertEqual(zipped.value?.1, "foo")
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
-        
-        notify2.valueChanging("bar", transient: false)
-        XCTAssertEqual(zipped.value?.0, true)
-        XCTAssertEqual(zipped.value?.1, "bar")
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
-    }
+//    func testZipWithNonNilInitialValues() {
+//        let (property1, notify1) = AsyncReadableProperty<Bool>.pipe(initialValue: false)
+//        let (property2, notify2) = AsyncReadableProperty<String>.pipe(initialValue: "foo")
+//        let zipped = zip(property1, property2)
+//        var changeObserved = false
+//        _ = zipped.signal.observe({ _ in changeObserved = true })
+////        zipped.start()
+//        
+//        XCTAssertEqual(zipped.value?.0, false)
+//        XCTAssertEqual(zipped.value?.1, "foo")
+//        XCTAssertEqual(changeObserved, false)
+//        changeObserved = false
+//        
+//        notify1.valueChanging(true, transient: false)
+//        XCTAssertEqual(zipped.value?.0, true)
+//        XCTAssertEqual(zipped.value?.1, "foo")
+//        XCTAssertEqual(changeObserved, true)
+//        changeObserved = false
+//        
+//        notify2.valueChanging("bar", transient: false)
+//        XCTAssertEqual(zipped.value?.0, true)
+//        XCTAssertEqual(zipped.value?.1, "bar")
+//        XCTAssertEqual(changeObserved, true)
+//        changeObserved = false
+//    }
     
     func testNot() {
-        let (property, notify) = AsyncReadableProperty<Bool>.pipe(initialValue: false)
+        let (property, notify) = AsyncReadableProperty<Bool>.pipe(initialValue: nil)
         let mapped = !property
-        var changeObserved = false
-        _ = mapped.signal.observe({ _ in changeObserved = true })
-//        mapped.start()
+        let observer = BoolObserver()
         
-        XCTAssertEqual(mapped.value, true)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
+        func verify(value: Bool?, changes: [Bool], willChangeCount: Int, didChangeCount: Int, file: StaticString = #file, line: UInt = #line) {
+            XCTAssertEqual(mapped.value, value, file: file, line: line)
+            XCTAssertEqual(observer.changes, changes, file: file, line: line)
+            XCTAssertEqual(observer.willChangeCount, willChangeCount, file: file, line: line)
+            XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
+        }
         
-        notify.valueChanging(true, transient: false)
-        XCTAssertEqual(mapped.value, false)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
+        verify(value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
         
-        // TODO: Need to pass isRepeat func to pipe() so that we can avoid duplicates
+        // TODO: Use PipeSignal.onObserve to simulate initial async load when first observer attached
+        let removal = observer.observe(mapped.signal)
+        verify(value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
         
-        notify.valueChanging(false, transient: false)
-        XCTAssertEqual(mapped.value, true)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
+        notify.changed(false)
+        verify(value: true, changes: [true], willChangeCount: 1, didChangeCount: 1)
+        
+        notify.changed(true)
+        verify(value: false, changes: [true, false], willChangeCount: 2, didChangeCount: 2)
+        
+        removal()
     }
 }
