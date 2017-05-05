@@ -82,7 +82,9 @@ class RelationArrayPropertyTests: BindingTestCase {
                 "Page3",
                 "Page4"
             ],
-            changes: [.initial(property.elements)], willChangeCount: 1, didChangeCount: 1
+            changes: [.initial(property.elements)],
+            willChangeCount: 1,
+            didChangeCount: 1
         )
 
         removal()
@@ -243,42 +245,36 @@ class RelationArrayPropertyTests: BindingTestCase {
         addPerson(3, "Carlos")
         addPerson(4, "Bob")
         
-        var willChangeCount = 0
-        var didChangeCount = 0
-        var changes: [Change] = []
-        
         let property = r.arrayProperty(idAttr: "id", orderAttr: "name")
-        let removal = property.signal.observe(SignalObserver(
-            valueWillChange: {
-                willChangeCount += 1
-            },
-            valueChanging: { arrayChanges, _ in
-                changes.append(contentsOf: arrayChanges)
-            },
-            valueDidChange: {
-                didChangeCount += 1
-            }
-        ))
+        let observer = TestArrayObserver()
         
+        func verify(elements: [String], changes: [Change], willChangeCount: Int, didChangeCount: Int, file: StaticString = #file, line: UInt = #line) {
+            verifyArray(property, elements, file: file, line: line)
+            XCTAssertEqual(observer.changes, changes, file: file, line: line)
+            XCTAssertEqual(observer.willChangeCount, willChangeCount, file: file, line: line)
+            XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
+            observer.changes = []
+        }
+
         // Verify that property value remains empty until we actually start it
-        XCTAssertEqual(property.elements, [])
-        XCTAssertEqual(willChangeCount, 0)
-        XCTAssertEqual(didChangeCount, 0)
-        XCTAssertEqual(changes, [])
+        verify(elements: [], changes: [], willChangeCount: 0, didChangeCount: 0)
         
         // Verify that in-memory array structure was built correctly after property/signal was started
-//        awaitCompletion{ property.start() }
-        verifyArray(property, [
-            "Alice",
-            "Bob",
-            "Carlos",
-            "Donald"
-        ])
-        XCTAssertEqual(willChangeCount, 1)
-        XCTAssertEqual(didChangeCount, 1)
-        // TODO
-        //XCTAssertEqual(changes, [])
-        
+        let removal = observer.observe(property)
+        verify(elements: [], changes: [], willChangeCount: 1, didChangeCount: 0)
+        awaitIdle()
+        verify(
+            elements: [
+                "Alice",
+                "Bob",
+                "Carlos",
+                "Donald"
+            ],
+            changes: [.initial(property.elements)],
+            willChangeCount: 1,
+            didChangeCount: 1
+        )
+
         removal()
     }
     
@@ -289,48 +285,31 @@ class RelationArrayPropertyTests: BindingTestCase {
         let db = TransactionalDatabase(loggingDB)
         let r = db["person"]
         
-        var willChangeCount = 0
-        var didChangeCount = 0
-        var changes: [Change] = []
-        
         let property = r.arrayProperty(idAttr: "id", orderAttr: "name")
-        let removal = property.signal.observe(SignalObserver(
-            valueWillChange: {
-                willChangeCount += 1
-            },
-            valueChanging: { arrayChanges, _ in
-                changes.append(contentsOf: arrayChanges)
-            },
-            valueDidChange: {
-                didChangeCount += 1
-            }
-        ))
+        let observer = TestArrayObserver()
         
         func addPerson(_ personID: Int64, _ name: String) {
             let row: Row = [
                 "id": RelationValue(personID),
                 "name": RelationValue(name)
             ]
-            awaitCompletion{
-                r.asyncAdd(row)
-            }
+            r.asyncAdd(row)
         }
         
         func deletePerson(_ personID: Int64) {
-            awaitCompletion{
-                r.asyncDelete(Attribute("id") *== RelationValue(personID))
-            }
+            r.asyncDelete(Attribute("id") *== RelationValue(personID))
         }
         
         func renamePerson(_ personID: Int64, _ name: String) {
-            awaitCompletion{
-                r.asyncUpdate(Attribute("id") *== RelationValue(personID), newValues: ["name": RelationValue(name)])
-            }
+            r.asyncUpdate(Attribute("id") *== RelationValue(personID), newValues: ["name": RelationValue(name)])
         }
         
-        func verifyChanges(_ expected: [Change], file: StaticString = #file, line: UInt = #line) {
-            XCTAssertEqual(changes, expected, file: file, line: line)
-            changes = []
+        func verify(elements: [String], changes: [Change], willChangeCount: Int, didChangeCount: Int, file: StaticString = #file, line: UInt = #line) {
+            verifyArray(property, elements, file: file, line: line)
+            XCTAssertEqual(observer.changes, changes, file: file, line: line)
+            XCTAssertEqual(observer.willChangeCount, willChangeCount, file: file, line: line)
+            XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
+            observer.changes = []
         }
         
         func verifySQLite(_ expected: Relation, file: StaticString = #file, line: UInt = #line) {
@@ -339,37 +318,40 @@ class RelationArrayPropertyTests: BindingTestCase {
         }
         
         // Verify that property value remains empty until we actually start it
-        XCTAssertEqual(property.elements, [])
-        XCTAssertEqual(willChangeCount, 0)
-        XCTAssertEqual(didChangeCount, 0)
-        XCTAssertEqual(changes, [])
+        verify(elements: [], changes: [], willChangeCount: 0, didChangeCount: 0)
         
-        // Verify that in-memory array structure is empty after property/signal was started
-//        awaitCompletion{ property.start() }
-        XCTAssertEqual(willChangeCount, 1)
-        XCTAssertEqual(didChangeCount, 1)
-        verifyArray(property, [])
-        verifyChanges([.initial([])])
+        // Verify that in-memory array structure is empty after signal is observed/started
+        let removal = observer.observe(property)
+        verify(elements: [], changes: [], willChangeCount: 1, didChangeCount: 0)
+        awaitIdle()
+        verify(elements: [], changes: [.initial([])], willChangeCount: 1, didChangeCount: 1)
+        observer.reset()
         
         // Insert some persons
         addPerson(1, "Alice")
+        verify(elements: [], changes: [], willChangeCount: 1, didChangeCount: 0)
+        awaitIdle()
+        verify(elements: ["Alice"], changes: [.insert(0)], willChangeCount: 1, didChangeCount: 1)
+        observer.reset()
+
         addPerson(2, "Donald")
+        verify(elements: ["Alice"], changes: [], willChangeCount: 1, didChangeCount: 0)
+        awaitIdle()
+        verify(elements: ["Alice", "Donald"], changes: [.insert(1)], willChangeCount: 1, didChangeCount: 1)
+        observer.reset()
+
         addPerson(3, "Carlos")
+        verify(elements: ["Alice", "Donald"], changes: [], willChangeCount: 1, didChangeCount: 0)
+        awaitIdle()
+        verify(elements: ["Alice", "Carlos", "Donald"], changes: [.insert(1)], willChangeCount: 1, didChangeCount: 1)
+        observer.reset()
+
         addPerson(4, "Bob")
-        XCTAssertEqual(willChangeCount, 5)
-        XCTAssertEqual(didChangeCount, 5)
-        verifyArray(property, [
-            "Alice",
-            "Bob",
-            "Carlos",
-            "Donald"
-        ])
-        verifyChanges([
-            .insert(0),
-            .insert(1),
-            .insert(1),
-            .insert(1),
-        ])
+        verify(elements: ["Alice", "Carlos", "Donald"], changes: [], willChangeCount: 1, didChangeCount: 0)
+        awaitIdle()
+        verify(elements: ["Alice", "Bob", "Carlos", "Donald"], changes: [.insert(1)], willChangeCount: 1, didChangeCount: 1)
+        observer.reset()
+        
         verifySQLite(MakeRelation(
             ["id", "name"],
             [1,    "Alice"],
@@ -380,17 +362,11 @@ class RelationArrayPropertyTests: BindingTestCase {
         
         // Rename a person
         renamePerson(2, "Bon")
-        XCTAssertEqual(willChangeCount, 6)
-        XCTAssertEqual(didChangeCount, 6)
-        verifyArray(property, [
-            "Alice",
-            "Bob",
-            "Bon",
-            "Carlos"
-        ])
-        verifyChanges([
-            .move(srcIndex: 3, dstIndex: 2)
-        ])
+        verify(elements: ["Alice", "Bob", "Carlos", "Donald"], changes: [], willChangeCount: 1, didChangeCount: 0)
+        awaitIdle()
+        verify(elements: ["Alice", "Bob", "Bon", "Carlos"], changes: [.move(srcIndex: 3, dstIndex: 2)], willChangeCount: 1, didChangeCount: 1)
+        observer.reset()
+        
         verifySQLite(MakeRelation(
             ["id", "name"],
             [1,    "Alice"],
@@ -401,16 +377,11 @@ class RelationArrayPropertyTests: BindingTestCase {
 
         // Delete a person
         deletePerson(1)
-        XCTAssertEqual(willChangeCount, 7)
-        XCTAssertEqual(didChangeCount, 7)
-        verifyArray(property, [
-            "Bob",
-            "Bon",
-            "Carlos"
-        ])
-        verifyChanges([
-            .delete(0)
-        ])
+        verify(elements: ["Alice", "Bob", "Bon", "Carlos"], changes: [], willChangeCount: 1, didChangeCount: 0)
+        awaitIdle()
+        verify(elements: ["Bob", "Bon", "Carlos"], changes: [.delete(0)], willChangeCount: 1, didChangeCount: 1)
+        observer.reset()
+        
         verifySQLite(MakeRelation(
             ["id", "name"],
             [2,    "Bon"],
@@ -419,5 +390,9 @@ class RelationArrayPropertyTests: BindingTestCase {
         ))
         
         removal()
+    }
+    
+    func testFullArray() {
+        // TODO
     }
 }
