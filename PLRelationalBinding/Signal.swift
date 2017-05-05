@@ -81,7 +81,7 @@ open class Signal<T>: SignalType {
     }
     
     open func property() -> AsyncReadableProperty<T> {
-        return AsyncReadableProperty(initialValue: nil, signal: self)
+        return AsyncReadableProperty(signal: self)
     }
 
     /// Adds the given observer to the set of observers that are notified when this signal's value has changed.

@@ -98,6 +98,6 @@ private class FullArrayProperty<Element: ArrayElement>: AsyncReadableProperty<[E
     
     fileprivate init(underlying: ArrayProperty<Element>) {
         self.underlying = underlying
-        super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.elements })
+        super.init(signal: underlying.signal.map{ _ in return underlying.elements })
     }
 }

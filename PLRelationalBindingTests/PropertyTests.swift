@@ -207,7 +207,7 @@ class PropertyTests: XCTestCase {
         rhs2Signal.onObserve = { observer in
             observer.valueWillChange()
         }
-        let rhs2 = AsyncReadableProperty(initialValue: nil, signal: rhs2Signal)
+        let rhs2 = AsyncReadableProperty(signal: rhs2Signal)
         let binding2 = lhs <~ rhs2
         XCTAssertEqual(lhsLockCount, 2)
         XCTAssertEqual(lhsUnlockCount, 1)
@@ -255,7 +255,7 @@ class PropertyTests: XCTestCase {
         rhs2Signal.onObserve = { observer in
             observer.valueWillChange()
         }
-        let rhs2 = AsyncReadableProperty(initialValue: nil, signal: rhs2Signal)
+        let rhs2 = AsyncReadableProperty(signal: rhs2Signal)
         lhs <~ rhs2
         XCTAssertEqual(lhsLockCount, 2)
         XCTAssertEqual(lhsUnlockCount, 1)

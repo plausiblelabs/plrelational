@@ -206,6 +206,6 @@ private class FullTreeProperty<Node: TreeNode>: AsyncReadableProperty<Node> {
     
     fileprivate init(underlying: TreeProperty<Node>) {
         self.underlying = underlying
-        super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.root })
+        super.init(signal: underlying.signal.map{ _ in return underlying.root })
     }
 }

@@ -96,8 +96,8 @@ class AsyncPropertyOperationsTests: BindingTestCase {
 //    }
     
     func testZip() {
-        let (property1, notify1) = AsyncReadableProperty<Bool>.pipe(initialValue: nil)
-        let (property2, notify2) = AsyncReadableProperty<Bool>.pipe(initialValue: nil)
+        let (property1, notify1) = AsyncReadableProperty<Bool>.pipe()
+        let (property2, notify2) = AsyncReadableProperty<Bool>.pipe()
         let zipped = zip(property1, property2)
         let observer = TestObserver<(Bool, Bool)>()
         
@@ -155,7 +155,7 @@ class AsyncPropertyOperationsTests: BindingTestCase {
 //    }
     
     func testNot() {
-        let (property, notify) = AsyncReadableProperty<Bool>.pipe(initialValue: nil)
+        let (property, notify) = AsyncReadableProperty<Bool>.pipe()
         let mapped = !property
         let observer = BoolObserver()
         

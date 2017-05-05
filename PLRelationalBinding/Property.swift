@@ -114,10 +114,8 @@ open class BindableProperty<T> {
     /// Establishes a unidirectional binding between this property and the given signal.
     /// When the other signal's value changes, this property's value will be updated.
     /// Note that calling `bind` will cause this property to take on the initial value
-    /// of the other property if it is available.
-    fileprivate func bind(_ signal: Signal<T>, initialValue: T?, owner: AnyObject) -> Binding {
-        // TODO: initialValue is unused!!!!!
-        
+    /// delivered by the given signal.
+    fileprivate func bind(_ signal: Signal<T>, owner: AnyObject) -> Binding {
         // Keep track of Will/DidChange events for this binding
         var changeCount = 0
         
@@ -331,9 +329,11 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         var otherChangeCount = 0
         
         // Observe the signal of the other property
+        print("SELF ABOUT TO OBSERVE OTHER")
         let signalObserverRemoval1 = other.signal.observe(SignalObserver(
             valueWillChange: { [weak self] in
                 guard let strongSelf = self else { return }
+                print("OTHER WILL CHANGE")
                 if selfInitiatedChange {
                     otherChangeCount += 1
                 }
@@ -343,6 +343,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
             },
             valueChanging: { [weak self] value, metadata in
                 guard let strongSelf = self else { return }
+                print("OTHER CHANGING")
                 if otherChangeCount == 0 {
                     if case .change(let newValue) = reverse(value) {
                         otherInitiatedChange = true
@@ -353,6 +354,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
             },
             valueDidChange: { [weak self] in
                 guard let strongSelf = self else { return }
+                print("OTHER DID CHANGE")
                 if otherChangeCount > 0 {
                     otherChangeCount -= 1
                 } else if otherChangeCount == 0 {
@@ -362,13 +364,16 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         ))
         
         // Make the other property observe this property's signal
-        let signalObserverRemoval2 = signal.observe(SignalObserver(
+        print("OTHER ABOUT TO OBSERVE SELF")
+        let signalObserverRemoval2 = self.signal.observe(SignalObserver(
             valueWillChange: {
+                print("SELF WILL CHANGE")
                 if !otherInitiatedChange {
                     selfInitiatedChange = true
                 }
             },
             valueChanging: { [weak other] value, metadata in
+                print("SELF CHANGING")
                 if !otherInitiatedChange {
                     if case .change(let newValue) = forward(value) {
                         other?.setValue(newValue, metadata)
@@ -376,26 +381,17 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
                 }
             },
             valueDidChange: {
+                print("SELF DID CHANGE")
                 if !otherInitiatedChange {
                     selfInitiatedChange = false
                 }
             }
         ))
         
-        // Make this property take on the initial value from the other property (or vice versa)
-        otherInitiatedChange = true
-        initial()
-        otherInitiatedChange = false
-
-//        // Start the other property's signal
-//        other.start()
-        
-        // Take on the given signal's change count; note that we only do this in the case where
-        // there wasn't an initial value, because otherwise deliverInitial will be true and
-        // the observer's valueWillChange will be called and omg this is so complicated
-//        if other.value != nil {
-//            changeHandler.incrementCount(other.signal.changeCount)
-//        }
+//        // Make this property take on the initial value from the other property (or vice versa)
+//        otherInitiatedChange = true
+//        initial()
+//        otherInitiatedChange = false
 
         // Save and return the binding
         let bindingID = nextBindingID
@@ -551,19 +547,18 @@ precedencegroup PropertyOperatorPrecedence {
 extension BindableProperty {
     /// Establishes a unidirectional binding between this property and the given property.
     /// When the other property's value changes, this property's value will be updated.
-    /// Note that calling `bind` will cause this property to take on the given initial
-    /// value immediately if non-nil, otherwise will take on the given property's value.
-    @discardableResult public func bind<RHS: ReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T {
-        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, owner: rhs)
+    /// Note that calling `bind` will cause this property to take on the `rhs` property's
+    /// value immediately, if known.
+    @discardableResult public func bind<RHS: ReadablePropertyType>(_ rhs: RHS) -> Binding where RHS.Value == T {
+        return self.bind(rhs.signal, owner: rhs)
     }
 
     /// Establishes a unidirectional binding between this property and the given property.
     /// When the other property's value changes, this property's value will be updated.
-    /// Note that calling `bind` will `start` the other property and will cause this property
-    /// to take on the given initial value if non-nil, otherwise will take on the given
-    /// property's value (if defined).
-    @discardableResult public func bind<RHS: AsyncReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T, RHS.SignalChange == T {
-        return self.bind(rhs.signal, initialValue: initialValue ?? rhs.value, owner: rhs)
+    /// Note that calling `bind` will `start` the `rhs` property and will cause this property
+    /// to take on the `rhs` property's value immediately, if known.
+    @discardableResult public func bind<RHS: AsyncReadablePropertyType>(_ rhs: RHS) -> Binding where RHS.Value == T, RHS.SignalChange == T {
+        return self.bind(rhs.signal, owner: rhs)
     }
 }
 
@@ -584,7 +579,7 @@ infix operator ~~> : PropertyOperatorPrecedence
 
 @discardableResult public func ~~> <T>(lhs: Signal<T>, rhs: ActionProperty<T>) -> Binding {
     // TODO: We invent an owner here; what if no one else owns the signal?
-    return rhs.bind(lhs, initialValue: nil, owner: "" as AnyObject)
+    return rhs.bind(lhs, owner: "" as AnyObject)
 }
 
 infix operator <~> : PropertyOperatorPrecedence

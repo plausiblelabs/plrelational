@@ -24,6 +24,12 @@ class TestObserver<T> {
             }
         ))
     }
+    
+    func reset() {
+        willChangeCount = 0
+        didChangeCount = 0
+        changes = []
+    }
 }
 
 typealias StringObserver = TestObserver<String>

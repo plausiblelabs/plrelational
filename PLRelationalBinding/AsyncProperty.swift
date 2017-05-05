@@ -47,8 +47,8 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     
     public internal(set) var value: T?
     
-    public init(initialValue: T?, signal: Signal<T>) {
-        self.value = initialValue
+    public init(signal: Signal<T>) {
+        self.value = nil
         self.underlyingSignal = signal
 
         let pipeSignal = PipeSignal<T>()
@@ -99,16 +99,16 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
         return self
     }
     
-    public static func pipe(initialValue: T? = nil) -> (AsyncReadableProperty<T>, Signal<T>.Notify) {
+    public static func pipe() -> (AsyncReadableProperty<T>, Signal<T>.Notify) {
         let (signal, notify) = Signal<T>.pipe()
-        let property = AsyncReadableProperty(initialValue: initialValue, signal: signal)
+        let property = AsyncReadableProperty(signal: signal)
         return (property, notify)
     }
 }
 
 private class ConstantValueAsyncProperty<T>: AsyncReadableProperty<T> {
     init(_ value: T) {
-        super.init(initialValue: value, signal: ConstantSignal(value))
+        super.init(signal: ConstantSignal(value))
     }
 }
 
@@ -130,13 +130,13 @@ open class AsyncReadWriteProperty<T>: AsyncReadableProperty<T> {
 extension SignalType {
     /// Lifts this signal into an AsyncReadableProperty.
     public func property() -> AsyncReadableProperty<Self.Value> {
-        return AsyncReadableProperty(initialValue: nil, signal: self.signal)
+        return AsyncReadableProperty(signal: self.signal)
     }
 }
 
 extension ReadablePropertyType {
     /// Returns an AsyncReadableProperty that is derived from this synchronous property's signal.
     public func async() -> AsyncReadableProperty<Value> {
-        return AsyncReadableProperty(initialValue: self.value, signal: self.signal)
+        return AsyncReadableProperty(signal: self.signal)
     }
 }

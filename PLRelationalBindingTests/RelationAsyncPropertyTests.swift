@@ -160,11 +160,11 @@ class RelationAsyncPropertyTests: BindingTestCase {
         {
             XCTAssertEqual(nameProperty.value, value, file: file, line: line)
             XCTAssertEqual(nameObserver.changes, changes, file: file, line: line)
-            XCTAssertEqual(nameObserver.willChangeCount, willChangeCount, file: file, line: line)
-            XCTAssertEqual(nameObserver.didChangeCount, didChangeCount, file: file, line: line)
-            XCTAssertEqual(nameSnapshotCount, snapshotCount, file: file, line: line)
-            XCTAssertEqual(nameUpdateCount, updateCount, file: file, line: line)
-            XCTAssertEqual(nameCommitCount, commitCount, file: file, line: line)
+            XCTAssertEqual(nameObserver.willChangeCount, willChangeCount, "Incorrect willChangeCount", file: file, line: line)
+            XCTAssertEqual(nameObserver.didChangeCount, didChangeCount, "Incorrect didChangeCount", file: file, line: line)
+            XCTAssertEqual(nameSnapshotCount, snapshotCount, "Incorrect snapshotCount", file: file, line: line)
+            XCTAssertEqual(nameUpdateCount, updateCount, "Incorrect updateCount", file: file, line: line)
+            XCTAssertEqual(nameCommitCount, commitCount, "Incorrect commitCount", file: file, line: line)
         }
 
         func verifyLHS(value: String?, changes: [String],
@@ -196,33 +196,19 @@ class RelationAsyncPropertyTests: BindingTestCase {
         XCTAssertEqual(nameProperty.signal.observerCount, 1)
         
         // Bidirectionally bind lhs property to the async name property
+        print("ABOUT TO BIND")
         _ = lhsProperty <~> nameProperty
 
-        // Look at the observer counts to verify that lhsProperty is observing nameProperty and vice versa.
-        // Note that AsyncReadWriteProperty observes its underlying signal (which carries values
-        // from the relation) after the property is started, so there's an additional observer for that one.
-        XCTAssertEqual(nameProperty.signal.observerCount, 3)
+        // Look at the observer counts to verify that lhsProperty is observing nameProperty and vice versa
+        XCTAssertEqual(nameProperty.signal.observerCount, 2)
         XCTAssertEqual(lhsProperty.signal.observerCount, 2)
-        
-        // XXX: Finish reimplementing this test
-        awaitIdle()
         
         // Verify that name property's value is loaded asynchronously and that lhs property's value is
         // updated when the rhs value is ready
-//        XCTAssertEqual(nameProperty.value, nil)
-//        XCTAssertEqual(nameWillChangeCount, 1)
-//        XCTAssertEqual(nameDidChangeCount, 0)
-//        XCTAssertEqual(nameChanges, [])
-//        XCTAssertEqual(nameSnapshotCount, 0)
-//        XCTAssertEqual(nameUpdateCount, 0)
-//        XCTAssertEqual(nameCommitCount, 0)
-//        XCTAssertEqual(lhsProperty.value, "initial lhs value")
-//        XCTAssertEqual(lhsChanges, [])
-//        XCTAssertEqual(lhsDidSetValues, [])
-//        XCTAssertEqual(lhsLockCount, 1)
-//        XCTAssertEqual(lhsUnlockCount, 0)
-//
-//        awaitIdle()
+        verifyName(value: nil, changes: [], willChangeCount: 2, didChangeCount: 0, snapshotCount: 0, updateCount: 0, commitCount: 0)
+        verifyLHS(value: "initial lhs value", changes: ["initial lhs value"], didSetValues: [], lockCount: 1, unlockCount: 0)
+
+        awaitIdle()
 //        XCTAssertEqual(nameProperty.value, "")
 //        XCTAssertEqual(nameWillChangeCount, 1)
 //        XCTAssertEqual(nameDidChangeCount, 1)
