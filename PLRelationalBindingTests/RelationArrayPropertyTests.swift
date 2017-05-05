@@ -151,7 +151,7 @@ class RelationArrayPropertyTests: BindingTestCase {
         // Insert some pages
         addPage(1, name: "Page1", previousID: nil)
         verify(elements: [], changes: [], willChangeCount: 2, didChangeCount: 1)
-        // XXX: orderForPos relies on the current in-memory tree structure, so we await
+        // XXX: orderForPos relies on the current in-memory array structure, so we await
         // async completion after each add
         awaitIdle()
         verify(elements: ["Page1"], changes: [.insert(0)], willChangeCount: 2, didChangeCount: 2)

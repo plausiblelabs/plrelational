@@ -31,16 +31,16 @@ private typealias Pos = TreePos<Node>
 private typealias Path = TreePath<Node>
 private typealias Change = TreeChange<Node>
 
-class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoalescedObserver {
+class RelationTreeProperty: TreeProperty<RowTreeNode> {
 
     private let relation: Relation
-    private let idAttr: Attribute
+    fileprivate let idAttr: Attribute
     private let parentAttr: Attribute
     private let orderAttr: Attribute
     private let tag: AnyObject?
+    fileprivate let notify: Signal<SignalChange>.Notify
     
-    private var removal: ObserverRemoval?
-    private var started = false
+    private var relationObserverRemoval: ObserverRemoval?
     
     init(relation: Relation, idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute, tag: AnyObject?) {
         precondition(relation.scheme.attributes.isSuperset(of: [idAttr, parentAttr, orderAttr]))
@@ -52,52 +52,70 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         self.tag = tag
         
         let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: self.parentAttr, tag: tag)
-        let (signal, notify) = Signal<SignalChange>.pipe()
-        super.init(root: rootNode, signal: signal, notify: notify)
+        
+        let (pipeSignal, pipeNotify) = Signal<SignalChange>.pipe()
+        self.notify = pipeNotify
+        
+        super.init(root: rootNode, signal: pipeSignal)
+        
+        // TODO: There is a possibility (however unlikely) that the underlying relation is already
+        // in an async update, i.e., it has already delivered a relationWillChange.  If that happens,
+        // setting changeCount to zero here will be incorrect.
+        //var changeCount = 0
+        pipeSignal.onObserve = { observer in
+            if self.relationObserverRemoval == nil {
+                // Observe the underlying relation the first time someone observes our public signal
+                self.relationObserverRemoval = relation.addAsyncObserver(self)
+                
+                // Perform an async query to compute the initial tree
+                pipeNotify.valueWillChange()
+                relation.asyncAllRows(
+                    postprocessor: { rows -> RowTreeNode in
+                        // Map rows from underlying relation to Node values
+                        var nodeDict = [RelationValue: Node]()
+                        for row in rows {
+                            let rowID = row[self.idAttr]
+                            nodeDict[rowID] = RowTreeNode(id: rowID, row: row, parentAttr: self.parentAttr, tag: self.tag)
+                        }
+                        
+                        // Use order attribute from underlying relation to nest child nodes under parent elements
+                        let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: self.parentAttr, tag: self.tag)
+                        for node in nodeDict.values {
+                            let parentNode = nodeDict[node.data[self.parentAttr]] ?? rootNode
+                            _ = parentNode.children.insertSorted(node, {$0.data[self.orderAttr]})
+                        }
+                        
+                        return rootNode
+                    },
+                    completion: { result in
+                        if let rootNode = result.ok {
+                            self.root = rootNode
+                            self.notify.valueChanging([.initial(rootNode)], transient: false)
+                        }
+                        self.notify.valueDidChange()
+                    }
+                )
+            } else {
+                // For subsequent observers, deliver our current value to just the observer being attached
+//                for _ in 0..<changeCount {
+//                    // If the underlying relation is in an asynchronous change (delivered WillChange before
+//                    // this observer was attached), we need to give this new observer the corresponding
+//                    // number of WillChange notifications so that it is correctly balanced when the
+//                    // DidChange notification(s) come in later
+//                    observer.valueWillChange()
+//                }
+                observer.valueWillChange()
+                observer.valueChanging([.initial(self.root)], transient: false)
+                observer.valueDidChange()
+            }
+        }
     }
     
     deinit {
-        removal?()
+        relationObserverRemoval?()
     }
     
-    /*override*/ func start() {
-        if started {
-            return
-        }
-        
-        removal = relation.addAsyncObserver(self)
-
-        notify.valueWillChange()
-        relation.asyncAllRows(
-            postprocessor: { rows -> RowTreeNode in
-                // Map Rows from underlying Relation to Node values
-                var nodeDict = [RelationValue: Node]()
-                for row in rows {
-                    let rowID = row[self.idAttr]
-                    nodeDict[rowID] = RowTreeNode(id: rowID, row: row, parentAttr: self.parentAttr, tag: self.tag)
-                }
-                
-                // Use order Attribute from underlying Relation to nest child Nodes under parent elements
-                let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: self.parentAttr, tag: self.tag)
-                for node in nodeDict.values {
-                    let parentNode = nodeDict[node.data[self.parentAttr]] ?? rootNode
-                    _ = parentNode.children.insertSorted(node, {$0.data[self.orderAttr]})
-                }
-                
-                return rootNode
-            },
-            completion: { result in
-                if let rootNode = result.ok {
-                    self.root = rootNode
-                    self.notifyObservers(treeChanges: [.initial(rootNode)])
-                }
-                self.notify.valueDidChange()
-            }
-        )
-        started = true
-    }
-    
-    private func onInsert(rows: [Row], changes: inout [Change]) {
+    fileprivate func onInsert(rows: [Row], changes: inout [Change]) {
         
         func insertNode(_ node: Node, parent: Node) -> Int {
             return parent.children.insertSorted(node, { $0.data[orderAttr] })
@@ -145,7 +163,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         }
     }
     
-    private func onDelete(ids: [RelationValue], changes: inout [Change]) {
+    fileprivate func onDelete(ids: [RelationValue], changes: inout [Change]) {
         // Observers should only be notified about the top-most nodes that were deleted.
         // We handle this by looking at the identifiers of the rows/nodes to be deleted,
         // and only deleting the unique (top-most) parents.
@@ -187,7 +205,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
         }
     }
 
-    private func onUpdate(rows: [Row], changes: inout [Change]) {
+    fileprivate func onUpdate(rows: [Row], changes: inout [Change]) {
         for row in rows {
             if let change = self.onUpdate(row) {
                 changes.append(change)
@@ -362,7 +380,10 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
 
         return (nodeID: srcID, dstParentID: dstParentID, order: newOrder)
     }
-    
+}
+
+extension RelationTreeProperty: AsyncRelationChangeCoalescedObserver {
+
     func relationWillChange(_ relation: Relation) {
         notify.valueWillChange()
     }
@@ -378,7 +399,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode>, AsyncRelationChangeCoales
                 self.onUpdate(rows: parts.updatedRows, changes: &treeChanges)
                 self.onDelete(ids: parts.deletedIDs, changes: &treeChanges)
                 if treeChanges.count > 0 {
-                    self.notifyObservers(treeChanges: treeChanges)
+                    self.notify.valueChanging(treeChanges, transient: false)
                 }
             }
             self.notify.valueDidChange()
