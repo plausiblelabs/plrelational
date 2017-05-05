@@ -218,9 +218,4 @@ private class FullTreeProperty<Node: TreeNode>: AsyncReadableProperty<Node> {
         self.underlying = underlying
         super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.root })
     }
-    
-//    fileprivate override func start() {
-//        underlying.start()
-//        super.start()
-//    }
 }

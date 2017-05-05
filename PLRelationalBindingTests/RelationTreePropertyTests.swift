@@ -350,4 +350,8 @@ class RelationTreePropertyTests: BindingTestCase {
             [8, "Group2",      .null, 7.0]
         ))
     }
+    
+    func testFullTree() {
+        // TODO
+    }
 }

@@ -46,7 +46,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         let p = r.project("name").allRelationValues().property()
         XCTAssertEqual(p.value, nil)
         
-        //awaitCompletion{ p.start() }
+        awaitCompletion{ p.start() }
         XCTAssertEqual(p.value, Set(["cat", "dog", "fish"].map{ RelationValue($0) }))
         
         awaitCompletion{ _ = r.asyncAdd(["id": 4, "name": "bird"]) }
@@ -126,7 +126,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         AssertValueUnset(p)
         XCTAssertTrue(changes == [])
         
-//        awaitCompletion{ p.start() }
+        awaitCompletion{ p.start() }
         AssertValueEqual(p, "cat")
         XCTAssertTrue(changes == ["cat"])
         
@@ -151,7 +151,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         AssertValueEqual(p, "cat")
         XCTAssertTrue(changes == ["cat"])
         
-//        awaitCompletion{ p.start() }
+        awaitCompletion{ p.start() }
         AssertValueEqual(p, "cat")
         XCTAssertTrue(changes == ["cat"])
         
@@ -176,7 +176,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         XCTAssertEqual(p.value, nil)
         XCTAssertTrue(changes == [])
         
-//        awaitCompletion{ p.start() }
+        awaitCompletion{ p.start() }
         XCTAssertEqual(p.value, "cat")
         XCTAssertTrue(changes == ["cat"])
         
@@ -199,19 +199,19 @@ class RelationAsTypedValueTests: BindingTestCase {
         let p = r.project("name").oneString(initialValue: "cat").property()
         _ = p.signal.observe{ v, _ in changes.append(v) }
         XCTAssertEqual(p.value, "cat")
-        XCTAssertTrue(changes == [])
+        XCTAssertTrue(changes == ["cat"])
         
-//        awaitCompletion{ p.start() }
+        awaitCompletion{ p.start() }
         XCTAssertEqual(p.value, "cat")
-        XCTAssertTrue(changes == [])
+        XCTAssertTrue(changes == ["cat"])
         
         awaitCompletion{ _ = r.asyncUpdate(true, newValues: ["name": "kat"]) }
         XCTAssertEqual(p.value, "kat")
-        XCTAssertTrue(changes == ["kat"])
+        XCTAssertTrue(changes == ["cat", "kat"])
         
         awaitCompletion{ _ = r.asyncAdd(["id": 3, "name": "dog", "friendly": 0, "age": 6, "pulse": 3.0]) }
         XCTAssertEqual(p.value, "")
-        XCTAssertTrue(changes == ["kat", ""])
+        XCTAssertTrue(changes == ["cat", "kat", ""])
     }
     
     func testExtractCommonValue() {

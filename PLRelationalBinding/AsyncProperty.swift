@@ -6,8 +6,11 @@
 import Foundation
 
 public protocol AsyncPropertyType {
-    /// Causes the underlying signal to start delivering values.
-    func startX()
+    /// A convenience for putting the underlying source signal into action.  Normally that
+    /// will occur the first time an observer begins observing this property's signal, but
+    /// in some cases no observation is needed and the caller just wants this property to
+    /// start delivering values.  This is a shorthand for `signal.observe` with a no-op observer.
+    func start()
 }
 
 public protocol AsyncReadablePropertyType: class, AsyncPropertyType {
@@ -25,11 +28,7 @@ public protocol AsyncReadablePropertyType: class, AsyncPropertyType {
 }
 
 extension AsyncReadablePropertyType {
-    /// A convenience for putting the underlying source signal into action.  Normally that
-    /// will occur the first time an observer begins observing this property's signal, but
-    /// in some cases no observation is needed and the caller just wants this property to
-    /// start delivering values.  This is a shorthand for `signal.observe` with a no-op observer.
-    public func startX() {
+    public func start() {
         _ = self.signal.observe({ _ in })
     }
 }
@@ -99,14 +98,6 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     public var property: AsyncReadableProperty<T> {
         return self
     }
-    
-//    /// A convenience for putting the underlying source signal into action.  Normally that
-//    /// will occur the first time an observer begins observing this property's signal, but
-//    /// in some cases no observation is needed and the caller just wants this property to
-//    /// start delivering values.  This is a shorthand for `signal.observe` with a no-op observer.
-//    public func startX() {
-//        _ = self.signal.observe({ _ in })
-//    }
     
     public static func pipe(initialValue: T? = nil) -> (AsyncReadableProperty<T>, Signal<T>.Notify) {
         let (signal, notify) = Signal<T>.pipe()

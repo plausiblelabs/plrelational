@@ -54,9 +54,6 @@ open class ArrayProperty<Element: ArrayElement>: AsyncReadablePropertyType {
         self.signal = signal
     }
     
-//    open func startX() {
-//    }
-    
     public var property: AsyncReadableProperty<[Element]> {
         return fullArray()
     }
@@ -103,9 +100,4 @@ private class FullArrayProperty<Element: ArrayElement>: AsyncReadableProperty<[E
         self.underlying = underlying
         super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.elements })
     }
-    
-//    fileprivate override func start() {
-//        underlying.start()
-//        super.start()
-//    }
 }
