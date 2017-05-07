@@ -5,7 +5,7 @@
 
 import Foundation
 
-public typealias ObserverRemoval = (Void) -> Void
+public typealias ObserverRemoval = () -> Void
 
 public struct ChangeMetadata {
     public let transient: Bool
@@ -15,23 +15,72 @@ public struct ChangeMetadata {
     }
 }
 
+/// An event delivered to a SignalObserver.  Note that "synchronous" signals must only
+/// deliver `valueChanging` events, while "asynchronous" signals can send a
+/// `beginPossibleAsyncChange` event to signal that a new value *may* be forthcoming via
+/// `valueChanging`.  The underlying signal is not *required* to deliver a `valueChanging`
+/// after a `begin`, but every `begin` must be balanced by an `end`.
+public enum SignalEvent<T> {
+    case beginPossibleAsyncChange
+    case valueChanging(T, ChangeMetadata)
+    case endPossibleAsyncChange
+}
+
+/// An observer that responds to events delivered by a Signal.
 public struct SignalObserver<T> {
-    public let valueWillChange: () -> Void
-    public let valueChanging: (_ change: T, _ metadata: ChangeMetadata) -> Void
-    public let valueDidChange: () -> Void
-    
-    public init(
-        valueWillChange: @escaping () -> Void,
-        valueChanging: @escaping (_ change: T, _ metadata: ChangeMetadata) -> Void,
-        valueDidChange: @escaping () -> Void)
-    {
-        self.valueWillChange = valueWillChange
-        self.valueChanging = valueChanging
-        self.valueDidChange = valueDidChange
+    public let onEvent: (SignalEvent<T>) -> Void
+
+    public init(onEvent: @escaping (SignalEvent<T>) -> Void) {
+        self.onEvent = onEvent
     }
     
+    /// Convenience initializer that only accepts `valueChanging` events.
+    /// Any other events are considered a fatal error.  This is mainly useful
+    /// in cases where the observed signal is expected to be fully synchronous,
+    /// i.e., always delivers changes immediately.
+    public init(synchronousValueChanging: @escaping (T, ChangeMetadata) -> Void) {
+        self.init(onEvent: { event in
+            switch event {
+            case .beginPossibleAsyncChange, .endPossibleAsyncChange:
+                fatalError("Asynchronous events not allowed")
+            case let .valueChanging(value, metadata):
+                synchronousValueChanging(value, metadata)
+            }
+        })
+    }
+    
+    /// Convenience initializer for compatibility with earlier structure.
+    public init(
+        valueWillChange: @escaping () -> Void,
+        valueChanging: @escaping (T, ChangeMetadata) -> Void,
+        valueDidChange: @escaping () -> Void)
+    {
+        self.init(onEvent: { event in
+            switch event {
+            case .beginPossibleAsyncChange:
+                valueWillChange()
+            case let .valueChanging(value, metadata):
+                valueChanging(value, metadata)
+            case .endPossibleAsyncChange:
+                valueDidChange()
+            }
+        })
+    }
+
+    public func valueWillChange() {
+        self.onEvent(.beginPossibleAsyncChange)
+    }
+
+    public func valueChanging(_ change: T, _ metadata: ChangeMetadata) {
+        self.onEvent(.valueChanging(change, metadata))
+    }
+
     public func valueChanging(_ change: T, transient: Bool = false) {
-        valueChanging(change, ChangeMetadata(transient: transient))
+        self.valueChanging(change, ChangeMetadata(transient: transient))
+    }
+    
+    public func valueDidChange() {
+        self.onEvent(.endPossibleAsyncChange)
     }
     
     /// Shorthand for `valueWillChange`, `valueChanging` (transient=false), and `valueDidChange` in series.
@@ -174,9 +223,7 @@ internal class ConstantSignal<T>: SourceSignal<T> {
     }
     
     override func observeImpl(_ observer: Observer) {
-        observer.valueWillChange()
         observer.valueChanging(value)
-        observer.valueDidChange()
     }
 }
 

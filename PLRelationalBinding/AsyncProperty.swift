@@ -83,9 +83,7 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
                     observer.valueWillChange()
                 }
                 if let value = self.value {
-                    observer.valueWillChange()
                     observer.valueChanging(value)
-                    observer.valueDidChange()
                 }
             }
         }

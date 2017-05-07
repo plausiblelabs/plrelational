@@ -9,13 +9,13 @@ extension ReadablePropertyType {
     /// Returns a ReadableProperty whose value is derived from this property's `value`.
     /// The given `transform` will be applied whenever this property's value changes.
     public func map<U>(_ transform: @escaping (Self.Value) -> U) -> ReadableProperty<U> {
-        return ReadableProperty(initialValue: transform(self.value), signal: self.signal.map(transform), changing: valueChanging)
+        return ReadableProperty(signal: self.signal.map(transform), changing: valueChanging)
     }
     
     /// Returns a ReadableProperty whose value is derived from this property's `value`.
     /// The given `transform` will be applied whenever this property's value changes.
     public func map<U: Equatable>(_ transform: @escaping (Self.Value) -> U) -> ReadableProperty<U> {
-        return ReadableProperty(initialValue: transform(self.value), signal: self.signal.map(transform), changing: valueChanging)
+        return ReadableProperty(signal: self.signal.map(transform), changing: valueChanging)
     }
 }
 
@@ -37,7 +37,7 @@ extension ReadablePropertyType {
 /// each of the given properties.  The returned property's `value` will contain a fresh tuple
 /// any time the value of either input changes.
 public func zip<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(_ lhs: LHS, _ rhs: RHS) -> ReadableProperty<(LHS.Value, RHS.Value)> {
-    return ReadableProperty(initialValue: (lhs.value, rhs.value), signal: zip(lhs.signal, rhs.signal), changing: valueChanging)
+    return ReadableProperty(signal: zip(lhs.signal, rhs.signal), changing: valueChanging)
 }
 
 /// Returns a ReadableProperty whose value is the negation of the boolean value of the given property.
@@ -49,13 +49,13 @@ extension ReadablePropertyType where Value == Bool {
     /// Returns a ReadableProperty whose value resolves to `self.value || other.value`.  The returned
     /// property's value will be recomputed any time the value of either input changes.
     public func or(_ other: Self) -> ReadableProperty<Bool> {
-        return ReadableProperty(initialValue: self.value || other.value, signal: self.signal *|| other.signal, changing: valueChanging)
+        return ReadableProperty(signal: self.signal *|| other.signal, changing: valueChanging)
     }
     
     /// Returns a ReadableProperty whose value resolves to `self.value && other.value`.  The returned
     /// property's value will be recomputed any time the value of either input changes.
     public func and(_ other: Self) -> ReadableProperty<Bool> {
-        return ReadableProperty(initialValue: self.value && other.value, signal: self.signal *&& other.signal, changing: valueChanging)
+        return ReadableProperty(signal: self.signal *&& other.signal, changing: valueChanging)
     }
 }
 
@@ -75,5 +75,5 @@ public func *&&<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Boo
 infix operator *== : ComparisonPrecedence
 
 public func *==<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Bool> where P.Value: Equatable {
-    return ReadableProperty(initialValue: lhs.value == rhs.value, signal: lhs.signal *== rhs.signal, changing: valueChanging)
+    return ReadableProperty(signal: lhs.signal *== rhs.signal, changing: valueChanging)
 }

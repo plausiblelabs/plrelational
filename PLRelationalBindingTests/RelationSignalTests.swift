@@ -84,22 +84,22 @@ class RelationSignalTests: BindingTestCase {
         
         // Verify that the first observer gets the initial value
         let removal1 = observer1.observe(signal)
-        verify(observer1, changes: ["foo"], willChangeCount: 1, didChangeCount: 1)
+        verify(observer1, changes: ["foo"], willChangeCount: 0, didChangeCount: 0)
         verify(observer2, changes: [], willChangeCount: 0, didChangeCount: 0)
         
         // Verify that the second observer gets the initial value and that the first observer
         // does not get notified
         let removal2 = observer2.observe(signal)
-        verify(observer1, changes: ["foo"], willChangeCount: 1, didChangeCount: 1)
-        verify(observer2, changes: ["foo"], willChangeCount: 1, didChangeCount: 1)
+        verify(observer1, changes: ["foo"], willChangeCount: 0, didChangeCount: 0)
+        verify(observer2, changes: ["foo"], willChangeCount: 0, didChangeCount: 0)
         
         // Perform an async update to the underlying relation
         r.asyncAdd(["id": 1, "name": "cat"])
-        verify(observer1, changes: ["foo"], willChangeCount: 2, didChangeCount: 1)
-        verify(observer2, changes: ["foo"], willChangeCount: 2, didChangeCount: 1)
+        verify(observer1, changes: ["foo"], willChangeCount: 1, didChangeCount: 0)
+        verify(observer2, changes: ["foo"], willChangeCount: 1, didChangeCount: 0)
         awaitIdle()
-        verify(observer1, changes: ["foo", "cat"], willChangeCount: 2, didChangeCount: 2)
-        verify(observer2, changes: ["foo", "cat"], willChangeCount: 2, didChangeCount: 2)
+        verify(observer1, changes: ["foo", "cat"], willChangeCount: 1, didChangeCount: 1)
+        verify(observer2, changes: ["foo", "cat"], willChangeCount: 1, didChangeCount: 1)
         
         removal1()
         removal2()
@@ -133,15 +133,15 @@ class RelationSignalTests: BindingTestCase {
         // first observer does not get notified
         let removal2 = observer2.observe(signal)
         verify(observer1, changes: [""], willChangeCount: 1, didChangeCount: 1)
-        verify(observer2, changes: [""], willChangeCount: 1, didChangeCount: 1)
+        verify(observer2, changes: [""], willChangeCount: 0, didChangeCount: 0)
         
         // Perform an async update to the underlying relation
         r.asyncAdd(["id": 1, "name": "cat"])
         verify(observer1, changes: [""], willChangeCount: 2, didChangeCount: 1)
-        verify(observer2, changes: [""], willChangeCount: 2, didChangeCount: 1)
+        verify(observer2, changes: [""], willChangeCount: 1, didChangeCount: 0)
         awaitIdle()
         verify(observer1, changes: ["", "cat"], willChangeCount: 2, didChangeCount: 2)
-        verify(observer2, changes: ["", "cat"], willChangeCount: 2, didChangeCount: 2)
+        verify(observer2, changes: ["", "cat"], willChangeCount: 1, didChangeCount: 1)
         
         removal1()
         removal2()

@@ -88,13 +88,13 @@ class RelationAsyncPropertyTests: BindingTestCase {
         
         // Observe the property's signal and verify that the initial value is delivered immediately
         let removal = observer.observe(property.signal)
-        verify(value: "cow", changes: ["cow"], willChangeCount: 1, didChangeCount: 1)
+        verify(value: "cow", changes: ["cow"], willChangeCount: 0, didChangeCount: 0)
         
         // Perform an async update to the underlying relation
         r.asyncAdd(["id": 1, "name": "cat"])
-        verify(value: "cow", changes: ["cow"], willChangeCount: 2, didChangeCount: 1)
+        verify(value: "cow", changes: ["cow"], willChangeCount: 1, didChangeCount: 0)
         awaitIdle()
-        verify(value: "cat", changes: ["cow", "cat"], willChangeCount: 2, didChangeCount: 2)
+        verify(value: "cat", changes: ["cow", "cat"], willChangeCount: 1, didChangeCount: 1)
         
         removal()
     }

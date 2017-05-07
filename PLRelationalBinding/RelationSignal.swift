@@ -35,11 +35,9 @@ class RelationSignal<T>: SourceSignal<T> {
 
         if let initialValue = latestValue {
             // We already have a value, so deliver it to just the given observer
-            observer.valueWillChange()
             // TODO: Should we have a metadata flag to note this as an "initial" value (transient
             // doesn't really tell the whole story)
             observer.valueChanging(initialValue, transient: false)
-            observer.valueDidChange()
         } else {
             // We don't already have a value; if we haven't already done so, perform
             // an async query to get the initial value

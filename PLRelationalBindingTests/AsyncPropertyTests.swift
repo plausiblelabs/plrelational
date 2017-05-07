@@ -29,12 +29,12 @@ class AsyncPropertyTests: BindingTestCase {
         
         // Verify that the current property value is delivered when observer is attached
         let removal1 = observer1.observe(property.signal)
-        verify(property, observer1, value: false, changes: [false], willChangeCount: 1, didChangeCount: 1)
+        verify(property, observer1, value: false, changes: [false], willChangeCount: 0, didChangeCount: 0)
         verify(property, observer2, value: false, changes: [], willChangeCount: 0, didChangeCount: 0)
         
         let removal2 = observer2.observe(property.signal)
-        verify(property, observer1, value: false, changes: [false], willChangeCount: 1, didChangeCount: 1)
-        verify(property, observer2, value: false, changes: [false], willChangeCount: 1, didChangeCount: 1)
+        verify(property, observer1, value: false, changes: [false], willChangeCount: 0, didChangeCount: 0)
+        verify(property, observer2, value: false, changes: [false], willChangeCount: 0, didChangeCount: 0)
         
         removal1()
         removal2()
@@ -49,11 +49,11 @@ class AsyncPropertyTests: BindingTestCase {
 
         let removal = observer.observe(asyncProperty.signal)
         XCTAssertEqual(syncProperty.value, "1")
-        verify(asyncProperty, observer, value: "1", changes: ["1"], willChangeCount: 1, didChangeCount: 1)
+        verify(asyncProperty, observer, value: "1", changes: ["1"], willChangeCount: 0, didChangeCount: 0)
 
         syncProperty.change("2", transient: false)
         XCTAssertEqual(syncProperty.value, "2")
-        verify(asyncProperty, observer, value: "2", changes: ["1", "2"], willChangeCount: 2, didChangeCount: 2)
+        verify(asyncProperty, observer, value: "2", changes: ["1", "2"], willChangeCount: 0, didChangeCount: 0)
         
         removal()
     }

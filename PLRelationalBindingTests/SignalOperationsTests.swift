@@ -198,10 +198,6 @@ class SignalOperationsTests: BindingTestCase {
     func testNot() {
         let (signal, notify) = Signal<Bool>.pipe()
         
-        // Send a valueWillChange to the underlying signal to mimic the case where a signal
-        // is mapped while already in a change block
-        notify.valueWillChange()
-        
         let mapped = not(signal)
 
         verifyUnary(
