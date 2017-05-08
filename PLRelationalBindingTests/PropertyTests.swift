@@ -408,117 +408,126 @@ class PropertyTests: XCTestCase {
 //        XCTAssertEqual(rhs2.signal.observerCount, 0)
 //    }
 
-//    func testConnectBidi() {
-//        var boolProperty: MutableValueProperty<Bool>! = mutableValueProperty(false)
-//        let stringProperty = mutableValueProperty("")
-//        let intProperty = mutableValueProperty(6)
-//        
-//        XCTAssertEqual(boolProperty.value, false)
-//        XCTAssertEqual(stringProperty.value, "")
-//        XCTAssertEqual(intProperty.value, 6)
-//        XCTAssertEqual(boolProperty.signal.observerCount, 0)
-//        XCTAssertEqual(stringProperty.signal.observerCount, 0)
-//        XCTAssertEqual(intProperty.signal.observerCount, 0)
-//        
-//        // We set up the connections such that `boolProperty` is the "master" value and the others
-//        // are secondary:
-//        //   - If `boolProperty` is updated, then `stringProperty` and `intProperty` are updated.
-//        //   - If `stringProperty` is updated, then `boolProperty` is updated, and `intProperty` should
-//        //     but updated transitively.
-//        //   - If `intProperty` is updated, then `boolProperty` is updated, and `stringProperty` should
-//        //     but updated transitively.
-//        
-//        // For this reverse case, we won't update the master value if the string is not "true" or "false"
-//        // (just to exercise the .NoChange case)
-//        _ = boolProperty.connectBidi(
-//            stringProperty,
-//            forward: {
-//                // Bool -> String
-//                .change($0.description)
-//            },
-//            reverse: {
-//                // String -> Bool
-//                switch $0 {
-//                case "true":
-//                    return .change(true)
-//                case "false":
-//                    return .change(false)
-//                default:
-//                    return .noChange
-//                }
-//            }
-//        )
-//
-//        // Verify that stringProperty takes on boolProperty's value
-//        XCTAssertEqual(boolProperty.value, false)
-//        XCTAssertEqual(stringProperty.value, "false")
-//        XCTAssertEqual(intProperty.value, 6)
-//        XCTAssertEqual(boolProperty.signal.observerCount, 1)
-//        XCTAssertEqual(stringProperty.signal.observerCount, 1)
-//        XCTAssertEqual(intProperty.signal.observerCount, 0)
-//        
-//        // For this reverse case, we'll treat any non-zero value as true
-//        _ = boolProperty.connectBidi(
-//            intProperty,
-//            forward: {
-//                // Bool -> Int
-//                .change($0 ? 1 : 0)
-//            },
-//            reverse: {
-//                // Int -> Bool
-//                .change($0 != 0)
-//            }
-//        )
-//        
-//        XCTAssertEqual(boolProperty.value, false)
-//        XCTAssertEqual(stringProperty.value, "false")
-//        XCTAssertEqual(intProperty.value, 0)
-//        XCTAssertEqual(boolProperty.signal.observerCount, 2)
-//        XCTAssertEqual(stringProperty.signal.observerCount, 1)
-//        XCTAssertEqual(intProperty.signal.observerCount, 1)
-//        
-//        // Update boolProperty and verify that secondary ones are updated
-//        boolProperty.change(true, transient: false)
-//        XCTAssertEqual(boolProperty.value, true)
-//        XCTAssertEqual(stringProperty.value, "true")
-//        XCTAssertEqual(intProperty.value, 1)
-//        
-//        // Update stringProperty and verify that others are updated
-//        stringProperty.change("false", transient: false)
-//        XCTAssertEqual(boolProperty.value, false)
-//        XCTAssertEqual(stringProperty.value, "false")
-//        XCTAssertEqual(intProperty.value, 0)
-//        
-//        // Update stringProperty and verify that there is no change reported
-//        // TODO: Verify the no change part
-//        stringProperty.change("false", transient: false)
-//        XCTAssertEqual(boolProperty.value, false)
-//        XCTAssertEqual(stringProperty.value, "false")
-//        XCTAssertEqual(intProperty.value, 0)
-//        
-//        // Update intProperty and verify that others are updated
-//        intProperty.change(8, transient: false)
-//        XCTAssertEqual(boolProperty.value, true)
-//        XCTAssertEqual(stringProperty.value, "true")
-//        XCTAssertEqual(intProperty.value, 8)
-//        
-//        // Update stringProperty with an unknown value and verify that others are not updated
-//        stringProperty.change("foo", transient: false)
-//        XCTAssertEqual(boolProperty.value, true)
-//        XCTAssertEqual(stringProperty.value, "foo")
-//        XCTAssertEqual(intProperty.value, 8)
-//        
-//        // Update stringProperty with a known value and verify that others are updated
-//        stringProperty.change("false", transient: false)
-//        XCTAssertEqual(boolProperty.value, false)
-//        XCTAssertEqual(stringProperty.value, "false")
-//        XCTAssertEqual(intProperty.value, 0)
-//        
-//        // Nil out boolProperty and verify that the others are unbound
-//        boolProperty = nil
-//        XCTAssertEqual(stringProperty.signal.observerCount, 0)
-//        XCTAssertEqual(intProperty.signal.observerCount, 0)
-//    }
+    func testConnectBidi() {
+        var boolProperty: MutableValueProperty<Bool>! = mutableValueProperty(false)
+        let stringProperty = mutableValueProperty("")
+        let intProperty = mutableValueProperty(6)
+        
+        XCTAssertEqual(boolProperty.value, false)
+        XCTAssertEqual(stringProperty.value, "")
+        XCTAssertEqual(intProperty.value, 6)
+        XCTAssertEqual(boolProperty.signal.observerCount, 0)
+        XCTAssertEqual(stringProperty.signal.observerCount, 0)
+        XCTAssertEqual(intProperty.signal.observerCount, 0)
+        
+        // We set up the connections such that `boolProperty` is the "master" value and the others
+        // are secondary:
+        //   - If `boolProperty` is updated, then `stringProperty` and `intProperty` are updated.
+        //   - If `stringProperty` is updated, then `boolProperty` is updated, and `intProperty` should
+        //     but updated transitively.
+        //   - If `intProperty` is updated, then `boolProperty` is updated, and `stringProperty` should
+        //     but updated transitively.
+        
+        // For this reverse case, we won't update the master value if the string is not "true" or "false"
+        // (just to exercise the .noChange case)
+        _ = boolProperty.connectBidi(
+            stringProperty,
+            leftToRight: { boolValue, _ in
+                // Bool -> String
+                .change(boolValue.description)
+            },
+            rightToLeft: { stringValue, isInitial in
+                // String -> Bool
+                if isInitial {
+                    return .noChange
+                } else {
+                    switch stringValue {
+                    case "true":
+                        return .change(true)
+                    case "false":
+                        return .change(false)
+                    default:
+                        return .noChange
+                    }
+                }
+            }
+        )
+
+        // Verify that stringProperty takes on boolProperty's value
+        XCTAssertEqual(boolProperty.value, false)
+        XCTAssertEqual(stringProperty.value, "false")
+        XCTAssertEqual(intProperty.value, 6)
+        XCTAssertEqual(boolProperty.signal.observerCount, 1)
+        XCTAssertEqual(stringProperty.signal.observerCount, 1)
+        XCTAssertEqual(intProperty.signal.observerCount, 0)
+        
+        // For this reverse case, we'll treat any non-zero value as true
+        _ = boolProperty.connectBidi(
+            intProperty,
+            leftToRight: { boolValue, _ in
+                // Bool -> Int
+                .change(boolValue ? 1 : 0)
+            },
+            rightToLeft: { intValue, isInitial in
+                // Int -> Bool
+                if isInitial {
+                    return .noChange
+                } else {
+                    return .change(intValue != 0)
+                }
+            }
+        )
+        
+        // Verify that intProperty takes on boolProperty's value
+        XCTAssertEqual(boolProperty.value, false)
+        XCTAssertEqual(stringProperty.value, "false")
+        XCTAssertEqual(intProperty.value, 0)
+        XCTAssertEqual(boolProperty.signal.observerCount, 2)
+        XCTAssertEqual(stringProperty.signal.observerCount, 1)
+        XCTAssertEqual(intProperty.signal.observerCount, 1)
+        
+        // Update boolProperty and verify that secondary ones are updated
+        boolProperty.change(true)
+        XCTAssertEqual(boolProperty.value, true)
+        XCTAssertEqual(stringProperty.value, "true")
+        XCTAssertEqual(intProperty.value, 1)
+        
+        // Update stringProperty and verify that others are updated
+        stringProperty.change("false")
+        XCTAssertEqual(boolProperty.value, false)
+        XCTAssertEqual(stringProperty.value, "false")
+        XCTAssertEqual(intProperty.value, 0)
+        
+        // Update stringProperty and verify that there is no change reported
+        // TODO: Verify the no change part
+        stringProperty.change("false")
+        XCTAssertEqual(boolProperty.value, false)
+        XCTAssertEqual(stringProperty.value, "false")
+        XCTAssertEqual(intProperty.value, 0)
+        
+        // Update intProperty and verify that others are updated
+        intProperty.change(8)
+        XCTAssertEqual(boolProperty.value, true)
+        XCTAssertEqual(stringProperty.value, "true")
+        XCTAssertEqual(intProperty.value, 8)
+        
+        // Update stringProperty with an unknown value and verify that others are not updated
+        stringProperty.change("foo")
+        XCTAssertEqual(boolProperty.value, true)
+        XCTAssertEqual(stringProperty.value, "foo")
+        XCTAssertEqual(intProperty.value, 8)
+        
+        // Update stringProperty with a known value and verify that others are updated
+        stringProperty.change("false")
+        XCTAssertEqual(boolProperty.value, false)
+        XCTAssertEqual(stringProperty.value, "false")
+        XCTAssertEqual(intProperty.value, 0)
+        
+        // Nil out boolProperty and verify that the others are unbound
+        boolProperty = nil
+        XCTAssertEqual(stringProperty.signal.observerCount, 0)
+        XCTAssertEqual(intProperty.signal.observerCount, 0)
+    }
     
     func testActionProperty() {
         var changeCount = 0

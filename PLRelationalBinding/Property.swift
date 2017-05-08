@@ -224,88 +224,77 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         fatalError("Must be implemented by subclasses")
     }
     
-//    /// Establishes a bidirectional binding between this property and the given property.
-//    /// When this property's value changes, the other property's value will be updated and
-//    /// vice versa.  Note that calling `bindBidi` will cause this property to take on the
-//    /// other property's value immedately.
-//    public func bindBidi(_ other: ReadWriteProperty<T>) -> Binding {
-//        return connectBidi(
-//            other,
-//            initial: {
-//                self.setValue(other.value, ChangeMetadata(transient: true))
-//            },
-//            forward: { .change($0) },
-//            reverse: { .change($0) }
-//        )
-//    }
-//
-//    /// Establishes a bidirectional connection between this property and the given property,
-//    /// using `forward` and `reverse` to conditionally apply changes in each direction.
-//    /// Note that calling `connectBidi` will cause the other property to take on this
-//    /// property's value immediately (this is the opposite behavior from `bindBidi`).
-//    public func connectBidi<U>(_ other: ReadWriteProperty<U>, forward: @escaping (T) -> ChangeResult<U>, reverse: @escaping (U) -> ChangeResult<T>) -> Binding {
-//        return connectBidi(
-//            other,
-//            initial: {
-//                if case .change(let initialValue) = forward(self.value) {
-//                    other.setValue(initialValue, ChangeMetadata(transient: true))
-//                }
-//            },
-//            forward: forward,
-//            reverse: reverse
-//        )
-//    }
-//
-//    private func connectBidi<U>(_ other: ReadWriteProperty<U>, initial: () -> Void, forward: @escaping (T) -> ChangeResult<U>, reverse: @escaping (U) -> ChangeResult<T>) -> Binding {
-//        var selfInitiatedChange = false
-//        
-//        // Observe the signal of the other property
-//        let signalObserverRemoval1 = other.signal.observe(SignalObserver(
-//            // TODO: How to deal with ChangeHandler here?
-//            valueWillChange: {},
-//            valueChanging: { [weak self] value, metadata in
-//                if selfInitiatedChange { return }
-//                if case .change(let newValue) = reverse(value) {
-//                    selfInitiatedChange = true
-//                    self?.setValue(newValue, metadata)
-//                    selfInitiatedChange = false
-//                }
-//            },
-//            // TODO: How to deal with ChangeHandler here?
-//            valueDidChange: {}
-//        ))
-//        
-//        // Make the other property observe this property's signal
-//        let signalObserverRemoval2 = signal.observe(SignalObserver(
-//            // TODO: Should we be attempting to modify other's ChangeHandler?
-//            valueWillChange: {},
-//            valueChanging: { [weak other] value, metadata in
-//                if selfInitiatedChange { return }
-//                if case .change(let newValue) = forward(value) {
-//                    selfInitiatedChange = true
-//                    other?.setValue(newValue, metadata)
-//                    selfInitiatedChange = false
-//                }
-//            },
-//            valueDidChange: {}
-//        ))
-//        
-//        // Make this property take on the initial value from the other property (or vice versa)
-//        selfInitiatedChange = true
-//        initial()
-//        selfInitiatedChange = false
-//        
-//        // Save and return the binding
-//        let bindingID = nextBindingID
-//        let binding = Binding(signalOwner: other, removal: { [weak self] in
-//            signalObserverRemoval1()
-//            signalObserverRemoval2()
-//            self?.bindings.removeValue(forKey: bindingID)?.unbind()
-//        })
-//        nextBindingID += 1
-//        bindings[bindingID] = binding
-//        return binding
-//    }
+    /// Establishes a bidirectional binding between this property and the given property.
+    /// When this property's value changes, the other property's value will be updated and
+    /// vice versa.  Note that calling `bindBidi` will cause this property to take on the
+    /// other property's value immedately.
+    public func bindBidi(_ other: ReadWriteProperty<T>) -> Binding {
+        return connectBidi(
+            other,
+            leftToRight: { value, isInitial in
+                // We don't want `other` to take on `self`'s value initially, but we do want
+                // it when `self` changes subsequently
+                if isInitial {
+                    return .noChange
+                } else {
+                    return .change(value)
+                }
+            },
+            rightToLeft: { value, isInitial in
+                // We do want `self` to take on `other` value initially, and whenever `other`
+                // changes subsequently
+                return .change(value)
+            }
+        )
+    }
+
+    /// Establishes a bidirectional connection between this property and the given property,
+    /// using `leftToRight` and `rightToLeft` to conditionally apply changes in each direction.
+    public func connectBidi<U>(_ rhs: ReadWriteProperty<U>,
+                               leftToRight: @escaping (_ value: T, _ isInitial: Bool) -> ChangeResult<U>,
+                               rightToLeft: @escaping (_ value: U, _ isInitial: Bool) -> ChangeResult<T>) -> Binding
+    {
+        var selfInitiatedChange = false
+        
+        // Make self (the LHS) observe the signal of the RHS property
+        var initialRight = true
+        let leftObservingRightRemoval = rhs.signal.observe(SignalObserver(
+            synchronousValueChanging: { [weak self] value, metadata in
+                if selfInitiatedChange { return }
+                if case .change(let newValue) = rightToLeft(value, initialRight) {
+                    selfInitiatedChange = true
+                    self?.setValue(newValue, metadata)
+                    selfInitiatedChange = false
+                }
+                initialRight = false
+            }
+        ))
+        
+        // Make the RHS property observe the signal of self (the LHS)
+        var initialLeft = true
+        let rightObservingLeftRemoval = self.signal.observe(SignalObserver(
+            synchronousValueChanging: { [weak rhs] value, metadata in
+                if selfInitiatedChange { return }
+                if case .change(let newValue) = leftToRight(value, initialLeft) {
+                    selfInitiatedChange = true
+                    rhs?.setValue(newValue, metadata)
+                    selfInitiatedChange = false
+                }
+                initialLeft = false
+            }
+        ))
+        
+        // Save and return the binding
+        let bindingID = nextBindingID
+        let binding = Binding(signalOwner: rhs, removal: { [weak self] in
+            leftObservingRightRemoval()
+            rightObservingLeftRemoval()
+            self?.bindings.removeValue(forKey: bindingID)?.unbind()
+        })
+        nextBindingID += 1
+        bindings[bindingID] = binding
+        return binding
+    }
     
     /// Establishes a bidirectional binding between this property and the given property.
     /// When this property's value changes, the other property's value will be updated and
@@ -415,7 +404,7 @@ public final class MutableValueProperty<T>: ReadWriteProperty<T> {
     }
     
     /// Called to update the underlying value and notify observers that the value has been changed.
-    public func change(_ newValue: T, transient: Bool) {
+    public func change(_ newValue: T, transient: Bool = false) {
         change(newValue, metadata: ChangeMetadata(transient: transient))
     }
     
