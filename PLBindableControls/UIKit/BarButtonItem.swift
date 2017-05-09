@@ -14,25 +14,23 @@ open class BarButtonItem: UIBarButtonItem {
             self?.isEnabled = value
         })
     }()
-    
-    public let bindable_clicks: Signal<()>
-    private let clicksNotify: Signal<()>.Notify
+
+    private let _bindable_clicks = SourceSignal<()>()
+    public var bindable_clicks: Signal<()> { return _bindable_clicks }
 
     public override init() {
-        (bindable_clicks, clicksNotify) = Signal.pipe()
         super.init()
         target = self
         action = #selector(buttonClicked(_:))
     }
 
     public required init?(coder: NSCoder) {
-        (bindable_clicks, clicksNotify) = Signal.pipe()
         super.init(coder: coder)
         target = self
         action = #selector(buttonClicked(_:))
     }
 
     @objc func buttonClicked(_ sender: BarButtonItem) {
-        clicksNotify.valueChanging((), ChangeMetadata(transient: true))
+        _bindable_clicks.notifyAction()
     }
 }

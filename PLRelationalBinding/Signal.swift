@@ -135,7 +135,7 @@ open class SourceSignal<T>: Signal<T> {
     fileprivate var observers: [UInt64: Observer] = [:]
     private var nextObserverID: UInt64 = 0
     
-    internal override init() {
+    public override init() {
     }
     
     /// Should be overridden by subclasses to perform custom observe behavior (for example, starting the underlying
@@ -181,6 +181,12 @@ open class SourceSignal<T>: Signal<T> {
     
     public override var observerCount: Int {
         return observers.count
+    }
+}
+
+extension SourceSignal where T == () {
+    public func notifyAction() {
+        self.notifyValueChanging(())
     }
 }
 

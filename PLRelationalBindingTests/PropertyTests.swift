@@ -544,11 +544,11 @@ class PropertyTests: XCTestCase {
         XCTAssertEqual(changeCount, 0)
         XCTAssertEqual(source.observerCount, 1)
         
-        source.notifyValueChanging(())
+        source.notifyAction()
         XCTAssertEqual(changeCount, 1)
         XCTAssertEqual(source.observerCount, 1)
         
-        source.notifyValueChanging(())
+        source.notifyAction()
         XCTAssertEqual(changeCount, 2)
         XCTAssertEqual(source.observerCount, 1)
         

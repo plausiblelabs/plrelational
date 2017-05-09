@@ -128,12 +128,14 @@ open class BindableProperty<T> {
     /// Establishes a unidirectional binding between this property and the given signal.
     /// When the other signal's value changes, this property's value will be updated.
     /// Note that calling `bind` will cause this property to take on the initial value
-    /// delivered by the given signal.
-    fileprivate func bind(_ signal: Signal<T>, owner: AnyObject) -> Binding {
+    /// delivered by the given signal.  If the signal cannot provide an initial value,
+    /// this property will take on the given `initialValue` if non-nil.
+    fileprivate func bind(_ signal: Signal<T>, owner: AnyObject, initialValue: T? = nil) -> Binding {
         // Keep track of Begin/EndPossibleAsync events for this binding
         var changeCount = 0
         
         // Observe the given signal for changes
+        var setInitial = false
         let signalObserverRemoval = signal.observe{ [weak self] event in
             switch event {
             case .beginPossibleAsyncChange:
@@ -142,6 +144,7 @@ open class BindableProperty<T> {
             
             case let .valueChanging(newValue, metadata):
                 self?.setValue(newValue, metadata)
+                setInitial = true
             
             case .endPossibleAsyncChange:
                 changeCount -= 1
@@ -149,6 +152,12 @@ open class BindableProperty<T> {
             }
         }
 
+        if !setInitial {
+            if let initialValue = initialValue {
+                self.setValue(initialValue, ChangeMetadata(transient: false))
+            }
+        }
+        
         // Save and return the binding
         let bindingID = nextBindingID
         let binding = Binding(signalOwner: owner, removal: { [weak self] in
@@ -508,17 +517,18 @@ extension BindableProperty {
     /// Establishes a unidirectional binding between this property and the given property.
     /// When the other property's value changes, this property's value will be updated.
     /// Note that calling `bind` will cause this property to take on the `rhs` property's
-    /// value immediately, if known.
-    @discardableResult public func bind<RHS: ReadablePropertyType>(_ rhs: RHS) -> Binding where RHS.Value == T {
-        return self.bind(rhs.signal, owner: rhs)
+    /// value immediately, if known, otherwise it will take on `initialValue` if non-nil.
+    @discardableResult public func bind<RHS: ReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T {
+        return self.bind(rhs.signal, owner: rhs, initialValue: initialValue)
     }
 
     /// Establishes a unidirectional binding between this property and the given property.
     /// When the other property's value changes, this property's value will be updated.
     /// Note that calling `bind` will `start` the `rhs` property and will cause this property
-    /// to take on the `rhs` property's value immediately, if known.
-    @discardableResult public func bind<RHS: AsyncReadablePropertyType>(_ rhs: RHS) -> Binding where RHS.Value == T, RHS.SignalChange == T {
-        return self.bind(rhs.signal, owner: rhs)
+    /// to take on the `rhs` property's value immediately, if known, otherwise it will take
+    /// on `initialValue` if non-nil.
+    @discardableResult public func bind<RHS: AsyncReadablePropertyType>(_ rhs: RHS, initialValue: T? = nil) -> Binding where RHS.Value == T, RHS.SignalChange == T {
+        return self.bind(rhs.signal, owner: rhs, initialValue: initialValue)
     }
 }
 
@@ -544,9 +554,9 @@ infix operator ~~> : PropertyOperatorPrecedence
 
 infix operator <~> : PropertyOperatorPrecedence
 
-//@discardableResult public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Binding {
-//    return lhs.bindBidi(rhs)
-//}
+@discardableResult public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Binding {
+    return lhs.bindBidi(rhs)
+}
 
 @discardableResult public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: AsyncReadWriteProperty<T>) -> Binding {
     return lhs.bindBidi(rhs)

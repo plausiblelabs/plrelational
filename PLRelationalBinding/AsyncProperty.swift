@@ -64,9 +64,11 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
                     case .beginPossibleAsyncChange:
                         changeCount += 1
                         pipeSignal.notifyBeginPossibleAsyncChange()
+                        
                     case let .valueChanging(newValue, metadata):
                         self?.value = newValue
                         pipeSignal.notifyValueChanging(newValue, metadata)
+                        
                     case .endPossibleAsyncChange:
                         changeCount -= 1
                         pipeSignal.notifyEndPossibleAsyncChange()
