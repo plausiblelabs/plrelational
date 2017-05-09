@@ -89,10 +89,10 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
             } else {
                 // For subsequent observers, deliver our current value to just the observer being attached
                 for _ in 0..<changeCount {
-                    // If underlyingSignal is in an asynchronous change (delivered WillChange before
+                    // If underlyingSignal is in an asynchronous change (delivered BeginPossibleAsync before
                     // this observer was attached), we need to give this new observer the corresponding
-                    // number of WillChange notifications so that it is correctly balanced when the
-                    // DidChange notification(s) come in later
+                    // number of BeginPossibleAsync notifications so that it is correctly balanced when the
+                    // EndPossibleAsync notification(s) come in later
                     observer.notifyBeginPossibleAsyncChange()
                 }
                 if let value = self.mutableValue {
