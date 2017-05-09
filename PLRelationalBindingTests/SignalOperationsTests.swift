@@ -108,7 +108,66 @@ class SignalOperationsTests: BindingTestCase {
             expected: [1, 0]
         )
     }
-    
+
+    func testFlatMap() {
+        let intSource = SourceSignal<Int>()
+        
+        var stringValue = "Nothing"
+        var stringSource: PipeSignal<String>? = nil
+        func changeString(_ newValue: String) {
+            stringValue = newValue
+            stringSource!.notifyValueChanging(newValue)
+        }
+
+        let mapped = intSource.flatMap{ value -> Signal<String> in
+            stringValue = "Loading for \(value)"
+            stringSource = PipeSignal<String>()
+            stringSource!.onObserve = { observer in
+                observer.notifyValueChanging(stringValue)
+            }
+            return stringSource!
+        }
+        
+        let observer1 = TestObserver<String>()
+        
+        let removal1 = observer1.observe(mapped)
+        verify(observer1, changes: [], willChangeCount: 0, didChangeCount: 0)
+        
+        intSource.notifyValueChangedAsync(1)
+        verify(observer1, changes: ["Loading for 1"], willChangeCount: 1, didChangeCount: 1)
+        observer1.reset()
+        
+        changeString("Loaded 1!")
+        verify(observer1, changes: ["Loaded 1!"], willChangeCount: 0, didChangeCount: 0)
+        observer1.reset()
+
+        changeString("Loaded 1 again!")
+        verify(observer1, changes: ["Loaded 1 again!"], willChangeCount: 0, didChangeCount: 0)
+        observer1.reset()
+
+        intSource.notifyValueChangedAsync(2)
+        verify(observer1, changes: ["Loading for 2"], willChangeCount: 1, didChangeCount: 1)
+        observer1.reset()
+        
+        changeString("Loaded 2!")
+        verify(observer1, changes: ["Loaded 2!"], willChangeCount: 0, didChangeCount: 0)
+        observer1.reset()
+        
+        changeString("Loaded 2 again!")
+        verify(observer1, changes: ["Loaded 2 again!"], willChangeCount: 0, didChangeCount: 0)
+        observer1.reset()
+
+        let observer2 = TestObserver<String>()
+        let removal2 = observer2.observe(mapped)
+        verify(observer1, changes: [], willChangeCount: 0, didChangeCount: 0)
+        verify(observer2, changes: ["Loaded 2 again!"], willChangeCount: 0, didChangeCount: 0)
+        observer1.reset()
+        observer2.reset()
+        
+        removal1()
+        removal2()
+    }
+
     func testZip() {
         let source1 = SourceSignal<Bool>()
         let source2 = SourceSignal<Bool>()

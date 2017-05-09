@@ -12,14 +12,16 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
         return AsyncReadableProperty(signal: self.signal.map(transform))
     }
     
-//    /// Returns an AsyncReadableProperty whose value is derived from the given property's `value`.
-//    /// The given `transform` will be applied whenever this property's value changes, and in turn
-//    /// the property returned by `transform` becomes the new source of values.
-//    public func flatMap<P: AsyncReadablePropertyType>(_ transform: @escaping (Self.Value) -> P) -> AsyncReadableProperty<P.Value>
-//        where P.Value == P.SignalChange
-//    {
-//        return FlatMappedValueProperty(property: self, transform: transform)
-//    }
+    /// Returns an AsyncReadableProperty whose value is derived from the given property's `value`.
+    /// The given `transform` will be applied whenever this property's value changes, and in turn
+    /// the property returned by `transform` becomes the new source of values.
+    public func flatMap<P: AsyncReadablePropertyType>(_ transform: @escaping (Self.Value) -> P) -> AsyncReadableProperty<P.Value>
+        where P.Value == P.SignalChange
+    {
+        return AsyncReadableProperty(signal: self.signal.flatMap{
+            return transform($0).signal
+        })
+    }
 }
 
 /// Returns an AsyncReadableProperty whose value is a tuple (pair) containing the `value` from

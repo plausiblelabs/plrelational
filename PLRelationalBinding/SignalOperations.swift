@@ -10,6 +10,13 @@ extension SignalType {
     public func map<U>(_ transform: @escaping (Self.Value) -> U) -> Signal<U> {
         return MappedSignal(underlying: self, transform: transform)
     }
+    
+    /// Returns a Signal whose values are derived from the given signal.  The given `transform`
+    /// will be applied whenever this signal's value changes, and in turn the signal returned by
+    /// `transform` becomes the new source of values.
+    public func flatMap<S: SignalType>(_ transform: @escaping (Self.Value) -> S) -> Signal<S.Value> {
+        return FlatMappedSignal(underlying: self, transform: transform)
+    }
 }
 
 /// Returns a Signal that creates a fresh tuple (pair) any time there is a new value in either input.
@@ -93,6 +100,73 @@ private class MappedSignal<T>: Signal<T> {
     
     override var observerCount: Int {
         return countFunc()
+    }
+}
+
+private class FlatMappedSignal<S: SignalType, T: SignalType>: SourceSignal<T.Value> {
+    private let underlying: Signal<S.Value>
+    private let transform: (S.Value) -> T
+    private var mappedValue: T.Value?
+    private var underlyingSignalObserverRemoval: ObserverRemoval?
+    private var mappedSignalObserverRemoval: ObserverRemoval?
+    
+    init(underlying: S, transform: @escaping (S.Value) -> T) {
+        self.underlying = underlying.signal
+        self.transform = transform
+        
+        super.init()
+    }
+
+    deinit {
+        underlyingSignalObserverRemoval?()
+        mappedSignalObserverRemoval?()
+    }
+    
+    override func observeImpl(_ observer: Observer) {
+        if self.underlyingSignalObserverRemoval == nil {
+            // Observe the underlying signal when the first observer is attached
+            self.underlyingSignalObserverRemoval = underlying.observe{ event in
+                switch event {
+                case .beginPossibleAsyncChange:
+                    self.notifyBeginPossibleAsyncChange()
+                    
+                case let .valueChanging(newValue, _):
+                    // When the underlying signal produces a new value, create and observe the signal
+                    // produced by `transform`
+                    self.mappedValue = nil
+                    self.mappedSignalObserverRemoval?()
+                    let newSignal = self.transform(newValue)
+                    self.mappedSignalObserverRemoval = newSignal.observe{ event in
+                        switch event {
+                        case .beginPossibleAsyncChange:
+                            self.notifyBeginPossibleAsyncChange()
+                            
+                        case let .valueChanging(newValue, metadata):
+                            self.mappedValue = newValue
+                            self.notifyValueChanging(newValue, metadata)
+                            
+                        case .endPossibleAsyncChange:
+                            self.notifyEndPossibleAsyncChange()
+                        }
+                    }
+                    
+                case .endPossibleAsyncChange:
+                    self.notifyEndPossibleAsyncChange()
+                }
+            }
+        } else {
+            // When other observers are attached, just deliver the latest mapped value
+            // TODO: Take Begin/EndPossibleAsync into account
+            if let mappedValue = mappedValue {
+                observer.notifyValueChanging(mappedValue)
+            }
+        }
+    }
+    
+    override var observerCount: Int {
+        // TODO: Does this need to take the mapped signal into account too?  (Not too important, since observerCount is for
+        // debugging purposes only.)
+        return underlying.observerCount
     }
 }
 

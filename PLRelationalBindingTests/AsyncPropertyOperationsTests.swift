@@ -38,63 +38,65 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         removal()
     }
     
-//    func testFlatMap() {
-//        let (boolProperty, boolNotify) = AsyncReadableProperty<Bool>.pipe(initialValue: nil)
-//        
-//        var stringNotify: Signal<String>.Notify? = nil
-//        let mapped = boolProperty.flatMap{ value -> AsyncReadableProperty<String> in
-//            let (property, notify) = AsyncReadableProperty<String>.pipe(initialValue: "Loading for \(value)")
-//            stringNotify = notify
-//            return property
-//        }
-//        
-//        var changeObserved = false
-//        _ = mapped.signal.observe({ _ in changeObserved = true })
-////        mapped.start()
-//        
-//        XCTAssertEqual(mapped.value, nil)
-//        XCTAssertNil(stringNotify)
-//        XCTAssertEqual(changeObserved, false)
-//        changeObserved = false
-//        
-//        boolNotify.valueChanging(true, transient: false)
-//        XCTAssertEqual(boolProperty.value, true)
-//        XCTAssertEqual(mapped.value, "Loading for true")
-//        XCTAssertNotNil(stringNotify)
-//        XCTAssertEqual(changeObserved, true)
-//        changeObserved = false
-//
-//        stringNotify!.valueChanging("Loaded true!", transient: false)
-//        XCTAssertEqual(boolProperty.value, true)
-//        XCTAssertEqual(mapped.value, "Loaded true!")
-//        XCTAssertEqual(changeObserved, true)
-//        changeObserved = false
-//
-//        stringNotify!.valueChanging("Loaded true again!", transient: false)
-//        XCTAssertEqual(boolProperty.value, true)
-//        XCTAssertEqual(mapped.value, "Loaded true again!")
-//        XCTAssertEqual(changeObserved, true)
-//        changeObserved = false
-//
-//        boolNotify.valueChanging(false, transient: false)
-//        XCTAssertEqual(boolProperty.value, false)
-//        XCTAssertEqual(mapped.value, "Loading for false")
-//        XCTAssertNotNil(stringNotify)
-//        XCTAssertEqual(changeObserved, true)
-//        changeObserved = false
-//        
-//        stringNotify!.valueChanging("Loaded false!", transient: false)
-//        XCTAssertEqual(boolProperty.value, false)
-//        XCTAssertEqual(mapped.value, "Loaded false!")
-//        XCTAssertEqual(changeObserved, true)
-//        changeObserved = false
-//        
-//        stringNotify!.valueChanging("Loaded false again!", transient: false)
-//        XCTAssertEqual(boolProperty.value, false)
-//        XCTAssertEqual(mapped.value, "Loaded false again!")
-//        XCTAssertEqual(changeObserved, true)
-//        changeObserved = false
-//    }
+    func testFlatMap() {
+        let intSource = PipeSignal<Int>()
+        let intProperty = intSource.property()
+
+        var stringValue = "Nothing"
+        var stringSource: PipeSignal<String>? = nil
+        func changeString(_ newValue: String) {
+            stringValue = newValue
+            stringSource!.notifyValueChanging(newValue)
+        }
+        
+        let mapped = intProperty.flatMap{ value -> AsyncReadableProperty<String> in
+            stringValue = "Loading for \(value)"
+            stringSource = PipeSignal<String>()
+            stringSource!.onObserve = { observer in
+                observer.notifyValueChanging(stringValue)
+            }
+            return stringSource!.property()
+        }
+
+        let observer = StringObserver()
+        
+        func verify(value: String?, changes: [String], willChangeCount: Int, didChangeCount: Int, file: StaticString = #file, line: UInt = #line) {
+            XCTAssertEqual(mapped.value, value, file: file, line: line)
+            XCTAssertEqual(observer.changes, changes, file: file, line: line)
+            XCTAssertEqual(observer.willChangeCount, willChangeCount, file: file, line: line)
+            XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
+        }
+        
+        let removal = observer.observe(mapped.signal)
+        verify(value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
+        XCTAssertNil(stringSource)
+        
+        intSource.notifyValueChangedAsync(1)
+        verify(value: "Loading for 1", changes: ["Loading for 1"], willChangeCount: 1, didChangeCount: 1)
+        observer.reset()
+        
+        changeString("Loaded 1!")
+        verify(value: "Loaded 1!", changes: ["Loaded 1!"], willChangeCount: 0, didChangeCount: 0)
+        observer.reset()
+
+        changeString("Loaded 1 again!")
+        verify(value: "Loaded 1 again!", changes: ["Loaded 1 again!"], willChangeCount: 0, didChangeCount: 0)
+        observer.reset()
+        
+        intSource.notifyValueChangedAsync(2)
+        verify(value: "Loading for 2", changes: ["Loading for 2"], willChangeCount: 1, didChangeCount: 1)
+        observer.reset()
+        
+        changeString("Loaded 2!")
+        verify(value: "Loaded 2!", changes: ["Loaded 2!"], willChangeCount: 0, didChangeCount: 0)
+        observer.reset()
+        
+        changeString("Loaded 2 again!")
+        verify(value: "Loaded 2 again!", changes: ["Loaded 2 again!"], willChangeCount: 0, didChangeCount: 0)
+        observer.reset()
+        
+        removal()
+    }
     
     func testZip() {
         let source1 = PipeSignal<Bool>()
