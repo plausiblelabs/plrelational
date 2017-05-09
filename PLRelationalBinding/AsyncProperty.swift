@@ -45,10 +45,21 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     private var underlyingRemoval: ObserverRemoval?
     public let signal: Signal<T>
     
-    public internal(set) var value: T?
+    private var observed = false
+    internal var mutableValue: T?
+    public var value: T? {
+        if !observed {
+            // Note that `mutableValue` will be nil until either a) an observer is attached to `signal`
+            // and it has delivered an initial value or b) someone tries to access `value` (in which case
+            // we attach a dummy observer to kick the signal into action)
+            let removal = signal.observe{ _ in }
+            removal()
+        }
+        return mutableValue
+    }
     
     public init(signal: Signal<T>) {
-        self.value = nil
+        self.mutableValue = nil
         self.underlyingSignal = signal
 
         let pipeSignal = PipeSignal<T>()
@@ -56,6 +67,7 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
 
         var changeCount = 0
         pipeSignal.onObserve = { observer in
+            self.observed = true
             if self.underlyingRemoval == nil {
                 // Observe the underlying signal the first time someone observes our public signal
                 guard self.underlyingRemoval == nil else { return }
@@ -66,7 +78,7 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
                         pipeSignal.notifyBeginPossibleAsyncChange()
                         
                     case let .valueChanging(newValue, metadata):
-                        self?.value = newValue
+                        self?.mutableValue = newValue
                         pipeSignal.notifyValueChanging(newValue, metadata)
                         
                     case .endPossibleAsyncChange:
@@ -83,7 +95,7 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
                     // DidChange notification(s) come in later
                     observer.notifyBeginPossibleAsyncChange()
                 }
-                if let value = self.value {
+                if let value = self.mutableValue {
                     observer.notifyValueChanging(value)
                 }
             }

@@ -81,7 +81,7 @@ open class ReadableProperty<T>: ReadablePropertyType {
             if self.underlyingRemoval == nil {
                 // Observe the underlying signal the first time someone observes our public signal.
                 // Note that since ReadableProperty is expected to be fully synchronous, our observer
-                // will error (fatally) upon receiving an asynchronous MayChange/DidChange event.
+                // will error (fatally) upon receiving an asynchronous Begin/EndPossibleAsync event.
                 self.underlyingRemoval = self.underlyingSignal.observeSynchronousValueChanging{ [weak self] newValue, metadata in
                     guard let strongSelf = self else { return }
                     if strongSelf.underlyingRemoval == nil || isChange(strongSelf.mutableValue, newValue) {
