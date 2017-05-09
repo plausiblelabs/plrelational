@@ -38,7 +38,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
     private let parentAttr: Attribute
     private let orderAttr: Attribute
     private let tag: AnyObject?
-    fileprivate let notify: Signal<SignalChange>.Notify
+    fileprivate let sourceSignal: PipeSignal<SignalChange>
     
     private var relationObserverRemoval: ObserverRemoval?
     
@@ -53,22 +53,21 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         
         let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: self.parentAttr, tag: tag)
         
-        let (pipeSignal, pipeNotify) = Signal<SignalChange>.pipe()
-        self.notify = pipeNotify
+        self.sourceSignal = PipeSignal()
         
-        super.init(root: rootNode, signal: pipeSignal)
+        super.init(root: rootNode, signal: sourceSignal)
         
         // TODO: There is a possibility (however unlikely) that the underlying relation is already
         // in an async update, i.e., it has already delivered a relationWillChange.  If that happens,
         // setting changeCount to zero here will be incorrect.
         //var changeCount = 0
-        pipeSignal.onObserve = { observer in
+        sourceSignal.onObserve = { observer in
             if self.relationObserverRemoval == nil {
                 // Observe the underlying relation the first time someone observes our public signal
                 self.relationObserverRemoval = relation.addAsyncObserver(self)
                 
                 // Perform an async query to compute the initial tree
-                pipeNotify.valueWillChange()
+                self.sourceSignal.notifyBeginPossibleAsyncChange()
                 relation.asyncAllRows(
                     postprocessor: { rows -> RowTreeNode in
                         // Map rows from underlying relation to Node values
@@ -90,9 +89,9 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
                     completion: { result in
                         if let rootNode = result.ok {
                             self.root = rootNode
-                            self.notify.valueChanging([.initial(rootNode)], transient: false)
+                            self.sourceSignal.notifyValueChanging([.initial(rootNode)], transient: false)
                         }
-                        self.notify.valueDidChange()
+                        self.sourceSignal.notifyEndPossibleAsyncChange()
                     }
                 )
             } else {
@@ -102,11 +101,9 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
 //                    // this observer was attached), we need to give this new observer the corresponding
 //                    // number of WillChange notifications so that it is correctly balanced when the
 //                    // DidChange notification(s) come in later
-//                    observer.valueWillChange()
+//                    observer.notifyBeginPossibleAsyncChange()
 //                }
-                observer.valueWillChange()
-                observer.valueChanging([.initial(self.root)], transient: false)
-                observer.valueDidChange()
+                observer.notifyValueChanging([.initial(self.root)], transient: false)
             }
         }
     }
@@ -385,7 +382,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
 extension RelationTreeProperty: AsyncRelationChangeCoalescedObserver {
 
     func relationWillChange(_ relation: Relation) {
-        notify.valueWillChange()
+        sourceSignal.notifyBeginPossibleAsyncChange()
     }
     
     func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
@@ -399,10 +396,10 @@ extension RelationTreeProperty: AsyncRelationChangeCoalescedObserver {
                 self.onUpdate(rows: parts.updatedRows, changes: &treeChanges)
                 self.onDelete(ids: parts.deletedIDs, changes: &treeChanges)
                 if treeChanges.count > 0 {
-                    self.notify.valueChanging(treeChanges, transient: false)
+                    sourceSignal.notifyValueChanging(treeChanges, transient: false)
                 }
             }
-            self.notify.valueDidChange()
+            sourceSignal.notifyEndPossibleAsyncChange()
             
         case .Err(let err):
             // TODO: actual handling

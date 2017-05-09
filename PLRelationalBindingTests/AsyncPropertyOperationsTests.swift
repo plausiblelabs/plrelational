@@ -9,7 +9,8 @@ import XCTest
 class AsyncPropertyOperationsTests: BindingTestCase {
     
     func testMap() {
-        let (property, notify) = AsyncReadableProperty<Bool>.pipe()
+        let source = PipeSignal<Bool>()
+        let property = AsyncReadableProperty(signal: source)
         let mapped = property.map{ $0 ? 1 : 0 }
         let observer = IntObserver()
         
@@ -26,12 +27,12 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         let removal = observer.observe(mapped.signal)
         verify(value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
 
-        notify.changed(true)
+        source.notifyValueChangedAsync(true)
         verify(value: 1, changes: [1], willChangeCount: 1, didChangeCount: 1)
 
         // TODO: Use isRepeat to avoid duplicates?
         
-        notify.changed(false)
+        source.notifyValueChangedAsync(false)
         verify(value: 0, changes: [1, 0], willChangeCount: 2, didChangeCount: 2)
 
         removal()
@@ -96,8 +97,12 @@ class AsyncPropertyOperationsTests: BindingTestCase {
 //    }
     
     func testZip() {
-        let (property1, notify1) = AsyncReadableProperty<Bool>.pipe()
-        let (property2, notify2) = AsyncReadableProperty<Bool>.pipe()
+        let source1 = PipeSignal<Bool>()
+        let source2 = PipeSignal<Bool>()
+        
+        let property1 = AsyncReadableProperty(signal: source1)
+        let property2 = AsyncReadableProperty(signal: source2)
+        
         let zipped = zip(property1, property2)
         let observer = TestObserver<(Bool, Bool)>()
         
@@ -116,13 +121,13 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         let removal = observer.observe(zipped.signal)
         verify(value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
         
-        notify1.changed(true)
+        source1.notifyValueChangedAsync(true)
         verify(value: nil, changes: [], willChangeCount: 1, didChangeCount: 1)
         
-        notify2.changed(false)
+        source2.notifyValueChangedAsync(false)
         verify(value: (true, false), changes: [(true, false)], willChangeCount: 2, didChangeCount: 2)
         
-        notify2.changed(true)
+        source2.notifyValueChangedAsync(true)
         verify(value: (true, true), changes: [(true, false), (true, true)], willChangeCount: 3, didChangeCount: 3)
         
         removal()
@@ -155,7 +160,8 @@ class AsyncPropertyOperationsTests: BindingTestCase {
 //    }
     
     func testNot() {
-        let (property, notify) = AsyncReadableProperty<Bool>.pipe()
+        let source = PipeSignal<Bool>()
+        let property = AsyncReadableProperty(signal: source)
         let mapped = !property
         let observer = BoolObserver()
         
@@ -172,10 +178,10 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         let removal = observer.observe(mapped.signal)
         verify(value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
         
-        notify.changed(false)
+        source.notifyValueChangedAsync(false)
         verify(value: true, changes: [true], willChangeCount: 1, didChangeCount: 1)
         
-        notify.changed(true)
+        source.notifyValueChangedAsync(true)
         verify(value: false, changes: [true, false], willChangeCount: 2, didChangeCount: 2)
         
         removal()

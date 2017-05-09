@@ -203,9 +203,9 @@ class PropertyTests: XCTestCase {
         
         // Test bind to AsyncReadableProperty for the case where rhs value is initially not available
         // (it delivers WillChange immediately but nothing else after that)
-        let (rhs2Signal, rhs2Notify) = Signal<String>.pipe()
+        let rhs2Signal = PipeSignal<String>()
         rhs2Signal.onObserve = { observer in
-            observer.valueWillChange()
+            observer.notifyBeginPossibleAsyncChange()
         }
         let rhs2 = AsyncReadableProperty(signal: rhs2Signal)
         let binding2 = lhs <~ rhs2
@@ -218,7 +218,7 @@ class PropertyTests: XCTestCase {
         XCTAssertEqual(lhsUnlockCount, 1)
         
         // Verify that lhs is not affected after `rhs2` is changed after being unbound
-        rhs2Notify.valueChanging("lo", transient: false)
+        rhs2Signal.notifyValueChanging("lo")
         XCTAssertEqual(lhs.value, "yo")
         XCTAssertEqual(lhsLockCount, 1)
         XCTAssertEqual(lhsUnlockCount, 1)
@@ -251,9 +251,9 @@ class PropertyTests: XCTestCase {
         
         // Test bind to AsyncReadableProperty for the case where rhs value is initially not available
         // (it delivers WillChange immediately but nothing else after that)
-        let (rhs2Signal, rhs2Notify) = Signal<String>.pipe()
+        let rhs2Signal = PipeSignal<String>()
         rhs2Signal.onObserve = { observer in
-            observer.valueWillChange()
+            observer.notifyBeginPossibleAsyncChange()
         }
         let rhs2 = AsyncReadableProperty(signal: rhs2Signal)
         lhs <~ rhs2
@@ -266,7 +266,7 @@ class PropertyTests: XCTestCase {
         XCTAssertEqual(lhsUnlockCount, 1)
         
         // Verify that lhs is not affected after `rhs2` is changed after being unbound
-        rhs2Notify.valueChanging("lo", transient: false)
+        rhs2Signal.notifyValueChanging("lo")
         XCTAssertEqual(lhs.value, "yo")
         XCTAssertEqual(lhsLockCount, 1)
         XCTAssertEqual(lhsUnlockCount, 1)
@@ -537,23 +537,23 @@ class PropertyTests: XCTestCase {
 
         XCTAssertEqual(changeCount, 0)
 
-        let (signal, notify) = Signal<()>.pipe()
-        XCTAssertEqual(signal.observerCount, 0)
+        let source = SourceSignal<()>()
+        XCTAssertEqual(source.observerCount, 0)
         
-        let binding = signal ~~> property
+        let binding = source ~~> property
         XCTAssertEqual(changeCount, 0)
-        XCTAssertEqual(signal.observerCount, 1)
+        XCTAssertEqual(source.observerCount, 1)
         
-        notify.valueChanging((), ChangeMetadata(transient: false))
+        source.notifyValueChanging(())
         XCTAssertEqual(changeCount, 1)
-        XCTAssertEqual(signal.observerCount, 1)
+        XCTAssertEqual(source.observerCount, 1)
         
-        notify.valueChanging((), ChangeMetadata(transient: false))
+        source.notifyValueChanging(())
         XCTAssertEqual(changeCount, 2)
-        XCTAssertEqual(signal.observerCount, 1)
+        XCTAssertEqual(source.observerCount, 1)
         
         binding.unbind()
         XCTAssertEqual(changeCount, 2)
-        XCTAssertEqual(signal.observerCount, 0)
+        XCTAssertEqual(source.observerCount, 0)
     }
 }

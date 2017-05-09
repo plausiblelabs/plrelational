@@ -34,60 +34,20 @@ public struct SignalObserver<T> {
         self.onEvent = onEvent
     }
     
-    /// Convenience initializer that only accepts `valueChanging` events.
-    /// Any other events are considered a fatal error.  This is mainly useful
-    /// in cases where the observed signal is expected to be fully synchronous,
-    /// i.e., always delivers changes immediately.
-    public init(synchronousValueChanging: @escaping (T, ChangeMetadata) -> Void) {
-        self.init(onEvent: { event in
-            switch event {
-            case .beginPossibleAsyncChange, .endPossibleAsyncChange:
-                fatalError("Asynchronous events not allowed")
-            case let .valueChanging(value, metadata):
-                synchronousValueChanging(value, metadata)
-            }
-        })
-    }
-    
-    /// Convenience initializer for compatibility with earlier structure.
-    public init(
-        valueWillChange: @escaping () -> Void,
-        valueChanging: @escaping (T, ChangeMetadata) -> Void,
-        valueDidChange: @escaping () -> Void)
-    {
-        self.init(onEvent: { event in
-            switch event {
-            case .beginPossibleAsyncChange:
-                valueWillChange()
-            case let .valueChanging(value, metadata):
-                valueChanging(value, metadata)
-            case .endPossibleAsyncChange:
-                valueDidChange()
-            }
-        })
-    }
-
-    public func valueWillChange() {
+    public func notifyBeginPossibleAsyncChange() {
         self.onEvent(.beginPossibleAsyncChange)
     }
-
-    public func valueChanging(_ change: T, _ metadata: ChangeMetadata) {
+    
+    public func notifyValueChanging(_ change: T, _ metadata: ChangeMetadata) {
         self.onEvent(.valueChanging(change, metadata))
     }
 
-    public func valueChanging(_ change: T, transient: Bool = false) {
-        self.valueChanging(change, ChangeMetadata(transient: transient))
+    public func notifyValueChanging(_ change: T, transient: Bool = false) {
+        self.notifyValueChanging(change, ChangeMetadata(transient: transient))
     }
     
-    public func valueDidChange() {
+    public func notifyEndPossibleAsyncChange() {
         self.onEvent(.endPossibleAsyncChange)
-    }
-    
-    /// Shorthand for `valueWillChange`, `valueChanging` (transient=false), and `valueDidChange` in series.
-    public func changed(_ value: T) {
-        valueWillChange()
-        valueChanging(value, transient: false)
-        valueDidChange()
     }
 }
 
@@ -98,7 +58,7 @@ public protocol SignalType: class {
     var signal: Signal<Value> { get }
     
     /// Registers the given observer, which will be notified when the signal delivers new values.
-    func observe(_ observer: SignalObserver<Value>) -> ObserverRemoval
+    func addObserver(_ observer: SignalObserver<Value>) -> ObserverRemoval
     
     /// Lifts this signal into an AsyncReadableProperty.
     func property() -> AsyncReadableProperty<Value>
@@ -107,24 +67,47 @@ public protocol SignalType: class {
     var observerCount: Int { get }
 }
 
+extension SignalType {
+    
+    /// Convenience form of observe that takes an event handler function.
+    public func observe(_ onEvent: @escaping (SignalEvent<Value>) -> Void) -> ObserverRemoval {
+        return self.addObserver(SignalObserver<Value>(onEvent: onEvent))
+    }
+
+    /// Convenience form of observe that only responds to `valueChanging` events.  Any other events are treated as no-ops.
+    public func observeValueChanging(_ onValueChanging: @escaping (Value, ChangeMetadata) -> Void) -> ObserverRemoval {
+        return self.observe{ event in
+            switch event {
+            case let .valueChanging(value, metadata):
+                onValueChanging(value, metadata)
+            case .beginPossibleAsyncChange, .endPossibleAsyncChange:
+                break
+            }
+        }
+    }
+
+    /// Convenience form of observe that only accepts `valueChanging` events.  Any other events are considered
+    /// a fatal error.  This is mainly useful in cases where the observed signal is expected to be fully synchronous,
+    /// i.e., always delivers changes immediately.
+    public func observeSynchronousValueChanging(_ onValueChanging: @escaping (Value, ChangeMetadata) -> Void) -> ObserverRemoval {
+        return self.observe{ event in
+            switch event {
+            case .beginPossibleAsyncChange, .endPossibleAsyncChange:
+                fatalError("Asynchronous events not allowed")
+            case let .valueChanging(value, metadata):
+                onValueChanging(value, metadata)
+            }
+        }
+    }
+}
+
 open class Signal<T>: SignalType {
     public typealias Value = T
     public typealias Observer = SignalObserver<T>
-    public typealias Notify = SignalObserver<T>
 
     internal init() {
     }
     
-    public static func pipe() -> (PipeSignal<T>, Notify) {
-        let signal = PipeSignal<T>()
-        let notify = SignalObserver(
-            valueWillChange: signal.notifyWillChange,
-            valueChanging: signal.notifyChanging,
-            valueDidChange: signal.notifyDidChange
-        )
-        return (signal, notify)
-    }
-
     public var signal: Signal<T> {
         return self
     }
@@ -135,30 +118,10 @@ open class Signal<T>: SignalType {
 
     /// Adds the given observer to the set of observers that are notified when this signal's value has changed.
     /// If the given observer is the first one to be added for this signal, the underlying signal source will
-    /// be brought to action.  If the signal source has a value available, the given observer will have its
-    /// `valueWillChange`, `valueChanging`, and `valueDidChange` handlers called before `observe` returns.
-    public func observe(_ observer: Observer) -> ObserverRemoval {
+    /// be brought to action.  If the signal source has a value available, the given observer will be sent a
+    /// `valueChanging` event before `observe` returns.
+    public func addObserver(_ observer: Observer) -> ObserverRemoval {
         fatalError("Must be implemented by subclass")
-    }
-
-    /// Convenience form of `observe` that builds an Observer whose `valueWillChange` and `valueDidChange`
-    /// handlers pass through to `notify`, but uses the given `valueChanging` handler.
-    public func observe<U>(_ notify: SignalObserver<U>, _ valueChanging: @escaping (_ change: T, _ metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
-        return self.observe(SignalObserver(
-            valueWillChange: notify.valueWillChange,
-            valueChanging: valueChanging,
-            valueDidChange: notify.valueDidChange
-        ))
-    }
-    
-    /// Convenience form of `observe` that builds an Observer whose `valueWillChange` and `valueDidChange`
-    /// are no-ops, but uses the given `valueChanging` handler.
-    public func observe(_ valueChanging: @escaping (_ change: T, _ metadata: ChangeMetadata) -> Void) -> ObserverRemoval {
-        return self.observe(SignalObserver(
-            valueWillChange: {},
-            valueChanging: valueChanging,
-            valueDidChange: {}
-        ))
     }
     
     public var observerCount: Int {
@@ -166,9 +129,10 @@ open class Signal<T>: SignalType {
     }
 }
 
+/// A signal that exposes methods for notifying observers.
 open class SourceSignal<T>: Signal<T> {
     
-    private var observers: [UInt64: Observer] = [:]
+    fileprivate var observers: [UInt64: Observer] = [:]
     private var nextObserverID: UInt64 = 0
     
     internal override init() {
@@ -181,7 +145,7 @@ open class SourceSignal<T>: Signal<T> {
         // outside this library
     }
     
-    public override func observe(_ observer: Observer) -> ObserverRemoval {
+    public override func addObserver(_ observer: Observer) -> ObserverRemoval {
         let id = nextObserverID
         nextObserverID += 1
         observers[id] = observer
@@ -191,21 +155,27 @@ open class SourceSignal<T>: Signal<T> {
         return { self.observers.removeValue(forKey: id) }
     }
     
-    internal func notifyWillChange() {
+    public func notifyBeginPossibleAsyncChange() {
         for (_, observer) in observers {
-            observer.valueWillChange()
+            observer.notifyBeginPossibleAsyncChange()
         }
     }
     
-    internal func notifyChanging(_ change: T, metadata: ChangeMetadata) {
+    public func notifyValueChanging(_ change: T, _ metadata: ChangeMetadata) {
         for (_, observer) in observers {
-            observer.valueChanging(change, metadata)
+            observer.notifyValueChanging(change, metadata)
         }
     }
     
-    internal func notifyDidChange() {
+    public func notifyValueChanging(_ change: T, transient: Bool = false) {
         for (_, observer) in observers {
-            observer.valueDidChange()
+            observer.notifyValueChanging(change, transient: transient)
+        }
+    }
+    
+    public func notifyEndPossibleAsyncChange() {
+        for (_, observer) in observers {
+            observer.notifyEndPossibleAsyncChange()
         }
     }
     
@@ -223,12 +193,11 @@ internal class ConstantSignal<T>: SourceSignal<T> {
     }
     
     override func observeImpl(_ observer: Observer) {
-        observer.valueChanging(value)
+        observer.notifyValueChanging(value)
     }
 }
 
-/// A SourceSignal used in the implementation of `pipe`.  Allows for a function to be called
-/// when an observer is attached.
+/// A SourceSignal that allows for a function to be called when an observer is attached.
 public class PipeSignal<T>: SourceSignal<T> {
     public var onObserve: ((Observer) -> Void)?
     

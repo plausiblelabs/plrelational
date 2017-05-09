@@ -66,17 +66,18 @@ private class MappedSignal<T>: Signal<T> {
     init<S: SignalType>(underlying: S, transform: @escaping (S.Value) -> T) {
         self.observeFunc = { observer in
             // Observe the underlying signal
-            return underlying.observe(SignalObserver(
-                valueWillChange: {
-                    observer.valueWillChange()
-                },
-                valueChanging: { change, metadata in
-                    observer.valueChanging(transform(change), metadata)
-                },
-                valueDidChange: {
-                    observer.valueDidChange()
+            return underlying.observe{ event in
+                switch event {
+                case .beginPossibleAsyncChange:
+                    observer.notifyBeginPossibleAsyncChange()
+                    
+                case let .valueChanging(newValue, metadata):
+                    observer.notifyValueChanging(transform(newValue), metadata)
+                    
+                case .endPossibleAsyncChange:
+                    observer.notifyEndPossibleAsyncChange()
                 }
-            ))
+            }
         }
         
         self.countFunc = {
@@ -86,7 +87,7 @@ private class MappedSignal<T>: Signal<T> {
         super.init()
     }
 
-    override func observe(_ observer: Observer) -> ObserverRemoval {
+    override func addObserver(_ observer: Observer) -> ObserverRemoval {
         return observeFunc(observer)
     }
     
@@ -107,37 +108,39 @@ private class BinaryOpSignal<T>: Signal<T> {
             
             func notify(_ metadata: ChangeMetadata) {
                 if let lv = lhsValue, let rv = rhsValue {
-                    observer.valueChanging(f(lv, rv), metadata)
+                    observer.notifyValueChanging(f(lv, rv), metadata)
                 }
             }
             
             // Observe the lhs signal
-            let lhsRemoval = lhs.observe(SignalObserver(
-                valueWillChange: {
-                    observer.valueWillChange()
-                },
-                valueChanging: { change, metadata in
-                    lhsValue = change
+            let lhsRemoval = lhs.observe{ event in
+                switch event {
+                case .beginPossibleAsyncChange:
+                    observer.notifyBeginPossibleAsyncChange()
+                    
+                case let .valueChanging(newValue, metadata):
+                    lhsValue = newValue
                     notify(metadata)
-                },
-                valueDidChange: {
-                    observer.valueDidChange()
+
+                case .endPossibleAsyncChange:
+                    observer.notifyEndPossibleAsyncChange()
                 }
-            ))
+            }
             
             // Observe the rhs signal
-            let rhsRemoval = rhs.observe(SignalObserver(
-                valueWillChange: {
-                    observer.valueWillChange()
-                },
-                valueChanging: { change, metadata in
-                    rhsValue = change
+            let rhsRemoval = rhs.observe{ event in
+                switch event {
+                case .beginPossibleAsyncChange:
+                    observer.notifyBeginPossibleAsyncChange()
+                    
+                case let .valueChanging(newValue, metadata):
+                    rhsValue = newValue
                     notify(metadata)
-                },
-                valueDidChange: {
-                    observer.valueDidChange()
+                    
+                case .endPossibleAsyncChange:
+                    observer.notifyEndPossibleAsyncChange()
                 }
-            ))
+            }
             
             return {
                 lhsRemoval()
@@ -152,7 +155,7 @@ private class BinaryOpSignal<T>: Signal<T> {
         super.init()
     }
     
-    override func observe(_ observer: Observer) -> ObserverRemoval {
+    override func addObserver(_ observer: Observer) -> ObserverRemoval {
         return observeFunc(observer)
     }
     

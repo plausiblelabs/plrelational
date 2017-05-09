@@ -122,7 +122,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         
         var changes: [String?] = []
         let p = r.project("name").oneStringOrNil().property()
-        _ = p.signal.observe{ v, _ in changes.append(v) }
+        _ = p.signal.observeValueChanging{ v, _ in changes.append(v) }
         AssertValueUnset(p)
         XCTAssertTrue(changes == [])
         
@@ -147,7 +147,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         
         var changes: [String?] = []
         let p = r.project("name").oneStringOrNil(initialValue: "cat").property()
-        _ = p.signal.observe{ v, _ in changes.append(v) }
+        _ = p.signal.observeValueChanging{ v, _ in changes.append(v) }
         AssertValueEqual(p, "cat")
         XCTAssertTrue(changes == ["cat"])
         
@@ -172,7 +172,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         
         var changes: [String] = []
         let p = r.project("name").oneString().property()
-        _ = p.signal.observe{ v, _ in changes.append(v) }
+        _ = p.signal.observeValueChanging{ v, _ in changes.append(v) }
         XCTAssertEqual(p.value, nil)
         XCTAssertTrue(changes == [])
         
@@ -197,7 +197,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         
         var changes: [String] = []
         let p = r.project("name").oneString(initialValue: "cat").property()
-        _ = p.signal.observe{ v, _ in changes.append(v) }
+        _ = p.signal.observeValueChanging{ v, _ in changes.append(v) }
         XCTAssertEqual(p.value, "cat")
         XCTAssertTrue(changes == ["cat"])
         

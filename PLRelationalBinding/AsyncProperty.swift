@@ -59,20 +59,19 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
             if self.underlyingRemoval == nil {
                 // Observe the underlying signal the first time someone observes our public signal
                 guard self.underlyingRemoval == nil else { return }
-                self.underlyingRemoval = self.underlyingSignal.observe(SignalObserver(
-                    valueWillChange: {
+                self.underlyingRemoval = self.underlyingSignal.observe{ [weak self] event in
+                    switch event {
+                    case .beginPossibleAsyncChange:
                         changeCount += 1
-                        pipeSignal.notifyWillChange()
-                    },
-                    valueChanging: { [weak self] newValue, metadata in
+                        pipeSignal.notifyBeginPossibleAsyncChange()
+                    case let .valueChanging(newValue, metadata):
                         self?.value = newValue
-                        pipeSignal.notifyChanging(newValue, metadata: metadata)
-                    },
-                    valueDidChange: {
+                        pipeSignal.notifyValueChanging(newValue, metadata)
+                    case .endPossibleAsyncChange:
                         changeCount -= 1
-                        pipeSignal.notifyDidChange()
+                        pipeSignal.notifyEndPossibleAsyncChange()
                     }
-                ))
+                }
             } else {
                 // For subsequent observers, deliver our current value to just the observer being attached
                 for _ in 0..<changeCount {
@@ -80,10 +79,10 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
                     // this observer was attached), we need to give this new observer the corresponding
                     // number of WillChange notifications so that it is correctly balanced when the
                     // DidChange notification(s) come in later
-                    observer.valueWillChange()
+                    observer.notifyBeginPossibleAsyncChange()
                 }
                 if let value = self.value {
-                    observer.valueChanging(value)
+                    observer.notifyValueChanging(value)
                 }
             }
         }
@@ -95,12 +94,6 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     
     public var property: AsyncReadableProperty<T> {
         return self
-    }
-    
-    public static func pipe() -> (AsyncReadableProperty<T>, Signal<T>.Notify) {
-        let (signal, notify) = Signal<T>.pipe()
-        let property = AsyncReadableProperty(signal: signal)
-        return (property, notify)
     }
 }
 

@@ -22,7 +22,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
     fileprivate let idAttr: Attribute
     private let orderAttr: Attribute
     private let tag: AnyObject?
-    fileprivate let notify: Signal<SignalChange>.Notify
+    fileprivate let sourceSignal: PipeSignal<SignalChange>
     
     private var relationObserverRemoval: ObserverRemoval?
 
@@ -34,22 +34,21 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
         self.orderAttr = orderAttr
         self.tag = tag
 
-        let (pipeSignal, pipeNotify) = Signal<SignalChange>.pipe()
-        self.notify = pipeNotify
+        self.sourceSignal = PipeSignal()
         
-        super.init(signal: pipeSignal)
+        super.init(signal: sourceSignal)
 
         // TODO: There is a possibility (however unlikely) that the underlying relation is already
         // in an async update, i.e., it has already delivered a relationWillChange.  If that happens,
         // setting changeCount to zero here will be incorrect.
         //var changeCount = 0
-        pipeSignal.onObserve = { observer in
+        sourceSignal.onObserve = { observer in
             if self.relationObserverRemoval == nil {
                 // Observe the underlying relation the first time someone observes our public signal
                 self.relationObserverRemoval = relation.addAsyncObserver(self)
                 
                 // Perform an async query to compute the initial array
-                pipeNotify.valueWillChange()
+                self.sourceSignal.notifyBeginPossibleAsyncChange()
                 relation.asyncAllRows(
                     postprocessor: { rows -> [RowArrayElement] in
                         let sortedRows = rows.sorted{ $0[self.orderAttr] < $1[self.orderAttr] }
@@ -60,9 +59,9 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
                     completion: { result in
                         if let sortedElements = result.ok {
                             self.elements = sortedElements
-                            self.notify.valueChanging([.initial(sortedElements)], transient: false)
+                            self.sourceSignal.notifyValueChanging([.initial(sortedElements)], transient: false)
                         }
-                        self.notify.valueDidChange()
+                        self.sourceSignal.notifyEndPossibleAsyncChange()
                     }
                 )
             } else {
@@ -72,11 +71,9 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
 //                    // this observer was attached), we need to give this new observer the corresponding
 //                    // number of WillChange notifications so that it is correctly balanced when the
 //                    // DidChange notification(s) come in later
-//                    observer.valueWillChange()
+//                    observer.notifyBeginPossibleAsyncChange()
 //                }
-                observer.valueWillChange()
-                observer.valueChanging([.initial(self.elements)], transient: false)
-                observer.valueDidChange()
+                observer.notifyValueChanging([.initial(self.elements)], transient: false)
             }
         }
     }
@@ -206,7 +203,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
 extension RelationArrayProperty: AsyncRelationChangeCoalescedObserver {
 
     func relationWillChange(_ relation: Relation) {
-        notify.valueWillChange()
+        sourceSignal.notifyBeginPossibleAsyncChange()
     }
 
     func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
@@ -220,10 +217,10 @@ extension RelationArrayProperty: AsyncRelationChangeCoalescedObserver {
                 self.onUpdate(parts.updatedRows, changes: &arrayChanges)
                 self.onDelete(parts.deletedIDs, changes: &arrayChanges)
                 if arrayChanges.count > 0 {
-                    self.notify.valueChanging(arrayChanges, transient: false)
+                    sourceSignal.notifyValueChanging(arrayChanges, transient: false)
                 }
             }
-            self.notify.valueDidChange()
+            sourceSignal.notifyEndPossibleAsyncChange()
             
         case .Err(let err):
             // TODO: actual handling

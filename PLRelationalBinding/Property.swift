@@ -82,21 +82,19 @@ open class ReadableProperty<T>: ReadablePropertyType {
                 // Observe the underlying signal the first time someone observes our public signal.
                 // Note that since ReadableProperty is expected to be fully synchronous, our observer
                 // will error (fatally) upon receiving an asynchronous MayChange/DidChange event.
-                self.underlyingRemoval = self.underlyingSignal.observe(SignalObserver(
-                    synchronousValueChanging: { [weak self] newValue, metadata in
-                        guard let strongSelf = self else { return }
-                        if strongSelf.underlyingRemoval == nil || isChange(strongSelf.mutableValue, newValue) {
-                            strongSelf.mutableValue = newValue
-                            pipeSignal.notifyChanging(newValue, metadata: metadata)
-                        }
+                self.underlyingRemoval = self.underlyingSignal.observeSynchronousValueChanging{ [weak self] newValue, metadata in
+                    guard let strongSelf = self else { return }
+                    if strongSelf.underlyingRemoval == nil || isChange(strongSelf.mutableValue, newValue) {
+                        strongSelf.mutableValue = newValue
+                        pipeSignal.notifyValueChanging(newValue, metadata)
                     }
-                ))
+                }
                 if self.mutableValue == nil {
                     fatalError("Synchronous signals *must* deliver a `valueChanging` event when observer is attached")
                 }
             } else {
                 // For subsequent observers, deliver our current value to just the observer being attached
-                observer.valueChanging(self.value, transient: false)
+                observer.notifyValueChanging(self.value, transient: false)
             }
         }
     }
@@ -132,24 +130,24 @@ open class BindableProperty<T> {
     /// Note that calling `bind` will cause this property to take on the initial value
     /// delivered by the given signal.
     fileprivate func bind(_ signal: Signal<T>, owner: AnyObject) -> Binding {
-        // Keep track of Will/DidChange events for this binding
+        // Keep track of Begin/EndPossibleAsync events for this binding
         var changeCount = 0
         
         // Observe the given signal for changes
-        let signalObserverRemoval = signal.observe(SignalObserver(
-            valueWillChange: { [weak self] in
+        let signalObserverRemoval = signal.observe{ [weak self] event in
+            switch event {
+            case .beginPossibleAsyncChange:
                 changeCount += 1
                 self?.changeHandler.willChange()
-            },
-            valueChanging: { [weak self] value, metadata in
-                guard let strongSelf = self else { return }
-                strongSelf.setValue(value, metadata)
-            },
-            valueDidChange: { [weak self] in
+            
+            case let .valueChanging(newValue, metadata):
+                self?.setValue(newValue, metadata)
+            
+            case .endPossibleAsyncChange:
                 changeCount -= 1
                 self?.changeHandler.didChange()
             }
-        ))
+        }
 
         // Save and return the binding
         let bindingID = nextBindingID
@@ -201,20 +199,18 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     public var value: T {
         return getValue()
     }
-    public let signal: Signal<T>
-    fileprivate let notify: Signal<T>.Notify
+    fileprivate let sourceSignal: PipeSignal<T>
+    public var signal: Signal<T> { return sourceSignal }
     
     internal override init(changeHandler: ChangeHandler) {
-        let (pipeSignal, pipeNotify) = Signal<T>.pipe()
-        self.signal = pipeSignal
-        self.notify = pipeNotify
+        self.sourceSignal = PipeSignal()
 
         super.init(changeHandler: changeHandler)
         
         // Deliver the current value when an observer attaches to our signal
-        pipeSignal.onObserve = { [weak self] observer in
+        sourceSignal.onObserve = { [weak self] observer in
             guard let strongSelf = self else { return }
-            observer.valueChanging(strongSelf.value, transient: false)
+            observer.notifyValueChanging(strongSelf.value, transient: false)
         }
     }
 
@@ -258,31 +254,27 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         
         // Make self (the LHS) observe the signal of the RHS property
         var initialRight = true
-        let leftObservingRightRemoval = rhs.signal.observe(SignalObserver(
-            synchronousValueChanging: { [weak self] value, metadata in
-                if selfInitiatedChange { return }
-                if case .change(let newValue) = rightToLeft(value, initialRight) {
-                    selfInitiatedChange = true
-                    self?.setValue(newValue, metadata)
-                    selfInitiatedChange = false
-                }
-                initialRight = false
+        let leftObservingRightRemoval = rhs.signal.observeSynchronousValueChanging{ [weak self] value, metadata in
+            if selfInitiatedChange { return }
+            if case .change(let newValue) = rightToLeft(value, initialRight) {
+                selfInitiatedChange = true
+                self?.setValue(newValue, metadata)
+                selfInitiatedChange = false
             }
-        ))
+            initialRight = false
+        }
         
         // Make the RHS property observe the signal of self (the LHS)
         var initialLeft = true
-        let rightObservingLeftRemoval = self.signal.observe(SignalObserver(
-            synchronousValueChanging: { [weak rhs] value, metadata in
-                if selfInitiatedChange { return }
-                if case .change(let newValue) = leftToRight(value, initialLeft) {
-                    selfInitiatedChange = true
-                    rhs?.setValue(newValue, metadata)
-                    selfInitiatedChange = false
-                }
-                initialLeft = false
+        let rightObservingLeftRemoval = self.signal.observeSynchronousValueChanging{ [weak rhs] value, metadata in
+            if selfInitiatedChange { return }
+            if case .change(let newValue) = leftToRight(value, initialLeft) {
+                selfInitiatedChange = true
+                rhs?.setValue(newValue, metadata)
+                selfInitiatedChange = false
             }
-        ))
+            initialLeft = false
+        }
         
         // Save and return the binding
         let bindingID = nextBindingID
@@ -310,21 +302,19 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         var otherObservingSelfRemoval: ObserverRemoval? = nil
         func makeOtherObserveSelf(_ selfSignal: Signal<T>) {
             var ignoreInitial = true
-            otherObservingSelfRemoval = selfSignal.observe(SignalObserver(
-                synchronousValueChanging: { [weak other] value, metadata in
-                    if ignoreInitial {
-                        // Ignore the initial value that is delivered by `self` when we attach `other` as an observer;
-                        // we don't want `other` to take on `self`'s value until self actually initiates a change
-                        ignoreInitial = false
-                        return
-                    }
-                    if !otherInitiatedChange {
-                        selfInitiatedChange = true
-                        other?.setValue(value, metadata)
-                        selfInitiatedChange = false
-                    }
+            otherObservingSelfRemoval = selfSignal.observeSynchronousValueChanging{ [weak other] value, metadata in
+                if ignoreInitial {
+                    // Ignore the initial value that is delivered by `self` when we attach `other` as an observer;
+                    // we don't want `other` to take on `self`'s value until self actually initiates a change
+                    ignoreInitial = false
+                    return
                 }
-            ))
+                if !otherInitiatedChange {
+                    selfInitiatedChange = true
+                    other?.setValue(value, metadata)
+                    selfInitiatedChange = false
+                }
+            }
         }
         
         // This is the number of async changes pending by the `other` property in response to a change
@@ -340,36 +330,36 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
 
         // Observe the signal of the other property.  Note that we don't make `other` observe
         // `self` until we've seen an initial value from `other`.
-        let selfObservingOtherRemoval = other.signal.observe(SignalObserver(
-            valueWillChange: { [weak self] in
-                guard let strongSelf = self else { return }
+        let selfObservingOtherRemoval = other.signal.observe{ [weak self] event in
+            guard let strongSelf = self else { return }
+            
+            switch event {
+            case .beginPossibleAsyncChange:
                 if selfInitiatedChange {
                     otherChangeCount += 1
                 }
                 if otherChangeCount == 0 {
                     strongSelf.changeHandler.willChange()
                 }
-            },
-            valueChanging: { [weak self] value, metadata in
-                guard let strongSelf = self else { return }
+                
+            case let .valueChanging(newValue, metadata):
                 if otherChangeCount == 0 {
                     otherInitiatedChange = true
-                    strongSelf.setValue(value, metadata)
+                    strongSelf.setValue(newValue, metadata)
                     otherInitiatedChange = false
                 }
                 if otherObservingSelfRemoval == nil {
                     makeOtherObserveSelf(strongSelf.signal)
                 }
-            },
-            valueDidChange: { [weak self] in
-                guard let strongSelf = self else { return }
+
+            case .endPossibleAsyncChange:
                 if otherChangeCount > 0 {
                     otherChangeCount -= 1
                 } else if otherChangeCount == 0 {
                     strongSelf.changeHandler.didChange()
                 }
             }
-        ))
+        }
         
         // Save and return the binding
         let bindingID = nextBindingID
@@ -412,7 +402,7 @@ public final class MutableValueProperty<T>: ReadWriteProperty<T> {
     public func change(_ newValue: T, metadata: ChangeMetadata) {
         if valueChanging(mutableValue, newValue) {
             mutableValue = newValue
-            notify.valueChanging(newValue, metadata)
+            sourceSignal.notifyValueChanging(newValue, metadata)
         }
     }
     
@@ -425,7 +415,7 @@ public final class MutableValueProperty<T>: ReadWriteProperty<T> {
         if valueChanging(mutableValue, newValue) {
             mutableValue = newValue
             didSet?(newValue, metadata)
-            notify.valueChanging(newValue, metadata)
+            sourceSignal.notifyValueChanging(newValue, metadata)
         }
     }
 }
@@ -484,7 +474,7 @@ public final class ExternalValueProperty<T>: ReadWriteProperty<T> {
     
     /// Called to notify observers that the underlying external value has been changed.
     public func changed(transient: Bool) {
-        notify.valueChanging(getValue(), ChangeMetadata(transient: transient))
+        sourceSignal.notifyValueChanging(getValue(), transient: transient)
     }
     
     internal override func getValue() -> T {
@@ -496,7 +486,7 @@ public final class ExternalValueProperty<T>: ReadWriteProperty<T> {
         if exclusiveMode { return }
         
         set(newValue, metadata)
-        notify.valueChanging(newValue, metadata)
+        sourceSignal.notifyValueChanging(newValue, metadata)
     }
 }
 

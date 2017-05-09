@@ -17,17 +17,18 @@ private class TestTreeObserver {
     var changes: [Change] = []
     
     func observe(_ property: TreeProperty<RowTreeNode>) -> ObserverRemoval {
-        return property.signal.observe(SignalObserver(
-            valueWillChange: {
+        return property.signal.observe{ event in
+            switch event {
+            case .beginPossibleAsyncChange:
                 self.willChangeCount += 1
-            },
-            valueChanging: { treeChanges, _ in
+                
+            case let .valueChanging(treeChanges, _):
                 self.changes.append(contentsOf: treeChanges)
-            },
-            valueDidChange: {
+                
+            case .endPossibleAsyncChange:
                 self.didChangeCount += 1
             }
-        ))
+        }
     }
     
     func reset() {

@@ -69,13 +69,13 @@ public prefix func !<P: AsyncReadablePropertyType>(property: P) -> AsyncReadable
 //            self.mappedProperty = prop
 //            self.mappedRemoval = prop.signal.observe(SignalObserver(
 //                valueWillChange: {
-//                    notify.valueWillChange()
+//                    notify.notifyBeginPossibleAsyncChange()
 //                },
 //                valueChanging: { mappedChange, mappedMetadata in
 //                    notify.valueChanging(mappedChange, mappedMetadata)
 //                },
 //                valueDidChange: {
-//                    notify.valueDidChange()
+//                    notify.notifyEndPossibleAsyncChange()
 //                }
 //            ))
 //        }
@@ -84,7 +84,7 @@ public prefix func !<P: AsyncReadablePropertyType>(property: P) -> AsyncReadable
 //            // Observe the underlying property
 //            self.underlyingRemoval = property.signal.observe(SignalObserver(
 //                valueWillChange: {
-//                    notify.valueWillChange()
+//                    notify.notifyBeginPossibleAsyncChange()
 //                },
 //                valueChanging: { [weak self] change, metadata in
 //                    // Stop observing the previous mapped property
@@ -100,16 +100,16 @@ public prefix func !<P: AsyncReadablePropertyType>(property: P) -> AsyncReadable
 //                    
 ////                    // Deliver the mapped property's initial value, if needed
 ////                    if let initialValue = mappedProperty.value {
-////                        notify.valueWillChange()
+////                        notify.notifyBeginPossibleAsyncChange()
 ////                        notify.valueChanging(initialValue, transient: false)
-////                        notify.valueDidChange()
+////                        notify.notifyEndPossibleAsyncChange()
 ////                    }
 //                    
 ////                    // Start the new property
 ////                    mappedProperty.start()
 //                },
 //                valueDidChange: {
-//                    notify.valueDidChange()
+//                    notify.notifyEndPossibleAsyncChange()
 //                }
 //            ))
 //

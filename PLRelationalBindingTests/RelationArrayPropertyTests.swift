@@ -16,17 +16,18 @@ private class TestArrayObserver {
     var changes: [Change] = []
     
     func observe(_ property: ArrayProperty<RowArrayElement>) -> ObserverRemoval {
-        return property.signal.observe(SignalObserver(
-            valueWillChange: {
+        return property.signal.observe{ event in
+            switch event {
+            case .beginPossibleAsyncChange:
                 self.willChangeCount += 1
-            },
-            valueChanging: { arrayChanges, _ in
+                
+            case let .valueChanging(arrayChanges, _):
                 self.changes.append(contentsOf: arrayChanges)
-            },
-            valueDidChange: {
+                
+            case .endPossibleAsyncChange:
                 self.didChangeCount += 1
             }
-        ))
+        }
     }
     
     func reset() {

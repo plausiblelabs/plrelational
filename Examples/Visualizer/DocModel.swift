@@ -202,9 +202,9 @@ class DocModel {
                 if case .idle = latestAsyncState { return }
                 // Only deliver if model was successfully loaded
                 guard let model = model else { return }
-                notify.valueWillChange()
+                notify.notifyBeginPossibleAsyncChange()
                 notify.valueChanging(.idle(model))
-                notify.valueDidChange()
+                notify.notifyEndPossibleAsyncChange()
             })
         }
         
@@ -213,7 +213,7 @@ class DocModel {
         // the fully realized view model upon completion.
         let removal = currentHistoryItemSignal.observe(SignalObserver(
             valueWillChange: {
-                notify.valueWillChange()
+                notify.notifyBeginPossibleAsyncChange()
             },
             valueChanging: { [weak self] change, _ in
                 let asyncState: AsyncState<RelationViewModel?>
@@ -236,7 +236,7 @@ class DocModel {
                 notify.valueChanging(asyncState)
             },
             valueDidChange: {
-                notify.valueDidChange()
+                notify.notifyEndPossibleAsyncChange()
             }
         ))
         self.observerRemovals.append(removal)

@@ -37,11 +37,11 @@ class RelationSignal<T>: SourceSignal<T> {
             // We already have a value, so deliver it to just the given observer
             // TODO: Should we have a metadata flag to note this as an "initial" value (transient
             // doesn't really tell the whole story)
-            observer.valueChanging(initialValue, transient: false)
+            observer.notifyValueChanging(initialValue, transient: false)
         } else {
             // We don't already have a value; if we haven't already done so, perform
             // an async query to get the initial value
-            observer.valueWillChange()
+            observer.notifyBeginPossibleAsyncChange()
             if !startedInitialQuery {
                 startedInitialQuery = true
                 relation.asyncAllRows(
@@ -50,9 +50,9 @@ class RelationSignal<T>: SourceSignal<T> {
                         // Note that we can notify all observers, not just the given one
                         if let newValue = result.ok {
                             self.latestValue = newValue
-                            self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+                            self.notifyValueChanging(newValue, transient: false)
                         }
-                        self.notifyDidChange()
+                        self.notifyEndPossibleAsyncChange()
                     }
                 )
             }
@@ -74,7 +74,7 @@ class RelationSignal<T>: SourceSignal<T> {
 
 extension RelationSignal: AsyncRelationContentCoalescedObserver {
     func relationWillChange(_ relation: Relation) {
-        self.notifyWillChange()
+        self.notifyBeginPossibleAsyncChange()
     }
 
     func relationDidChange(_ relation: Relation, result: Result<T, RelationError>) {
@@ -82,9 +82,9 @@ extension RelationSignal: AsyncRelationContentCoalescedObserver {
         case .Ok(let newValue):
             if !isRepeat(newValue) {
                 self.latestValue = newValue
-                self.notifyChanging(newValue, metadata: ChangeMetadata(transient: false))
+                self.notifyValueChanging(newValue, transient: false)
             }
-            self.notifyDidChange()
+            self.notifyEndPossibleAsyncChange()
         case .Err(let err):
             // TODO: actual handling
             fatalError("Got error for relation change: \(err)")
