@@ -59,6 +59,13 @@ extension ReadablePropertyType where Value == Bool {
     }
 }
 
+extension MutableValueProperty where T == Bool {
+    public func toggle(transient: Bool) {
+        let newValue = !self.value
+        self.change(newValue, transient: transient)
+    }
+}
+
 // TODO: This syntax is same as SelectExpression operators; maybe we should use something different
 infix operator *||: LogicalDisjunctionPrecedence
 
