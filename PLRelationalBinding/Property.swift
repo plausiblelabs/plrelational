@@ -308,24 +308,6 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         // This flag is set while `other` is triggering a change to `self`
         var otherInitiatedChange = false
 
-        var otherObservingSelfRemoval: ObserverRemoval? = nil
-        func makeOtherObserveSelf(_ selfSignal: Signal<T>) {
-            var ignoreInitial = true
-            otherObservingSelfRemoval = selfSignal.observeSynchronousValueChanging{ [weak other] value, metadata in
-                if ignoreInitial {
-                    // Ignore the initial value that is delivered by `self` when we attach `other` as an observer;
-                    // we don't want `other` to take on `self`'s value until self actually initiates a change
-                    ignoreInitial = false
-                    return
-                }
-                if !otherInitiatedChange {
-                    selfInitiatedChange = true
-                    other?.setValue(value, metadata)
-                    selfInitiatedChange = false
-                }
-            }
-        }
-        
         // This is the number of async changes pending by the `other` property in response to a change
         // by the `self` property
         // TODO: This system isn't quite sufficient, as it's possible for the `self` property to
@@ -337,11 +319,26 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         // how conflicts are handled should they arise.
         var otherChangeCount = 0
 
-        // Observe the signal of the other property.  Note that we don't make `other` observe
-        // `self` until we've seen an initial value from `other`.
+        // Make the `other` property observe `self`
+        var ignoreInitial = true
+        let otherObservingSelfRemoval = self.signal.observeSynchronousValueChanging{ [weak other] value, metadata in
+            if ignoreInitial {
+                // Ignore the initial value that is delivered by `self` when we attach `other` as an observer;
+                // we don't want `other` to take on `self`'s value until self actually initiates a change
+                ignoreInitial = false
+                return
+            }
+            if !otherInitiatedChange {
+                selfInitiatedChange = true
+                other?.setValue(value, metadata)
+                selfInitiatedChange = false
+            }
+        }
+        
+        // Make `self` observe the signal of the `other` property
         let selfObservingOtherRemoval = other.signal.observe{ [weak self] event in
             guard let strongSelf = self else { return }
-            
+
             switch event {
             case .beginPossibleAsyncChange:
                 if selfInitiatedChange {
@@ -357,9 +354,6 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
                     strongSelf.setValue(newValue, metadata)
                     otherInitiatedChange = false
                 }
-                if otherObservingSelfRemoval == nil {
-                    makeOtherObserveSelf(strongSelf.signal)
-                }
 
             case .endPossibleAsyncChange:
                 if otherChangeCount > 0 {
@@ -373,8 +367,8 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
         // Save and return the binding
         let bindingID = nextBindingID
         let binding = Binding(signalOwner: other, removal: { [weak self] in
+            otherObservingSelfRemoval()
             selfObservingOtherRemoval()
-            otherObservingSelfRemoval?()
             self?.bindings.removeValue(forKey: bindingID)?.unbind()
         })
         nextBindingID += 1
