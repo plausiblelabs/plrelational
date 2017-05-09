@@ -24,8 +24,8 @@ class AsyncPropertyTests: BindingTestCase {
         let observer2 = BoolObserver()
         
         // Verify initial property value
-        verify(property, observer1, value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
-        verify(property, observer2, value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
+        verify(property, observer1, value: false, changes: [], willChangeCount: 0, didChangeCount: 0)
+        verify(property, observer2, value: false, changes: [], willChangeCount: 0, didChangeCount: 0)
         
         // Verify that the current property value is delivered when observer is attached
         let removal1 = observer1.observe(property.signal)
@@ -45,7 +45,7 @@ class AsyncPropertyTests: BindingTestCase {
         let asyncProperty = syncProperty.async()
 
         let observer = StringObserver()
-        verify(asyncProperty, observer, value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
+        verify(asyncProperty, observer, value: "1", changes: [], willChangeCount: 0, didChangeCount: 0)
 
         let removal = observer.observe(asyncProperty.signal)
         XCTAssertEqual(syncProperty.value, "1")

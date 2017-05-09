@@ -83,8 +83,8 @@ class RelationAsyncPropertyTests: BindingTestCase {
             XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
         }
         
-        // Verify that property value remains nil until we actually observe the property's signal
-        verify(value: nil, changes: [], willChangeCount: 0, didChangeCount: 0)
+        // Verify that property takes on the initial value from the source signal (as a result of accessing `value`)
+        verify(value: "cow", changes: [], willChangeCount: 0, didChangeCount: 0)
         
         // Observe the property's signal and verify that the initial value is delivered immediately
         let removal = observer.observe(property.signal)
@@ -212,9 +212,8 @@ class RelationAsyncPropertyTests: BindingTestCase {
         // Bidirectionally bind lhs property to the async name property
         _ = lhsProperty <~> nameProperty
 
-        // Look at the observer counts to verify that lhsProperty has started observing nameProperty (note that nameProperty doesn't
-        // start observing lhsProperty until the initial name value has been computed)
-        XCTAssertEqual(lhsProperty.signal.observerCount, 1)
+        // Look at the observer counts to verify that lhsProperty has started observing nameProperty and vice versa
+        XCTAssertEqual(lhsProperty.signal.observerCount, 2)
         XCTAssertEqual(nameProperty.signal.observerCount, 2)
         
         // Verify that name property's value is loaded asynchronously and that lhs property's value is
@@ -227,7 +226,7 @@ class RelationAsyncPropertyTests: BindingTestCase {
         resetNameObserver()
         resetLHSObserver()
 
-        // Verify that nameProperty has started observing lhsProperty
+        // Verify that observer counts haven't changed
         XCTAssertEqual(lhsProperty.signal.observerCount, 2)
         XCTAssertEqual(nameProperty.signal.observerCount, 2)
 
