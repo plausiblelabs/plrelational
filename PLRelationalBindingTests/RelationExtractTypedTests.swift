@@ -122,7 +122,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         
         var changes: [String?] = []
         let p = r.project("name").oneStringOrNil().property()
-        _ = p.signal.observe{ v, _ in changes.append(v) }
+        _ = p.signal.observeValueChanging{ v, _ in changes.append(v) }
         AssertValueUnset(p)
         XCTAssertTrue(changes == [])
         
@@ -147,21 +147,21 @@ class RelationAsTypedValueTests: BindingTestCase {
         
         var changes: [String?] = []
         let p = r.project("name").oneStringOrNil(initialValue: "cat").property()
-        _ = p.signal.observe{ v, _ in changes.append(v) }
+        _ = p.signal.observeValueChanging{ v, _ in changes.append(v) }
         AssertValueEqual(p, "cat")
-        XCTAssertTrue(changes == [])
+        XCTAssertTrue(changes == ["cat"])
         
         awaitCompletion{ p.start() }
         AssertValueEqual(p, "cat")
-        XCTAssertTrue(changes == [])
+        XCTAssertTrue(changes == ["cat"])
         
         awaitCompletion{ _ = r.asyncUpdate(true, newValues: ["name": "kat"]) }
         AssertValueEqual(p, "kat")
-        XCTAssertTrue(changes == ["kat"])
+        XCTAssertTrue(changes == ["cat", "kat"])
         
         awaitCompletion{ _ = r.asyncAdd(["id": 3, "name": "dog", "friendly": 0, "age": 6, "pulse": 3.0]) }
         AssertValueEqual(p, nil)
-        XCTAssertTrue(changes == ["kat", nil])
+        XCTAssertTrue(changes == ["cat", "kat", nil])
     }
     
     func testOneStringSignal() {
@@ -172,7 +172,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         
         var changes: [String] = []
         let p = r.project("name").oneString().property()
-        _ = p.signal.observe{ v, _ in changes.append(v) }
+        _ = p.signal.observeValueChanging{ v, _ in changes.append(v) }
         XCTAssertEqual(p.value, nil)
         XCTAssertTrue(changes == [])
         
@@ -197,21 +197,21 @@ class RelationAsTypedValueTests: BindingTestCase {
         
         var changes: [String] = []
         let p = r.project("name").oneString(initialValue: "cat").property()
-        _ = p.signal.observe{ v, _ in changes.append(v) }
+        _ = p.signal.observeValueChanging{ v, _ in changes.append(v) }
         XCTAssertEqual(p.value, "cat")
-        XCTAssertTrue(changes == [])
+        XCTAssertTrue(changes == ["cat"])
         
         awaitCompletion{ p.start() }
         XCTAssertEqual(p.value, "cat")
-        XCTAssertTrue(changes == [])
+        XCTAssertTrue(changes == ["cat"])
         
         awaitCompletion{ _ = r.asyncUpdate(true, newValues: ["name": "kat"]) }
         XCTAssertEqual(p.value, "kat")
-        XCTAssertTrue(changes == ["kat"])
+        XCTAssertTrue(changes == ["cat", "kat"])
         
         awaitCompletion{ _ = r.asyncAdd(["id": 3, "name": "dog", "friendly": 0, "age": 6, "pulse": 3.0]) }
         XCTAssertEqual(p.value, "")
-        XCTAssertTrue(changes == ["kat", ""])
+        XCTAssertTrue(changes == ["cat", "kat", ""])
     }
     
     func testExtractCommonValue() {

@@ -21,9 +21,10 @@ open class TextField: UITextField, UITextFieldDelegate {
     /// Whether to deliver transient changes.  If `true` a transient change will be delivered via the
     /// `string` property on each keystroke.  If `false` (the default), no transient changes will be
     /// delivered, and only a single commit change will be delivered when the user is done editing.
-    // TODO: For now we assume deliverTransientChanges==true
-//    public var deliverTransientChanges: Bool = false
+    public var deliverTransientChanges: Bool = false
     
+    private var previousCommittedValue: String?
+
     public override init(frame: CGRect) {
         super.init(frame: frame)
         
@@ -36,8 +37,27 @@ open class TextField: UITextField, UITextFieldDelegate {
         self.delegate = self
     }
 
+    open func textFieldDidBeginEditing(_ textField: UITextField) {
+        _bindable_text.exclusiveMode = true
+        previousCommittedValue = self.text
+    }
+    
     open func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-        _bindable_text.changed(transient: true)
+        if deliverTransientChanges {
+            _bindable_text.changed(transient: true)
+        }
         return true
+    }
+    
+    open func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        return true
+    }
+    
+    open func textFieldDidEndEditing(_ textField: UITextField, reason: UITextFieldDidEndEditingReason) {
+        if self.text != previousCommittedValue {
+            _bindable_text.changed(transient: false)
+        }
+        _bindable_text.exclusiveMode = false
+        previousCommittedValue = nil
     }
 }

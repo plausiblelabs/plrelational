@@ -69,24 +69,14 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
     }
     
     public let signal: Signal<SignalChange>
-    internal let notify: Signal<SignalChange>.Notify
     
-    init(root: Node, signal: Signal<SignalChange>, notify: Signal<SignalChange>.Notify) {
+    init(root: Node, signal: Signal<SignalChange>) {
         self.root = root
         self.signal = signal
-        self.notify = notify
     }
     
     public var property: AsyncReadableProperty<Node> {
         return fullTree()
-    }
-    
-    open func start() {
-    }
-    
-    internal func notifyObservers(treeChanges: [TreeChange<Node>]) {
-        let metadata = ChangeMetadata(transient: false)
-        notify.valueChanging(treeChanges, metadata)
     }
     
     /// Returns the node with the given identifier.
@@ -216,11 +206,6 @@ private class FullTreeProperty<Node: TreeNode>: AsyncReadableProperty<Node> {
     
     fileprivate init(underlying: TreeProperty<Node>) {
         self.underlying = underlying
-        super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.root })
-    }
-    
-    fileprivate override func start() {
-        underlying.start()
-        super.start()
+        super.init(signal: underlying.signal.map{ _ in return underlying.root })
     }
 }

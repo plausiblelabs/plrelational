@@ -9,7 +9,7 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
     /// Returns an AsyncReadableProperty whose value is derived from this property's `value`.
     /// The given `transform` will be applied whenever this property's value changes.
     public func map<U>(_ transform: @escaping (Self.Value) -> U) -> AsyncReadableProperty<U> {
-        return MappedValueProperty(property: self, transform: transform)
+        return AsyncReadableProperty(signal: self.signal.map(transform))
     }
     
     /// Returns an AsyncReadableProperty whose value is derived from the given property's `value`.
@@ -18,7 +18,9 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
     public func flatMap<P: AsyncReadablePropertyType>(_ transform: @escaping (Self.Value) -> P) -> AsyncReadableProperty<P.Value>
         where P.Value == P.SignalChange
     {
-        return FlatMappedValueProperty(property: self, transform: transform)
+        return AsyncReadableProperty(signal: self.signal.flatMap{
+            return transform($0).signal
+        })
     }
 }
 
@@ -28,7 +30,7 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
 public func zip<LHS: AsyncReadablePropertyType, RHS: AsyncReadablePropertyType>(_ lhs: LHS, _ rhs: RHS) -> AsyncReadableProperty<(LHS.Value, RHS.Value)>
     where LHS.Value == LHS.SignalChange, RHS.Value == RHS.SignalChange
 {
-    return BinaryOpValueProperty(lhs, rhs, { ($0, $1) })
+    return AsyncReadableProperty(signal: zip(lhs.signal, rhs.signal))
 }
 
 /// Returns an AsyncReadableProperty whose value is the negation of the boolean value of the given property.
@@ -44,189 +46,4 @@ public prefix func !<P: AsyncReadablePropertyType>(property: P) -> AsyncReadable
     where P.Value == Bool, P.SignalChange == Bool
 {
     return not(property)
-}
-
-private class MappedValueProperty<T>: AsyncReadableProperty<T> {
-    private let underlying: AsyncPropertyType
-    
-    init<P: AsyncReadablePropertyType>(property: P, transform: @escaping (P.Value) -> T)
-        where P.Value == P.SignalChange
-    {
-        self.underlying = property
-
-        let initialValue = property.value.map(transform)
-        super.init(initialValue: initialValue, signal: property.signal.map(transform))
-    }
-    
-    fileprivate override func start() {
-        underlying.start()
-        super.start()
-    }
-}
-
-private class FlatMappedValueProperty<T>: AsyncReadableProperty<T> {
-    private let underlying: AsyncPropertyType
-    private var startFunc: (() -> Void)?
-    private var underlyingRemoval: ObserverRemoval?
-    private var mappedRemoval: ObserverRemoval?
-    
-    init<P: AsyncReadablePropertyType, Q: AsyncReadablePropertyType>(property: P, transform: @escaping (P.Value) -> Q)
-        where P.Value == P.SignalChange, Q.Value == Q.SignalChange, T == Q.Value
-    {
-        self.underlying = property
-        
-        let initialMappedProperty = property.value.map(transform)
-        let initialValue = initialMappedProperty?.value
-
-        // TODO: Do we need to take initialMappedProperty.signal's changeCount into account?
-        let (signal, notify) = Signal<Q.Value>.pipe(initialChangeCount: property.signal.changeCount)
-        
-        super.init(initialValue: initialValue, signal: signal)
-
-        func observeMappedProperty(_ prop: Q) {
-            self.mappedRemoval = prop.signal.observe(SignalObserver(
-                valueWillChange: {
-                    notify.valueWillChange()
-                },
-                valueChanging: { mappedChange, mappedMetadata in
-                    notify.valueChanging(mappedChange, mappedMetadata)
-                },
-                valueDidChange: {
-                    notify.valueDidChange()
-                }
-            ))
-        }
-        
-        self.startFunc = {
-            // Observe the underlying property
-            self.underlyingRemoval = property.signal.observe(SignalObserver(
-                valueWillChange: {
-                    notify.valueWillChange()
-                },
-                valueChanging: { [weak self] change, metadata in
-                    // Stop observing the previous mapped property
-                    // TODO: Should we stop observing earlier (in valueWillChange)?
-                    self?.mappedRemoval?()
-                    
-                    // Compute the new mapped property
-                    let mappedProperty = transform(change)
-                    
-                    // Observe the new property's signal
-                    observeMappedProperty(mappedProperty)
-                    
-                    // Deliver the mapped property's initial value, if needed
-                    if let initialValue = mappedProperty.value {
-                        notify.valueWillChange()
-                        notify.valueChanging(initialValue, transient: false)
-                        notify.valueDidChange()
-                    }
-                    
-                    // Start the new property
-                    mappedProperty.start()
-                },
-                valueDidChange: {
-                    notify.valueDidChange()
-                }
-            ))
-
-            // Start the underlying property
-            property.start()
-            
-            if let initialProperty = initialMappedProperty {
-                // Observe the initial mapped property's signal
-                observeMappedProperty(initialProperty)
-                
-                // Start the initial mapped property
-                initialProperty.start()
-            }
-        }
-    }
-
-    deinit {
-        underlyingRemoval?()
-        mappedRemoval?()
-    }
-    
-    fileprivate override func start() {
-        startFunc?()
-        startFunc = nil
-        super.start()
-    }
-}
-
-private class BinaryOpValueProperty<T>: AsyncReadableProperty<T> {
-    private let underlying1: AsyncPropertyType
-    private let underlying2: AsyncPropertyType
-    private var startFunc: (() -> Void)?
-    private var removal1: ObserverRemoval?
-    private var removal2: ObserverRemoval?
-
-    init<LHS: AsyncReadablePropertyType, RHS: AsyncReadablePropertyType>(_ lhs: LHS, _ rhs: RHS, _ f: @escaping (LHS.Value, RHS.Value) -> T)
-        where LHS.Value == LHS.SignalChange, RHS.Value == RHS.SignalChange
-    {
-        self.underlying1 = lhs
-        self.underlying2 = rhs
-        
-        let (signal, notify) = Signal<T>.pipe(initialChangeCount: lhs.signal.changeCount + rhs.signal.changeCount)
-        
-        // Note that we don't deliver a pair until both underlying values are defined
-        var lhsValue = lhs.value
-        var rhsValue = rhs.value
-        func notifyChanging(_ metadata: ChangeMetadata) {
-            if let lv = lhsValue, let rv = rhsValue {
-                notify.valueChanging(f(lv, rv), metadata)
-            }
-        }
-
-        let initialValue: T?
-        if let lv = lhsValue, let rv = rhsValue {
-            initialValue = f(lv, rv)
-        } else {
-            initialValue = nil
-        }
-        super.init(initialValue: initialValue, signal: signal)
-        
-        self.startFunc = {
-            // Observe the underlying signals
-            self.removal1 = lhs.signal.observe(SignalObserver(
-                valueWillChange: {
-                    notify.valueWillChange()
-                },
-                valueChanging: { change, metadata in
-                    lhsValue = change
-                    notifyChanging(metadata)
-                },
-                valueDidChange: {
-                    notify.valueDidChange()
-                }
-            ))
-            self.removal2 = rhs.signal.observe(SignalObserver(
-                valueWillChange: {
-                    notify.valueWillChange()
-                },
-                valueChanging: { change, metadata in
-                    rhsValue = change
-                    notifyChanging(metadata)
-                },
-                valueDidChange: {
-                    notify.valueDidChange()
-                }
-            ))
-            
-            // Start the underlying properties
-            lhs.start()
-            rhs.start()
-        }
-    }
-
-    deinit {
-        removal1?()
-        removal2?()
-    }
-    
-    fileprivate override func start() {
-        startFunc?()
-        startFunc = nil
-        super.start()
-    }
 }

@@ -71,12 +71,10 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
         
         super.init()
         
-        // TODO: Handle will/didChange
-        treeObserverRemoval = model.data.signal.observe(SignalObserver(
-            valueWillChange: {},
-            valueChanging: { [weak self] changes, _ in self?.treeChanged(changes) },
-            valueDidChange: {}
-        ))
+        // TODO: Handle Begin/EndPossibleAsync events?
+        treeObserverRemoval = model.data.signal.observeValueChanging{ [weak self] changes, _ in
+            self?.treeChanged(changes)
+        }
         _ = selection <~> model.selection
         
         outlineView.delegate = self

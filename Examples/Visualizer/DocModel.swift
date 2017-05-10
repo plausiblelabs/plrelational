@@ -190,7 +190,7 @@ class DocModel {
         
         // Create a new signal that will deliver the AsyncState changes
         let currentHistoryItemSignal = self.activeTabCurrentHistoryItem.signal
-        let (signal, notify) = Signal<AsyncState<RelationViewModel?>>.pipe(initialChangeCount: currentHistoryItemSignal.changeCount)
+        let (signal, notify) = Signal<AsyncState<RelationViewModel?>>.pipe()
 
         func loadViewModel(_ objectID: ObjectID) {
             let contentLoadID = UUID()
@@ -202,9 +202,9 @@ class DocModel {
                 if case .idle = latestAsyncState { return }
                 // Only deliver if model was successfully loaded
                 guard let model = model else { return }
-                notify.valueWillChange()
+                notify.notifyBeginPossibleAsyncChange()
                 notify.valueChanging(.idle(model))
-                notify.valueDidChange()
+                notify.notifyEndPossibleAsyncChange()
             })
         }
         
@@ -213,7 +213,7 @@ class DocModel {
         // the fully realized view model upon completion.
         let removal = currentHistoryItemSignal.observe(SignalObserver(
             valueWillChange: {
-                notify.valueWillChange()
+                notify.notifyBeginPossibleAsyncChange()
             },
             valueChanging: { [weak self] change, _ in
                 let asyncState: AsyncState<RelationViewModel?>
@@ -236,7 +236,7 @@ class DocModel {
                 notify.valueChanging(asyncState)
             },
             valueDidChange: {
-                notify.valueDidChange()
+                notify.notifyEndPossibleAsyncChange()
             }
         ))
         self.observerRemovals.append(removal)

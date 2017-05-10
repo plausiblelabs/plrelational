@@ -7,11 +7,38 @@ import XCTest
 import PLRelational
 @testable import PLRelationalBinding
 
-class RelationTreePropertyTests: BindingTestCase {
+private typealias Pos = TreePos<RowTreeNode>
+private typealias Path = TreePath<RowTreeNode>
+private typealias Change = TreeChange<RowTreeNode>
 
-    private typealias Pos = TreePos<RowTreeNode>
-    private typealias Path = TreePath<RowTreeNode>
-    private typealias Change = TreeChange<RowTreeNode>
+private class TestTreeObserver {
+    var willChangeCount = 0
+    var didChangeCount = 0
+    var changes: [Change] = []
+    
+    func observe(_ property: TreeProperty<RowTreeNode>) -> ObserverRemoval {
+        return property.signal.observe{ event in
+            switch event {
+            case .beginPossibleAsyncChange:
+                self.willChangeCount += 1
+                
+            case let .valueChanging(treeChanges, _):
+                self.changes.append(contentsOf: treeChanges)
+                
+            case .endPossibleAsyncChange:
+                self.didChangeCount += 1
+            }
+        }
+    }
+    
+    func reset() {
+        willChangeCount = 0
+        didChangeCount = 0
+        changes = []
+    }
+}
+
+class RelationTreePropertyTests: BindingTestCase {
 
     func testInit() {
         let sqliteDB = makeDB().db
@@ -43,44 +70,38 @@ class RelationTreePropertyTests: BindingTestCase {
         addCollection(6, name: "Child2", parentID: 2, order: 2.0)
         addCollection(7, name: "Group2", parentID: nil, order: 2.0)
         
-        var willChangeCount = 0
-        var didChangeCount = 0
-        var changes: [Change] = []
-        
         let property = r.treeProperty(idAttr: "id", parentAttr: "parent", orderAttr: "order")
-        let removal = property.signal.observe(SignalObserver(
-            valueWillChange: {
-                willChangeCount += 1
-            },
-            valueChanging: { treeChanges, _ in
-                changes.append(contentsOf: treeChanges)
-            },
-            valueDidChange: {
-                didChangeCount += 1
-            }
-        ))
+        let observer = TestTreeObserver()
+        
+        func verify(nodes: [String], changes: [Change], willChangeCount: Int, didChangeCount: Int, file: StaticString = #file, line: UInt = #line) {
+            verifyTree(property, nodes, file: file, line: line)
+            XCTAssertEqual(observer.changes, changes, file: file, line: line)
+            XCTAssertEqual(observer.willChangeCount, willChangeCount, file: file, line: line)
+            XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
+            observer.changes = []
+        }
         
         // Verify that property value remains empty until we actually start it
-        XCTAssertEqual(property.root.children.count, 0)
-        XCTAssertEqual(willChangeCount, 0)
-        XCTAssertEqual(didChangeCount, 0)
-        XCTAssertEqual(changes, [])
-        
-        // Verify that in-memory array structure was built correctly after property/signal was started
-        awaitCompletion{ property.start() }
-        verifyTree(property, [
-            "Group1",
-            "  Collection1",
-            "    Child1",
-            "    Child2",
-            "  Page1",
-            "  Page2",
-            "Group2"
-        ])
-        XCTAssertEqual(willChangeCount, 1)
-        XCTAssertEqual(didChangeCount, 1)
-        // TODO
-        //XCTAssertEqual(changes, [])
+        verify(nodes: [], changes: [], willChangeCount: 0, didChangeCount: 0)
+
+        // Verify that in-memory tree structure is built correctly after signal is observed/started
+        let removal = observer.observe(property)
+        verify(nodes: [], changes: [], willChangeCount: 1, didChangeCount: 0)
+        awaitIdle()
+        verify(
+            nodes: [
+                "Group1",
+                "  Collection1",
+                "    Child1",
+                "    Child2",
+                "  Page1",
+                "  Page2",
+                "Group2"
+            ],
+            changes: [.initial(property.root)],
+            willChangeCount: 1,
+            didChangeCount: 1
+        )
         
         removal()
     }
@@ -92,22 +113,8 @@ class RelationTreePropertyTests: BindingTestCase {
         let db = TransactionalDatabase(loggingDB)
         let r = db["collection"]
 
-        var willChangeCount = 0
-        var didChangeCount = 0
-        var changes: [Change] = []
-        
         let property = r.treeProperty(idAttr: "id", parentAttr: "parent", orderAttr: "order")
-        let removal = property.signal.observe(SignalObserver(
-            valueWillChange: {
-                willChangeCount += 1
-            },
-            valueChanging: { treeChanges, _ in
-                changes.append(contentsOf: treeChanges)
-            },
-            valueDidChange: {
-                didChangeCount += 1
-            }
-        ))
+        let observer = TestTreeObserver()
 
         func addCollection(_ collectionID: Int64, name: String, parentID: Int64?) {
             let parent = parentID.map{RelationValue($0)}
@@ -118,41 +125,31 @@ class RelationTreePropertyTests: BindingTestCase {
                 "parent": parent ?? .null,
                 "order": RelationValue(order)
             ]
-            awaitCompletion{
-                r.asyncAdd(row)
-            }
+            r.asyncAdd(row)
+            // XXX: orderForAppend relies on the current in-memory tree structure, so we await
+            // async completion after each add
+            awaitIdle()
         }
         
         func deleteCollection(_ collectionID: Int64) {
-            awaitCompletion{
-                r.treeDelete(
-                    Attribute("id") *== RelationValue(collectionID),
-                    parentAttribute: "id",
-                    childAttribute: "parent",
-                    completionCallback: { _ in })
-            }
+            r.treeDelete(
+                Attribute("id") *== RelationValue(collectionID),
+                parentAttribute: "id",
+                childAttribute: "parent",
+                completionCallback: { _ in })
         }
         
         func renameCollection(_ collectionID: Int64, _ name: String) {
-            awaitCompletion{
-                r.asyncUpdate(Attribute("id") *== RelationValue(collectionID), newValues: ["name": RelationValue(name)])
-            }
+            r.asyncUpdate(Attribute("id") *== RelationValue(collectionID), newValues: ["name": RelationValue(name)])
         }
         
         func moveCollection(srcPath: Path, dstPath: Path) {
             let (nodeID, dstParentID, order) = property.orderForMove(srcPath: srcPath, dstPath: dstPath)
             
-            awaitCompletion{
-                r.asyncUpdate(Attribute("id") *== nodeID, newValues: [
-                    "parent": dstParentID ?? .null,
-                    "order": RelationValue(order)
-                ])
-            }
-        }
-        
-        func verifyChanges(_ expected: [Change], file: StaticString = #file, line: UInt = #line) {
-            XCTAssertEqual(changes, expected, file: file, line: line)
-            changes = []
+            r.asyncUpdate(Attribute("id") *== nodeID, newValues: [
+                "parent": dstParentID ?? .null,
+                "order": RelationValue(order)
+            ])
         }
         
         func verifySQLite(_ expected: Relation, file: StaticString = #file, line: UInt = #line) {
@@ -165,19 +162,24 @@ class RelationTreePropertyTests: BindingTestCase {
             return TreePath(parent: parent, index: index)
         }
         
+        func verify(nodes: [String], changes: [Change], willChangeCount: Int, didChangeCount: Int, file: StaticString = #file, line: UInt = #line) {
+            verifyTree(property, nodes, file: file, line: line)
+            XCTAssertEqual(observer.changes, changes, file: file, line: line)
+            XCTAssertEqual(observer.willChangeCount, willChangeCount, file: file, line: line)
+            XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
+            observer.changes = []
+        }
+        
         // Verify that property value remains empty until we actually start it
-        XCTAssertEqual(property.value!.children.count, 0)
-        XCTAssertEqual(willChangeCount, 0)
-        XCTAssertEqual(didChangeCount, 0)
-        XCTAssertEqual(changes, [])
+        verify(nodes: [], changes: [], willChangeCount: 0, didChangeCount: 0)
 
-        // Verify that in-memory tree structure is empty after property/signal was started
-        awaitCompletion{ property.start() }
-        XCTAssertEqual(property.value!.children.count, 0)
-        XCTAssertEqual(willChangeCount, 1)
-        XCTAssertEqual(didChangeCount, 1)
-        verifyChanges([.initial(property.value!)])
-
+        // Verify that in-memory tree structure is built correctly after signal is observed/started
+        let removal = observer.observe(property)
+        verify(nodes: [], changes: [], willChangeCount: 1, didChangeCount: 0)
+        awaitIdle()
+        verify(nodes: [], changes: [.initial(property.root)], willChangeCount: 1, didChangeCount: 1)
+        observer.reset()
+        
         // Insert some collections
         // TODO: The following only uses orderForAppend; need to exercise orderForInsert too
         addCollection(1, name: "Group1", parentID: nil)
@@ -188,26 +190,32 @@ class RelationTreePropertyTests: BindingTestCase {
         addCollection(6, name: "Child2", parentID: 2)
         addCollection(7, name: "Child3", parentID: 2)
         addCollection(8, name: "Group2", parentID: nil)
-        verifyTree(property, [
-            "Group1",
-            "  Collection1",
-            "    Child1",
-            "    Child2",
-            "    Child3",
-            "  Page1",
-            "  Page2",
-            "Group2"
-        ])
-        verifyChanges([
-            .insert(path(nil, 0)),
-            .insert(path(1, 0)),
-            .insert(path(1, 1)),
-            .insert(path(1, 2)),
-            .insert(path(2, 0)),
-            .insert(path(2, 1)),
-            .insert(path(2, 2)),
-            .insert(path(nil, 1)),
-        ])
+        verify(
+            nodes: [
+                "Group1",
+                "  Collection1",
+                "    Child1",
+                "    Child2",
+                "    Child3",
+                "  Page1",
+                "  Page2",
+                "Group2"
+            ],
+            changes: [
+                .insert(path(nil, 0)),
+                .insert(path(1, 0)),
+                .insert(path(1, 1)),
+                .insert(path(1, 2)),
+                .insert(path(2, 0)),
+                .insert(path(2, 1)),
+                .insert(path(2, 2)),
+                .insert(path(nil, 1)),
+            ],
+            willChangeCount: 8,
+            didChangeCount: 8
+        )
+        observer.reset()
+        
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
             [1, "Group1",      .null, 5.0],
@@ -222,19 +230,26 @@ class RelationTreePropertyTests: BindingTestCase {
 
         // Re-order a collection within its parent
         moveCollection(srcPath: path(2, 2), dstPath: path(2, 0))
-        verifyTree(property, [
-            "Group1",
-            "  Collection1",
-            "    Child3",
-            "    Child1",
-            "    Child2",
-            "  Page1",
-            "  Page2",
-            "Group2"
-        ])
-        verifyChanges([
-            .move(src: path(2, 2), dst: path(2, 0))
-        ])
+        awaitIdle()
+        verify(
+            nodes: [
+                "Group1",
+                "  Collection1",
+                "    Child3",
+                "    Child1",
+                "    Child2",
+                "  Page1",
+                "  Page2",
+                "Group2"
+            ],
+            changes: [
+                .move(src: path(2, 2), dst: path(2, 0))
+            ],
+            willChangeCount: 1,
+            didChangeCount: 1
+        )
+        observer.reset()
+
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
             [1, "Group1",      .null, 5.0],
@@ -249,19 +264,26 @@ class RelationTreePropertyTests: BindingTestCase {
 
         // Move a collection to a new parent
         moveCollection(srcPath: path(1, 0), dstPath: path(8, 0))
-        verifyTree(property, [
-            "Group1",
-            "  Page1",
-            "  Page2",
-            "Group2",
-            "  Collection1",
-            "    Child3",
-            "    Child1",
-            "    Child2"
-        ])
-        verifyChanges([
-            .move(src: path(1, 0), dst: path(8, 0))
-        ])
+        awaitIdle()
+        verify(
+            nodes: [
+                "Group1",
+                "  Page1",
+                "  Page2",
+                "Group2",
+                "  Collection1",
+                "    Child3",
+                "    Child1",
+                "    Child2"
+            ],
+            changes: [
+                .move(src: path(1, 0), dst: path(8, 0))
+            ],
+            willChangeCount: 1,
+            didChangeCount: 1
+        )
+        observer.reset()
+
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
             [1, "Group1",      .null, 5.0],
@@ -276,19 +298,26 @@ class RelationTreePropertyTests: BindingTestCase {
 
         // Move a collection to the top level
         moveCollection(srcPath: path(2, 1), dstPath: path(nil, 1))
-        verifyTree(property, [
-            "Group1",
-            "  Page1",
-            "  Page2",
-            "Child1",
-            "Group2",
-            "  Collection1",
-            "    Child3",
-            "    Child2"
-        ])
-        verifyChanges([
-            .move(src: path(2, 1), dst: path(nil, 1))
-        ])
+        awaitIdle()
+        verify(
+            nodes: [
+                "Group1",
+                "  Page1",
+                "  Page2",
+                "Child1",
+                "Group2",
+                "  Collection1",
+                "    Child3",
+                "    Child2"
+            ],
+            changes: [
+                .move(src: path(2, 1), dst: path(nil, 1))
+            ],
+            willChangeCount: 1,
+            didChangeCount: 1
+        )
+        observer.reset()
+        
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
             [1, "Group1",      .null, 5.0],
@@ -304,19 +333,26 @@ class RelationTreePropertyTests: BindingTestCase {
         // Update a collection name; verify that an `update` change is sent and the node's row data
         // is updated as well
         renameCollection(3, "PageX")
-        verifyTree(property, [
-            "Group1",
-            "  PageX",
-            "  Page2",
-            "Child1",
-            "Group2",
-            "  Collection1",
-            "    Child3",
-            "    Child2"
-        ])
-        verifyChanges([
-            .update(path(1, 0))
-        ])
+        awaitIdle()
+        verify(
+            nodes: [
+                "Group1",
+                "  PageX",
+                "  Page2",
+                "Child1",
+                "Group2",
+                "  Collection1",
+                "    Child3",
+                "    Child2"
+            ],
+            changes: [
+                .update(path(1, 0))
+            ],
+            willChangeCount: 1,
+            didChangeCount: 1
+        )
+        observer.reset()
+
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
             [1, "Group1",      .null, 5.0],
@@ -331,17 +367,42 @@ class RelationTreePropertyTests: BindingTestCase {
 
         // Delete a couple collections
         deleteCollection(4)
+        awaitIdle()
+        verify(
+            nodes: [
+                "Group1",
+                "  PageX",
+                "Child1",
+                "Group2",
+                "  Collection1",
+                "    Child3",
+                "    Child2"
+            ],
+            changes: [
+                .delete(path(1, 1))
+            ],
+            willChangeCount: 1,
+            didChangeCount: 1
+        )
+        observer.reset()
+
         deleteCollection(2)
-        verifyTree(property, [
-            "Group1",
-            "  PageX",
-            "Child1",
-            "Group2"
-        ])
-        verifyChanges([
-            .delete(path(1, 1)),
-            .delete(path(8, 0))
-        ])
+        awaitIdle()
+        verify(
+            nodes: [
+                "Group1",
+                "  PageX",
+                "Child1",
+                "Group2"
+            ],
+            changes: [
+                .delete(path(8, 0))
+            ],
+            willChangeCount: 1,
+            didChangeCount: 1
+        )
+        observer.reset()
+        
         verifySQLite(MakeRelation(
             ["id", "name", "parent", "order"],
             [1, "Group1",      .null, 5.0],
@@ -349,5 +410,11 @@ class RelationTreePropertyTests: BindingTestCase {
             [5, "Child1",      .null, 6.0],
             [8, "Group2",      .null, 7.0]
         ))
+        
+        removal()
+    }
+    
+    func testFullTree() {
+        // TODO
     }
 }

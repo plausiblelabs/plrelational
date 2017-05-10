@@ -199,7 +199,7 @@ private class ColorPickerModel {
         // color <-> colorItem
         _ = self.color.connectBidi(
             self.colorItem,
-            forward: { [weak self] value in
+            leftToRight: { [weak self] value, isInitial in
                 // CommonValue<Color> -> ColorItem
                 guard let strongSelf = self else { return .noChange }
                 
@@ -216,8 +216,9 @@ private class ColorPickerModel {
                 
                 return .change(newColorItem)
             },
-            reverse: { value in
+            rightToLeft: { value, isInitial in
                 // ColorItem -> CommonValue<Color>
+                guard !isInitial else { return .noChange }
                 if let newColor = value?.color {
                     return .change(CommonValue.one(newColor))
                 } else {
@@ -229,14 +230,15 @@ private class ColorPickerModel {
         // color <-> opacityValue
         _ = self.color.connectBidi(
             self.opacityValue,
-            forward: { value in
+            leftToRight: { value, isInitial in
                 // CommonValue<Color> -> Double?
                 .change(value.orNil()?.components.a)
             },
-            reverse: { [weak self] value in
+            rightToLeft: { [weak self] value, isInitial in
                 // Double? -> CommonValue<Color>
                 guard let strongSelf = self else { return .noChange }
                 guard let newOpacity = value else { return .noChange }
+                guard !isInitial else { return .noChange }
                 
                 let currentColor: Color = strongSelf.color.value.orDefault(strongSelf.defaultColor)
                 let newColor = currentColor.withAlpha(newOpacity)
@@ -247,7 +249,7 @@ private class ColorPickerModel {
         // color <-> panelColor
         _ = self.color.connectBidi(
             self.panelColor,
-            forward: { value in
+            leftToRight: { value, isInitial in
                 // CommonValue<Color> -> Color
                 if let color = value.orNil() {
                     return .change(color)
@@ -255,9 +257,10 @@ private class ColorPickerModel {
                     return .noChange
                 }
             },
-            reverse: { value in
+            rightToLeft: { value, isInitial in
                 // Color -> CommonValue<Color>
-                .change(CommonValue.one(value))
+                guard !isInitial else { return .noChange }
+                return .change(CommonValue.one(value))
             }
         )
     }
