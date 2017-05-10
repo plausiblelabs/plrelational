@@ -89,12 +89,10 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
         tableView.columnAutoresizingStyle = .lastColumnOnlyAutoresizingStyle
         tableView.sizeLastColumnToFit()
 
-        // TODO: Handle will/didChange
-        arrayObserverRemoval = model.data.signal.observe(SignalObserver(
-            valueWillChange: {},
-            valueChanging: { [weak self] stateChange, _ in self?.arrayChanged(stateChange) },
-            valueDidChange: {}
-        ))
+        // TODO: Handle Begin/EndPossibleAsync events?
+        arrayObserverRemoval = model.data.signal.observeValueChanging{ [weak self] changes, _ in
+            self?.arrayChanged(changes)
+        }
         
         tableView.delegate = self
         tableView.dataSource = self

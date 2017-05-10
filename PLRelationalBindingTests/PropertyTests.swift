@@ -7,58 +7,91 @@ import XCTest
 @testable import PLRelationalBinding
 
 class PropertyTests: XCTestCase {
+
+    func verify<P: ReadablePropertyType, T: Equatable>(_ property: P, _ observer: TestObserver<T>,
+                value: T?, changes: [T], willChangeCount: Int = 0, didChangeCount: Int = 0,
+                file: StaticString = #file, line: UInt = #line) where P.Value == T
+    {
+        XCTAssertEqual(property.value, value, file: file, line: line)
+        XCTAssertEqual(observer.changes, changes, file: file, line: line)
+        XCTAssertEqual(observer.willChangeCount, willChangeCount, file: file, line: line)
+        XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
+    }
+    
+    func testConstantValueProperty() {
+        let property = constantValueProperty(false)
+        let observer1 = BoolObserver()
+        let observer2 = BoolObserver()
+        
+        // Verify initial property value
+        verify(property, observer1, value: false, changes: [])
+        verify(property, observer2, value: false, changes: [])
+        
+        // Verify that the current property value is delivered when observer is attached
+        let removal1 = observer1.observe(property.signal)
+        verify(property, observer1, value: false, changes: [false])
+        verify(property, observer2, value: false, changes: [])
+
+        let removal2 = observer2.observe(property.signal)
+        verify(property, observer1, value: false, changes: [false])
+        verify(property, observer2, value: false, changes: [false])
+
+        removal1()
+        removal2()
+    }
     
     func testMutableValueProperty() {
         let property = mutableValueProperty(false)
+        let observer = BoolObserver()
         
-        var changeObserved = false
-        _ = property.signal.observe({ _ in changeObserved = true })
-        
-        XCTAssertEqual(property.value, false)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
-        
+        // Verify initial property value
+        verify(property, observer, value: false, changes: [])
+
+        // Verify that the current property value is delivered when observer is attached
+        let removal = observer.observe(property.signal)
+        verify(property, observer, value: false, changes: [false])
+
+        // Call `change` with same value and verify that no change is observed when value is not changing
+        property.change(false, transient: false)
+        verify(property, observer, value: false, changes: [false])
+
+        // Call `change` with a different value and verify that change is observed
         property.change(true, transient: false)
-        XCTAssertEqual(property.value, true)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
-        
+        verify(property, observer, value: true, changes: [false, true])
+
+        // Call `change` with same value and verify that no change is observed when value is not changing
         property.change(true, transient: false)
-        XCTAssertEqual(property.value, true)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
+        verify(property, observer, value: true, changes: [false, true])
+        
+        removal()
     }
     
     func testExternalValueProperty() {
         var value = false
         let property = ExternalValueProperty(
             get: { return value },
-            set: { newValue, _ in value = newValue },
-            changeHandler: ChangeHandler()
+            set: { newValue, _ in value = newValue }
         )
+        let observer = BoolObserver()
         
-        var changeObserved = false
-        _ = property.signal.observe({ _ in changeObserved = true })
+        // Verify initial property value
+        verify(property, observer, value: false, changes: [])
         
-        XCTAssertEqual(value, false)
-        XCTAssertEqual(property.value, false)
-        XCTAssertEqual(changeObserved, false)
-        changeObserved = false
+        // Verify that the current property value is delivered when observer is attached
+        let removal = observer.observe(property.signal)
+        verify(property, observer, value: false, changes: [false])
         
+        // Call `changed` with a different value and verify that change is observed
         value = true
         property.changed(transient: false)
-        XCTAssertEqual(value, true)
-        XCTAssertEqual(property.value, true)
-        XCTAssertEqual(changeObserved, true)
-        changeObserved = false
+        verify(property, observer, value: true, changes: [false, true])
 
         // TODO: Unlike MutableValueProperty, ExternalValueProperty doesn't prevent
         // notification when the value is not changing; should it?
 //        property.changed(transient: false)
-//        XCTAssertEqual(value, true)
-//        XCTAssertEqual(property.value, true)
-//        XCTAssertEqual(changeObserved, false)
-//        changeObserved = false
+//        verify(property, observer, value: true, changes: [false, true], willChangeCount: 2, didChangeCount: 2)
+        
+        removal()
     }
 
     func testBind() {
@@ -155,19 +188,38 @@ class PropertyTests: XCTestCase {
         XCTAssertEqual(lhsLockCount, 0)
         XCTAssertEqual(lhsUnlockCount, 0)
         
-        let rhs = mutableValueProperty("yo")
-        // XXX: This is a shady way of simulating the case where the `rhs` property's signal is in a changing
-        // state when we bind it to `lhs`
-        rhs.signal.notifyWillChange()
+        // Test bind to ReadableProperty (value should be delivered synchronously, so no lock/unlock)
+        let rhs1 = mutableValueProperty("yo")
+        let binding1 = lhs <~ rhs1
+        XCTAssertEqual(lhsLockCount, 0)
+        XCTAssertEqual(lhsUnlockCount, 0)
+        binding1.unbind()
+
+        // Verify that lhs is not affected after `rhs1` is changed after being unbound
+        rhs1.change("no", transient: false)
+        XCTAssertEqual(lhs.value, "yo")
         XCTAssertEqual(lhsLockCount, 0)
         XCTAssertEqual(lhsUnlockCount, 0)
         
-        let binding = lhs <~ rhs
+        // Test bind to AsyncReadableProperty for the case where rhs value is initially not available
+        // (it delivers WillChange immediately but nothing else after that)
+        let rhs2Signal = PipeSignal<String>()
+        rhs2Signal.onObserve = { observer in
+            observer.notifyBeginPossibleAsyncChange()
+        }
+        let rhs2 = AsyncReadableProperty(signal: rhs2Signal)
+        let binding2 = lhs <~ rhs2
         XCTAssertEqual(lhsLockCount, 1)
         XCTAssertEqual(lhsUnlockCount, 0)
-
-        // Verify that ChangeHandler is unlocked after we unbind `rhs`
-        binding.unbind()
+        
+        // Verify that ChangeHandler is unlocked after we unbind `rhs2`
+        binding2.unbind()
+        XCTAssertEqual(lhsLockCount, 1)
+        XCTAssertEqual(lhsUnlockCount, 1)
+        
+        // Verify that lhs is not affected after `rhs2` is changed after being unbound
+        rhs2Signal.notifyValueChanging("lo")
+        XCTAssertEqual(lhs.value, "yo")
         XCTAssertEqual(lhsLockCount, 1)
         XCTAssertEqual(lhsUnlockCount, 1)
     }
@@ -183,15 +235,28 @@ class PropertyTests: XCTestCase {
         let lhs = mutableValueProperty("hi", lhsChangeHandler)
         XCTAssertEqual(lhsLockCount, 0)
         XCTAssertEqual(lhsUnlockCount, 0)
+
+        // Test bind to ReadableProperty (value should be delivered synchronously, so no lock/unlock)
+        let rhs1 = mutableValueProperty("yo")
+        lhs <~ rhs1
+        XCTAssertEqual(lhsLockCount, 0)
+        XCTAssertEqual(lhsUnlockCount, 0)
+        lhs.unbindAll()
         
-        let rhs = mutableValueProperty("yo")
-        // XXX: This is a shady way of simulating the case where the `rhs` property's signal is in a changing
-        // state when we bind it to `lhs`
-        rhs.signal.notifyWillChange()
+        // Verify that lhs is not affected after `rhs1` is changed after being unbound
+        rhs1.change("no", transient: false)
+        XCTAssertEqual(lhs.value, "yo")
         XCTAssertEqual(lhsLockCount, 0)
         XCTAssertEqual(lhsUnlockCount, 0)
         
-        lhs <~ rhs
+        // Test bind to AsyncReadableProperty for the case where rhs value is initially not available
+        // (it delivers WillChange immediately but nothing else after that)
+        let rhs2Signal = PipeSignal<String>()
+        rhs2Signal.onObserve = { observer in
+            observer.notifyBeginPossibleAsyncChange()
+        }
+        let rhs2 = AsyncReadableProperty(signal: rhs2Signal)
+        lhs <~ rhs2
         XCTAssertEqual(lhsLockCount, 1)
         XCTAssertEqual(lhsUnlockCount, 0)
         
@@ -199,143 +264,149 @@ class PropertyTests: XCTestCase {
         lhs.unbindAll()
         XCTAssertEqual(lhsLockCount, 1)
         XCTAssertEqual(lhsUnlockCount, 1)
+        
+        // Verify that lhs is not affected after `rhs2` is changed after being unbound
+        rhs2Signal.notifyValueChanging("lo")
+        XCTAssertEqual(lhs.value, "yo")
+        XCTAssertEqual(lhsLockCount, 1)
+        XCTAssertEqual(lhsUnlockCount, 1)
     }
 
-    func testBindBidiManyToOne() {
-        var lhsValues: [String] = []
-        var lhs: MutableValueProperty<String>! = mutableValueProperty("initial lhs value", { newValue, _ in
-            lhsValues.append(newValue)
-        })
-
-        // Create two properties so that we can verify the case where a property is bound
-        // bidirectionally to multiple properties at the same time
-        var rhs1Values: [String] = []
-        let rhs1: MutableValueProperty<String>! = mutableValueProperty("initial rhs1 value", { newValue, _ in
-            rhs1Values.append(newValue)
-        })
-
-        var rhs2Values: [String] = []
-        let rhs2: MutableValueProperty<String>! = mutableValueProperty("initial rhs2 value", { newValue, _ in
-            rhs2Values.append(newValue)
-        })
-        
-        // Verify the initial state
-        XCTAssertEqual(lhs.value, "initial lhs value")
-        XCTAssertEqual(rhs1.value, "initial rhs1 value")
-        XCTAssertEqual(rhs2.value, "initial rhs2 value")
-        XCTAssertEqual(lhsValues, [])
-        XCTAssertEqual(rhs1Values, [])
-        XCTAssertEqual(rhs2Values, [])
-        XCTAssertEqual(lhs.signal.observerCount, 0)
-        XCTAssertEqual(rhs1.signal.observerCount, 0)
-        XCTAssertEqual(rhs2.signal.observerCount, 0)
-
-        // Bidirectionally bind `lhs` to `rhs1`; verify that `lhs` takes on the `rhs1` value
-        let binding1 = lhs <~> rhs1
-        XCTAssertEqual(lhs.value, "initial rhs1 value")
-        XCTAssertEqual(rhs1.value, "initial rhs1 value")
-        XCTAssertEqual(rhs2.value, "initial rhs2 value")
-        XCTAssertEqual(lhsValues, ["initial rhs1 value"])
-        XCTAssertEqual(rhs1Values, [])
-        XCTAssertEqual(rhs2Values, [])
-        XCTAssertEqual(lhs.signal.observerCount, 1)
-        XCTAssertEqual(rhs1.signal.observerCount, 1)
-        XCTAssertEqual(rhs2.signal.observerCount, 0)
-        
-        // Change the rhs1 value and verify that the lhs value is updated
-        rhs1.change("rhs1 was updated", transient: false)
-        XCTAssertEqual(lhs.value, "rhs1 was updated")
-        XCTAssertEqual(rhs1.value, "rhs1 was updated")
-        XCTAssertEqual(rhs2.value, "initial rhs2 value")
-        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated"])
-        XCTAssertEqual(rhs1Values, [])
-        XCTAssertEqual(rhs2Values, [])
-        XCTAssertEqual(lhs.signal.observerCount, 1)
-        XCTAssertEqual(rhs1.signal.observerCount, 1)
-        XCTAssertEqual(rhs2.signal.observerCount, 0)
-
-        // Also bidirectionally bind `lhs` to `rhs2`; verify that `lhs` and `rhs1` take on the `rhs2` value
-        _ = lhs <~> rhs2
-        XCTAssertEqual(lhs.value, "initial rhs2 value")
-        XCTAssertEqual(rhs1.value, "initial rhs2 value")
-        XCTAssertEqual(rhs2.value, "initial rhs2 value")
-        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value"])
-        XCTAssertEqual(rhs1Values, ["initial rhs2 value"])
-        XCTAssertEqual(rhs2Values, [])
-        XCTAssertEqual(lhs.signal.observerCount, 2)
-        XCTAssertEqual(rhs1.signal.observerCount, 1)
-        XCTAssertEqual(rhs2.signal.observerCount, 1)
-        
-        // Change the rhs2 value and verify that both lhs and rhs2 values are updated
-        rhs2.change("rhs2 was updated", transient: false)
-        XCTAssertEqual(lhs.value, "rhs2 was updated")
-        XCTAssertEqual(rhs1.value, "rhs2 was updated")
-        XCTAssertEqual(rhs2.value, "rhs2 was updated")
-        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated"])
-        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated"])
-        XCTAssertEqual(rhs2Values, [])
-        XCTAssertEqual(lhs.signal.observerCount, 2)
-        XCTAssertEqual(rhs1.signal.observerCount, 1)
-        XCTAssertEqual(rhs2.signal.observerCount, 1)
-
-        // Change the lhs value and verify that both rhs1 and rhs2 values are updated
-        lhs.change("lhs was updated", transient: false)
-        XCTAssertEqual(lhs.value, "lhs was updated")
-        XCTAssertEqual(rhs1.value, "lhs was updated")
-        XCTAssertEqual(rhs2.value, "lhs was updated")
-        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated"])
-        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated", "lhs was updated"])
-        XCTAssertEqual(rhs2Values, ["lhs was updated"])
-        XCTAssertEqual(lhs.signal.observerCount, 2)
-        XCTAssertEqual(rhs1.signal.observerCount, 1)
-        XCTAssertEqual(rhs2.signal.observerCount, 1)
-
-        // Unbind `rhs1` and verify that other properties are unaffected
-        binding1.unbind()
-        XCTAssertEqual(lhs.value, "lhs was updated")
-        XCTAssertEqual(rhs1.value, "lhs was updated")
-        XCTAssertEqual(rhs2.value, "lhs was updated")
-        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated"])
-        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated", "lhs was updated"])
-        XCTAssertEqual(rhs2Values, ["lhs was updated"])
-        XCTAssertEqual(lhs.signal.observerCount, 1)
-        XCTAssertEqual(rhs1.signal.observerCount, 0)
-        XCTAssertEqual(rhs2.signal.observerCount, 1)
-
-        // Change the rhs1 value and verify that the other properties are unaffected
-        rhs1.change("rhs1 was updated after unbind", transient: false)
-        XCTAssertEqual(lhs.value, "lhs was updated")
-        XCTAssertEqual(rhs1.value, "rhs1 was updated after unbind")
-        XCTAssertEqual(rhs2.value, "lhs was updated")
-        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated"])
-        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated", "lhs was updated"])
-        XCTAssertEqual(rhs2Values, ["lhs was updated"])
-        XCTAssertEqual(lhs.signal.observerCount, 1)
-        XCTAssertEqual(rhs1.signal.observerCount, 0)
-        XCTAssertEqual(rhs2.signal.observerCount, 1)
-
-        // Change the rhs2 value again and verify that only the lhs value is updated
-        rhs2.change("rhs2 was updated again", transient: false)
-        XCTAssertEqual(lhs.value, "rhs2 was updated again")
-        XCTAssertEqual(rhs1.value, "rhs1 was updated after unbind")
-        XCTAssertEqual(rhs2.value, "rhs2 was updated again")
-        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated", "rhs2 was updated again"])
-        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated", "lhs was updated"])
-        XCTAssertEqual(rhs2Values, ["lhs was updated"])
-        XCTAssertEqual(lhs.signal.observerCount, 1)
-        XCTAssertEqual(rhs1.signal.observerCount, 0)
-        XCTAssertEqual(rhs2.signal.observerCount, 1)
-
-        // Nil out `lhs` and verify that `rhs2` is unbound
-        lhs = nil
-        XCTAssertEqual(rhs1.value, "rhs1 was updated after unbind")
-        XCTAssertEqual(rhs2.value, "rhs2 was updated again")
-        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated", "rhs2 was updated again"])
-        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated", "lhs was updated"])
-        XCTAssertEqual(rhs2Values, ["lhs was updated"])
-        XCTAssertEqual(rhs1.signal.observerCount, 0)
-        XCTAssertEqual(rhs2.signal.observerCount, 0)
-    }
+//    func testBindBidiManyToOne() {
+//        var lhsValues: [String] = []
+//        var lhs: MutableValueProperty<String>! = mutableValueProperty("initial lhs value", { newValue, _ in
+//            lhsValues.append(newValue)
+//        })
+//
+//        // Create two properties so that we can verify the case where a property is bound
+//        // bidirectionally to multiple properties at the same time
+//        var rhs1Values: [String] = []
+//        let rhs1: MutableValueProperty<String>! = mutableValueProperty("initial rhs1 value", { newValue, _ in
+//            rhs1Values.append(newValue)
+//        })
+//
+//        var rhs2Values: [String] = []
+//        let rhs2: MutableValueProperty<String>! = mutableValueProperty("initial rhs2 value", { newValue, _ in
+//            rhs2Values.append(newValue)
+//        })
+//        
+//        // Verify the initial state
+//        XCTAssertEqual(lhs.value, "initial lhs value")
+//        XCTAssertEqual(rhs1.value, "initial rhs1 value")
+//        XCTAssertEqual(rhs2.value, "initial rhs2 value")
+//        XCTAssertEqual(lhsValues, [])
+//        XCTAssertEqual(rhs1Values, [])
+//        XCTAssertEqual(rhs2Values, [])
+//        XCTAssertEqual(lhs.signal.observerCount, 0)
+//        XCTAssertEqual(rhs1.signal.observerCount, 0)
+//        XCTAssertEqual(rhs2.signal.observerCount, 0)
+//
+//        // Bidirectionally bind `lhs` to `rhs1`; verify that `lhs` takes on the `rhs1` value
+//        let binding1 = lhs <~> rhs1
+//        XCTAssertEqual(lhs.value, "initial rhs1 value")
+//        XCTAssertEqual(rhs1.value, "initial rhs1 value")
+//        XCTAssertEqual(rhs2.value, "initial rhs2 value")
+//        XCTAssertEqual(lhsValues, ["initial rhs1 value"])
+//        XCTAssertEqual(rhs1Values, [])
+//        XCTAssertEqual(rhs2Values, [])
+//        XCTAssertEqual(lhs.signal.observerCount, 1)
+//        XCTAssertEqual(rhs1.signal.observerCount, 1)
+//        XCTAssertEqual(rhs2.signal.observerCount, 0)
+//        
+//        // Change the rhs1 value and verify that the lhs value is updated
+//        rhs1.change("rhs1 was updated", transient: false)
+//        XCTAssertEqual(lhs.value, "rhs1 was updated")
+//        XCTAssertEqual(rhs1.value, "rhs1 was updated")
+//        XCTAssertEqual(rhs2.value, "initial rhs2 value")
+//        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated"])
+//        XCTAssertEqual(rhs1Values, [])
+//        XCTAssertEqual(rhs2Values, [])
+//        XCTAssertEqual(lhs.signal.observerCount, 1)
+//        XCTAssertEqual(rhs1.signal.observerCount, 1)
+//        XCTAssertEqual(rhs2.signal.observerCount, 0)
+//
+//        // Also bidirectionally bind `lhs` to `rhs2`; verify that `lhs` and `rhs1` take on the `rhs2` value
+//        _ = lhs <~> rhs2
+//        XCTAssertEqual(lhs.value, "initial rhs2 value")
+//        XCTAssertEqual(rhs1.value, "initial rhs2 value")
+//        XCTAssertEqual(rhs2.value, "initial rhs2 value")
+//        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value"])
+//        XCTAssertEqual(rhs1Values, ["initial rhs2 value"])
+//        XCTAssertEqual(rhs2Values, [])
+//        XCTAssertEqual(lhs.signal.observerCount, 2)
+//        XCTAssertEqual(rhs1.signal.observerCount, 1)
+//        XCTAssertEqual(rhs2.signal.observerCount, 1)
+//        
+//        // Change the rhs2 value and verify that both lhs and rhs2 values are updated
+//        rhs2.change("rhs2 was updated", transient: false)
+//        XCTAssertEqual(lhs.value, "rhs2 was updated")
+//        XCTAssertEqual(rhs1.value, "rhs2 was updated")
+//        XCTAssertEqual(rhs2.value, "rhs2 was updated")
+//        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated"])
+//        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated"])
+//        XCTAssertEqual(rhs2Values, [])
+//        XCTAssertEqual(lhs.signal.observerCount, 2)
+//        XCTAssertEqual(rhs1.signal.observerCount, 1)
+//        XCTAssertEqual(rhs2.signal.observerCount, 1)
+//
+//        // Change the lhs value and verify that both rhs1 and rhs2 values are updated
+//        lhs.change("lhs was updated", transient: false)
+//        XCTAssertEqual(lhs.value, "lhs was updated")
+//        XCTAssertEqual(rhs1.value, "lhs was updated")
+//        XCTAssertEqual(rhs2.value, "lhs was updated")
+//        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated"])
+//        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated", "lhs was updated"])
+//        XCTAssertEqual(rhs2Values, ["lhs was updated"])
+//        XCTAssertEqual(lhs.signal.observerCount, 2)
+//        XCTAssertEqual(rhs1.signal.observerCount, 1)
+//        XCTAssertEqual(rhs2.signal.observerCount, 1)
+//
+//        // Unbind `rhs1` and verify that other properties are unaffected
+//        binding1.unbind()
+//        XCTAssertEqual(lhs.value, "lhs was updated")
+//        XCTAssertEqual(rhs1.value, "lhs was updated")
+//        XCTAssertEqual(rhs2.value, "lhs was updated")
+//        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated"])
+//        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated", "lhs was updated"])
+//        XCTAssertEqual(rhs2Values, ["lhs was updated"])
+//        XCTAssertEqual(lhs.signal.observerCount, 1)
+//        XCTAssertEqual(rhs1.signal.observerCount, 0)
+//        XCTAssertEqual(rhs2.signal.observerCount, 1)
+//
+//        // Change the rhs1 value and verify that the other properties are unaffected
+//        rhs1.change("rhs1 was updated after unbind", transient: false)
+//        XCTAssertEqual(lhs.value, "lhs was updated")
+//        XCTAssertEqual(rhs1.value, "rhs1 was updated after unbind")
+//        XCTAssertEqual(rhs2.value, "lhs was updated")
+//        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated"])
+//        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated", "lhs was updated"])
+//        XCTAssertEqual(rhs2Values, ["lhs was updated"])
+//        XCTAssertEqual(lhs.signal.observerCount, 1)
+//        XCTAssertEqual(rhs1.signal.observerCount, 0)
+//        XCTAssertEqual(rhs2.signal.observerCount, 1)
+//
+//        // Change the rhs2 value again and verify that only the lhs value is updated
+//        rhs2.change("rhs2 was updated again", transient: false)
+//        XCTAssertEqual(lhs.value, "rhs2 was updated again")
+//        XCTAssertEqual(rhs1.value, "rhs1 was updated after unbind")
+//        XCTAssertEqual(rhs2.value, "rhs2 was updated again")
+//        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated", "rhs2 was updated again"])
+//        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated", "lhs was updated"])
+//        XCTAssertEqual(rhs2Values, ["lhs was updated"])
+//        XCTAssertEqual(lhs.signal.observerCount, 1)
+//        XCTAssertEqual(rhs1.signal.observerCount, 0)
+//        XCTAssertEqual(rhs2.signal.observerCount, 1)
+//
+//        // Nil out `lhs` and verify that `rhs2` is unbound
+//        lhs = nil
+//        XCTAssertEqual(rhs1.value, "rhs1 was updated after unbind")
+//        XCTAssertEqual(rhs2.value, "rhs2 was updated again")
+//        XCTAssertEqual(lhsValues, ["initial rhs1 value", "rhs1 was updated", "initial rhs2 value", "rhs2 was updated", "rhs2 was updated again"])
+//        XCTAssertEqual(rhs1Values, ["initial rhs2 value", "rhs2 was updated", "lhs was updated"])
+//        XCTAssertEqual(rhs2Values, ["lhs was updated"])
+//        XCTAssertEqual(rhs1.signal.observerCount, 0)
+//        XCTAssertEqual(rhs2.signal.observerCount, 0)
+//    }
 
     func testConnectBidi() {
         var boolProperty: MutableValueProperty<Bool>! = mutableValueProperty(false)
@@ -358,22 +429,26 @@ class PropertyTests: XCTestCase {
         //     but updated transitively.
         
         // For this reverse case, we won't update the master value if the string is not "true" or "false"
-        // (just to exercise the .NoChange case)
+        // (just to exercise the .noChange case)
         _ = boolProperty.connectBidi(
             stringProperty,
-            forward: {
+            leftToRight: { boolValue, _ in
                 // Bool -> String
-                .change($0.description)
+                .change(boolValue.description)
             },
-            reverse: {
+            rightToLeft: { stringValue, isInitial in
                 // String -> Bool
-                switch $0 {
-                case "true":
-                    return .change(true)
-                case "false":
-                    return .change(false)
-                default:
+                if isInitial {
                     return .noChange
+                } else {
+                    switch stringValue {
+                    case "true":
+                        return .change(true)
+                    case "false":
+                        return .change(false)
+                    default:
+                        return .noChange
+                    }
                 }
             }
         )
@@ -389,16 +464,21 @@ class PropertyTests: XCTestCase {
         // For this reverse case, we'll treat any non-zero value as true
         _ = boolProperty.connectBidi(
             intProperty,
-            forward: {
+            leftToRight: { boolValue, _ in
                 // Bool -> Int
-                .change($0 ? 1 : 0)
+                .change(boolValue ? 1 : 0)
             },
-            reverse: {
+            rightToLeft: { intValue, isInitial in
                 // Int -> Bool
-                .change($0 != 0)
+                if isInitial {
+                    return .noChange
+                } else {
+                    return .change(intValue != 0)
+                }
             }
         )
         
+        // Verify that intProperty takes on boolProperty's value
         XCTAssertEqual(boolProperty.value, false)
         XCTAssertEqual(stringProperty.value, "false")
         XCTAssertEqual(intProperty.value, 0)
@@ -407,38 +487,38 @@ class PropertyTests: XCTestCase {
         XCTAssertEqual(intProperty.signal.observerCount, 1)
         
         // Update boolProperty and verify that secondary ones are updated
-        boolProperty.change(true, transient: false)
+        boolProperty.change(true)
         XCTAssertEqual(boolProperty.value, true)
         XCTAssertEqual(stringProperty.value, "true")
         XCTAssertEqual(intProperty.value, 1)
         
         // Update stringProperty and verify that others are updated
-        stringProperty.change("false", transient: false)
+        stringProperty.change("false")
         XCTAssertEqual(boolProperty.value, false)
         XCTAssertEqual(stringProperty.value, "false")
         XCTAssertEqual(intProperty.value, 0)
         
         // Update stringProperty and verify that there is no change reported
         // TODO: Verify the no change part
-        stringProperty.change("false", transient: false)
+        stringProperty.change("false")
         XCTAssertEqual(boolProperty.value, false)
         XCTAssertEqual(stringProperty.value, "false")
         XCTAssertEqual(intProperty.value, 0)
         
         // Update intProperty and verify that others are updated
-        intProperty.change(8, transient: false)
+        intProperty.change(8)
         XCTAssertEqual(boolProperty.value, true)
         XCTAssertEqual(stringProperty.value, "true")
         XCTAssertEqual(intProperty.value, 8)
         
         // Update stringProperty with an unknown value and verify that others are not updated
-        stringProperty.change("foo", transient: false)
+        stringProperty.change("foo")
         XCTAssertEqual(boolProperty.value, true)
         XCTAssertEqual(stringProperty.value, "foo")
         XCTAssertEqual(intProperty.value, 8)
         
         // Update stringProperty with a known value and verify that others are updated
-        stringProperty.change("false", transient: false)
+        stringProperty.change("false")
         XCTAssertEqual(boolProperty.value, false)
         XCTAssertEqual(stringProperty.value, "false")
         XCTAssertEqual(intProperty.value, 0)
@@ -457,23 +537,23 @@ class PropertyTests: XCTestCase {
 
         XCTAssertEqual(changeCount, 0)
 
-        let (signal, notify) = Signal<()>.pipe()
-        XCTAssertEqual(signal.observerCount, 0)
+        let source = SourceSignal<()>()
+        XCTAssertEqual(source.observerCount, 0)
         
-        let binding = signal ~~> property
+        let binding = source ~~> property
         XCTAssertEqual(changeCount, 0)
-        XCTAssertEqual(signal.observerCount, 1)
+        XCTAssertEqual(source.observerCount, 1)
         
-        notify.valueChanging((), ChangeMetadata(transient: false))
+        source.notifyAction()
         XCTAssertEqual(changeCount, 1)
-        XCTAssertEqual(signal.observerCount, 1)
+        XCTAssertEqual(source.observerCount, 1)
         
-        notify.valueChanging((), ChangeMetadata(transient: false))
+        source.notifyAction()
         XCTAssertEqual(changeCount, 2)
-        XCTAssertEqual(signal.observerCount, 1)
+        XCTAssertEqual(source.observerCount, 1)
         
         binding.unbind()
         XCTAssertEqual(changeCount, 2)
-        XCTAssertEqual(signal.observerCount, 0)
+        XCTAssertEqual(source.observerCount, 0)
     }
 }

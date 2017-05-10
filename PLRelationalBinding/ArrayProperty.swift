@@ -48,26 +48,16 @@ open class ArrayProperty<Element: ArrayElement>: AsyncReadablePropertyType {
     }
     
     public let signal: Signal<SignalChange>
-    internal let notify: Signal<SignalChange>.Notify
     
-    init(signal: Signal<SignalChange>, notify: Signal<SignalChange>.Notify) {
+    init(signal: Signal<SignalChange>) {
         self.elements = []
         self.signal = signal
-        self.notify = notify
-    }
-    
-    open func start() {
     }
     
     public var property: AsyncReadableProperty<[Element]> {
         return fullArray()
     }
     
-    internal func notifyObservers(arrayChanges: [ArrayChange<Element>]) {
-        let metadata = ChangeMetadata(transient: false)
-        notify.valueChanging(arrayChanges, metadata)
-    }
-
     /// Returns the index of the element with the given ID, relative to the sorted elements array.
     public func indexForID(_ id: Element.ID) -> Int? {
         return elements.index(where: { $0.id == id })
@@ -108,11 +98,6 @@ private class FullArrayProperty<Element: ArrayElement>: AsyncReadableProperty<[E
     
     fileprivate init(underlying: ArrayProperty<Element>) {
         self.underlying = underlying
-        super.init(initialValue: underlying.value, signal: underlying.signal.map{ _ in return underlying.elements })
-    }
-    
-    fileprivate override func start() {
-        underlying.start()
-        super.start()
+        super.init(signal: underlying.signal.map{ _ in return underlying.elements })
     }
 }

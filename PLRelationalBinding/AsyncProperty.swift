@@ -6,7 +6,10 @@
 import Foundation
 
 public protocol AsyncPropertyType {
-    /// Causes the underlying signal to start delivering values.
+    /// A convenience for putting the underlying source signal into action.  Normally that
+    /// will occur the first time an observer begins observing this property's signal, but
+    /// in some cases no observation is needed and the caller just wants this property to
+    /// start delivering values.  This is a shorthand for `signal.observe` with a no-op observer.
     func start()
 }
 
@@ -24,103 +27,104 @@ public protocol AsyncReadablePropertyType: class, AsyncPropertyType {
     var value: Value? { get }
 }
 
+extension AsyncReadablePropertyType {
+    public func start() {
+        _ = self.signal.observe({ _ in })
+    }
+}
+
 /// A concrete readable property whose value is fetched asynchronously.
 open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
     public typealias Value = T
     public typealias SignalChange = T
-    
+
+    // Note that we observe our private `underlyingSignal` that was provided at init time, and then deliver `valueChanging` events
+    // *after* we update our `value`.  This allows code to observe this property's public `signal` and be guaranteed that `value`
+    // will contain the latest value before observers are notified.
+    private let underlyingSignal: Signal<T>
+    private var underlyingRemoval: ObserverRemoval?
     public let signal: Signal<T>
-    public internal(set) var value: T?
-    private var removal: ObserverRemoval?
-    private var started = false
     
-    public init(initialValue: T?, signal: Signal<T>) {
-        self.value = initialValue
-        self.signal = signal
+    private var observed = false
+    internal var mutableValue: T?
+    public var value: T? {
+        if !observed {
+            // Note that `mutableValue` will be nil until either a) an observer is attached to `signal`
+            // and it has delivered an initial value or b) someone tries to access `value` (in which case
+            // we attach a dummy observer to kick the signal into action)
+            let removal = signal.observe{ _ in }
+            removal()
+        }
+        return mutableValue
+    }
+    
+    public init(signal: Signal<T>) {
+        self.mutableValue = nil
+        self.underlyingSignal = signal
+
+        let pipeSignal = PipeSignal<T>()
+        self.signal = pipeSignal
+
+        var changeCount = 0
+        pipeSignal.onObserve = { observer in
+            self.observed = true
+            if self.underlyingRemoval == nil {
+                // Observe the underlying signal the first time someone observes our public signal
+                guard self.underlyingRemoval == nil else { return }
+                self.underlyingRemoval = self.underlyingSignal.observe{ [weak self] event in
+                    switch event {
+                    case .beginPossibleAsyncChange:
+                        changeCount += 1
+                        pipeSignal.notifyBeginPossibleAsyncChange()
+                        
+                    case let .valueChanging(newValue, metadata):
+                        self?.mutableValue = newValue
+                        pipeSignal.notifyValueChanging(newValue, metadata)
+                        
+                    case .endPossibleAsyncChange:
+                        changeCount -= 1
+                        pipeSignal.notifyEndPossibleAsyncChange()
+                    }
+                }
+            } else {
+                // For subsequent observers, deliver our current value to just the observer being attached
+                for _ in 0..<changeCount {
+                    // If underlyingSignal is in an asynchronous change (delivered BeginPossibleAsync before
+                    // this observer was attached), we need to give this new observer the corresponding
+                    // number of BeginPossibleAsync notifications so that it is correctly balanced when the
+                    // EndPossibleAsync notification(s) come in later
+                    observer.notifyBeginPossibleAsyncChange()
+                }
+                if let value = self.mutableValue {
+                    observer.notifyValueChanging(value)
+                }
+            }
+        }
     }
     
     deinit {
-        removal?()
+        underlyingRemoval?()
     }
     
     public var property: AsyncReadableProperty<T> {
         return self
     }
-    
-    public func start() {
-        // TODO: Need to make a SignalProducer like thing that can create a unique signal
-        // each time start() is called; for now we'll assume it can be called only once
-        if !started {
-            let deliverInitial = value == nil
-            removal = signal.observe({ [weak self] newValue, _ in
-                self?.value = newValue
-            })
-            signal.start(deliverInitial: deliverInitial)
-            started = true
-        }
-    }
-    
-    public static func pipe(initialValue: T? = nil) -> (AsyncReadableProperty<T>, Signal<T>.Notify) {
-        let (signal, notify) = Signal<T>.pipe()
-        let property = AsyncReadableProperty(initialValue: initialValue, signal: signal)
-        return (property, notify)
-    }
 }
 
 private class ConstantValueAsyncProperty<T>: AsyncReadableProperty<T> {
     init(_ value: T) {
-        // TODO: Use a no-op signal here
-        let (signal, _) = Signal<T>.pipe()
-        super.init(initialValue: value, signal: signal)
+        super.init(signal: ConstantSignal(value))
     }
 }
 
-/// Returns an AsyncReadableProperty whose value never changes.  Note that since the value cannot change,
-/// observers will never be notified of changes.
+/// Returns an AsyncReadableProperty whose value never changes.
 public func constantValueAsyncProperty<T>(_ value: T) -> AsyncReadableProperty<T> {
     return ConstantValueAsyncProperty(value)
 }
 
-
 /// A concrete readable property whose value can be updated and fetched asynchronously.
-open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
-    public typealias Value = T
-    public typealias SignalChange = T
+open class AsyncReadWriteProperty<T>: AsyncReadableProperty<T> {
 
-    public var value: T? {
-        return getValue()
-    }
-    
-    public let signal: Signal<T>
-    private var started = false
-
-    internal init(signal: Signal<T>) {
-        self.signal = signal
-    }
-    
-    public var property: AsyncReadableProperty<T> {
-        return AsyncReadableProperty(initialValue: self.value, signal: self.signal)
-    }
-    
-    public func start() {
-        // TODO: For now we'll assume it can be called only once
-        if !started {
-            startImpl()
-            started = true
-        }
-    }
-    
-    /// Invokes the provided startFunc by default, but subclasses can override for custom start behavior.
-    internal func startImpl() {
-        fatalError("Must be implemented by subclasses")
-    }
-    
-    /// Returns the current value.  This must be overridden by subclasses and is intended to be
-    /// called by the `bind` implementations only, not by external callers.
-    internal func getValue() -> T? {
-        fatalError("Must be implemented by subclasses")
-    }
-    
     /// Sets the new value.  This must be overridden by subclasses and is intended to be
     /// called by the `bind` implementations only, not by external callers.
     internal func setValue(_ value: T, _ metadata: ChangeMetadata) {
@@ -131,13 +135,13 @@ open class AsyncReadWriteProperty<T>: AsyncReadablePropertyType {
 extension SignalType {
     /// Lifts this signal into an AsyncReadableProperty.
     public func property() -> AsyncReadableProperty<Self.Value> {
-        return AsyncReadableProperty(initialValue: nil, signal: self.signal)
+        return AsyncReadableProperty(signal: self.signal)
     }
 }
 
-extension ReadablePropertyType where Value == SignalChange {
+extension ReadablePropertyType {
     /// Returns an AsyncReadableProperty that is derived from this synchronous property's signal.
     public func async() -> AsyncReadableProperty<Value> {
-        return AsyncReadableProperty(initialValue: self.value, signal: self.signal)
+        return AsyncReadableProperty(signal: self.signal)
     }
 }
