@@ -38,6 +38,25 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         removal()
     }
     
+    func testMapLifetime() {
+        let source = SourceSignal<Bool>()
+        let property = AsyncReadableProperty(signal: source)
+        
+        var mapped: AsyncReadableProperty<Int>? = property.map{ $0 ? 1 : 0 }
+        weak var weakMapped: AsyncReadableProperty<Int>? = mapped
+        
+        XCTAssertNotNil(weakMapped)
+        XCTAssertEqual(weakMapped!.value, nil)
+        
+        source.notifyValueChanging(true)
+        XCTAssertEqual(weakMapped!.value, 1)
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        mapped = nil
+        XCTAssertNil(weakMapped)
+    }
+    
     func testFlatMap() {
         let intSource = PipeSignal<Int>()
         let intProperty = intSource.property()
@@ -96,6 +115,39 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         observer.reset()
         
         removal()
+    }
+    
+    func testFlatMapLifetime() {
+        let intSource = PipeSignal<Int>()
+        let intProperty = intSource.property()
+        
+        var stringValue = "Nothing"
+        var stringSource: PipeSignal<String>? = nil
+        func changeString(_ newValue: String) {
+            stringValue = newValue
+            stringSource!.notifyValueChanging(newValue)
+        }
+        
+        var mapped: AsyncReadableProperty<String>? = intProperty.flatMap{ value -> AsyncReadableProperty<String> in
+            stringValue = "Loading for \(value)"
+            stringSource = PipeSignal<String>()
+            stringSource!.onObserve = { observer in
+                observer.notifyValueChanging(stringValue)
+            }
+            return stringSource!.property()
+        }
+        weak var weakMapped: AsyncReadableProperty<String>? = mapped
+        
+        XCTAssertNotNil(weakMapped)
+        XCTAssertEqual(weakMapped!.value, nil)
+        
+        intSource.notifyValueChanging(1)
+        XCTAssertEqual(weakMapped!.value, "Loading for 1")
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        mapped = nil
+        XCTAssertNil(weakMapped)
     }
     
     func testZip() {

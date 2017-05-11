@@ -18,9 +18,7 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
     public func flatMap<P: AsyncReadablePropertyType>(_ transform: @escaping (Self.Value) -> P) -> AsyncReadableProperty<P.Value>
         where P.Value == P.SignalChange
     {
-        return AsyncReadableProperty(signal: self.signal.flatMap{
-            return transform($0).signal
-        })
+        return FlatMappedProperty(signal: self.signal, transform: transform)
     }
 }
 
@@ -46,4 +44,25 @@ public prefix func !<P: AsyncReadablePropertyType>(property: P) -> AsyncReadable
     where P.Value == Bool, P.SignalChange == Bool
 {
     return not(property)
+}
+
+// XXX: The purpose of this custom subclass is to keep a strong reference to the latest AsyncReadableProperty
+// that is returned by `transform`.  Due to the way AsyncReadableProperty weakly/lazily observes its underlying
+// signal, the mapped signal would be dead in the case where no one else is strongly holding onto its parent
+// property.  The whole question of property/signal/binding lifetimes needs to be rethought.
+private class FlatMappedProperty<T, U>: AsyncReadableProperty<U> {
+    
+    private var mappedProperty: AsyncReadableProperty<U>?
+    
+    init<P: AsyncReadablePropertyType>(signal: Signal<T>, transform: @escaping (T) -> P) where P.Value == U, P.SignalChange == U {
+        let delegatingSignal = DelegatingSignal<U>()
+        
+        super.init(signal: delegatingSignal)
+
+        delegatingSignal.underlyingSignal = signal.flatMap{ [weak self] (newValue: T) -> Signal<U> in
+            let mappedProperty: AsyncReadableProperty<U> = transform(newValue).property
+            self?.mappedProperty = mappedProperty
+            return mappedProperty.signal
+        }
+    }
 }

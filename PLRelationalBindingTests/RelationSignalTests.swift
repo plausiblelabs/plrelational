@@ -263,4 +263,36 @@ class RelationSignalTests: BindingTestCase {
         verify(observer1, changes: [], willChangeCount: 1, didChangeCount: 0)
         verify(observer2, changes: [""], willChangeCount: 2, didChangeCount: 1)
     }
+    
+    func testLifetime() {
+        let sqliteDB = makeDB().db
+        _ = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["animal"]
+        
+        var signal: Signal<String>? = r
+            .select(Attribute("id") *== 1)
+            .project(["name"])
+            .oneString()
+        weak var weakSignal: Signal<String>? = signal
+        
+        XCTAssertNotNil(weakSignal)
+
+        var latestValue: String?
+        let removal = signal!.observeValueChanging{ newValue, _ in latestValue = newValue }
+        
+        awaitIdle()
+        XCTAssertEqual(latestValue, "")
+        
+        r.asyncAdd(["id": 1, "name": "cat"])
+        awaitIdle()
+        XCTAssertEqual(latestValue, "cat")
+
+        removal()
+        
+        // Verify that signal weakly observes its underlying relation and does not leave dangling strong references
+        // that prevent the signal from being deinitialized
+        signal = nil
+        XCTAssertNil(weakSignal)
+    }
 }

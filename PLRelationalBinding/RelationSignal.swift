@@ -3,16 +3,17 @@
 // All rights reserved.
 //
 
+import Foundation
 import PLRelational
 
 class RelationSignal<T>: SourceSignal<T> {
     fileprivate let relation: Relation
     fileprivate let rowsToValue: (Relation, AnyIterator<Row>) -> T
     fileprivate let isRepeat: (T, T) -> Bool
-    internal var latestValue: T?
-    private var startedInitialQuery = false
+    fileprivate var latestValue: T?
     private var relationObserverRemoval: ObserverRemoval?
     private var asyncChangeCount = 0
+    private var initialQueryID: UUID?
     
     init(relation: Relation, initialValue: T?, rowsToValue: @escaping (Relation, AnyIterator<Row>) -> T, isRepeat: @escaping (T, T) -> Bool) {
         self.relation = relation
@@ -23,7 +24,11 @@ class RelationSignal<T>: SourceSignal<T> {
         super.init()
     }
 
-    override func observeImpl(_ observer: Observer) {
+    deinit {
+        relationObserverRemoval?()
+    }
+
+    override func addObserverImpl(_ observer: Observer) {
         func convertRowsToValue(rows: Set<Row>) -> T {
             return self.rowsToValue(self.relation, AnyIterator(rows.makeIterator()))
         }
@@ -48,22 +53,42 @@ class RelationSignal<T>: SourceSignal<T> {
         } else {
             // We don't already have a value; if we haven't already done so, perform
             // an async query to get the initial value
-            if !startedInitialQuery {
-                startedInitialQuery = true
+            if initialQueryID == nil {
+                let currentInitialQueryID = UUID()
+                initialQueryID = currentInitialQueryID
+                
                 self.beginPossibleAsyncChange()
+                
                 relation.asyncAllRows(
                     postprocessor: convertRowsToValue,
-                    completion: { result in
-                        // Note that we can notify all observers, not just the given one
+                    completion: { [weak self] result in
+                        guard let strongSelf = self else { return }
+                        
+                        // Ignore completion if all observers were removed and we initiated another
+                        // query before this one had a chance to complete
+                        guard strongSelf.initialQueryID == currentInitialQueryID else { return }
+                        
+                        // Note that we notify all observers, not just the given one, since more
+                        // observers may have been added since we started the initial query
                         if let newValue = result.ok {
-                            self.latestValue = newValue
-                            self.notifyValueChanging(newValue, transient: false)
+                            strongSelf.latestValue = newValue
+                            strongSelf.notifyValueChanging(newValue, transient: false)
                         }
-                        self.endPossibleAsyncChange()
+                        strongSelf.endPossibleAsyncChange()
                     }
                 )
             }
         }
+    }
+    
+    override func onEmptyObserverSet() {
+        // When no one is left observing this signal, stop observing the underlying relation
+        // TODO: Should we also nil out latestValue so that it has to be refetched when someone
+        // starts observing again?
+        relationObserverRemoval?()
+        relationObserverRemoval = nil
+        asyncChangeCount = 0
+        initialQueryID = nil
     }
 
     fileprivate func isRepeat(_ newValue: T) -> Bool {
@@ -82,10 +107,6 @@ class RelationSignal<T>: SourceSignal<T> {
     fileprivate func endPossibleAsyncChange() {
         asyncChangeCount -= 1
         self.notifyEndPossibleAsyncChange()
-    }
-
-    deinit {
-        relationObserverRemoval?()
     }
 }
 
