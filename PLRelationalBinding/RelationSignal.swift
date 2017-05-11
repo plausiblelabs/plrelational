@@ -12,6 +12,7 @@ class RelationSignal<T>: SourceSignal<T> {
     internal var latestValue: T?
     private var startedInitialQuery = false
     private var relationObserverRemoval: ObserverRemoval?
+    private var asyncChangeCount = 0
     
     init(relation: Relation, initialValue: T?, rowsToValue: @escaping (Relation, AnyIterator<Row>) -> T, isRepeat: @escaping (T, T) -> Bool) {
         self.relation = relation
@@ -33,6 +34,12 @@ class RelationSignal<T>: SourceSignal<T> {
             self.relationObserverRemoval = relation.addAsyncObserver(self, postprocessor: convertRowsToValue)
         }
 
+        // First deliver one or more BeginPossibleAsync events if we happen to be in the middle of a possible
+        // async change
+        for _ in 0..<asyncChangeCount {
+            observer.notifyBeginPossibleAsyncChange()
+        }
+
         if let initialValue = latestValue {
             // We already have a value, so deliver it to just the given observer
             // TODO: Should we have a metadata flag to note this as an "initial" value (transient
@@ -41,9 +48,9 @@ class RelationSignal<T>: SourceSignal<T> {
         } else {
             // We don't already have a value; if we haven't already done so, perform
             // an async query to get the initial value
-            observer.notifyBeginPossibleAsyncChange()
             if !startedInitialQuery {
                 startedInitialQuery = true
+                self.beginPossibleAsyncChange()
                 relation.asyncAllRows(
                     postprocessor: convertRowsToValue,
                     completion: { result in
@@ -52,7 +59,7 @@ class RelationSignal<T>: SourceSignal<T> {
                             self.latestValue = newValue
                             self.notifyValueChanging(newValue, transient: false)
                         }
-                        self.notifyEndPossibleAsyncChange()
+                        self.endPossibleAsyncChange()
                     }
                 )
             }
@@ -67,6 +74,16 @@ class RelationSignal<T>: SourceSignal<T> {
         }
     }
     
+    fileprivate func beginPossibleAsyncChange() {
+        asyncChangeCount += 1
+        self.notifyBeginPossibleAsyncChange()
+    }
+
+    fileprivate func endPossibleAsyncChange() {
+        asyncChangeCount -= 1
+        self.notifyEndPossibleAsyncChange()
+    }
+
     deinit {
         relationObserverRemoval?()
     }
@@ -74,7 +91,7 @@ class RelationSignal<T>: SourceSignal<T> {
 
 extension RelationSignal: AsyncRelationContentCoalescedObserver {
     func relationWillChange(_ relation: Relation) {
-        self.notifyBeginPossibleAsyncChange()
+        self.beginPossibleAsyncChange()
     }
 
     func relationDidChange(_ relation: Relation, result: Result<T, RelationError>) {
@@ -84,7 +101,7 @@ extension RelationSignal: AsyncRelationContentCoalescedObserver {
                 self.latestValue = newValue
                 self.notifyValueChanging(newValue, transient: false)
             }
-            self.notifyEndPossibleAsyncChange()
+            self.endPossibleAsyncChange()
         case .Err(let err):
             // TODO: actual handling
             fatalError("Got error for relation change: \(err)")

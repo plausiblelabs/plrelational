@@ -60,12 +60,22 @@ class RelationSignalTests: BindingTestCase {
         r.asyncDelete(true)
         verify(observer1, changes: ["", "cat"], willChangeCount: 3, didChangeCount: 2)
         verify(observer2, changes: ["", "cat"], willChangeCount: 3, didChangeCount: 2)
+        
+        // Add a third observer while the delete is pending and verify that it receives both a
+        // WillChange and the latest value
+        let observer3 = StringObserver()
+        let removal3 = observer3.observe(signal)
+        verify(observer3, changes: ["cat"], willChangeCount: 1, didChangeCount: 0)
+        
+        // Await async completion and verify state changes
         awaitIdle()
         verify(observer1, changes: ["", "cat", ""], willChangeCount: 3, didChangeCount: 3)
         verify(observer2, changes: ["", "cat", ""], willChangeCount: 3, didChangeCount: 3)
+        verify(observer3, changes: ["cat", ""], willChangeCount: 1, didChangeCount: 1)
         
         removal1()
         removal2()
+        removal3()
     }
     
     func testObserversWithExplicitInitialValue() {
