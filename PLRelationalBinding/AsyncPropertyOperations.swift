@@ -9,7 +9,7 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
     /// Returns an AsyncReadableProperty whose value is derived from this property's `value`.
     /// The given `transform` will be applied whenever this property's value changes.
     public func map<U>(_ transform: @escaping (Self.Value) -> U) -> AsyncReadableProperty<U> {
-        return AsyncReadableProperty(signal: self.signal.map(transform))
+        return UnaryOpProperty(signal: self.signal.map(transform), owner: self)
     }
     
     /// Returns an AsyncReadableProperty whose value is derived from the given property's `value`.
@@ -28,7 +28,7 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
 public func zip<LHS: AsyncReadablePropertyType, RHS: AsyncReadablePropertyType>(_ lhs: LHS, _ rhs: RHS) -> AsyncReadableProperty<(LHS.Value, RHS.Value)>
     where LHS.Value == LHS.SignalChange, RHS.Value == RHS.SignalChange
 {
-    return AsyncReadableProperty(signal: zip(lhs.signal, rhs.signal))
+    return BinaryOpProperty(signal: zip(lhs.signal, rhs.signal), owner1: lhs, owner2: rhs)
 }
 
 /// Returns an AsyncReadableProperty whose value is the negation of the boolean value of the given property.
@@ -44,6 +44,30 @@ public prefix func !<P: AsyncReadablePropertyType>(property: P) -> AsyncReadable
     where P.Value == Bool, P.SignalChange == Bool
 {
     return not(property)
+}
+
+/// Property that keeps a strong reference to the signal owner.
+private class UnaryOpProperty<T>: AsyncReadableProperty<T> {
+    
+    private let owner: AnyObject
+    
+    init(signal: Signal<T>, owner: AnyObject) {
+        self.owner = owner
+        super.init(signal: signal)
+    }
+}
+
+/// Property that keeps a strong reference to the signal owners.
+private class BinaryOpProperty<T>: AsyncReadableProperty<T> {
+    
+    private let owner1: AnyObject
+    private let owner2: AnyObject
+    
+    init(signal: Signal<T>, owner1: AnyObject, owner2: AnyObject) {
+        self.owner1 = owner1
+        self.owner2 = owner2
+        super.init(signal: signal)
+    }
 }
 
 // XXX: The purpose of this custom subclass is to keep a strong reference to the latest AsyncReadableProperty
