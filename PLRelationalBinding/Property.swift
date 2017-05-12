@@ -77,24 +77,25 @@ open class ReadableProperty<T>: ReadablePropertyType {
         }
         
         // Deliver the current value when an observer attaches to our signal
-        pipeSignal.onObserve = { observer in
-            if self.underlyingRemoval == nil {
+        pipeSignal.onObserve = { [weak self] observer in
+            guard let strongSelf = self else { return }
+            if strongSelf.underlyingRemoval == nil {
                 // Observe the underlying signal the first time someone observes our public signal.
                 // Note that since ReadableProperty is expected to be fully synchronous, our observer
                 // will error (fatally) upon receiving an asynchronous Begin/EndPossibleAsync event.
-                self.underlyingRemoval = self.underlyingSignal.observeSynchronousValueChanging{ [weak self] newValue, metadata in
+                strongSelf.underlyingRemoval = strongSelf.underlyingSignal.observeSynchronousValueChanging{ [weak self] newValue, metadata in
                     guard let strongSelf = self else { return }
                     if strongSelf.underlyingRemoval == nil || isChange(strongSelf.mutableValue, newValue) {
                         strongSelf.mutableValue = newValue
                         pipeSignal.notifyValueChanging(newValue, metadata)
                     }
                 }
-                if self.mutableValue == nil {
+                if strongSelf.mutableValue == nil {
                     fatalError("Synchronous signals *must* deliver a `valueChanging` event when observer is attached")
                 }
             } else {
                 // For subsequent observers, deliver our current value to just the observer being attached
-                observer.notifyValueChanging(self.value, transient: false)
+                observer.notifyValueChanging(strongSelf.value, transient: false)
             }
         }
     }

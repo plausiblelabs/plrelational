@@ -36,6 +36,23 @@ class PropertyOperationsTests: BindingTestCase {
         
         removal()
     }
+    
+    func testMapLifetime() {
+        let property = mutableValueProperty(false)
+        var mapped: ReadableProperty<Int>? = property.map{ $0 ? 1 : 0 }
+        weak var weakMapped: ReadableProperty<Int>? = mapped
+        
+        XCTAssertNotNil(weakMapped)
+        XCTAssertEqual(weakMapped!.value, 0)
+        
+        property.change(true)
+        XCTAssertEqual(weakMapped!.value, 1)
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        mapped = nil
+        XCTAssertNil(weakMapped)
+    }
 
     func testZip() {
         let property1 = mutableValueProperty(false)
@@ -67,6 +84,47 @@ class PropertyOperationsTests: BindingTestCase {
         verify(value: (true, true), changes: [(false, false), (true, false), (true, true)])
         
         removal()
+    }
+    
+    func testZipLifetime() {
+        let property1 = mutableValueProperty(false)
+        let property2 = mutableValueProperty(false)
+        var zipped: ReadableProperty<(Bool, Bool)>? = zip(property1, property2)
+        weak var weakZipped: ReadableProperty<(Bool, Bool)>? = zipped
+        
+        XCTAssertNotNil(weakZipped)
+        XCTAssertEqual(weakZipped!.value.0, false)
+        XCTAssertEqual(weakZipped!.value.1, false)
+        
+        property2.change(true)
+        XCTAssertEqual(weakZipped!.value.0, false)
+        XCTAssertEqual(weakZipped!.value.1, true)
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        zipped = nil
+        XCTAssertNil(weakZipped)
+    }
+    
+    func testZipAndMapLifetime() {
+        let property1 = mutableValueProperty(false)
+        let property2 = mutableValueProperty(false)
+
+        var mapped: ReadableProperty<String>? =
+            zip(property1, property2)
+                .map{ "\($0.0) \($0.1)" }
+        weak var weakMapped: ReadableProperty<String>? = mapped
+        
+        XCTAssertNotNil(weakMapped)
+        XCTAssertEqual(weakMapped!.value, "false false")
+
+        property2.change(true)
+        XCTAssertEqual(weakMapped!.value, "false true")
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        mapped = nil
+        XCTAssertNil(weakMapped)
     }
     
     func testNot() {

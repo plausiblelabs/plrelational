@@ -108,6 +108,32 @@ class SignalOperationsTests: BindingTestCase {
             expected: [1, 0]
         )
     }
+    
+    func testMapLifetime() {
+        let source = PipeSignal<Int>()
+        source.onObserve = { observer in
+            observer.notifyValueChanging(0)
+        }
+        
+        var mapped: Signal<String>? = source.map{ "\($0)" }
+        weak var weakMapped: Signal<String>? = mapped
+        
+        XCTAssertNotNil(weakMapped)
+        
+        var mappedValue: String?
+        let removal = mapped!.observeValueChanging{ newValue, _ in mappedValue = newValue }
+        XCTAssertEqual(mappedValue, "0")
+        
+        source.notifyValueChanging(1)
+        XCTAssertEqual(mappedValue, "1")
+
+        removal()
+
+        // Verify that mapped signal weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the mapped signal from being deinitialized
+        mapped = nil
+        XCTAssertNil(weakMapped)
+    }
 
     func testFlatMap() {
         let intSource = SourceSignal<Int>()
@@ -166,6 +192,39 @@ class SignalOperationsTests: BindingTestCase {
         
         removal1()
         removal2()
+    }
+    
+    func testFlatMapLifetime() {
+        let intSource = SourceSignal<Int>()
+        
+        let stringSource = PipeSignal<String>()
+        stringSource.onObserve = { observer in
+            observer.notifyValueChanging("Loading!")
+        }
+        
+        var mapped: Signal<String>? = intSource.flatMap{ value -> Signal<String> in
+            return stringSource
+        }
+        weak var weakMapped: Signal<String>? = mapped
+        
+        XCTAssertNotNil(weakMapped)
+        
+        var mappedValue: String?
+        let removal = mapped!.observeValueChanging{ newValue, _ in mappedValue = newValue }
+        XCTAssertEqual(mappedValue, nil)
+        
+        intSource.notifyValueChanging(1)
+        XCTAssertEqual(mappedValue, "Loading!")
+
+        stringSource.notifyValueChanging("Loaded!")
+        XCTAssertEqual(mappedValue, "Loaded!")
+
+        removal()
+        
+        // Verify that mapped signal weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the mapped signal from being deinitialized
+        mapped = nil
+        XCTAssertNil(weakMapped)
     }
 
     func testZip() {

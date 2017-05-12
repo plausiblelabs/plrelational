@@ -140,8 +140,14 @@ open class SourceSignal<T>: Signal<T> {
     
     /// Should be overridden by subclasses to perform custom observe behavior (for example, starting the underlying
     /// signal source).
-    internal func observeImpl(_ observer: Observer) {
-        // TODO: Need to make this public if we eventually want to support arbitrary signal sources defined
+    internal func addObserverImpl(_ observer: Observer) {
+        // TODO: Need to make this open if we eventually want to support arbitrary signal sources defined
+        // outside this library
+    }
+    
+    /// Called when the last observer has been removed.
+    internal func onEmptyObserverSet() {
+        // TODO: Need to make this open if we eventually want to support arbitrary signal sources defined
         // outside this library
     }
     
@@ -150,9 +156,15 @@ open class SourceSignal<T>: Signal<T> {
         nextObserverID += 1
         observers[id] = observer
         
-        observeImpl(observer)
+        addObserverImpl(observer)
         
-        return { self.observers.removeValue(forKey: id) }
+        return { [weak self] in
+            guard let strongSelf = self else { return }
+            strongSelf.observers.removeValue(forKey: id)
+            if strongSelf.observers.isEmpty {
+                strongSelf.onEmptyObserverSet()
+            }
+        }
     }
     
     public func notifyBeginPossibleAsyncChange() {
@@ -198,7 +210,7 @@ internal class ConstantSignal<T>: SourceSignal<T> {
         self.value = value
     }
     
-    override func observeImpl(_ observer: Observer) {
+    override func addObserverImpl(_ observer: Observer) {
         observer.notifyValueChanging(value)
     }
 }
@@ -207,8 +219,24 @@ internal class ConstantSignal<T>: SourceSignal<T> {
 public class PipeSignal<T>: SourceSignal<T> {
     public var onObserve: ((Observer) -> Void)?
     
-    override func observeImpl(_ observer: Observer) {
+    override func addObserverImpl(_ observer: Observer) {
         onObserve?(observer)
+    }
+}
+
+// XXX: Workaround for cases where we want to have a Signal that mutates `self` but need
+// a signal to pass to `super.init`.  The `underlyingSignal` must be set before an
+// observer is attached.
+internal class DelegatingSignal<T>: Signal<T> {
+    
+    var underlyingSignal: Signal<T>!
+    
+    override func addObserver(_ observer: Observer) -> ObserverRemoval {
+        return underlyingSignal.addObserver(observer)
+    }
+    
+    override var observerCount: Int {
+        return underlyingSignal.observerCount
     }
 }
 

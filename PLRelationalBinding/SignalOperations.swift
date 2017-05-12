@@ -122,36 +122,37 @@ private class FlatMappedSignal<S: SignalType, T: SignalType>: SourceSignal<T.Val
         mappedSignalObserverRemoval?()
     }
     
-    override func observeImpl(_ observer: Observer) {
+    override func addObserverImpl(_ observer: Observer) {
         if self.underlyingSignalObserverRemoval == nil {
             // Observe the underlying signal when the first observer is attached
-            self.underlyingSignalObserverRemoval = underlying.observe{ event in
+            self.underlyingSignalObserverRemoval = underlying.observe{ [weak self] event in
+                guard let strongSelf = self else { return }
                 switch event {
                 case .beginPossibleAsyncChange:
-                    self.notifyBeginPossibleAsyncChange()
+                    strongSelf.notifyBeginPossibleAsyncChange()
                     
                 case let .valueChanging(newValue, _):
-                    // When the underlying signal produces a new value, create and observe the signal
-                    // produced by `transform`
-                    self.mappedValue = nil
-                    self.mappedSignalObserverRemoval?()
-                    let newSignal = self.transform(newValue)
-                    self.mappedSignalObserverRemoval = newSignal.observe{ event in
+                    // When the underlying signal produces a new value, use `transform` to create a
+                    // a new signal and make that signal the new source of values
+                    strongSelf.mappedValue = nil
+                    strongSelf.mappedSignalObserverRemoval?()
+                    let newSignal = strongSelf.transform(newValue)
+                    strongSelf.mappedSignalObserverRemoval = newSignal.observe{ event in
                         switch event {
                         case .beginPossibleAsyncChange:
-                            self.notifyBeginPossibleAsyncChange()
+                            strongSelf.notifyBeginPossibleAsyncChange()
                             
                         case let .valueChanging(newValue, metadata):
-                            self.mappedValue = newValue
-                            self.notifyValueChanging(newValue, metadata)
+                            strongSelf.mappedValue = newValue
+                            strongSelf.notifyValueChanging(newValue, metadata)
                             
                         case .endPossibleAsyncChange:
-                            self.notifyEndPossibleAsyncChange()
+                            strongSelf.notifyEndPossibleAsyncChange()
                         }
                     }
                     
                 case .endPossibleAsyncChange:
-                    self.notifyEndPossibleAsyncChange()
+                    strongSelf.notifyEndPossibleAsyncChange()
                 }
             }
         } else {
@@ -163,10 +164,14 @@ private class FlatMappedSignal<S: SignalType, T: SignalType>: SourceSignal<T.Val
         }
     }
     
-    override var observerCount: Int {
-        // TODO: Does this need to take the mapped signal into account too?  (Not too important, since observerCount is for
-        // debugging purposes only.)
-        return underlying.observerCount
+    override func onEmptyObserverSet() {
+        underlyingSignalObserverRemoval?()
+        underlyingSignalObserverRemoval = nil
+        
+        mappedSignalObserverRemoval?()
+        mappedSignalObserverRemoval = nil
+        
+        mappedValue = nil
     }
 }
 

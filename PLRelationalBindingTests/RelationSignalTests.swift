@@ -60,12 +60,22 @@ class RelationSignalTests: BindingTestCase {
         r.asyncDelete(true)
         verify(observer1, changes: ["", "cat"], willChangeCount: 3, didChangeCount: 2)
         verify(observer2, changes: ["", "cat"], willChangeCount: 3, didChangeCount: 2)
+        
+        // Add a third observer while the delete is pending and verify that it receives both a
+        // WillChange and the latest value
+        let observer3 = StringObserver()
+        let removal3 = observer3.observe(signal)
+        verify(observer3, changes: ["cat"], willChangeCount: 1, didChangeCount: 0)
+        
+        // Await async completion and verify state changes
         awaitIdle()
         verify(observer1, changes: ["", "cat", ""], willChangeCount: 3, didChangeCount: 3)
         verify(observer2, changes: ["", "cat", ""], willChangeCount: 3, didChangeCount: 3)
+        verify(observer3, changes: ["cat", ""], willChangeCount: 1, didChangeCount: 1)
         
         removal1()
         removal2()
+        removal3()
     }
     
     func testObserversWithExplicitInitialValue() {
@@ -252,5 +262,37 @@ class RelationSignalTests: BindingTestCase {
         awaitIdle()
         verify(observer1, changes: [], willChangeCount: 1, didChangeCount: 0)
         verify(observer2, changes: [""], willChangeCount: 2, didChangeCount: 1)
+    }
+    
+    func testLifetime() {
+        let sqliteDB = makeDB().db
+        _ = sqliteDB.createRelation("animal", scheme: ["id", "name"]).ok!
+        let db = TransactionalDatabase(sqliteDB)
+        let r = db["animal"]
+        
+        var signal: Signal<String>? = r
+            .select(Attribute("id") *== 1)
+            .project(["name"])
+            .oneString()
+        weak var weakSignal: Signal<String>? = signal
+        
+        XCTAssertNotNil(weakSignal)
+
+        var latestValue: String?
+        let removal = signal!.observeValueChanging{ newValue, _ in latestValue = newValue }
+        
+        awaitIdle()
+        XCTAssertEqual(latestValue, "")
+        
+        r.asyncAdd(["id": 1, "name": "cat"])
+        awaitIdle()
+        XCTAssertEqual(latestValue, "cat")
+
+        removal()
+        
+        // Verify that signal weakly observes its underlying relation and does not leave dangling strong references
+        // that prevent the signal from being deinitialized
+        signal = nil
+        XCTAssertNil(weakSignal)
     }
 }
