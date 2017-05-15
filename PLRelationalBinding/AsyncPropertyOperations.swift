@@ -8,7 +8,7 @@ import Foundation
 extension ReadablePropertyType {
     /// Returns an AsyncReadableProperty that is derived from this synchronous property's signal.
     public func async() -> AsyncReadableProperty<Value> {
-        return UnaryOpProperty(signal: self.signal, owner: self)
+        return UnaryOpProperty(signal: self.signal, underlyingProperty: self)
     }
 }
 
@@ -16,7 +16,7 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
     /// Returns an AsyncReadableProperty whose value is derived from this property's `value`.
     /// The given `transform` will be applied whenever this property's value changes.
     public func map<U>(_ transform: @escaping (Self.Value) -> U) -> AsyncReadableProperty<U> {
-        return UnaryOpProperty(signal: self.signal.map(transform), owner: self)
+        return UnaryOpProperty(signal: self.signal.map(transform), underlyingProperty: self)
     }
     
     /// Returns an AsyncReadableProperty whose value is derived from the given property's `value`.
@@ -25,7 +25,7 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
     public func flatMap<P: AsyncReadablePropertyType>(_ transform: @escaping (Self.Value) -> P) -> AsyncReadableProperty<P.Value>
         where P.Value == P.SignalChange
     {
-        return FlatMappedProperty(signal: self.signal, transform: transform)
+        return FlatMappedProperty(signal: self.signal, transform: transform, underlyingProperty: self)
     }
 }
 
@@ -35,7 +35,7 @@ extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
 public func zip<LHS: AsyncReadablePropertyType, RHS: AsyncReadablePropertyType>(_ lhs: LHS, _ rhs: RHS) -> AsyncReadableProperty<(LHS.Value, RHS.Value)>
     where LHS.Value == LHS.SignalChange, RHS.Value == RHS.SignalChange
 {
-    return BinaryOpProperty(signal: zip(lhs.signal, rhs.signal), owner1: lhs, owner2: rhs)
+    return BinaryOpProperty(signal: zip(lhs.signal, rhs.signal), underlyingProperty1: lhs, underlyingProperty2: rhs)
 }
 
 /// Returns an AsyncReadableProperty whose value is the negation of the boolean value of the given property.
@@ -56,10 +56,10 @@ public prefix func !<P: AsyncReadablePropertyType>(property: P) -> AsyncReadable
 /// Property that keeps a strong reference to the signal owner.
 private class UnaryOpProperty<T>: AsyncReadableProperty<T> {
     
-    private let owner: AnyObject
+    private let underlyingProperty: AnyObject
     
-    init(signal: Signal<T>, owner: AnyObject) {
-        self.owner = owner
+    init(signal: Signal<T>, underlyingProperty: AnyObject) {
+        self.underlyingProperty = underlyingProperty
         super.init(signal: signal)
     }
 }
@@ -67,12 +67,12 @@ private class UnaryOpProperty<T>: AsyncReadableProperty<T> {
 /// Property that keeps a strong reference to the signal owners.
 private class BinaryOpProperty<T>: AsyncReadableProperty<T> {
     
-    private let owner1: AnyObject
-    private let owner2: AnyObject
+    private let underlyingProperty1: AnyObject
+    private let underlyingProperty2: AnyObject
     
-    init(signal: Signal<T>, owner1: AnyObject, owner2: AnyObject) {
-        self.owner1 = owner1
-        self.owner2 = owner2
+    init(signal: Signal<T>, underlyingProperty1: AnyObject, underlyingProperty2: AnyObject) {
+        self.underlyingProperty1 = underlyingProperty1
+        self.underlyingProperty2 = underlyingProperty2
         super.init(signal: signal)
     }
 }
@@ -83,9 +83,12 @@ private class BinaryOpProperty<T>: AsyncReadableProperty<T> {
 // property.  The whole question of property/signal/binding lifetimes needs to be rethought.
 private class FlatMappedProperty<T, U>: AsyncReadableProperty<U> {
     
+    private let underlyingProperty: AnyObject
     private var mappedProperty: AsyncReadableProperty<U>?
     
-    init<P: AsyncReadablePropertyType>(signal: Signal<T>, transform: @escaping (T) -> P) where P.Value == U, P.SignalChange == U {
+    init<P: AsyncReadablePropertyType>(signal: Signal<T>, transform: @escaping (T) -> P, underlyingProperty: AnyObject) where P.Value == U, P.SignalChange == U {
+        self.underlyingProperty = underlyingProperty
+        
         let delegatingSignal = DelegatingSignal<U>()
         
         super.init(signal: delegatingSignal)

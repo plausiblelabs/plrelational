@@ -200,6 +200,14 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         XCTAssertNil(weakMapped)
     }
     
+    func testFlatMapWithoutStrongReferenceToUnderlying() {
+        let mapped = mutableValueProperty(1).async().flatMap{ value -> AsyncReadableProperty<String> in
+            return mutableValueProperty("Loading for \(value)").async()
+        }
+
+        XCTAssertEqual(mapped.value, "Loading for 1")
+    }
+    
     func testZip() {
         let source1 = PipeSignal<Bool>()
         let source2 = PipeSignal<Bool>()
