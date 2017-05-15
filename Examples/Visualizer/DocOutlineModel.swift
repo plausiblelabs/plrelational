@@ -177,13 +177,9 @@ class DocOutlineModel: SectionedTreeViewModel {
         self.relationsSection = DocOutlineSection(id: .relations, cellText: nil, children: .tree(docItems))
         self.sections = [relationsSection]
         
-        let docItemsRemoval = docItems.signal.observe(SignalObserver(
-            valueWillChange: {},
-            valueChanging: { changes, _ in
-                self.handleDocItemsTreeChanges(changes)
-        },
-            valueDidChange: {}
-        ))
+        let docItemsRemoval = docItems.signal.observeValueChanging{ changes, _ in
+            self.handleDocItemsTreeChanges(changes)
+        }
         observerRemovals.append(docItemsRemoval)
     }
     
@@ -384,7 +380,18 @@ class DocOutlineModel: SectionedTreeViewModel {
         return nil
     }
     
-    // TODO: Need a more general purpose `move` for SectionedTreeViewModel that works for any section
+    func pasteboardPlistToMoveItem(_ item: Any) -> Any? {
+        return nil
+    }
+    
+    func isDropAllowed(plist: Any, proposedItem: Any?, proposedChildIndex proposedIndex: Int) -> Bool {
+        return false
+    }
+    
+    func acceptDrop(plist: Any, item: Any?, childIndex: Int) -> Bool {
+        return false
+    }
+    
     func movePageItem(srcPath: TreePath<RowTreeNode>, dstPath: TreePath<RowTreeNode>) {
         let (nodeID, dstParentID, order) = relationsSection.childrenTree!.orderForMove(srcPath: srcPath, dstPath: dstPath)
         // TODO: s/Item/type.name/
