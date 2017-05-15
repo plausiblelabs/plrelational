@@ -8,6 +8,56 @@ import XCTest
 
 class AsyncPropertyOperationsTests: BindingTestCase {
     
+    func testLiftSynchronousPropertyToAsync() {
+        let syncProperty = mutableValueProperty("1")
+        let asyncProperty = syncProperty.async()
+        
+        func verify<P: AsyncReadablePropertyType, T: Equatable>(_ property: P, _ observer: TestObserver<T>,
+                    value: T?, changes: [T], willChangeCount: Int, didChangeCount: Int,
+                    file: StaticString = #file, line: UInt = #line) where P.Value == T
+        {
+            XCTAssertEqual(property.value, value, file: file, line: line)
+            XCTAssertEqual(observer.changes, changes, file: file, line: line)
+            XCTAssertEqual(observer.willChangeCount, willChangeCount, file: file, line: line)
+            XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
+        }
+
+        let observer = StringObserver()
+        verify(asyncProperty, observer, value: "1", changes: [], willChangeCount: 0, didChangeCount: 0)
+        
+        let removal = observer.observe(asyncProperty.signal)
+        XCTAssertEqual(syncProperty.value, "1")
+        verify(asyncProperty, observer, value: "1", changes: ["1"], willChangeCount: 0, didChangeCount: 0)
+        
+        syncProperty.change("2", transient: false)
+        XCTAssertEqual(syncProperty.value, "2")
+        verify(asyncProperty, observer, value: "2", changes: ["1", "2"], willChangeCount: 0, didChangeCount: 0)
+        
+        removal()
+    }
+
+    func testLiftToAsyncWithoutStrongReferenceToSynchronousProperty() {
+        let asyncProperty = mutableValueProperty("1").async()
+        XCTAssertEqual(asyncProperty.value, "1")
+    }
+    
+    func testLiftedAsyncLifetime() {
+        let source = mutableValueProperty("1")
+        var async: AsyncReadableProperty<String>? = source.async()
+        weak var weakAsync: AsyncReadableProperty<String>? = async
+        
+        XCTAssertNotNil(weakAsync)
+        XCTAssertEqual(weakAsync!.value, "1")
+        
+        source.change("2")
+        XCTAssertEqual(weakAsync!.value, "2")
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        async = nil
+        XCTAssertNil(weakAsync)
+    }
+
     func testMap() {
         let source = PipeSignal<Bool>()
         let property = AsyncReadableProperty(signal: source)

@@ -5,6 +5,13 @@
 
 import Foundation
 
+extension ReadablePropertyType {
+    /// Returns an AsyncReadableProperty that is derived from this synchronous property's signal.
+    public func async() -> AsyncReadableProperty<Value> {
+        return UnaryOpProperty(signal: self.signal, owner: self)
+    }
+}
+
 extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
     /// Returns an AsyncReadableProperty whose value is derived from this property's `value`.
     /// The given `transform` will be applied whenever this property's value changes.
