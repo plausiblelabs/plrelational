@@ -20,7 +20,7 @@ class DocDatabase {
         ItemType = "type",
         Name = "name"
         static var relationName: String { return "object" }
-        static var relationSpec: Spec { return file(path: "objects.plist") }
+        static var relationSpec: Spec { return file(path: "objects.plist", primaryKeys: [ID.a]) }
     }
     
     enum ObjectData: String, SchemeEnum { case
@@ -30,14 +30,14 @@ class DocDatabase {
         LastEditingUser = "last_user",
         LastEditingComputer = "last_computer"
         static var relationName: String { return "object_data" }
-        static var relationSpec: Spec { return file(path: "object_data") }
+        static var relationSpec: Spec { return file(path: "object_data", primaryKeys: [ID.a]) }
     }
     
     enum RelationModelData: String, SchemeEnum { case
         ObjectID = "obj_id", // Foreign Key: Object.ID
         Plist = "plist" // XXX: Lazy!
         static var relationName: String { return "relation_model_data" }
-        static var relationSpec: Spec { return dir(path: "relation_model_data", primaryKey: RelationModelData.ObjectID.a) }
+        static var relationSpec: Spec { return dir(path: "relation_model_data", primaryKey: ObjectID.a) }
     }
 
     enum DocItem: String, SchemeEnum { case
@@ -46,16 +46,17 @@ class DocDatabase {
         Parent = "parent",
         Order = "order"
         static var relationName: String { return "doc_item" }
-        static var relationSpec: Spec { return file(path: "doc_items.plist") }
+        static var relationSpec: Spec { return file(path: "doc_items.plist", primaryKeys: [ID.a]) }
     }
     
-    // TODO: These tab-related relations should be machine- or user-specific
+    // TODO: These tab-related relations should be machine- or user-specific; for now we keep them in memory only
+    // and don't attempt to write the data to disk
     enum Tab: String, SchemeEnum { case
         ID = "id",
         Order = "order",
         HistoryID = "history_id"   // Foreign Key: TabHistoryItem.ID
         static var relationName: String { return "tab" }
-        static var relationSpec: Spec { return file(path: "tabs.plist") }
+        static var relationSpec: Spec { return transient(primaryKeys: [ID.a]) }
     }
     
     enum TabHistoryItem: String, SchemeEnum { case
@@ -67,22 +68,13 @@ class DocDatabase {
         DocItemID = "doc_item_id",  // Foreign Key: DocItem.ID
         ItemType = "type"
         static var relationName: String { return "tab_history_item" }
-        static var relationSpec: Spec { return file(path: "tab_history_items.plist") }
+        static var relationSpec: Spec { return transient(primaryKeys: [ID.a]) }
     }
     
     enum SelectedTab: String, SchemeEnum { case
         ID = "id" // Foreign Key: Tab.ID
         static var relationName: String { return "selected_tab" }
-        static var relationSpec: Spec { return file(path: "selected_tabs.plist") }
-    }
-    
-    // XXX: This isn't actually being used in the app and should be removed, but first we would
-    // need to update the test code to stop using it for the purposes of performing dummy
-    // queries/updates
-    enum SelectedInspectorItemID: String, SchemeEnum { case
-        ID = "id"
-        static var relationName: String { return "selected_inspector_item" }
-        static var relationSpec: Spec { return file(path: "selected_inspector_items.plist") }
+        static var relationSpec: Spec { return transient(primaryKeys: [ID.a]) }
     }
     
     private(set) var url: URL?
@@ -152,7 +144,7 @@ class DocDatabase {
         performUndoableAction(name, before: nil, transactionFunc)
     }
     
-    func performUndoableAction(_ name: String, before: ChangeLoggingDatabaseSnapshot?, _ transactionFunc: @escaping (Void) -> Void) {
+    func performUndoableAction(_ name: String, before: TransactionalDatabaseSnapshot?, _ transactionFunc: @escaping (Void) -> Void) {
         if isBusy {
             print("WARNING: Performing action `\(name)` while database is busy; are you sure this is safe?")
         }
@@ -225,9 +217,6 @@ class DocDatabase {
     lazy var selectedTab: TransactionalRelation = self.transactionalRelation(SelectedTab.self)
     lazy var tabHistoryItems: TransactionalRelation = self.transactionalRelation(TabHistoryItem.self)
     
-    // XXX
-    lazy var selectedInspectorItemIDs: TransactionalRelation = self.transactionalRelation(SelectedInspectorItemID.self)
-    
     private func addObject(objectID: ObjectID, name: String, type: ItemType,
                            created: Date, modified: Date,
                            lastUser: String, lastComputer: String)
@@ -299,6 +288,7 @@ class DocDatabase {
         
         docItems.cascadingDelete(
             DocItem.ID.a *== docItemID.relationValue,
+            affectedRelations: [docItems, tabHistoryItems, objects, objectData, tabs],
             cascade: { (relation, row) in
                 if relation === self.docItems {
                     // Tree delete within docItems (removes all descendants), and delete
@@ -576,9 +566,7 @@ class DocDatabase {
             DocItem.relationSpec,
             Tab.relationSpec,
             TabHistoryItem.relationSpec,
-            SelectedTab.relationSpec,
-            // XXX
-            SelectedInspectorItemID.relationSpec
+            SelectedTab.relationSpec
         ]
     }
     
@@ -815,8 +803,12 @@ extension SchemeEnum {
         return Scheme(attributes: Set(Self.cases().map{ $0.a }))
     }
     
-    static func file(path: String) -> PlistDatabase.RelationSpec {
-        return .file(name: relationName, path: path, scheme: scheme)
+    static func transient(primaryKeys: [Attribute]) -> PlistDatabase.RelationSpec {
+        return .transient(name: relationName, scheme: scheme, primaryKeys: primaryKeys)
+    }
+
+    static func file(path: String, primaryKeys: [Attribute]) -> PlistDatabase.RelationSpec {
+        return .file(name: relationName, path: path, scheme: scheme, primaryKeys: primaryKeys)
     }
     
     static func dir(path: String, primaryKey: Attribute) -> PlistDatabase.RelationSpec {

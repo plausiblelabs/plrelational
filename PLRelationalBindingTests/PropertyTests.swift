@@ -556,4 +556,25 @@ class PropertyTests: XCTestCase {
         XCTAssertEqual(changeCount, 2)
         XCTAssertEqual(source.observerCount, 0)
     }
+    
+    func testLifetime() {
+        let source = PipeSignal<Int>()
+        source.onObserve = { observer in
+            observer.notifyValueChanging(0)
+        }
+        
+        var property: ReadableProperty<Int>? = ReadableProperty(signal: source, changing: { _ in return true })
+        weak var weakProperty: ReadableProperty<Int>? = property
+        
+        XCTAssertNotNil(weakProperty)
+        XCTAssertEqual(weakProperty!.value, 0)
+        
+        source.notifyValueChanging(1)
+        XCTAssertEqual(weakProperty!.value, 1)
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        property = nil
+        XCTAssertNil(weakProperty)
+    }
 }

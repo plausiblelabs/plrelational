@@ -139,37 +139,66 @@ class DocModel {
         return db.selectDocOutlineItem(tabID: TabID(currentTabID), path: path, currentPosition: currentPosition)
     }
     
+    /// Stores data that is referenced by a RelationModel.
+    class ReferenceData {
+        var models: [RelationValue: RelationModel] = [:]
+    }
+    
     /// Asynchronously loads the RelationViewModel for the given object.
     // TODO: Allow for cancellation
     private func loadRelationViewModel(objectID: ObjectID, completion: @escaping (RelationViewModel?) -> Void) {
+        
+        func queriesForIDs(_ relation: RelationObject, _ attr: Attribute, _ values: [RelationValue]) -> [RecursiveQuery] {
+            return values.map{ RecursiveQuery(relation: relation, attr: attr, value: $0) }
+        }
+
         db.relationModelData.recursiveSelect(
-            idAttr: DB.RelationModelData.ObjectID.a,
-            initialID: objectID.relationValue,
-            rowCallback: { row -> Result<(RelationModel, [RelationValue]), RelationError> in
+            initialQueryAttr: DB.RelationModelData.ObjectID.a,
+            initialQueryValue: objectID.relationValue,
+            initialValue: ReferenceData(),
+            rowCallback: { (relation, row, accum) -> Result<(ReferenceData, [RecursiveQuery]), RelationError> in
                 guard let plistBlob: [UInt8] = row[DB.RelationModelData.Plist.a].get() else {
                     return .Err(DocModelError(message: "Invalid plist data"))
                 }
-                if let model = RelationModel.fromPlistData(Data(bytes: plistBlob)) {
-                    let objectIDsToLoad: [RelationValue]
-                    switch model {
-                    case .stored:
-                        // There's just one relation, and we already loaded it
-                        objectIDsToLoad = []
-                    case .shared(let sharedRelationModel):
-                        // Determine all relations referenced by this model
-                        objectIDsToLoad = sharedRelationModel.referencedObjectIDs().map{ $0.relationValue }
-                    }
-                    let result: (RelationModel, [RelationValue]) = (model, objectIDsToLoad)
-                    return .Ok(result)
-                } else {
+                guard let model = RelationModel.fromPlistData(Data(bytes: plistBlob)) else {
                     return .Err(DocModelError(message: "Failed to decode RelationModel plist data"))
                 }
+                
+                // Save the model that was loaded
+                let rowID = row[DB.RelationModelData.ObjectID.a]
+                accum.models[rowID] = model
+
+                // Determine whether we need to make any further queries
+                let queries: [RecursiveQuery]
+                switch model {
+                case .stored:
+                    // There's just one relation, and we already loaded it
+                    queries = []
+                case .shared(let sharedRelationModel):
+                    // Determine all relations referenced by this model
+                    let objectIDsToLoad = sharedRelationModel.referencedObjectIDs().map{ $0.relationValue }
+                    queries = queriesForIDs(self.db.relationModelData, DB.RelationModelData.ObjectID.a, objectIDsToLoad)
+                }
+                
+                let result: (ReferenceData, [RecursiveQuery]) = (accum, queries)
+                return .Ok(result)
+            },
+            filterCallback: { accum, queries in
+                // Filter out queries for those cases where we've already fetched the model
+                var validQueries: Set<RecursiveQuery> = []
+                for query in queries {
+                    let rowID = query.value
+                    if accum.models[rowID] == nil {
+                        validQueries.insert(query)
+                    }
+                }
+                return validQueries
             },
             completionCallback: { result in
                 // Convert RelationModels -> RelationViewModel
-                if let models = result.ok {
+                if let referenceData = result.ok {
                     // Convert RelationValue identifier keys -> ObjectID
-                    let modelDict = Dictionary(models.map{ (key, value) in (ObjectID(key), value) })
+                    let modelDict = Dictionary(referenceData.models.map{ (key, value) in (ObjectID(key), value) })
                     let viewModel = RelationViewModel(rootID: objectID, models: modelDict)
                     completion(viewModel)
                 } else {
@@ -186,15 +215,14 @@ class DocModel {
         // i.e., whether the loaded content should be delivered or discarded
         var currentContentLoadID: UUID?
 
-        var latestAsyncState: AsyncState<RelationViewModel?> = .idle(nil)
-        
         // Create a new signal that will deliver the AsyncState changes
-        let currentHistoryItemSignal = self.activeTabCurrentHistoryItem.signal
-        let (signal, notify) = Signal<AsyncState<RelationViewModel?>>.pipe()
+        var latestAsyncState: AsyncState<RelationViewModel?> = .idle(nil)
+        let signal = PipeSignal<AsyncState<RelationViewModel?>>()
 
         func loadViewModel(_ objectID: ObjectID) {
             let contentLoadID = UUID()
             currentContentLoadID = contentLoadID
+            
             self.loadRelationViewModel(objectID: objectID, completion: { model in
                 // Only deliver the loaded data if our content load ID matches
                 if currentContentLoadID != contentLoadID { return }
@@ -202,20 +230,22 @@ class DocModel {
                 if case .idle = latestAsyncState { return }
                 // Only deliver if model was successfully loaded
                 guard let model = model else { return }
-                notify.notifyBeginPossibleAsyncChange()
-                notify.valueChanging(.idle(model))
-                notify.notifyEndPossibleAsyncChange()
+                
+                signal.notifyValueChanging(.idle(model))
             })
         }
         
         // Observe the signal for the currently selected object.  When the selected object changes,
         // we deliver a `loading` state change prior to initiating the async query, and then deliver
-        // the fully realized view model upon completion.
-        let removal = currentHistoryItemSignal.observe(SignalObserver(
-            valueWillChange: {
-                notify.notifyBeginPossibleAsyncChange()
-            },
-            valueChanging: { [weak self] change, _ in
+        // the fully realized TextObjectData upon completion.
+        var changeCount = 0
+        let removal = self.activeTabCurrentHistoryItem.signal.observe{ event in
+            switch event {
+            case .beginPossibleAsyncChange:
+                changeCount += 1
+                signal.notifyBeginPossibleAsyncChange()
+                
+            case let .valueChanging(change, _):
                 let asyncState: AsyncState<RelationViewModel?>
                 if let historyItem = change {
                     let docOutlinePath = historyItem.outlinePath
@@ -233,15 +263,27 @@ class DocModel {
                     asyncState = .idle(nil)
                 }
                 latestAsyncState = asyncState
-                notify.valueChanging(asyncState)
-            },
-            valueDidChange: {
-                notify.notifyEndPossibleAsyncChange()
+                signal.notifyValueChanging(asyncState)
+                
+            case .endPossibleAsyncChange:
+                changeCount -= 1
+                signal.notifyEndPossibleAsyncChange()
             }
-        ))
+        }
         self.observerRemovals.append(removal)
         
-        // TODO: Compute initial value based on activeTabCurrentHistoryItem.value
+        // Deliver the latest value when an observer is attached
+        signal.onObserve = { observer in
+            for _ in 0..<changeCount {
+                // If activeTabCurrentHistoryItem.signal is in an asynchronous change (delivered BeginPossibleAsync
+                // before this observer was attached), we need to give this new observer the corresponding
+                // number of BeginPossibleAsync notifications so that it is correctly balanced when the
+                // EndPossibleAsync notification(s) come in later
+                observer.notifyBeginPossibleAsyncChange()
+            }
+            observer.notifyValueChanging(latestAsyncState)
+        }
+        
         return signal.property()
     }()
 }

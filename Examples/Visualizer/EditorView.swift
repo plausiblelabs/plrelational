@@ -40,7 +40,7 @@ class EditorView: BackgroundView {
         
         super.init(frame: frame)
         
-        let currentViewModelRemoval = model.selectedObjectRelationViewModel.signal.observe{ asyncState, _ in
+        let currentViewModelRemoval = model.selectedObjectRelationViewModel.signal.observeValueChanging{ asyncState, _ in
             switch asyncState {
             case .loading:
                 // Clear view while new model is being loaded
@@ -57,7 +57,6 @@ class EditorView: BackgroundView {
             }
         }
         observerRemovals.append(currentViewModelRemoval)
-        model.selectedObjectRelationViewModel.start()
     }
     
     required init?(coder: NSCoder) {

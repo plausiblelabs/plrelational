@@ -66,12 +66,12 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
         self.signal = pipeSignal
 
         var changeCount = 0
-        pipeSignal.onObserve = { observer in
-            self.observed = true
-            if self.underlyingRemoval == nil {
+        pipeSignal.onObserve = { [weak self] observer in
+            guard let strongSelf = self else { return }
+            strongSelf.observed = true
+            if strongSelf.underlyingRemoval == nil {
                 // Observe the underlying signal the first time someone observes our public signal
-                guard self.underlyingRemoval == nil else { return }
-                self.underlyingRemoval = self.underlyingSignal.observe{ [weak self] event in
+                strongSelf.underlyingRemoval = strongSelf.underlyingSignal.observe{ [weak self] event in
                     switch event {
                     case .beginPossibleAsyncChange:
                         changeCount += 1
@@ -95,7 +95,7 @@ open class AsyncReadableProperty<T>: AsyncReadablePropertyType {
                     // EndPossibleAsync notification(s) come in later
                     observer.notifyBeginPossibleAsyncChange()
                 }
-                if let value = self.mutableValue {
+                if let value = strongSelf.mutableValue {
                     observer.notifyValueChanging(value)
                 }
             }
@@ -135,13 +135,6 @@ open class AsyncReadWriteProperty<T>: AsyncReadableProperty<T> {
 extension SignalType {
     /// Lifts this signal into an AsyncReadableProperty.
     public func property() -> AsyncReadableProperty<Self.Value> {
-        return AsyncReadableProperty(signal: self.signal)
-    }
-}
-
-extension ReadablePropertyType {
-    /// Returns an AsyncReadableProperty that is derived from this synchronous property's signal.
-    public func async() -> AsyncReadableProperty<Value> {
         return AsyncReadableProperty(signal: self.signal)
     }
 }

@@ -8,6 +8,56 @@ import XCTest
 
 class AsyncPropertyOperationsTests: BindingTestCase {
     
+    func testLiftSynchronousPropertyToAsync() {
+        let syncProperty = mutableValueProperty("1")
+        let asyncProperty = syncProperty.async()
+        
+        func verify<P: AsyncReadablePropertyType, T: Equatable>(_ property: P, _ observer: TestObserver<T>,
+                    value: T?, changes: [T], willChangeCount: Int, didChangeCount: Int,
+                    file: StaticString = #file, line: UInt = #line) where P.Value == T
+        {
+            XCTAssertEqual(property.value, value, file: file, line: line)
+            XCTAssertEqual(observer.changes, changes, file: file, line: line)
+            XCTAssertEqual(observer.willChangeCount, willChangeCount, file: file, line: line)
+            XCTAssertEqual(observer.didChangeCount, didChangeCount, file: file, line: line)
+        }
+
+        let observer = StringObserver()
+        verify(asyncProperty, observer, value: "1", changes: [], willChangeCount: 0, didChangeCount: 0)
+        
+        let removal = observer.observe(asyncProperty.signal)
+        XCTAssertEqual(syncProperty.value, "1")
+        verify(asyncProperty, observer, value: "1", changes: ["1"], willChangeCount: 0, didChangeCount: 0)
+        
+        syncProperty.change("2", transient: false)
+        XCTAssertEqual(syncProperty.value, "2")
+        verify(asyncProperty, observer, value: "2", changes: ["1", "2"], willChangeCount: 0, didChangeCount: 0)
+        
+        removal()
+    }
+
+    func testLiftToAsyncWithoutStrongReferenceToSynchronousProperty() {
+        let asyncProperty = mutableValueProperty("1").async()
+        XCTAssertEqual(asyncProperty.value, "1")
+    }
+    
+    func testLiftedAsyncLifetime() {
+        let source = mutableValueProperty("1")
+        var async: AsyncReadableProperty<String>? = source.async()
+        weak var weakAsync: AsyncReadableProperty<String>? = async
+        
+        XCTAssertNotNil(weakAsync)
+        XCTAssertEqual(weakAsync!.value, "1")
+        
+        source.change("2")
+        XCTAssertEqual(weakAsync!.value, "2")
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        async = nil
+        XCTAssertNil(weakAsync)
+    }
+
     func testMap() {
         let source = PipeSignal<Bool>()
         let property = AsyncReadableProperty(signal: source)
@@ -38,6 +88,25 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         removal()
     }
     
+    func testMapLifetime() {
+        let source = SourceSignal<Bool>()
+        let property = AsyncReadableProperty(signal: source)
+        
+        var mapped: AsyncReadableProperty<Int>? = property.map{ $0 ? 1 : 0 }
+        weak var weakMapped: AsyncReadableProperty<Int>? = mapped
+        
+        XCTAssertNotNil(weakMapped)
+        XCTAssertEqual(weakMapped!.value, nil)
+        
+        source.notifyValueChanging(true)
+        XCTAssertEqual(weakMapped!.value, 1)
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        mapped = nil
+        XCTAssertNil(weakMapped)
+    }
+
     func testFlatMap() {
         let intSource = PipeSignal<Int>()
         let intProperty = intSource.property()
@@ -98,6 +167,47 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         removal()
     }
     
+    func testFlatMapLifetime() {
+        let intSource = PipeSignal<Int>()
+        let intProperty = intSource.property()
+        
+        var stringValue = "Nothing"
+        var stringSource: PipeSignal<String>? = nil
+        func changeString(_ newValue: String) {
+            stringValue = newValue
+            stringSource!.notifyValueChanging(newValue)
+        }
+        
+        var mapped: AsyncReadableProperty<String>? = intProperty.flatMap{ value -> AsyncReadableProperty<String> in
+            stringValue = "Loading for \(value)"
+            stringSource = PipeSignal<String>()
+            stringSource!.onObserve = { observer in
+                observer.notifyValueChanging(stringValue)
+            }
+            return stringSource!.property()
+        }
+        weak var weakMapped: AsyncReadableProperty<String>? = mapped
+        
+        XCTAssertNotNil(weakMapped)
+        XCTAssertEqual(weakMapped!.value, nil)
+        
+        intSource.notifyValueChanging(1)
+        XCTAssertEqual(weakMapped!.value, "Loading for 1")
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        mapped = nil
+        XCTAssertNil(weakMapped)
+    }
+    
+    func testFlatMapWithoutStrongReferenceToUnderlying() {
+        let mapped = mutableValueProperty(1).async().flatMap{ value -> AsyncReadableProperty<String> in
+            return mutableValueProperty("Loading for \(value)").async()
+        }
+
+        XCTAssertEqual(mapped.value, "Loading for 1")
+    }
+    
     func testZip() {
         let source1 = PipeSignal<Bool>()
         let source2 = PipeSignal<Bool>()
@@ -133,6 +243,61 @@ class AsyncPropertyOperationsTests: BindingTestCase {
         verify(value: (true, true), changes: [(true, false), (true, true)], willChangeCount: 3, didChangeCount: 3)
         
         removal()
+    }
+    
+    func testZipLifetime() {
+        let source1 = PipeSignal<Bool>()
+        let source2 = PipeSignal<Bool>()
+        
+        let property1 = AsyncReadableProperty(signal: source1)
+        let property2 = AsyncReadableProperty(signal: source2)
+        
+        var zipped: AsyncReadableProperty<(Bool, Bool)>? = zip(property1, property2)
+        weak var weakZipped: AsyncReadableProperty<(Bool, Bool)>? = zipped
+        
+        XCTAssertNotNil(weakZipped)
+        XCTAssertEqual(weakZipped!.value?.0, nil)
+        XCTAssertEqual(weakZipped!.value?.1, nil)
+        
+        source1.notifyValueChanging(true)
+        XCTAssertEqual(weakZipped!.value?.0, nil)
+        XCTAssertEqual(weakZipped!.value?.1, nil)
+
+        source2.notifyValueChanging(false)
+        XCTAssertEqual(weakZipped!.value?.0, true)
+        XCTAssertEqual(weakZipped!.value?.1, false)
+
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        zipped = nil
+        XCTAssertNil(weakZipped)
+    }
+    
+    func testZipAndMapLifetime() {
+        let source1 = PipeSignal<Bool>()
+        let source2 = PipeSignal<Bool>()
+        
+        let property1 = AsyncReadableProperty(signal: source1)
+        let property2 = AsyncReadableProperty(signal: source2)
+        
+        var mapped: AsyncReadableProperty<String>? =
+            zip(property1, property2)
+                .map{ "\($0.0) \($0.1)" }
+        weak var weakMapped: AsyncReadableProperty<String>? = mapped
+        
+        XCTAssertNotNil(weakMapped)
+        XCTAssertEqual(weakMapped!.value, nil)
+        
+        source1.notifyValueChanging(true)
+        XCTAssertEqual(weakMapped!.value, nil)
+        
+        source2.notifyValueChanging(false)
+        XCTAssertEqual(weakMapped!.value, "true false")
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        mapped = nil
+        XCTAssertNil(weakMapped)
     }
     
 //    func testZipWithNonNilInitialValues() {

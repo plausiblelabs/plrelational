@@ -40,21 +40,21 @@ class AsyncPropertyTests: BindingTestCase {
         removal2()
     }
 
-    func testLiftSynchronousPropertyToAsync() {
-        let syncProperty = mutableValueProperty("1")
-        let asyncProperty = syncProperty.async()
-
-        let observer = StringObserver()
-        verify(asyncProperty, observer, value: "1", changes: [], willChangeCount: 0, didChangeCount: 0)
-
-        let removal = observer.observe(asyncProperty.signal)
-        XCTAssertEqual(syncProperty.value, "1")
-        verify(asyncProperty, observer, value: "1", changes: ["1"], willChangeCount: 0, didChangeCount: 0)
-
-        syncProperty.change("2", transient: false)
-        XCTAssertEqual(syncProperty.value, "2")
-        verify(asyncProperty, observer, value: "2", changes: ["1", "2"], willChangeCount: 0, didChangeCount: 0)
+    func testLifetime() {
+        let source = SourceSignal<Int>()
         
-        removal()
+        var property: AsyncReadableProperty<Int>? = AsyncReadableProperty(signal: source)
+        weak var weakProperty: AsyncReadableProperty<Int>? = property
+        
+        XCTAssertNotNil(weakProperty)
+        XCTAssertEqual(weakProperty!.value, nil)
+        
+        source.notifyValueChanging(1)
+        XCTAssertEqual(weakProperty!.value, 1)
+        
+        // Verify that property weakly observes its underlying signal and does not leave dangling strong references
+        // that prevent the property from being deinitialized
+        property = nil
+        XCTAssertNil(weakProperty)
     }
 }

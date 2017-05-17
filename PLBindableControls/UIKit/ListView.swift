@@ -81,6 +81,9 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
     
     // MARK: - UITableViewDelegate
     
+    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    }
+
     open func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {
         let element = self.model.data.elements[indexPath.row]
         if self.model.rowSelected(element.data) {
@@ -88,6 +91,9 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
         } else {
             return nil
         }
+    }
+    
+    open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     }
     
     /// Selects the row corresponding to the given element ID.
@@ -100,8 +106,55 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
     // MARK: - Property observers
     
     private func arrayChanged(_ changes: [ArrayChange<M.Element>]) {
-        // TODO
         Swift.print("ARRAY CHANGED: \(changes)")
-        self.tableView.reloadData()
+        
+        // XXX: Unlike NSTableView, UITableView does not seem to like reloadData inside
+        // the begin/endUpdates section.  We will do the initial reloadData outside
+        // a begin/end and then subsequent modifications will be done inside begin/end.
+        var didBegin = false
+        
+        func beginUpdates() {
+            if !didBegin {
+                tableView.beginUpdates()
+                didBegin = true
+            }
+        }
+        
+        func endUpdates() {
+            if didBegin {
+                tableView.endUpdates()
+                didBegin = false
+            }
+        }
+        
+        for change in changes {
+            switch change {
+            case .initial(_):
+                tableView.reloadData()
+                
+            case let .insert(index):
+                let indexPath = IndexPath(row: index, section: 0)
+                beginUpdates()
+                tableView.insertRows(at: [indexPath], with: .automatic)
+                
+            case let .delete(index):
+                let indexPath = IndexPath(row: index, section: 0)
+                beginUpdates()
+                tableView.deleteRows(at: [indexPath], with: .automatic)
+                
+            case let .update(index):
+                let indexPath = IndexPath(row: index, section: 0)
+                beginUpdates()
+                tableView.reloadRows(at: [indexPath], with: .automatic)
+                
+            case let .move(srcIndex, dstIndex):
+                let srcIndexPath = IndexPath(row: srcIndex, section: 0)
+                let dstIndexPath = IndexPath(row: dstIndex, section: 0)
+                beginUpdates()
+                tableView.moveRow(at: srcIndexPath, to: dstIndexPath)
+            }
+        }
+
+        endUpdates()
     }
 }
