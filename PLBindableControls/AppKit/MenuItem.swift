@@ -24,18 +24,20 @@ public struct MenuItemContent<T> {
     public let object: T
     public let title: MenuItemProperty<String>?
     public let image: MenuItemProperty<Image>?
+    public let enabled: Bool
     
-    public init(object: T, title: MenuItemProperty<String>?, image: MenuItemProperty<Image>? = nil) {
+    public init(object: T, title: MenuItemProperty<String>?, image: MenuItemProperty<Image>? = nil, enabled: Bool = true) {
         self.object = object
         self.title = title
         self.image = image
+        self.enabled = enabled
     }
     
-    public init(object: T, title: ReadableProperty<String>, image: ReadableProperty<Image>? = nil) {
-        self.init(object: object, title: .sync(title), image: image.map{ .sync($0) })
+    public init(object: T, title: ReadableProperty<String>, image: ReadableProperty<Image>? = nil, enabled: Bool = true) {
+        self.init(object: object, title: .sync(title), image: image.map{ .sync($0) }, enabled: enabled)
     }
     
-    public init(object: T, title: AsyncReadableProperty<String>, image: ReadableProperty<Image>? = nil) {
+    public init(object: T, title: AsyncReadableProperty<String>, image: ReadableProperty<Image>? = nil, enabled: Bool = true) {
         self.init(object: object, title: .async(title), image: image.map{ .sync($0) })
     }
 }
@@ -155,6 +157,8 @@ class NativeMenuItem<T> {
             default:
                 break
             }
+            
+            nsitem.isEnabled = content.enabled
         }
     }
     
