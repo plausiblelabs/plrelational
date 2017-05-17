@@ -19,6 +19,15 @@ extension Dictionary {
             return new
         }
     }
+    
+    public subscript(key: Key, defaultValue defaultValue: @autoclosure (Void) -> Value) -> Value {
+        mutating get {
+            return getOrCreate(key, defaultValue: defaultValue())
+        }
+        set {
+            self[key] = newValue
+        }
+    }
 }
 
 /// Combine a dictionary and some collection of key/value pairs, which may be a second dictionary.
