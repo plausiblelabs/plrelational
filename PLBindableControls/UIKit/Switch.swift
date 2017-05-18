@@ -6,7 +6,7 @@
 import UIKit
 import PLRelationalBinding
 
-open class Switch: UISwitch, UITextFieldDelegate {
+open class Switch: UISwitch {
     
     private lazy var changeHandler: ChangeHandler = ChangeHandler(
         onLock: { [weak self] in
