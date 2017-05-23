@@ -411,6 +411,7 @@
 		C22B160E1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */; };
 		C22B16101E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */; };
 		C22B16111E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */; };
+		C2A78A1D1ED4A84D0021ACCF /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
 		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2EB823C1E96A67D00B80CAE /* SelectExpressionAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB823B1E96A67D00B80CAE /* SelectExpressionAnalysis.swift */; };
 		C2F13CE31E8D4ECD001376D8 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
@@ -849,6 +850,7 @@
 		C28BFEF01D81F7C4005F07A0 /* ObjectCasting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectCasting.swift; sourceTree = "<group>"; };
 		C29739DB1DEDFF0E00C79DB1 /* CachingRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CachingRelation.swift; sourceTree = "<group>"; };
 		C29C28351D872BEA001E20E7 /* UnsafePointerReadWrite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnsafePointerReadWrite.swift; sourceTree = "<group>"; };
+		C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemovableSet.swift; sourceTree = "<group>"; };
 		C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConcreteRelation.swift; sourceTree = "<group>"; };
 		C2AC82631D3980E2005D39C9 /* NegativeSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NegativeSet.swift; sourceTree = "<group>"; };
 		C2B339DD1CEA54E7008568E9 /* RelationDump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDump.swift; sourceTree = "<group>"; };
@@ -1942,6 +1944,7 @@
 				C2C6308C1D355B7500AD44C1 /* PerThreadInstance.swift */,
 				C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */,
 				C283FFCF1E805101000CDED9 /* Promise.swift */,
+				C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */,
 				C2B53CBA1D197814006B6278 /* RWLock.swift */,
 				C257C7511CBEBF6300234A89 /* SetPowerSet.swift */,
 				C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */,
@@ -3119,6 +3122,7 @@
 				37B440491E899A0900C8C336 /* PlistFileRelation.swift in Sources */,
 				37B440441E899A0100C8C336 /* StoredRelation.swift in Sources */,
 				37B4404A1E899A0900C8C336 /* RowPlist.swift in Sources */,
+				C2A78A1D1ED4A84D0021ACCF /* RemovableSet.swift in Sources */,
 				37B440A11E899A7200C8C336 /* StringPad.swift in Sources */,
 				37B440971E899A7200C8C336 /* ObserverSet.swift in Sources */,
 				37B440841E899A7200C8C336 /* CollectionConvenience.swift in Sources */,
