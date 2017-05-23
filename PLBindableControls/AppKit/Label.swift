@@ -20,6 +20,10 @@ open class Label: NSTextField {
     public private(set) lazy var string: BindableProperty<String> = WriteOnlyProperty(set: { [weak self] in
         self?.stringValue = $0.0
     })
+    
+    public private(set) lazy var bindable_textColor: BindableProperty<NSColor> = WriteOnlyProperty(set: { [weak self] in
+        self?.textColor = $0.0
+    })
 }
 
 extension Label {

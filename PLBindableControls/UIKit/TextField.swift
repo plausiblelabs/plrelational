@@ -27,14 +27,17 @@ open class TextField: UITextField, UITextFieldDelegate {
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        
-        self.delegate = self
+        self.configure()
     }
     
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
-        
+        self.configure()
+    }
+    
+    private func configure() {
         self.delegate = self
+        self.addTarget(self, action: #selector(textFieldChanged(_:)), for: .editingChanged)
     }
 
     open func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -42,11 +45,10 @@ open class TextField: UITextField, UITextFieldDelegate {
         previousCommittedValue = self.text
     }
     
-    open func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+    func textFieldChanged(_ sender: UITextField) {
         if deliverTransientChanges {
             _bindable_text.changed(transient: true)
         }
-        return true
     }
     
     open func textFieldShouldReturn(_ textField: UITextField) -> Bool {
