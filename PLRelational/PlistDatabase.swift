@@ -7,6 +7,7 @@ import Foundation
 
 protocol PlistRelation: StoredRelation {
     var url: URL? { get set }
+    var saveObservers: RemovableSet<(URL) -> Void> { get }
     func save() -> Result<(), RelationError>
 }
 
@@ -131,5 +132,13 @@ public class PlistDatabase: StoredDatabase {
             }
         }
         return result
+    }
+    
+    public func addSaveObserver(_ observer: @escaping (URL) -> Void) {
+        relations.withValue({
+            for managed in $0.values {
+                _ = managed.relation.saveObservers.add(observer)
+            }
+        })
     }
 }
