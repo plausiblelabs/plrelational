@@ -419,6 +419,42 @@ class PlistDirectoryRelationTests: XCTestCase {
         XCTAssertNil(r2Result.err)
         XCTAssertNotNil(r2Result.ok?.rows().first(where: { _ in true })?.err)
     }
+    
+    func testSaveObserver() {
+        let url = tmpURL()
+        let r = PlistDirectoryRelation.withDirectory(url, scheme: ["n"], primaryKey: "n", create: true).ok!
+        
+        var observedURLs: [URL] = []
+        let remover = r.saveObservers.add({
+            observedURLs.append($0)
+        })
+        
+        XCTAssertNil(r.add(["n": 42]).err)
+        XCTAssertNil(r.add(["n": 43]).err)
+        XCTAssertNil(r.save().err)
+        
+        XCTAssertEqual(observedURLs.count, 2)
+        for observedURL in observedURLs {
+            XCTAssertTrue(observedURL.path.hasPrefix(url.path))
+        }
+        
+        observedURLs = []
+        XCTAssertNil(r.delete(Attribute("n") *== 42).err)
+        XCTAssertNil(r.save().err)
+        XCTAssertEqual(observedURLs.count, 1)
+        for observedURL in observedURLs {
+            XCTAssertTrue(observedURL.path.hasPrefix(url.path))
+        }
+        
+        observedURLs = []
+        remover()
+        
+        XCTAssertNil(r.add(["n": 44]).err)
+        XCTAssertNil(r.add(["n": 45]).err)
+        XCTAssertNil(r.save().err)
+        
+        XCTAssertEqual(observedURLs, [])
+    }
 }
 
 fileprivate class LoggingCodec: DataCodec {

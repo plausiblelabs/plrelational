@@ -411,6 +411,7 @@
 		C22B160E1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */; };
 		C22B16101E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */; };
 		C22B16111E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */; };
+		C25BB38D1ED4AE79002FC659 /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
 		C2A78A1D1ED4A84D0021ACCF /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
 		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2EB823C1E96A67D00B80CAE /* SelectExpressionAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB823B1E96A67D00B80CAE /* SelectExpressionAnalysis.swift */; };
@@ -2995,6 +2996,7 @@
 				37B4407C1E899A4400C8C336 /* BookmarkableGraph.swift in Sources */,
 				37B4405E1E899A2000C8C336 /* ChangeLoggingDatabase.swift in Sources */,
 				37B440A71E899A7200C8C336 /* ConsistentPRNG.swift in Sources */,
+				C25BB38D1ED4AE79002FC659 /* RemovableSet.swift in Sources */,
 				37B440201E8999D200C8C336 /* SelectExpression.swift in Sources */,
 				37B440BB1E899A7300C8C336 /* PerThreadInstance.swift in Sources */,
 				37B4404B1E899A0A00C8C336 /* PlistDatabase.swift in Sources */,

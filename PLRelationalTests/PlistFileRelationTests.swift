@@ -160,6 +160,7 @@ class PlistFileRelationTests: XCTestCase {
             }
         }
     }
+    
     func testSelectPerformance() {
         let r = PlistFileRelation.withFile(nil, scheme: ["a", "b"], primaryKeys: ["a"], create: true).ok!
         
@@ -206,5 +207,28 @@ class PlistFileRelationTests: XCTestCase {
                 _ = r.delete(Attribute("a") *== RelationValue(i))
             }
         })
+    }
+    
+    func testSaveObserver() {
+        let url = tmpURL()
+        let r = PlistFileRelation.withFile(url, scheme: ["n"], primaryKeys: ["n"], create: true).ok!
+        
+        var observedURL: URL?
+        let remover = r.saveObservers.add({
+            observedURL = $0
+        })
+        
+        XCTAssertNil(r.add(["n": 42]).err)
+        XCTAssertNil(r.save().err)
+        
+        XCTAssertEqual(url, observedURL)
+        
+        observedURL = nil
+        remover()
+        
+        XCTAssertNil(r.add(["n": 43]).err)
+        XCTAssertNil(r.save().err)
+        
+        XCTAssertNil(observedURL)
     }
 }

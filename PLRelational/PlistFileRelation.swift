@@ -33,6 +33,8 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
     
     public var debugName: String?
     
+    public let saveObservers = RemovableSet<(URL) -> Void>()
+    
     fileprivate init(scheme: Scheme, primaryKeys: [Attribute], url: URL?, codec: DataCodec?, isTransient: Bool) {
         self.scheme = scheme
         self.values = IndexedSet(primaryKeys: primaryKeys)
@@ -180,7 +182,12 @@ extension PlistFileRelation {
         do {
             let data = try PropertyListSerialization.data(fromPropertyList: dict, format: .xml, options: 0)
             let encodedDataResult = codec?.encode(data) ?? .Ok(data)
-            return try encodedDataResult.map({ try $0.write(to: url, options: .atomicWrite) })
+            return try encodedDataResult.map({
+                try $0.write(to: url, options: .atomicWrite)
+                for observer in saveObservers {
+                    observer(url)
+                }
+            })
         } catch {
             return .Err(error)
         }

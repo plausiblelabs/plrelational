@@ -31,6 +31,8 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
     
     public var debugName: String?
     
+    public let saveObservers = RemovableSet<(URL) -> Void>()
+    
     fileprivate var writeCache = WriteCache()
     fileprivate var readCache = ReadCache()
     
@@ -217,6 +219,9 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
         for url in writeCache.toDelete.lazy.flatMap({ $0.urlValue }) {
             do {
                 try FileManager.default.removeItem(at: url)
+                for observer in saveObservers {
+                    observer(url)
+                }
             } catch let error as NSError {
                 // Ignore NoSuchFileError, since we may legitimately try to delete files that don't exist
                 if error.domain != NSCocoaErrorDomain || error.code != NSFileNoSuchFileError {
@@ -334,7 +339,12 @@ extension PlistDirectoryRelation {
             let plist = row.toPlist()
             let data = try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
             let encodedDataResult = codec?.encode(data) ?? .Ok(data)
-            return try encodedDataResult.map({ try $0.write(to: url, options: .atomicWrite) })
+            return try encodedDataResult.map({
+                try $0.write(to: url, options: .atomicWrite)
+                for observer in saveObservers {
+                    observer(url)
+                }
+            })
         } catch {
             return .Err(error)
         }

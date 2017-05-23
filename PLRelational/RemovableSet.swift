@@ -10,6 +10,8 @@ public class RemovableSet<T>: Sequence {
     private var nextNumber: UInt64 = 0
     private var contents: [UInt64: T] = [:]
     
+    public init() {}
+    
     /// Add a value to the set. Returns a remover which, when called, removes the value from the set.
     public func add(_ value: T) -> RemovableSetRemover {
         let number = nextNumber
