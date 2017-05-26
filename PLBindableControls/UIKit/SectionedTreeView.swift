@@ -101,6 +101,12 @@ open class SectionedTreeView<M: SectionedTreeViewModel> {
     public init(model: M, tableView: UITableView) {
         self.impl = Impl(model: model, tableView: tableView)
     }
+    
+    /// XXX: Apparently UITableView will not respond to selectRow() before the view has appeared, so this must be called from the
+    /// parent UIViewController's viewWillAppear() in order to get the current selection to stick.
+    public func refreshSelection() {
+        impl.refreshSelection()
+    }
 }
 
 /// Private implementation for SectionedTreeView.
@@ -111,7 +117,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
     fileprivate weak var viewDelegate: SectionedTreeViewDelegate?
     
     private lazy var selection: MutableValueProperty<M.Path?> = mutableValueProperty(nil, { selectedPath, _ in
-        self.selectItem(selectedPath)
+        self.selectItem(selectedPath, animated: true, scroll: false)
     })
     
     init(model: M, tableView: UITableView) {
@@ -119,14 +125,20 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
         self.tableView = tableView
         
         super.init()
-        
-        self.model.delegate = self
-        self.selection <~ model.selection
-        
+
         tableView.delegate = self
         tableView.dataSource = self
         
+        model.delegate = self
         model.start()
+        
+        tableView.reloadData()
+        
+        self.selection <~ model.selection
+    }
+    
+    func refreshSelection() {
+        selectItem(self.selection.value, animated: false, scroll: true)
     }
     
     // MARK: - UITableViewDataSource
@@ -177,14 +189,14 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
     }
     
     /// Selects the row corresponding to the given item path.
-    private func selectItem(_ itemPath: M.Path?) {
+    private func selectItem(_ itemPath: M.Path?, animated: Bool, scroll: Bool) {
         // XXX: Ignore external selection changes made while in exclusive mode
         if model.selectionExclusiveMode {
             return
         }
 
         let indexPath = itemPath.flatMap(self.model.indexPathForItemPath)
-        self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
+        self.tableView.selectRow(at: indexPath, animated: animated, scrollPosition: scroll ? .middle : .none)
     }
     
     // MARK: - SectionedTreeViewModelDelegate protocol
@@ -194,6 +206,9 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
         
         // TODO: For now we just reload the whole thing
         self.tableView.reloadData()
+
+        // XXX: Set the selection in case the selection property was updated before the tree changes came in
+        //refreshSelection()
 
 //        self.tableView.beginUpdates()
 //        
