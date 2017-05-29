@@ -29,7 +29,7 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
     private let tableView: UITableView
     
     private lazy var selection: MutableValueProperty<M.Element.ID?> = mutableValueProperty(nil, { selectedID, _ in
-        self.selectItem(selectedID)
+        self.selectItem(selectedID, animated: true, scroll: false)
     })
     
     private var arrayObserverRemoval: ObserverRemoval?
@@ -58,6 +58,12 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
         arrayObserverRemoval?()
     }
     
+    /// XXX: Apparently UITableView will not respond to selectRow() before the view has appeared, so this must be called from the
+    /// parent UIViewController's viewWillAppear() in order to get the current selection to stick.
+    public func refreshSelection() {
+        selectItem(self.selection.value, animated: false, scroll: true)
+    }
+
     // MARK: - UITableViewDataSource
     
     open func numberOfSections(in tableView: UITableView) -> Int {
@@ -97,10 +103,10 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
     }
     
     /// Selects the row corresponding to the given element ID.
-    private func selectItem(_ id: M.Element.ID?) {
+    private func selectItem(_ id: M.Element.ID?, animated: Bool, scroll: Bool) {
         let rowIndex = id.flatMap(self.model.data.indexForID)
         let indexPath = rowIndex.map{ IndexPath(row: $0, section: 0) }
-        self.tableView.selectRow(at: indexPath, animated: false, scrollPosition: .none)
+        self.tableView.selectRow(at: indexPath, animated: animated, scrollPosition: scroll ? .middle : .none)
     }
     
     // MARK: - Property observers
@@ -156,5 +162,8 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
         }
 
         endUpdates()
+        
+        // XXX: Set the selection in case the selection property was updated before the array changes came in
+        refreshSelection()
     }
 }

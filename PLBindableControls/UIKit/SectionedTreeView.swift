@@ -208,7 +208,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
         self.tableView.reloadData()
 
         // XXX: Set the selection in case the selection property was updated before the tree changes came in
-        //refreshSelection()
+        refreshSelection()
 
 //        self.tableView.beginUpdates()
 //        
