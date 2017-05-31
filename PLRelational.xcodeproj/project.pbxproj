@@ -377,6 +377,7 @@
 		37B441B21E89AAB800C8C336 /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611321CD7F80F001DAF59 /* TextField.swift */; };
 		37B441B31E89AAB800C8C336 /* ContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611521CE3A942001DAF59 /* ContextMenu.swift */; };
 		37B441B41E89AAB800C8C336 /* MenuItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE591D08A2240067870D /* MenuItem.swift */; };
+		37BEE30B1EDF88CF00D15285 /* Slider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37BEE30A1EDF88CF00D15285 /* Slider.swift */; };
 		37C48D381E8C375C000BDE70 /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43F1C1E898BAD00C8C336 /* PLRelational.framework */; };
 		37C48D391E8C375C000BDE70 /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440EF1E899FB700C8C336 /* PLRelationalBinding.framework */; };
 		37C48D3A1E8C37C9000BDE70 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
@@ -745,6 +746,7 @@
 		37B441611E89A49A00C8C336 /* PLBindableControls.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PLBindableControls.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		37B441691E89A49B00C8C336 /* PLBindableControlsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PLBindableControlsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		37B4419B1E89AA7E00C8C336 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		37BEE30A1EDF88CF00D15285 /* Slider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Slider.swift; sourceTree = "<group>"; };
 		37C48DAB1E8C6787000BDE70 /* TreeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeView.swift; sourceTree = "<group>"; };
 		37C610FD1CD7EFAE001DAF59 /* SampleApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37C610FF1CD7EFAE001DAF59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -1697,6 +1699,7 @@
 			children = (
 				37ED180D1E94335900935D39 /* BarButtonItem.swift */,
 				37D6F08B1E8D6CD4003255FE /* Label.swift */,
+				37BEE30A1EDF88CF00D15285 /* Slider.swift */,
 				373070FE1EB84F4200FC0E13 /* Switch.swift */,
 				373070B81EB6F9A000FC0E13 /* TextField.swift */,
 			);
@@ -2917,6 +2920,7 @@
 				37D6F0931E8ECDB0003255FE /* SectionedTreeView.swift in Sources */,
 				374DAEBF1E8C28EA00FF245B /* UndoableDatabase.swift in Sources */,
 				373070FF1EB84F4200FC0E13 /* Switch.swift in Sources */,
+				37BEE30B1EDF88CF00D15285 /* Slider.swift in Sources */,
 				37D6F08F1E8D7862003255FE /* Bindable.swift in Sources */,
 				37C48DAA1E8C676A000BDE70 /* TextProperty.swift in Sources */,
 				37D6F08C1E8D6CD4003255FE /* Label.swift in Sources */,
