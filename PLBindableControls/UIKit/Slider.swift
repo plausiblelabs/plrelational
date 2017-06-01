@@ -19,6 +19,17 @@ open class Slider: UISlider {
         }
     )
     
+    private lazy var _bindable_value: ExternalValueProperty<Float> = ExternalValueProperty(
+        get: { [weak self] in
+            self?.value ?? 0.0
+        },
+        set: { [weak self] newValue, _ in
+            self?.value = newValue
+        },
+        changeHandler: self.changeHandler
+    )
+    public var bindable_value: ReadWriteProperty<Float> { return _bindable_value }
+
     public override init(frame: CGRect) {
         super.init(frame: frame)
         self.addTarget(self, action: #selector(updatedState(_:)), for: .valueChanged)
@@ -30,6 +41,7 @@ open class Slider: UISlider {
     }
     
     func updatedState(_ sender: Slider) {
-        // TODO
+        // TODO: Use transient: true if isContinuous==true and the value is still changing?
+        _bindable_value.changed(transient: false)
     }
 }
