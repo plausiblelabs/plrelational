@@ -19,19 +19,30 @@ extension ReadablePropertyType {
     }
 }
 
-//extension ReadWriteProperty {
-//    public func bidiMap<U: Equatable>(forward: @escaping (T) -> U?, reverse: @escaping (U?) -> T) -> ReadWriteProperty<U?> {
-//        let newProperty = mutableValueProperty(forward(self.value), valueChanging: { $0 != $1 })
-//        _ = self.connectBidi(newProperty, forward: { .change(forward($0)) }, reverse: { .change(reverse($0)) })
-//        return newProperty
-//    }
-//    
-//    public func bidiMap<U: Equatable>(forward: @escaping (T) -> U, reverse: @escaping (U) -> T) -> ReadWriteProperty<U> {
-//        let newProperty = mutableValueProperty(forward(self.value))
-//        _ = self.connectBidi(newProperty, forward: { .change(forward($0)) }, reverse: { .change(reverse($0)) })
-//        return newProperty
-//    }
-//}
+extension ReadWriteProperty {
+    /// Returns a ReadWriteProperty that supports bidirectional transformation of the underlying value.
+    ///
+    /// - parameter outgoing: The transformation to apply when the underlying value is changing (going "out" to another property).
+    /// - parameter incoming: The transformation to apply when a new value is coming "in" from another property.
+    public func mapBidi<U: Equatable>(outgoing: @escaping (T) -> U, incoming: @escaping (U) -> T) -> ReadWriteProperty<U> {
+        // Make the new property take on the transformed version of the underlying property's value
+        let newProperty = mutableValueProperty(outgoing(self.value))
+
+        // Set up a bidirectional transformation
+        // TODO: Should we hold onto this underlying Binding?
+        _ = self.connectBidi(
+            newProperty,
+            leftToRight: { value, _ in
+                .change(outgoing(value))
+            },
+            rightToLeft: { value, _ in
+                .change(incoming(value))
+            }
+        )
+    
+        return newProperty
+    }
+}
 
 /// Returns a ReadableProperty whose value is a tuple (pair) containing the `value` from
 /// each of the given properties.  The returned property's `value` will contain a fresh tuple
