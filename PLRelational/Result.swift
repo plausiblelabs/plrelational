@@ -162,6 +162,17 @@ extension Result {
     }
 }
 
+extension Result where E == Error {
+    public init(_ f: @autoclosure () throws -> T) {
+        do {
+            let value = try f()
+            self = .Ok(value)
+        } catch {
+            self = .Err(error)
+        }
+    }
+}
+
 precedencegroup ResultFlatMapPrecedence {
     associativity: left
 }
