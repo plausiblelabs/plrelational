@@ -508,6 +508,11 @@ extension PlistDirectoryRelation {
             toWrite.removeValue(forKey: .key(key))
             toDelete.insert(.key(key))
         }
+        
+        mutating func clear(url: URL) {
+            toWrite.removeValue(forKey: .url(url))
+            toDelete.remove(.url(url))
+        }
     }
 }
 
@@ -530,8 +535,12 @@ extension PlistDirectoryRelation {
             }
         }
         
-        func standardized(url: URL) -> NSURL {
+        private func standardized(url: URL) -> NSURL {
             return url.standardizedFileURL as NSURL
+        }
+        
+        func clear(url: URL) {
+            cache.removeObject(forKey: standardized(url: url))
         }
     }
 }
@@ -539,5 +548,65 @@ extension PlistDirectoryRelation {
 extension PlistDirectoryRelation {
     public enum Error: Swift.Error {
         case schemeMismatch(foundScheme: Scheme)
+    }
+}
+
+extension PlistDirectoryRelation {
+    func replaceLocalFile(url: URL, movingURL: URL) -> Result<Bool, Swift.Error> {
+        if urlMatches(url) {
+            let existingRow = readRow(url: url)
+            let newRow = readRow(url: movingURL)
+            readCache.clear(url: movingURL)
+            
+            return newRow.then({ newRow in
+                do {
+                    _ = try FileManager.default.replaceItemAt(url, withItemAt: movingURL)
+                    
+                    if existingRow.ok != newRow {
+                        let added = ConcreteRelation(newRow)
+                        let removed = existingRow.ok.map(ConcreteRelation.init)
+                        notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .directChange)
+                    }
+                    return .Ok(true)
+                } catch {
+                    return .Err(error)
+                }
+            })
+        } else {
+            return .Ok(false)
+        }
+    }
+    
+    func deleteLocalFile(url: URL) -> Result<Bool, Swift.Error> {
+        if urlMatches(url) {
+            return readRow(url: url).then({ row in
+                do {
+                    try FileManager.default.removeItem(at: url)
+                    
+                    readCache.clear(url: url)
+                    writeCache.clear(url: url)
+                    
+                    let removed = ConcreteRelation(row)
+                    notifyChangeObservers(RelationChange(added: nil, removed: removed), kind: .directChange)
+                    
+                    return .Ok(true)
+                } catch {
+                    return .Err(error)
+                }
+            })
+        } else {
+            return .Ok(false)
+        }
+    }
+    
+    func urlMatches(_ url: URL) -> Bool {
+        guard url.isFileURL else { return false }
+        
+        guard let myComponents = self.url?.standardizedFileURL.pathComponents else { return false }
+        let otherComponents = url.standardizedFileURL.pathComponents
+        
+        guard otherComponents.count >= myComponents.count else { return false }
+        
+        return zip(myComponents, otherComponents).all(==)
     }
 }

@@ -238,3 +238,48 @@ private extension PlistFileRelation {
             ?? Set(values.filter({ expression.valueWithRow($0).boolValue }))
     }
 }
+
+extension PlistFileRelation {
+    func replaceLocalFile(url: URL, movingURL: URL) -> Result<Bool, Swift.Error> {
+        if urlMatches(url) {
+            let replacementRelation = PlistFileRelation.withFile(movingURL, scheme: scheme, primaryKeys: Array(values.primaryKeys), create: false, codec: codec)
+            return replacementRelation.then({ replacementRelation in
+                do {
+                    _ = try FileManager.default.replaceItemAt(url, withItemAt: movingURL)
+                    
+                    let existingRows = self.values.values
+                    let replacementRows = replacementRelation.values.values
+                    
+                    let added = ConcreteRelation(scheme: self.scheme, values: replacementRows - existingRows)
+                    let removed = ConcreteRelation(scheme: self.scheme, values: existingRows - replacementRows)
+                    
+                    self.values = replacementRelation.values
+                    
+                    self.notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .directChange)
+                    return .Ok(true)
+                } catch {
+                    return .Err(error)
+                }
+            })
+        } else {
+            return .Ok(false)
+        }
+    }
+    
+    func deleteLocalFile(url: URL) -> Result<Bool, Swift.Error> {
+        if urlMatches(url) {
+            do {
+                try FileManager.default.removeItem(at: url)
+                return delete(true).map({ true })
+            } catch {
+                return .Err(error)
+            }
+        } else {
+            return .Ok(false)
+        }
+    }
+    
+    private func urlMatches(_ url: URL) -> Bool {
+        return url.standardizedFileURL == self.url?.standardizedFileURL
+    }
+}

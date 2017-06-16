@@ -9,6 +9,9 @@ protocol PlistRelation: StoredRelation {
     var url: URL? { get set }
     var saveObservers: RemovableSet<(URL) -> Void> { get }
     func save() -> Result<(), RelationError>
+    
+    func replaceLocalFile(url: URL, movingURL: URL) -> Result<Bool, Error>
+    func deleteLocalFile(url: URL) -> Result<Bool, Error>
 }
 
 public class PlistDatabase: StoredDatabase {
@@ -139,6 +142,36 @@ public class PlistDatabase: StoredDatabase {
             for managed in $0.values {
                 _ = managed.relation.saveObservers.add(observer)
             }
+        })
+    }
+    
+    /// Replace a local file within the doc database with a new file.
+    /// Returns `true` if the replacement was done, and `false` if
+    /// the local file isn't part of the doc database.
+    public func replaceLocalFile(url: URL, movingURL: URL) -> Result<Bool, Error> {
+        return relations.withValue({
+            for (key: _, value: (spec: _, relation: r)) in $0 {
+                let result = r.replaceLocalFile(url: url, movingURL: movingURL)
+                if result.ok == true || result.err != nil {
+                    return result
+                }
+            }
+            return .Ok(false)
+        })
+    }
+    
+    /// Delete a local file within the doc database.
+    /// Returns `true` if the deletion was done, and `false` if
+    /// the local file isn't part of the doc database.
+    public func deleteLocalFile(url: URL) -> Result<Bool, Error> {
+        return relations.withValue({
+            for (key: _, value: (spec: _, relation: r)) in $0 {
+                let result = r.deleteLocalFile(url: url)
+                if result.ok == true || result.err != nil {
+                    return result
+                }
+            }
+            return .Ok(false)
         })
     }
 }
