@@ -131,7 +131,7 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    func executeQuery(_ sql: String, _ parameters: [RelationValue] = []) -> Result<AnyIterator<Result<Row, RelationError>>, RelationError> {
+    public func executeQuery(_ sql: String, _ parameters: [RelationValue] = []) -> Result<AnyIterator<Result<Row, RelationError>>, RelationError> {
         return makeStatement({ sqlite3_prepare_v2(self.db, sql, -1, &$0, nil) }).then({ stmt -> Result<AnyIterator<Result<Row, RelationError>>, RelationError> in
             for (index, param) in parameters.enumerated() {
                 if let err = bindValue(stmt.value, Int32(index + 1), param).err {
@@ -172,7 +172,7 @@ extension SQLiteDatabase {
         })
     }
     
-    func executeQueryWithEmptyResults(_ sql: String, _ parameters: [RelationValue] = []) -> Result<Void, RelationError> {
+    public func executeQueryWithEmptyResults(_ sql: String, _ parameters: [RelationValue] = []) -> Result<Void, RelationError> {
         return executeQuery(sql, parameters).then({
             let rows = Array($0)
             if let error = rows.first?.err {
@@ -181,6 +181,10 @@ extension SQLiteDatabase {
             precondition(rows.isEmpty, "Unexpected result from \(sql) query: \(rows)")
             return .Ok()
         })
+    }
+    
+    public func lastInsertRowID() -> Int64 {
+        return sqlite3_last_insert_rowid(db)
     }
     
     fileprivate func columnToValue(_ stmt: sqlite3_stmt, _ index: Int32) -> RelationValue {
