@@ -131,10 +131,10 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    public func executeQuery(_ sql: String, _ parameters: [RelationValue] = []) -> Result<AnyIterator<Result<Row, RelationError>>, RelationError> {
+    public func executeQuery(_ sql: String, _ parameters: [RelationValue] = [], bindBlobsRaw: Bool = false) -> Result<AnyIterator<Result<Row, RelationError>>, RelationError> {
         return makeStatement({ sqlite3_prepare_v2(self.db, sql, -1, &$0, nil) }).then({ stmt -> Result<AnyIterator<Result<Row, RelationError>>, RelationError> in
             for (index, param) in parameters.enumerated() {
-                if let err = bindValue(stmt.value, Int32(index + 1), param).err {
+                if let err = bindValue(stmt.value, Int32(index + 1), param, bindBlobsRaw: bindBlobsRaw).err {
                     return .Err(err)
                 }
             }
@@ -162,7 +162,7 @@ extension SQLiteDatabase {
                     let columnCount = sqlite3_column_count(stmt.value)
                     for i in 0..<columnCount {
                         let name = String(cString: sqlite3_column_name(stmt.value, i))
-                        let value = self.columnToValue(stmt.value, i)
+                        let value = self.columnToValue(stmt.value, i, rawBlobs: bindBlobsRaw)
                         row[Attribute(name)] = value
                     }
                     
@@ -172,8 +172,8 @@ extension SQLiteDatabase {
         })
     }
     
-    public func executeQueryWithEmptyResults(_ sql: String, _ parameters: [RelationValue] = []) -> Result<Void, RelationError> {
-        return executeQuery(sql, parameters).then({
+    public func executeQueryWithEmptyResults(_ sql: String, _ parameters: [RelationValue] = [], bindBlobsRaw: Bool = false) -> Result<Void, RelationError> {
+        return executeQuery(sql, parameters, bindBlobsRaw: bindBlobsRaw).then({
             let rows = Array($0)
             if let error = rows.first?.err {
                 return .Err(error)
@@ -187,7 +187,7 @@ extension SQLiteDatabase {
         return sqlite3_last_insert_rowid(db)
     }
     
-    fileprivate func columnToValue(_ stmt: sqlite3_stmt, _ index: Int32) -> RelationValue {
+    fileprivate func columnToValue(_ stmt: sqlite3_stmt, _ index: Int32, rawBlobs: Bool) -> RelationValue {
         let type = sqlite3_column_type(stmt, index)
         switch type {
         case SQLITE_NULL: return .null // TODO: We don't really support SQLITE_NULL. We write out our own NULLs using funky BLOBs. Is it wise to read them in?
@@ -198,7 +198,7 @@ extension SQLiteDatabase {
             let length = sqlite3_column_bytes(stmt, index)
             let ptr = sqlite3_column_blob(stmt, index).bindMemory(to: UInt8.self, capacity: Int(length))
             let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: Int(length))
-            return blobToValue(buffer)
+            return rawBlobs ? .blob(Array(buffer)) : blobToValue(buffer)
         default:
             fatalError("Got unknown column type \(type) from SQLite")
         }
@@ -216,14 +216,19 @@ extension SQLiteDatabase {
         }
     }
     
-    fileprivate func bindValue(_ stmt: sqlite3_stmt, _ index: Int32, _ value: RelationValue) -> Result<Void, RelationError> {
+    fileprivate func bindValue(_ stmt: sqlite3_stmt, _ index: Int32, _ value: RelationValue, bindBlobsRaw: Bool) -> Result<Void, RelationError> {
         let result: Result<Int32, RelationError>
         switch value {
         case .null: result = self.errwrap(sqlite3_bind_blob64(stmt, index, BLOBHeaders.NULL, UInt64(BLOBHeaders.length), SQLITE_TRANSIENT))
         case .integer(let x): result = self.errwrap(sqlite3_bind_int64(stmt, index, x))
         case .real(let x): result = self.errwrap(sqlite3_bind_double(stmt, index, x))
         case .text(let x): result = self.errwrap(sqlite3_bind_text(stmt, index, x, -1, SQLITE_TRANSIENT))
-        case .blob(let x): result = self.errwrap(sqlite3_bind_blob64(stmt, index, BLOBHeaders.BLOB + x, UInt64(BLOBHeaders.length + x.count), SQLITE_TRANSIENT))
+        case .blob(let x):
+            if bindBlobsRaw {
+                result = self.errwrap(sqlite3_bind_blob64(stmt, index, x, UInt64(x.count), SQLITE_TRANSIENT))
+            } else {
+                result = self.errwrap(sqlite3_bind_blob64(stmt, index, BLOBHeaders.BLOB + x, UInt64(BLOBHeaders.length + x.count), SQLITE_TRANSIENT))
+            }
         case .notFound: result = .Ok(0)
         }
         return result.map({ _ in })
