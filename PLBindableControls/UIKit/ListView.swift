@@ -23,11 +23,17 @@ public protocol ListViewModel: class {
     func rowSelected(_ data: Element.Data) -> Bool
 }
 
+public protocol ListViewDelegate: class {
+    func willDisplayCell(_ cell: UITableViewCell, indexPath: IndexPath)
+}
+
 open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableViewDelegate {
     
     public let model: M
     private let tableView: UITableView
     
+    public weak var delegate: ListViewDelegate?
+
     private lazy var selection: MutableValueProperty<M.Element.ID?> = mutableValueProperty(nil, { selectedID, _ in
         self.selectItem(selectedID, animated: true, scroll: false)
     })
@@ -88,6 +94,7 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
     // MARK: - UITableViewDelegate
     
     open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        delegate?.willDisplayCell(cell, indexPath: indexPath)
     }
 
     open func tableView(_ tableView: UITableView, willSelectRowAt indexPath: IndexPath) -> IndexPath? {

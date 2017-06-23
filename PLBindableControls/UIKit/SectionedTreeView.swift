@@ -91,7 +91,6 @@ public protocol SectionedTreeViewDelegate: class {
 open class SectionedTreeView<M: SectionedTreeViewModel> {
     
     private let impl: Impl<M>
-    private weak var delegate: SectionedTreeViewDelegate?
     
     public var viewDelegate: SectionedTreeViewDelegate? {
         get { return impl.viewDelegate }

@@ -11,6 +11,7 @@ public enum LabelText {
     case asyncReadOnly(AsyncReadableProperty<String>)
     case readOnlyOpt(ReadableProperty<String?>)
     case asyncReadOnlyOpt(AsyncReadableProperty<String?>)
+    case readOnlyAttributed(ReadableProperty<NSAttributedString>)
 }
 
 extension UILabel {
@@ -27,6 +28,8 @@ extension UILabel {
                 bindable.optText <~ prop
             case .asyncReadOnlyOpt(let prop):
                 bindable.optText <~ prop
+            case .readOnlyAttributed(let prop):
+                bindable.attributedText <~ prop
             }
         }
     }
@@ -49,6 +52,12 @@ extension Bindable where Base: UILabel {
             if let value = value {
                 base?.text = value
             }
+        })
+    }
+    
+    public var attributedText: BindableProperty<NSAttributedString> {
+        return WriteOnlyProperty(set: { [weak base = self.base] value, _ in
+            base?.attributedText = value
         })
     }
 }
