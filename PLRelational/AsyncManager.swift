@@ -218,13 +218,13 @@ public final class AsyncManager: PerThreadInstance {
                 sendWillChange(relation, predicate: query, newValues: newValues)
             case .restoreSnapshot(let database, _), .applyDelta(let database, _):
                 for (_, relation) in database.relations {
-                    registerChange(relation, predicate: true, newValues: nil)
+                    sendWillChange(relation, predicate: true, newValues: nil)
                 }
             case .query:
                 break
             case .customAction(_, let affectedRelations):
                 for relation in affectedRelations {
-                    registerChange(relation, predicate: true, newValues: nil)
+                    sendWillChange(relation, predicate: true, newValues: nil)
                 }
             }
         }
