@@ -26,6 +26,8 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         }
     )
     
+    public var onCommand: ((Selector) -> Bool)?
+    
     private lazy var _string: ExternalValueProperty<String> = ExternalValueProperty(
         get: { [unowned self] in
             self.stringValue
@@ -126,6 +128,13 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         _optString.exclusiveMode = false
         previousCommittedValue = nil
         previousValue = nil
+    }
+
+    // TODO: TextField already serves as its own NSTextFieldDelegate, so if clients want to
+    // add their own delegate, they'll be out of luck; for now we add optional callbacks for
+    // certain things, but we should find a better approach.
+    open func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+        return onCommand?(commandSelector) ?? false
     }
     
     @objc private func timerFired() {
