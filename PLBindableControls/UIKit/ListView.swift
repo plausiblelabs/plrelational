@@ -124,54 +124,57 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
     private func arrayChanged(_ changes: [ArrayChange<M.Element>]) {
         Swift.print("ARRAY CHANGED: \(changes)")
         
-        // XXX: Unlike NSTableView, UITableView does not seem to like reloadData inside
-        // the begin/endUpdates section.  We will do the initial reloadData outside
-        // a begin/end and then subsequent modifications will be done inside begin/end.
-        var didBegin = false
-        
-        func beginUpdates() {
-            if !didBegin {
-                tableView.beginUpdates()
-                didBegin = true
-            }
-        }
-        
-        func endUpdates() {
-            if didBegin {
-                tableView.endUpdates()
-                didBegin = false
-            }
-        }
-        
-        for change in changes {
-            switch change {
-            case .initial(_):
-                tableView.reloadData()
-                
-            case let .insert(index):
-                let indexPath = IndexPath(row: index, section: 0)
-                beginUpdates()
-                tableView.insertRows(at: [indexPath], with: rowAnimation)
-                
-            case let .delete(index):
-                let indexPath = IndexPath(row: index, section: 0)
-                beginUpdates()
-                tableView.deleteRows(at: [indexPath], with: rowAnimation)
-                
-            case let .update(index):
-                let indexPath = IndexPath(row: index, section: 0)
-                beginUpdates()
-                tableView.reloadRows(at: [indexPath], with: rowAnimation)
-                
-            case let .move(srcIndex, dstIndex):
-                let srcIndexPath = IndexPath(row: srcIndex, section: 0)
-                let dstIndexPath = IndexPath(row: dstIndex, section: 0)
-                beginUpdates()
-                tableView.moveRow(at: srcIndexPath, to: dstIndexPath)
-            }
-        }
+//        // XXX: Unlike NSTableView, UITableView does not seem to like reloadData inside
+//        // the begin/endUpdates section.  We will do the initial reloadData outside
+//        // a begin/end and then subsequent modifications will be done inside begin/end.
+//        var didBegin = false
+//        
+//        func beginUpdates() {
+//            if !didBegin {
+//                tableView.beginUpdates()
+//                didBegin = true
+//            }
+//        }
+//        
+//        func endUpdates() {
+//            if didBegin {
+//                tableView.endUpdates()
+//                didBegin = false
+//            }
+//        }
+//        
+//        for change in changes {
+//            switch change {
+//            case .initial(_):
+//                tableView.reloadData()
+//                
+//            case let .insert(index):
+//                let indexPath = IndexPath(row: index, section: 0)
+//                beginUpdates()
+//                tableView.insertRows(at: [indexPath], with: rowAnimation)
+//                
+//            case let .delete(index):
+//                let indexPath = IndexPath(row: index, section: 0)
+//                beginUpdates()
+//                tableView.deleteRows(at: [indexPath], with: rowAnimation)
+//                
+//            case let .update(index):
+//                let indexPath = IndexPath(row: index, section: 0)
+//                beginUpdates()
+//                tableView.reloadRows(at: [indexPath], with: rowAnimation)
+//                
+//            case let .move(srcIndex, dstIndex):
+//                let srcIndexPath = IndexPath(row: srcIndex, section: 0)
+//                let dstIndexPath = IndexPath(row: dstIndex, section: 0)
+//                beginUpdates()
+//                tableView.moveRow(at: srcIndexPath, to: dstIndexPath)
+//            }
+//        }
+//
+//        endUpdates()
 
-        endUpdates()
+        // XXX: Just use reloadData for the time being
+        tableView.reloadData()
         
         // XXX: Set the selection in case the selection property was updated before the array changes came in
         refreshSelection()
