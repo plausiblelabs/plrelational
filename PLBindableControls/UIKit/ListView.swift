@@ -34,6 +34,9 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
     
     public weak var delegate: ListViewDelegate?
 
+    /// The animation style to use when a row is inserted or deleted.
+    public var rowAnimation: UITableViewRowAnimation = .automatic
+    
     private lazy var selection: MutableValueProperty<M.Element.ID?> = mutableValueProperty(nil, { selectedID, _ in
         self.selectItem(selectedID, animated: true, scroll: false)
     })
@@ -148,17 +151,17 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
             case let .insert(index):
                 let indexPath = IndexPath(row: index, section: 0)
                 beginUpdates()
-                tableView.insertRows(at: [indexPath], with: .automatic)
+                tableView.insertRows(at: [indexPath], with: rowAnimation)
                 
             case let .delete(index):
                 let indexPath = IndexPath(row: index, section: 0)
                 beginUpdates()
-                tableView.deleteRows(at: [indexPath], with: .automatic)
+                tableView.deleteRows(at: [indexPath], with: rowAnimation)
                 
             case let .update(index):
                 let indexPath = IndexPath(row: index, section: 0)
                 beginUpdates()
-                tableView.reloadRows(at: [indexPath], with: .automatic)
+                tableView.reloadRows(at: [indexPath], with: rowAnimation)
                 
             case let .move(srcIndex, dstIndex):
                 let srcIndexPath = IndexPath(row: srcIndex, section: 0)
