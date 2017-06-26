@@ -84,7 +84,7 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    func escapeIdentifier(_ id: String) -> String {
+    public func escapeIdentifier(_ id: String) -> String {
         let escapedQuotes = id.replacingOccurrences(of: "\"", with: "\"\"")
         return "\"\(escapedQuotes)\""
     }
