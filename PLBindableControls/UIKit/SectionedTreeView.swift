@@ -155,10 +155,12 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, UITableViewDataSour
         // and eventually other things)
         let identifier = model.cellIdentifier(indexPath)
         let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath)
-        
+
+        // TODO: Labels in UITableViewCell do not automatically refresh (must be triggered by reloading the whole cell), so
+        // we probably should make cellText return a constant string value rather than a property
         let text = model.cellText(indexPath)
-        cell.textLabel?.bind(text)
-        
+        cell.textLabel?.set(text)
+
         // TODO: For now we disable selection for group-style items, but eventually we might want to allow expand/collapse
         cell.isUserInteractionEnabled = !model.cellIsGroupStyle(indexPath)
         

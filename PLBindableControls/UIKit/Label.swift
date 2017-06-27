@@ -14,50 +14,65 @@ public enum LabelText {
     case readOnlyAttributed(ReadableProperty<NSAttributedString>)
 }
 
-extension UILabel {
+public class Label: UILabel {
+    
+    public private(set) lazy var bindable_visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] value, _ in
+        self?.isHidden = !value
+    })
+    
+    public private(set) lazy var bindable_text: BindableProperty<String> = WriteOnlyProperty(set: { [weak self] value, _ in
+        self?.text = value
+    })
+    
+    public private(set) lazy var bindable_optText: BindableProperty<String?> = WriteOnlyProperty(set: { [weak self] value, _ in
+        // This behavior is specific to optText: when `value` goes to nil, we keep the previous string value
+        // in place.  This is mainly useful for the case where an table view cell is being deleted and the
+        // relation associated with its Label is becoming empty (thus resulting in a nil string value).
+        // Without this special behavior, the cell text will flash to the placeholder string as it fades out.
+        if let value = value {
+            self?.text = value
+        }
+    })
+    
+    public private(set) lazy var bindable_attributedText: BindableProperty<NSAttributedString> = WriteOnlyProperty(set: { [weak self] value, _ in
+        self?.attributedText = value
+    })
+}
+
+extension Label {
     public func bind(_ text: LabelText?) {
-        // TODO: Hmm, with this `bindable` extension approach, there's no way to explicitly unbind existing bindings
-        // since each access of `bindable.text` returns a fresh property instance
         if let text = text {
             switch text {
             case .readOnly(let prop):
-                bindable.text <~ prop
+                bindable_text <~ prop
             case .asyncReadOnly(let prop):
-                bindable.text <~ prop
+                bindable_text <~ prop
             case .readOnlyOpt(let prop):
-                bindable.optText <~ prop
+                bindable_optText <~ prop
             case .asyncReadOnlyOpt(let prop):
-                bindable.optText <~ prop
+                bindable_optText <~ prop
             case .readOnlyAttributed(let prop):
-                bindable.attributedText <~ prop
+                bindable_attributedText <~ prop
             }
         }
     }
 }
 
-extension Bindable where Base: UILabel {
-    
-    public var text: BindableProperty<String> {
-        return WriteOnlyProperty(set: { [weak base = self.base] value, _ in
-            base?.text = value
-        })
-    }
-
-    public var optText: BindableProperty<String?> {
-        // This behavior is specific to optText: when `value` goes to nil, we keep the previous string value
-        // in place.  This is mainly useful for the case where an table view cell is being deleted and the
-        // relation associated with its Label is becoming empty (thus resulting in a nil string value).
-        // Without this special behavior, the cell text will flash to the placeholder string as it fades out.
-        return WriteOnlyProperty(set: { [weak base = self.base] value, _ in
-            if let value = value {
-                base?.text = value
+extension UILabel {
+    public func set(_ text: LabelText?) {
+        if let text = text {
+            switch text {
+            case .readOnly(let prop):
+                self.text = prop.value
+            case .asyncReadOnly(let prop):
+                self.text = prop.value
+            case .readOnlyOpt(let prop):
+                self.text = prop.value
+            case .asyncReadOnlyOpt(let prop):
+                self.text = prop.value ?? nil
+            case .readOnlyAttributed(let prop):
+                self.attributedText = prop.value
             }
-        })
-    }
-    
-    public var attributedText: BindableProperty<NSAttributedString> {
-        return WriteOnlyProperty(set: { [weak base = self.base] value, _ in
-            base?.attributedText = value
-        })
+        }
     }
 }

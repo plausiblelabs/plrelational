@@ -88,8 +88,10 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
         let identifier = model.cellIdentifier(element.data)
         let cell = tableView.dequeueReusableCell(withIdentifier: identifier, for: indexPath)
 
+        // TODO: Labels in UITableViewCell do not automatically refresh (must be triggered by reloading the whole cell), so
+        // we probably should make cellText return a constant string value rather than a property
         let text = model.cellText(element.data)
-        cell.textLabel?.bind(text)
+        cell.textLabel?.set(text)
 
         return cell
     }
