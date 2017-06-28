@@ -5,7 +5,7 @@
 
 import sqlite3
 
-typealias sqlite3 = OpaquePointer
+public typealias sqlite3 = OpaquePointer
 typealias sqlite3_stmt = OpaquePointer
 
 let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
@@ -19,7 +19,7 @@ private struct BLOBHeaders {
 }
 
 open class SQLiteDatabase: StoredDatabase {
-    let db: sqlite3
+    public let db: sqlite3
     
     fileprivate var tables = Mutexed<[String: SQLiteTableRelation]>([:])
     
