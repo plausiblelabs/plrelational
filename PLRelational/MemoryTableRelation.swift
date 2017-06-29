@@ -37,11 +37,16 @@ open class MemoryTableRelation: Relation, MutableRelation, RelationDefaultChange
     }
     
     open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
-        let toUpdate = values.filter({ query.valueWithRow($0).boolValue })
+        let toUpdate = Set(values.filter({ query.valueWithRow($0).boolValue }))
         values.subtract(toUpdate)
         
-        let updated = toUpdate.map({ $0.rowWithUpdate(newValues) })
+        let updated = Set(toUpdate.map({ $0.rowWithUpdate(newValues) }))
         values.formUnion(updated)
+        
+        let added = ConcreteRelation(scheme: scheme, values: updated - toUpdate)
+        let removed = ConcreteRelation(scheme: scheme, values: toUpdate - updated)
+        
+        notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .directChange)
         
         return .Ok()
     }
