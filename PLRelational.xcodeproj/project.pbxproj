@@ -413,6 +413,8 @@
 		C22B16101E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */; };
 		C22B16111E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */; };
 		C25BB38D1ED4AE79002FC659 /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
+		C25ECC6C1F042E5B00CBB798 /* DJBHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */; };
+		C25ECC851F053A9A00CBB798 /* DJBHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */; };
 		C2A78A1D1ED4A84D0021ACCF /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
 		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2EB823C1E96A67D00B80CAE /* SelectExpressionAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB823B1E96A67D00B80CAE /* SelectExpressionAnalysis.swift */; };
@@ -839,6 +841,7 @@
 		C257C7531CC017EB00234A89 /* SimpleDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SimpleDatabase.swift; sourceTree = "<group>"; };
 		C25D63401DDF5F3000135E20 /* OptionalFlatten.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionalFlatten.swift; sourceTree = "<group>"; };
 		C25D63421DDF88BA00135E20 /* AsyncRunloopHack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncRunloopHack.swift; sourceTree = "<group>"; };
+		C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DJBHash.swift; sourceTree = "<group>"; };
 		C263BBF21CE51B51006B7662 /* UnaryOperator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnaryOperator.swift; sourceTree = "<group>"; };
 		C276C9811E82EC4E00EC536C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C277E7FC1CDA90A300B7B8F6 /* ChangeLoggingRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ChangeLoggingRelation.swift; sourceTree = "<group>"; };
@@ -1927,6 +1930,7 @@
 				C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */,
 				C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */,
 				C2EC76FE1D4FD75A00A374B1 /* DispatchContext.swift */,
+				C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */,
 				C277E8021CDB9D3400B7B8F6 /* GeneratorConcat.swift */,
 				C2402BC91E856F37001EB905 /* IndexedSet.swift */,
 				C2CE513B1D4693DC0011C554 /* InlineMutableData.swift */,
@@ -3022,6 +3026,7 @@
 				37B440401E8999FD00C8C336 /* ConcreteRelation.swift in Sources */,
 				37B440AE1E899A7200C8C336 /* GeneratorConcat.swift in Sources */,
 				37B440AA1E899A7200C8C336 /* Debug.swift in Sources */,
+				C25ECC851F053A9A00CBB798 /* DJBHash.swift in Sources */,
 				37B440321E8999EB00C8C336 /* RelationObserver.swift in Sources */,
 				37B440BA1E899A7300C8C336 /* OptionalFlatten.swift in Sources */,
 				37B440571E899A1400C8C336 /* SQLiteDatabase.swift in Sources */,
@@ -3137,6 +3142,7 @@
 				37B4403D1E8999FB00C8C336 /* ConcreteRelation.swift in Sources */,
 				37B4408C1E899A7200C8C336 /* GeneratorConcat.swift in Sources */,
 				37B440881E899A7200C8C336 /* Debug.swift in Sources */,
+				C25ECC6C1F042E5B00CBB798 /* DJBHash.swift in Sources */,
 				37B4402D1E8999EA00C8C336 /* RelationObserver.swift in Sources */,
 				37B440981E899A7200C8C336 /* OptionalFlatten.swift in Sources */,
 				37B440551E899A1400C8C336 /* SQLiteDatabase.swift in Sources */,

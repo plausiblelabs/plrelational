@@ -120,7 +120,7 @@ extension Row: CustomStringConvertible {
     }
 }
 
-typealias InlineRowHeader = (count: Int, hash: Int)
+typealias InlineRowHeader = (count: Int, hash: DJBHash)
 typealias InlineRowElement = (Attribute, RelationValue)
 
 final class InlineRow: ManagedBuffer<InlineRowHeader, InlineRowElement> {
@@ -218,7 +218,7 @@ extension InlineRow {
     /// - Returns: An empty InlineRow object with the given capacity. You may then call
     ///            add() up to that many times on the resulting object's pointers.
     static func create(capacity: Int) -> InlineRow {
-        let obj = create(minimumCapacity: capacity, makingHeaderWith: { _ in (count: 0, hash: 5381) })
+        let obj = create(minimumCapacity: capacity, makingHeaderWith: { _ in (count: 0, hash: DJBHash()) })
         return obj as! InlineRow
     }
     
@@ -231,14 +231,9 @@ extension InlineRow {
     ///   - headerPtr: A pointer to the object's header.
     ///   - elementsPtr: A pointer to the object's elements.
     static func add(_ pair: (Attribute, RelationValue), headerPtr: UnsafeMutablePointer<InlineRowHeader>, elementsPtr: UnsafeMutablePointer<InlineRowElement>) {
-        func combineHash(_ existing: inout Int, _ new: Int) {
-            // DJB hash function, adapted from http://stackoverflow.com/questions/31438210/how-to-implement-the-hashable-protocol-in-swift-for-an-int-array-a-custom-strin
-            existing = (existing << 5) &+ existing &+ new
-        }
-        
         (elementsPtr + headerPtr.pointee.count).initialize(to: pair)
-        combineHash(&headerPtr.pointee.hash, pair.0.hashValue)
-        combineHash(&headerPtr.pointee.hash, pair.1.hashValue)
+        headerPtr.pointee.hash.combine(pair.0.hashValue)
+        headerPtr.pointee.hash.combine(pair.1.hashValue)
         headerPtr.pointee.count += 1
     }
     
@@ -290,7 +285,7 @@ extension InlineRow: Hashable {
     
     var hashValue: Int {
         return withUnsafeMutablePointers({
-            $0.0.pointee.hash
+            $0.0.pointee.hash.value
         })
     }
 }
@@ -300,7 +295,7 @@ extension InlineRow: CustomDebugStringConvertible {
         var result = ""
         
         withUnsafeMutablePointers({ headerPtr, elementsPtr in
-            result.append(String(format: "<InlineRow %p count:%ld hash: %lx>", UInt(bitPattern: ObjectIdentifier(self)), headerPtr.pointee.count, headerPtr.pointee.hash))
+            result.append(String(format: "<InlineRow %p count:%ld hash: %lx>", UInt(bitPattern: ObjectIdentifier(self)), headerPtr.pointee.count, headerPtr.pointee.hash.value))
             for i in 0 ..< headerPtr.pointee.count {
                 let (attribute, value) = elementsPtr[i]
                 result.append("\n    \(attribute): \(value)")
