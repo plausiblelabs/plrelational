@@ -3,7 +3,17 @@
 // All rights reserved.
 //
 
-import AppKit
+#if os(OSX)
+    import AppKit
+    private func open(_ filename: String) {
+        NSWorkspace.shared().openFile(filename, withApplication: "Graphviz")
+    }
+#elseif os(iOS)
+    import UIKit
+    private func open(_ filename: String) {
+        print("WROTE \(filename)")
+    }
+#endif
 
 
 private let colors = [
@@ -72,7 +82,7 @@ private func internalGraphvizDumpAndOpen(object: AnyObject, nodes: [QueryPlanner
         counter += 1
     }
     try! output.write(toFile: filename, atomically: true, encoding: String.Encoding.utf8)
-    NSWorkspace.shared().openFile(filename, withApplication: "Graphviz")
+    open(filename)
 }
 
 private func wordWrap(_ string: String, width: Int) -> String {

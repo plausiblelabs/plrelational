@@ -412,6 +412,8 @@
 		C22B160E1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */; };
 		C22B16101E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */; };
 		C22B16111E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */; };
+		C243FADF1F056E1C0015DE85 /* RelationDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B339DD1CEA54E7008568E9 /* RelationDump.swift */; };
+		C243FAE01F056E210015DE85 /* QueryPlannerDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */; };
 		C25BB38D1ED4AE79002FC659 /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
 		C25ECC6C1F042E5B00CBB798 /* DJBHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */; };
 		C25ECC851F053A9A00CBB798 /* DJBHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */; };
@@ -2992,6 +2994,7 @@
 				37B440AB1E899A7200C8C336 /* DictionaryConvenience.swift in Sources */,
 				37B440B11E899A7200C8C336 /* MirrorChildren.swift in Sources */,
 				37B440391E8999F700C8C336 /* BinaryOperator.swift in Sources */,
+				C243FADF1F056E1C0015DE85 /* RelationDump.swift in Sources */,
 				374363021EA6741C004982B0 /* SetSubtraction.swift in Sources */,
 				37B440C21E899A7300C8C336 /* StringConvenience.swift in Sources */,
 				37B440B21E899A7200C8C336 /* Mutex.swift in Sources */,
@@ -3040,6 +3043,7 @@
 				37B4407B1E899A4400C8C336 /* DataCodec.swift in Sources */,
 				37B440581E899A1400C8C336 /* SQLiteRelation.swift in Sources */,
 				37B4401D1E8999D200C8C336 /* RelationParts.swift in Sources */,
+				C243FAE01F056E210015DE85 /* QueryPlannerDump.swift in Sources */,
 				37B4402E1E8999EB00C8C336 /* RelationChange.swift in Sources */,
 				37B440811E899A5100C8C336 /* RelationActivityLogging.swift in Sources */,
 				37B440BF1E899A7300C8C336 /* SetPowerSet.swift in Sources */,

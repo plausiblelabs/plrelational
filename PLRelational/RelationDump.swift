@@ -3,7 +3,18 @@
 // All rights reserved.
 //
 
-import AppKit
+#if os(OSX)
+    import AppKit
+    private func open(_ filename: String) {
+        NSWorkspace.shared().openFile(filename, withApplication: "Graphviz")
+    }
+#elseif os(iOS)
+    import UIKit
+    private func open(_ filename: String) {
+        print("WROTE \(filename)")
+    }
+#endif
+
 fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
   switch (lhs, rhs) {
   case let (l?, r?):
@@ -23,7 +34,6 @@ fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
     return rhs < lhs
   }
 }
-
 
 private struct FieldNameExclusions {
     static let strings: Set = ["changeObserverData", "log", "cachedCurrentRelation", "values"]
@@ -177,8 +187,8 @@ extension Relation {
                     var label = ([name] + supplemental).joined(separator: "\n")
                     if showContents {
                         var lines = r.description.components(separatedBy: "\n")
-                        if lines.count > 10 {
-                           lines = lines.prefix(10) + ["..."]
+                        if lines.count > 6 {
+                           lines = lines.prefix(6) + ["..."]
                         }
                         label += "\n" + lines.joined(separator: "\n")
                     }
@@ -226,7 +236,7 @@ extension Relation {
             counter += 1
         }
         try! output.write(toFile: filename, atomically: true, encoding: String.Encoding.utf8)
-        NSWorkspace.shared().openFile(filename, withApplication: "Graphviz")
+        open(filename)
     }
     
     public func dumpAsCode(print: @escaping (String) -> Void = { print($0, terminator: "") }) {
