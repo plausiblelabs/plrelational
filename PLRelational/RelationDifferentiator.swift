@@ -299,18 +299,20 @@ extension RelationDifferentiator {
     fileprivate func equijoinDerivative(_ r: IntermediateRelation, matching: [Attribute: Attribute]) -> RelationChange {
         let A = r.operands[0]
         let B = r.operands[1]
+        let oldA = preChangeRelation(A)
+        let oldB = preChangeRelation(B)
         let dA = derivativeOf(A)
         let dB = derivativeOf(B)
         
         // When a row is added to A, then matching it with B is added to the join itself.
-        // When a row is removed from A, then matching it with B or with rows removed from B will be what is removed from the join.
+        // When a row is removed from A, then matching it with the old B will be what is removed from the join.
         // Likewise in reverse.
         
         let addsFromA = dA.added?.equijoin(B, matching: matching)
-        let removesFromA = dA.removed?.equijoin(B + dB.removed, matching: matching)
+        let removesFromA = dA.removed?.equijoin(oldB, matching: matching)
         
         let addsFromB = dB.added.map({ A.equijoin($0, matching: matching) })
-        let removesFromB = dB.removed.map({ (A + dA.removed).equijoin($0, matching: matching) })
+        let removesFromB = dB.removed.map({ (oldA).equijoin($0, matching: matching) })
         
         return RelationChange(added: addsFromA + addsFromB, removed: removesFromA + removesFromB)
     }

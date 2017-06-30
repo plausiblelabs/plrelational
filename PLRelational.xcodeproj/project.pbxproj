@@ -414,6 +414,8 @@
 		C22B16111E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */; };
 		C243FADF1F056E1C0015DE85 /* RelationDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B339DD1CEA54E7008568E9 /* RelationDump.swift */; };
 		C243FAE01F056E210015DE85 /* QueryPlannerDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */; };
+		C243FAE21F0599FC0015DE85 /* RelationDifferentiatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C243FAE11F0599FC0015DE85 /* RelationDifferentiatorTests.swift */; };
+		C243FAE31F0599FC0015DE85 /* RelationDifferentiatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C243FAE11F0599FC0015DE85 /* RelationDifferentiatorTests.swift */; };
 		C25BB38D1ED4AE79002FC659 /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
 		C25ECC6C1F042E5B00CBB798 /* DJBHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */; };
 		C25ECC851F053A9A00CBB798 /* DJBHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */; };
@@ -830,6 +832,7 @@
 		C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionConvenience.swift; sourceTree = "<group>"; };
 		C23BC0551D24629E00188F86 /* SmallInlineArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmallInlineArray.swift; sourceTree = "<group>"; };
 		C2402BC91E856F37001EB905 /* IndexedSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IndexedSet.swift; sourceTree = "<group>"; };
+		C243FAE11F0599FC0015DE85 /* RelationDifferentiatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiatorTests.swift; sourceTree = "<group>"; };
 		C2478CF81E773F0B00C3FB05 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = modules/module.modulemap; sourceTree = SOURCE_ROOT; };
 		C2478CF91E773F9300C3FB05 /* module-sqlite3-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "module-sqlite3-include.h"; path = "modules/module-sqlite3-include.h"; sourceTree = SOURCE_ROOT; };
 		C2478CFA1E773FEB00C3FB05 /* module-commoncrypto-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "module-commoncrypto-include.h"; path = "../modules/module-commoncrypto-include.h"; sourceTree = "<group>"; };
@@ -1250,6 +1253,7 @@
 				C22877421CE36FD800C48B37 /* RelationDefaultChangeObserverImplementation.swift */,
 				C204A14F1D071A9200DF297F /* RelationDerivative.swift */,
 				C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */,
+				C243FAE11F0599FC0015DE85 /* RelationDifferentiatorTests.swift */,
 				C2BA22991D3FD70200DCCE72 /* RelationObservationTests.swift */,
 				C204A1511D073E6100DF297F /* RelationObserver.swift */,
 			);
@@ -3095,6 +3099,7 @@
 				37B440631E899A2400C8C336 /* TransactionalDatabaseTests.swift in Sources */,
 				37B440CA1E899A7800C8C336 /* ObjectMapTests.swift in Sources */,
 				37B4407E1E899A4900C8C336 /* BookmarkableGraphTests.swift in Sources */,
+				C243FAE31F0599FC0015DE85 /* RelationDifferentiatorTests.swift in Sources */,
 				37B440521E899A0F00C8C336 /* PlistDatabaseTests.swift in Sources */,
 				37B440CC1E899BB200C8C336 /* DBTestCase.swift in Sources */,
 				37B4405A1E899A1800C8C336 /* SQLiteDatabaseTests.swift in Sources */,
@@ -3211,6 +3216,7 @@
 				37B440661E899A2500C8C336 /* TransactionalDatabaseTests.swift in Sources */,
 				37B440C81E899A7700C8C336 /* ObjectMapTests.swift in Sources */,
 				37B4407D1E899A4800C8C336 /* BookmarkableGraphTests.swift in Sources */,
+				C243FAE21F0599FC0015DE85 /* RelationDifferentiatorTests.swift in Sources */,
 				37B4404F1E899A0E00C8C336 /* PlistDatabaseTests.swift in Sources */,
 				37B440CB1E899BB000C8C336 /* DBTestCase.swift in Sources */,
 				37B440591E899A1800C8C336 /* SQLiteDatabaseTests.swift in Sources */,
