@@ -79,7 +79,7 @@ public class ChangeLoggingRelation {
         let result = applyLogToCurrentRelationAndGetChanges([change])
         return result.then({
             var reverse: [ChangeLoggingRelationChange] = []
-            if let added = $0.added , added.isEmpty.ok != true {
+            if let added = $0.added, added.isEmpty.ok != true {
                 for row in added.rows() {
                     switch row {
                     case .Ok(let row):
