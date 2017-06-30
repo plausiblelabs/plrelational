@@ -72,6 +72,7 @@
 		37A4A25F1D30260F005CAEA5 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37A4A25D1D30260F005CAEA5 /* MainMenu.xib */; };
 		37A4A26A1D30260F005CAEA5 /* AsyncExampleAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2691D30260F005CAEA5 /* AsyncExampleAppTests.swift */; };
 		37A4A2731D30265B005CAEA5 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4A2721D30265B005CAEA5 /* ViewModel.swift */; };
+		37A9A37E1F06B9A000B35559 /* SegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A9A37B1F06B65C00B35559 /* SegmentedControl.swift */; };
 		37B253861DCFD94800E9311D /* DocOutlineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B253851DCFD94800E9311D /* DocOutlineView.swift */; };
 		37B253881DCFD99C00E9311D /* EditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B253871DCFD99C00E9311D /* EditorView.swift */; };
 		37B2538A1DCFDC6C00E9311D /* NSColor255.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B253891DCFDC6C00E9311D /* NSColor255.swift */; };
@@ -730,6 +731,7 @@
 		37A4A2981D358581005CAEA5 /* RelationAsyncPropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationAsyncPropertyTests.swift; path = PLRelationalBindingTests/RelationAsyncPropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		37A4A29E1D35B09E005CAEA5 /* RelationSignal.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationSignal.swift; sourceTree = "<group>"; };
 		37A4A2A01D35B0B7005CAEA5 /* RelationSignalTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationSignalTests.swift; path = PLRelationalBindingTests/RelationSignalTests.swift; sourceTree = SOURCE_ROOT; };
+		37A9A37B1F06B65C00B35559 /* SegmentedControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SegmentedControl.swift; sourceTree = "<group>"; };
 		37B253851DCFD94800E9311D /* DocOutlineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocOutlineView.swift; sourceTree = "<group>"; };
 		37B253871DCFD99C00E9311D /* EditorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditorView.swift; sourceTree = "<group>"; };
 		37B253891DCFDC6C00E9311D /* NSColor255.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NSColor255.swift; sourceTree = "<group>"; };
@@ -1456,6 +1458,7 @@
 				376A96371D09225900E696AE /* ComboBox.swift */,
 				C2D21C4B1E6F324000261764 /* Label.swift */,
 				3761369A1CF9523A00F572C5 /* PopUpButton.swift */,
+				37A9A37B1F06B65C00B35559 /* SegmentedControl.swift */,
 				3761369C1CFBA42100F572C5 /* StepperView.swift */,
 				37C611321CD7F80F001DAF59 /* TextField.swift */,
 			);
@@ -3323,6 +3326,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37B441B41E89AAB800C8C336 /* MenuItem.swift in Sources */,
+				37A9A37E1F06B9A000B35559 /* SegmentedControl.swift in Sources */,
 				37B441A21E89AAB800C8C336 /* TextProperty.swift in Sources */,
 				37B441A71E89AAB800C8C336 /* TableView.swift in Sources */,
 				37B441A11E89AAB800C8C336 /* ProgressIndicator.swift in Sources */,
