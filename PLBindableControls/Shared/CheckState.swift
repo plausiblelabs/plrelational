@@ -36,7 +36,7 @@ public enum CheckState: String { case
     }
     
 #if os(macOS)
-    init(_ nsValue: Int) {
+    public init(_ nsValue: Int) {
         switch nsValue {
         case NSMixedState:
             self = .mixed
