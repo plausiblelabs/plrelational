@@ -17,6 +17,12 @@ extension ReadablePropertyType {
     public func map<U: Equatable>(_ transform: @escaping (Self.Value) -> U) -> ReadableProperty<U> {
         return UnaryOpProperty(signal: self.signal.map(transform), changing: valueChanging, owner: self)
     }
+    
+    /// Returns a ReadableProperty with the same type and value. Useful for hiding the
+    /// original property type.
+    public var readable: ReadableProperty<Value> {
+        return self.map({ $0 })
+    }
 }
 
 extension ReadWriteProperty {
