@@ -19,10 +19,13 @@ open class ColorPickerView: NSView {
     private let colorPanel: ColorPanel
 
     public init(defaultColor: Color) {
+        // XXX: Using hardcoded sizing for the time being
+        let frame = CGRect(x: 0, y: 0, width: 236, height: 26)
+        
         self.model = ColorPickerModel(defaultColor: defaultColor)
         
         // Configure color popup button
-        colorPopup = PopUpButton(frame: NSZeroRect, pullsDown: false)
+        colorPopup = PopUpButton(frame: CGRect(x: 0, y: 0, width: 154, height: 26), pullsDown: false)
         _ = colorPopup.items <~ constantValueProperty(model.popupItems)
         _ = colorPopup.selectedObject <~> model.colorItem
         colorPopup.defaultItemContent = MenuItemContent(
@@ -33,38 +36,21 @@ open class ColorPickerView: NSView {
         
         // Configure opacity combo box
         let opacityValues: [CGFloat] = stride(from: 0, through: 100, by: 10).map{ CGFloat($0) / 100.0 }
-        opacityCombo = ComboBox(frame: NSZeroRect)
+        opacityCombo = ComboBox(frame: CGRect(x: frame.width - 78, y: 0, width: 78, height: 26))
         opacityCombo.formatter = OpacityFormatter()
         _ = opacityCombo.items <~ constantValueProperty(opacityValues)
         _ = opacityCombo.value <~> model.opacityValue
         
         // Configure color panel
         colorPanel = ColorPanel()
-        _ = colorPanel.color <~> model.panelColor
-        _ = colorPanel.visible <~> model.panelVisible
+//        _ = colorPanel.color <~> model.panelColor
+//        _ = colorPanel.visible <~> model.panelVisible
         
-        super.init(frame: NSZeroRect)
+        super.init(frame: frame)
         
         // Configure the layout
-        let horizontalStack = NSStackView(views: [colorPopup, opacityCombo])
-        horizontalStack.orientation = .horizontal
-        
-        let verticalStack = NSStackView(views: [horizontalStack])
-        verticalStack.orientation = .vertical
-        verticalStack.alignment = .leading
-        verticalStack.spacing = 2
-        
-//        if let label = label {
-//            verticalStack.insertView(setupLabel(label), atIndex: 0, inGravity: .Leading)
-//        }
-        
-        self.addSubview(verticalStack)
-        self.addConstraints([
-            NSLayoutConstraint(item: self, attribute: .left, relatedBy: .equal, toItem: verticalStack, attribute: .left, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: self, attribute: .right, relatedBy: .equal, toItem: verticalStack, attribute: .right, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: self, attribute: .top, relatedBy: .equal, toItem: verticalStack, attribute: .top, multiplier: 1, constant: 0),
-            NSLayoutConstraint(item: self, attribute: .bottom, relatedBy: .equal, toItem: verticalStack, attribute: .bottom, multiplier: 1, constant: 0),
-        ])
+        self.addSubview(colorPopup)
+        self.addSubview(opacityCombo)
     }
     
     public required init?(coder: NSCoder) {
@@ -247,22 +233,22 @@ private class ColorPickerModel {
         )
         
         // color <-> panelColor
-        _ = self.color.connectBidi(
-            self.panelColor,
-            leftToRight: { value, isInitial in
-                // CommonValue<Color> -> Color
-                if let color = value.orNil() {
-                    return .change(color)
-                } else {
-                    return .noChange
-                }
-            },
-            rightToLeft: { value, isInitial in
-                // Color -> CommonValue<Color>
-                guard !isInitial else { return .noChange }
-                return .change(CommonValue.one(value))
-            }
-        )
+//        _ = self.color.connectBidi(
+//            self.panelColor,
+//            leftToRight: { value, isInitial in
+//                // CommonValue<Color> -> Color
+//                if let color = value.orNil() {
+//                    return .change(color)
+//                } else {
+//                    return .noChange
+//                }
+//            },
+//            rightToLeft: { value, isInitial in
+//                // Color -> CommonValue<Color>
+//                guard !isInitial else { return .noChange }
+//                return .change(CommonValue.one(value))
+//            }
+//        )
     }
 }
 

@@ -26,6 +26,14 @@ open class ColorPanel {
     
     private var ignorePanelUpdates = false
     
+    deinit {
+        // XXX: Ugh, should only do this if `self` is the current target, but no way to determine that.  We may need to change
+        // ColorPanel to be a singleton :(
+        let colorPanel = NSColorPanel.shared()
+        colorPanel.setTarget(nil)
+        colorPanel.setAction(nil)
+    }
+    
     private func updateColorPanel(newColor: Color?, makeVisible: Bool) {
         ignorePanelUpdates = true
         
