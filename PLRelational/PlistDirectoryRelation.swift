@@ -60,7 +60,7 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
             if !create {
                 // We are opening a relation, so let's require its existence at init time
                 if !(url as NSURL).checkResourceIsReachableAndReturnError(nil) {
-                    return .Err(NSError(domain: NSCocoaErrorDomain, code: NSFileReadNoSuchFileError, userInfo: nil))
+                    return .Err(NSError.fileNotFound)
                 }
             }
         } else {
@@ -123,13 +123,6 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
             return .Ok(false)
         }
         
-        if writeCache.toDelete.contains(.key(keyValue)) {
-            return .Ok(false)
-        }
-        if let pendingWriteRow = writeCache.toWrite[.key(keyValue)] {
-            return .Ok(pendingWriteRow == row)
-        }
-        
         let ourRow = readRow(primaryKey: keyValue)
         return ourRow.map({ $0 == row })
     }
@@ -151,12 +144,22 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
             for updatedRow in withUpdates {
                 let url = plistURL(forRow: updatedRow)
                 let key = updatedRow[primaryKey]
+                if let url = url {
+                    readCache.clear(url: url)
+                }
                 writeCache.add(url: url, key: key, row: updatedRow)
             }
             for deleteKey in toDeleteKeys {
                 let url = plistURL(forKeyValue: deleteKey)
+                if let url = url {
+                    readCache.clear(url: url)
+                }
                 writeCache.delete(url: url, key: deleteKey)
             }
+            
+            let added = ConcreteRelation(scheme: self.scheme, values: withUpdates - toUpdate)
+            let removed = ConcreteRelation(scheme: self.scheme, values: toUpdate - withUpdates)
+            notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .directChange)
             
             return .Ok()
         })
@@ -222,9 +225,9 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
                 for observer in saveObservers {
                     observer(url)
                 }
-            } catch let error as NSError {
-                // Ignore NoSuchFileError, since we may legitimately try to delete files that don't exist
-                if error.domain != NSCocoaErrorDomain || error.code != NSFileNoSuchFileError {
+            } catch {
+                // Ignore file not found, since we may legitimately try to delete files that don't exist
+                if !error.isFileNotFound {
                     return .Err(error)
                 }
             }
@@ -281,6 +284,14 @@ extension PlistDirectoryRelation {
     
     fileprivate func readRow(url: URL) -> Result<Row, RelationError> {
         do {
+            if let row = writeCache.toWrite[.url(url)] {
+                return .Ok(row)
+            }
+            
+            if writeCache.toDelete.contains(.url(url)) {
+                return .Err(NSError.fileNotFound)
+            }
+            
             let modDate = flatten(try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)
             if let entry = readCache[url] {
                 if modDate == entry.date {
@@ -319,9 +330,7 @@ extension PlistDirectoryRelation {
         case .Ok(let row):
             return .Ok(row)
             
-        case .Err(let error as NSError) where error.domain == NSCocoaErrorDomain && error.code == NSFileReadNoSuchFileError:
-            // NSData throws NSFileReadNoSuchFileError when the file doesn't exist. It doesn't seem to be documented
-            // but given that it's an official Cocoa constant it seems safe enough.
+        case .Err(let error) where error.isFileNotFound:
             return .Ok(nil)
             
         case .Err(let error):
@@ -414,12 +423,7 @@ extension PlistDirectoryRelation {
             return AnyIterator({
                 return urlGenerator.next().map({ urlResult in
                     urlResult.mapErr({ $0 as RelationError }).then({
-                        if let cacheRow = self.writeCache.toWrite[.url($0)] {
-                            return .Ok(cacheRow)
-                        } else {
-                            let result = self.readRow(url: $0)
-                            return result
-                        }
+                        return self.readRow(url: $0)
                     })
                 })
             })
@@ -430,15 +434,6 @@ extension PlistDirectoryRelation {
     
     fileprivate func filteredRowGenerator(primaryKeyValues: [RelationValue]) -> AnyIterator<Result<Set<Row>, RelationError>> {
         let rows = primaryKeyValues.lazy.flatMap({ value -> Result<Set<Row>, RelationError>? in
-            if let url = self.plistURL(forKeyValue: value) {
-                if let toWriteRow = self.writeCache.toWrite[.url(url)] {
-                    return .Ok([toWriteRow])
-                }
-                if self.writeCache.toDelete.contains(.url(url)) {
-                    return nil
-                }
-            }
-            
             let result = self.readRow(primaryKey: value)
             switch result {
             case .Ok(nil):
@@ -552,7 +547,7 @@ extension PlistDirectoryRelation {
 }
 
 extension PlistDirectoryRelation {
-    func replaceLocalFile(url: URL, movingURL: URL) -> Result<Bool, Swift.Error> {
+    public func replaceLocalFile(url: URL, movingURL: URL) -> Result<Bool, Swift.Error> {
         if urlMatches(url) {
             let existingRow = readRow(url: url)
             let newRow = readRow(url: movingURL)
@@ -562,6 +557,8 @@ extension PlistDirectoryRelation {
                 do {
                     _ = try FileManager.default.replaceItemAt(url, withItemAt: movingURL)
                     
+                    writeCache.clear(url: url)
+                    readCache.clear(url: url)
                     if existingRow.ok != newRow {
                         let added = ConcreteRelation(newRow)
                         let removed = existingRow.ok.map(ConcreteRelation.init)
@@ -577,7 +574,7 @@ extension PlistDirectoryRelation {
         }
     }
     
-    func deleteLocalFile(url: URL) -> Result<Bool, Swift.Error> {
+    public func deleteLocalFile(url: URL) -> Result<Bool, Swift.Error> {
         if urlMatches(url) {
             return readRow(url: url).then({ row in
                 do {
@@ -608,5 +605,20 @@ extension PlistDirectoryRelation {
         guard otherComponents.count >= myComponents.count else { return false }
         
         return zip(myComponents, otherComponents).all(==)
+    }
+}
+
+private extension Error {
+    var isFileNotFound: Bool {
+        // NSData throws NSFileReadNoSuchFileError when the file doesn't exist. It doesn't seem to be documented
+        // but given that it's an official Cocoa constant it seems safe enough.
+        let codes = [NSFileNoSuchFileError, NSFileReadNoSuchFileError]
+        return (self as NSError).domain == NSCocoaErrorDomain && codes.contains((self as NSError).code)
+    }
+}
+
+private extension NSError {
+    static var fileNotFound: NSError {
+        return NSError(domain: NSCocoaErrorDomain, code: NSFileReadNoSuchFileError, userInfo: nil)
     }
 }

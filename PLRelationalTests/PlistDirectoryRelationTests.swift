@@ -455,6 +455,56 @@ class PlistDirectoryRelationTests: XCTestCase {
         
         XCTAssertEqual(observedURLs, [])
     }
+    
+    func testLocalFileOperations() {
+        let url = tmpURL()
+        let r = PlistDirectoryRelation.withDirectory(url, scheme: ["n", "text"], primaryKey: "n", create: true).ok!
+        
+        var change: RelationChange?
+        let remover = r.addChangeObserver({ change = $0 })
+        
+        XCTAssertNil(r.add(["n": 1, "text": "one"]).err)
+        XCTAssertNil(r.save().err)
+        
+        AssertEqual(change?.added, ConcreteRelation(["n": 1, "text": "one"]))
+        AssertEqual(change?.removed, nil)
+        
+        let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: nil)!
+        let files = enumerator.map({ $0 as! URL }).filter({ $0.isDirectory.ok == false })
+        XCTAssertEqual(files.count, 1)
+        let rowURL = files[0]
+        
+        XCTAssertNil(r.add(["n": 2, "text": "two"]).err)
+        XCTAssertNil(r.save().err)
+        
+        AssertEqual(change?.added, ConcreteRelation(["n": 2, "text": "two"]))
+        AssertEqual(change?.removed, nil)
+        
+        let rowURL2 = tmpURL()
+        try! FileManager.default.copyItem(at: rowURL, to: rowURL2)
+        
+        XCTAssertNil(r.update(Attribute("n") *== 1, newValues: ["text": "WON"]).err)
+        XCTAssertNil(r.save().err)
+        
+        AssertEqual(change?.added, ConcreteRelation(["n": 1, "text": "WON"]))
+        AssertEqual(change?.removed, ConcreteRelation(["n": 1, "text": "one"]))
+        
+        let replaceResult = r.replaceLocalFile(url: rowURL, movingURL: rowURL2)
+        XCTAssertEqual(replaceResult.ok, true)
+        XCTAssertNil(replaceResult.err)
+        
+        AssertEqual(change?.added, ConcreteRelation(["n": 1, "text": "one"]))
+        AssertEqual(change?.removed, ConcreteRelation(["n": 1, "text": "WON"]))
+        
+        let deleteResult = r.deleteLocalFile(url: rowURL)
+        XCTAssertEqual(deleteResult.ok, true)
+        XCTAssertNil(deleteResult.err)
+        
+        AssertEqual(change?.added, nil)
+        AssertEqual(change?.removed, ConcreteRelation(["n": 1, "text": "one"]))
+        
+        remover()
+    }
 }
 
 fileprivate class LoggingCodec: DataCodec {
