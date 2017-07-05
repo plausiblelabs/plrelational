@@ -240,7 +240,7 @@ private extension PlistFileRelation {
 }
 
 extension PlistFileRelation {
-    func replaceLocalFile(url: URL, movingURL: URL) -> Result<Bool, Swift.Error> {
+    public func replaceLocalFile(url: URL, movingURL: URL) -> Result<Bool, Swift.Error> {
         if urlMatches(url) {
             let replacementRelation = PlistFileRelation.withFile(movingURL, scheme: scheme, primaryKeys: Array(values.primaryKeys), create: false, codec: codec)
             return replacementRelation.then({ replacementRelation in
@@ -266,7 +266,7 @@ extension PlistFileRelation {
         }
     }
     
-    func deleteLocalFile(url: URL) -> Result<Bool, Swift.Error> {
+    public func deleteLocalFile(url: URL) -> Result<Bool, Swift.Error> {
         if urlMatches(url) {
             do {
                 try FileManager.default.removeItem(at: url)

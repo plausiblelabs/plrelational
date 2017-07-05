@@ -231,4 +231,44 @@ class PlistFileRelationTests: XCTestCase {
         
         XCTAssertNil(observedURL)
     }
+    
+    func testLocalFileOperations() {
+        let url = tmpURL()
+        let r = PlistFileRelation.withFile(url, scheme: ["n"], primaryKeys: ["n"], create: true).ok!
+        
+        var change: RelationChange?
+        let remover = r.addChangeObserver({ change = $0 })
+        
+        XCTAssertNil(r.add(["n": 1]).err)
+        XCTAssertNil(r.save().err)
+        AssertEqual(change?.added, ConcreteRelation(["n": 1]))
+        AssertEqual(change?.removed, nil)
+        
+        let url2 = tmpURL()
+        try! FileManager.default.copyItem(at: url, to: url2)
+        
+        XCTAssertNil(r.add(["n": 2]).err)
+        XCTAssertNil(r.save().err)
+        
+        AssertEqual(change?.added, ConcreteRelation(["n": 2]))
+        AssertEqual(change?.removed, nil)
+        
+        let moveResult = r.replaceLocalFile(url: url, movingURL: url2)
+        XCTAssertEqual(moveResult.ok, true)
+        XCTAssertNil(moveResult.err)
+        
+        AssertEqual(change?.added, nil)
+        AssertEqual(change?.removed, ConcreteRelation(["n": 2]))
+        
+        let deleteResult = r.deleteLocalFile(url: url)
+        XCTAssertEqual(deleteResult.ok, true)
+        XCTAssertNil(deleteResult.err)
+        
+        AssertEqual(change?.added, nil)
+        AssertEqual(change?.removed, ConcreteRelation(["n": 1]))
+        
+        XCTAssertFalse(FileManager.default.fileExists(atPath: url.path))
+
+        remover()
+    }
 }
