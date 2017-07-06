@@ -21,7 +21,7 @@ extension RelationChange {
         return
             hoistOptional(copiedAdded)
                 .combine(hoistOptional(copiedRemoved))
-                .map(RelationChange.init)
+                .map({ RelationChange(added: $0, removed: $1) })
     }
 }
 
