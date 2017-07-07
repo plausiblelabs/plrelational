@@ -420,6 +420,10 @@
 		C25BB38D1ED4AE79002FC659 /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
 		C25ECC6C1F042E5B00CBB798 /* DJBHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */; };
 		C25ECC851F053A9A00CBB798 /* DJBHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */; };
+		C2935C5E1F1002CC00441B6A /* RelationTextIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2935C5C1F1002CC00441B6A /* RelationTextIndex.swift */; };
+		C2935C5F1F1002CC00441B6A /* RelationTextIndex.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2935C5C1F1002CC00441B6A /* RelationTextIndex.swift */; };
+		C2935C621F1002D200441B6A /* RelationTextIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2935C5D1F1002CC00441B6A /* RelationTextIndexTests.swift */; };
+		C2935C631F1002D200441B6A /* RelationTextIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2935C5D1F1002CC00441B6A /* RelationTextIndexTests.swift */; };
 		C2A78A1D1ED4A84D0021ACCF /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
 		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2EB823C1E96A67D00B80CAE /* SelectExpressionAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB823B1E96A67D00B80CAE /* SelectExpressionAnalysis.swift */; };
@@ -835,9 +839,9 @@
 		C23BC0551D24629E00188F86 /* SmallInlineArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmallInlineArray.swift; sourceTree = "<group>"; };
 		C2402BC91E856F37001EB905 /* IndexedSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IndexedSet.swift; sourceTree = "<group>"; };
 		C243FAE11F0599FC0015DE85 /* RelationDifferentiatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiatorTests.swift; sourceTree = "<group>"; };
-		C2478CF81E773F0B00C3FB05 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; name = module.modulemap; path = modules/module.modulemap; sourceTree = SOURCE_ROOT; };
-		C2478CF91E773F9300C3FB05 /* module-sqlite3-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "module-sqlite3-include.h"; path = "modules/module-sqlite3-include.h"; sourceTree = SOURCE_ROOT; };
-		C2478CFA1E773FEB00C3FB05 /* module-commoncrypto-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "module-commoncrypto-include.h"; path = "../modules/module-commoncrypto-include.h"; sourceTree = "<group>"; };
+		C2478CF81E773F0B00C3FB05 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
+		C2478CF91E773F9300C3FB05 /* module-sqlite3-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "module-sqlite3-include.h"; sourceTree = "<group>"; };
+		C2478CFA1E773FEB00C3FB05 /* module-commoncrypto-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "module-commoncrypto-include.h"; sourceTree = "<group>"; };
 		C24C4A641E255D4000482726 /* ChangeLoggingRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeLoggingRelationTests.swift; path = ../PLRelationalTests/ChangeLoggingRelationTests.swift; sourceTree = "<group>"; };
 		C24C4A671E26740C00482726 /* BookmarkableGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarkableGraph.swift; sourceTree = "<group>"; };
 		C24C4A691E26940400482726 /* BookmarkableGraphTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BookmarkableGraphTests.swift; path = ../PLRelationalTests/BookmarkableGraphTests.swift; sourceTree = "<group>"; };
@@ -861,6 +865,9 @@
 		C277E8111CE4FAD400B7B8F6 /* SelectExpressionOperators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SelectExpressionOperators.swift; sourceTree = "<group>"; };
 		C283FFCF1E805101000CDED9 /* Promise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Promise.swift; sourceTree = "<group>"; };
 		C28BFEF01D81F7C4005F07A0 /* ObjectCasting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectCasting.swift; sourceTree = "<group>"; };
+		C2935C5C1F1002CC00441B6A /* RelationTextIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationTextIndex.swift; sourceTree = "<group>"; };
+		C2935C5D1F1002CC00441B6A /* RelationTextIndexTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationTextIndexTests.swift; sourceTree = "<group>"; };
+		C2935C911F10058D00441B6A /* SQLiteTokenizerAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SQLiteTokenizerAPI.h; sourceTree = "<group>"; };
 		C29739DB1DEDFF0E00C79DB1 /* CachingRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CachingRelation.swift; sourceTree = "<group>"; };
 		C29C28351D872BEA001E20E7 /* UnsafePointerReadWrite.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnsafePointerReadWrite.swift; sourceTree = "<group>"; };
 		C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemovableSet.swift; sourceTree = "<group>"; };
@@ -1819,9 +1826,11 @@
 				C2478CF81E773F0B00C3FB05 /* module.modulemap */,
 				C2478CF91E773F9300C3FB05 /* module-sqlite3-include.h */,
 				C2478CFA1E773FEB00C3FB05 /* module-commoncrypto-include.h */,
+				C2935C911F10058D00441B6A /* SQLiteTokenizerAPI.h */,
 			);
 			name = "Custom Module Map";
-			sourceTree = "<group>";
+			path = modules;
+			sourceTree = SOURCE_ROOT;
 		};
 		C22921E61CD12CF100518184 /* PLRelationalTests */ = {
 			isa = PBXGroup;
@@ -1884,6 +1893,7 @@
 				374AE96B1D91B7A3007D1366 /* Memory Relations */,
 				374AE9651D91B5B1007D1366 /* Stored Relations */,
 				C277E7FB1CDA908E00B7B8F6 /* Logging Relations */,
+				C2935C551F1002A100441B6A /* Full text search */,
 				374AE9671D91B5F5007D1366 /* Async Management */,
 				C20F926B1D9587A3002F9125 /* Data Codec */,
 				C24C4A661E2673F800482726 /* Graphs */,
@@ -1925,6 +1935,15 @@
 				C2FE9B9A1CEE3A810004E635 /* TransactionalDatabaseTests.swift */,
 			);
 			name = "Logging Relations";
+			sourceTree = "<group>";
+		};
+		C2935C551F1002A100441B6A /* Full text search */ = {
+			isa = PBXGroup;
+			children = (
+				C2935C5C1F1002CC00441B6A /* RelationTextIndex.swift */,
+				C2935C5D1F1002CC00441B6A /* RelationTextIndexTests.swift */,
+			);
+			name = "Full text search";
 			sourceTree = "<group>";
 		};
 		C2BD298F1CD250B30081FD05 /* Utilities */ = {
@@ -3059,6 +3078,7 @@
 				37B4401F1E8999D200C8C336 /* Row.swift in Sources */,
 				37B440B81E899A7300C8C336 /* ObjectSet.swift in Sources */,
 				374363001EA673F3004982B0 /* MutableBox.swift in Sources */,
+				C2935C5F1F1002CC00441B6A /* RelationTextIndex.swift in Sources */,
 				37B440301E8999EB00C8C336 /* RelationDerivative.swift in Sources */,
 				374363011EA673FC004982B0 /* InternedUTF8String.swift in Sources */,
 				37B440AF1E899A7200C8C336 /* IndexedSet.swift in Sources */,
@@ -3105,6 +3125,7 @@
 				C243FAE31F0599FC0015DE85 /* RelationDifferentiatorTests.swift in Sources */,
 				37B440521E899A0F00C8C336 /* PlistDatabaseTests.swift in Sources */,
 				37B440CC1E899BB200C8C336 /* DBTestCase.swift in Sources */,
+				C2935C631F1002D200441B6A /* RelationTextIndexTests.swift in Sources */,
 				37B4405A1E899A1800C8C336 /* SQLiteDatabaseTests.swift in Sources */,
 				37B440531E899A0F00C8C336 /* PlistDirectoryRelationTests.swift in Sources */,
 			);
@@ -3176,6 +3197,7 @@
 				37B440431E899A0100C8C336 /* StoredDatabase.swift in Sources */,
 				37B440171E8999D200C8C336 /* Row.swift in Sources */,
 				37B440961E899A7200C8C336 /* ObjectSet.swift in Sources */,
+				C2935C5E1F1002CC00441B6A /* RelationTextIndex.swift in Sources */,
 				37B4402B1E8999EA00C8C336 /* RelationDerivative.swift in Sources */,
 				37B4406C1E899A3100C8C336 /* QueryPlannerDump.swift in Sources */,
 				37B4408D1E899A7200C8C336 /* IndexedSet.swift in Sources */,
@@ -3222,6 +3244,7 @@
 				C243FAE21F0599FC0015DE85 /* RelationDifferentiatorTests.swift in Sources */,
 				37B4404F1E899A0E00C8C336 /* PlistDatabaseTests.swift in Sources */,
 				37B440CB1E899BB000C8C336 /* DBTestCase.swift in Sources */,
+				C2935C621F1002D200441B6A /* RelationTextIndexTests.swift in Sources */,
 				37B440591E899A1800C8C336 /* SQLiteDatabaseTests.swift in Sources */,
 				37B440501E899A0E00C8C336 /* PlistDirectoryRelationTests.swift in Sources */,
 			);
