@@ -1,9 +1,6 @@
 //
-//  InternedUTF8StringTests.swift
-//  PLRelational
-//
-//  Created by Mike Ash on 3/31/17.
-//  Copyright © 2017 mikeash. All rights reserved.
+// Copyright (c) 2017 Plausible Labs Cooperative, Inc.
+// All rights reserved.
 //
 
 import XCTest
