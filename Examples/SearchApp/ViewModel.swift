@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// Copyright (c) 2017 Plausible Labs Cooperative, Inc.
 // All rights reserved.
 //
 
@@ -9,22 +9,22 @@ import PLRelationalBinding
 import PLBindableControls
 
 class ViewModel {
-
-    private var persons: MutableRelation
-    private var selectedPersonID: MutableRelation
-    private var personResults: MutableSelectRelation
     
+    private let persons: Relation
+    private let personBios: Relation
+    private let selectedPersonID: TransactionalRelation
+    private let selectedPerson: Relation
+
+    private let transactionalDB: TransactionalDatabase
     private let undoableDB: UndoableDatabase
-
-    private var removals: [ObserverRemoval] = []
     
-    init(undoManager: UndoManager) {
+    init(undoManager: PLBindableControls.UndoManager) {
         
         func makeDB() -> (path: String, db: SQLiteDatabase) {
             let tmp = "/tmp" as NSString
             let dbname = "SearchApp.db"
-            let path = tmp.stringByAppendingPathComponent(dbname)
-            _ = try? NSFileManager.defaultManager().removeItemAtPath(path)
+            let path = tmp.appendingPathComponent(dbname)
+            _ = try? FileManager.default.removeItem(atPath: path)
             
             let db = try! SQLiteDatabase(path)
             
@@ -33,126 +33,138 @@ class ViewModel {
         
         // Prepare the stored relations
         let sqliteDB = makeDB().db
-        let db = TransactionalDatabase(sqliteDB)
-        func createRelation(name: String, _ scheme: Scheme) -> MutableRelation {
+        let transactionalDB = TransactionalDatabase(sqliteDB)
+        func createRelation(_ name: String, _ scheme: Scheme) -> TransactionalRelation {
             let createResult = sqliteDB.createRelation(name, scheme: scheme)
             precondition(createResult.ok != nil)
-            return db[name]
+            return transactionalDB[name]
         }
-        persons = createRelation("person", ["id", "name", "sales", "order"])
+        persons = createRelation("person", ["id", "name"])
+        personBios = createRelation("person_bio", ["id", "bio"])
         selectedPersonID = createRelation("selected_person", ["id"])
-        personResults = persons.mutableSelect(false)
         
-        undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
+        selectedPerson = selectedPersonID
+            .join(persons)
+            .join(personBios)
 
-        _ = personResults.addChangeObserver({ _ in
-            Swift.print("RESULTS: \(self.personResults)")
+        self.undoableDB = UndoableDatabase(db: transactionalDB, undoManager: undoManager)
+        self.transactionalDB = transactionalDB
+
+        // Add some persons
+        func addPerson(_ id: Int64, _ name: String, _ bio: String) {
+            let personRow: Row = [
+                "id": RelationValue(id),
+                "name": RelationValue(name)
+            ]
+            _ = sqliteDB["person"]!.add(personRow)
+            
+            let bioRow: Row = [
+                "id": RelationValue(id),
+                "bio": RelationValue(bio)
+            ]
+            _ = sqliteDB["person_bio"]!.add(bioRow)
+        }
+        addPerson(1, "Montgomery Burns", "Owner, Springfield Nuclear Power Plant.")
+        addPerson(2, "Waylon Smithers", "Personal assistant to Mr. Burns.")
+        addPerson(3, "Homer Simpson", "Safety inspector at Springfield Nuclear Power Plant, Sector 7G.")
+        addPerson(4, "Lenny Leonard", "Friend to Homer and Carl.")
+        addPerson(5, "Carl Carlson", "Friend to Homer and Lenny.")
+    }
+    
+    private lazy var searchIndex: RelationTextIndex = {
+        let personIDs = self.persons
+            .project("id")
+        let personBioData = self.persons
+            .join(self.personBios)
+        
+        func columnConfig(_ attribute: Attribute, _ textExtractor: @escaping (Row) -> Result<String, RelationError>) -> RelationTextIndex.ColumnConfig {
+            return RelationTextIndex.ColumnConfig(snippetAttribute: attribute, textExtractor: textExtractor)
+        }
+        
+        let nameConfig = columnConfig(SearchResult.personNameAttribute, { (row: Row) in
+            return .Ok(row["name"].get()!)
         })
         
-        // Add some test persons
-        var id: Int64 = 1
-        var order: Double = 1.0
-        func addPerson(name: String, _ sales: Int64) {
-            let row: Row = [
-                "id": RelationValue(id),
-                "name": RelationValue(name),
-                "sales": RelationValue(sales),
-                "order": RelationValue(order)
-            ]
-            sqliteDB["person"]!.add(row)
-            
-            id += 1
-            order += 1.0
-        }
-        addPerson("Fred", 5)
-        addPerson("Wilma", 7)
-        addPerson("Barney", 3)
-        addPerson("Betty", 9)
-    }
-    
-    deinit {
-        removals.forEach{ $0() }
-    }
-    
-    private lazy var queueScheduler: Scheduler = QueueScheduler()
-    
-    // ASYNC: Reads string changes on MAIN thread, writes to selectExpression on BG thread,
-    lazy var queryString: ReadWriteProperty<String> = mutableValueProperty("", { [weak self] query, _ in
-        self?.queueScheduler.schedule{ [weak self] in
-            if query.isEmpty {
-                self?.personResults.selectExpression = false
-            } else {
-                self?.personResults.selectExpression = SelectExpressionBinaryOperator(lhs: Attribute("name"), op: GlobComparator(), rhs: "\(query)*")
-            }
-        }
-    })
-    
-    lazy var personResultsArray: ArrayProperty<RowArrayElement> = { [unowned self] in
-        return self.personResults.arrayProperty()
+        let bioConfig = columnConfig(SearchResult.personBioAttribute, { (row: Row) in
+            return .Ok(row["bio"].get()!)
+        })
+        
+        return try! RelationTextIndex(ids: (personIDs, "id"), content: (personBioData, "id"), columnConfigs: [nameConfig, bioConfig])
     }()
     
-    lazy var listViewModel: ListViewModel<RowArrayElement> = { [unowned self] in
-        
-        // ASYNC: Reads values on MAIN thread, writes to relation on MAIN thread
-        func selectionProperty(relation: MutableRelation) -> ReadWriteProperty<Set<RelationValue>> {
-            return self.undoableDB.bidiProperty(
-                relation,
-                action: "Change Selection",
-                get: { $0.allValues },
-                set: { relation.replaceValues(Array($0)) }
-            )
-        }
+    private lazy var searchResults: RelationTextIndex.SearchRelation = {
+        return self.searchIndex.search("")
+    }()
+    
+    private lazy var resultsArray: ArrayProperty<RowArrayElement> = {
+        return self.searchResults.arrayProperty(idAttr: "id", orderAttr: "rank")
+    }()
+    
+    lazy var queryString: ReadWriteProperty<String> = {
+        return mutableValueProperty("", { query, _ in
+            self.searchResults.query = "\(query)*"
+        })
+    }()
 
-        // ASYNC: Reads value on MAIN thread
-        func cellString(row: Row) -> String {
-            return "\(row["name"]) (\(row["sales"]))"
-        }
-        
+    lazy var resultsListModel: ListViewModel<RowArrayElement> = {
         return ListViewModel(
-            // ASYNC: Changes from relation calculated on BG thread, reported on MAIN thread
-            data: self.personResultsArray,
+            data: self.resultsArray,
             contextMenu: nil,
             move: nil,
-            selection: selectionProperty(self.selectedPersonID),
             cellIdentifier: { _ in "Cell" },
             cellText: { row in
-                let rowID = row["id"]
-                let cellText = self.persons
-                    .select(Attribute("id") *== rowID)
-                    .property{ $0.oneValue(cellString, orDefault: "") }
-                return .ReadOnly(cellText)
+                return .readOnly(constantValueProperty(""))
             },
-            cellImage: nil
+            cellImage: nil,
+            cellAttributedText: { row in
+                return SearchResult.highlightedString(from: row)
+            }
         )
     }()
     
-    // ASYNC: Should resolve to `true` when `personResultsArray` is in `Computing` state
-    // TODO: Hmm, background work actually begins when `queryString` updates the select expression,
-    // but here we only show progress indicator once the changes make their way to `personResultsArray`
-    lazy var progressVisible: ReadableProperty<Bool> = { [unowned self] in
-        // TODO
-        //return self.personResultsArray.map{ $0.isComputing }
-        return constantValueProperty(false)
+    lazy var resultsListSelection: AsyncReadWriteProperty<Set<RelationValue>> = {
+        return self.bidiProperty(
+            signal: self.selectedPersonID.allRelationValues(),
+            update: { self.selectedPersonID.asyncReplaceValues(Array($0)) }
+        )
     }()
     
-    // ASYNC: Reads value on MAIN thread (since `selectedPersonID` relation is in-memory only)
-    lazy var recordDisabled: ReadableProperty<Bool> = { [unowned self] in
-        return self.selectedPersonID.empty
+    lazy var hasResults: AsyncReadableProperty<Bool> = {
+        return self.searchResults.nonEmpty.property()
     }()
 
-    // ASYNC: Reads clicks on MAIN thread, writes to relation on MAIN thread (assuming in-memory relation)
-    lazy var recordClicked: ActionProperty = ActionProperty {
-        Swift.print("TODO: INCREMENT SALES")
+    lazy var selectedPersonName: AsyncReadableProperty<String> = {
+        return self.selectedPerson
+            .project("name")
+            .oneStringOrNil()
+            .property()
+            .map{ $0 ?? "No selection" }
+    }()
+
+    lazy var selectedPersonBio: AsyncReadableProperty<String> = {
+        return self.selectedPerson
+            .project("bio")
+            .oneString()
+            .property()
+    }()
+
+    private func bidiProperty<T>(signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
+        let config = asyncMutationConfig(update)
+        return signal.property(mutator: config)
     }
-
-    // ASYNC: Reads value on MAIN thread (assuming changes are stored in-memory only)
-    lazy var saveDisabled: ReadableProperty<Bool> = { [unowned self] in
-        // TODO: Return true only when there are no changes
-        return constantValueProperty(true)
-    }()
-
-    // ASYNC: Reads clicks on MAIN thread, writes to SQLite relation on BG thread
-    lazy var saveClicked: ActionProperty = ActionProperty {
-        Swift.print("TODO: SAVE CHANGES")
+    
+    private func asyncMutationConfig<T>(_ update: @escaping (T) -> Void) -> RelationMutationConfig<T> {
+        return RelationMutationConfig(
+            snapshot: {
+                // TODO: Make snapshot optional; we don't actually use it for non-undoable properties
+                return self.transactionalDB.takeSnapshot()
+            },
+            update: { newValue in
+                update(newValue)
+            },
+            commit: { _, newValue in
+                update(newValue)
+            }
+        )
     }
 }

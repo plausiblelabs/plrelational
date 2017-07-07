@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3707532A1F103173009C3700 /* PLBindableControls.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B441611E89A49A00C8C336 /* PLBindableControls.framework */; };
+		3707532B1F103173009C3700 /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43FFA1E8997EB00C8C336 /* PLRelational.framework */; };
+		3707532C1F103173009C3700 /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
+		3707532E1F1034F0009C3700 /* SearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707532D1F1034F0009C3700 /* SearchResult.swift */; };
 		370F88081E8F004C0043B903 /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370F88061E8F00440043B903 /* ListView.swift */; };
 		3710A68F1DDCF93C0070EC29 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A68E1DDCF93C0070EC29 /* SidebarView.swift */; };
 		3710A6911DDCFA330070EC29 /* SidebarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A6901DDCFA330070EC29 /* SidebarModel.swift */; };
@@ -409,6 +413,27 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		370753241F103167009C3700 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B43FF91E8997EB00C8C336;
+			remoteInfo = "PLRelational-macOS";
+		};
+		370753261F103167009C3700 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B440D21E899F7600C8C336;
+			remoteInfo = "PLRelationalBinding-macOS";
+		};
+		370753281F103167009C3700 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B441601E89A49A00C8C336;
+			remoteInfo = "PLBindableControls-macOS";
+		};
 		372707F71CFE2C7E00710C80 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
@@ -593,6 +618,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3707532D1F1034F0009C3700 /* SearchResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchResult.swift; sourceTree = "<group>"; };
 		370F88061E8F00440043B903 /* ListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		3710A68E1DDCF93C0070EC29 /* SidebarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		3710A6901DDCFA330070EC29 /* SidebarModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SidebarModel.swift; sourceTree = "<group>"; };
@@ -945,6 +971,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3707532B1F103173009C3700 /* PLRelational.framework in Frameworks */,
+				3707532C1F103173009C3700 /* PLRelationalBinding.framework in Frameworks */,
+				3707532A1F103173009C3700 /* PLBindableControls.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1372,6 +1401,7 @@
 			children = (
 				37A1CE6D1D1081980067870D /* AppDelegate.swift */,
 				37A1CED51D11DC410067870D /* ViewModel.swift */,
+				3707532D1F1034F0009C3700 /* SearchResult.swift */,
 				37A1CE711D1081980067870D /* MainMenu.xib */,
 				37A1CE6F1D1081980067870D /* Assets.xcassets */,
 				37A1CE741D1081980067870D /* Info.plist */,
@@ -2123,6 +2153,9 @@
 			buildRules = (
 			);
 			dependencies = (
+				370753251F103167009C3700 /* PBXTargetDependency */,
+				370753271F103167009C3700 /* PBXTargetDependency */,
+				370753291F103167009C3700 /* PBXTargetDependency */,
 			);
 			name = SearchApp;
 			productName = SearchApp;
@@ -2802,6 +2835,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				37A1CE6E1D1081980067870D /* AppDelegate.swift in Sources */,
+				3707532E1F1034F0009C3700 /* SearchResult.swift in Sources */,
 				37A1CED61D11DC410067870D /* ViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3210,6 +3244,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		370753251F103167009C3700 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B43FF91E8997EB00C8C336 /* PLRelational-macOS */;
+			targetProxy = 370753241F103167009C3700 /* PBXContainerItemProxy */;
+		};
+		370753271F103167009C3700 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B440D21E899F7600C8C336 /* PLRelationalBinding-macOS */;
+			targetProxy = 370753261F103167009C3700 /* PBXContainerItemProxy */;
+		};
+		370753291F103167009C3700 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B441601E89A49A00C8C336 /* PLBindableControls-macOS */;
+			targetProxy = 370753281F103167009C3700 /* PBXContainerItemProxy */;
+		};
 		372707F81CFE2C7E00710C80 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 372707E71CFE2C7E00710C80 /* BindableControlsApp */;
@@ -3753,6 +3802,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -3765,6 +3815,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

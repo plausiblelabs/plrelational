@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2016 Plausible Labs Cooperative, Inc.
+// Copyright (c) 2017 Plausible Labs Cooperative, Inc.
 // All rights reserved.
 //
 
@@ -10,37 +10,37 @@ import PLBindableControls
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
-
+    
     @IBOutlet weak var window: NSWindow!
-    @IBOutlet var textField: TextField!
+    @IBOutlet var queryField: TextField!
     @IBOutlet var outlineView: ExtOutlineView!
-    @IBOutlet var recordButton: Button!
-    @IBOutlet var saveButton: Button!
-    @IBOutlet var progressIndicator: ProgressIndicator!
+    @IBOutlet var noResultsLabel: Label!
+    @IBOutlet var personNameLabel: Label!
+    @IBOutlet var personBioLabel: Label!
     
-    var nsUndoManager: SPUndoManager!
-    var model: ViewModel!
-    var listView: ListView<RowArrayElement>!
+    private var nsUndoManager: SPUndoManager!
+    private var model: ViewModel!
+    private var resultsListView: ListView<RowArrayElement>!
     
-    func applicationDidFinishLaunching(aNotification: NSNotification) {
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
         window.delegate = self
+        queryField.deliverTransientChanges = true
         
         // Prepare the undo manager
         nsUndoManager = SPUndoManager()
-        let undoManager = UndoManager(nsmanager: nsUndoManager)
-
+        let undoManager = PLBindableControls.UndoManager(nsmanager: nsUndoManager)
+        
         // Bind the views to the view model
         model = ViewModel(undoManager: undoManager)
-        textField.string <~> model.queryString
-        listView = ListView(model: model.listViewModel, outlineView: outlineView)
-        progressIndicator.visible <~ model.progressVisible
-        recordButton.disabled <~ model.recordDisabled
-        recordButton.clicks ~~> model.recordClicked
-        saveButton.disabled <~ model.saveDisabled
-        saveButton.clicks ~~> model.saveClicked
+        model.queryString <~ queryField.string
+        resultsListView = ListView(model: model.resultsListModel, outlineView: outlineView)
+        resultsListView.selection <~> model.resultsListSelection
+        noResultsLabel.visible <~ not(model.hasResults)
+        personNameLabel.string <~ model.selectedPersonName
+        personBioLabel.string <~ model.selectedPersonBio
     }
     
-    func windowWillReturnUndoManager(window: NSWindow) -> NSUndoManager? {
+    func windowWillReturnUndoManager(_ window: NSWindow) -> Foundation.UndoManager? {
         return nsUndoManager
     }
 }

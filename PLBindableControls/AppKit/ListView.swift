@@ -14,6 +14,7 @@ public struct ListViewModel<E: ArrayElement> {
     public let cellIdentifier: (E.Data) -> String
     public let cellText: (E.Data) -> TextProperty
     public let cellImage: ((E.Data) -> ReadableProperty<Image>)?
+    public let cellAttributedText: ((E.Data) -> NSAttributedString)?
 
     public init(
         data: ArrayProperty<E>,
@@ -21,7 +22,8 @@ public struct ListViewModel<E: ArrayElement> {
         move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)?,
         cellIdentifier: @escaping (E.Data) -> String,
         cellText: @escaping (E.Data) -> TextProperty,
-        cellImage: ((E.Data) -> ReadableProperty<Image>)?)
+        cellImage: ((E.Data) -> ReadableProperty<Image>)?,
+        cellAttributedText: ((E.Data) -> NSAttributedString)? = nil)
     {
         self.data = data
         self.contextMenu = contextMenu
@@ -29,6 +31,7 @@ public struct ListViewModel<E: ArrayElement> {
         self.cellIdentifier = cellIdentifier
         self.cellText = cellText
         self.cellImage = cellImage
+        self.cellAttributedText = cellAttributedText
     }
 }
 
@@ -165,8 +168,12 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         let identifier = model.cellIdentifier(element.data)
         let view = outlineView.make(withIdentifier: identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
-            let cellText = model.cellText(element.data)
-            textField.bind(cellText)
+            if let attributedString = model.cellAttributedText?(element.data) {
+                textField.attributedStringValue = attributedString
+            } else {
+                let cellText = model.cellText(element.data)
+                textField.bind(cellText)
+            }
         }
         if let imageView = view.imageView as? ImageView {
             imageView.img.unbindAll()
