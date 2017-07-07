@@ -33,7 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Bind the views to the view model
         model = ViewModel(undoManager: undoManager)
         model.queryString <~ queryField.string
-        resultsListView = ListView(model: model.resultsListModel, outlineView: outlineView)
+        resultsListView = ResultsListView(model: model.resultsListModel, outlineView: outlineView)
         resultsListView.selection <~> model.resultsListSelection
         noResultsLabel.visible <~ not(model.hasResults)
         personNameLabel.string <~ model.selectedPersonName
