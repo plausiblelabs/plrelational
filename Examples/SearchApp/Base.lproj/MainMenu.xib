@@ -692,17 +692,17 @@
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
-                    <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="66" horizontalPageScroll="10" verticalLineScroll="66" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iU5-GL-DVc">
+                    <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="76" horizontalPageScroll="10" verticalLineScroll="76" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="iU5-GL-DVc">
                         <rect key="frame" x="20" y="221" width="440" height="249"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <clipView key="contentView" ambiguous="YES" id="4rg-nv-S6b">
                             <rect key="frame" x="1" y="1" width="438" height="247"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
-                                <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowHeight="64" viewBased="YES" indentationPerLevel="16" outlineTableColumn="iVy-AT-1Hj" id="3Nn-Wq-K9X" userLabel="Outline View" customClass="ExtOutlineView" customModule="PLBindableControls">
+                                <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowHeight="76" viewBased="YES" indentationPerLevel="16" indentationMarkerFollowsCell="NO" outlineTableColumn="iVy-AT-1Hj" id="3Nn-Wq-K9X" userLabel="Outline View" customClass="ExtOutlineView" customModule="PLBindableControls">
                                     <rect key="frame" x="0.0" y="0.0" width="438" height="247"/>
                                     <autoresizingMask key="autoresizingMask"/>
-                                    <size key="intercellSpacing" width="3" height="2"/>
+                                    <size key="intercellSpacing" width="3" height="0.0"/>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                     <tableColumns>
@@ -720,11 +720,11 @@
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                             <prototypeCellViews>
                                                 <tableCellView identifier="Cell" id="QST-lT-Jlh">
-                                                    <rect key="frame" x="1" y="1" width="435" height="64"/>
+                                                    <rect key="frame" x="1" y="0.0" width="434" height="74"/>
                                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                     <subviews>
                                                         <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="p5K-f1-o2r" userLabel="Result" customClass="TextField" customModule="PLBindableControls">
-                                                            <rect key="frame" x="0.0" y="-16" width="434" height="80"/>
+                                                            <rect key="frame" x="0.0" y="7" width="420" height="60"/>
                                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                             <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="hc6-cR-Arg">
                                                                 <font key="font" metaFont="system"/>
