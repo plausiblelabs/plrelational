@@ -64,11 +64,11 @@ class ViewModel {
             ]
             _ = sqliteDB["person_bio"]!.add(bioRow)
         }
-        addPerson(1, "Montgomery Burns", "Owner, Springfield Nuclear Power Plant.")
-        addPerson(2, "Waylon Smithers", "Personal assistant to Mr. Burns.")
-        addPerson(3, "Homer Simpson", "Safety inspector at Springfield Nuclear Power Plant, Sector 7G.")
-        addPerson(4, "Lenny Leonard", "Friend to Homer and Carl.")
-        addPerson(5, "Carl Carlson", "Friend to Homer and Lenny.")
+        addPerson(1, "Montgomery Burns", "Owner, Springfield Nuclear Power Plant.  His full name is Charles Montgomery Burns, sometimes shortened as C.M. Burns or Monty Burns, but his employees call him Mr. Burns.  He is the richest man in Springfield.")
+        addPerson(2, "Waylon Smithers", "Personal assistant to Mr. Burns.  Smithers is a character that is known for things like this and that and this and that and this and that.")
+        addPerson(3, "Homer Simpson", "Safety inspector at Springfield Nuclear Power Plant, Sector 7G.  Homer is best known for saying things like \"D'oh!\" and eating donuts.")
+        addPerson(4, "Lenny Leonard", "Friend to Homer and Carl.  Lenny is a character that is known for things like this and that and this and that and this and that.")
+        addPerson(5, "Carl Carlson", "Friend to Homer and Lenny.  Carl is a character that is known for things like this and that and this and that and this and that.")
     }
     
     private lazy var searchIndex: RelationTextIndex = {
@@ -97,7 +97,7 @@ class ViewModel {
     }()
     
     private lazy var resultsArray: ArrayProperty<RowArrayElement> = {
-        return self.searchResults.arrayProperty(idAttr: "id", orderAttr: "rank")
+        return self.searchResults.arrayProperty(idAttr: "id", orderAttr: "rank", descending: true)
     }()
     
     lazy var queryString: ReadWriteProperty<String> = {
