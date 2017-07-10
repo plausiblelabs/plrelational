@@ -81,7 +81,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
                         let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: self.parentAttr, tag: self.tag)
                         for node in nodeDict.values {
                             let parentNode = nodeDict[node.data[self.parentAttr]] ?? rootNode
-                            _ = parentNode.children.insertSorted(node, {$0.data[self.orderAttr]})
+                            _ = parentNode.children.insertSorted(node, {$0.data[self.orderAttr]}, <)
                         }
                         
                         return rootNode
@@ -115,7 +115,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
     fileprivate func onInsert(rows: [Row], changes: inout [Change]) {
         
         func insertNode(_ node: Node, parent: Node) -> Int {
-            return parent.children.insertSorted(node, { $0.data[orderAttr] })
+            return parent.children.insertSorted(node, { $0.data[orderAttr] }, <)
         }
 
         // Observers should only be notified about the top-most nodes that were inserted.
@@ -254,7 +254,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         srcParent.children.remove(at: srcIndex)
         
         // Insert the node in its new parent
-        let dstIndex = dstParent.children.insertSorted(node, { $0.data[orderAttr] })
+        let dstIndex = dstParent.children.insertSorted(node, { $0.data[orderAttr] }, <)
 
         // Prepare changes
         let newSrcPath = TreePath(parent: optSrcParent, index: srcIndex)

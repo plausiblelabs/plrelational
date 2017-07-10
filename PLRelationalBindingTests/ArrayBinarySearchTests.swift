@@ -26,7 +26,7 @@ class ArrayBinarySearchTests: XCTestCase {
 
         func insert(_ v: Int, _ vs: [Int], _ expected: [Int], _ expectedIndex: Int) {
             var mutvs = vs
-            let index = mutvs.insertSorted(v, { $0 })
+            let index = mutvs.insertSorted(v, { $0 }, <)
             XCTAssertEqual(mutvs, expected)
             XCTAssertEqual(index, expectedIndex)
         }

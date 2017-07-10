@@ -8,10 +8,10 @@ extension Array {
         return self[0..<count].binarySearch(lessThan)
     }
     
-    mutating func insertSorted<T>(_ element: Element, _ f: (Element) -> T) -> Int where T: Comparable {
+    mutating func insertSorted<T>(_ element: Element, _ f: (Element) -> T, _ compare: (T, T) -> Bool) -> Int where T: Comparable {
         let val = f(element)
 
-        let index = binarySearch({ f($0) < val })
+        let index = binarySearch({ compare(f($0), val) })
         
         if index < count {
             insert(element, at: index)

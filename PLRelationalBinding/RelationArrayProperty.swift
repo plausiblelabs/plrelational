@@ -21,17 +21,23 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
     private let relation: Relation
     fileprivate let idAttr: Attribute
     private let orderAttr: Attribute
+    private let orderFunc: (RelationValue, RelationValue) -> Bool
     private let tag: AnyObject?
     fileprivate let sourceSignal: PipeSignal<SignalChange>
     
     private var relationObserverRemoval: ObserverRemoval?
 
-    fileprivate init(relation: Relation, idAttr: Attribute, orderAttr: Attribute, tag: AnyObject?) {
+    fileprivate init(relation: Relation, idAttr: Attribute, orderAttr: Attribute, descending: Bool, tag: AnyObject?) {
         precondition(relation.scheme.attributes.isSuperset(of: [idAttr, orderAttr]))
         
         self.relation = relation
         self.idAttr = idAttr
         self.orderAttr = orderAttr
+        if descending {
+            self.orderFunc = { $0 > $1 }
+        } else {
+            self.orderFunc = { $0 < $1 }
+        }
         self.tag = tag
 
         self.sourceSignal = PipeSignal()
@@ -51,7 +57,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
                 self.sourceSignal.notifyBeginPossibleAsyncChange()
                 relation.asyncAllRows(
                     postprocessor: { rows -> [RowArrayElement] in
-                        let sortedRows = rows.sorted{ $0[self.orderAttr] < $1[self.orderAttr] }
+                        let sortedRows = rows.sorted{ self.orderFunc($0[self.orderAttr], $1[self.orderAttr]) }
                         return sortedRows.map{
                             RowArrayElement(id: $0[self.idAttr], data: $0, tag: self.tag)
                         }
@@ -85,7 +91,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
     fileprivate func onInsert(_ rows: [Row], changes: inout [Change]) {
 
         func insertElement(_ element: Element) -> Int {
-            return elements.insertSorted(element, { $0.data[orderAttr] })
+            return elements.insertSorted(element, { $0.data[orderAttr] }, orderFunc)
         }
 
         func insertRow(_ row: Row) -> Int {
@@ -139,7 +145,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
         _ = elements.remove(at: srcIndex)
         
         // Insert the element in its new position
-        let dstIndex = elements.insertSorted(element, { $0.data[orderAttr] })
+        let dstIndex = elements.insertSorted(element, { $0.data[orderAttr] }, orderFunc)
         
         return .move(srcIndex: srcIndex, dstIndex: dstIndex)
     }
@@ -231,7 +237,7 @@ extension RelationArrayProperty: AsyncRelationChangeCoalescedObserver {
 
 extension Relation {
     /// Returns an ArrayProperty that gets its data from this relation.
-    public func arrayProperty(idAttr: Attribute, orderAttr: Attribute, tag: AnyObject? = nil) -> ArrayProperty<RowArrayElement> {
-        return RelationArrayProperty(relation: self, idAttr: idAttr, orderAttr: orderAttr, tag: tag)
+    public func arrayProperty(idAttr: Attribute, orderAttr: Attribute, descending: Bool = false, tag: AnyObject? = nil) -> ArrayProperty<RowArrayElement> {
+        return RelationArrayProperty(relation: self, idAttr: idAttr, orderAttr: orderAttr, descending: descending, tag: tag)
     }
 }
