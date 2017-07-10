@@ -76,6 +76,9 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     /// Whether to animate insert/delete changes with a fade.
     public var animateChanges = false
 
+    /// Whether to reload cell contents when the corresponding array element is updated.
+    public var reloadCellOnUpdate = false
+    
     /// Whether to select and enter edit mode for the cell that is inserted next.  This flag will
     /// be unset automatically after the cell is selected/edited.
     public var selectAndEditNextInsertedCell = false
@@ -240,15 +243,21 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
                 let rows = IndexSet(integer: index)
                 outlineView.removeItems(at: rows, inParent: nil, withAnimation: animation)
              
-            case .update:
-                // TODO: For now we will ignore updates and assume that the cell contents will
-                // be updated individually in response to the change.  We should make this
-                // configurable to allow for optionally calling reloadItem() to refresh the
-                // entire cell on any non-trivial update.
-                break
+            case let .update(index):
+                // XXX: There are cases where calling `reloadData` every time the array element's content is
+                // updated may cause problems (like if there's a text field being edited), so for now we
+                // make this opt-in with a flag
+                if reloadCellOnUpdate {
+                    let rows = IndexSet(integer: index)
+                    outlineView.reloadData(forRowIndexes: rows, columnIndexes: [0])
+                }
                 
             case let .move(srcIndex, dstIndex):
                 outlineView.moveItem(at: srcIndex, inParent: nil, to: dstIndex, inParent: nil)
+                // XXX: If both the order and content of the array element are changed simultaneously, we'll
+                // only see a `move` change here, and apparently `moveItem` doesn't cause the cell's contents
+                // to be reloaded so we need to do that manually
+                outlineView.reloadData(forRowIndexes: IndexSet(integer: dstIndex), columnIndexes: [0])
             }
         }
 

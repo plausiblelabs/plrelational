@@ -34,6 +34,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         model = ViewModel(undoManager: undoManager)
         model.queryString <~ queryField.string
         resultsListView = ResultsListView(model: model.resultsListModel, outlineView: outlineView)
+        resultsListView.reloadCellOnUpdate = true
         resultsListView.selection <~> model.resultsListSelection
         noResultsLabel.visible <~ not(model.hasResults)
         personNameLabel.string <~ model.selectedPersonName
