@@ -24,15 +24,15 @@ extension CFRunLoop: DispatchContext {
 
 
 public struct RunLoopDispatchContext: DispatchContext {
-    var runloop: CFRunLoop
+    public var runloop: CFRunLoop
     
     /// When this is true, calls to `async` on the thread belonging to `runloop` are executed
     /// immediately inline, rather than being delayed to the next runloop cycle. Sorry, I
     /// couldn't come up with a good name. It's not really async when that happens, but it's
     /// sometimes useful.
-    var executeReentrantImmediately: Bool
+    public var executeReentrantImmediately: Bool
     
-    var modes: [CFRunLoopMode]
+    public var modes: [CFRunLoopMode]
     
     public init(runloop: CFRunLoop = CFRunLoopGetCurrent(), executeReentrantImmediately: Bool = true, modes: [CFRunLoopMode] = [.commonModes]) {
         self.runloop = runloop
@@ -61,7 +61,7 @@ public struct DirectDispatchContext: DispatchContext {
 }
 
 public struct DispatchQueueContext: DispatchContext {
-    var queue: DispatchQueue
+    public var queue: DispatchQueue
     
     public init(queue: DispatchQueue) {
         self.queue = queue
@@ -84,8 +84,8 @@ extension DispatchQueueContext {
 
 
 public struct DispatchContextWrapped<T> {
-    var context: DispatchContext
-    var wrapped: T
+    public var context: DispatchContext
+    public var wrapped: T
     
     init(context: DispatchContext, wrapped: T) {
         self.context = context
