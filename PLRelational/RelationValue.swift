@@ -70,10 +70,10 @@ extension RelationValue: Hashable {
     public var hashValue: Int {
         switch self {
         case .null: return 0
-        case .integer(let x): return 1 ^ x.hashValue
-        case .real(let x): return 2 ^ x.hashValue
-        case .text(let x): return 3 ^ x.hashValue
-        case .blob(let x): return 4 ^ x.hashValueFromElements
+        case .integer(let x): return DJBHash.hash(values: [1, x.hashValue])
+        case .real(let x): return DJBHash.hash(values: [2, x.hashValue])
+        case .text(let x): return DJBHash.hash(values: [3, x.hashValue])
+        case .blob(let x): return DJBHash.hash(values: [4, x.hashValueFromElements])
         case .notFound: return 5
         }
     }

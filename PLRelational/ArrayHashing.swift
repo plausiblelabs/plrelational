@@ -5,8 +5,11 @@
 
 extension Array where Element: Hashable {
     /// Generate a hash value from the hash values of the array elements.
-    /// Currently just XORs them all. Do we want something smarter?
     var hashValueFromElements: Int {
-        return reduce(0, { $0 ^ $1.hashValue })
+        var hash = DJBHash()
+        for element in self {
+            hash.combine(element.hashValue)
+        }
+        return hash.value
     }
 }

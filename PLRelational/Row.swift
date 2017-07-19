@@ -266,7 +266,6 @@ extension InlineRow: Hashable {
             let lhsAttr = lhs.attributeAtIndex(index: i)
             let rhsAttr = rhs.attributeAtIndex(index: i)
             if lhsAttr != rhsAttr {
-                print("Collided hash: \(lhs.hashValue) \(rhs.hashValue)")
                 return false
             }
         }
@@ -275,7 +274,6 @@ extension InlineRow: Hashable {
             let lhsValue = lhs[i].1
             let rhsValue = rhs[i].1
             if lhsValue != rhsValue {
-                print("Collided hash: \(lhs.hashValue) \(rhs.hashValue)")
                 return false
             }
         }

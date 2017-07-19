@@ -43,7 +43,7 @@ public struct RecursiveQuery: Hashable {
     }
     
     public var hashValue: Int {
-        return attr.hashValue ^ value.hashValue
+        return DJBHash.hash(values: [attr.hashValue, value.hashValue])
     }
 }
 

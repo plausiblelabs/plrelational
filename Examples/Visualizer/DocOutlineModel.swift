@@ -145,7 +145,7 @@ func ==(a: DocOutlinePath, b: DocOutlinePath) -> Bool {
 extension DocOutlinePath: Hashable {
     var hashValue: Int {
         switch self {
-        case let .relation(did, oid, _): return did.hashValue ^ oid.hashValue
+        case let .relation(did, oid, _): return DJBHash.hash(values: [did.hashValue, oid.hashValue])
         }
     }
 }

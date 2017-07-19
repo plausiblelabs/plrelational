@@ -9,6 +9,8 @@ import AppKit
 import UIKit
 #endif
 
+import PLRelational
+
 public struct Color: Hashable {
     
     public struct Components: Hashable {
@@ -29,7 +31,7 @@ public struct Color: Hashable {
         }
         
         public var hashValue: Int {
-            return r.hashValue ^ g.hashValue ^ b.hashValue ^ a.hashValue
+            return DJBHash.hash(values: [r.hashValue, g.hashValue, b.hashValue, a.hashValue])
         }
     }
     
