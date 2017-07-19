@@ -12,4 +12,12 @@ public struct DJBHash {
     }
     
     public init() {}
+    
+    public static func hash<S: Sequence>(values: S) -> Int where S.Iterator.Element == Int {
+        var hash = DJBHash()
+        for value in values {
+            hash.combine(value)
+        }
+        return hash.value
+    }
 }
