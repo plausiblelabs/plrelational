@@ -95,9 +95,6 @@ func parseArguments() -> (directory: String, outputDirectory: String, targets: [
         }
     }
     
-    print(CommandLine.arguments)
-    print(targets)
-    
     return (directory, outputDirectory, targets)
 }
 
