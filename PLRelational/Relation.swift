@@ -11,15 +11,23 @@ public typealias RelationError = Error
 
 public typealias RelationObject = Relation & AnyObject
 
+/// A protocol defining a relation, which is conceptually a set of `Row`s, all of which have
+/// the same scheme.
 public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
+    /// The relation's scheme.
     var scheme: Scheme { get }
     
+    /// A value which defines how the `Relation`'s content is provided. Content can be provided directly,
+    /// as an operator on other `Relation`s, or by deferring to another `Relation` entirely.
     var contentProvider: RelationContentProvider { get }
     
+    /// The debug name for the `Relation`, which can be handy for identifying them in debug dumps.
     var debugName: String? { get set }
-
+    
+    /// Return `true` if the given row is contained in the `Relation`, and false if not.
     func contains(_ row: Row) -> Result<Bool, RelationError>
     
+    /// Update the `Relation` content by assigning the given values to all rows which match the query.
     mutating func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError>
     
     /// Add an observer which is notified when the content of the Relation
@@ -28,11 +36,27 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// it no longer needs it.
     func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void)
     
+    /// Return a new `Relation` which represents the union of this `Relation` and another one.
     func union(_ other: Relation) -> Relation
+    
+    /// Return a new `Relation` which represents the intersection of this `Relation` and another one.
     func intersection(_ other: Relation) -> Relation
+    
+    /// Return a new `Relation` which represents the difference of this `Relation` and another one.
     func difference(_ other: Relation) -> Relation
     
+    /// Return a new `Relation` which represents the join of this `Relation` and another one.
+    /// This is equivalent to an `equijoin` where the matches are equal to the intersection of
+    /// the two schemes.
     func join(_ other: Relation) -> Relation
+    
+    /// Return a new `Relation` which represents the join of this `Relation` and another one,
+    /// matching the values for the attributes given in the `matching` parameter.
+    ///
+    /// - parameter other: The Relation to join with.
+    /// - parameter matching: A dictionary which describes the matches to perform for the join.
+    ///                       The value for the key `Attribute` in this `Relation` will be matched
+    ///                       with the value for the value `Attribute` in `other`.
     func equijoin(_ other: Relation, matching: [Attribute: Attribute]) -> Relation
     func thetajoin(_ other: Relation, query: SelectExpression) -> Relation
     func split(_ query: SelectExpression) -> (Relation, Relation)
@@ -44,16 +68,21 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     func max(_ attribute: Attribute) -> Relation
     func count() -> Relation
     
-    /// Return a new Relation that resolves to this Relation when it is non-empty, otherwise
+    /// Return a new `Relation` that resolves to this Relation when it is non-empty, otherwise
     /// resolves to the other Relation.
     func otherwise(_ other: Relation) -> Relation
     
-    /// Return a new Relation that resolves to this Relation when there is a unique value
+    /// Return a new `Relation` that resolves to this Relation when there is a unique value
     /// for the given attribute that is the same as `matching`, otherwise resolves to an
     /// empty Relation.
     func unique(_ attribute: Attribute, matching: RelationValue) -> Relation
     
+    /// Perform a select operation with a query defined by the contents of a `Row`. The
+    /// resulting query is equivalent to ANDing together an equality expression for each
+    /// attribute in the row, requiring it to be equal to that value in the row.
     func select(_ rowToFind: Row) -> Relation
+    
+    /// Perform a select operation with the given query.
     func select(_ query: SelectExpression) -> Relation
     
     /// Return a new Relation that is this Relation with the given update applied to it.
@@ -62,17 +91,52 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// The same as the two-parameter withUpdate, but it updates all rows.
     func withUpdate(_ newValues: Row) -> Relation
     
+    /// Return a new `Relation` that renames the `Attribute`s in the keys of `renames` to the
+    /// corresponding values.
     func renameAttributes(_ renames: [Attribute: Attribute]) -> Relation
 }
 
+/// A value which describes how a `Relation` produces values.
 public enum RelationContentProvider {
+    /// The `Relation` produces values by providing a generator. The first associated value is a function which,
+    /// when called, produces an iterator. The iterator produces sets of rows, or errors. Depending on the
+    /// underlying implementation, the iterator may produce a single set containing all rows, a bunch of sets
+    /// containing individual rows, or anything in between.
+    ///
+    /// The `approximateCount` associated value is an optional approximate count of the number of rows in the
+    /// `Relation`. Providing a value here can help the query optimizer/runner be more efficient. If `nil` is
+    /// provided for this value, then it will be assumed that the number of rows in the `Relation` is large.
     case generator((Void) -> AnyIterator<Result<Set<Row>, RelationError>>, approximateCount: Double?)
+    
+    /// The `Relation` produces values by providing a generator which can be filtered, hopefully efficiently,
+    /// with a `SelectExpression`. The query optimizer/runner will take advantage of this to request only
+    /// the rows needed to fulfill a request, rather than requesting all rows, when possible.
+    ///
+    /// The first associated value is a function which, when called with a `SelectExpression`, produces an iterator.
+    /// The iterator produces sets of rows which match the expression, or errors.
+    ///
+    /// The `approximateCount` associated value is a function which takes a `SelectExpression` and returns the
+    /// approximate number of matching rows this `Relation` contains. This helps the query optimizer/runner, as
+    /// described in `generator`.
     case efficientlySelectableGenerator((SelectExpression) -> AnyIterator<Result<Set<Row>, RelationError>>, approximateCount: (SelectExpression) -> Double?)
+    
+    /// The `Relation` produces values by providing a plain `Set` of rows. The first associated value is a function
+    /// which, when called, provides the set. This is suitable for `Relations` which store rows in memory as a `Set`
+    /// and can provide it directly.
+    ///
+    /// The `approximateCount` associated value describes the approximate number of rows in the `Relation`, as
+    /// described in `generator`.
     case set((Void) -> Swift.Set<Row>, approximateCount: Double?)
+    
+    /// The `Relation` doesn't contain any values, but represents the result of applying the given operator to
+    /// the given `Relation` operands.
     case intermediate(IntermediateRelation.Operator, [Relation])
+    
+    /// The `Relation` doesn't contain any values, but has an underlying `Relation` which can provide values.
     case underlying(Relation)
 }
 
+/// A value describing the kind of change made to a `Relation`.
 public enum RelationObservationKind {
     /// A change due to something in the Relation itself.
     case directChange

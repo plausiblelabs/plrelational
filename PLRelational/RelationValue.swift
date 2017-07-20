@@ -10,12 +10,23 @@ import Foundation
 /// Plus a "not found" value for when an attribute doesn't exist at all.
 /// We might want to do our own thing and not hew so closely to SQLite's way....
 public enum RelationValue {
+    /// The null value. Note that unlike SQL, our null is equal to itself.
     case null
+    
+    /// A 64-bit signed integer.
     case integer(Int64)
+    
+    /// A 64-bit floating point value.
     case real(Double)
+    
+    /// A string.
     case text(String)
+    
+    /// A byte array.
     case blob([UInt8])
     
+    /// A special value used to indicate that a `Row` has no value for a given attribute.
+    /// Not intended to be persisted or provided by `Relation`s.
     case notFound
 }
 
@@ -93,22 +104,27 @@ extension RelationValue: CustomStringConvertible {
 }
 
 extension RelationValue {
+    /// Create a new integer value.
     public init(_ int: Int64) {
         self = .integer(int)
     }
     
+    /// Create a new floating point value.
     public init(_ real: Double) {
         self = .real(real)
     }
     
+    /// Create a new text value.
     public init(_ text: String) {
         self = .text(text)
     }
     
+    /// Create a new byte array value.
     public init(_ blob: [UInt8]) {
         self = .blob(blob)
     }
     
+    /// Create a new byte array value from the contents of `data`.
     public init(_ data: Data) {
         let count = data.count
         self = data.withUnsafeBytes({
@@ -116,6 +132,7 @@ extension RelationValue {
         })
     }
     
+    /// Create a new byte array value from the contents of `sequence`.
     public init<Seq: Sequence>(_ sequence: Seq) where Seq.Iterator.Element == UInt8 {
         self = .blob(Array(sequence))
     }
@@ -148,6 +165,7 @@ extension RelationValue: ExpressibleByFloatLiteral {
 }
 
 extension RelationValue {
+    /// Get the underlying integer value, or nil if the value is not an integer.
     public func get() -> Int64? {
         switch self {
         case .integer(let x): return x
@@ -155,6 +173,7 @@ extension RelationValue {
         }
     }
 
+    /// Get the underlying floating point value, or nil if the value is not floating point.
     public func get() -> Double? {
         switch self {
         case .real(let x): return x
@@ -162,6 +181,7 @@ extension RelationValue {
         }
     }
 
+    /// Get the underlying string value, or nil if the value is not an string.
     public func get() -> String? {
         switch self {
         case .text(let x): return x
@@ -169,6 +189,7 @@ extension RelationValue {
         }
     }
     
+    /// Get the underlying byte array value, or nil if the value is not an byte array.
     public func get() -> [UInt8]? {
         switch self {
         case .blob(let x): return x
@@ -187,6 +208,7 @@ extension RelationValue {
         return self != .integer(0)
     }
     
+    /// Create a new integer value from a boolean. The result is `1` for `true` and `0` for `false`.
     public static func boolValue(_ value: Bool) -> RelationValue {
         return .integer(value ? 1 : 0)
     }

@@ -12,6 +12,7 @@ open class CachingRelation: IntermediateRelation {
     
     fileprivate let limit: Int
     
+    /// The currently cached rows.
     public fileprivate(set) var cache: Set<Row>?
     
     /// Initialize a caching relation wrapping another relation. If the number of rows in

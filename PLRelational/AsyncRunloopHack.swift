@@ -20,6 +20,7 @@ private func debugLog(_: String) {}
 ///
 /// To use, call AsyncRunloopHack.hack() on the main thread. Only do this once.
 public class AsyncRunloopHack {
+    /// Install the hack on the current runloop.
     public class func hack() {
         AsyncRunloopHack().hack()
     }

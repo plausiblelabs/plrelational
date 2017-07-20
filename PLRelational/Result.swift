@@ -3,12 +3,17 @@
 // All rights reserved.
 //
 
+/// A value which is either a successful result, or an error.
 public enum Result<T, E> {
+    /// A successful result.
     case Ok(T)
+    
+    /// An error.
     case Err(E)
 }
 
 extension Result {
+    /// Provide the result value for success, and `nil` for failure.
     public var ok: T? {
         switch self {
         case .Ok(let t): return t
@@ -16,6 +21,7 @@ extension Result {
         }
     }
     
+    /// Provide the error value for errors, and `nil` for success.
     public var err: E? {
         switch self {
         case .Err(let e): return e
@@ -25,6 +31,8 @@ extension Result {
 }
 
 extension Result {
+    /// Map the `Result` to a new `Result` by applying the given function to the underlying
+    /// value for success, or propagating the error for failure.
     public func map<NewT>(_ f: (T) throws -> NewT) rethrows -> Result<NewT, E> {
         switch self {
         case .Ok(let t): return .Ok(try f(t))
@@ -32,6 +40,9 @@ extension Result {
         }
     }
     
+    /// Map the `Result` to a new `Result` by applying the given function to the underlying
+    /// value for success, or propagating the error for failure. Returns `nil` if the function
+    /// returns nil.
     public func map<NewT>(_ f: (T) throws -> NewT?) rethrows -> Result<NewT, E>? {
         switch self {
         case .Ok(let t): return try f(t).map({ .Ok($0) })
@@ -39,30 +50,40 @@ extension Result {
         }
     }
     
+    /// Map the `Result` to a new `Result` by applying the given function to the error,
+    /// or propagating the value for success.
     public func mapErr<NewE>(_ f: (E) throws -> NewE) rethrows -> Result<T, NewE> {
         switch self {
         case .Ok(let t): return .Ok(t)
         case .Err(let e): return .Err(try f(e))
         }
     }
-
+    
+    /// Map the `Result` to a new `Result` by applying the given function to the underlying value
+    /// for success, or propagating the error for failure. Takes a function which returns a `Result`,
+    /// and returns the error if that function returns an error.
     public func flatMap<NewT>(_ f: (T) throws -> Result<NewT, E>) rethrows -> Result<NewT, E> {
         switch self {
         case .Ok(let t): return try f(t)
         case .Err(let e): return .Err(e)
         }
     }
-
+    
+    /// The same as `flatMap`.
     public func then<NewT>(_ f: (T) throws -> Result<NewT, E>) rethrows -> Result<NewT, E> {
         return try flatMap(f)
     }
 }
 
 extension Result {
+    /// If both `self` and `other` are success, return `self`. Otherwise return
+    /// the first error in the pair.
     public func and(_ other: Result<T, E>) -> Result<T, E> {
         return self.ok == nil ? self : other
     }
     
+    /// If either `self` or `other` are success, return the first value in the pair.
+    /// Otherwise return the first error in the pair.
     public func or(_ other: Result<T, E>) -> Result<T, E> {
         return self.err == nil ? self : other
     }
@@ -107,6 +128,9 @@ public func flatmapOk<Seq, InnerT, NewT, E>(_ seq: Seq, _ f: (InnerT) -> NewT?) 
     return .Ok(results)
 }
 
+/// Iterate over a sequence of `Result`s, checking each value against the predicate. If a value is found where the
+/// predicate is `true`, return `true`. If an error is found first, return that error. If no matching value and no
+/// error is found, return `false`.
 public func containsOk<Seq, T, E>(_ seq: Seq, _ predicate: (T) -> Bool) -> Result<Bool, E> where Seq: Sequence, Seq.Iterator.Element == Result<T, E> {
     for elt in seq {
         switch elt {
@@ -137,6 +161,8 @@ public func hoistOptional<T, E>(_ optionalResult: Result<T, E>?) -> Result<T?, E
 }
 
 extension Result {
+    /// Transform two `Result`s into a single `Result` whose value is a tuple containing the two
+    /// original values.
     public func combine<U>(_ other: Result<U, E>) -> Result<(T, U), E> {
         switch (self, other) {
         case (.Ok(let t), .Ok(let u)): return .Ok((t, u))
@@ -150,6 +176,10 @@ extension Result {
 }
 
 extension Result {
+    /// Return the underlying value. If the `Result` contains an error, throw that error.
+    /// NOTE: The error type must be something throwable (i.e. conforms to `Swift.Error`)
+    /// but this can't be enforced in the type system currently, so it's up to you to
+    /// only call this when the type is appropriate.
     public func orThrow() throws -> T {
         // TODO EWW: Swift doesn't support the use of the protocol itself to satisfy a requirement like "E: ErrorType"
         // so we just check at runtime instead in order to support Result<T, ErrorType>.
@@ -163,6 +193,8 @@ extension Result {
 }
 
 extension Result where E == Error {
+    /// Convert a throwing expression into a `Result`. If the expression returns a value, the `Result`
+    /// contains that value as success. If it throws, the `Result` contains the thrown error as an error.
     public init(_ f: @autoclosure () throws -> T) {
         do {
             let value = try f()
@@ -177,13 +209,13 @@ precedencegroup ResultFlatMapPrecedence {
     associativity: left
 }
 
-/* The flatMap (aka bind) operator. */
+/// The flatMap (aka bind) operator.
 infix operator >>- : ResultFlatMapPrecedence
 public func >>- <T, E, NT>(result: Result<T, E>, next: (T) -> Result<NT, E>) -> Result<NT, E> {
     return result.flatMap(next)
 }
 
-/* Alternate flatMap that assumes a Void success value (allows for chaining without braces). */
+/// Alternate flatMap that assumes a Void success value (allows for chaining without braces).
 infix operator >>>- : ResultFlatMapPrecedence
 public func >>>- <E>(result: Result<Void, E>, next: @autoclosure () -> Result<Void, E>) -> Result<Void, E> {
     return result.flatMap(next)

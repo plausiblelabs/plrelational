@@ -3,7 +3,11 @@
 // All rights reserved.
 //
 
+/// A protocol which represents a select expression. A select expression
+/// can be applied to a `Row` to produce a value. This is typically used
+/// to filter `Relation`s using expressions which return booleans.
 public protocol SelectExpression {
+    /// Evaluate the expression for the given `Row` and return the resulting value.
     func valueWithRow(_ row: Row) -> RelationValue
 }
 
@@ -13,7 +17,13 @@ extension Attribute: SelectExpression {
     }
 }
 
+/// A protocol for select expressions which are always constant values.
+/// In other words, the return value from `valueWithRow` does not depend
+/// the `Row` passed in.
 public protocol SelectExpressionConstantValue: SelectExpression {
+    /// The actual value this expression contains. This value must match
+    /// the value returned by `valueWithRow`. The protocol provides a
+    /// default implementation for `valueWithRow` which returns this.
     var relationValue: RelationValue { get }
 }
 
@@ -61,11 +71,18 @@ extension SelectExpression {
     }
 }
 
+/// A select expression consisting of a binary operator applied to two sub-expressions.
 public struct SelectExpressionBinaryOperator: SelectExpression {
+    /// The left-hand side.
     public var lhs: SelectExpression
+    
+    /// The operator.
     public var op: BinaryOperator
+    
+    /// The right-hand side.
     public var rhs: SelectExpression
     
+    /// Create a new binary operator expression.
     public init(lhs: SelectExpression, op: BinaryOperator, rhs: SelectExpression) {
         self.lhs = lhs
         self.op = op
@@ -91,10 +108,15 @@ public extension SelectExpression {
     }
 }
 
+/// A select expression consisting of a unary operator applied to a sub-expression.
 public struct SelectExpressionUnaryOperator: SelectExpression {
+    /// The operator.
     public var op: UnaryOperator
+    
+    /// The sub-expression.
     public var expr: SelectExpression
     
+    /// Create a new unary operator expression.
     public init(op: UnaryOperator, expr: SelectExpression) {
         self.op = op
         self.expr = expr
@@ -152,6 +174,7 @@ extension SelectExpression {
 }
 
 extension SelectExpression {
+    /// Rename all of the `Attribute`s in the expresson according to the key/value pairs in `renames`.
     func withRenamedAttributes(_ renames: [Attribute: Attribute]) -> SelectExpression {
         return self.mapTree({
             switch $0 {

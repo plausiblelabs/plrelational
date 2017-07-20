@@ -3,21 +3,28 @@
 // All rights reserved.
 //
 
+/// A key used to describe `Relation` schemes and map keys to values in `Row`.
+/// Note: `Attribute` is implemented internally using interned strings. This
+/// means that two equal `Attributes` always have the same storage. This cuts
+/// down on storage overhead and allows equality to be implemented as pointer
+/// equality. However, the interned strings cannot be destroyed when no longer
+/// in use. Because of this, a program must not created an unlimited number of
+/// distinct `Attribute`s.
 public struct Attribute {
-    /// Note: since InternedUTF8String never deallocates strings,
-    /// the number of distinct attributes used in a program must
-    /// be bounded. If that ever becomes unacceptable, we'll have
-    /// to rework this.
+    /// The underlying interned string representing the `Attribute`.
     public var internedName: InternedUTF8String
     
+    /// The `String` name of this `Attribute`.
     public var name: String {
         return internedName.string
     }
     
+    /// Create a new `Attribute` from an interned string.
     public init(_ internedName: InternedUTF8String) {
         self.internedName = internedName
     }
-
+    
+    /// Create a new `Attribute` from a string.
     public init(_ name: String) {
         self.internedName = .get(name)
     }

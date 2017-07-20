@@ -6,6 +6,10 @@
 import Foundation
 
 
+/// A single entry in a `Relation`. Conceptually, the same as `Dictionary<Attribute, RelationValue>`.
+/// The implementation is more complex, and optimized for the use cases it sees in this code. In particular,
+/// the underlying storage is implemented as an interned object, which makes hashing and equality
+/// really quick to evaluate.
 public struct Row: Hashable, Sequence {
     var inlineRow: InlineRow
     
@@ -13,16 +17,20 @@ public struct Row: Hashable, Sequence {
         self.inlineRow = inlineRow
     }
     
+    /// Initialize a new `Row` from a sequence of `Attribute`/`RelationValue` pairs.
     public init<S: Sequence>(values: S) where S.Iterator.Element == (key: Attribute, value: RelationValue) {
         inlineRow = InlineRow.internSequence(values)
     }
     
+    /// A convenience for a row with no attributes or values.
     public static var empty = Row(values: [])
     
     public var hashValue: Int {
         return ObjectIdentifier(inlineRow).hashValue
     }
     
+    /// Retrieve the value for a given `Attribute`. If the `Row` does not contain the `Attribute`,
+    /// return `.notFound`.
     public subscript(attribute: Attribute) -> RelationValue {
         get {
             return inlineRow[attribute] ?? .notFound
@@ -34,6 +42,7 @@ public struct Row: Hashable, Sequence {
         }
     }
     
+    /// Return a new `Row` created by renaming each key in `renames` to the corresponding value.
     public func renameAttributes(_ renames: [Attribute: Attribute]) -> Row {
         if renames.isEmpty {
             return self
@@ -83,18 +92,22 @@ public struct Row: Hashable, Sequence {
         return Iterator(inner: inlineRow.makeIterator())
     }
     
+    /// The attributes in the `Row`.
     public var attributes: LazyMapSequence<Row, Attribute> {
         return self.lazy.map({ $0.0 })
     }
     
+    /// The `Row`'s scheme.
     public var scheme: Scheme {
         return Scheme(attributes: Set(attributes))
     }
     
+    /// The number of values in the `Row`.
     public var count: Int {
         return inlineRow.count
     }
     
+    /// Whether the `Row` is empty.
     public var isEmpty: Bool {
         return count == 0
     }

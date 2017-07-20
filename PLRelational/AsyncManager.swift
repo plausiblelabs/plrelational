@@ -6,6 +6,20 @@
 import Foundation
 
 
+/// A class which manages asynchronous operations on `Relation`s. `Relation` provides
+/// primitive synchronous operations such as queries, updates, and deletions. `AsyncManager`
+/// then wraps those operations up and executes them in the background.
+///
+/// Normally you do not deal with this class directly, but use the various `async` methods
+/// available on `Relation` and similar. Those are wrappers around this class in more
+/// convenient form.
+///
+/// This class is tied to the thread where it is created, which must run a runloop. There
+/// is a common instance available by calling `currentInstance`. It is possible to create
+/// your own instance separate from this, but there is usually no reason to do so.
+///
+/// `Relation`s used for async operations must not also be used for synchronous operations
+/// at the same time.
 public final class AsyncManager: PerThreadInstance {
     public typealias ObservationRemover = (Void) -> Void
     
@@ -14,14 +28,20 @@ public final class AsyncManager: PerThreadInstance {
     fileprivate var variableInfo: ObjectDictionary<AnyObject, [VariableEntry]> = [:]
     
     private let runloop: CFRunLoop
+    
+    /// The runloop modes this manager is currently scheduled in. By default, `AsyncManager`
+    /// is scheduled in the common runloop modes.
     public private(set) var runloopModes: [CFRunLoopMode] = [.commonModes]
     
     private var executionTimer: CFRunLoopTimer?
     
+    /// Initialize an `AsyncManager`. The resulting instance is tied to the thread it's
+    /// created on.
     public init() {
         self.runloop = CFRunLoopGetCurrent()
     }
     
+    /// A type describing the current state of an `AsyncManager.`
     public enum State {
         /// Nothing is happening, no actions have been registered.
         case idle
@@ -39,6 +59,7 @@ public final class AsyncManager: PerThreadInstance {
     private var stateObservers: [UInt64: (State) -> Void] = [:]
     private var stateObserversNextID: UInt64 = 0
     
+    /// The current state of this instance.
     public var state: State = .idle {
         didSet {
             for (_, observer) in stateObservers {
@@ -62,6 +83,10 @@ public final class AsyncManager: PerThreadInstance {
         return old
     }
     
+    /// Add an observer which is called whenever `state` changes.
+    ///
+    /// - parameter observer: The observer function to call, which is passed in the new state.
+    /// - returns: A remover function. Call this to remove the observer.
     public func addStateObserver(_ observer: @escaping (State) -> Void) -> ObservationRemover {
         let id = stateObserversNextID
         stateObserversNextID += 1
@@ -70,26 +95,32 @@ public final class AsyncManager: PerThreadInstance {
         return { self.stateObservers.removeValue(forKey: id) }
     }
     
+    /// Register an update operation with the manager.
     public func registerUpdate(_ relation: Relation, query: SelectExpression, newValues: Row) {
         register(action: .update(relation, query, newValues))
     }
     
+    /// Register an add operation with the manager.
     public func registerAdd(_ relation: MutableRelation, row: Row) {
         register(action: .add(relation, row))
     }
     
+    /// Register a delete operation with the manager.
     public func registerDelete(_ relation: MutableRelation, query: SelectExpression) {
         register(action: .delete(relation, query))
     }
     
+    /// Register a restore snapshot operation with the manager.
     public func registerRestoreSnapshot(_ database: TransactionalDatabase, snapshot: TransactionalDatabaseSnapshot) {
         register(action: .restoreSnapshot(database, snapshot))
     }
     
+    /// Register a apply delta operation with the manager.
     public func registerApplyDelta(_ database: TransactionalDatabase, delta: TransactionalDatabaseDelta) {
         register(action: .applyDelta(database, delta))
     }
     
+    /// Register a query operation with the manager.
     public func registerQuery(_ relation: Relation, callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
         register(action: .query(relation, callback))
     }
