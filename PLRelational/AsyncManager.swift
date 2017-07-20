@@ -23,7 +23,7 @@ public final class AsyncManager: PerThreadInstance {
     }
     
     public enum State {
-        /// Nothing is happening, no actionss have been registered.
+        /// Nothing is happening, no actions have been registered.
         case idle
         
         /// Actions have been registered but are not yet running.
