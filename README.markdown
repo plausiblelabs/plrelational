@@ -31,25 +31,28 @@ Here is some quick code to exercise it:
     // Query the selected name
     selectedName.asyncAllRows({ print($0) })
     // Prints "Ok(Set([[name: Superman]]))" when the data comes back
+
+    // Create a property that presents the selected name relation as a single String
+    let selectedNameString = selectedName.oneString().property()
     
     // Observe changes to the selected name
-    let removal = selectedName.oneString().observeValueChanging({ value, metadata in
+    let removal = selectedNameString.signal.observeValueChanging{ value, metadata in
         print("Selected name is now \(value)")
-    })
+    }
     
     // Remove the observer when done
     removal()
     
     // Create a label and bind it to the selected name
     let label = Label()
-    label.string <~ selectedName.oneString().property()
+    label.string <~ selectedNameString
 
 ## Frameworks
 
 The PLRelational project provides three frameworks:
 
 * **PLRelational** provides all of the core data storage and processing facilities. It includes relations backed by plists, SQLite, or stored in memory, operators on those relations, full text search facilities, asynchronous data updates and retrieval, and more.
-* **PLRelationalBinding** provides the glue to connect PLRelational's relations to other entities. At its base it provides `Signal` and `Property` types which are abstract data providers, as well as extensions that allow a relation to be expressed in terms of them.
+* **PLRelationalBinding** provides the reactive glue to connect PLRelational's relations to other entities. At its base it provides `Signal` and `Property` types which are abstract data providers, as well as extensions that allow a relation to be expressed in terms of them.
 * **PLBindableControls** extends standard AppKit and UIKit controls to expose `Property` objects from PLRelationalBinding. This allows those controls to be linked to relations from PLRelational, which causes them to automatically reflect the current value of a relation, or update that value based on user interaction.
 
 Typically you will use all three together, but PLRelational can be used standalone, and PLRelationalBinding can be used without PLBindableControls.
