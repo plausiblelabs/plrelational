@@ -5,6 +5,8 @@
 
 import Foundation
 
+/// Indicates the state of a property that is common to multiple entities.  Useful in modeling
+/// "multi-select" for user interface controls such as list views, multi-state checkboxes, etc.
 public enum CommonValue<T: Equatable>: Equatable { case
     /// The value is not defined for any item.
     none,
@@ -15,7 +17,7 @@ public enum CommonValue<T: Equatable>: Equatable { case
     /// There is a mixed set of values across all items.
     multi
     
-    /// Returns the single value if there is one, or the given default value in the .None or .Multi cases.
+    /// Returns the single value if there is one, or the given default value in the .none or .multi cases.
     public func orDefault(_ defaultValue: T) -> T {
         switch self {
         case .none, .multi:
@@ -25,7 +27,7 @@ public enum CommonValue<T: Equatable>: Equatable { case
         }
     }
     
-    /// Returns the single value if there is one, or nil in the .None or .Multi cases.
+    /// Returns the single value if there is one, or nil in the .none or .multi cases.
     public func orNil() -> T? {
         switch self {
         case .none, .multi:
@@ -35,7 +37,7 @@ public enum CommonValue<T: Equatable>: Equatable { case
         }
     }
     
-    /// Returns the given value in the .Multi case, otherwise returns nil.
+    /// Returns the given value in the .multi case, otherwise returns nil.
     public func whenMulti<U>(_ value: U) -> U? {
         switch self {
         case .none, .one:
@@ -45,7 +47,7 @@ public enum CommonValue<T: Equatable>: Equatable { case
         }
     }
     
-    /// Returns the given value in the .Multi case, otherwise returns the alternate value.
+    /// Returns the given value in the .multi case, otherwise returns the alternate value.
     public func whenMulti<U>(_ value: U, otherwise: U) -> U {
         switch self {
         case .none, .one:

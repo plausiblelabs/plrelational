@@ -6,11 +6,13 @@
 import Foundation
 import PLRelational
 
+/// :nodoc:
 public protocol Plistable {
     func toPlist() -> AnyObject
     static func fromPlist(_ obj: AnyObject) -> Self?
 }
 
+/// :nodoc:
 extension RelationValue: Plistable {
     public func toPlist() -> AnyObject {
         switch self {

@@ -14,7 +14,12 @@ public protocol AsyncPropertyType {
 }
 
 public protocol AsyncReadablePropertyType: class, AsyncPropertyType {
+    /// The property's value type.
     associatedtype Value
+    
+    /// The type of change delivered by the signal.  For simple properties, this will be the same as `Value`, but
+    /// for complex properties (e.g. where `Value` is an array or tree structure) this may be an enumerated type
+    /// that indicates fine-grained changes to the value.
     associatedtype SignalChange
 
     /// Converts this instance into a concrete `AsyncReadableProperty`.
@@ -117,6 +122,7 @@ private class ConstantValueAsyncProperty<T>: AsyncReadableProperty<T> {
     }
 }
 
+/// :nodoc:
 /// Returns an AsyncReadableProperty whose value never changes.
 public func constantValueAsyncProperty<T>(_ value: T) -> AsyncReadableProperty<T> {
     return ConstantValueAsyncProperty(value)

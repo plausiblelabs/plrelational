@@ -71,6 +71,7 @@ extension RelationChange {
     }
 }
 
+/// :nodoc:
 /// Extracts the added, updated, and removed rows from the given NegativeSet.
 public func partsOf(_ set: NegativeSet<Row>, idAttr: Attribute) -> RelationChangeParts {
     // First gather the rows that are being deleted (or updated)

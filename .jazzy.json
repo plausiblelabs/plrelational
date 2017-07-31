@@ -16,10 +16,66 @@
             ]
         },
         {
-            "name": "PLRelationalBinding",
+            "name": "Signals",
             "children": [
                 "SignalType",
-                "Signal"
+                "Signal",
+                "SourceSignal",
+                "PipeSignal",
+                "SignalEvent",
+                "SignalObserver",
+                "ChangeMetadata"
+            ]
+        },
+        {
+            "name": "Properties and Binding",
+            "children": [
+                "ReadablePropertyType",
+                "ReadableProperty",
+                "BindableProperty",
+                "WriteOnlyProperty",
+                "ReadWriteProperty",
+                "MutableValueProperty",
+                "ExternalValueProperty",
+                "ActionProperty",
+                "AsyncPropertyType",
+                "AsyncReadablePropertyType",
+                "AsyncReadableProperty",
+                "AsyncReadWriteProperty",
+                "Binding",
+                "ChangeResult",
+                "ChangeHandler",
+                "<~(_:_:)",
+                "<~>(_:_:)",
+                "~~>(_:_:)"
+            ]
+        },
+        {
+            "name": "Array Property",
+            "children": [
+                "ArrayProperty",
+                "ArrayPos",
+                "ArrayChange",
+                "ArrayElement",
+                "RowArrayElement"
+            ]
+        },
+        {
+            "name": "Tree Property",
+            "children": [
+                "TreeProperty",
+                "TreePos",
+                "TreePath",
+                "TreeChange",
+                "TreeNode",
+                "RowTreeNode"
+            ]
+        },
+        {
+            "name": "Relation-based Property Support",
+            "children": [
+                "RelationChangeParts",
+                "RelationMutationConfig"
             ]
         }
     ]

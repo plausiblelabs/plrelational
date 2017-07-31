@@ -6,6 +6,9 @@
 import Foundation
 
 extension ReadablePropertyType {
+    
+    // MARK: Operations
+    
     /// Returns a ReadableProperty whose value is derived from this property's `value`.
     /// The given `transform` will be applied whenever this property's value changes.
     public func map<U>(_ transform: @escaping (Self.Value) -> U) -> ReadableProperty<U> {
@@ -77,6 +80,9 @@ extension ReadablePropertyType where Value == Bool {
 }
 
 extension MutableValueProperty where T == Bool {
+    
+    // MARK: Operations
+    
     public func toggle(transient: Bool) {
         let newValue = !self.value
         self.change(newValue, transient: transient)

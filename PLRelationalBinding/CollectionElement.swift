@@ -5,6 +5,7 @@
 
 import Foundation
 
+/// :nodoc:
 public protocol CollectionElement: class {
     associatedtype ID: Hashable, Plistable
     associatedtype Data

@@ -86,6 +86,7 @@ extension Relation {
     }
 }
 
+/// :nodoc:
 extension MutableRelation {
     /// Replaces the rows in this relation (synchronously) by performing a delete-all followed by an add for each row.
     public func replaceRows(_ rows: [Row]) {
@@ -106,6 +107,7 @@ extension MutableRelation {
     }
 }
 
+/// :nodoc:
 extension TransactionalRelation {
     /// Replaces the rows in this relation (asynchronously) by performing a delete-all followed by an add for each row.
     public func asyncReplaceRows(_ rows: [Row]) {

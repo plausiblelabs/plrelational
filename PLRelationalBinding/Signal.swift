@@ -68,8 +68,10 @@ public struct SignalObserver<T> {
     }
 }
 
+/// Base protocol for signals, which deliver values produced by some source and notify observers when a change
+/// is being made.
 public protocol SignalType: class {
-    /// The value type that is delivered on this signal.
+    /// The type of values that are delivered on this signal.
     associatedtype Value
     
     /// Converts this instance into a concrete `Signal`.

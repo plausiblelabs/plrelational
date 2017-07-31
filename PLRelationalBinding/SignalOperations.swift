@@ -5,9 +5,10 @@
 
 import Foundation
 
-// MARK: Operations
-
 extension SignalType {
+    
+    // MARK: Operations
+
     /// Returns a Signal that applies the given `transform` to each new value.
     public func map<U>(_ transform: @escaping (Self.Value) -> U) -> Signal<U> {
         return MappedSignal(underlying: self, transform: transform)

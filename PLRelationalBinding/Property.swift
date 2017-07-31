@@ -5,11 +5,16 @@
 
 import Foundation
 
-public enum ChangeResult<T> { case
-    change(T),
-    noChange
+/// Describes the result of a `connectBidi` transformation.
+public enum ChangeResult<T> {
+    /// The given value should be changed.
+    case change(T)
+    
+    /// No change should be applied.
+    case noChange
 }
 
+/// A handle to a binding that is established by one of the `bind` or `connect` methods.
 public class Binding {
 
     // XXX: Hang on to the owner of the signal, otherwise if no one else is
@@ -24,7 +29,8 @@ public class Binding {
         self.signalOwner = signalOwner
         self.removal = removal
     }
-    
+
+    /// Forcibly breaks this binding.
     public func unbind() {
         signalOwner = nil
         removal?()
@@ -32,14 +38,19 @@ public class Binding {
     }
 }
 
+/// Represents a property, which exposes a value and allows observers to see when that value has changed.
 public protocol ReadablePropertyType: class {
+    /// The property's value type.
     associatedtype Value
-    
+
+    /// The value exposed by this property.
     var value: Value { get }
+    
+    /// The signal that delivers value change events.
     var signal: Signal<Value> { get }
 }
 
-///// A concrete property that is readable and observable.
+/// A concrete property that is readable and observable.
 open class ReadableProperty<T>: ReadablePropertyType {
     public typealias Value = T
     
@@ -61,6 +72,7 @@ open class ReadableProperty<T>: ReadablePropertyType {
 
     private let changing: (T, T) -> Bool
     
+    /// Initializes the property from the given Signal and a function that is used to suppress redundant changes.
     public init(signal: Signal<T>, changing: @escaping (T, T) -> Bool) {
         self.changing = changing
 
@@ -188,11 +200,11 @@ open class BindableProperty<T> {
     }
 }
 
+/// A concrete property that can be updated, but not read from.
 open class WriteOnlyProperty<T>: BindableProperty<T> {
 
     fileprivate let set: Setter
     
-    // TODO: Drop the default value (to make sure all clients are properly migrated to the new system)
     public init(set: @escaping Setter, changeHandler: ChangeHandler = ChangeHandler()) {
         self.set = set
         super.init(changeHandler: changeHandler)
@@ -203,6 +215,7 @@ open class WriteOnlyProperty<T>: BindableProperty<T> {
     }
 }
 
+/// Base class for properties that can be both read from and written to, i.e. is capable of bidirectional binding.
 open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     public typealias Value = T
 
@@ -378,11 +391,13 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     }
 }
 
+/// :nodoc:
 /// Returns a ReadableProperty whose value never changes.
 public func constantValueProperty<T>(_ value: T) -> ReadableProperty<T> {
     return ReadableProperty(signal: ConstantSignal<T>(value), changing: { _ in false })
 }
 
+/// A concrete read/write property whose value can be mutated directly.
 public final class MutableValueProperty<T>: ReadWriteProperty<T> {
 
     private let valueChanging: (T, T) -> Bool
@@ -424,39 +439,51 @@ public final class MutableValueProperty<T>: ReadWriteProperty<T> {
     }
 }
 
+// TODO: These are all `nodoc` for now to avoid cluttering up the docs.  We should prune them and/or convert them to convenience initializers.
+
+/// :nodoc:
 public func mutableValueProperty<T>(_ initialValue: T, valueChanging: @escaping (T, T) -> Bool, _ changeHandler: ChangeHandler, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
     return MutableValueProperty(initialValue, changeHandler: changeHandler, valueChanging: valueChanging, didSet: didSet)
 }
 
-// TODO: Drop the variants that don't require changeHandler (to make sure all clients are properly migrated to the new system)
+/// :nodoc:
 public func mutableValueProperty<T>(_ initialValue: T, valueChanging: @escaping (T, T) -> Bool, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
+/// :nodoc:
 public func mutableValueProperty<T: Equatable>(_ initialValue: T, _ changeHandler: ChangeHandler, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
     return MutableValueProperty(initialValue, changeHandler: changeHandler, valueChanging: valueChanging, didSet: didSet)
 }
 
+/// :nodoc:
 public func mutableValueProperty<T: Equatable>(_ initialValue: T, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
+/// :nodoc:
 public func mutableValueProperty<T>(_ initialValue: T?, _ didSet: BindableProperty<T?>.Setter? = nil) -> MutableValueProperty<T?> {
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
+/// :nodoc:
 public func mutableValueProperty<T: Equatable>(_ initialValue: T?, _ changeHandler: ChangeHandler, _ didSet: BindableProperty<T?>.Setter? = nil) -> MutableValueProperty<T?> {
     return MutableValueProperty(initialValue, changeHandler: changeHandler, valueChanging: valueChanging, didSet: didSet)
 }
 
+/// :nodoc:
 public func mutableValueProperty<T: Equatable>(_ initialValue: T?, _ didSet: BindableProperty<T?>.Setter? = nil) -> MutableValueProperty<T?> {
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
+/// :nodoc:
 public func mutableValueProperty<T: Equatable>(_ initialValue: [T], _ didSet: BindableProperty<[T]>.Setter? = nil) -> MutableValueProperty<[T]> {
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
+/// A read/write property whose storage is maintained external to the property.  This is mainly useful for compatibility
+/// with existing UI frameworks.  For example, an ExternalValueProperty may be used to add binding support to an existing
+/// AppKit control, such as the `stringValue` property of NSTextField.
 public final class ExternalValueProperty<T>: ReadWriteProperty<T> {
     public typealias Getter = () -> T
 
@@ -494,6 +521,10 @@ public final class ExternalValueProperty<T>: ReadWriteProperty<T> {
     }
 }
 
+/// A convenience form of WriteOnlyProperty that allows a given function to be called whenever a new value is
+/// delivered through a binding.  This allows for use of the `~~>` operator that allows for setting up a
+/// binding between a UI control that produces "momentary" events (e.g. UIButton clicks) and an ActionProperty
+/// that wraps an event handler.
 public class ActionProperty<T>: WriteOnlyProperty<T> {
 
     public init(_ action: @escaping (T) -> Void) {
@@ -530,18 +561,21 @@ extension BindableProperty {
 // This syntax is borrowed from ReactiveCocoa.
 infix operator <~ : PropertyOperatorPrecedence
 
+/// Establishes a unidirectional binding between `lhs` and `rhs`.
+/// When the value of the synchronous `rhs` property changes, the value of `lhs` will be updated.
 @discardableResult public func <~ <T, RHS: ReadablePropertyType>(lhs: BindableProperty<T>, rhs: RHS) -> Binding where RHS.Value == T {
     return lhs.bind(rhs)
 }
 
+/// Establishes a unidirectional binding between `lhs` and `rhs`.
+/// When the value of the asynchronous `rhs` property changes, the value of `lhs` will be updated.
 @discardableResult public func <~ <T, RHS: AsyncReadablePropertyType>(lhs: BindableProperty<T>, rhs: RHS) -> Binding where RHS.Value == T, RHS.SignalChange == T {
     return lhs.bind(rhs)
 }
 
-// TODO: It seems that `~>` is defined somewhere already (not sure where exactly), so to avoid
-// conflicts we use `~~>` here instead
 infix operator ~~> : PropertyOperatorPrecedence
 
+/// Establishes a unidirectional binding such that `rhs` is poked whenever `lhs` delivers a new value.
 @discardableResult public func ~~> <T>(lhs: Signal<T>, rhs: ActionProperty<T>) -> Binding {
     // TODO: We invent an owner here; what if no one else owns the signal?
     return rhs.bind(lhs, owner: "" as AnyObject)
@@ -549,10 +583,20 @@ infix operator ~~> : PropertyOperatorPrecedence
 
 infix operator <~> : PropertyOperatorPrecedence
 
+/// Establishes a bidirectional binding between the two properties.
+/// When one property's value changes, the other property's value will be updated and
+/// vice versa.
+/// Note that using this operator will cause the `lhs` property to take on the
+/// the `rhs` property's value immedately.
 @discardableResult public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: ReadWriteProperty<T>) -> Binding {
     return lhs.bindBidi(rhs)
 }
 
+/// Establishes a bidirectional binding between the two properties.
+/// When one property's value changes, the other property's value will be updated and
+/// vice versa.
+/// Note that using this operator will cause the `lhs` property to take on the
+/// the `rhs` property's value immedately (if the value is defined).
 @discardableResult public func <~> <T>(lhs: ReadWriteProperty<T>, rhs: AsyncReadWriteProperty<T>) -> Binding {
     return lhs.bindBidi(rhs)
 }

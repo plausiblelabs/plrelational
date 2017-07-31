@@ -6,6 +6,9 @@
 import Foundation
 
 extension ReadablePropertyType {
+    
+    // MARK: Convert to async
+    
     /// Returns an AsyncReadableProperty that is derived from this synchronous property's signal.
     public func async() -> AsyncReadableProperty<Value> {
         return UnaryOpProperty(signal: self.signal, underlyingProperty: self)
@@ -13,6 +16,9 @@ extension ReadablePropertyType {
 }
 
 extension AsyncReadablePropertyType where Self.Value == Self.SignalChange {
+    
+    // MARK: Operations
+    
     /// Returns an AsyncReadableProperty whose value is derived from this property's `value`.
     /// The given `transform` will be applied whenever this property's value changes.
     public func map<U>(_ transform: @escaping (Self.Value) -> U) -> AsyncReadableProperty<U> {
@@ -47,6 +53,7 @@ public func not<P: AsyncReadablePropertyType>(_ property: P) -> AsyncReadablePro
 
 prefix operator !
 
+/// Returns an AsyncReadableProperty whose value is the negation of the given boolean property.
 public prefix func !<P: AsyncReadablePropertyType>(property: P) -> AsyncReadableProperty<Bool>
     where P.Value == Bool, P.SignalChange == Bool
 {
