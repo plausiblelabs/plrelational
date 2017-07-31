@@ -409,6 +409,9 @@ extension RelationTreeProperty: AsyncRelationChangeCoalescedObserver {
 }
 
 extension Relation {
+    
+    // MARK: TreeProperty creation
+
     /// Returns a TreeProperty that gets its data from this relation.
     public func treeProperty(idAttr: Attribute, parentAttr: Attribute, orderAttr: Attribute, tag: AnyObject? = nil) -> TreeProperty<RowTreeNode> {
         return RelationTreeProperty(relation: self, idAttr: idAttr, parentAttr: parentAttr, orderAttr: orderAttr, tag: tag)

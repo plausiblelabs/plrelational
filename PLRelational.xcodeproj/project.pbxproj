@@ -653,6 +653,7 @@
 /* Begin PBXFileReference section */
 		3707532D1F1034F0009C3700 /* SearchResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchResult.swift; sourceTree = "<group>"; };
 		3707532F1F104FA4009C3700 /* ResultsListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultsListView.swift; sourceTree = "<group>"; };
+		370753A31F2FAE9D009C3700 /* .jazzy.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = .jazzy.json; sourceTree = "<group>"; };
 		370F88061E8F00440043B903 /* ListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		3710A68E1DDCF93C0070EC29 /* SidebarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		3710A6901DDCFA330070EC29 /* SidebarModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SidebarModel.swift; sourceTree = "<group>"; };
@@ -1120,6 +1121,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		370753A21F2FAE43009C3700 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				370753A31F2FAE9D009C3700 /* .jazzy.json */,
+				C27511151F20DFE3009DB9CC /* DocumentationBuilder */,
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
 		3710A69F1DDD29E60070EC29 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -1787,7 +1797,7 @@
 				372707B31CFE23CA00710C80 /* PLRelationalBinding */,
 				37A1CE9F1D1081FC0067870D /* PLBindableControls */,
 				37F1D9B41DCD3D1C004D4AAD /* Example Apps */,
-				C27511151F20DFE3009DB9CC /* DocumentationBuilder */,
+				370753A21F2FAE43009C3700 /* Documentation */,
 				C22BF12D1CBC348500D3FE59 /* Products */,
 				C2D4A8491D88789A001D9971 /* Swift library workaround */,
 				37B4419A1E89AA7E00C8C336 /* Frameworks */,
@@ -4816,6 +4826,7 @@
 				C27511191F20DFE3009DB9CC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C275111C1F20F362009DB9CC /* Build configuration list for PBXAggregateTarget "Documentation" */ = {
 			isa = XCConfigurationList;
@@ -4824,6 +4835,7 @@
 				C275111E1F20F362009DB9CC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

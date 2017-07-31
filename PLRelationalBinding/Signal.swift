@@ -7,9 +7,14 @@ import Foundation
 
 public typealias ObserverRemoval = () -> Void
 
+/// Describes a change that is delivered on a signal.
 public struct ChangeMetadata {
-    public let transient: Bool
     
+    /// Whether this change is transient (a fleeting change such as fast keystrokes) or one that is considered
+    /// more significant (a change that should be committed to a backing store).
+    public let transient: Bool
+
+    /// Initializes the metadata with the given transient flag.
     public init(transient: Bool) {
         self.transient = transient
     }
@@ -21,53 +26,71 @@ public struct ChangeMetadata {
 /// `valueChanging`.  The underlying signal is not *required* to deliver a `valueChanging`
 /// after a `begin`, but every `begin` must be balanced by an `end`.
 public enum SignalEvent<T> {
+    /// Indicates that a new value *may* be forthcoming.
     case beginPossibleAsyncChange
+    
+    /// Indicates that the signal's value is changing.
     case valueChanging(T, ChangeMetadata)
+    
+    /// Indicates that a new value *may* have been delivered asynchronously.
     case endPossibleAsyncChange
 }
 
 /// An observer that responds to events delivered by a Signal.
 public struct SignalObserver<T> {
+    
+    /// The event callback function.
     public let onEvent: (SignalEvent<T>) -> Void
 
+    /// Initializes the observer with a callback function.
     public init(onEvent: @escaping (SignalEvent<T>) -> Void) {
         self.onEvent = onEvent
     }
-    
+
+    /// Invokes `onEvent` with a `.beginPossibleAsyncChange` event.
     public func notifyBeginPossibleAsyncChange() {
         self.onEvent(.beginPossibleAsyncChange)
     }
     
+    /// Invokes `onEvent` with a `.valueChanging` event.
     public func notifyValueChanging(_ change: T, _ metadata: ChangeMetadata) {
         self.onEvent(.valueChanging(change, metadata))
     }
 
+    /// Invokes `onEvent` with a `.valueChanging` event.
     public func notifyValueChanging(_ change: T, transient: Bool = false) {
         self.notifyValueChanging(change, ChangeMetadata(transient: transient))
     }
     
+    /// Invokes `onEvent` with an `.endPossibleAsyncChange` event.
     public func notifyEndPossibleAsyncChange() {
         self.onEvent(.endPossibleAsyncChange)
     }
 }
 
 public protocol SignalType: class {
+    /// The value type that is delivered on this signal.
     associatedtype Value
     
     /// Converts this instance into a concrete `Signal`.
     var signal: Signal<Value> { get }
     
-    /// Registers the given observer, which will be notified when the signal delivers new values.
+    /// Adds the given observer to the set of observers that are notified when this signal's value has changed.
+    /// If the given observer is the first one to be added for this signal, the underlying signal source will
+    /// be brought to action.  If the signal source has a value available, the given observer will be sent a
+    /// `valueChanging` event before `observe` returns.
     func addObserver(_ observer: SignalObserver<Value>) -> ObserverRemoval
     
     /// Lifts this signal into an AsyncReadableProperty.
     func property() -> AsyncReadableProperty<Value>
     
-    /// For testing purposes only.
+    /// Returns the number of attached observers.  For testing purposes only.
     var observerCount: Int { get }
 }
 
 extension SignalType {
+    
+    // MARK: Observation
     
     /// Convenience form of observe that takes an event handler function.
     public func observe(_ onEvent: @escaping (SignalEvent<Value>) -> Void) -> ObserverRemoval {
@@ -101,6 +124,7 @@ extension SignalType {
     }
 }
 
+/// Base (abstract) implementation of the `SignalType` protocol.
 open class Signal<T>: SignalType {
     public typealias Value = T
     public typealias Observer = SignalObserver<T>
@@ -116,10 +140,6 @@ open class Signal<T>: SignalType {
         return AsyncReadableProperty(signal: self)
     }
 
-    /// Adds the given observer to the set of observers that are notified when this signal's value has changed.
-    /// If the given observer is the first one to be added for this signal, the underlying signal source will
-    /// be brought to action.  If the signal source has a value available, the given observer will be sent a
-    /// `valueChanging` event before `observe` returns.
     public func addObserver(_ observer: Observer) -> ObserverRemoval {
         fatalError("Must be implemented by subclass")
     }
@@ -167,24 +187,28 @@ open class SourceSignal<T>: Signal<T> {
         }
     }
     
+    /// Delivers a `.beginPossibleAsyncChange` event to all observers of this signal.
     public func notifyBeginPossibleAsyncChange() {
         for (_, observer) in observers {
             observer.notifyBeginPossibleAsyncChange()
         }
     }
     
+    /// Delivers a `.valueChanging` event to all observers of this signal.
     public func notifyValueChanging(_ change: T, _ metadata: ChangeMetadata) {
         for (_, observer) in observers {
             observer.notifyValueChanging(change, metadata)
         }
     }
     
+    /// Delivers a `.valueChanging` event to all observers of this signal.
     public func notifyValueChanging(_ change: T, transient: Bool = false) {
         for (_, observer) in observers {
             observer.notifyValueChanging(change, transient: transient)
         }
     }
     
+    /// Delivers an `.endPossibleAsyncChange` event to all observers of this signal.
     public func notifyEndPossibleAsyncChange() {
         for (_, observer) in observers {
             observer.notifyEndPossibleAsyncChange()
@@ -197,6 +221,7 @@ open class SourceSignal<T>: Signal<T> {
 }
 
 extension SourceSignal where T == () {
+    /// Shorthand for delivering an empty `.valueChanging` event to all observers of this signal.
     public func notifyAction() {
         self.notifyValueChanging(())
     }
@@ -217,6 +242,8 @@ internal class ConstantSignal<T>: SourceSignal<T> {
 
 /// A SourceSignal that allows for a function to be called when an observer is attached.
 public class PipeSignal<T>: SourceSignal<T> {
+    
+    /// The function that is called when an observer is attached.
     public var onObserve: ((Observer) -> Void)?
     
     override func addObserverImpl(_ observer: Observer) {

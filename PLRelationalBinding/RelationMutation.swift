@@ -6,7 +6,11 @@
 import Foundation
 import PLRelational
 
+/// :nodoc:
 extension Relation {
+    
+    // MARK: Synchronous updates
+
     /// Performs a synchronous update using a single RelationValue.
     public func updateValue(_ value: RelationValue) -> Result<Void, RelationError> {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
@@ -44,6 +48,9 @@ extension Relation {
 }
 
 extension Relation {
+    
+    // MARK: Asynchronous updates
+    
     /// Performs an asynchronous update using a single RelationValue.
     public func asyncUpdateValue(_ value: RelationValue) {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")

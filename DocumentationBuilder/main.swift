@@ -107,7 +107,7 @@ guard hasSK && hasJazzy else {
         fputs("    Requires sourcekitten command. https://github.com/jpsim/SourceKitten - sudo port install sourcekitten\n", stderr)
     }
     if !hasJazzy {
-        fputs("    Requirez jazzy command. https://github.com/realm/jazzy - sudo gem install jazzy\n", stderr)
+        fputs("    Requires jazzy command. https://github.com/realm/jazzy - sudo gem install jazzy\n", stderr)
     }
     exit(1)
 }
@@ -131,7 +131,7 @@ for (module, target) in args.targets {
 
 do {
     let combinedJSON = try JSONSerialization.data(withJSONObject: JSONs, options: [])
-    _ = run(stdin: combinedJSON, ["jazzy", "--output", args.outputDirectory, "--clean", "--sourcekitten-sourcefile", "/dev/stdin"])
+    _ = run(stdin: combinedJSON, ["jazzy", "--output", args.outputDirectory, "--config", ".jazzy.json", "--clean", "--sourcekitten-sourcefile", "/dev/stdin"])
 } catch {
     fail("JSON serialization failed: \(error)")
 }

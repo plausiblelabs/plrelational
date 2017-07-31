@@ -5,6 +5,8 @@
 
 import Foundation
 
+// MARK: Operations
+
 extension SignalType {
     /// Returns a Signal that applies the given `transform` to each new value.
     public func map<U>(_ transform: @escaping (Self.Value) -> U) -> Signal<U> {
@@ -30,7 +32,8 @@ public func not(_ signal: Signal<Bool>) -> Signal<Bool> {
 }
 
 extension SignalType where Value == Bool {
-    /// Returns a Signal whose value resolves to the logical OR of this signal and the other input signal.
+    /// Returns a Signal whose value resolves to the logical OR of the values delivered on this signal
+    /// and the other input signal.
     public func or(_ other: Self) -> Signal<Bool> {
         return BinaryOpSignal(self, other, { $0 || $1 })
     }
@@ -47,21 +50,24 @@ extension SignalType where Value == Bool {
     }
 }
 
-// TODO: This syntax is same as SelectExpression operators; maybe we should use something different
+
 infix operator *|| : LogicalDisjunctionPrecedence
 
 infix operator *&& : LogicalConjunctionPrecedence
 
+/// Returns a Signal whose value resolves to the logical OR of the values delivered on the given signals.
 public func *||(lhs: Signal<Bool>, rhs: Signal<Bool>) -> Signal<Bool> {
     return lhs.or(rhs)
 }
 
+/// Returns a Signal whose value resolves to the logical AND of the values delivered on the given signals.
 public func *&&(lhs: Signal<Bool>, rhs: Signal<Bool>) -> Signal<Bool> {
     return lhs.and(rhs)
 }
 
 infix operator *== : ComparisonPrecedence
 
+/// Returns a Signal whose value resolves to `true` when the values delivered on the given signals are equal.
 public func *==<S: SignalType>(lhs: S, rhs: S) -> Signal<Bool> where S.Value: Equatable {
     return BinaryOpSignal(lhs, rhs, { $0 == $1 })
 }

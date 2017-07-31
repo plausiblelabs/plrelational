@@ -12,11 +12,8 @@ import PLRelational
 
 extension Relation {
     
-    /// Generates all non-error rows in the relation.
-    public func okRows() -> AnyIterator<Row> {
-        return AnyIterator(self.rows().lazy.flatMap{ $0.ok }.makeIterator())
-    }
-
+    // MARK: Signals
+    
     /// Returns a Signal that delivers true when the set of rows is empty.
     public var empty: Signal<Bool> {
         return signal(initialValue: nil, { $1.next() == nil })
@@ -26,7 +23,148 @@ extension Relation {
     public var nonEmpty: Signal<Bool> {
         return signal(initialValue: nil, { $1.next() != nil })
     }
-
+    
+    /// Returns a Signal, sourced from this relation, that delivers all values for the single attribute.
+    public func allValuesForSingleAttribute<V: Hashable>(_ transform: @escaping (RelationValue) -> V?) -> Signal<Set<V>> {
+        return signal(initialValue: nil, { $0.extractAllValuesForSingleAttribute(from: $1, transform) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a set of all RelationValues for the single attribute.
+    public func allRelationValues() -> Signal<Set<RelationValue>> {
+        return signal(initialValue: nil, { $0.extractAllRelationValues(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a set of all transformed values.
+    public func allValues<V: Hashable>(_ transform: @escaping (Row) -> V?) -> Signal<Set<V>> {
+        return signal(initialValue: nil, { $0.extractAllValues(from: $1, transform) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single row if there is exactly one,
+    /// otherwise delivers nil.
+    public func oneRow() -> Signal<Row?> {
+        return signal(initialValue: nil, { $0.extractOneRow($1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers nil.
+    public func valueFromOneRow<V>(_ transform: @escaping (Row) -> V?) -> Signal<V?> {
+        return signal(initialValue: nil, { $0.extractValueFromOneRow($1, transform) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers nil.
+    public func valueFromOneRow<V: Equatable>(_ transform: @escaping (Row) -> V?) -> Signal<V?> {
+        return signal(initialValue: nil, { $0.extractValueFromOneRow($1, transform) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers the given default value.
+    public func valueFromOneRow<V>(_ transform: @escaping (Row) -> V?, orDefault defaultValue: V) -> Signal<V> {
+        return signal(initialValue: nil, { $0.extractValueFromOneRow($1, transform, orDefault: defaultValue) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers the given default value.
+    public func valueFromOneRow<V: Equatable>(_ transform: @escaping (Row) -> V?, orDefault defaultValue: V) -> Signal<V> {
+        return signal(initialValue: nil, { $0.extractValueFromOneRow($1, transform, orDefault: defaultValue) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers nil.
+    public func oneValueOrNil<V>(_ transform: @escaping (RelationValue) -> V?) -> Signal<V?> {
+        return signal(initialValue: nil, { $0.extractOneValueOrNil(from: $1, transform) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers nil.
+    public func oneValueOrNil<V: Equatable>(_ transform: @escaping (RelationValue) -> V?) -> Signal<V?> {
+        return signal(initialValue: nil, { $0.extractOneValueOrNil(from: $1, transform) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers the given default value.
+    public func oneValue<V>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V, initialValue: V? = nil) -> Signal<V> {
+        return signal(initialValue: initialValue, { $0.extractOneValue(from: $1, transform, orDefault: defaultValue) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
+    /// one row, otherwise delivers the given default value.
+    public func oneValue<V: Equatable>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V, initialValue: V? = nil) -> Signal<V> {
+        return signal(initialValue: initialValue, { $0.extractOneValue(from: $1, transform, orDefault: defaultValue) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single RelationValue if there is exactly
+    /// one row, otherwise delivers nil.
+    public func oneRelationValueOrNil() -> Signal<RelationValue?> {
+        return signal(initialValue: nil, { $0.extractOneRelationValueOrNil(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single string value if there is exactly
+    /// one row, otherwise delivers nil.
+    public func oneStringOrNil(initialValue: String?? = nil) -> Signal<String?> {
+        return signal(initialValue: initialValue, { $0.extractOneStringOrNil(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single string value if there is exactly
+    /// one row, otherwise delivers an empty string.
+    public func oneString(initialValue: String? = nil) -> Signal<String> {
+        return signal(initialValue: initialValue, { $0.extractOneString(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single integer value if there is exactly
+    /// one row, otherwise delivers nil.
+    public func oneIntegerOrNil(initialValue: Int64?? = nil) -> Signal<Int64?> {
+        return signal(initialValue: initialValue, { $0.extractOneIntegerOrNil(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single integer value if there is exactly
+    /// one row, otherwise delivers zero.
+    public func oneInteger(initialValue: Int64? = nil) -> Signal<Int64> {
+        return signal(initialValue: initialValue, { $0.extractOneInteger(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single double value if there is exactly
+    /// one row, otherwise delivers nil.
+    public func oneDoubleOrNil(initialValue: Double?? = nil) -> Signal<Double?> {
+        return signal(initialValue: initialValue, { $0.extractOneDoubleOrNil(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single double value if there is exactly
+    /// one row, otherwise delivers zero.
+    public func oneDouble(initialValue: Double? = nil) -> Signal<Double> {
+        return signal(initialValue: nil, { $0.extractOneDouble(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single boolean value if there is exactly
+    /// one row, otherwise delivers nil.
+    public func oneBoolOrNil(initialValue: Bool?? = nil) -> Signal<Bool?> {
+        return signal(initialValue: initialValue, { $0.extractOneBoolOrNil(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single boolean value if there is exactly
+    /// one row, otherwise delivers false.
+    public func oneBool(initialValue: Bool? = nil) -> Signal<Bool> {
+        return signal(initialValue: initialValue, { $0.extractOneBool(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single blob value if there is exactly
+    /// one row, otherwise delivers nil.
+    public func oneBlobOrNil(initialValue: [UInt8]?? = nil) -> Signal<[UInt8]?> {
+        return signal(initialValue: initialValue, { $0.extractOneBlobOrNil(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a single blob value if there is exactly
+    /// one row, otherwise delivers an empty array.
+    public func oneBlob(initialValue: [UInt8]? = nil) -> Signal<[UInt8]> {
+        return signal(initialValue: initialValue, { $0.extractOneBlob(from: $1) })
+    }
+    
+    /// Returns a Signal, sourced from this relation, that delivers a CommonValue that indicates whether there
+    /// are zero, one, or multiple rows.
+    public func commonValue<V>(_ transform: @escaping (RelationValue) -> V?) -> Signal<CommonValue<V>> {
+        return signal(initialValue: nil, { $0.extractCommonValue(from: $1, transform) })
+    }
+    
     // MARK: Extract all values
     
     /// Returns a set of all values for the single attribute, built from one transformed value for each non-error row
@@ -44,11 +182,6 @@ extension Relation {
         return extractAllValuesForSingleAttribute(from: okRows(), transform)
     }
     
-    /// Returns a Signal, sourced from this relation, that delivers all values for the single attribute.
-    public func allValuesForSingleAttribute<V: Hashable>(_ transform: @escaping (RelationValue) -> V?) -> Signal<Set<V>> {
-        return signal(initialValue: nil, { $0.extractAllValuesForSingleAttribute(from: $1, transform) })
-    }
-
     /// Returns a set of all RelationValues for the single attribute, built from one RelationValue for each non-error row
     /// in the given set.
     public func extractAllRelationValues(from rows: AnyIterator<Row>) -> Set<RelationValue> {
@@ -58,11 +191,6 @@ extension Relation {
     /// Returns a set of all RelationValues for the single attribute in the relation.
     public func extractAllRelationValues() -> Set<RelationValue> {
         return extractAllRelationValues(from: okRows())
-    }
-    
-    /// Returns a Signal, sourced from this relation, that delivers a set of all RelationValues for the single attribute.
-    public func allRelationValues() -> Signal<Set<RelationValue>> {
-        return signal(initialValue: nil, { $0.extractAllRelationValues(from: $1) })
     }
     
     /// Returns a set of all values, built from one transformed value for each row in the given set.
@@ -75,11 +203,6 @@ extension Relation {
         return extractAllValues(from: okRows(), transform)
     }
 
-    /// Returns a Signal, sourced from this relation, that delivers a set of all transformed values.
-    public func allValues<V: Hashable>(_ transform: @escaping (Row) -> V?) -> Signal<Set<V>> {
-        return signal(initialValue: nil, { $0.extractAllValues(from: $1, transform) })
-    }
-    
     // MARK: Extract one row
     
     /// Returns a single row if there is exactly one row in the given set, otherwise returns nil.
@@ -100,12 +223,6 @@ extension Relation {
         return extractOneRow(okRows())
     }
     
-    /// Returns a Signal, sourced from this relation, that delivers a single row if there is exactly one,
-    /// otherwise delivers nil.
-    public func oneRow() -> Signal<Row?> {
-        return signal(initialValue: nil, { $0.extractOneRow($1) })
-    }
-    
     // MARK: Extract one value
     
     /// Returns a single transformed value if there is exactly one row in the given set, otherwise returns nil.
@@ -118,18 +235,6 @@ extension Relation {
         return extractValueFromOneRow(okRows(), transform)
     }
 
-    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
-    /// one row, otherwise delivers nil.
-    public func valueFromOneRow<V>(_ transform: @escaping (Row) -> V?) -> Signal<V?> {
-        return signal(initialValue: nil, { $0.extractValueFromOneRow($1, transform) })
-    }
-
-    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
-    /// one row, otherwise delivers nil.
-    public func valueFromOneRow<V: Equatable>(_ transform: @escaping (Row) -> V?) -> Signal<V?> {
-        return signal(initialValue: nil, { $0.extractValueFromOneRow($1, transform) })
-    }
-
     /// Returns a single transformed value if there is exactly one row in the given set, otherwise returns nil.
     public func extractValueFromOneRow<V>(_ rows: AnyIterator<Row>, _ transform: @escaping (Row) -> V?, orDefault defaultValue: V) -> V {
         return extractValueFromOneRow(rows, transform) ?? defaultValue
@@ -139,18 +244,6 @@ extension Relation {
     /// the given default value.
     public func extractValueFromOneRow<V>(_ transform: @escaping (Row) -> V?, orDefault defaultValue: V) -> V {
         return extractValueFromOneRow(okRows(), transform, orDefault: defaultValue)
-    }
-
-    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
-    /// one row, otherwise delivers the given default value.
-    public func valueFromOneRow<V>(_ transform: @escaping (Row) -> V?, orDefault defaultValue: V) -> Signal<V> {
-        return signal(initialValue: nil, { $0.extractValueFromOneRow($1, transform, orDefault: defaultValue) })
-    }
-
-    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
-    /// one row, otherwise delivers the given default value.
-    public func valueFromOneRow<V: Equatable>(_ transform: @escaping (Row) -> V?, orDefault defaultValue: V) -> Signal<V> {
-        return signal(initialValue: nil, { $0.extractValueFromOneRow($1, transform, orDefault: defaultValue) })
     }
 
     /// Returns a single transformed value if there is exactly one row in the given set, otherwise returns nil.
@@ -165,18 +258,6 @@ extension Relation {
         return extractOneValueOrNil(from: okRows(), transform)
     }
 
-    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
-    /// one row, otherwise delivers nil.
-    public func oneValueOrNil<V>(_ transform: @escaping (RelationValue) -> V?) -> Signal<V?> {
-        return signal(initialValue: nil, { $0.extractOneValueOrNil(from: $1, transform) })
-    }
-
-    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
-    /// one row, otherwise delivers nil.
-    public func oneValueOrNil<V: Equatable>(_ transform: @escaping (RelationValue) -> V?) -> Signal<V?> {
-        return signal(initialValue: nil, { $0.extractOneValueOrNil(from: $1, transform) })
-    }
-
     /// Returns a single transformed value if there is exactly one row in the given set, otherwise returns the
     /// given default value.
     public func extractOneValue<V>(from rows: AnyIterator<Row>, _ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V) -> V {
@@ -189,18 +270,6 @@ extension Relation {
         return extractOneValue(from: okRows(), transform, orDefault: defaultValue)
     }
 
-    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
-    /// one row, otherwise delivers the given default value.
-    public func oneValue<V>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V, initialValue: V? = nil) -> Signal<V> {
-        return signal(initialValue: initialValue, { $0.extractOneValue(from: $1, transform, orDefault: defaultValue) })
-    }
-
-    /// Returns a Signal, sourced from this relation, that delivers a single transformed value if there is exactly
-    /// one row, otherwise delivers the given default value.
-    public func oneValue<V: Equatable>(_ transform: @escaping (RelationValue) -> V?, orDefault defaultValue: V, initialValue: V? = nil) -> Signal<V> {
-        return signal(initialValue: initialValue, { $0.extractOneValue(from: $1, transform, orDefault: defaultValue) })
-    }
-
     /// Returns a single RelationValue if there is exactly one row in the given set, otherwise returns nil.
     public func extractOneRelationValueOrNil(from rows: AnyIterator<Row>) -> RelationValue? {
         return extractOneValueOrNil(from: rows, { $0 })
@@ -209,12 +278,6 @@ extension Relation {
     /// Returns a single RelationValue if there is exactly one row in the relation, otherwise returns nil.
     public func extractOneRelationValueOrNil() -> RelationValue? {
         return extractOneRelationValueOrNil(from: okRows())
-    }
-
-    /// Returns a Signal, sourced from this relation, that delivers a single RelationValue if there is exactly
-    /// one row, otherwise delivers nil.
-    public func oneRelationValueOrNil() -> Signal<RelationValue?> {
-        return signal(initialValue: nil, { $0.extractOneRelationValueOrNil(from: $1) })
     }
 
     // MARK: Extract one String
@@ -229,12 +292,6 @@ extension Relation {
         return extractOneStringOrNil(from: okRows())
     }
     
-    /// Returns a Signal, sourced from this relation, that delivers a single string value if there is exactly
-    /// one row, otherwise delivers nil.
-    public func oneStringOrNil(initialValue: String?? = nil) -> Signal<String?> {
-        return signal(initialValue: initialValue, { $0.extractOneStringOrNil(from: $1) })
-    }
-    
     /// Returns a single string value if there is exactly one row in the given set, otherwise returns
     /// an empty string.
     public func extractOneString(from rows: AnyIterator<Row>) -> String {
@@ -245,12 +302,6 @@ extension Relation {
     /// an empty string.
     public func extractOneString() -> String {
         return extractOneString(from: okRows())
-    }
-
-    /// Returns a Signal, sourced from this relation, that delivers a single string value if there is exactly
-    /// one row, otherwise delivers an empty string.
-    public func oneString(initialValue: String? = nil) -> Signal<String> {
-        return signal(initialValue: initialValue, { $0.extractOneString(from: $1) })
     }
 
     // MARK: Extract one Integer
@@ -265,12 +316,6 @@ extension Relation {
         return extractOneIntegerOrNil(from: okRows())
     }
 
-    /// Returns a Signal, sourced from this relation, that delivers a single integer value if there is exactly
-    /// one row, otherwise delivers nil.
-    public func oneIntegerOrNil(initialValue: Int64?? = nil) -> Signal<Int64?> {
-        return signal(initialValue: initialValue, { $0.extractOneIntegerOrNil(from: $1) })
-    }
-
     /// Returns a single integer value if there is exactly one row in the given set, otherwise returns zero.
     public func extractOneInteger(from rows: AnyIterator<Row>) -> Int64 {
         return extractOneIntegerOrNil(from: rows) ?? 0
@@ -281,12 +326,6 @@ extension Relation {
         return extractOneInteger(from: okRows())
     }
     
-    /// Returns a Signal, sourced from this relation, that delivers a single integer value if there is exactly
-    /// one row, otherwise delivers zero.
-    public func oneInteger(initialValue: Int64? = nil) -> Signal<Int64> {
-        return signal(initialValue: initialValue, { $0.extractOneInteger(from: $1) })
-    }
-
     // MARK: Extract one Double
 
     /// Returns a single double value if there is exactly one row in the given set, otherwise returns nil.
@@ -299,12 +338,6 @@ extension Relation {
         return extractOneDoubleOrNil(from: okRows())
     }
     
-    /// Returns a Signal, sourced from this relation, that delivers a single double value if there is exactly
-    /// one row, otherwise delivers nil.
-    public func oneDoubleOrNil(initialValue: Double?? = nil) -> Signal<Double?> {
-        return signal(initialValue: initialValue, { $0.extractOneDoubleOrNil(from: $1) })
-    }
-    
     /// Returns a single double value if there is exactly one row in the given set, otherwise returns zero.
     public func extractOneDouble(from rows: AnyIterator<Row>) -> Double {
         return extractOneDoubleOrNil(from: rows) ?? 0.0
@@ -315,12 +348,6 @@ extension Relation {
         return extractOneDouble(from: okRows())
     }
     
-    /// Returns a Signal, sourced from this relation, that delivers a single double value if there is exactly
-    /// one row, otherwise delivers zero.
-    public func oneDouble(initialValue: Double? = nil) -> Signal<Double> {
-        return signal(initialValue: nil, { $0.extractOneDouble(from: $1) })
-    }
-
     // MARK: Extract one Bool
 
     /// Returns a single boolean value if there is exactly one row in the given set, otherwise returns nil.
@@ -333,12 +360,6 @@ extension Relation {
         return extractOneBoolOrNil(from: okRows())
     }
     
-    /// Returns a Signal, sourced from this relation, that delivers a single boolean value if there is exactly
-    /// one row, otherwise delivers nil.
-    public func oneBoolOrNil(initialValue: Bool?? = nil) -> Signal<Bool?> {
-        return signal(initialValue: initialValue, { $0.extractOneBoolOrNil(from: $1) })
-    }
-
     /// Returns a single boolean value if there is exactly one row in the given set, otherwise returns false.
     public func extractOneBool(from rows: AnyIterator<Row>) -> Bool {
         return extractOneBoolOrNil(from: rows) ?? false
@@ -348,14 +369,8 @@ extension Relation {
     public func extractOneBool() -> Bool {
         return extractOneBool(from: okRows())
     }
-    
-    /// Returns a Signal, sourced from this relation, that delivers a single boolean value if there is exactly
-    /// one row, otherwise delivers false.
-    public func oneBool(initialValue: Bool? = nil) -> Signal<Bool> {
-        return signal(initialValue: initialValue, { $0.extractOneBool(from: $1) })
-    }
-    
-    // MARK: Extract one blob
+
+    // MARK: Extract one Blob
 
     /// Returns a single blob value if there is exactly one row in the given set, otherwise returns nil.
     public func extractOneBlobOrNil(from rows: AnyIterator<Row>) -> [UInt8]? {
@@ -367,12 +382,6 @@ extension Relation {
         return extractOneBlobOrNil(from: okRows())
     }
     
-    /// Returns a Signal, sourced from this relation, that delivers a single blob value if there is exactly
-    /// one row, otherwise delivers nil.
-    public func oneBlobOrNil(initialValue: [UInt8]?? = nil) -> Signal<[UInt8]?> {
-        return signal(initialValue: initialValue, { $0.extractOneBlobOrNil(from: $1) })
-    }
-
     /// Returns a single blob value if there is exactly one row in the given set, otherwise returns
     /// an empty array.
     public func extractOneBlob(from rows: AnyIterator<Row>) -> [UInt8] {
@@ -383,12 +392,6 @@ extension Relation {
     /// an empty array.
     public func extractOneBlob() -> [UInt8] {
         return extractOneBlob(from: okRows())
-    }
-    
-    /// Returns a Signal, sourced from this relation, that delivers a single blob value if there is exactly
-    /// one row, otherwise delivers an empty array.
-    public func oneBlob(initialValue: [UInt8]? = nil) -> Signal<[UInt8]> {
-        return signal(initialValue: initialValue, { $0.extractOneBlob(from: $1) })
     }
     
     // MARK: Extract CommonValue
@@ -417,9 +420,10 @@ extension Relation {
         return extractCommonValue(from: okRows(), transform)
     }
     
-    /// Returns a Signal, sourced from this relation, that delivers a CommonValue that indicates whether there
-    /// are zero, one, or multiple rows.
-    public func commonValue<V>(_ transform: @escaping (RelationValue) -> V?) -> Signal<CommonValue<V>> {
-        return signal(initialValue: nil, { $0.extractCommonValue(from: $1, transform) })
+    /// MARK: Row iterators
+    
+    /// Generates all non-error rows in the relation.
+    public func okRows() -> AnyIterator<Row> {
+        return AnyIterator(self.rows().lazy.flatMap{ $0.ok }.makeIterator())
     }
 }

@@ -10,7 +10,7 @@ public enum ChangeResult<T> { case
     noChange
 }
 
-open class Binding {
+public class Binding {
 
     // XXX: Hang on to the owner of the signal, otherwise if no one else is
     // holding a strong reference to it, it may go away and the signal won't

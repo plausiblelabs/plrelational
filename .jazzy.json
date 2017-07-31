@@ -1,0 +1,26 @@
+{
+    "author": "Plausible Labs",
+    "author_url": "https://opensource.plausible.coop/src/projects/SWC/repos/plrelational",
+    "module": "PLRelational",
+    "readme": "README.md",
+    "theme": "fullwidth",
+
+    "documentation": "Docs/*.md",
+    "abstract": "Docs/*.md",
+
+    "custom_categories": [
+        {
+            "name": "PLRelational",
+            "children": [
+                "Relation"
+            ]
+        },
+        {
+            "name": "PLRelationalBinding",
+            "children": [
+                "SignalType",
+                "Signal"
+            ]
+        }
+    ]
+}

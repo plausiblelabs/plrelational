@@ -48,6 +48,9 @@ private class RelationAsyncReadWriteProperty<T>: AsyncReadWriteProperty<T> {
 }
 
 extension SignalType {
+    
+    // MARK: Relation / AsyncReadWriteProperty convenience
+    
     /// Lifts this signal into an AsyncReadWriteProperty that writes values back to a relation via the given mutator.
     public func property(mutator: RelationMutationConfig<Value>) -> AsyncReadWriteProperty<Value> {
         return RelationAsyncReadWriteProperty(signal: signal, mutator: mutator)

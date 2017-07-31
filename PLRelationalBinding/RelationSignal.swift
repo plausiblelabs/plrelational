@@ -131,6 +131,9 @@ extension RelationSignal: AsyncRelationContentCoalescedObserver {
 }
 
 extension Relation {
+    
+    // MARK: Signal creation
+    
     /// Returns a Signal whose values are derived from this relation.
     public func signal<T>(initialValue: T?, _ rowsToValue: @escaping (Relation, AnyIterator<Row>) -> T) -> Signal<T> {
         return RelationSignal(relation: self, initialValue: initialValue, rowsToValue: rowsToValue, isRepeat: isRepeat)

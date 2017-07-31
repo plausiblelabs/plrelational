@@ -236,6 +236,9 @@ extension RelationArrayProperty: AsyncRelationChangeCoalescedObserver {
 }
 
 extension Relation {
+    
+    // MARK: ArrayProperty creation
+    
     /// Returns an ArrayProperty that gets its data from this relation.
     public func arrayProperty(idAttr: Attribute, orderAttr: Attribute, descending: Bool = false, tag: AnyObject? = nil) -> ArrayProperty<RowArrayElement> {
         return RelationArrayProperty(relation: self, idAttr: idAttr, orderAttr: orderAttr, descending: descending, tag: tag)
