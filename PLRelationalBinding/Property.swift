@@ -439,7 +439,7 @@ public final class MutableValueProperty<T>: ReadWriteProperty<T> {
     }
 }
 
-// TODO: These are all `nodoc` for now to avoid cluttering up the docs.  We should prune them and/or convert them to convenience initializers.
+// :nodoc: TODO: These are all `nodoc` for now to avoid cluttering up the docs.  We should prune them and/or convert them to convenience initializers.
 
 /// :nodoc:
 public func mutableValueProperty<T>(_ initialValue: T, valueChanging: @escaping (T, T) -> Bool, _ changeHandler: ChangeHandler, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {

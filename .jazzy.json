@@ -10,9 +10,41 @@
 
     "custom_categories": [
         {
-            "name": "PLRelational",
+            "name": "PLRelational Core",
             "children": [
-                "Relation"
+                "Relation",
+                "Attribute",
+                "Scheme",
+                "Row",
+                "RelationValue"
+            ]
+        },
+        {
+            "name": "Memory Relations",
+            "children": [
+                "ConcreteRelation",
+                "MemoryTableRelation",
+                "SimpleDatabase"
+            ]
+        },
+        {
+            "name": "Stored Relations",
+            "children": [
+                "StoredDatabase",
+                "StoredRelation",
+                "PlistDatabase",
+                "PlistDirectoryRelation",
+                "PlistFileRelation",
+                "SQLiteDatabase",
+                "SQLiteRelation"
+            ]
+        },
+        {
+            "name": "Logging Relations",
+            "children": [
+                "ChangeLoggingDatabase",
+                "ChangeLoggingRelation",
+                "TransactionalDatabase"
             ]
         },
         {

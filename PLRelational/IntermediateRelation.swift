@@ -536,6 +536,9 @@ private class MutableSelectIntermediateRelation: IntermediateRelation, MutableSe
 }
 
 extension Relation {
+    
+    // MARK: Mutable select
+    
     public func mutableSelect(_ expression: SelectExpression) -> MutableSelectRelation {
         return MutableSelectIntermediateRelation(op: .mutableSelect(expression), operands: [self])
     }

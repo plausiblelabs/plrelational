@@ -149,6 +149,7 @@ extension QueryRunner {
     }
 }
 
+/// :nodoc:
 extension Relation {
     public func dumpQueryPlanAndOpen() {
         QueryPlanner(roots: [(self, DirectDispatchContext().wrap({ _ in }))]).graphvizDumpAndOpen()

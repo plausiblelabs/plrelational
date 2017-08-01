@@ -39,6 +39,7 @@ private struct FieldNameExclusions {
     static let strings: Set = ["changeObserverData", "log", "cachedCurrentRelation", "values"]
 }
 
+/// :nodoc:
 extension Relation {
     public func fullDebugDump(showContents: Bool = true) {
         fullDebugDump(showContents, 0)

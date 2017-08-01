@@ -6,6 +6,9 @@
 import Foundation
 
 extension Relation where Self: AnyObject {
+    
+    // MARK: Recursive select
+
     /// Perform a recursive `select` query on this relation.  This is modeled after `cascadingDelete`.
     public func recursiveSelect<T>(
         initialQueryAttr: Attribute,

@@ -85,6 +85,9 @@ public protocol AsyncRelationChangeCoalescedObserver {
 }
 
 public extension Relation {
+    
+    // MARK: Observation
+    
     func addAsyncObserver(_ observer: AsyncRelationChangeObserver) -> AsyncManager.ObservationRemover {
         return AsyncManager.currentInstance.observe(self, observer: observer)
     }
@@ -137,6 +140,9 @@ public extension Relation {
 }
 
 public extension Relation {
+    
+    // MARK: Updates
+    
     func asyncUpdate(_ query: SelectExpression, newValues: Row) {
         AsyncManager.currentInstance.registerUpdate(self, query: query, newValues: newValues)
     }

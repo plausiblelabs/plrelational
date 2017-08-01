@@ -17,6 +17,7 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// The relation's scheme.
     var scheme: Scheme { get }
     
+    /// :nodoc:
     /// A value which defines how the `Relation`'s content is provided. Content can be provided directly,
     /// as an operator on other `Relation`s, or by deferring to another `Relation` entirely.
     var contentProvider: RelationContentProvider { get }
@@ -27,14 +28,31 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// Return `true` if the given row is contained in the `Relation`, and false if not.
     func contains(_ row: Row) -> Result<Bool, RelationError>
     
-    /// Update the `Relation` content by assigning the given values to all rows which match the query.
-    mutating func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError>
-    
+    /// :nodoc:
     /// Add an observer which is notified when the content of the Relation
     /// changes. The return value is a function which removes the observation when
     /// invoked. The caller can use that function to cancel the observation when
     /// it no longer needs it.
     func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void)
+
+    // MARK: Core relational algebra
+    
+    func project(_ scheme: Scheme) -> Relation
+    func project(dropping scheme: Scheme) -> Relation
+    func project(_ attribute: Attribute) -> Relation
+
+    /// Perform a select operation with a query defined by the contents of a `Row`. The
+    /// resulting query is equivalent to ANDing together an equality expression for each
+    /// attribute in the row, requiring it to be equal to that value in the row.
+    func select(_ rowToFind: Row) -> Relation
+    
+    /// Perform a select operation with the given query.
+    func select(_ query: SelectExpression) -> Relation
+    
+    /// Return a new `Relation` that renames the `Attribute`s in the keys of `renames` to the
+    /// corresponding values.
+    func renameAttributes(_ renames: [Attribute: Attribute]) -> Relation
+    func renamePrime() -> Relation
     
     /// Return a new `Relation` which represents the union of this `Relation` and another one.
     func union(_ other: Relation) -> Relation
@@ -61,13 +79,19 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     func thetajoin(_ other: Relation, query: SelectExpression) -> Relation
     func split(_ query: SelectExpression) -> (Relation, Relation)
     func divide(_ other: Relation) -> Relation
-    
+
+    // MARK: Relational algebra extensions
+
     func leftOuterJoin(_ other: Relation) -> Relation
+
+    // MARK: Aggregate operations
     
     func min(_ attribute: Attribute) -> Relation
     func max(_ attribute: Attribute) -> Relation
     func count() -> Relation
-    
+
+    // MARK: Experimental operations
+
     /// Return a new `Relation` that resolves to this Relation when it is non-empty, otherwise
     /// resolves to the other Relation.
     func otherwise(_ other: Relation) -> Relation
@@ -77,25 +101,22 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// empty Relation.
     func unique(_ attribute: Attribute, matching: RelationValue) -> Relation
     
-    /// Perform a select operation with a query defined by the contents of a `Row`. The
-    /// resulting query is equivalent to ANDing together an equality expression for each
-    /// attribute in the row, requiring it to be equal to that value in the row.
-    func select(_ rowToFind: Row) -> Relation
+    // MARK: Synchronous updates
     
-    /// Perform a select operation with the given query.
-    func select(_ query: SelectExpression) -> Relation
+    /// :nodoc:
+    /// Update the `Relation` content by assigning the given values to all rows which match the query.
+    mutating func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError>
     
+    /// :nodoc:
     /// Return a new Relation that is this Relation with the given update applied to it.
     func withUpdate(_ query: SelectExpression, newValues: Row) -> Relation
     
+    /// :nodoc:
     /// The same as the two-parameter withUpdate, but it updates all rows.
     func withUpdate(_ newValues: Row) -> Relation
-    
-    /// Return a new `Relation` that renames the `Attribute`s in the keys of `renames` to the
-    /// corresponding values.
-    func renameAttributes(_ renames: [Attribute: Attribute]) -> Relation
 }
 
+/// :nodoc:
 /// A value which describes how a `Relation` produces values.
 public enum RelationContentProvider {
     /// The `Relation` produces values by providing a generator. The first associated value is a function which,
@@ -136,6 +157,7 @@ public enum RelationContentProvider {
     case underlying(Relation)
 }
 
+/// :nodoc:
 /// A value describing the kind of change made to a `Relation`.
 public enum RelationObservationKind {
     /// A change due to something in the Relation itself.
@@ -146,6 +168,9 @@ public enum RelationObservationKind {
 }
 
 extension Relation {
+    
+    // MARK: Debugging
+    
     /// Set the debug name and return self, for convenient chaining.
     /// Value-type relations return a new one rather than mutating in place.
     public func setDebugName(_ name: String) -> Self {
@@ -155,6 +180,7 @@ extension Relation {
     }
 }
 
+/// :nodoc:
 extension Relation {
     /// A shortcut that adds a change observer for all kinds.
     public func addChangeObserver(_ observer: RelationObserver) -> ((Void) -> Void) {
@@ -162,7 +188,11 @@ extension Relation {
     }
 }
 
+/// :nodoc:
 extension Relation {
+    
+    // MARK: Synchronous fetch
+
     /// Return a generator which iterates over the contents of the Relation. It tries to perform incremental
     /// work on each pass, although currently the amount of work is potentially unbounded (but should be
     /// mostly small). On each iteration, the result may be an error (if one was encountered while building
@@ -232,6 +262,9 @@ extension Relation {
 }
 
 extension Relation {
+    
+    // MARK: Asynchronous fetch
+    
     /// Fetch rows and invoke a callback as they come in. Each call is passed one or more rows, or an error.
     /// If no error occurs, the sequence of calls is terminated by a final call which passes zero rows.
     public func asyncBulkRows(_ callback: DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>) {
@@ -399,6 +432,7 @@ extension Relation {
     }
 }
 
+/// :nodoc:
 extension Relation {
     public func withUpdate(_ query: SelectExpression, newValues: Row) -> Relation {
         // Pick out the rows which will be updated, and update them.
@@ -417,6 +451,7 @@ extension Relation {
     }
 }
 
+/// :nodoc:
 extension Relation {
     public var isEmpty: Result<Bool, RelationError> {
         switch rows().next() {
@@ -428,10 +463,14 @@ extension Relation {
 }
 
 extension Relation {
+    
+    // MARK: Description
+    
     public var description: String {
         return descriptionWithRows(self.rows())
     }
     
+    /// :nodoc:
     public func descriptionWithRows(_ rows: AnyIterator<Result<Row, RelationError>>) -> String {
         let columns = scheme.attributes.sorted()
         let rows = rows.map({ row in
@@ -456,6 +495,7 @@ extension Relation {
     }
 }
 
+/// :nodoc:
 extension Relation {
     public func addChangeObserver(_ f: @escaping (RelationChange) -> Void) -> ((Void) -> Void) {
         let x = addChangeObserver(SimpleRelationObserverProxy(f: f))

@@ -69,6 +69,9 @@ extension CachingRelation {
 }
 
 extension Relation {
+    
+    // MARK: Caching
+
     /// Return a new CachingRelation that caches `self` up to the specified limit
     public func cache(upTo: Int) -> CachingRelation {
         return CachingRelation(self, limit: upTo)
