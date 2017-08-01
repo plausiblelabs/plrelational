@@ -5,6 +5,7 @@
 
 private let enableValidation = true
 
+/// :nodoc:
 open class QueryRunner {
     var nodes: [QueryPlanner.Node]
     fileprivate var outputCallbacks: [QueryPlanner.OutputCallback]
@@ -890,6 +891,7 @@ private func ==(a: QueryRunner.IntermediateToProcess, b: QueryRunner.Intermediat
     return a.nodeIndex == b.nodeIndex && a.inputIndex == b.inputIndex
 }
 
+/// :nodoc:
 extension QueryRunner {
     public enum Error: Swift.Error {
         case mutatedDuringEnumeration

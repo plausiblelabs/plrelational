@@ -3,6 +3,7 @@
 // All rights reserved.
 //
 
+/// :nodoc:
 public extension RangeReplaceableCollection where Iterator.Element: Equatable {
     mutating func remove(_ element: Iterator.Element) {
         if let index = index(of: element) {
@@ -11,6 +12,7 @@ public extension RangeReplaceableCollection where Iterator.Element: Equatable {
     }
 }
     
+/// :nodoc:
 public extension RangeReplaceableCollection {
     /// Remove ONE element matching the predicate. Don't call this if there's more than one,
     /// or you'll just confuse yourself.
@@ -28,12 +30,14 @@ public extension RangeReplaceableCollection {
     }
 }
 
+/// :nodoc:
 public extension Collection where Iterator.Element: Equatable, Indices.Iterator.Element == Index {
     func indexesOf(_ element: Iterator.Element) -> [Index] {
         return indices.filter({ self[$0] == element })
     }
 }
 
+/// :nodoc:
 public extension MutableCollection where Iterator.Element: Equatable, Indices.Iterator.Element == Index {
     mutating func replace(_ element: Iterator.Element, with: Iterator.Element) {
         for i in indices {
@@ -44,6 +48,7 @@ public extension MutableCollection where Iterator.Element: Equatable, Indices.It
     }
 }
 
+/// :nodoc:
 public extension MutableCollection where Indices.Iterator.Element == Index{
     mutating func mutatingForEach(_ f: (inout Iterator.Element) -> Void) {
         for i in indices {
@@ -52,6 +57,7 @@ public extension MutableCollection where Indices.Iterator.Element == Index{
     }
 }
 
+/// :nodoc:
 public extension Dictionary {
     mutating func mutatingForEach(_ f: (inout Value) -> Void) {
         for k in keys {
@@ -60,6 +66,7 @@ public extension Dictionary {
     }
 }
 
+/// :nodoc:
 public extension Sequence {
     func all(_ predicate: (Iterator.Element) -> Bool) -> Bool {
         for elt in self {
@@ -71,6 +78,7 @@ public extension Sequence {
     }
 }
 
+/// :nodoc:
 public extension Array where Element: Comparable {
     /// Sort the array in place, ordered smallest to largest. Optimized for small arrays.
     /// For larger arrays, it just calls through to sortInPlace.
@@ -90,6 +98,7 @@ public extension Array where Element: Comparable {
     }
 }
 
+/// :nodoc:
 public extension Array where Element: Equatable {
     func indexesOf(_ toFind: Element) -> [Int] {
         switch count {
@@ -121,10 +130,12 @@ public extension Array where Element: Equatable {
     }
 }
 
+/// :nodoc:
 public func +<T: Hashable>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
     return lhs.union(rhs)
 }
 
+/// :nodoc:
 public func -<T: Hashable>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
     return lhs.fastSubtracting(rhs)
 }

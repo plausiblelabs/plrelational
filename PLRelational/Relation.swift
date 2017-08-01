@@ -6,6 +6,7 @@
 import Foundation
 
 
+/// :nodoc:
 /// Silly placeholder until we figure out what the error type should actually look like.
 public typealias RelationError = Error
 

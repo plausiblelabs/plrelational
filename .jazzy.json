@@ -24,7 +24,7 @@
             "children": [
                 "ConcreteRelation",
                 "MemoryTableRelation",
-                "SimpleDatabase"
+                "CachingRelation"
             ]
         },
         {
@@ -36,7 +36,8 @@
                 "PlistDirectoryRelation",
                 "PlistFileRelation",
                 "SQLiteDatabase",
-                "SQLiteRelation"
+                "SQLiteRelation",
+                "SQLiteTableRelation"
             ]
         },
         {
@@ -44,7 +45,37 @@
             "children": [
                 "ChangeLoggingDatabase",
                 "ChangeLoggingRelation",
-                "TransactionalDatabase"
+                "TransactionalDatabase",
+                "TransactionalRelation",
+                "TransactionResult"
+            ]
+        },
+        {
+            "name": "Change Observation",
+            "children": [
+                "AsyncRelationChangeObserver",
+                "AsyncRelationChangeCoalescedObserver",
+                "AsyncRelationContentObserver",
+                "AsyncRelationContentCoalescedObserver",
+                "RelationChange"
+            ]
+        },
+        {
+            "name": "Full Text Search",
+            "children": [
+                "RelationTextIndex"
+            ]
+        },
+        {
+            "name": "Relation Support",
+            "children": [
+                "SelectExpression",
+                "MutableRelation",
+                "MutableSelectRelation",
+                "CascadingUpdate",
+                "RecursiveQuery",
+                "DataCodec",
+                "Result"
             ]
         },
         {
@@ -104,10 +135,11 @@
             ]
         },
         {
-            "name": "Relation-based Property Support",
+            "name": "Relation-backed Property Support",
             "children": [
                 "RelationChangeParts",
-                "RelationMutationConfig"
+                "RelationMutationConfig",
+                "CommonValue"
             ]
         }
     ]

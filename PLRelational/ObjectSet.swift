@@ -3,6 +3,7 @@
 // All rights reserved.
 //
 
+/// :nodoc:
 /// Like a Set, but based on object identity rather than value equality.
 public struct ObjectSet<T: AnyObject>: Sequence {
     fileprivate var set: Set<ObjectSetWrapper<T>>
@@ -53,6 +54,7 @@ func ==<T: AnyObject>(a: ObjectSetWrapper<T>, b: ObjectSetWrapper<T>) -> Bool {
     return a.object === b.object
 }
 
+/// :nodoc:
 extension ObjectSet: ExpressibleByArrayLiteral {
     public init(arrayLiteral elements: T...) {
         self.init(elements)

@@ -3,10 +3,12 @@
 // All rights reserved.
 //
 
+/// :nodoc:
 public struct ChangeLoggingDatabaseSnapshot {
     var relationSnapshots: [(ChangeLoggingRelation, ChangeLoggingRelationSnapshot)]
 }
 
+/// :nodoc:
 public struct ChangeLoggingDatabaseDelta {
     var relationDeltas: [(ChangeLoggingRelation, ChangeLoggingRelationDelta)]
     

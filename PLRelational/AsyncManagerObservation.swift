@@ -6,7 +6,7 @@
 import Foundation
 
 
-/// There are two fundamenal ways to asynchronously observe relations: change observation and content observation.
+/// There are two fundamental ways to asynchronously observe relations: change observation and content observation.
 ///
 /// Change observation provides the deltas for each change. This is useful for things that need to know exactly
 /// what changed, perhaps so they can efficiently update some other thing derived from the Relation content.
@@ -39,6 +39,7 @@ public protocol AsyncRelationChangeObserver {
     func relationDidChange(_ relation: Relation)
 }
 
+/// :nodoc:
 extension AsyncManager {
     public func observe(_ relation: Relation, observer: AsyncRelationChangeCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
         class ShimObserver: AsyncRelationChangeObserver {
@@ -104,6 +105,7 @@ public protocol AsyncRelationContentObserver {
     func relationDidChange(_ relation: Relation)
 }
 
+/// :nodoc:
 extension AsyncManager {
     public func observe<T: AsyncRelationContentCoalescedObserver>(_ relation: Relation, observer: T, context: DispatchContext? = nil, postprocessor: @escaping (Set<Row>) -> T.PostprocessingOutput) -> ObservationRemover {
         
@@ -148,6 +150,7 @@ public extension Relation {
     }
 }
 
+/// :nodoc:
 /// Returns a postprocessing function which sorts the rows in ascending order based on the value each row has for `attribute`.
 public func sortByAttribute(_ attribute: Attribute) -> ((Set<Row>) -> [Row]) {
     return {

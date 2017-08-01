@@ -17,6 +17,7 @@ extension Attribute: SelectExpression {
     }
 }
 
+/// :nodoc:
 /// A protocol for select expressions which are always constant values.
 /// In other words, the return value from `valueWithRow` does not depend
 /// the `Row` passed in.
@@ -27,36 +28,42 @@ public protocol SelectExpressionConstantValue: SelectExpression {
     var relationValue: RelationValue { get }
 }
 
+/// :nodoc:
 extension RelationValue: SelectExpressionConstantValue {
     public var relationValue: RelationValue {
         return self
     }
 }
 
+/// :nodoc:
 extension SelectExpressionConstantValue {
     public func valueWithRow(_ row: Row) -> RelationValue {
         return self.relationValue
     }
 }
 
+/// :nodoc:
 extension String: SelectExpressionConstantValue {
     public var relationValue: RelationValue {
         return RelationValue(self)
     }
 }
 
+/// :nodoc:
 extension Int: SelectExpressionConstantValue {
     public var relationValue: RelationValue  {
         return RelationValue(Int64(self))
     }
 }
 
+/// :nodoc:
 extension Int64: SelectExpressionConstantValue {
     public var relationValue: RelationValue {
         return RelationValue(self)
     }
 }
 
+/// :nodoc:
 extension Bool: SelectExpressionConstantValue {
     public var relationValue: RelationValue {
         return RelationValue.boolValue(self)
@@ -71,6 +78,7 @@ extension SelectExpression {
     }
 }
 
+/// :nodoc:
 /// A select expression consisting of a binary operator applied to two sub-expressions.
 public struct SelectExpressionBinaryOperator: SelectExpression {
     /// The left-hand side.
@@ -108,6 +116,7 @@ public extension SelectExpression {
     }
 }
 
+/// :nodoc:
 /// A select expression consisting of a unary operator applied to a sub-expression.
 public struct SelectExpressionUnaryOperator: SelectExpression {
     /// The operator.
@@ -198,6 +207,7 @@ extension SelectExpression {
     }
 }
 
+/// :nodoc:
 extension Sequence where Iterator.Element == SelectExpression {
     /// Combine a sequence of SelectExpressions using the given combining function. The combination
     /// is performed in a way that attempts to produce the shallowest possible tree in the result.
@@ -217,12 +227,14 @@ extension Sequence where Iterator.Element == SelectExpression {
     }
 }
 
+/// :nodoc:
 extension SelectExpressionBinaryOperator: CustomStringConvertible {
     public var description: String {
         return "(\(lhs)) \(op) (\(rhs))"
     }
 }
 
+/// :nodoc:
 extension SelectExpressionUnaryOperator: CustomStringConvertible {
     public var description: String {
         return "\(op)(\(expr))"

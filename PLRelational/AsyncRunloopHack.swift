@@ -13,6 +13,7 @@ fileprivate let timeToWait: TimeInterval = 0.1
 // Comment this out to get the debug logs to show up.
 private func debugLog(_: String) {}
 
+/// :nodoc:
 /// This class observes runloop activity and blocks the runloop when it's about to return to
 /// an idle state while AsyncManager is running. It will block until AsyncManager completes,
 /// or after 0.1 seconds, whichever comes first. The purpose is to make quick things happen

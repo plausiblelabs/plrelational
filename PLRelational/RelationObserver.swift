@@ -3,6 +3,7 @@
 // All rights reserved.
 //
 
+/// :nodoc:
 public protocol RelationObserver {
     func transactionBegan()
     func relationChanged(_ relation: Relation, change: RelationChange)

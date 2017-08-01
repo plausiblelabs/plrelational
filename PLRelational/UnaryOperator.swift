@@ -3,10 +3,12 @@
 // All rights reserved.
 //
 
+/// :nodoc:
 public protocol UnaryOperator {
     func evaluate(_ value: RelationValue) -> RelationValue
 }
 
+/// :nodoc:
 public struct NotOperator: UnaryOperator {
     public init() {}
     
@@ -15,6 +17,7 @@ public struct NotOperator: UnaryOperator {
     }
 }
 
+/// :nodoc:
 extension NotOperator: CustomStringConvertible {
     public var description: String {
         return "!"

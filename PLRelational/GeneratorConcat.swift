@@ -3,12 +3,14 @@
 // All rights reserved.
 //
 
+/// :nodoc:
 extension IteratorProtocol {
     public func concat<OtherGen: IteratorProtocol>(_ other: OtherGen) -> ConcatGenerator<Self, OtherGen> where OtherGen.Element == Self.Element {
         return ConcatGenerator(self, other)
     }
 }
 
+/// :nodoc:
 /// A GeneratorType which concatenates two other generators. It will produce all elements from
 /// the first generator, then all elements from the second.
 public struct ConcatGenerator<G1: IteratorProtocol, G2: IteratorProtocol>: IteratorProtocol where G1.Element == G2.Element {

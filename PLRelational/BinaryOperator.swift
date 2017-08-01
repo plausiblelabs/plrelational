@@ -5,10 +5,12 @@
 
 import sqlite3
 
+/// :nodoc:
 public protocol BinaryOperator {
     func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue
 }
 
+/// :nodoc:
 public struct EqualityComparator: BinaryOperator {
     public init() {}
     
@@ -17,6 +19,7 @@ public struct EqualityComparator: BinaryOperator {
     }
 }
 
+/// :nodoc:
 public struct InequalityComparator: BinaryOperator {
     public init() {}
     
@@ -25,6 +28,7 @@ public struct InequalityComparator: BinaryOperator {
     }
 }
 
+/// :nodoc:
 public struct LTComparator: BinaryOperator {
     public init() {}
     
@@ -33,6 +37,7 @@ public struct LTComparator: BinaryOperator {
     }
 }
 
+/// :nodoc:
 public struct LEComparator: BinaryOperator {
     public init() {}
     
@@ -41,6 +46,7 @@ public struct LEComparator: BinaryOperator {
     }
 }
 
+/// :nodoc:
 public struct GTComparator: BinaryOperator {
     public init() {}
     
@@ -49,6 +55,7 @@ public struct GTComparator: BinaryOperator {
     }
 }
 
+/// :nodoc:
 public struct GEComparator: BinaryOperator {
     public init() {}
     
@@ -57,6 +64,7 @@ public struct GEComparator: BinaryOperator {
     }
 }
 
+/// :nodoc:
 public struct AndComparator: BinaryOperator {
     public init() {}
     
@@ -65,6 +73,7 @@ public struct AndComparator: BinaryOperator {
     }
 }
 
+/// :nodoc:
 public struct OrComparator: BinaryOperator {
     public init() {}
     
@@ -73,6 +82,7 @@ public struct OrComparator: BinaryOperator {
     }
 }
 
+/// :nodoc:
 public struct GlobComparator: BinaryOperator {
     public init() {}
     
@@ -89,6 +99,7 @@ public struct GlobComparator: BinaryOperator {
     }
 }
 
+/// :nodoc:
 public struct AnyComparator: BinaryOperator {
     var compare: (RelationValue, RelationValue) -> Bool
     
@@ -101,54 +112,63 @@ public struct AnyComparator: BinaryOperator {
     }
 }
 
+/// :nodoc:
 extension EqualityComparator: CustomStringConvertible {
     public var description: String {
         return "="
     }
 }
 
+/// :nodoc:
 extension InequalityComparator: CustomStringConvertible {
     public var description: String {
         return "!="
     }
 }
 
+/// :nodoc:
 extension LTComparator: CustomStringConvertible {
     public var description: String {
         return "<"
     }
 }
 
+/// :nodoc:
 extension LEComparator: CustomStringConvertible {
     public var description: String {
         return "<="
     }
 }
 
+/// :nodoc:
 extension GTComparator: CustomStringConvertible {
     public var description: String {
         return ">"
     }
 }
 
+/// :nodoc:
 extension GEComparator: CustomStringConvertible {
     public var description: String {
         return ">="
     }
 }
 
+/// :nodoc:
 extension AndComparator: CustomStringConvertible {
     public var description: String {
         return "AND"
     }
 }
 
+/// :nodoc:
 extension OrComparator: CustomStringConvertible {
     public var description: String {
         return "OR"
     }
 }
 
+/// :nodoc:
 extension GlobComparator: CustomStringConvertible {
     public var description: String {
         return "GLOB"

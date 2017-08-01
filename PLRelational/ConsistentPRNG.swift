@@ -5,7 +5,7 @@
 
 import Darwin
 
-
+/// :nodoc:
 /// A PRNG that produces consistent output on each run. Obviously, don't use this for anything
 /// where randomness is relevant to security. Intended for pseudorandom test cases that can be
 /// replicated on each run.

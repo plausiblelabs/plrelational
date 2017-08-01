@@ -5,11 +5,12 @@
 
 import Foundation
 
-
+/// :nodoc:
 public protocol DispatchContext {
     func async(_ f: @escaping (Void) -> Void)
 }
 
+/// :nodoc:
 extension CFRunLoop: DispatchContext {
     public func async(_ f: @escaping (Void) -> Void) {
         async(inModes: [.commonModes], f)
@@ -23,6 +24,7 @@ extension CFRunLoop: DispatchContext {
 }
 
 
+/// :nodoc:
 public struct RunLoopDispatchContext: DispatchContext {
     public var runloop: CFRunLoop
     
@@ -49,6 +51,7 @@ public struct RunLoopDispatchContext: DispatchContext {
     }
 }
 
+/// :nodoc:
 /// A simple dispatch context that just makes the calls immediately inline. This is not really
 /// "async" but it's sometimes useful.
 public struct DirectDispatchContext: DispatchContext {
@@ -60,6 +63,7 @@ public struct DirectDispatchContext: DispatchContext {
     }
 }
 
+/// :nodoc:
 public struct DispatchQueueContext: DispatchContext {
     public var queue: DispatchQueue
     
@@ -76,6 +80,7 @@ public struct DispatchQueueContext: DispatchContext {
     }
 }
 
+/// :nodoc:
 extension DispatchQueueContext {
     public static var main: DispatchQueueContext {
         return DispatchQueueContext(queue: DispatchQueue.main)
@@ -83,6 +88,7 @@ extension DispatchQueueContext {
 }
 
 
+/// :nodoc:
 public struct DispatchContextWrapped<T> {
     public var context: DispatchContext
     public var wrapped: T
@@ -99,6 +105,7 @@ public struct DispatchContextWrapped<T> {
     }
 }
 
+/// :nodoc:
 extension DispatchContext {
     public func wrap<T>(_ value: T) -> DispatchContextWrapped<T> {
         return DispatchContextWrapped(context: self, wrapped: value)

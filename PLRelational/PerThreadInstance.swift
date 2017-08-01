@@ -6,12 +6,14 @@
 import Foundation
 
 
+/// :nodoc:
 public protocol PerThreadInstance: class {
     static var currentInstance: Self { get }
     
     init()
 }
 
+/// :nodoc:
 extension PerThreadInstance {
     public static var currentInstance: Self {
         let key = NSValue(nonretainedObject: self)

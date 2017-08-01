@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-
+/// :nodoc:
 /// A set that can quickly look up elements based on the values of certain keys.
 /// Initialize it with a set of primary keys. Later, elements holding a particular
 /// value for a primary key can be looked up quickly.
@@ -18,6 +18,7 @@ public struct IndexedSet<Element: IndexableValue> {
     fileprivate var allValues: Set<Element>
 }
 
+/// :nodoc:
 extension IndexedSet {
     /// Initialize a set with the given primary keys. These keys will be indexed
     /// and elements with matching values for those keys can be quickly retrieved.
@@ -68,6 +69,7 @@ extension IndexedSet {
     }
 }
 
+/// :nodoc:
 extension IndexedSet: Sequence {
     public func makeIterator() -> SetIterator<Element> {
         return allValues.makeIterator()
@@ -95,6 +97,7 @@ extension IndexedSet {
     }
 }
 
+/// :nodoc:
 /// Protocol for values that can be stored in IndexedSet.
 public protocol IndexableValue: Hashable {
     associatedtype Index: Hashable
@@ -104,6 +107,7 @@ public protocol IndexableValue: Hashable {
     func value(index: Index) -> Value
 }
 
+/// :nodoc:
 // Make Row an IndexableValue
 extension Row: IndexableValue {
     public func value(index: Attribute) -> RelationValue {

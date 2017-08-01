@@ -3,6 +3,7 @@
 // All rights reserved.
 //
 
+/// :nodoc:
 /// A generalized Relation which derives its value by performing some operation on other Relations.
 /// This implements operations such as union, intersection, difference, join, etc.
 open class IntermediateRelation: Relation, RelationDefaultChangeObserverImplementation {
@@ -56,6 +57,7 @@ open class IntermediateRelation: Relation, RelationDefaultChangeObserverImplemen
     }
 }
 
+/// :nodoc:
 extension IntermediateRelation {
     public enum Operator {
         case union
@@ -124,6 +126,7 @@ extension IntermediateRelation {
     }
 }
 
+/// :nodoc:
 extension IntermediateRelation: RelationObserver {
     public func onAddFirstObserver() {
         let differentiator = RelationDifferentiator(relation: self)
@@ -176,6 +179,7 @@ extension IntermediateRelation {
     }
 }
 
+/// :nodoc:
 extension IntermediateRelation {
     public var scheme: Scheme {
         switch op {
@@ -215,6 +219,7 @@ extension IntermediateRelation {
     }
 }
 
+/// :nodoc:
 extension IntermediateRelation {
     public func contains(_ row: Row) -> Result<Bool, RelationError> {
         switch op {
@@ -350,6 +355,7 @@ extension IntermediateRelation {
     }
 }
 
+/// :nodoc:
 extension IntermediateRelation {
     public func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         switch op {

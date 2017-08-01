@@ -5,7 +5,7 @@
 
 import Darwin
 
-
+/// :nodoc:
 /// An interned string that can be efficiently hashed and compared for equality by
 /// just examining a pointer. These strings are never deallocated so the total number
 /// of distinct ones used in a program run must be bounded.
@@ -43,6 +43,7 @@ extension InternedUTF8String {
     }
 }
 
+/// :nodoc:
 public struct InternedUTF8String: Hashable, Comparable {
     private struct Header {
         static var size: Int {
@@ -100,6 +101,7 @@ public struct InternedUTF8String: Hashable, Comparable {
     }
 }
 
+/// :nodoc:
 extension InternedUTF8String {
     public struct Data: Hashable {
         var ptr: UnsafePointer<UInt8>

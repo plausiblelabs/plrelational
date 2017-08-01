@@ -5,6 +5,7 @@
 
 import Foundation
 
+/// :nodoc:
 open class ObserverSetEntry<Parameters> {
     fileprivate weak var object: AnyObject?
     fileprivate let f: (AnyObject) -> (Parameters) -> Void
@@ -15,6 +16,7 @@ open class ObserverSetEntry<Parameters> {
     }
 }
 
+/// :nodoc:
 open class ObserverSet<Parameters>: CustomStringConvertible {
     // Locking support
     
