@@ -6,7 +6,7 @@
 
 import Foundation
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// A simple mutex with a Swifty API. Note: despite being a struct, it acts like a reference type.
 public struct Mutex {
     fileprivate let lock = NSLock()
@@ -19,7 +19,7 @@ public struct Mutex {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// A wrapper that holds a value and a mutex, and allows accessing that value with the mutex held.
 /// When the wrapped type is a reference type, this will act like a reference type. When the
 /// wrapped type is a value type, this will act weirdly, with the mutex being shared among copies

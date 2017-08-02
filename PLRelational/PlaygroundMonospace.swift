@@ -9,10 +9,10 @@ import AppKit
 import UIKit
 #endif
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 public protocol PlaygroundMonospace: CustomStringConvertible, CustomPlaygroundQuickLookable {}
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 extension PlaygroundMonospace {
     public var customPlaygroundQuickLook: PlaygroundQuickLook {
 #if os(macOS)

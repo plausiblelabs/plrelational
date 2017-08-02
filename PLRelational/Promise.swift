@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// A simple implementation of a promise. You can set a value and wait for a value to be set.
 /// Thread safe, obviously.
 public class Promise<T> {

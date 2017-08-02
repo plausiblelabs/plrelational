@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 extension Set {
     /// As of Xcode 8.3/Swift 3.1, the implementation of Set's `subtract` is kind of dumb:
     ///

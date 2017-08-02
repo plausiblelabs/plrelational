@@ -6,7 +6,7 @@
 import Foundation
 
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 extension URL {
     public var isDirectory: Result<Bool, NSError> {
         do {

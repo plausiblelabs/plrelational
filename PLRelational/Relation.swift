@@ -6,7 +6,7 @@
 import Foundation
 
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 /// Silly placeholder until we figure out what the error type should actually look like.
 public typealias RelationError = Error
 
@@ -18,7 +18,7 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// The relation's scheme.
     var scheme: Scheme { get }
     
-    /// :nodoc:
+    /// :nodoc: Implementation detail (will be made non-public eventually)
     /// A value which defines how the `Relation`'s content is provided. Content can be provided directly,
     /// as an operator on other `Relation`s, or by deferring to another `Relation` entirely.
     var contentProvider: RelationContentProvider { get }
@@ -29,7 +29,7 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// Return `true` if the given row is contained in the `Relation`, and false if not.
     func contains(_ row: Row) -> Result<Bool, RelationError>
     
-    /// :nodoc:
+    /// :nodoc: Implementation detail (will be made non-public eventually); also related to synchronous APIs, which are de-emphasized
     /// Add an observer which is notified when the content of the Relation
     /// changes. The return value is a function which removes the observation when
     /// invoked. The caller can use that function to cancel the observation when
@@ -104,20 +104,20 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     
     // MARK: Synchronous updates
     
-    /// :nodoc:
+    /// :nodoc: Synchronous APIs are de-emphasized and not treated as part of "official" API; may be removed in the future
     /// Update the `Relation` content by assigning the given values to all rows which match the query.
     mutating func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError>
     
-    /// :nodoc:
+    /// :nodoc: Synchronous APIs are de-emphasized and not treated as part of "official" API; may be removed in the future
     /// Return a new Relation that is this Relation with the given update applied to it.
     func withUpdate(_ query: SelectExpression, newValues: Row) -> Relation
     
-    /// :nodoc:
+    /// :nodoc: Synchronous APIs are de-emphasized and not treated as part of "official" API; may be removed in the future
     /// The same as the two-parameter withUpdate, but it updates all rows.
     func withUpdate(_ newValues: Row) -> Relation
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// A value which describes how a `Relation` produces values.
 public enum RelationContentProvider {
     /// The `Relation` produces values by providing a generator. The first associated value is a function which,
@@ -158,7 +158,7 @@ public enum RelationContentProvider {
     case underlying(Relation)
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// A value describing the kind of change made to a `Relation`.
 public enum RelationObservationKind {
     /// A change due to something in the Relation itself.
@@ -181,7 +181,7 @@ extension Relation {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually); also related to synchronous APIs, which are de-emphasized
 extension Relation {
     /// A shortcut that adds a change observer for all kinds.
     public func addChangeObserver(_ observer: RelationObserver) -> ((Void) -> Void) {
@@ -189,7 +189,7 @@ extension Relation {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually); also related to synchronous APIs, which are de-emphasized
 extension Relation {
     
     // MARK: Synchronous fetch
@@ -433,7 +433,7 @@ extension Relation {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Synchronous APIs are de-emphasized and not treated as part of "official" API; may be removed in the future
 extension Relation {
     public func withUpdate(_ query: SelectExpression, newValues: Row) -> Relation {
         // Pick out the rows which will be updated, and update them.
@@ -452,7 +452,7 @@ extension Relation {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Synchronous APIs are de-emphasized and not treated as part of "official" API; may be removed in the future
 extension Relation {
     public var isEmpty: Result<Bool, RelationError> {
         switch rows().next() {
@@ -471,7 +471,7 @@ extension Relation {
         return descriptionWithRows(self.rows())
     }
     
-    /// :nodoc:
+    /// :nodoc: Implementation detail (will be made non-public eventually)
     public func descriptionWithRows(_ rows: AnyIterator<Result<Row, RelationError>>) -> String {
         let columns = scheme.attributes.sorted()
         let rows = rows.map({ row in
@@ -496,7 +496,7 @@ extension Relation {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually); also related to synchronous APIs, which are de-emphasized
 extension Relation {
     public func addChangeObserver(_ f: @escaping (RelationChange) -> Void) -> ((Void) -> Void) {
         let x = addChangeObserver(SimpleRelationObserverProxy(f: f))

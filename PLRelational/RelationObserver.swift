@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually); also related to synchronous APIs, which are de-emphasized
 public protocol RelationObserver {
     func transactionBegan()
     func relationChanged(_ relation: Relation, change: RelationChange)

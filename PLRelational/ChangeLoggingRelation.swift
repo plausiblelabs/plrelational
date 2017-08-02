@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 enum ChangeLoggingRelationChange {
     case union(Relation)
     case select(SelectExpression)
@@ -19,12 +19,12 @@ private struct ChangeLoggingRelationCurrentChange {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct ChangeLoggingRelationSnapshot {
     var bookmark: ChangeLoggingRelation.Graph.Bookmark
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct ChangeLoggingRelationDelta {
     var forward: [ChangeLoggingRelationChange]
     var reverse: [ChangeLoggingRelationChange]

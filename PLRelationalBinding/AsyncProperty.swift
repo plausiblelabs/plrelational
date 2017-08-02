@@ -122,7 +122,7 @@ private class ConstantValueAsyncProperty<T>: AsyncReadableProperty<T> {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Should be re-implemented as a convenience initializer
 /// Returns an AsyncReadableProperty whose value never changes.
 public func constantValueAsyncProperty<T>(_ value: T) -> AsyncReadableProperty<T> {
     return ConstantValueAsyncProperty(value)

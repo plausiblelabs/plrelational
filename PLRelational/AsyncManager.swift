@@ -6,7 +6,7 @@
 import Foundation
 
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// A class which manages asynchronous operations on `Relation`s. `Relation` provides
 /// primitive synchronous operations such as queries, updates, and deletions. `AsyncManager`
 /// then wraps those operations up and executes them in the background.

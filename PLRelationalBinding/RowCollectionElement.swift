@@ -6,7 +6,7 @@
 import Foundation
 import PLRelational
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public class RowCollectionElement: CollectionElement {
     public typealias ID = RelationValue
     public typealias Data = Row

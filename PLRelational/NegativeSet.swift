@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// A Set which tracks objects removed from an empty set, conceptually as an object
 /// with a count of -1. Removing an object and then adding it results in the set
 /// not containing that object. It only supports added and removed, not arbitrary

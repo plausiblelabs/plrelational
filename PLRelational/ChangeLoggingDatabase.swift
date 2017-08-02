@@ -3,12 +3,12 @@
 // All rights reserved.
 //
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct ChangeLoggingDatabaseSnapshot {
     var relationSnapshots: [(ChangeLoggingRelation, ChangeLoggingRelationSnapshot)]
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct ChangeLoggingDatabaseDelta {
     var relationDeltas: [(ChangeLoggingRelation, ChangeLoggingRelationDelta)]
     

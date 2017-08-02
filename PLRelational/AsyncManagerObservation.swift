@@ -39,7 +39,7 @@ public protocol AsyncRelationChangeObserver {
     func relationDidChange(_ relation: Relation)
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 extension AsyncManager {
     public func observe(_ relation: Relation, observer: AsyncRelationChangeCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
         class ShimObserver: AsyncRelationChangeObserver {
@@ -105,7 +105,7 @@ public protocol AsyncRelationContentObserver {
     func relationDidChange(_ relation: Relation)
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 extension AsyncManager {
     public func observe<T: AsyncRelationContentCoalescedObserver>(_ relation: Relation, observer: T, context: DispatchContext? = nil, postprocessor: @escaping (Set<Row>) -> T.PostprocessingOutput) -> ObservationRemover {
         
@@ -150,7 +150,7 @@ public extension Relation {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// Returns a postprocessing function which sorts the rows in ascending order based on the value each row has for `attribute`.
 public func sortByAttribute(_ attribute: Attribute) -> ((Set<Row>) -> [Row]) {
     return {

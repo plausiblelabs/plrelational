@@ -5,12 +5,12 @@
 
 import sqlite3
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public protocol BinaryOperator {
     func evaluate(_ a: RelationValue, _ b: RelationValue) -> RelationValue
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct EqualityComparator: BinaryOperator {
     public init() {}
     
@@ -19,7 +19,7 @@ public struct EqualityComparator: BinaryOperator {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct InequalityComparator: BinaryOperator {
     public init() {}
     
@@ -28,7 +28,7 @@ public struct InequalityComparator: BinaryOperator {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct LTComparator: BinaryOperator {
     public init() {}
     
@@ -37,7 +37,7 @@ public struct LTComparator: BinaryOperator {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct LEComparator: BinaryOperator {
     public init() {}
     
@@ -46,7 +46,7 @@ public struct LEComparator: BinaryOperator {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct GTComparator: BinaryOperator {
     public init() {}
     
@@ -55,7 +55,7 @@ public struct GTComparator: BinaryOperator {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct GEComparator: BinaryOperator {
     public init() {}
     
@@ -64,7 +64,7 @@ public struct GEComparator: BinaryOperator {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct AndComparator: BinaryOperator {
     public init() {}
     
@@ -73,7 +73,7 @@ public struct AndComparator: BinaryOperator {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct OrComparator: BinaryOperator {
     public init() {}
     
@@ -82,7 +82,7 @@ public struct OrComparator: BinaryOperator {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct GlobComparator: BinaryOperator {
     public init() {}
     
@@ -99,7 +99,7 @@ public struct GlobComparator: BinaryOperator {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct AnyComparator: BinaryOperator {
     var compare: (RelationValue, RelationValue) -> Bool
     
@@ -112,63 +112,63 @@ public struct AnyComparator: BinaryOperator {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 extension EqualityComparator: CustomStringConvertible {
     public var description: String {
         return "="
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 extension InequalityComparator: CustomStringConvertible {
     public var description: String {
         return "!="
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 extension LTComparator: CustomStringConvertible {
     public var description: String {
         return "<"
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 extension LEComparator: CustomStringConvertible {
     public var description: String {
         return "<="
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 extension GTComparator: CustomStringConvertible {
     public var description: String {
         return ">"
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 extension GEComparator: CustomStringConvertible {
     public var description: String {
         return ">="
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 extension AndComparator: CustomStringConvertible {
     public var description: String {
         return "AND"
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 extension OrComparator: CustomStringConvertible {
     public var description: String {
         return "OR"
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 extension GlobComparator: CustomStringConvertible {
     public var description: String {
         return "GLOB"

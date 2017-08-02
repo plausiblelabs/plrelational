@@ -5,7 +5,7 @@
 
 import Foundation
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// Observe the deallocation of an object.
 ///
 /// - parameter target: The object to observe.

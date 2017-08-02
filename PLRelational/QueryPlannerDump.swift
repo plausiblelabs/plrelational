@@ -149,7 +149,7 @@ extension QueryRunner {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Debugging aids are hidden from "official" API for now; may be exposed in the future
 extension Relation {
     public func dumpQueryPlanAndOpen() {
         QueryPlanner(roots: [(self, DirectDispatchContext().wrap({ _ in }))]).graphvizDumpAndOpen()

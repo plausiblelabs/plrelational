@@ -5,12 +5,12 @@
 
 import Foundation
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 public protocol DispatchContext {
     func async(_ f: @escaping (Void) -> Void)
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 extension CFRunLoop: DispatchContext {
     public func async(_ f: @escaping (Void) -> Void) {
         async(inModes: [.commonModes], f)
@@ -24,7 +24,7 @@ extension CFRunLoop: DispatchContext {
 }
 
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 public struct RunLoopDispatchContext: DispatchContext {
     public var runloop: CFRunLoop
     
@@ -51,7 +51,7 @@ public struct RunLoopDispatchContext: DispatchContext {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// A simple dispatch context that just makes the calls immediately inline. This is not really
 /// "async" but it's sometimes useful.
 public struct DirectDispatchContext: DispatchContext {
@@ -63,7 +63,7 @@ public struct DirectDispatchContext: DispatchContext {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 public struct DispatchQueueContext: DispatchContext {
     public var queue: DispatchQueue
     
@@ -80,7 +80,7 @@ public struct DispatchQueueContext: DispatchContext {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 extension DispatchQueueContext {
     public static var main: DispatchQueueContext {
         return DispatchQueueContext(queue: DispatchQueue.main)
@@ -88,7 +88,7 @@ extension DispatchQueueContext {
 }
 
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 public struct DispatchContextWrapped<T> {
     public var context: DispatchContext
     public var wrapped: T
@@ -105,7 +105,7 @@ public struct DispatchContextWrapped<T> {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 extension DispatchContext {
     public func wrap<T>(_ value: T) -> DispatchContextWrapped<T> {
         return DispatchContextWrapped(context: self, wrapped: value)

@@ -305,12 +305,12 @@ extension TransactionalRelation {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct TransactionalDatabaseSnapshot {
     var relationSnapshots: [(TransactionalRelation, ChangeLoggingRelationSnapshot)]
 }
 
-/// :nodoc:
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 public struct TransactionalDatabaseDelta {
     var relationDeltas: [(TransactionalRelation, ChangeLoggingRelationDelta)]
     

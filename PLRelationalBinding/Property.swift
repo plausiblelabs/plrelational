@@ -391,7 +391,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Should be re-implemented as a convenience initializer
 /// Returns a ReadableProperty whose value never changes.
 public func constantValueProperty<T>(_ value: T) -> ReadableProperty<T> {
     return ReadableProperty(signal: ConstantSignal<T>(value), changing: { _ in false })
@@ -439,44 +439,42 @@ public final class MutableValueProperty<T>: ReadWriteProperty<T> {
     }
 }
 
-// :nodoc: TODO: These are all `nodoc` for now to avoid cluttering up the docs.  We should prune them and/or convert them to convenience initializers.
-
-/// :nodoc:
+/// :nodoc: Should be re-implemented as a convenience initializer
 public func mutableValueProperty<T>(_ initialValue: T, valueChanging: @escaping (T, T) -> Bool, _ changeHandler: ChangeHandler, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
     return MutableValueProperty(initialValue, changeHandler: changeHandler, valueChanging: valueChanging, didSet: didSet)
 }
 
-/// :nodoc:
+/// :nodoc: Should be re-implemented as a convenience initializer
 public func mutableValueProperty<T>(_ initialValue: T, valueChanging: @escaping (T, T) -> Bool, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
-/// :nodoc:
+/// :nodoc: Should be re-implemented as a convenience initializer
 public func mutableValueProperty<T: Equatable>(_ initialValue: T, _ changeHandler: ChangeHandler, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
     return MutableValueProperty(initialValue, changeHandler: changeHandler, valueChanging: valueChanging, didSet: didSet)
 }
 
-/// :nodoc:
+/// :nodoc: Should be re-implemented as a convenience initializer
 public func mutableValueProperty<T: Equatable>(_ initialValue: T, _ didSet: BindableProperty<T>.Setter? = nil) -> MutableValueProperty<T> {
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
-/// :nodoc:
+/// :nodoc: Should be re-implemented as a convenience initializer
 public func mutableValueProperty<T>(_ initialValue: T?, _ didSet: BindableProperty<T?>.Setter? = nil) -> MutableValueProperty<T?> {
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
-/// :nodoc:
+/// :nodoc: Should be re-implemented as a convenience initializer
 public func mutableValueProperty<T: Equatable>(_ initialValue: T?, _ changeHandler: ChangeHandler, _ didSet: BindableProperty<T?>.Setter? = nil) -> MutableValueProperty<T?> {
     return MutableValueProperty(initialValue, changeHandler: changeHandler, valueChanging: valueChanging, didSet: didSet)
 }
 
-/// :nodoc:
+/// :nodoc: Should be re-implemented as a convenience initializer
 public func mutableValueProperty<T: Equatable>(_ initialValue: T?, _ didSet: BindableProperty<T?>.Setter? = nil) -> MutableValueProperty<T?> {
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
-/// :nodoc:
+/// :nodoc: Should be re-implemented as a convenience initializer
 public func mutableValueProperty<T: Equatable>(_ initialValue: [T], _ didSet: BindableProperty<[T]>.Setter? = nil) -> MutableValueProperty<[T]> {
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }

@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// A set of arbitrary objects which can be iterated and can later be removed.
 /// Ideal for observer callbacks.
 public class RemovableSet<T>: Sequence {
@@ -28,7 +28,7 @@ public class RemovableSet<T>: Sequence {
     }
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// A set of observer functions which take some parameter and return Void.
 /// The same as RemovableSet aside from constraining the content type and
 /// providing a notify method to make it easier to call the observers.

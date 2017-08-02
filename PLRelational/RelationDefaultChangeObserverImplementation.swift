@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 /// A mixin protocol which provides a default implementation to manage change
 /// observers. Types which conform must provide the one stored property in
 /// the protocol, then get the implementation provided.
@@ -22,14 +22,14 @@ public protocol RelationDefaultChangeObserverImplementation: class, Relation {
     func onRemoveLastObserver()
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 public struct RelationDefaultChangeObserverImplementationData {
     fileprivate var didAddFirstObserver = false
     fileprivate var observers: [UInt64: (observer: RelationObserver, kinds: [RelationObservationKind])]?
     fileprivate var nextID: UInt64 = 0
 }
 
-/// :nodoc:
+/// :nodoc: Implementation detail (will be made non-public eventually)
 extension RelationDefaultChangeObserverImplementation {
     public func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void) {
         let id = changeObserverData.nextID
