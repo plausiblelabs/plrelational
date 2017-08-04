@@ -2812,7 +2812,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"$TARGET_BUILD_DIR\"/DocumentationBuilder --directory \"$SOURCE_ROOT\" --output \"$SOURCE_ROOT\"/docs-iOS PLRelational-iOS PLRelationalBinding-iOS PLBindableControls-iOS\n\"$TARGET_BUILD_DIR\"/DocumentationBuilder --directory \"$SOURCE_ROOT\" --output \"$SOURCE_ROOT\"/docs-macOS PLRelational-macOS PLRelationalBinding-macOS PLBindableControls-macOS\n";
+			shellScript = "\"$TARGET_BUILD_DIR\"/DocumentationBuilder --directory \"$SOURCE_ROOT\" --output /tmp/plrdocs PLRelational-macOS PLRelationalBinding-macOS\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
