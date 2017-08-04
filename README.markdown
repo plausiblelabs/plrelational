@@ -68,6 +68,6 @@ The Xcode project includes a number of example apps for macOS:
 
 ## Further Reading
 
-Documentation generated from documentation comments is available online here: https://example.com/REPLACEME
+Generated documentation is [available online](https://opensource.plausible.coop/plrelational/docs/current) for the PLRelational and PLRelationalBinding frameworks.
 
 Enjoy!
