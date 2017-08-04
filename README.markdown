@@ -57,9 +57,16 @@ The PLRelational project provides three frameworks:
 
 Typically you will use all three together, but PLRelational can be used standalone, and PLRelationalBinding can be used without PLBindableControls.
 
-## Further Reading
+## Examples
 
-For more information about PLRelational, see our series of blog posts located here: https://example.com/REPLACEME
+The Xcode project includes a number of example apps for macOS:
+
+* **HelloWorldApp** is the best place to start; a minimal example that demonstrates relations, binding, undo/redo, etc.
+* **SearchApp** demonstrates the use of `RelationTextIndex` for full text search.
+* **BindableControlsApp** is primarily a UI testing target for all the AppKit controls in PLBindableControls.
+* **Visualizer** contains the beginnings of a visual tool (very much a work in progress) for creating and debugging relations.
+
+## Further Reading
 
 Documentation generated from documentation comments is available online here: https://example.com/REPLACEME
 
