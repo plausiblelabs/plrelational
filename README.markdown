@@ -66,6 +66,10 @@ The Xcode project includes a number of example apps for macOS:
 * **BindableControlsApp** is primarily a UI testing target for all the AppKit controls in PLBindableControls.
 * **Visualizer** contains the beginnings of a visual tool (very much a work in progress) for creating and debugging relations.
 
+## Acknowledgements
+
+The PLRelational collection of frameworks draws inspiration from and stands on the shoulders of many other works, chief among them the earliest relational research from E.F. Codd, et al, [Out of the Tar Pit](https://github.com/papers-we-love/papers-we-love/blob/master/design/out-of-the-tar-pit.pdf) by Ben Moseley and Peter Marks, [Push-Pull Functional Reactive Programming](http://conal.net/papers/push-pull-frp) by Conal Elliott, and the many incarnations of Rx such as [ReactiveSwift](https://github.com/ReactiveCocoa/ReactiveSwift).  Thanks also to [Landon Fuller](https://twitter.com/landonfuller) for his continued advice and for planting the seeds that resulted in the earliest prototypes.
+
 ## Further Reading
 
 For a more in-depth introduction to these frameworks, check out [Reactive Relational Programming with PLRelational](https://plausible.coop/blog/2017/08/10/reactive-relational-programming-with-plrelational).
