@@ -68,6 +68,8 @@ The Xcode project includes a number of example apps for macOS:
 
 ## Further Reading
 
-Generated documentation is [available online](https://opensource.plausible.coop/plrelational/docs/current) for the PLRelational and PLRelationalBinding frameworks.
+For a more in-depth introduction to these frameworks, check out [Reactive Relational Programming with PLRelational](https://plausible.coop/blog/2017/08/10/reactive-relational-programming-with-plrelational).
+
+Generated documentation is also [available online](https://opensource.plausible.coop/plrelational/docs/current) for the PLRelational and PLRelationalBinding frameworks.
 
 Enjoy!
