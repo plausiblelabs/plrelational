@@ -50,6 +50,19 @@
 		37412EB51F100AE2002F131A /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43FFA1E8997EB00C8C336 /* PLRelational.framework */; };
 		37412EB61F100AE2002F131A /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
 		37412EB91F100F3D002F131A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37412EB71F100F3D002F131A /* MainMenu.xib */; };
+		374315E41F420B0C00128F5A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 374315DE1F420B0C00128F5A /* Assets.xcassets */; };
+		374315E51F420B0C00128F5A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 374315DF1F420B0C00128F5A /* MainMenu.xib */; };
+		374315E61F420B0C00128F5A /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 374315E11F420B0C00128F5A /* Info.plist */; };
+		374315F31F420B5200128F5A /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43FFA1E8997EB00C8C336 /* PLRelational.framework */; };
+		374315F41F420B5200128F5A /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
+		374315F51F420B5200128F5A /* PLBindableControls.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B441611E89A49A00C8C336 /* PLBindableControls.framework */; };
+		374315FE1F420B7E00128F5A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374315DD1F420B0C00128F5A /* AppDelegate.swift */; };
+		374315FF1F420B7E00128F5A /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374315E21F420B0C00128F5A /* ViewModel.swift */; };
+		374316001F420B9800128F5A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 374315DF1F420B0C00128F5A /* MainMenu.xib */; };
+		374316011F420B9800128F5A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 374315DE1F420B0C00128F5A /* Assets.xcassets */; };
+		374316051F42337300128F5A /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374316041F42337300128F5A /* TextView.swift */; };
+		374316071F42354100128F5A /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374316061F42354100128F5A /* Async.swift */; };
+		374316081F42354100128F5A /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374316061F42354100128F5A /* Async.swift */; };
 		374363001EA673F3004982B0 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
 		374363011EA673FC004982B0 /* InternedUTF8String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */; };
 		374363021EA6741C004982B0 /* SetSubtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */; };
@@ -493,6 +506,27 @@
 			remoteGlobalIDString = 37B441601E89A49A00C8C336;
 			remoteInfo = "PLBindableControls-macOS";
 		};
+		374315EA1F420B5200128F5A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B43FF91E8997EB00C8C336;
+			remoteInfo = "PLRelational-macOS";
+		};
+		374315EC1F420B5200128F5A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B440D21E899F7600C8C336;
+			remoteInfo = "PLRelationalBinding-macOS";
+		};
+		374315EE1F420B5200128F5A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B441601E89A49A00C8C336;
+			remoteInfo = "PLBindableControls-macOS";
+		};
 		37504B4C1DC6995100CEE4D4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
@@ -695,6 +729,15 @@
 		37412EA21F100848002F131A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		37412EAC1F100AB7002F131A /* ViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		37412EB81F100F3D002F131A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		374315DD1F420B0C00128F5A /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		374315DE1F420B0C00128F5A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		374315E01F420B0C00128F5A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		374315E11F420B0C00128F5A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		374315E21F420B0C00128F5A /* ViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		374315FC1F420B5200128F5A /* RelationChangeApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RelationChangeApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		374315FD1F420B5200128F5A /* HelloWorldApp copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "HelloWorldApp copy-Info.plist"; path = "/Users/campbell/Projects/vp/plrelational/HelloWorldApp copy-Info.plist"; sourceTree = "<absolute>"; };
+		374316041F42337300128F5A /* TextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
+		374316061F42354100128F5A /* Async.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
 		374AE9711D91C2F0007D1366 /* StoredDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredDatabase.swift; sourceTree = "<group>"; };
 		374AE9731D91C2FC007D1366 /* StoredRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredRelation.swift; sourceTree = "<group>"; };
 		374AE9751D91DBC7007D1366 /* PlistDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDatabase.swift; sourceTree = "<group>"; };
@@ -963,6 +1006,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		374315F21F420B5200128F5A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				374315F31F420B5200128F5A /* PLRelational.framework in Frameworks */,
+				374315F41F420B5200128F5A /* PLRelationalBinding.framework in Frameworks */,
+				374315F51F420B5200128F5A /* PLBindableControls.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1250,6 +1303,19 @@
 			path = Examples/HelloWorldAppUITests;
 			sourceTree = SOURCE_ROOT;
 		};
+		374315DC1F420B0C00128F5A /* RelationChangeApp */ = {
+			isa = PBXGroup;
+			children = (
+				374315DD1F420B0C00128F5A /* AppDelegate.swift */,
+				374315E21F420B0C00128F5A /* ViewModel.swift */,
+				374316041F42337300128F5A /* TextView.swift */,
+				374315DF1F420B0C00128F5A /* MainMenu.xib */,
+				374315DE1F420B0C00128F5A /* Assets.xcassets */,
+				374315E11F420B0C00128F5A /* Info.plist */,
+			);
+			path = RelationChangeApp;
+			sourceTree = "<group>";
+		};
 		374AE9651D91B5B1007D1366 /* Stored Relations */ = {
 			isa = PBXGroup;
 			children = (
@@ -1264,6 +1330,7 @@
 		374AE9671D91B5F5007D1366 /* Async Management */ = {
 			isa = PBXGroup;
 			children = (
+				374316061F42354100128F5A /* Async.swift */,
 				C2C6308A1D35553F00AD44C1 /* AsyncManager.swift */,
 				C2CA46181D3FF1870082E2D2 /* AsyncManagerObservation.swift */,
 				C2BA22971D3FD65F00DCCE72 /* AsyncManagerTests.swift */,
@@ -1744,6 +1811,7 @@
 			children = (
 				372707E91CFE2C7E00710C80 /* BindableControlsApp */,
 				37412E821F100848002F131A /* HelloWorldApp */,
+				374315DC1F420B0C00128F5A /* RelationChangeApp */,
 				37A1CE6C1D1081980067870D /* SearchApp */,
 				37504B391DC6995100CEE4D4 /* Visualizer */,
 			);
@@ -1801,6 +1869,7 @@
 				C22BF12D1CBC348500D3FE59 /* Products */,
 				C2D4A8491D88789A001D9971 /* Swift library workaround */,
 				37B4419A1E89AA7E00C8C336 /* Frameworks */,
+				374315FD1F420B5200128F5A /* HelloWorldApp copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -1831,6 +1900,7 @@
 				37412E911F100848002F131A /* HelloWorldAppTests.xctest */,
 				37412E9C1F100848002F131A /* HelloWorldAppUITests.xctest */,
 				C27511141F20DFE3009DB9CC /* DocumentationBuilder */,
+				374315FC1F420B5200128F5A /* RelationChangeApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2113,6 +2183,26 @@
 			productName = HelloWorldAppUITests;
 			productReference = 37412E9C1F100848002F131A /* HelloWorldAppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		374315E81F420B5200128F5A /* RelationChangeApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 374315F91F420B5200128F5A /* Build configuration list for PBXNativeTarget "RelationChangeApp" */;
+			buildPhases = (
+				374315EF1F420B5200128F5A /* Sources */,
+				374315F21F420B5200128F5A /* Frameworks */,
+				374315F61F420B5200128F5A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				374315E91F420B5200128F5A /* PBXTargetDependency */,
+				374315EB1F420B5200128F5A /* PBXTargetDependency */,
+				374315ED1F420B5200128F5A /* PBXTargetDependency */,
+			);
+			name = RelationChangeApp;
+			productName = HelloWorldApp;
+			productReference = 374315FC1F420B5200128F5A /* RelationChangeApp.app */;
+			productType = "com.apple.product-type.application";
 		};
 		37504B371DC6995100CEE4D4 /* Visualizer */ = {
 			isa = PBXNativeTarget;
@@ -2498,6 +2588,9 @@
 						ProvisioningStyle = Automatic;
 						TestTargetID = 37412E801F100848002F131A;
 					};
+					374315E81F420B5200128F5A = {
+						DevelopmentTeam = NM4ZX45CU5;
+					};
 					37504B371DC6995100CEE4D4 = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = NM4ZX45CU5;
@@ -2618,6 +2711,7 @@
 				37A1CE6A1D1081980067870D /* SearchApp */,
 				37A1CE781D1081980067870D /* SearchAppTests */,
 				37A1CE831D1081980067870D /* SearchAppUITests */,
+				374315E81F420B5200128F5A /* RelationChangeApp */,
 				37504B371DC6995100CEE4D4 /* Visualizer */,
 				37504B4A1DC6995100CEE4D4 /* VisualizerTests */,
 				37504B551DC6995100CEE4D4 /* VisualizerUITests */,
@@ -2664,6 +2758,15 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		374315F61F420B5200128F5A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				374316001F420B9800128F5A /* MainMenu.xib in Resources */,
+				374316011F420B9800128F5A /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2746,6 +2849,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				374315E41F420B0C00128F5A /* Assets.xcassets in Resources */,
+				374315E51F420B0C00128F5A /* MainMenu.xib in Resources */,
+				374315E61F420B0C00128F5A /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2855,6 +2961,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				37412EA11F100848002F131A /* HelloWorldAppUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		374315EF1F420B5200128F5A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				374316051F42337300128F5A /* TextView.swift in Sources */,
+				374315FE1F420B7E00128F5A /* AppDelegate.swift in Sources */,
+				374315FF1F420B7E00128F5A /* ViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2998,6 +3114,7 @@
 				37B440701E899A3300C8C336 /* AsyncRunloopHack.swift in Sources */,
 				37B4401E1E8999D200C8C336 /* RelationValue.swift in Sources */,
 				37B4404D1E899A0A00C8C336 /* PlistFileRelation.swift in Sources */,
+				374316081F42354100128F5A /* Async.swift in Sources */,
 				37B440461E899A0200C8C336 /* StoredRelation.swift in Sources */,
 				37B4404E1E899A0A00C8C336 /* RowPlist.swift in Sources */,
 				37B440C31E899A7300C8C336 /* StringPad.swift in Sources */,
@@ -3117,6 +3234,7 @@
 				37B440691E899A3100C8C336 /* AsyncRunloopHack.swift in Sources */,
 				37B440161E8999D200C8C336 /* RelationValue.swift in Sources */,
 				37B440491E899A0900C8C336 /* PlistFileRelation.swift in Sources */,
+				374316071F42354100128F5A /* Async.swift in Sources */,
 				37B440441E899A0100C8C336 /* StoredRelation.swift in Sources */,
 				37B4404A1E899A0900C8C336 /* RowPlist.swift in Sources */,
 				C2A78A1D1ED4A84D0021ACCF /* RemovableSet.swift in Sources */,
@@ -3406,6 +3524,21 @@
 			target = 37B441601E89A49A00C8C336 /* PLBindableControls-macOS */;
 			targetProxy = 37412EB21F100AD5002F131A /* PBXContainerItemProxy */;
 		};
+		374315E91F420B5200128F5A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B43FF91E8997EB00C8C336 /* PLRelational-macOS */;
+			targetProxy = 374315EA1F420B5200128F5A /* PBXContainerItemProxy */;
+		};
+		374315EB1F420B5200128F5A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B440D21E899F7600C8C336 /* PLRelationalBinding-macOS */;
+			targetProxy = 374315EC1F420B5200128F5A /* PBXContainerItemProxy */;
+		};
+		374315ED1F420B5200128F5A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B441601E89A49A00C8C336 /* PLBindableControls-macOS */;
+			targetProxy = 374315EE1F420B5200128F5A /* PBXContainerItemProxy */;
+		};
 		37504B4D1DC6995100CEE4D4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 37504B371DC6995100CEE4D4 /* Visualizer */;
@@ -3501,6 +3634,14 @@
 			isa = PBXVariantGroup;
 			children = (
 				37412EB81F100F3D002F131A /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		374315DF1F420B0C00128F5A /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				374315E01F420B0C00128F5A /* Base */,
 			);
 			name = MainMenu.xib;
 			sourceTree = "<group>";
@@ -3692,6 +3833,41 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 				TEST_TARGET_NAME = HelloWorldApp;
+			};
+			name = Release;
+		};
+		374315FA1F420B5200128F5A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = NM4ZX45CU5;
+				INFOPLIST_FILE = "$(SRCROOT)/Examples/RelationChangeApp/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationChangeApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		374315FB1F420B5200128F5A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = NM4ZX45CU5;
+				INFOPLIST_FILE = "$(SRCROOT)/Examples/RelationChangeApp/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationChangeApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -4644,6 +4820,15 @@
 			buildConfigurations = (
 				37412EAA1F100848002F131A /* Debug */,
 				37412EAB1F100848002F131A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		374315F91F420B5200128F5A /* Build configuration list for PBXNativeTarget "RelationChangeApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				374315FA1F420B5200128F5A /* Debug */,
+				374315FB1F420B5200128F5A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
