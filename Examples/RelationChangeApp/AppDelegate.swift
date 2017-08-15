@@ -20,7 +20,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @IBOutlet weak var nextButton: Button!
     @IBOutlet weak var tableContainer: NSView!
     
-    private var tableViews: [RelationTableView] = []
     private var model: ViewModel!
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -36,11 +35,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Initialize our view model
         model = ViewModel()
 
-        // Configure the table views
+        // Configure the relation views
         let h: CGFloat = 120
-        addTableView(to: tableContainer, x: 20, y: 40, w: 240, h: h, name: "fruit", relation: model.fruits, idAttr: Fruit.id, orderedAttrs: [Fruit.id, Fruit.name])
-        addTableView(to: tableContainer, x: 300, y: 40, w: 120, h: h, name: "selected_fruit_id", relation: model.selectedFruitIDs, idAttr: SelectedFruit.id, orderedAttrs: [SelectedFruit.id])
-        addTableView(to: tableContainer, x: 20, y: 220, w: 240, h: h, name: "selected_fruit", relation: model.selectedFruits, idAttr: Fruit.id, orderedAttrs: [Fruit.id, Fruit.name])
+        addRelationView(to: tableContainer, x: 20, y: 40, w: 240, h: h, name: "fruit", relation: model.fruits, idAttr: Fruit.id, orderedAttrs: [Fruit.id, Fruit.name])
+        addRelationView(to: tableContainer, x: 300, y: 40, w: 120, h: h, name: "selected_fruit_id", relation: model.selectedFruitIDs, idAttr: SelectedFruit._id, orderedAttrs: [SelectedFruit.id])
+        addRelationView(to: tableContainer, x: 20, y: 220, w: 240, h: h, name: "selected_fruit", relation: model.selectedFruits, idAttr: SelectedFruit._id, orderedAttrs: [Fruit.id, Fruit.name])
 
         // Bind to the view model
         textView.text <~ model.changeDescription
@@ -50,45 +49,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         nextButton.clicks ~~> model.goToNextState
     }
     
-    private func addTableView(to parent: NSView, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat,
-                              name: String, relation: Relation, idAttr: Attribute, orderedAttrs: [Attribute])
+    private func addRelationView(to parent: NSView, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat,
+                                 name: String, relation: Relation, idAttr: Attribute, orderedAttrs: [Attribute])
     {
-        let columns = orderedAttrs.map{ RelationTableColumnModel(identifier: $0, title: $0.name, width: 80) }
-        let data = relation.arrayProperty(idAttr: idAttr, orderAttr: idAttr)
-        let model = TableViewModel(
-            columns: columns,
-            data: data,
-            cellText: { attribute, row in
-                let rowID = row[idAttr]
-                // TODO: For now we will convert non-string values to a string for display in
-                // the cell, but eventually we should have native support for these
-                let initialStringValue = row[attribute].description
-                let textProperty = relation
-                    .select(idAttr *== rowID)
-                    .project(attribute)
-                    .oneValue({ $0.description }, orDefault: "", initialValue: initialStringValue)
-                    .property()
-                return .asyncReadOnly(textProperty)
-            }
-        )
+        let relationView = RelationView(frame: NSMakeRect(x, y, w, h),relation: relation, idAttr: idAttr, orderedAttrs: orderedAttrs)
+        relationView.wantsLayer = true
+        relationView.layer!.cornerRadius = 8
+        parent.addSubview(relationView)
         
-        let scrollView = NSScrollView(frame: NSMakeRect(x, y, w, h))
-        let nsTableView = NSTableView(frame: scrollView.bounds)
-        nsTableView.allowsColumnResizing = false
-        nsTableView.allowsColumnReordering = false
-        nsTableView.allowsColumnSelection = false
-        nsTableView.selectionHighlightStyle = .none
-        nsTableView.headerView = CustomHeaderView()
-        scrollView.documentView = nsTableView
-        scrollView.hasVerticalScroller = true
-        scrollView.wantsLayer = true
-        scrollView.layer!.cornerRadius = 8
-        
-        let tableView = TableView(model: model, tableView: nsTableView)
-        tableView.animateChanges = true
-        parent.addSubview(scrollView)
-        tableViews.append(tableView)
-
         let label = Label()
         label.stringValue = name
         label.sizeToFit()

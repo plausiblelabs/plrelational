@@ -14,6 +14,7 @@ enum Fruit {
 }
 
 enum SelectedFruit {
+    static let _id = Attribute("_id")
     static let id = Attribute("id")
 }
 
@@ -53,7 +54,7 @@ class ViewModel {
         }
         self.db = db
         fruits = createRelation("fruit", [Fruit.id, Fruit.name])
-        selectedFruitIDs = createRelation("selected_fruit_id", [SelectedFruit.id])
+        selectedFruitIDs = createRelation("selected_fruit_id", [SelectedFruit._id, SelectedFruit.id])
         
         // Prepare higher-level relations
         selectedFruits = selectedFruitIDs.join(fruits)
@@ -71,7 +72,7 @@ class ViewModel {
         addFruit(2, "Bandana")
         
         func addSelectedFruit(_ id: Int64) {
-            _ = sqliteDB["selected_fruit_id"]!.add([SelectedFruit.id: RelationValue(id)])
+            _ = sqliteDB["selected_fruit_id"]!.add([SelectedFruit._id: 0, SelectedFruit.id: RelationValue(id)])
         }
         addSelectedFruit(1)
         

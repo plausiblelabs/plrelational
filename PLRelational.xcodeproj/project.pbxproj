@@ -63,6 +63,7 @@
 		374316051F42337300128F5A /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374316041F42337300128F5A /* TextView.swift */; };
 		374316071F42354100128F5A /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374316061F42354100128F5A /* Async.swift */; };
 		374316081F42354100128F5A /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374316061F42354100128F5A /* Async.swift */; };
+		3743160A1F4245A500128F5A /* RelationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374316091F4245A500128F5A /* RelationView.swift */; };
 		374363001EA673F3004982B0 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
 		374363011EA673FC004982B0 /* InternedUTF8String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */; };
 		374363021EA6741C004982B0 /* SetSubtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */; };
@@ -738,6 +739,7 @@
 		374315FD1F420B5200128F5A /* HelloWorldApp copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "HelloWorldApp copy-Info.plist"; path = "/Users/campbell/Projects/vp/plrelational/HelloWorldApp copy-Info.plist"; sourceTree = "<absolute>"; };
 		374316041F42337300128F5A /* TextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
 		374316061F42354100128F5A /* Async.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
+		374316091F4245A500128F5A /* RelationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationView.swift; sourceTree = "<group>"; };
 		374AE9711D91C2F0007D1366 /* StoredDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredDatabase.swift; sourceTree = "<group>"; };
 		374AE9731D91C2FC007D1366 /* StoredRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredRelation.swift; sourceTree = "<group>"; };
 		374AE9751D91DBC7007D1366 /* PlistDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDatabase.swift; sourceTree = "<group>"; };
@@ -1308,6 +1310,7 @@
 			children = (
 				374315DD1F420B0C00128F5A /* AppDelegate.swift */,
 				374315E21F420B0C00128F5A /* ViewModel.swift */,
+				374316091F4245A500128F5A /* RelationView.swift */,
 				374316041F42337300128F5A /* TextView.swift */,
 				374315DF1F420B0C00128F5A /* MainMenu.xib */,
 				374315DE1F420B0C00128F5A /* Assets.xcassets */,
@@ -2969,6 +2972,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				374316051F42337300128F5A /* TextView.swift in Sources */,
+				3743160A1F4245A500128F5A /* RelationView.swift in Sources */,
 				374315FE1F420B7E00128F5A /* AppDelegate.swift in Sources */,
 				374315FF1F420B7E00128F5A /* ViewModel.swift in Sources */,
 			);
