@@ -18,9 +18,12 @@ class RelationView: BackgroundView {
     private let arrayProperty: ArrayProperty<RowArrayElement>
     private var arrayObserverRemoval: ObserverRemoval?
 
-    init(frame: NSRect, relation: Relation, idAttr: Attribute, orderedAttrs: [Attribute]) {
+    private var changesToAnimate: [ArrayChange<RowArrayElement>] = []
+    private var stepDuration: TimeInterval = 0
+    
+    init(frame: NSRect, arrayProperty: ArrayProperty<RowArrayElement>, orderedAttrs: [Attribute]) {
+        self.arrayProperty = arrayProperty
         self.orderedAttrs = orderedAttrs
-        self.arrayProperty = relation.arrayProperty(idAttr: idAttr, orderAttr: idAttr)
         
         super.init(frame: frame)
         
@@ -29,7 +32,7 @@ class RelationView: BackgroundView {
         let headerRow = labelRow(y: 0, fg: .darkGray, orderedAttrs.map{ ($0, $0.name) })
         let headerView = headerRow.view
         let sep = BackgroundView(frame: NSMakeRect(0, rowH - 1, frame.width, 1))
-        sep.backgroundColor = .lightGray
+        sep.backgroundColor = NSColor(white: 0.9, alpha: 1.0)
         headerView.addSubview(sep)
         addSubview(headerView)
 
@@ -46,16 +49,17 @@ class RelationView: BackgroundView {
         arrayObserverRemoval?()
     }
     
-    private func arrayChanged(_ arrayChanges: [ArrayChange<RowArrayElement>]) {
+    func animate(delay: TimeInterval, duration: TimeInterval) {
+        self.stepDuration = duration
         
-        func addLabelRow(_ elem: RowArrayElement, _ index: Int, opacity: Float) {
-            let y = startY + (CGFloat(index) * rowH)
-            let row = labelRow(y: y, fg: .black, orderedAttrs.map{ ($0, elem.data[$0].description) })
-            labelRows.insert(row, at: index)
-            row.view.wantsLayer = true
-            row.view.layer!.opacity = opacity
-            addSubview(row.view)
-        }
+        Timer.scheduledTimer(withTimeInterval: delay, repeats: false, block: { _ in
+            Swift.print("RELATION VIEW ANIM")
+            self.applyAnimations()
+        })
+    }
+
+    private func applyAnimations() {
+        var accumDelay: TimeInterval = 0.0
         
         func slide(_ labelRow: LabelRow, delta: CGFloat) {
             let labelRowView = labelRow.view
@@ -69,6 +73,9 @@ class RelationView: BackgroundView {
             let animation = CABasicAnimation(keyPath: "position")
             animation.fromValue = NSValue(point: startPoint)
             animation.toValue = NSValue(point: endPoint)
+            animation.duration = self.stepDuration
+            animation.beginTime = CACurrentMediaTime() + accumDelay
+            animation.isRemovedOnCompletion = true
             labelRowView.layer!.add(animation, forKey: "position")
         }
         
@@ -87,32 +94,29 @@ class RelationView: BackgroundView {
             let animation = CABasicAnimation(keyPath: "opacity")
             animation.fromValue = NSNumber(value: Float(fadeIn ? 0.0 : 1.0))
             animation.toValue = NSNumber(value: Float(fadeIn ? 1.0 : 0.0))
-            animation.fillMode = kCAFillModeForwards
+            animation.fillMode = kCAFillModeBoth
+            animation.duration = self.stepDuration
+            animation.beginTime = CACurrentMediaTime() + accumDelay
             animation.isRemovedOnCompletion = true
             labelRowView.layer!.add(animation, forKey: "opacity")
 
             CATransaction.commit()
         }
         
-        // Record changes that were made to the array relative to its previous state
-        for change in arrayChanges {
+        for change in changesToAnimate {
             switch change {
-            case let .initial(elems):
-                Swift.print("INITIAL: \(elems)")
-                for (index, elem) in elems.enumerated() {
-                    addLabelRow(elem, index, opacity: 1)
-                }
-                
             case let .insert(index):
                 Swift.print("INSERT: \(index)")
                 // Slide existing elements (after the row to be inserted) down one spot
                 for i in index..<labelRows.count {
                     slide(labelRows[i], delta: rowH)
                 }
+                accumDelay += stepDuration
                 
                 // Add the new row and fade it in
                 addLabelRow(arrayProperty.elements[index], index, opacity: 0)
                 fade(labelRows[index])
+                accumDelay += stepDuration
                 
             case let .delete(index):
                 Swift.print("DELETE: \(index)")
@@ -120,12 +124,14 @@ class RelationView: BackgroundView {
                 for i in index+1..<labelRows.count {
                     slide(labelRows[i], delta: -rowH)
                 }
+                accumDelay += stepDuration
                 
                 // Fade out the row to be deleted, then remove it
                 let labelRow = labelRows.remove(at: index)
                 fade(labelRow, {
                     labelRow.view.removeFromSuperview()
                 })
+                accumDelay += stepDuration
                 
             case let .update(index):
                 Swift.print("UPDATE: \(index)")
@@ -145,8 +151,38 @@ class RelationView: BackgroundView {
                 
             case .move:
                 fatalError("Not yet implemented")
+    
+            case .initial:
+                fatalError("Unexpected initial change")
             }
         }
+        
+        changesToAnimate = []
+    }
+
+    private func arrayChanged(_ arrayChanges: [ArrayChange<RowArrayElement>]) {
+        // Record changes that were made to the array relative to its previous state
+        for change in arrayChanges {
+            switch change {
+            case let .initial(elems):
+                Swift.print("INITIAL: \(elems)")
+                for (index, elem) in elems.enumerated() {
+                    addLabelRow(elem, index, opacity: 1)
+                }
+                
+            default:
+                changesToAnimate.append(change)
+            }
+        }
+    }
+
+    private func addLabelRow(_ elem: RowArrayElement, _ index: Int, opacity: Float) {
+        let y = startY + (CGFloat(index) * rowH)
+        let row = labelRow(y: y, fg: .black, orderedAttrs.map{ ($0, elem.data[$0].description) })
+        labelRows.insert(row, at: index)
+        row.view.wantsLayer = true
+        row.view.layer!.opacity = opacity
+        addSubview(row.view)
     }
     
     private func labelRow(y: CGFloat, fg: NSColor, _ attrStrings: [(Attribute, String)]) -> LabelRow {

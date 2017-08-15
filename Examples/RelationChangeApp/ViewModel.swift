@@ -26,9 +26,9 @@ class ViewModel {
     }
     
     private let db: TransactionalDatabase
-    let fruits: TransactionalRelation
-    let selectedFruitIDs: Relation
-    let selectedFruits: Relation
+    private let fruits: TransactionalRelation
+    private let selectedFruitIDs: Relation
+    private let selectedFruits: Relation
     private let selectedFruitName: Relation
 
     private let changes: [Change]
@@ -126,19 +126,30 @@ class ViewModel {
             "fruits.asyncDelete(Fruit.id *== 1)\n"
         )
         
-        // TODO: The following fails with mutatedDuringEnumeration error
-//        selectedFruitName.asyncUpdateString("Banana")
-//        addChange(
-//            "// Fix the name of the selected fruit (\"Banana\")\n" +
-//            "selectedFruitName.asyncUpdateString(\"Banana\")\n"
-//        )
+        selectedFruitName.asyncUpdateString("Banana")
+        addChange(
+            "// Fix the name of the selected fruit (\"Banana\")\n" +
+            "selectedFruitName.asyncUpdateString(\"Banana\")\n"
+        )
         
         self.changes = changes
         
         // Jump back to initial state
         apply(changes.first!)
     }
-    
+
+    lazy var fruitsProperty: ArrayProperty<RowArrayElement> = {
+        return self.fruits.arrayProperty(idAttr: Fruit.id, orderAttr: Fruit.id)
+    }()
+
+    lazy var selectedFruitIDsProperty: ArrayProperty<RowArrayElement> = {
+        return self.selectedFruitIDs.arrayProperty(idAttr: SelectedFruit._id, orderAttr: SelectedFruit._id)
+    }()
+
+    lazy var selectedFruitsProperty: ArrayProperty<RowArrayElement> = {
+        return self.selectedFruits.arrayProperty(idAttr: SelectedFruit._id, orderAttr: SelectedFruit._id)
+    }()
+
     lazy var changeDescription: ReadableProperty<String> = {
         return self.changeIndex.map{ self.changes[$0].desc }
     }()
@@ -166,7 +177,11 @@ class ViewModel {
         self.changeIndex.change(newIndex)
         self.apply(self.changes[newIndex])
     }
-    
+
+    lazy var replayCurrentState: ActionProperty<()> = ActionProperty {
+        // TODO
+    }
+
     private func apply(_ change: Change) {
         db.asyncRestoreSnapshot(change.snapshot)
     }

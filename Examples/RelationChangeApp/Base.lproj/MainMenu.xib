@@ -16,6 +16,7 @@
             <connections>
                 <outlet property="nextButton" destination="xh3-Zi-i4Q" id="rXU-U0-1AH"/>
                 <outlet property="previousButton" destination="clW-7q-7ys" id="WLl-DR-l3r"/>
+                <outlet property="replayButton" destination="gIJ-Je-G36" id="gDl-HO-vDF"/>
                 <outlet property="tableContainer" destination="Obe-lp-Zh6" id="HAR-lR-06Q"/>
                 <outlet property="textView" destination="0Yk-T4-0dR" id="clo-Iz-FH9"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="MEA-UP-LPE"/>
@@ -674,45 +675,25 @@
         <window title="RelationChangeApp" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="335" y="390" width="985" height="456"/>
+            <rect key="contentRect" x="335" y="390" width="569" height="606"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <view key="contentView" wantsLayer="YES" id="EiT-Mj-1SZ">
-                <rect key="frame" x="0.0" y="0.0" width="985" height="456"/>
+                <rect key="frame" x="0.0" y="0.0" width="569" height="606"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="clW-7q-7ys" customClass="Button" customModule="PLBindableControls">
-                        <rect key="frame" x="160" y="13" width="93" height="32"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <buttonCell key="cell" type="push" title="Previous" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="mM8-Sd-faH">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                    </button>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xh3-Zi-i4Q" customClass="Button" customModule="PLBindableControls">
-                        <rect key="frame" x="253" y="13" width="93" height="32"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <buttonCell key="cell" type="push" title="Next" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Beq-hj-ave">
-                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                            <font key="font" metaFont="system"/>
-                        </buttonCell>
-                    </button>
-                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Obe-lp-Zh6" userLabel="Table Container" customClass="BackgroundView" customModule="PLBindableControls">
-                        <rect key="frame" x="519" y="61" width="446" height="375"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    </customView>
                     <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Jxl-IB-8gv">
-                        <rect key="frame" x="20" y="61" width="466" height="375"/>
+                        <rect key="frame" x="20" y="472" width="489" height="116"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <clipView key="contentView" ambiguous="YES" id="y8b-6T-vEN">
-                            <rect key="frame" x="1" y="1" width="464" height="373"/>
+                            <rect key="frame" x="1" y="1" width="487" height="114"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <textView ambiguous="YES" editable="NO" importsGraphics="NO" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" smartInsertDelete="YES" id="0Yk-T4-0dR" customClass="TextView" customModule="RelationChangeApp">
-                                    <rect key="frame" x="0.0" y="0.0" width="464" height="373"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="487" height="114"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                    <size key="minSize" width="464" height="373"/>
-                                    <size key="maxSize" width="466" height="10000000"/>
+                                    <size key="minSize" width="487" height="114"/>
+                                    <size key="maxSize" width="487" height="10000000"/>
                                     <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                 </textView>
                             </subviews>
@@ -723,13 +704,46 @@
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="fim-S8-cws">
-                            <rect key="frame" x="449" y="1" width="16" height="373"/>
+                            <rect key="frame" x="472" y="1" width="16" height="114"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                     </scrollView>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="clW-7q-7ys" customClass="Button" customModule="PLBindableControls">
+                        <rect key="frame" x="517" y="552" width="32" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSLeftFacingTriangleTemplate" imagePosition="overlaps" alignment="center" imageScaling="proportionallyDown" inset="2" id="mM8-Sd-faH">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                    </button>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gIJ-Je-G36" customClass="Button" customModule="PLBindableControls">
+                        <rect key="frame" x="517" y="515" width="32" height="31"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSRefreshTemplate" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="6Hl-Du-VuQ">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                    </button>
+                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Obe-lp-Zh6" userLabel="Table Container" customClass="BackgroundView" customModule="PLBindableControls">
+                        <rect key="frame" x="20" y="20" width="529" height="444"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    </customView>
+                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xh3-Zi-i4Q" customClass="Button" customModule="PLBindableControls">
+                        <rect key="frame" x="517" y="477" width="32" height="32"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSRightFacingTriangleTemplate" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="Beq-hj-ave">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                    </button>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="143.5" y="-260"/>
+            <point key="canvasLocation" x="-64.5" y="-185"/>
         </window>
     </objects>
+    <resources>
+        <image name="NSLeftFacingTriangleTemplate" width="9" height="12"/>
+        <image name="NSRefreshTemplate" width="11" height="15"/>
+        <image name="NSRightFacingTriangleTemplate" width="9" height="12"/>
+    </resources>
 </document>
