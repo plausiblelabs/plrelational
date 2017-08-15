@@ -320,6 +320,8 @@ public final class AsyncManager: PerThreadInstance {
                 }
             }
             
+            self.getDatabases(forActions: actions, into: &databases)
+            
             // Wrap everything up in a transaction.
             // TODO: this doesn't really work when there's more than one database, even though we sort of
             // pretend like it does. Fix that? Explicitly limit it to one database?
@@ -535,6 +537,25 @@ public final class AsyncManager: PerThreadInstance {
         })
     }
     
+    /// Pull out all the databases that need locking for our current actions.
+    fileprivate func getDatabases(forActions: [Action], into databases: inout ObjectSet<TransactionalDatabase>) {
+        let relations = forActions.flatMap({ action -> Relation? in
+            switch action {
+            case .update(let r, _, _):
+                return r
+            case .add(let r, _), .delete(let r, _):
+                return r
+            default:
+                return nil
+            }
+        })
+        QueryPlanner.visitRelationTree(relations, { relation, underlyingRelation in
+            if let r = relation as? TransactionalRelation, let db = r.db {
+                databases.insert(db)
+            }
+        })
+    }
+
     /// Return a dispatch context that uses the AsyncManager's runloop and runloop modes.
     public func runloopDispatchContext() -> DispatchContext {
         return RunLoopDispatchContext(runloop: self.runloop,
