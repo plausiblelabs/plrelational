@@ -103,14 +103,29 @@ class ViewModel {
             "selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.id: 2])\n"
         )
         
+        // TODO: The goal of this step was to demonstrate performing an update and a
+        // delete on the same pulse, but ArrayProperty doesn't correctly deal with that
+        // yet, so for now just break it up into two separate steps
+//        fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: "Cherry"])
+//        fruits.asyncDelete(Fruit.id *== 1)
+//        addChange(
+//            "// Update \"Cherry\" and delete \"Apple\"\n" +
+//            "fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: \"Cherry\"])\n" +
+//            "fruits.asyncDelete(Fruit.id *== 1)\n"
+//        )
+
         fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: "Cherry"])
+        addChange(
+            "// Update \"Cherry\"\n" +
+            "fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: \"Cherry\"])\n"
+        )
+        
         fruits.asyncDelete(Fruit.id *== 1)
         addChange(
-            "// Update \"Cherry\" and delete \"Apple\"\n" +
-            "fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: \"Cherry\"])\n" +
+            "// Delete \"Apple\"\n" +
             "fruits.asyncDelete(Fruit.id *== 1)\n"
         )
-
+        
         // TODO: The following fails with mutatedDuringEnumeration error
 //        selectedFruitName.asyncUpdateString("Banana")
 //        addChange(
