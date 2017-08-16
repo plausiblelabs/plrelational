@@ -17,9 +17,10 @@ private let stepDuration: TimeInterval = 1.0
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     @IBOutlet weak var window: NSWindow!
+    @IBOutlet weak var scrollView: NSScrollView!
     @IBOutlet weak var textView: TextView!
-    @IBOutlet weak var previousButton: Button!
     @IBOutlet weak var nextButton: Button!
+    @IBOutlet weak var resetButton: Button!
     @IBOutlet weak var replayButton: Button!
     @IBOutlet weak var tableContainer: NSView!
     
@@ -56,12 +57,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         style.lineSpacing = 4.0
         textView.defaultParagraphStyle = style
         
+        let gradient = CAGradientLayer()
+        gradient.anchorPoint = CGPoint(x: 0, y: 0)
+        gradient.bounds = textView.bounds
+        gradient.colors = [NSColor.clear.cgColor, NSColor.white.cgColor, NSColor.white.cgColor]
+        scrollView.wantsLayer = true
+        scrollView.layer!.mask = gradient
+        
         // Configure the relation views
         let viewW: CGFloat = 160
         let viewH: CGFloat = 120
-        input1View = addRelationView(to: tableContainer, x: 40, y: 90, w: viewW, h: viewH, name: "fruit", property: model.fruitsProperty, orderedAttrs: [Fruit.id, Fruit.name])
-        input2View = addRelationView(to: tableContainer, x: 320, y: 90, w: viewW, h: viewH, name: "selected_fruit_id", property: model.selectedFruitIDsProperty, orderedAttrs: [SelectedFruit.id])
-        let joinViewX = 40 + round((input2View.frame.maxX - input1View.frame.minX - viewW) * 0.5)
+        let halfPadX: CGFloat = 30
+        let input1ViewX = round(tableContainer.bounds.midX - viewW - halfPadX)
+        let input2ViewX = round(tableContainer.bounds.midX + halfPadX)
+        let joinViewX = round(tableContainer.bounds.midX - (viewW * 0.5))
+        input1View = addRelationView(to: tableContainer, x: input1ViewX, y: 90, w: viewW, h: viewH, name: "fruit", property: model.fruitsProperty, orderedAttrs: [Fruit.id, Fruit.name])
+        input2View = addRelationView(to: tableContainer, x: input2ViewX, y: 90, w: viewW, h: viewH, name: "selected_fruit_id", property: model.selectedFruitIDsProperty, orderedAttrs: [SelectedFruit.fruitID])
         joinView = addRelationView(to: tableContainer, x: joinViewX, y: 300, w: viewW, h: viewH, name: "selected_fruit", property: model.selectedFruitsProperty, orderedAttrs: [Fruit.id, Fruit.name])
 
         // Add the arrow views
@@ -75,10 +86,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         
         // Bind to the view model
         textView.text <~ model.changeDescription
-        previousButton.disabled <~ not(previousEnabled)
-        previousButton.clicks ~~> model.goToPreviousState
-        nextButton.disabled <~ not(nextEnabled)
+        
+        nextButton.disabled <~ animating
+        nextButton.visible <~ model.nextVisible
+        nextButton.string <~ model.nextButtonTitle
         nextButton.clicks ~~> model.goToNextState
+        
+        resetButton.disabled <~ animating
+        resetButton.visible <~ model.resetVisible
+        resetButton.clicks ~~> model.goToInitialState
+        
         replayButton.disabled <~ not(replayEnabled)
         replayButton.clicks ~~> model.replayCurrentState
         
@@ -121,7 +138,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     
     private func orchestrateAnimations() {
-        Swift.print("ORCH!")
+        Swift.print("ORCHESTRATE!")
         var accumDelay: TimeInterval = 0.0
 
         func animate(_ arrow: ArrowView, _ view: RelationView, _ changeCount: Int) {
@@ -180,15 +197,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         return arrowView
     }
 
-    private lazy var previousEnabled: ReadableProperty<Bool> = {
-        return not(self.animating) *&& self.model.previousEnabled
-    }()
-
-    private lazy var nextEnabled: ReadableProperty<Bool> = {
-        return not(self.animating) *&& self.model.nextEnabled
-    }()
-    
     private lazy var replayEnabled: ReadableProperty<Bool> = {
-        return not(self.animating)
+        return not(self.animating) *&& self.model.replayEnabled
     }()
 }

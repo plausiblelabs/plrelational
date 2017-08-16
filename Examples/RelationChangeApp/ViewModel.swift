@@ -15,24 +15,27 @@ enum Fruit {
 
 enum SelectedFruit {
     static let _id = Attribute("_id")
-    static let id = Attribute("id")
+    static let fruitID = Attribute("fruit_id")
 }
 
 class ViewModel {
     
-    struct Change {
-        let snapshot: TransactionalDatabaseSnapshot
+    struct State {
+        let before: TransactionalDatabaseSnapshot
+        let after: TransactionalDatabaseSnapshot
         let desc: String
     }
     
     private let db: TransactionalDatabase
     private let fruits: TransactionalRelation
-    private let selectedFruitIDs: Relation
+    private let selectedFruitIDs: TransactionalRelation
     private let selectedFruits: Relation
     private let selectedFruitName: Relation
 
-    private let changes: [Change]
-    private let changeIndex: MutableValueProperty<Int> = mutableValueProperty(0)
+    private var states: [State] = []
+    private let stateIndex: MutableValueProperty<Int> = mutableValueProperty(0)
+    private var lastPlayedIndex: MutableValueProperty<Int> = mutableValueProperty(-1)
+    var shouldAnimate: Bool = false
     
     init() {
         func makeDB() -> (path: String, db: SQLiteDatabase) {
@@ -54,88 +57,89 @@ class ViewModel {
         }
         self.db = db
         fruits = createRelation("fruit", [Fruit.id, Fruit.name])
-        selectedFruitIDs = createRelation("selected_fruit_id", [SelectedFruit._id, SelectedFruit.id])
+        selectedFruitIDs = createRelation("selected_fruit_id", [SelectedFruit._id, SelectedFruit.fruitID])
         
         // Prepare higher-level relations
-        selectedFruits = selectedFruitIDs.join(fruits)
+        selectedFruits = fruits.equijoin(selectedFruitIDs, matching: [Fruit.id: SelectedFruit.fruitID])
         selectedFruitName = selectedFruits.project(Fruit.name)
         
-        // Add some initial data directly to our stored relations
-        func addFruit(_ id: Int64, _ name: String) {
-            let row: Row = [
-                Fruit.id: RelationValue(id),
-                Fruit.name: RelationValue(name)
-            ]
-            _ = sqliteDB["fruit"]!.add(row)
-        }
-        addFruit(1, "Apple")
-        addFruit(2, "Bandana")
-        
-        func addSelectedFruit(_ id: Int64) {
-            _ = sqliteDB["selected_fruit_id"]!.add([SelectedFruit._id: 0, SelectedFruit.id: RelationValue(id)])
-        }
-        addSelectedFruit(1)
-        
-        // Build up a series of database changes, capturing a snapshot after each change
-        var changes = [Change]()
-        func addChange(_ desc: String) {
-            // XXX: Force async changes to be applied before we snapshot
+        // Build up a series of database states, capturing a snapshot before and after each change
+        func addState(_ desc: String, _ changes: (() -> Void)) {
+            let before = db.takeSnapshot()
+            changes()
+            // XXX: Force async changes to be applied before we take "after" snapshot
             PLRelational.Async.awaitAsyncCompletion()
-            changes.append(Change(snapshot: db.takeSnapshot(), desc: desc))
+            let after = db.takeSnapshot()
+            states.append(State(before: before, after: after, desc: desc))
         }
-        
-        addChange(
-            "// Initial state\n" +
-            "addFruit(1, \"Apple\")\n" +
-            "addFruit(2, \"Bandana\")\n" +
-            "addSelectedFruit(1)\n"
+
+        addState(
+            "// Step 1: Populate the empty relations\n" +
+            "fruits.asyncAdd([Fruit.id: 1, Fruit.name: \"Apple\"])\n" +
+            "fruits.asyncAdd([Fruit.id: 2, Fruit.name: \"Bandana\"])\n" +
+            "selectedFruitIDs.asyncAdd([SelectedFruit._id: 0, SelectedFruit.fruitID: 1])\n",
+            {
+                fruits.asyncAdd([Fruit.id: 1, Fruit.name: "Apple"])
+                fruits.asyncAdd([Fruit.id: 2, Fruit.name: "Bandana"])
+                selectedFruitIDs.asyncAdd([SelectedFruit._id: 0, SelectedFruit.fruitID: 1])
+            }
         )
         
-        fruits.asyncAdd([Fruit.id: 3, Fruit.name: "Cheri"])
-        addChange(
-            "// Insert \"Cheri\"\n" +
-            "fruits.asyncAdd([Fruit.id: 3, Fruit.name: \"Cheri\"])\n"
+        addState(
+            "// Step 2: Insert \"Cheri\"\n" +
+            "fruits.asyncAdd([Fruit.id: 3, Fruit.name: \"Cheri\"])\n\n\n",
+            {
+                fruits.asyncAdd([Fruit.id: 3, Fruit.name: "Cheri"])
+            }
         )
 
-        selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.id: 2])
-        addChange(
-            "// Mark \"Bandana\" as the selected fruit\n" +
-            "selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.id: 2])\n"
+        addState(
+            "// Step 3: Mark \"Bandana\" as the selected fruit\n" +
+            "selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.id: 2])\n\n\n",
+            {
+                selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.fruitID: 2])
+            }
         )
         
         // TODO: The goal of this step was to demonstrate performing an update and a
         // delete on the same pulse, but ArrayProperty doesn't correctly deal with that
         // yet, so for now just break it up into two separate steps
-//        fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: "Cherry"])
-//        fruits.asyncDelete(Fruit.id *== 1)
-//        addChange(
+//        addState(
 //            "// Update \"Cherry\" and delete \"Apple\"\n" +
 //            "fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: \"Cherry\"])\n" +
-//            "fruits.asyncDelete(Fruit.id *== 1)\n"
+//            "fruits.asyncDelete(Fruit.id *== 1)\n",
+//            {
+//                fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: "Cherry"])
+//                fruits.asyncDelete(Fruit.id *== 1)
+//            }
 //        )
 
-        fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: "Cherry"])
-        addChange(
-            "// Update \"Cherry\"\n" +
-            "fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: \"Cherry\"])\n"
+        addState(
+            "// Step 4: Update \"Cherry\"\n" +
+            "fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: \"Cherry\"])\n\n\n",
+            {
+                fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: "Cherry"])
+            }
         )
         
-        fruits.asyncDelete(Fruit.id *== 1)
-        addChange(
-            "// Delete \"Apple\"\n" +
-            "fruits.asyncDelete(Fruit.id *== 1)\n"
+        addState(
+            "// Step 5: Delete \"Apple\"\n" +
+            "fruits.asyncDelete(Fruit.id *== 1)\n\n\n",
+            {
+                fruits.asyncDelete(Fruit.id *== 1)
+            }
         )
         
-        selectedFruitName.asyncUpdateString("Banana")
-        addChange(
-            "// Fix the name of the selected fruit (\"Banana\")\n" +
-            "selectedFruitName.asyncUpdateString(\"Banana\")\n"
+        addState(
+            "// Step 6: Fix the name of the selected fruit (\"Banana\")\n" +
+            "selectedFruitName.asyncUpdateString(\"Banana\")\n\n\n",
+            {
+                selectedFruitName.asyncUpdateString("Banana")
+            }
         )
-        
-        self.changes = changes
         
         // Jump back to initial state
-        apply(changes.first!)
+        self.apply(states.first!.before, immediate: true)
     }
 
     lazy var fruitsProperty: ArrayProperty<RowArrayElement> = {
@@ -151,38 +155,66 @@ class ViewModel {
     }()
 
     lazy var changeDescription: ReadableProperty<String> = {
-        return self.changeIndex.map{ self.changes[$0].desc }
+        return self.stateIndex.map{
+            // XXX: Add blank lines to beginning to allow initial text to appear at bottom after scroll-to-end
+            let blanks = "\n\n\n\n\n"
+            return blanks + self.states[0...$0].map({ $0.desc }).joined(separator: "\n")
+        }
+    }()
+
+    lazy var resetVisible: ReadableProperty<Bool> = {
+        return zip(self.stateIndex, self.lastPlayedIndex).map{ (current, played) in current == self.states.count - 1 && played == current }
     }()
     
-    lazy var previousEnabled: ReadableProperty<Bool> = {
-        return self.changeIndex.map{ $0 > 0 }
+    lazy var nextVisible: ReadableProperty<Bool> = {
+        return not(self.resetVisible)
+    }()
+    
+    lazy var replayEnabled: ReadableProperty<Bool> = {
+        return self.stateIndex *== self.lastPlayedIndex
     }()
 
-    lazy var nextEnabled: ReadableProperty<Bool> = {
-        return self.changeIndex.map{ $0 < self.changes.count - 1 }
+    lazy var nextButtonTitle: ReadableProperty<String> = {
+        return self.replayEnabled.map{ $0 ? "Next Step" : "Play Step" }
     }()
-
-    lazy var goToPreviousState: ActionProperty<()> = ActionProperty {
-        let currentIndex = self.changeIndex.value
-        let newIndex = currentIndex - 1
-        if newIndex < 0 { return }
-        self.changeIndex.change(newIndex)
-        self.apply(self.changes[newIndex])
-    }
     
     lazy var goToNextState: ActionProperty<()> = ActionProperty {
-        let currentIndex = self.changeIndex.value
-        let newIndex = currentIndex + 1
-        if newIndex >= self.changes.count { return }
-        self.changeIndex.change(newIndex)
-        self.apply(self.changes[newIndex])
+        let currentStateIndex = self.stateIndex.value
+        let currentPlayedIndex = self.lastPlayedIndex.value
+        if currentPlayedIndex < currentStateIndex {
+            // Play the current state
+            self.lastPlayedIndex.change(currentStateIndex)
+            self.db.asyncRestoreSnapshot(self.states[currentStateIndex].after)
+        } else {
+            // Go forward to the next state
+            let newStateIndex = currentStateIndex + 1
+            if newStateIndex >= self.states.count { return }
+            self.stateIndex.change(newStateIndex)
+        }
+    }
+
+    lazy var goToInitialState: ActionProperty<()> = ActionProperty {
+        self.lastPlayedIndex.change(-1)
+        self.stateIndex.change(0)
+        self.apply(self.states.first!.before, immediate: true)
     }
 
     lazy var replayCurrentState: ActionProperty<()> = ActionProperty {
-        // TODO
+        // TODO: Do a quick animation back to the "before" state?
+        let state = self.states[self.stateIndex.value]
+        self.apply(state.before, immediate: true)
+        self.apply(state.after, immediate: false)
     }
-
-    private func apply(_ change: Change) {
-        db.asyncRestoreSnapshot(change.snapshot)
+    
+    private func apply(_ snapshot: TransactionalDatabaseSnapshot, immediate: Bool) {
+        if immediate {
+            shouldAnimate = false
+            self.db.asyncRestoreSnapshot(snapshot)
+            // TODO: Can we do without this await?
+            PLRelational.Async.awaitAsyncCompletion()
+            shouldAnimate = true
+        } else {
+            self.db.asyncRestoreSnapshot(snapshot)
+        }
     }
 }
