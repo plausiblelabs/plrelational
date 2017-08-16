@@ -59,53 +59,8 @@ class RelationView: BackgroundView {
     }
 
     private func applyAnimations() {
-        
-        func slide(_ labelRow: LabelRow, delta: CGFloat) {
-            let labelRowView = labelRow.view
-            
-            var rowFrame = labelRowView.frame
-            let startPoint = rowFrame.origin
-            rowFrame.origin.y += delta
-            let endPoint = rowFrame.origin
-            labelRowView.frame = rowFrame
-            
-            CATransaction.begin()
+        let slideDuration: TimeInterval = self.stepDuration * 0.3
 
-            let animation = CABasicAnimation(keyPath: "position")
-            animation.fromValue = NSValue(point: startPoint)
-            animation.toValue = NSValue(point: endPoint)
-            animation.duration = self.stepDuration
-            //animation.beginTime = CACurrentMediaTime() + accumDelay
-            animation.isRemovedOnCompletion = true
-            labelRowView.layer!.add(animation, forKey: "position")
-            
-            CATransaction.commit()
-        }
-        
-        func fade(_ labelRow: LabelRow, _ completion: (() -> Void)? = nil) {
-            let labelRowView = labelRow.view
-            let fadeIn = labelRowView.layer!.opacity < 1.0
-
-            CATransaction.begin()
-            
-            CATransaction.setCompletionBlock({
-                completion?()
-            })
-
-            labelRowView.layer!.opacity = fadeIn ? 1.0 : 0.0
-
-            let animation = CABasicAnimation(keyPath: "opacity")
-            animation.fromValue = NSNumber(value: Float(fadeIn ? 0.0 : 1.0))
-            animation.toValue = NSNumber(value: Float(fadeIn ? 1.0 : 0.0))
-            animation.fillMode = kCAFillModeBoth
-            animation.duration = self.stepDuration
-            //animation.beginTime = CACurrentMediaTime() + accumDelay
-            animation.isRemovedOnCompletion = true
-            labelRowView.layer!.add(animation, forKey: "opacity")
-
-            CATransaction.commit()
-        }
-        
         // Animate the change
         let change = changesToAnimate.removeFirst()
         switch change {
@@ -113,24 +68,25 @@ class RelationView: BackgroundView {
             Swift.print("INSERT: \(index)")
             // Slide existing elements (after the row to be inserted) down one spot
             for i in index..<labelRows.count {
-                slide(labelRows[i], delta: rowH)
+                labelRows[i].slide(delta: rowH, delay: 0.0, duration: slideDuration)
             }
             
             // Add the new row and fade it in
             addLabelRow(arrayProperty.elements[index], index, opacity: 0)
-            fade(labelRows[index])
+            labelRows[index].fade(duration: self.stepDuration)
             
         case let .delete(index):
             Swift.print("DELETE: \(index)")
             // Fade out the row to be deleted, then remove it
             let labelRow = labelRows.remove(at: index)
-            fade(labelRow, {
+            labelRow.fade(duration: self.stepDuration, completion: {
                 labelRow.view.removeFromSuperview()
             })
 
             // Slide existing elements (after the deleted row) up one spot
+            let slideDelay = self.stepDuration - slideDuration
             for i in index..<labelRows.count {
-                slide(labelRows[i], delta: -rowH)
+                labelRows[i].slide(delta: -rowH, delay: slideDelay, duration: slideDuration)
             }
 
         case let .update(index):
@@ -142,9 +98,8 @@ class RelationView: BackgroundView {
                     let updatedValue = updatedRow[attr]
                     let updatedString = updatedValue.description
                     if updatedString != cell.string {
-                        // TODO: Animate
-                        cell.string = updatedString
-                        cell.label.stringValue = updatedString
+                        // Fade to the new string
+                        cell.animate(to: updatedString, delay: 0, duration: stepDuration)
                     }
                 }
             }
@@ -219,10 +174,88 @@ class RelationView: BackgroundView {
     private class LabelRow {
         let view: BackgroundView
         let cells: [Attribute: LabelCell]
+        var highlightLayer: CAShapeLayer?
         
         init(view: BackgroundView, cells: [Attribute: LabelCell]) {
             self.view = view
             self.cells = cells
+        }
+        
+        func slide(delta: CGFloat, delay: TimeInterval, duration: TimeInterval) {
+            var rowFrame = view.frame
+            let startPoint = rowFrame.origin
+            rowFrame.origin.y += delta
+            let endPoint = rowFrame.origin
+            
+            CATransaction.begin()
+            
+            CATransaction.setCompletionBlock({
+                self.view.frame = rowFrame
+            })
+
+            let animation = CABasicAnimation(keyPath: "position")
+            animation.fromValue = NSValue(point: startPoint)
+            animation.toValue = NSValue(point: endPoint)
+            animation.duration = duration
+            animation.beginTime = CACurrentMediaTime() + delay
+            animation.isRemovedOnCompletion = true
+            view.layer!.add(animation, forKey: "position")
+            
+            CATransaction.commit()
+        }
+        
+        func fade(duration: TimeInterval, completion: (() -> Void)? = nil) {
+            let fadeIn = view.layer!.opacity < 1.0
+            
+            func addLayer() -> CAShapeLayer {
+                let l = CAShapeLayer()
+                l.path = NSBezierPath(roundedRect: view.bounds.insetBy(dx: 2, dy: 2), xRadius: 4, yRadius: 4).cgPath
+                self.view.wantsLayer = true
+                self.view.layer!.addSublayer(l)
+                self.view.layer!.masksToBounds = false
+                return l
+            }
+            
+            if highlightLayer == nil {
+                highlightLayer = addLayer()
+            }
+            let color: NSColor = fadeIn ? .green : .red
+            highlightLayer!.fillColor = color.withAlphaComponent(0.3).cgColor
+            highlightLayer!.opacity = 0.0
+            
+            func addHighlightAnimation() {
+                let animation = CABasicAnimation(keyPath: "opacity")
+                animation.fromValue = NSNumber(value: Float(0.0))
+                animation.toValue = NSNumber(value: Float(1.0))
+                animation.duration = duration * 0.6
+                animation.autoreverses = true
+                animation.repeatCount = 1
+                animation.isRemovedOnCompletion = true
+                highlightLayer!.add(animation, forKey: "opacity")
+            }
+
+            func addFadeAnimation() {
+                view.layer!.opacity = fadeIn ? 1.0 : 0.0
+                
+                let animation = CABasicAnimation(keyPath: "opacity")
+                animation.fromValue = NSNumber(value: Float(fadeIn ? 0.0 : 1.0))
+                animation.toValue = NSNumber(value: Float(fadeIn ? 1.0 : 0.0))
+                animation.fillMode = kCAFillModeBoth
+                animation.duration = duration
+                animation.isRemovedOnCompletion = true
+                view.layer!.add(animation, forKey: "opacity")
+            }
+            
+            CATransaction.begin()
+            
+            CATransaction.setCompletionBlock({
+                completion?()
+            })
+            
+            addHighlightAnimation()
+            addFadeAnimation()
+            
+            CATransaction.commit()
         }
     }
     
@@ -230,11 +263,44 @@ class RelationView: BackgroundView {
         let attribute: Attribute
         var string: String
         let label: Label
+        var highlightLayer: CALayer?
         
         init(attribute: Attribute, string: String, label: Label) {
             self.attribute = attribute
             self.string = string
             self.label = label
+        }
+        
+        func animate(to newString: String, delay: TimeInterval, duration: TimeInterval) {
+            self.string = newString
+            self.label.stringValue = newString
+            
+            func addLayer(_ color: NSColor) -> CAShapeLayer {
+                let l = CAShapeLayer()
+                l.path = NSBezierPath(roundedRect: label.bounds.insetBy(dx: -2, dy: -2), xRadius: 8, yRadius: 8).cgPath
+                l.fillColor = NSColor.clear.cgColor
+                l.strokeColor = color.cgColor
+                l.lineWidth = 2
+                self.label.wantsLayer = true
+                self.label.layer!.addSublayer(l)
+                self.label.layer!.masksToBounds = false
+                return l
+            }
+
+            if highlightLayer == nil {
+                highlightLayer = addLayer(.orange)
+            }
+            highlightLayer!.opacity = 0.0
+            
+            let animation = CABasicAnimation(keyPath: "opacity")
+            animation.fromValue = NSNumber(value: Float(0.0))
+            animation.toValue = NSNumber(value: Float(1.0))
+            animation.duration = duration * 0.5
+            animation.beginTime = CACurrentMediaTime() + delay
+            animation.autoreverses = true
+            animation.repeatCount = 1
+            animation.isRemovedOnCompletion = true
+            highlightLayer!.add(animation, forKey: "opacity")
         }
     }
 }
