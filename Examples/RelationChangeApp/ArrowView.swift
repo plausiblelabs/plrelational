@@ -92,7 +92,9 @@ class ArrowView: NSView {
         return true
     }
 
-    func animate(delay: CFTimeInterval, duration: CFTimeInterval) {
+    func animate(color: NSColor, delay: CFTimeInterval, duration: CFTimeInterval) {
+        fgLayer.strokeColor = color.cgColor
+        
         let animation = CABasicAnimation(keyPath: "position")
         animation.fromValue = NSValue(point: CGPoint(x: 0, y: -maskH))
         animation.toValue = NSValue(point: CGPoint(x: 0, y: self.bounds.height))

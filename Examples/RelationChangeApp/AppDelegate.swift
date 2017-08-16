@@ -16,6 +16,12 @@ private let stepDuration: TimeInterval = 1.0
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
+    private enum ChangeType {
+        case insert
+        case delete
+        case update
+    }
+    
     @IBOutlet weak var window: NSWindow!
     @IBOutlet weak var scrollView: NSScrollView!
     @IBOutlet weak var textView: TextView!
@@ -35,9 +41,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var model: ViewModel!
     
     private let animating: MutableValueProperty<Bool> = mutableValueProperty(false)
-    private var input1Changes: Int = 0
-    private var input2Changes: Int = 0
-    private var joinChanges: Int = 0
+    private var input1Changes: [ChangeType] = []
+    private var input2Changes: [ChangeType] = []
+    private var joinChanges: [ChangeType] = []
     
     private var orchestrateTimer: Timer?
     private var completionTimer: Timer?
@@ -100,7 +106,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         replayButton.clicks ~~> model.replayCurrentState
         
         // Observe the relation-based array properties so that we can orchestrate the animations
-        func observe(_ property: ArrayProperty<RowArrayElement>, _ callback: @escaping ((Int) -> Void)) {
+        func observe(_ property: ArrayProperty<RowArrayElement>, _ callback: @escaping (([ChangeType]) -> Void)) {
             let removal = property.signal.observe{ [weak self] event in
                 guard let strongSelf = self else { return }
                 switch event {
@@ -115,22 +121,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                         })
                     }
                 case let .valueChanging(changes, _):
-                    let validChanges = changes.filter{
-                        switch $0 {
-                        case .initial: return false
-                        case .insert, .delete, .update, .move: return true
+                    let changeTypes = changes.flatMap{ (change) -> ChangeType? in
+                        switch change {
+                        case .initial: return nil
+                        case .insert: return .insert
+                        case .delete: return .delete
+                        case .update, .move: return .update
                         }
                     }
-                    callback(validChanges.count)
+                    callback(changeTypes)
                 case .endPossibleAsyncChange:
                     break
                 }
             }
             observerRemovals.append(removal)
         }
-        observe(model.fruitsProperty, { [weak self] in self?.input1Changes += $0 })
-        observe(model.selectedFruitIDsProperty, { [weak self] in self?.input2Changes += $0 })
-        observe(model.selectedFruitsProperty, { [weak self] in self?.joinChanges += $0 })
+        observe(model.fruitsProperty, { [weak self] in self?.input1Changes.append(contentsOf: $0) })
+        observe(model.selectedFruitIDsProperty, { [weak self] in self?.input2Changes.append(contentsOf: $0) })
+        observe(model.selectedFruitsProperty, { [weak self] in self?.joinChanges.append(contentsOf: $0) })
     }
     
     deinit {
@@ -141,16 +149,31 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         Swift.print("ORCHESTRATE!")
         var accumDelay: TimeInterval = 0.0
 
-        func animate(_ arrow: ArrowView, _ view: RelationView, _ changeCount: Int) {
-            if changeCount == 0 {
+        func animate(_ arrow: ArrowView, _ view: RelationView, _ changes: [ChangeType]) {
+            if changes.count == 0 {
                 return
             }
             
-            arrow.animate(delay: accumDelay, duration: stepDuration)
+            let arrowColor: NSColor
+            let changeSet = Set(changes)
+            if changeSet.count == 1 {
+                switch changeSet.first! {
+                case .insert:
+                    arrowColor = .green
+                case .delete:
+                    arrowColor = .red
+                case .update:
+                    arrowColor = .orange
+                }
+            } else {
+                arrowColor = .orange
+            }
+            
+            arrow.animate(color: arrowColor, delay: accumDelay, duration: stepDuration)
             accumDelay += stepDuration
             
             view.animate(delay: accumDelay, duration: stepDuration)
-            accumDelay += (stepDuration * TimeInterval(changeCount))
+            accumDelay += (stepDuration * TimeInterval(changes.count))
         }
 
         animate(input1Arrow, input1View, input1Changes)
@@ -162,11 +185,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // Reset counters when animations have completed
         Swift.print("SCHEDULING COMPLETION: \(accumDelay)")
-        completionTimer = Timer.scheduledTimer(withTimeInterval: accumDelay + 0.5, repeats: false, block: { _ in
+        completionTimer = Timer.scheduledTimer(withTimeInterval: accumDelay + 0.2, repeats: false, block: { _ in
             Swift.print("DONE!")
-            self.input1Changes = 0
-            self.input2Changes = 0
-            self.joinChanges = 0
+            self.input1Changes = []
+            self.input2Changes = []
+            self.joinChanges = []
             self.animating.change(false)
         })
     }
