@@ -57,18 +57,21 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         textView.defaultParagraphStyle = style
         
         // Configure the relation views
-        let h: CGFloat = 120
-        input1View = addRelationView(to: tableContainer, x: 40, y: 90, w: 240, h: h, name: "fruit", property: model.fruitsProperty, orderedAttrs: [Fruit.id, Fruit.name])
-        input2View = addRelationView(to: tableContainer, x: 320, y: 90, w: 120, h: h, name: "selected_fruit_id", property: model.selectedFruitIDsProperty, orderedAttrs: [SelectedFruit.id])
-        joinView = addRelationView(to: tableContainer, x: 40, y: 300, w: 240, h: h, name: "selected_fruit", property: model.selectedFruitsProperty, orderedAttrs: [Fruit.id, Fruit.name])
+        let viewW: CGFloat = 160
+        let viewH: CGFloat = 120
+        input1View = addRelationView(to: tableContainer, x: 40, y: 90, w: viewW, h: viewH, name: "fruit", property: model.fruitsProperty, orderedAttrs: [Fruit.id, Fruit.name])
+        input2View = addRelationView(to: tableContainer, x: 320, y: 90, w: viewW, h: viewH, name: "selected_fruit_id", property: model.selectedFruitIDsProperty, orderedAttrs: [SelectedFruit.id])
+        let joinViewX = 40 + round((input2View.frame.maxX - input1View.frame.minX - viewW) * 0.5)
+        joinView = addRelationView(to: tableContainer, x: joinViewX, y: 300, w: viewW, h: viewH, name: "selected_fruit", property: model.selectedFruitsProperty, orderedAttrs: [Fruit.id, Fruit.name])
 
         // Add the arrow views
         let aw: CGFloat = 40
         let haw: CGFloat = aw * 0.5
         let ah: CGFloat = 64
-        input1Arrow = addArrowView(to: tableContainer, x: input1View.frame.midX - haw, y: 2, w: aw, h: ah)
-        input2Arrow = addArrowView(to: tableContainer, x: input2View.frame.midX - haw, y: 2, w: aw, h: ah)
-        joinArrow = addArrowView(to: tableContainer, x: joinView.frame.midX - haw, y: 220, w: aw, h: ah)
+        input1Arrow = addArrowView(to: tableContainer, x: input1View.frame.midX - haw, y: 2, w: aw, h: ah, dual: false)
+        input2Arrow = addArrowView(to: tableContainer, x: input2View.frame.midX - haw, y: 2, w: aw, h: ah, dual: false)
+        let joinArrowW = input2Arrow.frame.maxX - input1Arrow.frame.minX
+        joinArrow = addArrowView(to: tableContainer, x: input1Arrow.frame.minX, y: 214, w: joinArrowW, h: ah, dual: true)
         
         // Bind to the view model
         textView.text <~ model.changeDescription
@@ -171,8 +174,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         return relationView
     }
     
-    private func addArrowView(to parent: NSView, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat) -> ArrowView {
-        let arrowView = ArrowView(frame: NSMakeRect(x, y, w, h))
+    private func addArrowView(to parent: NSView, x: CGFloat, y: CGFloat, w: CGFloat, h: CGFloat, dual: Bool) -> ArrowView {
+        let arrowView = ArrowView(frame: NSMakeRect(x, y, w, h), dual: dual)
         parent.addSubview(arrowView)
         return arrowView
     }
