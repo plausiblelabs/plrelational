@@ -59,7 +59,6 @@ class RelationView: BackgroundView {
     }
 
     private func applyAnimations() {
-        var accumDelay: TimeInterval = 0.0
         
         func slide(_ labelRow: LabelRow, delta: CGFloat) {
             let labelRowView = labelRow.view
@@ -70,13 +69,17 @@ class RelationView: BackgroundView {
             let endPoint = rowFrame.origin
             labelRowView.frame = rowFrame
             
+            CATransaction.begin()
+
             let animation = CABasicAnimation(keyPath: "position")
             animation.fromValue = NSValue(point: startPoint)
             animation.toValue = NSValue(point: endPoint)
             animation.duration = self.stepDuration
-            animation.beginTime = CACurrentMediaTime() + accumDelay
+            //animation.beginTime = CACurrentMediaTime() + accumDelay
             animation.isRemovedOnCompletion = true
             labelRowView.layer!.add(animation, forKey: "position")
+            
+            CATransaction.commit()
         }
         
         func fade(_ labelRow: LabelRow, _ completion: (() -> Void)? = nil) {
@@ -96,68 +99,69 @@ class RelationView: BackgroundView {
             animation.toValue = NSNumber(value: Float(fadeIn ? 1.0 : 0.0))
             animation.fillMode = kCAFillModeBoth
             animation.duration = self.stepDuration
-            animation.beginTime = CACurrentMediaTime() + accumDelay
+            //animation.beginTime = CACurrentMediaTime() + accumDelay
             animation.isRemovedOnCompletion = true
             labelRowView.layer!.add(animation, forKey: "opacity")
 
             CATransaction.commit()
         }
         
-        for change in changesToAnimate {
-            switch change {
-            case let .insert(index):
-                Swift.print("INSERT: \(index)")
-                // Slide existing elements (after the row to be inserted) down one spot
-                for i in index..<labelRows.count {
-                    slide(labelRows[i], delta: rowH)
-                }
-                accumDelay += stepDuration
-                
-                // Add the new row and fade it in
-                addLabelRow(arrayProperty.elements[index], index, opacity: 0)
-                fade(labelRows[index])
-                accumDelay += stepDuration
-                
-            case let .delete(index):
-                Swift.print("DELETE: \(index)")
-                // Slide existing elements (after the row to be deleted) up one spot
-                for i in index+1..<labelRows.count {
-                    slide(labelRows[i], delta: -rowH)
-                }
-                accumDelay += stepDuration
-                
-                // Fade out the row to be deleted, then remove it
-                let labelRow = labelRows.remove(at: index)
-                fade(labelRow, {
-                    labelRow.view.removeFromSuperview()
-                })
-                accumDelay += stepDuration
-                
-            case let .update(index):
-                Swift.print("UPDATE: \(index)")
-                let labelRow = labelRows[index]
-                let updatedRow = arrayProperty.elements[index].data
-                for attr in updatedRow.scheme.attributes {
-                    if let cell = labelRow.cells[attr] {
-                        let updatedValue = updatedRow[attr]
-                        let updatedString = updatedValue.description
-                        if updatedString != cell.string {
-                            // TODO: Animate
-                            cell.string = updatedString
-                            cell.label.stringValue = updatedString
-                        }
+        // Animate the change
+        let change = changesToAnimate.removeFirst()
+        switch change {
+        case let .insert(index):
+            Swift.print("INSERT: \(index)")
+            // Slide existing elements (after the row to be inserted) down one spot
+            for i in index..<labelRows.count {
+                slide(labelRows[i], delta: rowH)
+            }
+            
+            // Add the new row and fade it in
+            addLabelRow(arrayProperty.elements[index], index, opacity: 0)
+            fade(labelRows[index])
+            
+        case let .delete(index):
+            Swift.print("DELETE: \(index)")
+            // Fade out the row to be deleted, then remove it
+            let labelRow = labelRows.remove(at: index)
+            fade(labelRow, {
+                labelRow.view.removeFromSuperview()
+            })
+
+            // Slide existing elements (after the deleted row) up one spot
+            for i in index..<labelRows.count {
+                slide(labelRows[i], delta: -rowH)
+            }
+
+        case let .update(index):
+            Swift.print("UPDATE: \(index)")
+            let labelRow = labelRows[index]
+            let updatedRow = arrayProperty.elements[index].data
+            for attr in updatedRow.scheme.attributes {
+                if let cell = labelRow.cells[attr] {
+                    let updatedValue = updatedRow[attr]
+                    let updatedString = updatedValue.description
+                    if updatedString != cell.string {
+                        // TODO: Animate
+                        cell.string = updatedString
+                        cell.label.stringValue = updatedString
                     }
                 }
-                
-            case .move:
-                fatalError("Not yet implemented")
-    
-            case .initial:
-                fatalError("Unexpected initial change")
             }
+            
+        case .move:
+            fatalError("Not yet implemented")
+
+        case .initial:
+            fatalError("Unexpected initial change")
         }
-        
-        changesToAnimate = []
+
+        if changesToAnimate.count > 0 {
+            // Schedule the next change to be animated
+            Timer.scheduledTimer(withTimeInterval: stepDuration, repeats: false, block: { _ in
+                self.applyAnimations()
+            })
+        }
     }
 
     private func arrayChanged(_ arrayChanges: [ArrayChange<RowArrayElement>]) {
