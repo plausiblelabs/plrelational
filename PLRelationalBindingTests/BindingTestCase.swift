@@ -29,10 +29,9 @@ class BindingTestCase: XCTestCase {
         
         return (path, db)
     }
-    
-    func prettyArray(_ array: ArrayProperty<RowArrayElement>) -> [String] {
+
+    func prettyArray(_ elements: [RowArrayElement]) -> [String] {
         var accum: [String] = []
-        let elements = array.value!
         for element in elements {
             accum.append("\(element.data["name"])")
         }
@@ -40,7 +39,7 @@ class BindingTestCase: XCTestCase {
     }
     
     func verifyArray(_ array: ArrayProperty<RowArrayElement>, _ expected: [String], file: StaticString = #file, line: UInt = #line) {
-        XCTAssertEqual(prettyArray(array), expected, file: file, line: line)
+        XCTAssertEqual(prettyArray(array.elements), expected, file: file, line: line)
     }
     
     func pretty(_ node: RowTreeNode, _ accum: inout [String], _ indent: Int) {
