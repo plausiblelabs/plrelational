@@ -23,7 +23,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     
     @IBOutlet weak var window: NSWindow!
-    @IBOutlet weak var scrollView: NSScrollView!
     @IBOutlet weak var textView: TextView!
     @IBOutlet weak var nextButton: Button!
     @IBOutlet weak var resetButton: Button!
@@ -57,18 +56,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         model = ViewModel()
         
         // Configure the text view
-        textView.textContainerInset = NSMakeSize(0, 5)
-        textView.font = NSFont(name: "Menlo", size: 11)
-        let style = NSMutableParagraphStyle()
-        style.lineSpacing = 4.0
-        textView.defaultParagraphStyle = style
-        
         let gradient = CAGradientLayer()
         gradient.anchorPoint = CGPoint(x: 0, y: 0)
         gradient.bounds = textView.bounds
         gradient.colors = [NSColor.clear.cgColor, NSColor.white.cgColor, NSColor.white.cgColor]
-        scrollView.wantsLayer = true
-        scrollView.layer!.mask = gradient
+        textView.wantsLayer = true
+        textView.layer!.mask = gradient
+        textView.strings = model.stateDescriptions
         
         // Configure the relation views
         let viewW: CGFloat = 160
@@ -91,7 +85,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         joinArrow = addArrowView(to: tableContainer, x: input1Arrow.frame.minX, y: 214, w: joinArrowW, h: ah, dual: true)
         
         // Bind to the view model
-        textView.text <~ model.changeDescription
+        textView.index <~ model.stateIndex
+        textView.animated = true
         
         nextButton.disabled <~ animating
         nextButton.visible <~ model.nextVisible

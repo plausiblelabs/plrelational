@@ -33,7 +33,7 @@ class ViewModel {
     private let selectedFruitName: Relation
 
     private var states: [State] = []
-    private let stateIndex: MutableValueProperty<Int> = mutableValueProperty(0)
+    let stateIndex: MutableValueProperty<Int> = mutableValueProperty(0)
     private var lastPlayedIndex: MutableValueProperty<Int> = mutableValueProperty(-1)
     var shouldAnimate: Bool = false
     
@@ -77,7 +77,7 @@ class ViewModel {
             "// Step 1: Populate the empty relations\n" +
             "fruits.asyncAdd([Fruit.id: 1, Fruit.name: \"Apple\"])\n" +
             "fruits.asyncAdd([Fruit.id: 2, Fruit.name: \"Bandana\"])\n" +
-            "selectedFruitIDs.asyncAdd([SelectedFruit._id: 0, SelectedFruit.fruitID: 1])\n",
+            "selectedFruitIDs.asyncAdd([SelectedFruit._id: 0, SelectedFruit.fruitID: 1])",
             {
                 fruits.asyncAdd([Fruit.id: 1, Fruit.name: "Apple"])
                 fruits.asyncAdd([Fruit.id: 2, Fruit.name: "Bandana"])
@@ -87,7 +87,7 @@ class ViewModel {
         
         addState(
             "// Step 2: Insert \"Cheri\"\n" +
-            "fruits.asyncAdd([Fruit.id: 3, Fruit.name: \"Cheri\"])\n\n\n",
+            "fruits.asyncAdd([Fruit.id: 3, Fruit.name: \"Cheri\"])",
             {
                 fruits.asyncAdd([Fruit.id: 3, Fruit.name: "Cheri"])
             }
@@ -95,7 +95,7 @@ class ViewModel {
 
         addState(
             "// Step 3: Mark \"Bandana\" as the selected fruit\n" +
-            "selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.id: 2])\n\n\n",
+            "selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.id: 2])",
             {
                 selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.fruitID: 2])
             }
@@ -116,7 +116,7 @@ class ViewModel {
 
         addState(
             "// Step 4: Update \"Cherry\"\n" +
-            "fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: \"Cherry\"])\n\n\n",
+            "fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: \"Cherry\"])",
             {
                 fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: "Cherry"])
             }
@@ -124,7 +124,7 @@ class ViewModel {
         
         addState(
             "// Step 5: Delete \"Apple\"\n" +
-            "fruits.asyncDelete(Fruit.id *== 1)\n\n\n",
+            "fruits.asyncDelete(Fruit.id *== 1)",
             {
                 fruits.asyncDelete(Fruit.id *== 1)
             }
@@ -132,7 +132,7 @@ class ViewModel {
         
         addState(
             "// Step 6: Fix the name of the selected fruit (\"Banana\")\n" +
-            "selectedFruitName.asyncUpdateString(\"Banana\")\n\n\n",
+            "selectedFruitName.asyncUpdateString(\"Banana\")",
             {
                 selectedFruitName.asyncUpdateString("Banana")
             }
@@ -154,12 +154,8 @@ class ViewModel {
         return self.selectedFruits.arrayProperty(idAttr: SelectedFruit._id, orderAttr: SelectedFruit._id)
     }()
 
-    lazy var changeDescription: ReadableProperty<String> = {
-        return self.stateIndex.map{
-            // XXX: Add blank lines to beginning to allow initial text to appear at bottom after scroll-to-end
-            let blanks = "\n\n\n\n\n"
-            return blanks + self.states[0...$0].map({ $0.desc }).joined(separator: "\n")
-        }
+    lazy var stateDescriptions: [String] = {
+        return self.states.map{ $0.desc }
     }()
 
     lazy var resetVisible: ReadableProperty<Bool> = {
