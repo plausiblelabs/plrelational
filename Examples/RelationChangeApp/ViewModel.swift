@@ -110,21 +110,8 @@ class ViewModel {
             }
         )
         
-        // TODO: The goal of this step was to demonstrate performing an update and a
-        // delete on the same pulse, but ArrayProperty doesn't correctly deal with that
-        // yet, so for now just break it up into two separate steps
-//        addState(
-//            "// Update \"Cherry\" and delete \"Apple\"\n" +
-//            "fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: \"Cherry\"])\n" +
-//            "fruits.asyncDelete(Fruit.id *== 1)\n",
-//            {
-//                fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: "Cherry"])
-//                fruits.asyncDelete(Fruit.id *== 1)
-//            }
-//        )
-
         addState(
-            "// Step 4: Update \"Cherry\"\n" +
+            "// Step 4: Fix spelling of \"Cherry\" by updating the source relation\n" +
             "fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: \"Cherry\"])",
             {
                 fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: "Cherry"])
@@ -140,7 +127,9 @@ class ViewModel {
         )
         
         addState(
-            "// Step 6: Fix the name of the selected fruit (\"Banana\")\n" +
+            "// Step 6: Fix spelling of the selected fruit (\"Banana\") by applying\n" +
+            "// the update to the higher-level relation (will automatically propagate\n" +
+            "// back to the source relation)\n" +
             "selectedFruitName.asyncUpdateString(\"Banana\")",
             {
                 selectedFruitName.asyncUpdateString("Banana")

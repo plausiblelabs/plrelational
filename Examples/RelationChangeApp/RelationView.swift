@@ -161,10 +161,10 @@ class RelationView: BackgroundView {
             labelFrame.origin.y = round((rowH - labelFrame.height) * 0.5)
             labelFrame.size.width = labelW - 8
             labelView.frame = labelFrame
+            rowView.addSubview(labelView)
 
             cells[attr] = LabelCell(attribute: attr, string: string, label: labelView)
             
-            rowView.addSubview(labelView)
             x += labelW
         }
 
@@ -263,44 +263,79 @@ class RelationView: BackgroundView {
         let attribute: Attribute
         var string: String
         let label: Label
+        let oldStringLabel: Label
         var highlightLayer: CALayer?
         
         init(attribute: Attribute, string: String, label: Label) {
             self.attribute = attribute
             self.string = string
             self.label = label
+            
+            self.oldStringLabel = Label(frame: label.frame)
+            oldStringLabel.backgroundColor = .white
+            oldStringLabel.drawsBackground = true
+            oldStringLabel.wantsLayer = true
+            oldStringLabel.layer!.opacity = 0.0
+            label.superview!.addSubview(oldStringLabel)
         }
         
         func animate(to newString: String, delay: TimeInterval, duration: TimeInterval) {
+            // Capture the current string
+            let oldString = self.string
+            
+            // Set the new string immediately
             self.string = newString
             self.label.stringValue = newString
             
-            func addLayer(_ color: NSColor) -> CAShapeLayer {
+            func addHighlightLayer(_ color: NSColor) -> CAShapeLayer {
                 let l = CAShapeLayer()
-                l.path = NSBezierPath(roundedRect: label.bounds.insetBy(dx: -2, dy: -2), xRadius: 8, yRadius: 8).cgPath
+                l.path = NSBezierPath(roundedRect: label.frame.insetBy(dx: -2, dy: -2), xRadius: 8, yRadius: 8).cgPath
                 l.fillColor = NSColor.clear.cgColor
                 l.strokeColor = color.cgColor
                 l.lineWidth = 2
-                self.label.wantsLayer = true
-                self.label.layer!.addSublayer(l)
-                self.label.layer!.masksToBounds = false
+                self.label.superview!.layer!.addSublayer(l)
+                self.label.superview!.layer!.masksToBounds = false
                 return l
             }
-
+            
+            func addHighlightAnimation() {
+                let animation = CABasicAnimation(keyPath: "opacity")
+                animation.fromValue = NSNumber(value: Float(0.0))
+                animation.toValue = NSNumber(value: Float(1.0))
+                animation.duration = duration * 0.5
+                animation.beginTime = CACurrentMediaTime() + delay
+                animation.autoreverses = true
+                animation.repeatCount = 1
+                animation.isRemovedOnCompletion = true
+                highlightLayer!.add(animation, forKey: "opacity")
+            }
+            
+            func addOldStringAnimation() {
+                let animation = CABasicAnimation(keyPath: "opacity")
+                animation.fromValue = NSNumber(value: Float(1.0))
+                animation.toValue = NSNumber(value: Float(0.0))
+                animation.duration = duration
+                animation.beginTime = CACurrentMediaTime() + delay
+                animation.fillMode = kCAFillModeBoth
+                animation.isRemovedOnCompletion = false
+                oldStringLabel.layer!.add(animation, forKey: "opacity")
+            }
+            
+            // Prepare the layers
             if highlightLayer == nil {
-                highlightLayer = addLayer(.orange)
+                highlightLayer = addHighlightLayer(.orange)
             }
             highlightLayer!.opacity = 0.0
             
-            let animation = CABasicAnimation(keyPath: "opacity")
-            animation.fromValue = NSNumber(value: Float(0.0))
-            animation.toValue = NSNumber(value: Float(1.0))
-            animation.duration = duration * 0.5
-            animation.beginTime = CACurrentMediaTime() + delay
-            animation.autoreverses = true
-            animation.repeatCount = 1
-            animation.isRemovedOnCompletion = true
-            highlightLayer!.add(animation, forKey: "opacity")
+            oldStringLabel.stringValue = oldString
+            oldStringLabel.layer!.opacity = 1.0
+
+            CATransaction.begin()
+
+            addHighlightAnimation()
+            addOldStringAnimation()
+            
+            CATransaction.commit()
         }
     }
 }
