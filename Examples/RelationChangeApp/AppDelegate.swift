@@ -136,7 +136,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     
     private func orchestrateAnimations() {
-        Swift.print("ORCHESTRATE!")
         let stepDuration = model.currentStepDuration
         var accumDelay: TimeInterval = 0.0
 
@@ -175,9 +174,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         orchestrateTimer = nil
 
         // Reset counters when animations have completed
-        Swift.print("SCHEDULING COMPLETION: \(accumDelay)")
         completionTimer = Timer.scheduledTimer(withTimeInterval: accumDelay + 0.1, repeats: false, block: { _ in
-            Swift.print("DONE!")
             self.input1Changes = []
             self.input2Changes = []
             self.joinChanges = []

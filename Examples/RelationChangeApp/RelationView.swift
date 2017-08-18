@@ -53,7 +53,6 @@ class RelationView: BackgroundView {
         self.stepDuration = duration
         
         Timer.scheduledTimer(withTimeInterval: delay, repeats: false, block: { _ in
-            Swift.print("RELATION VIEW ANIM")
             self.applyAnimations()
         })
     }
@@ -65,7 +64,6 @@ class RelationView: BackgroundView {
         let change = changesToAnimate.removeFirst()
         switch change {
         case let .insert(index):
-            Swift.print("INSERT: \(index)")
             // Slide existing elements (after the row to be inserted) down one spot
             for i in index..<labelRows.count {
                 labelRows[i].slide(delta: rowH, delay: 0.0, duration: slideDuration)
@@ -76,7 +74,6 @@ class RelationView: BackgroundView {
             labelRows[index].fade(duration: self.stepDuration)
             
         case let .delete(index):
-            Swift.print("DELETE: \(index)")
             // Fade out the row to be deleted, then remove it
             let labelRow = labelRows.remove(at: index)
             labelRow.fade(duration: self.stepDuration, completion: {
@@ -90,7 +87,6 @@ class RelationView: BackgroundView {
             }
 
         case let .update(index):
-            Swift.print("UPDATE: \(index)")
             let labelRow = labelRows[index]
             let updatedRow = arrayProperty.elements[index].data
             for attr in updatedRow.scheme.attributes {
@@ -124,7 +120,6 @@ class RelationView: BackgroundView {
         for change in arrayChanges {
             switch change {
             case let .initial(elems):
-                Swift.print("INITIAL: \(elems)")
                 for (index, elem) in elems.enumerated() {
                     addLabelRow(elem, index, opacity: 1)
                 }

@@ -46,6 +46,8 @@ class ViewModel {
     let animating: MutableValueProperty<Bool> = mutableValueProperty(false)
     private var animations: [Animation] = []
     
+    private var observerRemovals: [ObserverRemoval] = []
+
     init() {
         func makeDB() -> (path: String, db: SQLiteDatabase) {
             let tmp = "/tmp" as NSString
@@ -135,9 +137,23 @@ class ViewModel {
                 selectedFruitName.asyncUpdateString("Banana")
             }
         )
-        
+
         // Jump back to initial state
         self.db.asyncRestoreSnapshot(states.first!.before)
+
+        // Add observers that print out changes made to each relation
+        func addLoggingObserver(to relation: Relation, name: String) {
+            let observer = LoggingObserver(relationName: name)
+            let removal = relation.addAsyncObserver(observer)
+            observerRemovals.append(removal)
+        }
+        addLoggingObserver(to: fruits, name: "fruit")
+        addLoggingObserver(to: selectedFruitIDs, name: "selected_fruit_id")
+        addLoggingObserver(to: selectedFruits, name: "selected_fruit")
+    }
+    
+    deinit {
+        observerRemovals.forEach{ $0() }
     }
 
     lazy var fruitsProperty: ArrayProperty<RowArrayElement> = {
@@ -177,10 +193,12 @@ class ViewModel {
         let currentPlayedIndex = self.lastPlayedIndex.value
         if currentPlayedIndex < currentStateIndex {
             // Play the current state
+            let state = self.states[currentStateIndex]
             self.lastPlayedIndex.change(currentStateIndex)
             self.performAnimations([
-                self.animation(fast: false, snapshot: self.states[currentStateIndex].after)
+                self.animation(fast: false, snapshot: state.after)
             ])
+            print("\n" + state.desc + "\n")
         } else {
             // Go forward to the next state
             let newStateIndex = currentStateIndex + 1
@@ -234,5 +252,36 @@ class ViewModel {
     
     var currentStepDuration: TimeInterval {
         return animations.first!.stepDuration
+    }
+}
+
+private class LoggingObserver: AsyncRelationChangeCoalescedObserver {
+    
+    private let relationName: String
+    
+    init(relationName: String) {
+        self.relationName = relationName
+    }
+    
+    func relationWillChange(_ relation: Relation) {
+    }
+    
+    func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+        let rowSet = result.ok!
+        if !rowSet.added.isEmpty || !rowSet.removed.isEmpty {
+            print("====================")
+            print(self.relationName)
+            if !rowSet.added.isEmpty {
+                print("--------------------")
+                print("Added")
+                rowSet.added.forEach{ print($0) }
+            }
+            if !rowSet.removed.isEmpty {
+                print("--------------------")
+                print("Removed")
+                rowSet.removed.forEach{ print($0) }
+            }
+            print("====================\n")
+        }
     }
 }
