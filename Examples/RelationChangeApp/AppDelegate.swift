@@ -11,8 +11,6 @@ import PLBindableControls
 private let tableW: CGFloat = 240
 private let tableH: CGFloat = 120
 
-private let stepDuration: TimeInterval = 1.0
-
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
@@ -39,7 +37,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     private var model: ViewModel!
     
-    private let animating: MutableValueProperty<Bool> = mutableValueProperty(false)
     private var input1Changes: [ChangeType] = []
     private var input2Changes: [ChangeType] = []
     private var joinChanges: [ChangeType] = []
@@ -88,16 +85,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         textView.index <~ model.stateIndex
         textView.animated = true
         
-        nextButton.disabled <~ animating
+        nextButton.disabled <~ model.animating
         nextButton.visible <~ model.nextVisible
         nextButton.string <~ model.nextButtonTitle
         nextButton.clicks ~~> model.goToNextState
         
-        resetButton.disabled <~ animating
+        resetButton.disabled <~ model.animating
         resetButton.visible <~ model.resetVisible
         resetButton.clicks ~~> model.goToInitialState
         
-        replayButton.disabled <~ not(replayEnabled)
+        replayButton.disabled <~ not(model.replayEnabled)
         replayButton.clicks ~~> model.replayCurrentState
         
         // Observe the relation-based array properties so that we can orchestrate the animations
@@ -106,11 +103,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 guard let strongSelf = self else { return }
                 switch event {
                 case .beginPossibleAsyncChange:
-                    // Enter animating state as soon as we see any change to a relation.  Also, start a timer that will
-                    // fire and begin orchestrating animations after we've observed all changes on this runloop.
-                    if !strongSelf.animating.value {
-                        strongSelf.animating.change(true)
-                        strongSelf.orchestrateTimer?.invalidate()
+                    // As soon as we see any change to a relation, start a timer that will fire and begin orchestrating
+                    // animations after we've observed all changes queued on this runloop
+                    if strongSelf.orchestrateTimer == nil {
                         strongSelf.orchestrateTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false, block: { _ in
                             strongSelf.orchestrateAnimations()
                         })
@@ -142,6 +137,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
     private func orchestrateAnimations() {
         Swift.print("ORCHESTRATE!")
+        let stepDuration = model.currentStepDuration
         var accumDelay: TimeInterval = 0.0
 
         func animate(_ arrow: ArrowView, _ view: RelationView, _ changes: [ChangeType]) {
@@ -180,12 +176,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         // Reset counters when animations have completed
         Swift.print("SCHEDULING COMPLETION: \(accumDelay)")
-        completionTimer = Timer.scheduledTimer(withTimeInterval: accumDelay + 0.2, repeats: false, block: { _ in
+        completionTimer = Timer.scheduledTimer(withTimeInterval: accumDelay + 0.1, repeats: false, block: { _ in
             Swift.print("DONE!")
             self.input1Changes = []
             self.input2Changes = []
             self.joinChanges = []
-            self.animating.change(false)
+            self.model.prepareNextAnimation()
         })
     }
 
@@ -214,8 +210,4 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         parent.addSubview(arrowView)
         return arrowView
     }
-
-    private lazy var replayEnabled: ReadableProperty<Bool> = {
-        return not(self.animating) *&& self.model.replayEnabled
-    }()
 }

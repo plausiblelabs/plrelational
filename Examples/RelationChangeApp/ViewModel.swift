@@ -18,12 +18,20 @@ enum SelectedFruit {
     static let fruitID = Attribute("fruit_id")
 }
 
+private let normalStepDuration: TimeInterval = 1.0
+private let fastStepDuration: TimeInterval = 0.1
+
 class ViewModel {
     
     struct State {
         let before: TransactionalDatabaseSnapshot
         let after: TransactionalDatabaseSnapshot
         let desc: String
+    }
+    
+    struct Animation {
+        let stepDuration: TimeInterval
+        let snapshot: TransactionalDatabaseSnapshot
     }
     
     private let db: TransactionalDatabase
@@ -35,7 +43,8 @@ class ViewModel {
     private var states: [State] = []
     let stateIndex: MutableValueProperty<Int> = mutableValueProperty(0)
     private var lastPlayedIndex: MutableValueProperty<Int> = mutableValueProperty(-1)
-    var shouldAnimate: Bool = false
+    let animating: MutableValueProperty<Bool> = mutableValueProperty(false)
+    private var animations: [Animation] = []
     
     init() {
         func makeDB() -> (path: String, db: SQLiteDatabase) {
@@ -139,7 +148,7 @@ class ViewModel {
         )
         
         // Jump back to initial state
-        self.apply(states.first!.before, immediate: true)
+        self.db.asyncRestoreSnapshot(states.first!.before)
     }
 
     lazy var fruitsProperty: ArrayProperty<RowArrayElement> = {
@@ -167,7 +176,7 @@ class ViewModel {
     }()
     
     lazy var replayEnabled: ReadableProperty<Bool> = {
-        return self.stateIndex *== self.lastPlayedIndex
+        return not(self.animating) *&& (self.stateIndex *== self.lastPlayedIndex)
     }()
 
     lazy var nextButtonTitle: ReadableProperty<String> = {
@@ -180,7 +189,9 @@ class ViewModel {
         if currentPlayedIndex < currentStateIndex {
             // Play the current state
             self.lastPlayedIndex.change(currentStateIndex)
-            self.db.asyncRestoreSnapshot(self.states[currentStateIndex].after)
+            self.performAnimations([
+                self.animation(fast: false, snapshot: self.states[currentStateIndex].after)
+            ])
         } else {
             // Go forward to the next state
             let newStateIndex = currentStateIndex + 1
@@ -192,25 +203,47 @@ class ViewModel {
     lazy var goToInitialState: ActionProperty<()> = ActionProperty {
         self.lastPlayedIndex.change(-1)
         self.stateIndex.change(0)
-        self.apply(self.states.first!.before, immediate: true)
+        self.performAnimations([
+            self.animation(fast: true, snapshot: self.states.first!.before)
+        ])
     }
 
     lazy var replayCurrentState: ActionProperty<()> = ActionProperty {
-        // TODO: Do a quick animation back to the "before" state?
         let state = self.states[self.stateIndex.value]
-        self.apply(state.before, immediate: true)
-        self.apply(state.after, immediate: false)
+        self.performAnimations([
+            self.animation(fast: true, snapshot: state.before),
+            self.animation(fast: false, snapshot: state.after)
+        ])
+    }
+
+    private func animation(fast: Bool, snapshot: TransactionalDatabaseSnapshot) -> Animation {
+        return Animation(stepDuration: fast ? fastStepDuration : normalStepDuration, snapshot: snapshot)
     }
     
-    private func apply(_ snapshot: TransactionalDatabaseSnapshot, immediate: Bool) {
-        if immediate {
-            shouldAnimate = false
-            self.db.asyncRestoreSnapshot(snapshot)
-            // TODO: Can we do without this await?
-            PLRelational.Async.awaitAsyncCompletion()
-            shouldAnimate = true
+    private func performAnimations(_ animations: [Animation]) {
+        self.animations = animations
+        self.performPendingAnimation()
+    }
+    
+    private func performPendingAnimation() {
+        if let animation = animations.first {
+            // Perform the animation
+            if !animating.value {
+                animating.change(true)
+            }
+            db.asyncRestoreSnapshot(animation.snapshot)
         } else {
-            self.db.asyncRestoreSnapshot(snapshot)
+            // No more animations to perform
+            animating.change(false)
         }
+    }
+
+    func prepareNextAnimation() {
+        animations.removeFirst()
+        performPendingAnimation()
+    }
+    
+    var currentStepDuration: TimeInterval {
+        return animations.first!.stepDuration
     }
 }
