@@ -66,24 +66,19 @@ class TextView: BackgroundView {
         let startPoint = containerFrame.origin
         containerFrame.origin.y = labelH - (CGFloat(index) * labelH)
         let endPoint = containerFrame.origin
-        
+
+        self.labelContainer.frame = containerFrame
+
         if animated {
             CATransaction.begin()
-            
-            CATransaction.setCompletionBlock({
-                self.labelContainer.frame = containerFrame
-            })
             
             let animation = CABasicAnimation(keyPath: "position")
             animation.fromValue = NSValue(point: startPoint)
             animation.toValue = NSValue(point: endPoint)
             animation.duration = 0.5
-            animation.isRemovedOnCompletion = true
             labelContainer.layer!.add(animation, forKey: "position")
             
             CATransaction.commit()
-        } else {
-            self.labelContainer.frame = containerFrame
         }
     }
 }
