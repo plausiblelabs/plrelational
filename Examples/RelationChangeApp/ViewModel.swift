@@ -70,8 +70,12 @@ class ViewModel {
         fruits = createRelation("fruit", [Fruit.id, Fruit.name])
         selectedFruitIDs = createRelation("selected_fruit_id", [SelectedFruit._id, SelectedFruit.fruitID])
         
-        // Prepare higher-level relations
+        // Join `fruits` with `selectedFruitIDs` to produce a new Relation that will contain
+        // our fruit(s) of interest
         selectedFruits = fruits.equijoin(selectedFruitIDs, matching: [Fruit.id: SelectedFruit.fruitID])
+        
+        // Project just the `name` Attribute to produce another Relation that will contain
+        // only a single string value (the selected fruit's name)
         selectedFruitName = selectedFruits.project(Fruit.name)
         
         // Build up a series of database states, capturing a snapshot before and after each change
@@ -87,44 +91,46 @@ class ViewModel {
         addState(
             "// Step 1: Populate the empty relations\n" +
             "fruits.asyncAdd([Fruit.id: 1, Fruit.name: \"Apple\"])\n" +
-            "fruits.asyncAdd([Fruit.id: 2, Fruit.name: \"Bandana\"])\n" +
+            "fruits.asyncAdd([Fruit.id: 2, Fruit.name: \"Apricot\"])\n" +
+            "fruits.asyncAdd([Fruit.id: 3, Fruit.name: \"Bandana\"])\n" +
             "selectedFruitIDs.asyncAdd([SelectedFruit._id: 0, SelectedFruit.fruitID: 1])",
             {
                 fruits.asyncAdd([Fruit.id: 1, Fruit.name: "Apple"])
-                fruits.asyncAdd([Fruit.id: 2, Fruit.name: "Bandana"])
+                fruits.asyncAdd([Fruit.id: 2, Fruit.name: "Apricot"])
+                fruits.asyncAdd([Fruit.id: 3, Fruit.name: "Bandana"])
                 selectedFruitIDs.asyncAdd([SelectedFruit._id: 0, SelectedFruit.fruitID: 1])
-            }
-        )
-        
-        addState(
-            "// Step 2: Insert \"Cheri\"\n" +
-            "fruits.asyncAdd([Fruit.id: 3, Fruit.name: \"Cheri\"])",
-            {
-                fruits.asyncAdd([Fruit.id: 3, Fruit.name: "Cheri"])
             }
         )
 
         addState(
-            "// Step 3: Mark \"Bandana\" as the selected fruit\n" +
-            "selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.id: 2])",
+            "// Step 2: Delete \"Apricot\"\n" +
+            "fruits.asyncDelete(Fruit.id *== 2)",
             {
-                selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.fruitID: 2])
+                fruits.asyncDelete(Fruit.id *== 2)
             }
         )
-        
+
+        addState(
+            "// Step 3: Insert \"Cheri\"\n" +
+            "fruits.asyncAdd([Fruit.id: 4, Fruit.name: \"Cheri\"])",
+            {
+                fruits.asyncAdd([Fruit.id: 4, Fruit.name: "Cheri"])
+            }
+        )
+
         addState(
             "// Step 4: Fix spelling of \"Cherry\" by updating the source relation\n" +
-            "fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: \"Cherry\"])",
+            "fruits.asyncUpdate(Fruit.id *== 4, newValues: [Fruit.name: \"Cherry\"])",
             {
-                fruits.asyncUpdate(Fruit.id *== 3, newValues: [Fruit.name: "Cherry"])
+                fruits.asyncUpdate(Fruit.id *== 4, newValues: [Fruit.name: "Cherry"])
             }
         )
-        
+
         addState(
-            "// Step 5: Delete \"Apple\"\n" +
-            "fruits.asyncDelete(Fruit.id *== 1)",
+            "// Step 5: Mark \"Bandana\" as the selected fruit\n" +
+            "selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.id: 3])",
             {
-                fruits.asyncDelete(Fruit.id *== 1)
+                selectedFruitIDs.asyncUpdate(true, newValues: [SelectedFruit.fruitID: 3])
             }
         )
         
@@ -147,9 +153,9 @@ class ViewModel {
             let removal = relation.addAsyncObserver(observer)
             observerRemovals.append(removal)
         }
-        addLoggingObserver(to: fruits, name: "fruit")
-        addLoggingObserver(to: selectedFruitIDs, name: "selected_fruit_id")
-        addLoggingObserver(to: selectedFruits, name: "selected_fruit")
+        addLoggingObserver(to: fruits, name: "fruits")
+        addLoggingObserver(to: selectedFruitIDs, name: "selectedFruitIDs")
+        addLoggingObserver(to: selectedFruits, name: "selectedFruits")
     }
     
     deinit {
