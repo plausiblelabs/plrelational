@@ -49,24 +49,13 @@ class ViewModel {
     private var observerRemovals: [ObserverRemoval] = []
 
     init() {
-        func makeDB() -> (path: String, db: SQLiteDatabase) {
-            let tmp = "/tmp" as NSString
-            let dbname = "RelationChangeApp.db"
-            let path = tmp.appendingPathComponent(dbname)
-            _ = try? FileManager.default.removeItem(atPath: path)
-            let db = try! SQLiteDatabase(path)
-            return (path, db)
-        }
-        
         // Prepare the stored relations
-        let sqliteDB = makeDB().db
-        let db = TransactionalDatabase(sqliteDB)
+        let memoryDB = MemoryTableDatabase()
+        let db = TransactionalDatabase(memoryDB)
         func createRelation(_ name: String, _ scheme: Scheme) -> TransactionalRelation {
-            let createResult = sqliteDB.createRelation(name, scheme: scheme)
-            precondition(createResult.ok != nil)
+            _ = memoryDB.createRelation(name, scheme: scheme)
             return db[name]
         }
-        self.db = db
         fruits = createRelation("fruit", [Fruit.id, Fruit.name])
         selectedFruitIDs = createRelation("selected_fruit_id", [SelectedFruit._id, SelectedFruit.fruitID])
         
@@ -79,6 +68,7 @@ class ViewModel {
         selectedFruitName = selectedFruits.project(Fruit.name)
         
         // Build up a series of database states, capturing a snapshot before and after each change
+        self.db = db
         func addState(_ desc: String, _ changes: (() -> Void)) {
             let before = db.takeSnapshot()
             changes()
