@@ -65,6 +65,8 @@
 		374316081F42354100128F5A /* Async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374316061F42354100128F5A /* Async.swift */; };
 		3743160A1F4245A500128F5A /* RelationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374316091F4245A500128F5A /* RelationView.swift */; };
 		3743160C1F43920800128F5A /* ArrowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3743160B1F43920800128F5A /* ArrowView.swift */; };
+		374316131F4B560F00128F5A /* MemoryTableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374316121F4B560F00128F5A /* MemoryTableDatabase.swift */; };
+		374316141F4B560F00128F5A /* MemoryTableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374316121F4B560F00128F5A /* MemoryTableDatabase.swift */; };
 		374363001EA673F3004982B0 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
 		374363011EA673FC004982B0 /* InternedUTF8String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */; };
 		374363021EA6741C004982B0 /* SetSubtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */; };
@@ -742,6 +744,7 @@
 		374316061F42354100128F5A /* Async.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Async.swift; sourceTree = "<group>"; };
 		374316091F4245A500128F5A /* RelationView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationView.swift; sourceTree = "<group>"; };
 		3743160B1F43920800128F5A /* ArrowView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrowView.swift; sourceTree = "<group>"; };
+		374316121F4B560F00128F5A /* MemoryTableDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoryTableDatabase.swift; sourceTree = "<group>"; };
 		374AE9711D91C2F0007D1366 /* StoredDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredDatabase.swift; sourceTree = "<group>"; };
 		374AE9731D91C2FC007D1366 /* StoredRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredRelation.swift; sourceTree = "<group>"; };
 		374AE9751D91DBC7007D1366 /* PlistDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDatabase.swift; sourceTree = "<group>"; };
@@ -1389,6 +1392,7 @@
 			isa = PBXGroup;
 			children = (
 				C2A7C41B1CBFE56900248F92 /* ConcreteRelation.swift */,
+				374316121F4B560F00128F5A /* MemoryTableDatabase.swift */,
 				C2B53CBE1D1C2B0A006B6278 /* MemoryTableRelation.swift */,
 				C257C7531CC017EB00234A89 /* SimpleDatabase.swift */,
 			);
@@ -3146,6 +3150,7 @@
 				37B440B31E899A7200C8C336 /* NegativeSet.swift in Sources */,
 				37B4407B1E899A4400C8C336 /* DataCodec.swift in Sources */,
 				37B440581E899A1400C8C336 /* SQLiteRelation.swift in Sources */,
+				374316141F4B560F00128F5A /* MemoryTableDatabase.swift in Sources */,
 				37B4401D1E8999D200C8C336 /* RelationParts.swift in Sources */,
 				C243FAE01F056E210015DE85 /* QueryPlannerDump.swift in Sources */,
 				37B4402E1E8999EB00C8C336 /* RelationChange.swift in Sources */,
@@ -3266,6 +3271,7 @@
 				37B440131E8999D200C8C336 /* MutableRelation.swift in Sources */,
 				37B4406A1E899A3100C8C336 /* QueryOptimizer.swift in Sources */,
 				37B440911E899A7200C8C336 /* NegativeSet.swift in Sources */,
+				374316131F4B560F00128F5A /* MemoryTableDatabase.swift in Sources */,
 				37B440791E899A4300C8C336 /* DataCodec.swift in Sources */,
 				37B440561E899A1400C8C336 /* SQLiteRelation.swift in Sources */,
 				37B440151E8999D200C8C336 /* RelationParts.swift in Sources */,

@@ -82,4 +82,8 @@ class DBTestCase: XCTestCase {
             .file(name: relationName, path: "\(relationName).plist", scheme: scheme, primaryKeys: Array(scheme.attributes))
         ])
     }
+    
+    func makeMemoryTableDB(_ relationName: String, _ scheme: Scheme) -> MemoryTableDatabase {
+        return MemoryTableDatabase(relations: [relationName: MemoryTableRelation(scheme: scheme)])
+    }
 }
