@@ -46,6 +46,10 @@ class ViewModel {
     let animating: MutableValueProperty<Bool> = mutableValueProperty(false)
     private var animations: [Animation] = []
     
+    private let fruitsChangesText: MutableValueProperty<String> = mutableValueProperty("")
+    private let selectedFruitIDsChangesText: MutableValueProperty<String> = mutableValueProperty("")
+    private let selectedFruitsChangesText: MutableValueProperty<String> = mutableValueProperty("")
+    
     private var observerRemovals: [ObserverRemoval] = []
 
     init() {
@@ -56,15 +60,27 @@ class ViewModel {
             _ = memoryDB.createRelation(name, scheme: scheme)
             return db[name]
         }
-        fruits = createRelation("fruit", [Fruit.id, Fruit.name])
-        selectedFruitIDs = createRelation("selected_fruit_id", [SelectedFruit._id, SelectedFruit.fruitID])
         
-        // Join `fruits` with `selectedFruitIDs` to produce a new Relation that will contain
-        // our fruit(s) of interest
-        selectedFruits = fruits.equijoin(selectedFruitIDs, matching: [Fruit.id: SelectedFruit.fruitID])
+        // Each item in the `fruits` relation will have a unique identifier and a
+        // (possibly misspelled) name
+        fruits = createRelation(
+            "fruit",
+            [Fruit.id, Fruit.name])
         
-        // Project just the `name` Attribute to produce another Relation that will contain
-        // only a single string value (the selected fruit's name)
+        // The `fruit_id` attribute in the `selectedFruitsIDs` relation acts as a
+        // foreign key, referring to a row from the `fruits` relation
+        selectedFruitIDs = createRelation(
+            "selected_fruit_id",
+            [SelectedFruit._id, SelectedFruit.fruitID])
+        
+        // Join `fruits` with `selectedFruitIDs` to produce a new Relation that will
+        // contain our fruit(s) of interest.  (In a real application we might use this
+        // setup to model the selection state for a list view, for example.)
+        selectedFruits = fruits.equijoin(selectedFruitIDs,
+                                         matching: [Fruit.id: SelectedFruit.fruitID])
+        
+        // Project just the `name` Attribute to produce another Relation that will
+        // contain only a single string value (the selected fruit's name)
         selectedFruitName = selectedFruits.project(Fruit.name)
         
         // Build up a series of database states, capturing a snapshot before and after each change
@@ -138,14 +154,14 @@ class ViewModel {
         self.db.asyncRestoreSnapshot(states.first!.before)
 
         // Add observers that print out changes made to each relation
-        func addLoggingObserver(to relation: Relation, name: String) {
-            let observer = LoggingObserver(relationName: name)
+        func addLoggingObserver(to relation: Relation, name: String, orderedAttrs: [Attribute], changes: MutableValueProperty<String>) {
+            let observer = LoggingObserver(relationName: name, orderedAttrs: orderedAttrs, changes: changes)
             let removal = relation.addAsyncObserver(observer)
             observerRemovals.append(removal)
         }
-        addLoggingObserver(to: fruits, name: "fruits")
-        addLoggingObserver(to: selectedFruitIDs, name: "selectedFruitIDs")
-        addLoggingObserver(to: selectedFruits, name: "selectedFruits")
+        addLoggingObserver(to: fruits, name: "fruits", orderedAttrs: [Fruit.id, Fruit.name], changes: fruitsChangesText)
+        addLoggingObserver(to: selectedFruitIDs, name: "selectedFruitIDs", orderedAttrs: [SelectedFruit._id, SelectedFruit.fruitID], changes: selectedFruitIDsChangesText)
+        addLoggingObserver(to: selectedFruits, name: "selectedFruits", orderedAttrs: [Fruit.id, Fruit.name], changes: selectedFruitsChangesText)
     }
     
     deinit {
@@ -166,6 +182,26 @@ class ViewModel {
 
     lazy var stateDescriptions: [String] = {
         return self.states.map{ $0.desc }
+    }()
+    
+    lazy var rawChangesText: ReadableProperty<String> = {
+        let second: ReadableProperty<(String, String)> = zip(self.selectedFruitIDsChangesText, self.selectedFruitsChangesText)
+        return zip(self.fruitsChangesText, second)
+            .map{ (p0, p1) in
+                var accum = ""
+
+                func append(_ s: String) {
+                    if !s.isEmpty {
+                        accum.append(s + "\n")
+                    }
+                }
+
+                append(p0)
+                append(p1.0)
+                append(p1.1)
+                
+                return accum
+            }
     }()
 
     lazy var resetVisible: ReadableProperty<Bool> = {
@@ -200,6 +236,7 @@ class ViewModel {
             let newStateIndex = currentStateIndex + 1
             if newStateIndex >= self.states.count { return }
             self.stateIndex.change(newStateIndex)
+            self.clearChangesText()
         }
     }
 
@@ -249,14 +286,24 @@ class ViewModel {
     var currentStepDuration: TimeInterval {
         return animations.first!.stepDuration
     }
+    
+    private func clearChangesText() {
+        fruitsChangesText.change("")
+        selectedFruitIDsChangesText.change("")
+        selectedFruitsChangesText.change("")
+    }
 }
 
 private class LoggingObserver: AsyncRelationChangeCoalescedObserver {
     
     private let relationName: String
+    private let orderedAttrs: [Attribute]
+    private let changes: MutableValueProperty<String>
     
-    init(relationName: String) {
+    init(relationName: String, orderedAttrs: [Attribute], changes: MutableValueProperty<String>) {
         self.relationName = relationName
+        self.orderedAttrs = orderedAttrs
+        self.changes = changes
     }
     
     func relationWillChange(_ relation: Relation) {
@@ -264,20 +311,56 @@ private class LoggingObserver: AsyncRelationChangeCoalescedObserver {
     
     func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
         let rowSet = result.ok!
+        
+        var string = ""
+        func log(_ s: String) {
+            print(s)
+            string += s + "\n"
+        }
+        
+        func strongSep() {
+            log("============================")
+        }
+
+        func weakSep() {
+            log("----------------------------")
+        }
+
+        func pretty(_ row: Row) -> String {
+            let pairs: [String] = orderedAttrs.map{
+                return "\($0): \(row[$0])"
+            }
+            return "[\(pairs.joined(separator: ", "))]"
+        }
+        
+        func sortedDescriptions(for rows: Set<Row>) -> [String] {
+            let orderAttr = orderedAttrs.first!
+            return Array(rows)
+                .sorted(by: { (r0, r1) in r0[orderAttr] < r1[orderAttr] })
+                .map(pretty)
+        }
+        
+        func logRows(_ rows: Set<Row>) {
+            sortedDescriptions(for: rows).forEach(log)
+        }
+
         if !rowSet.added.isEmpty || !rowSet.removed.isEmpty {
-            print("====================")
-            print(self.relationName)
+            strongSep()
+            log(self.relationName)
             if !rowSet.added.isEmpty {
-                print("--------------------")
-                print("Added")
-                rowSet.added.forEach{ print($0) }
+                weakSep()
+                log("Added")
+                logRows(rowSet.added)
             }
             if !rowSet.removed.isEmpty {
-                print("--------------------")
-                print("Removed")
-                rowSet.removed.forEach{ print($0) }
+                weakSep()
+                log("Removed")
+                logRows(rowSet.removed)
             }
-            print("====================\n")
+            strongSep()
+            log("")
         }
+        
+        changes.change(string)
     }
 }

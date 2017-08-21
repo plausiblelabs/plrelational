@@ -14,11 +14,12 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="RelationChangeApp">
             <connections>
+                <outlet property="codeTextView" destination="4xl-aL-Lmr" id="Zsi-pE-l2Z"/>
                 <outlet property="nextButton" destination="xh3-Zi-i4Q" id="rXU-U0-1AH"/>
+                <outlet property="rawTextView" destination="WvG-wl-ts6" id="vmR-zF-O2J"/>
                 <outlet property="replayButton" destination="gIJ-Je-G36" id="gDl-HO-vDF"/>
                 <outlet property="resetButton" destination="zdk-uC-53P" id="ae7-N3-kib"/>
                 <outlet property="tableContainer" destination="Obe-lp-Zh6" id="HAR-lR-06Q"/>
-                <outlet property="textView" destination="4xl-aL-Lmr" id="GCQ-3O-BKQ"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="MEA-UP-LPE"/>
             </connections>
         </customObject>
@@ -682,7 +683,7 @@
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Obe-lp-Zh6" userLabel="Table Container" customClass="BackgroundView" customModule="PLBindableControls">
-                        <rect key="frame" x="20" y="20" width="551" height="444"/>
+                        <rect key="frame" x="20" y="20" width="400" height="444"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </customView>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zdk-uC-53P" customClass="Button" customModule="PLBindableControls">
@@ -715,10 +716,47 @@ DQ
 </string>
                         </buttonCell>
                     </button>
-                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4xl-aL-Lmr" customClass="TextView" customModule="RelationChangeApp">
+                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4xl-aL-Lmr" customClass="ScrollingTextView" customModule="RelationChangeApp">
                         <rect key="frame" x="20" y="475" width="551" height="200"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </customView>
+                    <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ssd-Rg-zJq">
+                        <rect key="frame" x="446" y="44" width="208" height="350"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <clipView key="contentView" ambiguous="YES" id="wqf-0e-Nsz">
+                            <rect key="frame" x="1" y="1" width="206" height="348"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <subviews>
+                                <textView ambiguous="YES" editable="NO" importsGraphics="NO" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" smartInsertDelete="YES" id="WvG-wl-ts6" customClass="TextView" customModule="RelationChangeApp">
+                                    <rect key="frame" x="0.0" y="0.0" width="206" height="348"/>
+                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                    <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                    <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                    <size key="minSize" width="206" height="348"/>
+                                    <size key="maxSize" width="463" height="10000000"/>
+                                    <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
+                                </textView>
+                            </subviews>
+                            <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                        </clipView>
+                        <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="YES" id="9wA-TY-J5B">
+                            <rect key="frame" x="-100" y="-100" width="87" height="18"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                        <scroller key="verticalScroller" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="99E-cd-B5p">
+                            <rect key="frame" x="191" y="1" width="16" height="348"/>
+                            <autoresizingMask key="autoresizingMask"/>
+                        </scroller>
+                    </scrollView>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="pW7-52-wH5">
+                        <rect key="frame" x="446" y="398" width="87" height="17"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Raw Changes" id="NgR-fm-O0y">
+                            <font key="font" metaFont="system"/>
+                            <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
                 </subviews>
             </view>
             <point key="canvasLocation" x="15.5" y="-202.5"/>

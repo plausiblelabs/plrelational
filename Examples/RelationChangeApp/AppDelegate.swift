@@ -8,6 +8,8 @@ import PLRelational
 import PLRelationalBinding
 import PLBindableControls
 
+let codeFont = NSFont(name: "Menlo", size: 11)
+
 private let tableW: CGFloat = 240
 private let tableH: CGFloat = 120
 
@@ -21,11 +23,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     
     @IBOutlet weak var window: NSWindow!
-    @IBOutlet weak var textView: TextView!
+    @IBOutlet weak var codeTextView: ScrollingTextView!
     @IBOutlet weak var nextButton: Button!
     @IBOutlet weak var resetButton: Button!
     @IBOutlet weak var replayButton: Button!
     @IBOutlet weak var tableContainer: NSView!
+    @IBOutlet weak var rawTextView: TextView!
     
     private var input1View: RelationView!
     private var input2View: RelationView!
@@ -52,25 +55,30 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Initialize our view model
         model = ViewModel()
         
-        // Configure the text view
+        // Configure the scrolling code text view
         let gradient = CAGradientLayer()
         gradient.anchorPoint = CGPoint(x: 0, y: 0)
-        gradient.bounds = textView.bounds
+        gradient.bounds = codeTextView.bounds
         gradient.colors = [NSColor.clear.cgColor, NSColor.white.cgColor, NSColor.white.cgColor]
-        textView.wantsLayer = true
-        textView.layer!.mask = gradient
-        textView.strings = model.stateDescriptions
+        codeTextView.wantsLayer = true
+        codeTextView.layer!.mask = gradient
+        codeTextView.strings = model.stateDescriptions
         
         // Configure the relation views
         let viewW: CGFloat = 160
         let viewH: CGFloat = 120
-        let halfPadX: CGFloat = 30
+        let halfPadX: CGFloat = 22
         let input1ViewX = round(tableContainer.bounds.midX - viewW - halfPadX)
         let input2ViewX = round(tableContainer.bounds.midX + halfPadX)
         let joinViewX = round(tableContainer.bounds.midX - (viewW * 0.5))
-        input1View = addRelationView(to: tableContainer, x: input1ViewX, y: 90, w: viewW, h: viewH, name: "fruit", property: model.fruitsProperty, orderedAttrs: [Fruit.id, Fruit.name])
-        input2View = addRelationView(to: tableContainer, x: input2ViewX, y: 90, w: viewW, h: viewH, name: "selected_fruit_id", property: model.selectedFruitIDsProperty, orderedAttrs: [SelectedFruit.fruitID])
-        joinView = addRelationView(to: tableContainer, x: joinViewX, y: 300, w: viewW, h: viewH, name: "selected_fruit", property: model.selectedFruitsProperty, orderedAttrs: [Fruit.id, Fruit.name])
+        input1View = addRelationView(to: tableContainer, x: input1ViewX, y: 90, w: viewW, h: viewH, name: "fruits", property: model.fruitsProperty, orderedAttrs: [Fruit.id, Fruit.name])
+        input2View = addRelationView(to: tableContainer, x: input2ViewX, y: 90, w: viewW, h: viewH, name: "selectedFruitIDs", property: model.selectedFruitIDsProperty, orderedAttrs: [SelectedFruit.fruitID])
+        joinView = addRelationView(to: tableContainer, x: joinViewX, y: 300, w: viewW, h: viewH, name: "selectedFruits", property: model.selectedFruitsProperty, orderedAttrs: [Fruit.id, Fruit.name])
+        
+        // Configure the raw changes text view
+        rawTextView.font = codeFont
+        rawTextView.textColor = .white
+        rawTextView.textContainerInset = NSMakeSize(4, 8)
 
         // Add the arrow views
         let aw: CGFloat = 40
@@ -82,8 +90,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         joinArrow = addArrowView(to: tableContainer, x: input1Arrow.frame.minX, y: 214, w: joinArrowW, h: ah, dual: true)
         
         // Bind to the view model
-        textView.index <~ model.stateIndex
-        textView.animated = true
+        codeTextView.index <~ model.stateIndex
+        codeTextView.animated = true
+        
+        rawTextView.text <~ model.rawChangesText
         
         nextButton.disabled <~ model.animating
         nextButton.visible <~ model.nextVisible
