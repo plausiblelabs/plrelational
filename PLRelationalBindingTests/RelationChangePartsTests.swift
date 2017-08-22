@@ -52,7 +52,7 @@ class RelationChangePartsTests: BindingTestCase {
             ["id": 4, "name": "donald"]
         ]
         
-        var set = NegativeSet<Row>()
+        var set = RowChange()
         set.unionInPlace(Set(added))
         set.subtractInPlace(Set(removed))
         let parts = partsOf(set, idAttr: "id")

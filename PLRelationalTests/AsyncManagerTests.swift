@@ -1129,13 +1129,13 @@ private class TestAsyncChangeCoalescedObserver: AsyncRelationChangeCoalescedObse
     }
     
     var willChangeCount = 0
-    var result: Result<NegativeSet<Row>, RelationError>?
+    var result: Result<RowChange, RelationError>?
     
     func relationWillChange(_ relation: Relation) {
         willChangeCount += 1
     }
     
-    func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<RowChange, RelationError>) {
         XCTAssertNil(self.result)
         self.result = result
         

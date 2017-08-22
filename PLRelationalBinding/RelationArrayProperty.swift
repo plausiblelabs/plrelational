@@ -231,7 +231,7 @@ extension RelationArrayProperty: AsyncRelationChangeCoalescedObserver {
         sourceSignal.notifyBeginPossibleAsyncChange()
     }
 
-    func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<RowChange, RelationError>) {
         switch result {
         case .Ok(let rows):
             // Compute array changes

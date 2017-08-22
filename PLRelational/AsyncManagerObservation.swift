@@ -5,6 +5,7 @@
 
 import Foundation
 
+public typealias RowChange = NegativeSet<Row>
 
 /// There are two fundamental ways to asynchronously observe relations: change observation and content observation.
 ///
@@ -44,7 +45,7 @@ extension AsyncManager {
     public func observe(_ relation: Relation, observer: AsyncRelationChangeCoalescedObserver, context: DispatchContext? = nil) -> ObservationRemover {
         class ShimObserver: AsyncRelationChangeObserver {
             let coalescedObserver: DispatchContextWrapped<AsyncRelationChangeCoalescedObserver>
-            var coalescedChanges = NegativeSet<Row>()
+            var coalescedChanges = RowChange()
             var error: RelationError?
             
             init(coalescedObserver: DispatchContextWrapped<AsyncRelationChangeCoalescedObserver>) {
@@ -82,7 +83,7 @@ extension AsyncManager {
 
 public protocol AsyncRelationChangeCoalescedObserver {
     func relationWillChange(_ relation: Relation)
-    func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>)
+    func relationDidChange(_ relation: Relation, result: Result<RowChange, RelationError>)
 }
 
 public extension Relation {

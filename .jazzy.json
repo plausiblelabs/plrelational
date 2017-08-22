@@ -23,6 +23,7 @@
             "name": "Memory Relations",
             "children": [
                 "ConcreteRelation",
+                "MemoryTableDatabase",
                 "MemoryTableRelation",
                 "CachingRelation"
             ]

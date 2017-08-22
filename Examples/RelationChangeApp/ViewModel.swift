@@ -309,7 +309,7 @@ private class LoggingObserver: AsyncRelationChangeCoalescedObserver {
     func relationWillChange(_ relation: Relation) {
     }
     
-    func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<RowChange, RelationError>) {
         let rowSet = result.ok!
         
         var string = ""
