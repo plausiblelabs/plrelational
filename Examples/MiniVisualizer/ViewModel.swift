@@ -17,7 +17,7 @@ enum Fruit {
 class ViewModel {
     
     private let db: TransactionalDatabase
-    private let fruits: TransactionalRelation
+    let fruits: TransactionalRelation
     
     private var observerRemovals: [ObserverRemoval] = []
     
