@@ -10,9 +10,6 @@ import PLBindableControls
 
 let codeFont = NSFont(name: "Menlo", size: 11)
 
-private let tableW: CGFloat = 240
-private let tableH: CGFloat = 120
-
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     
