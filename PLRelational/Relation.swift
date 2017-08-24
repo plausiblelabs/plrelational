@@ -108,12 +108,11 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// Update the `Relation` content by assigning the given values to all rows which match the query.
     mutating func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError>
     
-    /// :nodoc: Synchronous APIs are de-emphasized and not treated as part of "official" API; may be removed in the future
-    /// Return a new Relation that is this Relation with the given update applied to it.
+    /// Return a new `Relation` which represents this `Relation` with the given updates applied to all rows
+    /// that match the query.
     func withUpdate(_ query: SelectExpression, newValues: Row) -> Relation
     
-    /// :nodoc: Synchronous APIs are de-emphasized and not treated as part of "official" API; may be removed in the future
-    /// The same as the two-parameter withUpdate, but it updates all rows.
+    /// Return a new `Relation` which represents this `Relation` with the given updates applied to all rows.
     func withUpdate(_ newValues: Row) -> Relation
 }
 
@@ -433,7 +432,6 @@ extension Relation {
     }
 }
 
-/// :nodoc: Synchronous APIs are de-emphasized and not treated as part of "official" API; may be removed in the future
 extension Relation {
     public func withUpdate(_ query: SelectExpression, newValues: Row) -> Relation {
         // Pick out the rows which will be updated, and update them.
