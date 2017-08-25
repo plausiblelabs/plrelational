@@ -36,20 +36,17 @@ class ArrowView: NSView {
         }
         
         func curvyPath() -> NSBezierPath {
-            // TODO: Make straightPath use the same width always
             let tipW: CGFloat = 40
             let halfTipW: CGFloat = tipW * 0.5
             let tipH: CGFloat = 20
             let b = self.bounds
             let p = NSBezierPath()
-            let tipTop = CGPoint(x: b.midX, y: b.height - tipH)
-            let tipBot = CGPoint(x: b.midX, y: b.height - lw)
-            let leftCtrl1 = CGPoint(x: halfTipW, y: b.height - lw)
-            let leftCtrl2 = CGPoint(x: tipBot.x, y: lw)
+            let tipTop = CGPoint(x: halfTipW, y: b.height - tipH)
+            let tipBot = CGPoint(x: halfTipW, y: b.height - lw)
             let rightCtrl1 = CGPoint(x: b.width - halfTipW, y: b.height - lw)
             let rightCtrl2 = CGPoint(x: tipBot.x, y: lw)
             p.move(to: CGPoint(x: halfTipW, y: lw))
-            p.curve(to: tipTop, controlPoint1: leftCtrl1, controlPoint2: leftCtrl2)
+            p.line(to: tipBot)
             p.move(to: CGPoint(x: b.width - halfTipW, y: lw))
             p.curve(to: tipTop, controlPoint1: rightCtrl1, controlPoint2: rightCtrl2)
             p.line(to: tipBot)

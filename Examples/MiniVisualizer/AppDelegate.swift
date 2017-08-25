@@ -32,23 +32,30 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Initialize our view model
         model = ViewModel()
 
-        let viewW: CGFloat = 320
+        let viewW: CGFloat = tableContainer.frame.width
         let viewH: CGFloat = 150
-        sourceView = addStageView(to: tableContainer, x: 40, y: 40, w: viewW, h: viewH, name: "fruits", relation: model.fruits, property: model.fruitsProperty, orderedAttrs: [Fruit.id, Fruit.name, Fruit.quantity]).0
+        sourceView = addStageView(to: tableContainer, x: 0, y: 20, w: viewW, h: viewH, name: "fruits", relation: model.fruits, property: model.fruitsProperty, orderedAttrs: [Fruit.id, Fruit.name, Fruit.quantity]).0
         
         let removal = sourceView.output.signal.observeSynchronousValueChanging{ output, _ in
             self.resultView?.removeFromSuperview()
             self.resultLabel?.removeFromSuperview()
             self.resultArrow?.removeFromSuperview()
             if let output = output {
-                let (stageView, label) = self.addStageView(to: self.tableContainer, x: 40, y: 280, w: viewW, h: viewH, name: "result", relation: output.relation, property: output.arrayProperty, orderedAttrs: output.orderedAttrs)
+                let (stageView, label) = self.addStageView(to: self.tableContainer, x: 0, y: 280, w: viewW, h: viewH, name: "result", relation: output.relation, property: output.arrayProperty, orderedAttrs: output.orderedAttrs)
                 self.resultView = stageView
                 self.resultLabel = label
                 
                 let aw: CGFloat = 40
                 let haw: CGFloat = aw * 0.5
                 let ah: CGFloat = 64
-                self.resultArrow = self.addArrowView(to: self.tableContainer, x: self.sourceView.frame.midX - haw, y: self.sourceView.frame.maxY + 10, w: aw, h: ah, dual: false)
+                let arrowX: CGFloat = (self.sourceView.relationW * 0.5) - haw
+                let arrowW: CGFloat
+                if output.combineActive {
+                    arrowW = viewW - (arrowX * 2)
+                } else {
+                    arrowW = aw
+                }
+                self.resultArrow = self.addArrowView(to: self.tableContainer, x: arrowX, y: self.sourceView.frame.maxY + 10, w: arrowW, h: ah, dual: output.combineActive)
             }
         }
         observerRemovals.append(removal)
