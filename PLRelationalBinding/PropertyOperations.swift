@@ -68,13 +68,13 @@ public func not<P: ReadablePropertyType>(_ property: P) -> ReadableProperty<Bool
 extension ReadablePropertyType where Value == Bool {
     /// Returns a ReadableProperty whose value resolves to `self.value || other.value`.  The returned
     /// property's value will be recomputed any time the value of either input changes.
-    public func or(_ other: Self) -> ReadableProperty<Bool> {
+    public func or<P: ReadablePropertyType>(_ other: P) -> ReadableProperty<Bool> where P.Value == Bool {
         return BinaryOpProperty(signal: self.signal *|| other.signal, changing: valueChanging, owner1: self, owner2: other)
     }
     
     /// Returns a ReadableProperty whose value resolves to `self.value && other.value`.  The returned
     /// property's value will be recomputed any time the value of either input changes.
-    public func and(_ other: Self) -> ReadableProperty<Bool> {
+    public func and<P: ReadablePropertyType>(_ other: P) -> ReadableProperty<Bool> where P.Value == Bool {
         return BinaryOpProperty(signal: self.signal *&& other.signal, changing: valueChanging, owner1: self, owner2: other)
     }
 }
@@ -94,17 +94,17 @@ infix operator *||: LogicalDisjunctionPrecedence
 
 infix operator *&& : LogicalConjunctionPrecedence
 
-public func *||<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Bool> where P.Value == Bool {
+public func *||<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(lhs: LHS, rhs: RHS) -> ReadableProperty<Bool> where LHS.Value == Bool, RHS.Value == Bool {
     return lhs.or(rhs)
 }
 
-public func *&&<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Bool> where P.Value == Bool {
+public func *&&<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(lhs: LHS, rhs: RHS) -> ReadableProperty<Bool> where LHS.Value == Bool, RHS.Value == Bool {
     return lhs.and(rhs)
 }
 
 infix operator *== : ComparisonPrecedence
 
-public func *==<P: ReadablePropertyType>(lhs: P, rhs: P) -> ReadableProperty<Bool> where P.Value: Equatable {
+public func *==<LHS: ReadablePropertyType, RHS: ReadablePropertyType>(lhs: LHS, rhs: RHS) -> ReadableProperty<Bool> where LHS.Value: Equatable, LHS.Value == RHS.Value {
     return BinaryOpProperty(signal: lhs.signal *== rhs.signal, changing: valueChanging, owner1: lhs, owner2: rhs)
 }
 
