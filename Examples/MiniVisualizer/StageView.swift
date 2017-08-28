@@ -78,6 +78,17 @@ class StageView: BackgroundView {
     private let input1: RelationModel
     private let input2: RelationModel
     
+    private var filterFrame: CGRect!
+    private var filterView: BackgroundView!
+
+    private var combineFrame: CGRect!
+    private var combineView: BackgroundView!
+
+    private var input1View: RelationView!
+    
+    private var input2Frame: CGRect!
+    private var input2View: RelationView!
+    
     private var filterOpPopup: PopUpButton<FilterOp>!
     private var filterAttrPopup: PopUpButton<Attribute>!
     private var filterValueField: TextField!
@@ -104,31 +115,30 @@ class StageView: BackgroundView {
         let relationH: CGFloat = frame.height - filterH
         self.relationW = relationW
         
-        let filterFrame = NSMakeRect(0, frame.height - filterH - filterTopPad, relationW, filterH + filterTopPad)
-        let filterView = BackgroundView(frame: filterFrame)
-        //filterView.backgroundColor = NSColor(red: 37.0/255.0, green: 170.0/255.0, blue: 225.0/255.0, alpha: 1.0)
+        filterFrame = NSMakeRect(0, frame.height - filterH - filterTopPad, relationW, filterH + filterTopPad)
+        filterView = BackgroundView(frame: filterFrame)
         filterView.backgroundColor = NSColor(white: 0.7, alpha: 1.0)
         filterView.wantsLayer = true
         filterView.layer!.cornerRadius = 8
         self.addSubview(filterView)
         
-        let combineFrame = NSMakeRect(relationW, 16, combineW, relationH - 32)
-        let combineView = BackgroundView(frame: combineFrame)
-        //combineView.backgroundColor = NSColor(white: 0.7, alpha: 1.0)
+        combineFrame = NSMakeRect(relationW, 16, combineW, relationH - 32)
+        combineView = BackgroundView(frame: combineFrame)
         combineView.wantsLayer = true
         combineView.layer!.addSublayer(curvyBg(combineView.bounds))
         self.addSubview(combineView)
         
         let input1Frame = NSMakeRect(0, 0, relationW, relationH)
-        let input1View = RelationView(frame: input1Frame, arrayProperty: input1.arrayProperty, orderedAttrs: input1.orderedAttrs)
+        input1View = RelationView(frame: input1Frame, arrayProperty: input1.arrayProperty, orderedAttrs: input1.orderedAttrs)
         input1View.wantsLayer = true
         input1View.layer!.cornerRadius = 8
         self.addSubview(input1View)
 
-        let input2Frame = NSMakeRect(relationW + combineW, 0, relationW, relationH)
-        let input2View = RelationView(frame: input2Frame, arrayProperty: input2.arrayProperty, orderedAttrs: input2.orderedAttrs)
+        input2Frame = NSMakeRect(relationW + combineW, 0, relationW, relationH)
+        input2View = RelationView(frame: input2Frame, arrayProperty: input2.arrayProperty, orderedAttrs: input2.orderedAttrs)
         input2View.wantsLayer = true
         input2View.layer!.cornerRadius = 8
+        //input2View.layer!.opacity = 0.0
         self.addSubview(input2View)
 
         filterOpPopup = PopUpButton(frame: NSMakeRect(10, filterFrame.height - 32, 100, popupH), pullsDown: false)
@@ -151,12 +161,22 @@ class StageView: BackgroundView {
         combineOpPopup.items <~ self.combineOpMenuItems
         combineOpPopup.selectedObject <~> self.selectedCombineOp
         combineView.addSubview(combineOpPopup)
+        
+        let filterTrackingArea = NSTrackingArea(rect: filterFrame, options: [.activeInKeyWindow, .mouseEnteredAndExited], owner: self, userInfo: ["key": "filter"])
+        self.addTrackingArea(filterTrackingArea)
+
+        let combineTrackingArea = NSTrackingArea(rect: combineFrame, options: [.activeInKeyWindow, .mouseEnteredAndExited], owner: self, userInfo: ["key": "combine"])
+        self.addTrackingArea(combineTrackingArea)
+
+        filterOffset <~ not(filterVisible)
+        combineOffset <~ not(combineVisible)
+        input2Offset <~ not(combineVisible)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     private lazy var filterOpMenuItems: ReadableProperty<[MenuItem<FilterOp>]> = {
         var items = [MenuItem<FilterOp>]()
         func addItem(_ op: FilterOp) {
@@ -286,6 +306,70 @@ class StageView: BackgroundView {
                 return $0.0 ?? $0.1
             }
     }()
+    
+    // MARK: - Hover tracking
+    
+    private lazy var filterHover: MutableValueProperty<Bool> = mutableValueProperty(false)
+    private lazy var combineHover: MutableValueProperty<Bool> = mutableValueProperty(false)
+    
+    private lazy var filterVisible: ReadableProperty<Bool> = {
+        return self.filterHover *|| self.selectedFilterOp.map{ $0 != FilterOp.none }
+    }()
+
+    private lazy var combineVisible: ReadableProperty<Bool> = {
+        return self.combineHover *|| self.selectedCombineOp.map{ $0 != CombineOp.none }
+    }()
+    
+    private lazy var filterOffset: MutableValueProperty<Bool> = {
+        return mutableValueProperty(false, { offset, _ in
+            let yOff = self.filterFrame.height - 20
+            let end = CGPoint(x: 0, y: self.filterFrame.origin.y + (offset ? -yOff : 0))
+            slide(self.filterView, to: end)
+        })
+    }()
+
+    private lazy var combineOffset: MutableValueProperty<Bool> = {
+        return mutableValueProperty(false, { offset, _ in
+            let xOff = self.combineFrame.width - 10
+            let end = CGPoint(x: self.combineFrame.origin.x + (offset ? -xOff : 0), y: self.combineFrame.origin.y)
+            slide(self.combineView, to: end)
+        })
+    }()
+
+    private lazy var input2Offset: MutableValueProperty<Bool> = {
+        return mutableValueProperty(false, { offset, _ in
+            let xOff = self.input2Frame.width
+            let end = CGPoint(x: self.input2Frame.origin.x + (offset ? xOff : 0), y: self.input2Frame.origin.y)
+            slide(self.input2View, to: end)
+        })
+    }()
+
+//    private lazy var input2Opaque: MutableValueProperty<Bool> = {
+//        return mutableValueProperty(false, { opaque, _ in
+//            fade(self.input2View, to: opaque ? 1.0 : 0.0)
+//        })
+//    }()
+    
+    private func changeHover(_ hover: Bool, _ event: NSEvent) {
+        if let key = event.trackingArea?.userInfo?["key"] as? String {
+            switch key {
+            case "filter":
+                filterHover.change(hover)
+            case "combine":
+                combineHover.change(hover)
+            default:
+                break
+            }
+        }
+    }
+    
+    override func mouseEntered(with event: NSEvent) {
+        changeHover(true, event)
+    }
+    
+    override func mouseExited(with event: NSEvent) {
+        changeHover(false, event)
+    }
 }
 
 private extension Relation {
@@ -317,4 +401,37 @@ private func curvyBg(_ b: CGRect) -> CAShapeLayer {
     l.path = curvyPath().cgPath
     l.fillColor = NSColor(white: 0.7, alpha: 1.0).cgColor
     return l
+}
+
+private func slide(_ view: NSView, to end: CGPoint) {
+    var rowFrame = view.frame
+    rowFrame.origin = end
+    view.frame = rowFrame
+
+    CATransaction.begin()
+    
+    let animation = CABasicAnimation(keyPath: "position")
+    animation.fromValue = view.layer?.presentation()?.value(forKeyPath: "position")
+    animation.toValue = NSValue(point: end)
+    animation.duration = 0.2
+    animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
+    animation.isRemovedOnCompletion = false
+    view.layer!.add(animation, forKey: "position")
+    
+    CATransaction.commit()
+}
+
+private func fade(_ view: NSView, to opacity: Float) {
+    CATransaction.begin()
+    
+    let animation = CABasicAnimation(keyPath: "opacity")
+    animation.fromValue = view.layer?.presentation()?.value(forKeyPath: "opacity")
+    animation.toValue = NSNumber(value: opacity)
+    animation.duration = 0.2
+    animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseOut)
+    animation.fillMode = kCAFillModeForwards
+    animation.isRemovedOnCompletion = false
+    view.layer!.add(animation, forKey: "opacity")
+    
+    CATransaction.commit()
 }
