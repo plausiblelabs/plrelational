@@ -24,13 +24,18 @@ class DetailView: BackgroundView {
         
         super.init(frame: frame)
         
+        // Load the xib and bind to it
         Bundle.main.loadNibNamed("DetailView", owner: self, topLevelObjects: nil)
         view.frame = self.bounds
         addSubview(view)
         
+        // Configure the background
         self.backgroundColor = .white
         self.wantsLayer = true
         self.layer!.cornerRadius = 4
+        
+        // Bind to our view model
+        textField.string <~> model.itemText
     }
     
     required init?(coder: NSCoder) {

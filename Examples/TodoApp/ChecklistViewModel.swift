@@ -6,6 +6,7 @@
 import Cocoa
 import PLRelational
 import PLRelationalBinding
+import PLBindableControls
 
 class ChecklistViewModel {
     
@@ -20,4 +21,28 @@ class ChecklistViewModel {
     init(model: Model) {
         self.model = model
     }
+    
+    lazy var itemsListModel: ListViewModel<RowArrayElement> = {
+        return ListViewModel(
+            data: self.model.items.arrayProperty(idAttr: Item.id, orderAttr: Item.status),
+            contextMenu: nil,
+            move: nil,
+            cellIdentifier: { _ in "Cell" },
+            cellText: { row in
+                let rowID = row[Item.id]
+                let initialValue: String? = row[Item.text].get()
+                let textRelation = self.model.items.select(Item.id *== rowID).project(Item.text)
+                return .asyncReadWrite(self.model.itemText(textRelation, initialValue: initialValue))
+            },
+            cellImage: nil
+        )
+    }()
+    
+    lazy var itemsListSelection: AsyncReadWriteProperty<Set<RelationValue>> = {
+        return self.model.undoableBidiProperty(
+            action: "Change Selection",
+            signal: self.model.selectedItemIDs.allRelationValues(),
+            update: { self.model.selectedItemIDs.asyncReplaceValues(Array($0)) }
+        )
+    }()
 }

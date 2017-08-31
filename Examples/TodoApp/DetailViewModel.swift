@@ -21,4 +21,9 @@ class DetailViewModel {
     init(model: Model) {
         self.model = model
     }
+    
+    lazy var itemText: AsyncReadWriteProperty<String> = {
+        let textRelation = self.model.selectedItems.project(Item.text)
+        return self.model.itemText(textRelation, initialValue: nil)
+    }()
 }

@@ -16,6 +16,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @IBOutlet weak var detailContainer: NSView!
     @IBOutlet weak var noSelectionLabel: Label!
     
+    private var nsUndoManager: SPUndoManager!
+
     private var checklistView: ChecklistView!
     private var detailView: DetailView!
     
@@ -24,8 +26,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         window.delegate = self
         
+        // Prepare the undo manager
+        nsUndoManager = SPUndoManager()
+        let undoManager = PLBindableControls.UndoManager(nsmanager: nsUndoManager)
+
         // Initialize our model
-        model = Model()
+        model = Model(undoManager: undoManager)
         
         // Add the checklist view to the left side
         let checklistViewModel = ChecklistViewModel(model: model)
@@ -36,5 +42,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let detailViewModel = DetailViewModel(model: model)
         detailView = DetailView(frame: detailContainer.bounds, model: detailViewModel)
         detailContainer.addSubview(detailView)
+        
+        // Toggle the "No Selection" label and detail view depending on the selection state
+        detailView.visible <~ model.hasSelection
+        noSelectionLabel.visible <~ not(model.hasSelection)
+    }
+    
+    func windowWillReturnUndoManager(_ window: NSWindow) -> Foundation.UndoManager? {
+        return nsUndoManager
     }
 }
