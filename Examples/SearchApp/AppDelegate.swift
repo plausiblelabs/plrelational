@@ -33,9 +33,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         // Bind the views to the view model
         model = ViewModel(undoManager: undoManager)
         model.queryString <~ queryField.string
+        
         resultsListView = ResultsListView(model: model.resultsListModel, outlineView: outlineView)
         resultsListView.reloadCellOnUpdate = true
         resultsListView.selection <~> model.resultsListSelection
+        resultsListView.configureCell = { view, row in
+            view.textField?.attributedStringValue = SearchResult.highlightedString(from: row)
+        }
+        
         noResultsLabel.visible <~ not(model.hasResults)
         personNameLabel.string <~ model.selectedPersonName
         personBioLabel.string <~ model.selectedPersonBio

@@ -32,12 +32,28 @@ class ChecklistView: NSView {
         
         // Bind to our view model
         listView = CustomListView(model: model.itemsListModel, outlineView: outlineView)
+        listView.animateChanges = true
         listView.selection <~> model.itemsListSelection
+        listView.configureCell = { view, row in
+            let cellView = view as! ChecklistCellView
+            
+            let textField = cellView.textField as! TextField
+            textField.string.unbindAll()
+            textField.string <~> model.itemTitle(for: row)
+            
+            let detailLabel = cellView.detailLabel!
+            detailLabel.string.unbindAll()
+            detailLabel.string <~ model.itemTags(for: row)
+        }
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+}
+
+class ChecklistCellView: NSTableCellView {
+    @IBOutlet var detailLabel: Label!
 }
 
 /// Normally it would not be necessary to subclass ListView, but we do that here just to customize the row backgrounds.

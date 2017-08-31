@@ -12,26 +12,17 @@ public struct ListViewModel<E: ArrayElement> {
     // Note: dstIndex is relative to the state of the array *before* the item is removed.
     public let move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)?
     public let cellIdentifier: (E.Data) -> String
-    public let cellText: (E.Data) -> TextProperty
-    public let cellImage: ((E.Data) -> ReadableProperty<Image>)?
-    public let cellAttributedText: ((E.Data) -> NSAttributedString)?
 
     public init(
         data: ArrayProperty<E>,
         contextMenu: ((E.Data) -> ContextMenu?)?,
         move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)?,
-        cellIdentifier: @escaping (E.Data) -> String,
-        cellText: @escaping (E.Data) -> TextProperty,
-        cellImage: ((E.Data) -> ReadableProperty<Image>)?,
-        cellAttributedText: ((E.Data) -> NSAttributedString)? = nil)
+        cellIdentifier: @escaping (E.Data) -> String)
     {
         self.data = data
         self.contextMenu = contextMenu
         self.move = move
         self.cellIdentifier = cellIdentifier
-        self.cellText = cellText
-        self.cellImage = cellImage
-        self.cellAttributedText = cellAttributedText
     }
 }
 
@@ -70,6 +61,8 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         }
     )
 
+    public var configureCell: ((NSTableCellView, E.Data) -> Void)?
+    
     private var arrayObserverRemoval: ObserverRemoval?
     //private var selfInitiatedSelectionChange = false
     
@@ -170,20 +163,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         let element = item as! E
         let identifier = model.cellIdentifier(element.data)
         let view = outlineView.make(withIdentifier: identifier, owner: self) as! NSTableCellView
-        if let textField = view.textField as? TextField {
-            if let attributedString = model.cellAttributedText?(element.data) {
-                textField.attributedStringValue = attributedString
-            } else {
-                let cellText = model.cellText(element.data)
-                textField.bind(cellText)
-            }
-        }
-        if let imageView = view.imageView as? ImageView {
-            imageView.img.unbindAll()
-            if let image = model.cellImage?(element.data) {
-                _ = imageView.img <~ image
-            }
-        }
+        configureCell?(view, element.data)
         return view
     }
     

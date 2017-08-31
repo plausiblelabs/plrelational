@@ -111,14 +111,7 @@ class ViewModel {
             data: self.resultsArray,
             contextMenu: nil,
             move: nil,
-            cellIdentifier: { _ in "Cell" },
-            cellText: { row in
-                return .readOnly(constantValueProperty(""))
-            },
-            cellImage: nil,
-            cellAttributedText: { row in
-                return SearchResult.highlightedString(from: row)
-            }
+            cellIdentifier: { _ in "Cell" }
         )
     }()
     

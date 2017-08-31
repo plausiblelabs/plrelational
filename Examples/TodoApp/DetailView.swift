@@ -13,9 +13,12 @@ class DetailView: BackgroundView {
     @IBOutlet var view: NSView!
     @IBOutlet var checkbox: Checkbox!
     @IBOutlet var titleField: TextField!
+    @IBOutlet var tagComboBox: EphemeralComboBox!
     @IBOutlet var tagsOutlineView: NSOutlineView!
     @IBOutlet var createdOnLabel: Label!
     @IBOutlet var deleteButton: Button!
+    
+    private var tagsListView: ListView<RowArrayElement>!
     
     private let model: DetailViewModel
     
@@ -36,6 +39,19 @@ class DetailView: BackgroundView {
         
         // Bind to our view model
         titleField.string <~> model.itemTitle
+        
+        tagComboBox.items <~ model.availableTags
+        tagComboBox.selectedItemID ~~> model.addExistingTagToSelectedItem
+        tagComboBox.committedString ~~> model.addNewTagToSelectedItem
+        
+        tagsListView = ListView(model: model.tagsListViewModel, outlineView: tagsOutlineView)
+        tagsListView.selection <~> model.selectedTagID
+        tagsListView.configureCell = { view, row in
+            let textField = view.textField as! TextField
+            textField.string.unbindAll()
+            textField.string <~> model.tagName(for: row)
+        }
+        
         createdOnLabel.string <~ model.createdOn
         deleteButton.clicks ~~> model.deleteItem
     }

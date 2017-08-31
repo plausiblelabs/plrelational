@@ -6,13 +6,22 @@
 import Cocoa
 import PLRelational
 import PLRelationalBinding
+import PLBindableControls
 
 class DetailViewModel {
 
     private let model: Model
     
+    /// The selected item ID, cached in this property for easy access.
+    private let itemID: AsyncReadableProperty<String?>
+    
     init(model: Model) {
         self.model = model
+        
+        self.itemID = self.model.selectedItemIDs
+            .oneStringOrNil()
+            .property()
+        self.itemID.start()
     }
     
     /// The item's title.  This is a read/write property that is backed by UndoableDatabase, so any changes
@@ -39,5 +48,78 @@ class DetailViewModel {
     /// (side effect producing) action as a property that can easily be bound to a `Button`.
     lazy var deleteItem: ActionProperty<()> = ActionProperty { _ in 
         self.model.deleteSelectedItem()
+    }
+    
+    // MARK: - Tags
+
+    /// The tags associated with the selected to-do item, sorted by name.
+    private lazy var itemTags: ArrayProperty<RowArrayElement> = {
+        return self.model.tagsForSelectedItem
+            .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
+    }()
+
+    /// The tags that are available (i.e., not already applied) for the selected to-do
+    /// item, sorted by name.  We use `fullArray` so that the entire array is delivered
+    /// any time there is a change; this helps to make it compatible with
+    /// the `EphemeralComboBox` class.
+    lazy var availableTags: AsyncReadableProperty<[RowArrayElement]> = {
+        return self.model.availableTagsForSelectedItem
+            .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
+            .fullArray()
+    }()
+
+    /// The model for the tags list, i.e., the tags that have been applied to the
+    /// selected to-do item.
+    lazy var tagsListViewModel: ListViewModel<RowArrayElement> = {
+        return ListViewModel(
+            data: self.itemTags,
+            contextMenu: nil,
+            move: nil,
+            cellIdentifier: { _ in "Cell" }
+        )
+    }()
+    
+    /// Returns a read/write property that resolves to the name for the given tag.
+    func tagName(for row: Row) -> AsyncReadWriteProperty<String> {
+        let tagID: String = row[Tag.id].get()!
+        let name: String? = row[Tag.name].get()
+        return self.model.tagName(for: tagID, initialValue: name)
+    }
+    
+    /// Holds the ID of the tag that is selected in the tags list view.
+    lazy var selectedTagID: ReadWriteProperty<Set<RelationValue>> = {
+        return mutableValueProperty(Set())
+    }()
+    
+    private func addExistingTagToSelected(tagID: String) {
+        self.model.addExistingTag(tagID, to: itemID.value!!)
+    }
+
+    /// Adds an existing tag to the selected to-do item.
+    lazy var addExistingTagToSelectedItem: ActionProperty<RelationValue> = ActionProperty { tagID in
+        self.addExistingTagToSelected(tagID: tagID.get()!)
+    }
+
+    private func addNewTagToSelected(with name: String) {
+        // See if a tag already exists with the given name
+        let itemID = self.itemID.value!!
+        let existingIndex = model.allTags.value?.index(where: {
+            let rowName: String = $0.data[Tag.name].get()!
+            return name == rowName
+        })
+        if let index = existingIndex {
+            // A tag already exists with the given name, so apply that tag rather than creating a new one
+            let elem = model.allTags.value![index]
+            let tagID: String = elem.data[Tag.id].get()!
+            model.addExistingTag(tagID, to: itemID)
+        } else {
+            // No tag exists with that name, so create a new tag and apply it to this item
+            model.addNewTag(named: name, to: itemID)
+        }
+    }
+    
+    /// Creates a new tag of the given name and adds it to the selected to-do item.
+    lazy var addNewTagToSelectedItem: ActionProperty<String> = ActionProperty { name in
+        self.addNewTagToSelected(with: name)
     }
 }

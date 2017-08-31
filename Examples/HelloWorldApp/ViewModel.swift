@@ -77,31 +77,26 @@ class ViewModel {
     }
 
     lazy var employeesListModel: ListViewModel<RowArrayElement> = {
-        
-        func nameProperty(_ relation: Relation, initialValue: String?) -> AsyncReadWriteProperty<String> {
-            return self.undoableDB.bidiProperty(
-                action: "Rename Employee",
-                signal: relation.oneString(initialValue: initialValue),
-                update: {
-                    relation.asyncUpdateString($0)
-                }
-            )
-        }
-        
         return ListViewModel(
             data: self.employees.arrayProperty(idAttr: "id", orderAttr: "first_name"),
             contextMenu: nil,
             move: nil,
-            cellIdentifier: { _ in "Cell" },
-            cellText: { row in
-                let rowID = row["id"]
-                let initialValue: String? = row["first_name"].get()
-                let nameRelation = self.employees.select(Attribute("id") *== rowID).project(["first_name"])
-                return .asyncReadWrite(nameProperty(nameRelation, initialValue: initialValue))
-            },
-            cellImage: nil
+            cellIdentifier: { _ in "Cell" }
         )
     }()
+    
+    func employeeName(for rowID: Int64, initialValue: String?) -> AsyncReadWriteProperty<String> {
+        let relation = self.employees
+            .select(Attribute("id") *== RelationValue(rowID))
+            .project(["first_name"])
+        return self.undoableDB.bidiProperty(
+            action: "Rename Employee",
+            signal: relation.oneString(initialValue: initialValue),
+            update: {
+                relation.asyncUpdateString($0)
+            }
+        )
+    }
     
     lazy var employeesListSelection: AsyncReadWriteProperty<Set<RelationValue>> = {
         return self.undoableDB.bidiProperty(

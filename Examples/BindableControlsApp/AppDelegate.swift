@@ -128,18 +128,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             data: persons.arrayProperty(idAttr: "id", orderAttr: "order"),
             contextMenu: nil,
             move: nil,
-            cellIdentifier: { _ in "PageCell" },
-            cellText: { row in
-                let rowID = row["id"]
-                let initialValue: String? = row["name"].get()
-                let nameRelation = persons.select(Attribute("id") *== rowID).project(["name"])
-                return .asyncReadWrite(nameProperty(nameRelation, initialValue: initialValue))
-            },
-            cellImage: nil
+            cellIdentifier: { _ in "PageCell" }
         )
         listView = ListView(model: listViewModel, outlineView: outlineView)
         listView.animateChanges = true
         listView.selection <~> listSelectionProperty(selectedPersonID)
+        listView.configureCell = { view, row in
+            let rowID = row["id"]
+            let initialValue: String? = row["name"].get()
+            let nameRelation = persons.select(Attribute("id") *== rowID).project(["name"])
+            let textField = view.textField as! TextField
+            textField.string <~> nameProperty(nameRelation, initialValue: initialValue)
+        }
 
         // Add some other controls (could also do this in the xib)
         textField = TextField(frame: NSMakeRect(200, 30, 200, 24))

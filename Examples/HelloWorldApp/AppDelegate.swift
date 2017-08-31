@@ -29,8 +29,17 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         
         // Bind the views to the view model
         model = ViewModel(undoManager: undoManager)
+        
         listView = ListView(model: model.employeesListModel, outlineView: outlineView)
         listView.selection <~> model.employeesListSelection
+        listView.configureCell = { view, row in
+            let rowID: Int64 = row["id"].get()!
+            let initialValue: String? = row["first_name"].get()
+            let nameProperty = self.model.employeeName(for: rowID, initialValue: initialValue)
+            let textField = view.textField as! TextField
+            textField.string <~> nameProperty
+        }
+        
         empNameLabel.string <~ model.selectedEmployeeName
         empDeptLabel.string <~ model.selectedEmployeeDepartment
     }

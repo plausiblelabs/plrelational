@@ -16,12 +16,14 @@ extension Relation {
     
     /// Returns a Signal that delivers true when the set of rows is empty.
     public var empty: Signal<Bool> {
-        return signal(initialValue: nil, { $1.next() == nil })
+        // TODO: Make this a function that takes an optional initial value (instead
+        // of forcing `initialValue: true`)
+        return signal(initialValue: true, { $1.next() == nil })
     }
 
     /// Returns a Signal that delivers true when the set of rows is non-empty.
     public var nonEmpty: Signal<Bool> {
-        return signal(initialValue: nil, { $1.next() != nil })
+        return signal(initialValue: false, { $1.next() != nil })
     }
     
     /// Returns a Signal, sourced from this relation, that delivers all values for the single attribute.

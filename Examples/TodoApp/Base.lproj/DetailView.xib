@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
@@ -11,6 +11,7 @@
                 <outlet property="checkbox" destination="Je6-pU-989" id="eKf-3r-Qqo"/>
                 <outlet property="createdOnLabel" destination="eSX-Ec-zI8" id="ALN-ss-dJn"/>
                 <outlet property="deleteButton" destination="INn-4A-JZl" id="b7b-e2-AKo"/>
+                <outlet property="tagComboBox" destination="eHh-EJ-2bL" id="kOu-N9-EyE"/>
                 <outlet property="tagsOutlineView" destination="PCB-AS-Leo" id="ONZ-UX-9Ya"/>
                 <outlet property="titleField" destination="mvH-2r-sMI" id="LDp-sk-Dzo"/>
                 <outlet property="view" destination="c22-O7-iKe" id="e6g-sq-JcD"/>
@@ -55,7 +56,7 @@
                         <rect key="frame" x="1" y="1" width="248" height="80"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" indentationPerLevel="16" outlineTableColumn="gsP-uL-Bsu" id="PCB-AS-Leo">
+                            <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" indentationMarkerFollowsCell="NO" outlineTableColumn="gsP-uL-Bsu" id="PCB-AS-Leo">
                                 <rect key="frame" x="0.0" y="0.0" width="248" height="80"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <size key="intercellSpacing" width="2" height="3"/>
@@ -75,11 +76,11 @@
                                         </textFieldCell>
                                         <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         <prototypeCellViews>
-                                            <tableCellView identifier="DataCell" id="LMJ-9r-PkM">
+                                            <tableCellView identifier="Cell" id="LMJ-9r-PkM">
                                                 <rect key="frame" x="1" y="1" width="243" height="17"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
-                                                    <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7ib-bu-HiZ">
+                                                    <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="7ib-bu-HiZ" customClass="TextField" customModule="PLBindableControls">
                                                         <rect key="frame" x="1" y="0.0" width="242" height="17"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Table View Cell" id="A9e-vD-R9Z">
@@ -109,18 +110,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </scroller>
                 </scrollView>
-                <comboBox verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eHh-EJ-2bL">
+                <comboBox verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="eHh-EJ-2bL" customClass="EphemeralComboBox" customModule="PLBindableControls">
                     <rect key="frame" x="21" y="309" width="252" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" placeholderString="Assign a tag" drawsBackground="YES" completes="NO" numberOfVisibleItems="5" id="hKC-IS-C8n">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                        <objectValues>
-                            <string>Item 1</string>
-                            <string>Item 2</string>
-                            <string>Item 3</string>
-                        </objectValues>
                     </comboBoxCell>
                 </comboBox>
                 <scrollView fixedFrame="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" hasHorizontalScroller="NO" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g1q-sG-21T">
