@@ -41,11 +41,11 @@ private struct FieldNameExclusions {
 
 /// :nodoc: Debugging aids are hidden from "official" API for now; may be exposed in the future
 extension Relation {
-    public func fullDebugDump(showContents: Bool = true) {
-        fullDebugDump(showContents, 0)
+    public func fullDebugDump(options: Set<GraphvizDumpOption> = [.showContents]) {
+        fullDebugDump(options, 0)
     }
     
-    func fullDebugDump(_ showContents: Bool, _ indent: Int) {
+    func fullDebugDump(_ options: Set<GraphvizDumpOption>, _ indent: Int) {
         let indentString = "".padding(toLength: indent * 4, withPad: " ", startingAt: 0)
         func print(_ str: String) {
             for line in str.components(separatedBy: "\n") {
@@ -58,7 +58,7 @@ extension Relation {
         } else {
             print("\(type(of: self))")
         }
-        if showContents {
+        if options.contains(.showContents) {
             print("\(self.descriptionWithRows(self.rows()))")
         }
         
@@ -67,7 +67,7 @@ extension Relation {
         }
         for (name, subrelation) in getChildRelationsForDump() {
             print("\(name):")
-            subrelation.fullDebugDump(showContents, indent + 1)
+            subrelation.fullDebugDump(options, indent + 1)
         }
     }
     
@@ -170,13 +170,20 @@ extension Relation {
         print(rawDump(self))
     }
     
-    public func graphvizDump(showContents: Bool = false, printer print: @escaping (String) -> Void = { print($0) }) {
+    public func graphvizDump(options: Set<GraphvizDumpOption> = [], printer print: @escaping (String) -> Void = { print($0) }) {
         var seenIDs: Set<ObjectIdentifier> = []
         
         print("digraph relation_graph {")
         
         func visit(_ r: Relation, nonobjectID: String) -> String {
-            let supplemental: [String] = r.getFieldsForDump().map({
+            let supplemental: [String] = r.getFieldsForDump().flatMap({
+                if  ($0 == "debugName" && !options.contains(.showDebugName)) ||
+                    ($0 == "derivative" && !options.contains(.showDerivative)) ||
+                    ($0 == "inTransaction" && !options.contains(.showInTransaction)) ||
+                    ($0 == "didRegisterObservers" && !options.contains(.showDidRegisterObservers))
+                {
+                    return nil
+                }
                 let valueString = String(describing: $1).replacingOccurrences(of: "\"", with: "\\\"")
                 return "\($0): \(valueString)"
             })
@@ -184,9 +191,10 @@ extension Relation {
                 let id = ObjectIdentifier(obj)
                 let idString = String(format: "_%lx", UInt(bitPattern: id))
                 if !seenIDs.contains(id) {
-                    let name = "\(type(of: r)) \(idString)"
+                    let type = String(describing: type(of: r))
+                    let name = options.contains(.showAddress) ? type + " " + idString : type
                     var label = ([name] + supplemental).joined(separator: "\n")
-                    if showContents {
+                    if options.contains(.showContents) {
                         var lines = r.description.components(separatedBy: "\n")
                         if lines.count > 6 {
                            lines = lines.prefix(6) + ["..."]
@@ -219,9 +227,9 @@ extension Relation {
         print("}")
     }
     
-    public func graphvizDumpAndOpen(showContents: Bool = false) {
+    public func graphvizDumpAndOpen(options: Set<GraphvizDumpOption> = []) {
         var output = ""
-        graphvizDump(showContents: showContents, printer: { output += $0; output += "\n" })
+        graphvizDump(options: options, printer: { output += $0; output += "\n" })
         
         let objDescription: String
         if let obj = asObject(self) {
@@ -353,4 +361,14 @@ extension Relation {
         }
         _ = visit(self)
     }
+}
+
+public enum GraphvizDumpOption {
+    case showAddress
+    case showContents
+    
+    case showDebugName
+    case showDerivative
+    case showInTransaction
+    case showDidRegisterObservers
 }

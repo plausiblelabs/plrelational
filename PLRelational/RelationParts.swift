@@ -82,3 +82,9 @@ extension Scheme: Equatable {}
 public func ==(a: Scheme, b: Scheme) -> Bool {
     return a.attributes == b.attributes
 }
+
+extension Scheme: CustomStringConvertible {
+    public var description: String {
+        return String(describing: attributes.sorted())
+    }
+}
