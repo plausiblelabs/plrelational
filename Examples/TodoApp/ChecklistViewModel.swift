@@ -30,9 +30,9 @@ class ChecklistViewModel {
             cellIdentifier: { _ in "Cell" },
             cellText: { row in
                 let rowID = row[Item.id]
-                let initialValue: String? = row[Item.text].get()
-                let textRelation = self.model.items.select(Item.id *== rowID).project(Item.text)
-                return .asyncReadWrite(self.model.itemText(textRelation, initialValue: initialValue))
+                let initialValue: String? = row[Item.title].get()
+                let textRelation = self.model.items.select(Item.id *== rowID).project(Item.title)
+                return .asyncReadWrite(self.model.itemTitle(textRelation, initialValue: initialValue))
             },
             cellImage: nil
         )

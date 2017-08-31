@@ -12,10 +12,11 @@ private typealias Spec = PlistDatabase.RelationSpec
 
 enum Item {
     static let id = Attribute("item_id")
-    static let text = Attribute("text")
+    static let title = Attribute("title")
     static let created = Attribute("created")
     static let status = Attribute("status")
-    fileprivate static var spec: Spec { return .file(name: "item", path: "items.plist", scheme: [id, text, created, status], primaryKeys: [id]) }
+    static let notes = Attribute("notes")
+    fileprivate static var spec: Spec { return .file(name: "item", path: "items.plist", scheme: [id, title, created, status, notes], primaryKeys: [id]) }
 }
 
 enum Tag {
@@ -89,7 +90,8 @@ class Model {
         return undoableDB.bidiProperty(action: action, signal: signal, update: update)
     }
     
-    private func addItem(_ text: String) {
+    /// Adds a new row to the `items` relation.
+    private func addItem(_ title: String) {
         // Use UUIDs to uniquely identify rows
         let id = RelationValue(uuidString())
 
@@ -108,10 +110,38 @@ class Model {
         
         items.asyncAdd([
             Item.id: id,
-            Item.text: RelationValue(text),
+            Item.title: RelationValue(title),
             Item.created: created,
-            Item.status: status
+            Item.status: status,
+            Item.notes: RelationValue("")
         ])
+    }
+    
+    /// Deletes the row associated with the selected item and clears the selection.  This demonstrates
+    /// the use of `cascadingDelete`, which is kind of overkill for this particular case but does show
+    /// how easy it can be to clean up related data.
+    func deleteSelectedItem() {
+        // We initiate the cascading delete by removing all rows from `selectedItemIDs`
+        selectedItemIDs.cascadingDelete(
+            true, // `true` here means "all rows"
+            affectedRelations: [items, selectedItemIDs, itemTags],
+            cascade: { (relation, row) in
+                if relation === self.selectedItemIDs {
+                    // This row was deleted from `selectedItemIDs`; delete corresponding rows from
+                    // `items` and `itemTags`
+                    let itemID = row[SelectedItem.id]
+                    return [
+                        (self.items, Item.id *== itemID),
+                        (self.itemTags, ItemTag.itemID *== itemID)
+                    ]
+                } else {
+                    // Nothing else to clean up
+                    return []
+                }
+            },
+            update: { _ in return [] },
+            completionCallback: { _ in }
+        )
     }
     
     // MARK: - Properties
@@ -126,10 +156,10 @@ class Model {
         return self.selectedItems.nonEmpty.property()
     }()
 
-    /// Returns a property that reflects the item text.
-    func itemText(_ relation: Relation, initialValue: String?) -> AsyncReadWriteProperty<String> {
+    /// Returns a property that reflects the item title.
+    func itemTitle(_ relation: Relation, initialValue: String?) -> AsyncReadWriteProperty<String> {
         return self.undoableBidiProperty(
-            action: "Change Item Text",
+            action: "Change Item Title",
             signal: relation.oneString(initialValue: initialValue),
             update: {
                 relation.asyncUpdateString($0)
@@ -142,14 +172,26 @@ private func uuidString() -> String {
     return UUID().uuidString
 }
 
-private let dateFormatter: DateFormatter = {
+private let timestampFormatter: DateFormatter = {
     let f = DateFormatter()
     f.dateFormat = "yyyy-MM-dd HH:mm:ss"
     return f
 }()
 
 private func timestampString() -> String {
-    return dateFormatter.string(from: Date())
+    return timestampFormatter.string(from: Date())
+}
+
+private let dateFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateStyle = .medium
+    f.timeStyle = .none
+    return f
+}()
+
+func displayString(from timestampString: String) -> String {
+    let date = timestampFormatter.date(from: timestampString)!
+    return dateFormatter.string(from: date)
 }
 
 private func statusString(completed: Bool, timestamp: String) -> String {

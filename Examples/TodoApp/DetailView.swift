@@ -12,7 +12,7 @@ class DetailView: BackgroundView {
     
     @IBOutlet var view: NSView!
     @IBOutlet var checkbox: Checkbox!
-    @IBOutlet var textField: TextField!
+    @IBOutlet var titleField: TextField!
     @IBOutlet var tagsOutlineView: NSOutlineView!
     @IBOutlet var createdOnLabel: Label!
     @IBOutlet var deleteButton: Button!
@@ -35,7 +35,9 @@ class DetailView: BackgroundView {
         self.layer!.cornerRadius = 4
         
         // Bind to our view model
-        textField.string <~> model.itemText
+        titleField.string <~> model.itemTitle
+        createdOnLabel.string <~ model.createdOn
+        deleteButton.clicks ~~> model.deleteItem
     }
     
     required init?(coder: NSCoder) {
