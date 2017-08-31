@@ -93,6 +93,8 @@
 		3788C0991F577C63005920FD /* ChecklistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788C0981F577C63005920FD /* ChecklistViewModel.swift */; };
 		3788C09B1F577C82005920FD /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788C09A1F577C82005920FD /* DetailView.swift */; };
 		3788C09D1F577C8F005920FD /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788C09C1F577C8F005920FD /* DetailViewModel.swift */; };
+		3799AB491F57C43C0075570F /* ChecklistView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3799AB471F57C43C0075570F /* ChecklistView.xib */; };
+		3799AB4C1F57C8960075570F /* DetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3799AB4A1F57C8960075570F /* DetailView.xib */; };
 		37A1CE6E1D1081980067870D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE6D1D1081980067870D /* AppDelegate.swift */; };
 		37A1CE701D1081980067870D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37A1CE6F1D1081980067870D /* Assets.xcassets */; };
 		37A1CE731D1081980067870D /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37A1CE711D1081980067870D /* MainMenu.xib */; };
@@ -846,6 +848,8 @@
 		3788C09C1F577C8F005920FD /* DetailViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
 		37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncPropertyOperations.swift; sourceTree = "<group>"; };
 		37941D8D1DB8191200F5508F /* AsyncPropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyOperationsTests.swift; path = PLRelationalBindingTests/AsyncPropertyOperationsTests.swift; sourceTree = SOURCE_ROOT; };
+		3799AB481F57C43C0075570F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/ChecklistView.xib; sourceTree = "<group>"; };
+		3799AB4B1F57C8960075570F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/DetailView.xib; sourceTree = "<group>"; };
 		37A1CE591D08A2240067870D /* MenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuItem.swift; sourceTree = "<group>"; };
 		37A1CE5C1D08C3110067870D /* ColorPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
 		37A1CE5F1D08C70D0067870D /* Color.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
@@ -1795,10 +1799,12 @@
 			isa = PBXGroup;
 			children = (
 				37AEC3F51F576D18004E5487 /* AppDelegate.swift */,
-				3788C0961F577C43005920FD /* ChecklistView.swift */,
 				3788C0981F577C63005920FD /* ChecklistViewModel.swift */,
-				3788C09A1F577C82005920FD /* DetailView.swift */,
+				3788C0961F577C43005920FD /* ChecklistView.swift */,
+				3799AB471F57C43C0075570F /* ChecklistView.xib */,
 				3788C09C1F577C8F005920FD /* DetailViewModel.swift */,
+				3788C09A1F577C82005920FD /* DetailView.swift */,
+				3799AB4A1F57C8960075570F /* DetailView.xib */,
 				37AEC40F1F577064004E5487 /* Model.swift */,
 				37AEC4021F576E51004E5487 /* MainMenu.xib */,
 				37AEC3F91F576D18004E5487 /* Assets.xcassets */,
@@ -3039,6 +3045,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3799AB491F57C43C0075570F /* ChecklistView.xib in Resources */,
+				3799AB4C1F57C8960075570F /* DetailView.xib in Resources */,
 				37AEC3FA1F576D18004E5487 /* Assets.xcassets in Resources */,
 				37AEC40E1F576EE5004E5487 /* MainMenu.xib in Resources */,
 			);
@@ -3944,6 +3952,22 @@
 				37504B441DC6995100CEE4D4 /* Base */,
 			);
 			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		3799AB471F57C43C0075570F /* ChecklistView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3799AB481F57C43C0075570F /* Base */,
+			);
+			name = ChecklistView.xib;
+			sourceTree = "<group>";
+		};
+		3799AB4A1F57C8960075570F /* DetailView.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				3799AB4B1F57C8960075570F /* Base */,
+			);
+			name = DetailView.xib;
 			sourceTree = "<group>";
 		};
 		37A1CE711D1081980067870D /* MainMenu.xib */ = {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
@@ -15,7 +15,9 @@
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="TodoApp">
             <connections>
-                <outlet property="tableContainer" destination="Obe-lp-Zh6" id="HAR-lR-06Q"/>
+                <outlet property="detailContainer" destination="dw7-6W-Zdm" id="a1G-0D-q7G"/>
+                <outlet property="listContainer" destination="Obe-lp-Zh6" id="aVK-7b-5jQ"/>
+                <outlet property="noSelectionLabel" destination="DId-mn-StG" id="k1w-xO-BJQ"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="MEA-UP-LPE"/>
             </connections>
         </customObject>
@@ -672,19 +674,32 @@
         <window title="TodoApp" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="QvC-M9-y7g">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="335" y="390" width="820" height="695"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
+            <rect key="contentRect" x="335" y="390" width="640" height="440"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="877"/>
             <view key="contentView" wantsLayer="YES" id="EiT-Mj-1SZ">
-                <rect key="frame" x="0.0" y="0.0" width="820" height="695"/>
+                <rect key="frame" x="0.0" y="0.0" width="640" height="440"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Obe-lp-Zh6" userLabel="Table Container" customClass="BackgroundView" customModule="PLBindableControls">
-                        <rect key="frame" x="20" y="20" width="780" height="655"/>
+                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Obe-lp-Zh6" userLabel="List Container" customClass="BackgroundView" customModule="PLBindableControls">
+                        <rect key="frame" x="20" y="20" width="296" height="400"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </customView>
+                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dw7-6W-Zdm" userLabel="Detail Container" customClass="BackgroundView" customModule="PLBindableControls">
+                        <rect key="frame" x="324" y="20" width="296" height="400"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    </customView>
+                    <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DId-mn-StG" customClass="Label" customModule="PLBindableControls">
+                        <rect key="frame" x="416" y="209" width="113" height="23"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="No Selection" id="DH2-Dt-NDi">
+                            <font key="font" metaFont="system" size="19"/>
+                            <color key="textColor" name="tertiaryLabelColor" catalog="System" colorSpace="catalog"/>
+                            <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                        </textFieldCell>
+                    </textField>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="61" y="-202.5"/>
+            <point key="canvasLocation" x="-57" y="-369"/>
         </window>
     </objects>
 </document>
