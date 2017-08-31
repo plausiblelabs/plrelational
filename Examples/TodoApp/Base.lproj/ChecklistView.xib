@@ -8,6 +8,7 @@
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="ChecklistView" customModule="TodoApp" customModuleProvider="target">
             <connections>
+                <outlet property="newItemField" destination="hR4-e0-XFg" id="FVX-gR-7Zp"/>
                 <outlet property="outlineView" destination="IgM-9D-lPC" id="eAt-Ht-qL3"/>
                 <outlet property="view" destination="c22-O7-iKe" id="CoZ-oB-nWn"/>
             </connections>
@@ -18,10 +19,10 @@
             <rect key="frame" x="0.0" y="0.0" width="288" height="400"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hR4-e0-XFg">
+                <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hR4-e0-XFg" customClass="EphemeralTextField" customModule="PLBindableControls">
                     <rect key="frame" x="0.0" y="374" width="288" height="22"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="Add a to-do" bezelStyle="round" id="jHK-7q-SFd">
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" state="on" borderStyle="bezel" placeholderString="Add a to-do" bezelStyle="round" id="jHK-7q-SFd">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>

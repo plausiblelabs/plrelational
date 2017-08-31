@@ -126,7 +126,7 @@ class Model {
         // in the list with pending items at top and completed items at bottom, with
         // pending items sorted with most recently added items at top, and completed
         // items sorted with most recently completed items at top.
-        let status = RelationValue(statusString(completed: false, timestamp: now))
+        let status = RelationValue(statusString(pending: true, timestamp: now))
         
         items.asyncAdd([
             Item.id: id,
@@ -135,6 +135,13 @@ class Model {
             Item.status: status,
             Item.notes: RelationValue("")
         ])
+    }
+    
+    /// Adds a new row to the `items` relation.  This is an undoable action.
+    func addNewItem(with title: String) {
+        performUndoableAction("New Item", {
+            self.addItem(title)
+        })
     }
     
     /// Adds a new row to the `tags` relation.
@@ -301,6 +308,6 @@ func displayString(from timestampString: String) -> String {
     return dateFormatter.string(from: date)
 }
 
-private func statusString(completed: Bool, timestamp: String) -> String {
-    return "\(completed ? 1 : 0) \(timestamp)"
+private func statusString(pending: Bool, timestamp: String) -> String {
+    return "\(pending ? 1 : 0) \(timestamp)"
 }

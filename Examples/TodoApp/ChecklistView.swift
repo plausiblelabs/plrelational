@@ -11,6 +11,7 @@ import PLBindableControls
 class ChecklistView: NSView {
 
     @IBOutlet var view: NSView!
+    @IBOutlet var newItemField: EphemeralTextField!
     @IBOutlet var outlineView: NSOutlineView!
 
     private var listView: ListView<RowArrayElement>!
@@ -31,6 +32,8 @@ class ChecklistView: NSView {
         outlineView.backgroundColor = .clear
         
         // Bind to our view model
+        newItemField.strings ~~> model.addNewItem
+        
         listView = CustomListView(model: model.itemsListModel, outlineView: outlineView)
         listView.animateChanges = true
         listView.selection <~> model.itemsListSelection

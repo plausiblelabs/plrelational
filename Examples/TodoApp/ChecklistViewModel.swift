@@ -15,11 +15,16 @@ class ChecklistViewModel {
     init(model: Model) {
         self.model = model
     }
+
+    /// Creates a new to-do item with the given title.
+    lazy var addNewItem: ActionProperty<String> = ActionProperty { title in
+        self.model.addNewItem(with: title)
+    }
     
     /// The model for the list of to-do items.
     lazy var itemsListModel: ListViewModel<RowArrayElement> = {
         return ListViewModel(
-            data: self.model.items.arrayProperty(idAttr: Item.id, orderAttr: Item.status),
+            data: self.model.items.arrayProperty(idAttr: Item.id, orderAttr: Item.status, descending: true),
             contextMenu: nil,
             move: nil,
             cellIdentifier: { _ in "Cell" }
