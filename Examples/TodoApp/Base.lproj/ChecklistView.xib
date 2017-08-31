@@ -19,25 +19,25 @@
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="hR4-e0-XFg">
-                    <rect key="frame" x="0.0" y="378" width="288" height="22"/>
+                    <rect key="frame" x="0.0" y="374" width="288" height="25"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="Add a to-do" drawsBackground="YES" id="jHK-7q-SFd">
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" placeholderString="Add a to-do" bezelStyle="round" id="jHK-7q-SFd">
                         <font key="font" metaFont="system"/>
                         <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <scrollView fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="34" horizontalPageScroll="10" verticalLineScroll="34" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9XU-HE-sKe">
+                <scrollView fixedFrame="YES" borderType="none" autohidesScrollers="YES" horizontalLineScroll="36" horizontalPageScroll="10" verticalLineScroll="36" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9XU-HE-sKe">
                     <rect key="frame" x="0.0" y="0.0" width="288" height="366"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <clipView key="contentView" ambiguous="YES" drawsBackground="NO" id="VA9-7P-vBw">
-                        <rect key="frame" x="1" y="1" width="286" height="364"/>
+                        <rect key="frame" x="0.0" y="0.0" width="288" height="366"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowHeight="32" viewBased="YES" indentationPerLevel="16" indentationMarkerFollowsCell="NO" outlineTableColumn="cP5-KZ-mgr" id="IgM-9D-lPC">
-                                <rect key="frame" x="0.0" y="0.0" width="286" height="364"/>
+                            <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowHeight="32" viewBased="YES" indentationPerLevel="8" indentationMarkerFollowsCell="NO" outlineTableColumn="cP5-KZ-mgr" id="IgM-9D-lPC">
+                                <rect key="frame" x="0.0" y="0.0" width="288" height="366"/>
                                 <autoresizingMask key="autoresizingMask"/>
-                                <size key="intercellSpacing" width="0.0" height="2"/>
+                                <size key="intercellSpacing" width="0.0" height="4"/>
                                 <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                 <tableColumns>
@@ -55,11 +55,11 @@
                                         <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         <prototypeCellViews>
                                             <tableCellView identifier="Cell" id="Q60-XP-L7x">
-                                                <rect key="frame" x="0.0" y="1" width="283" height="32"/>
+                                                <rect key="frame" x="0.0" y="2" width="283" height="32"/>
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                 <subviews>
                                                     <textField verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8Zo-ea-rf9" customClass="TextField" customModule="PLBindableControls">
-                                                        <rect key="frame" x="28" y="8" width="244" height="17"/>
+                                                        <rect key="frame" x="28" y="6" width="244" height="18"/>
                                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                                         <textFieldCell key="cell" lineBreakMode="truncatingTail" sendsActionOnEndEditing="YES" title="Item" id="Fvx-j0-KyZ">
                                                             <font key="font" metaFont="system"/>
@@ -68,7 +68,7 @@
                                                         </textFieldCell>
                                                     </textField>
                                                     <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dJY-On-Sd5">
-                                                        <rect key="frame" x="2" y="7" width="22" height="18"/>
+                                                        <rect key="frame" x="2" y="5" width="22" height="18"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ycg-sY-1gG">
                                                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>

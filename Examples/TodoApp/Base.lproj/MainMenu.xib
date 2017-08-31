@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="12121"/>
@@ -675,17 +675,17 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="335" y="390" width="640" height="440"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1440" height="877"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <view key="contentView" wantsLayer="YES" id="EiT-Mj-1SZ">
                 <rect key="frame" x="0.0" y="0.0" width="640" height="440"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Obe-lp-Zh6" userLabel="List Container" customClass="BackgroundView" customModule="PLBindableControls">
-                        <rect key="frame" x="20" y="20" width="296" height="400"/>
+                        <rect key="frame" x="20" y="20" width="290" height="400"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </customView>
                     <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dw7-6W-Zdm" userLabel="Detail Container" customClass="BackgroundView" customModule="PLBindableControls">
-                        <rect key="frame" x="324" y="20" width="296" height="400"/>
+                        <rect key="frame" x="330" y="20" width="290" height="400"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     </customView>
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" allowsCharacterPickerTouchBarItem="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DId-mn-StG" customClass="Label" customModule="PLBindableControls">
