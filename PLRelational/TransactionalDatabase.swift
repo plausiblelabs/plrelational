@@ -24,7 +24,7 @@ open class TransactionalDatabase {
         self.changeLoggingDatabase = db
     }
     
-    public convenience init(_ db: SQLiteDatabase) {
+    public convenience init(_ db: StoredDatabase) {
         self.init(ChangeLoggingDatabase(db))
     }
     

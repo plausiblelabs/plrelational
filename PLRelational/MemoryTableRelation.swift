@@ -7,7 +7,7 @@
 /// An in-memory mutable Relation. Conceptually similar to ConcreteRelation, except that
 /// this is a reference type rather than a value type, and so behaves more like we might
 /// expect a "table" to. It's also observable, in case you need that sort of thing.
-open class MemoryTableRelation: Relation, MutableRelation, RelationDefaultChangeObserverImplementation {
+open class MemoryTableRelation: Relation, StoredRelation, RelationDefaultChangeObserverImplementation {
     open let scheme: Scheme
     
     public var values: Set<Row> = []

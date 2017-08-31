@@ -20,7 +20,15 @@ public class PlistDatabase: StoredDatabase {
         case transient(name: String, scheme: Scheme, primaryKeys: [Attribute])
         case file(name: String, path: String, scheme: Scheme, primaryKeys: [Attribute])
         case directory(name: String, path: String, scheme: Scheme, primaryKey: Attribute)
-        
+
+        public var name: String {
+            switch self {
+            case let .transient(name, _, _): return name
+            case let .file(name, _, _, _): return name
+            case let .directory(name, _, _, _): return name
+            }
+        }
+
         public func url(withRoot root: URL?) -> URL? {
             switch self {
             case .transient:

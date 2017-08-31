@@ -89,19 +89,33 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
     }
     
     fileprivate func onInsert(_ rows: [Row], changes: inout [Change]) {
+        var insertedIDs: [RelationValue] = []
 
-        func insertElement(_ element: Element) -> Int {
-            return elements.insertSorted(element, { $0.data[orderAttr] }, orderFunc)
+        func insertElement(_ element: Element) {
+            _ = elements.insertSorted(element, { $0.data[orderAttr] }, orderFunc)
         }
 
-        func insertRow(_ row: Row) -> Int {
+        func insertRow(_ row: Row) {
             let id = row[idAttr]
             let element = RowArrayElement(id: id, data: row, tag: self.tag)
-            return insertElement(element)
+            insertElement(element)
+            insertedIDs.append(id)
         }
         
+        // First insert the rows
         for row in rows {
-            let index = insertRow(row)
+            insertRow(row)
+        }
+        
+        // Once all rows are inserted, find the unique insertion index for each one
+        // so that changes are reported deterministically
+        var indexes: [Int] = []
+        for id in insertedIDs {
+            if let index = elements.index(where: { $0.id == id }) {
+                indexes.append(index)
+            }
+        }
+        for index in indexes.sorted() {
             changes.append(.insert(index))
         }
     }
@@ -127,8 +141,24 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
                 element.data = element.data.rowWithUpdate(row)
 
                 if newOrder != .notFound && newOrder != oldOrder {
-                    // Treat this as a move
-                    changes.append(onMove(element))
+                    // The order *might* be changing
+                    // TODO: Check whether the order is changing without actually doing
+                    // the remove/insert first
+                    
+                    // Remove the element from the array
+                    let srcIndex = indexForID(element.id)!
+                    _ = elements.remove(at: srcIndex)
+                    
+                    // Insert the element in its new position
+                    let dstIndex = elements.insertSorted(element, { $0.data[orderAttr] }, orderFunc)
+
+                    if dstIndex != srcIndex {
+                        // This is a move
+                        changes.append(.move(srcIndex: srcIndex, dstIndex: dstIndex))
+                    } else {
+                        // The order is unchanged, treat it as a simple update
+                        changes.append(.update(dstIndex))
+                    }
                 } else {
                     // Treat this as an update
                     if let index = indexForID(id) {
@@ -137,17 +167,6 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
                 }
             }
         }
-    }
-    
-    private func onMove(_ element: Element) -> Change {
-        // Remove the element from the array
-        let srcIndex = indexForID(element.id)!
-        _ = elements.remove(at: srcIndex)
-        
-        // Insert the element in its new position
-        let dstIndex = elements.insertSorted(element, { $0.data[orderAttr] }, orderFunc)
-        
-        return .move(srcIndex: srcIndex, dstIndex: dstIndex)
     }
     
     private func adjacentElementsForIndex(_ index: Int, notMatching element: Element) -> (Element?, Element?) {
@@ -212,16 +231,16 @@ extension RelationArrayProperty: AsyncRelationChangeCoalescedObserver {
         sourceSignal.notifyBeginPossibleAsyncChange()
     }
 
-    func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<RowChange, RelationError>) {
         switch result {
         case .Ok(let rows):
             // Compute array changes
             let parts = partsOf(rows, idAttr: idAttr)
             if !parts.isEmpty {
                 var arrayChanges: [Change] = []
+                self.onDelete(parts.deletedIDs, changes: &arrayChanges)
                 self.onInsert(parts.addedRows, changes: &arrayChanges)
                 self.onUpdate(parts.updatedRows, changes: &arrayChanges)
-                self.onDelete(parts.deletedIDs, changes: &arrayChanges)
                 if arrayChanges.count > 0 {
                     sourceSignal.notifyValueChanging(arrayChanges, transient: false)
                 }

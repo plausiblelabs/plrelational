@@ -390,6 +390,68 @@ class RelationArrayPropertyTests: BindingTestCase {
             [4,    "Bob"]
         ))
         
+        // Make a copy of the current array state
+        var copy = property.elements
+        
+        // Perform multiple inserts/updates/deletes within a single transaction
+        deletePerson(2)
+        addPerson(6, "Cate")
+        renamePerson(4, "Bobby")
+        addPerson(5, "Donna")
+        awaitIdle()
+
+        // TODO: Perform and verify a move as well
+        
+        // Verify ordering of changes (deletes followed by inserts followed by updates)
+        func isInsert(_ index: Int) -> Bool { if case .insert = observer.changes[index] { return true } else { return false } }
+        func isDelete(_ index: Int) -> Bool { if case .delete = observer.changes[index] { return true } else { return false } }
+        func isUpdate(_ index: Int) -> Bool { if case .update = observer.changes[index] { return true } else { return false } }
+        XCTAssertTrue(isDelete(0))
+        XCTAssertTrue(isInsert(1))
+        XCTAssertTrue(isInsert(2))
+        XCTAssertTrue(isUpdate(3))
+
+        // Also, the order within each of those groups is not guaranteed, but we should at least
+        // verify that the index values that are delivered will cause a mirrored array to be
+        // updated correctly when those values are applied
+        for change in observer.changes {
+            switch change {
+            case .initial, .move:
+                XCTFail()
+            case let .delete(index):
+                copy.remove(at: index)
+            case let .insert(index):
+                copy.insert(property.elements[index], at: index)
+            case let .update(index):
+                copy[index] = property.elements[index]
+            }
+        }
+        XCTAssertEqual(prettyArray(copy), ["Bobby", "Carlos", "Cate", "Donna"])
+
+        verifyArray(property, ["Bobby", "Carlos", "Cate", "Donna"])
+        observer.reset()
+
+        verifySQLite(MakeRelation(
+            ["id", "name"],
+            [3,    "Carlos"],
+            [4,    "Bobby"],
+            [5,    "Donna"],
+            [6,    "Cate"]
+        ))
+
+        // Perform a bunch of inserts and verify that change index values are ordered (these
+        // are expected to be delivered in ascending order)
+        for i in 10...20 {
+            addPerson(Int64(i), "A\(i)")
+        }
+        awaitIdle()
+        var expectedInsertChanges: [Change] = []
+        for i in 0...10 {
+            expectedInsertChanges.append(.insert(i))
+        }
+        XCTAssertEqual(observer.changes, expectedInsertChanges)
+        observer.reset()
+        
         removal()
     }
     

@@ -479,7 +479,7 @@ private class RelationTextIndexObserver: AsyncRelationChangeCoalescedObserver {
         // Do nothing
     }
     
-    func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<RowChange, RelationError>) {
         guard let owner = owner else { return }
         
         switch result {
@@ -523,7 +523,7 @@ private class RelationTextIndexObserver: AsyncRelationChangeCoalescedObserver {
         }
     }
 
-    private func loggableChanges(_ rows: NegativeSet<Row>) -> String {
+    private func loggableChanges(_ rows: RowChange) -> String {
         func fixup(row: Row) -> Row {
             var result = row
             for (attribute, value) in row {

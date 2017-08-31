@@ -1087,7 +1087,7 @@ class RelationTests: DBTestCase {
         class Observer: AsyncRelationChangeCoalescedObserver {
             let group: DispatchGroup
             
-            var changes: NegativeSet<Row>?
+            var changes: RowChange?
             
             init(group: DispatchGroup) {
                 self.group = group
@@ -1097,7 +1097,7 @@ class RelationTests: DBTestCase {
                 XCTAssertNil(changes)
             }
             
-            func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+            func relationDidChange(_ relation: Relation, result: Result<RowChange, RelationError>) {
                 XCTAssertNil(result.err)
                 self.changes = result.ok
                 group.leave()
@@ -1221,7 +1221,7 @@ class RelationTests: DBTestCase {
         class Observer: AsyncRelationChangeCoalescedObserver {
             let group: DispatchGroup
             
-            var changes: NegativeSet<Row>?
+            var changes: RowChange?
             
             init(group: DispatchGroup) {
                 self.group = group
@@ -1231,7 +1231,7 @@ class RelationTests: DBTestCase {
                 XCTAssertNil(changes)
             }
             
-            func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+            func relationDidChange(_ relation: Relation, result: Result<RowChange, RelationError>) {
                 XCTAssertNil(result.err)
                 self.changes = result.ok
                 group.leave()
@@ -1426,7 +1426,7 @@ class RelationTests: DBTestCase {
         class Observer: AsyncRelationChangeCoalescedObserver {
             let group: DispatchGroup
             
-            var changes: NegativeSet<Row>?
+            var changes: RowChange?
             
             init(group: DispatchGroup) {
                 self.group = group
@@ -1436,7 +1436,7 @@ class RelationTests: DBTestCase {
                 XCTAssertNil(changes)
             }
             
-            func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {
+            func relationDidChange(_ relation: Relation, result: Result<RowChange, RelationError>) {
                 XCTAssertNil(result.err)
                 self.changes = result.ok
                 group.leave()

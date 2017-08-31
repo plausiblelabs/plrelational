@@ -440,6 +440,9 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         let plistDB = makePlistDB("flights", scheme)
         verifyDatabaseBasics(plistDB, plistDB["flights"]!)
+        
+        let memoryDB = makeMemoryTableDB("flights", scheme)
+        verifyDatabaseBasics(memoryDB, memoryDB["flights"]!)
     }
     
     func testDatabaseSaveAfterPartialRowUpdate() {

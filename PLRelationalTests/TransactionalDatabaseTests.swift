@@ -582,7 +582,7 @@ class TransactionalDatabaseTests: DBTestCase {
         
         class DummyObserver: AsyncRelationChangeCoalescedObserver {
             func relationWillChange(_ relation: Relation) {}
-            func relationDidChange(_ relation: Relation, result: Result<NegativeSet<Row>, RelationError>) {}
+            func relationDidChange(_ relation: Relation, result: Result<RowChange, RelationError>) {}
         }
         
         let remover = a.addAsyncObserver(DummyObserver())

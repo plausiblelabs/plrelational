@@ -35,13 +35,13 @@ public func not(_ signal: Signal<Bool>) -> Signal<Bool> {
 extension SignalType where Value == Bool {
     /// Returns a Signal whose value resolves to the logical OR of the values delivered on this signal
     /// and the other input signal.
-    public func or(_ other: Self) -> Signal<Bool> {
+    public func or<S: SignalType>(_ other: S) -> Signal<Bool> where S.Value == Bool {
         return BinaryOpSignal(self, other, { $0 || $1 })
     }
 
     /// Returns a Signal whose value resolves to the logical AND of the values delivered on this signal
     /// and the other input signal.
-    public func and(_ other: Self) -> Signal<Bool> {
+    public func and<S: SignalType>(_ other: S) -> Signal<Bool> where S.Value == Bool {
         return BinaryOpSignal(self, other, { $0 && $1 })
     }
     
@@ -57,19 +57,19 @@ infix operator *|| : LogicalDisjunctionPrecedence
 infix operator *&& : LogicalConjunctionPrecedence
 
 /// Returns a Signal whose value resolves to the logical OR of the values delivered on the given signals.
-public func *||(lhs: Signal<Bool>, rhs: Signal<Bool>) -> Signal<Bool> {
+public func *||<LHS: SignalType, RHS: SignalType>(lhs: LHS, rhs: RHS) -> Signal<Bool> where LHS.Value == Bool, RHS.Value == Bool {
     return lhs.or(rhs)
 }
 
 /// Returns a Signal whose value resolves to the logical AND of the values delivered on the given signals.
-public func *&&(lhs: Signal<Bool>, rhs: Signal<Bool>) -> Signal<Bool> {
+public func *&&<LHS: SignalType, RHS: SignalType>(lhs: LHS, rhs: RHS) -> Signal<Bool> where LHS.Value == Bool, RHS.Value == Bool {
     return lhs.and(rhs)
 }
 
 infix operator *== : ComparisonPrecedence
 
 /// Returns a Signal whose value resolves to `true` when the values delivered on the given signals are equal.
-public func *==<S: SignalType>(lhs: S, rhs: S) -> Signal<Bool> where S.Value: Equatable {
+public func *==<LHS: SignalType, RHS: SignalType>(lhs: LHS, rhs: RHS) -> Signal<Bool> where LHS.Value: Equatable, LHS.Value == RHS.Value {
     return BinaryOpSignal(lhs, rhs, { $0 == $1 })
 }
 

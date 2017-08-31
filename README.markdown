@@ -57,10 +57,23 @@ The PLRelational project provides three frameworks:
 
 Typically you will use all three together, but PLRelational can be used standalone, and PLRelationalBinding can be used without PLBindableControls.
 
+## Examples
+
+The Xcode project includes a number of example apps for macOS:
+
+* **HelloWorldApp** is the best place to start; a minimal example that demonstrates relations, binding, undo/redo, etc.
+* **SearchApp** demonstrates the use of `RelationTextIndex` for full text search.
+* **BindableControlsApp** is primarily a UI testing target for all the AppKit controls in PLBindableControls.
+* **Visualizer** contains the beginnings of a visual tool (very much a work in progress) for creating and debugging relations.
+
+## Acknowledgements
+
+The PLRelational collection of frameworks draws inspiration from and stands on the shoulders of many other works, chief among them the earliest relational research from E.F. Codd, et al, [Out of the Tar Pit](https://github.com/papers-we-love/papers-we-love/blob/master/design/out-of-the-tar-pit.pdf) by Ben Moseley and Peter Marks, [Push-Pull Functional Reactive Programming](http://conal.net/papers/push-pull-frp) by Conal Elliott, and the many incarnations of Rx such as [ReactiveSwift](https://github.com/ReactiveCocoa/ReactiveSwift).  Thanks also to [Landon Fuller](https://twitter.com/landonfuller) for his continued advice and for planting the seeds that resulted in the earliest prototypes.
+
 ## Further Reading
 
-For more information about PLRelational, see our series of blog posts located here: https://example.com/REPLACEME
+For a more in-depth introduction to these frameworks, check out [Reactive Relational Programming with PLRelational](https://plausible.coop/blog/2017/08/10/reactive-relational-programming-with-plrelational).
 
-Documentation generated from documentation comments is available online here: https://example.com/REPLACEME
+Generated documentation is also [available online](https://opensource.plausible.coop/plrelational/docs/current) for the PLRelational and PLRelationalBinding frameworks.
 
 Enjoy!

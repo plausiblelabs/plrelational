@@ -8,7 +8,11 @@ import PLRelationalBinding
 
 open class PopUpButton<T: Equatable>: NSPopUpButton {
 
-    public lazy var items: BindableProperty<[MenuItem<T>]> = WriteOnlyProperty(set: { [unowned self] value, _ in
+    public private(set) lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] in
+        self?.isHidden = !$0.0
+    })
+
+    public private(set) lazy var items: BindableProperty<[MenuItem<T>]> = WriteOnlyProperty(set: { [unowned self] value, _ in
         // Clear the menu
         self.removeAllItems()
 
