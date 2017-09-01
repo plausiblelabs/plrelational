@@ -68,7 +68,7 @@
                                                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                         </textFieldCell>
                                                     </textField>
-                                                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dJY-On-Sd5">
+                                                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dJY-On-Sd5" customClass="Checkbox" customModule="PLBindableControls">
                                                         <rect key="frame" x="-1" y="5" width="22" height="18"/>
                                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                         <buttonCell key="cell" type="check" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ycg-sY-1gG">
@@ -87,6 +87,7 @@
                                                     </textField>
                                                 </subviews>
                                                 <connections>
+                                                    <outlet property="checkbox" destination="dJY-On-Sd5" id="g8N-cr-7UN"/>
                                                     <outlet property="detailLabel" destination="ioO-mI-o7k" id="xq5-Jf-NNV"/>
                                                     <outlet property="textField" destination="8Zo-ea-rf9" id="yqf-LE-Ixt"/>
                                                 </connections>

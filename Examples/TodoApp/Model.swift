@@ -110,6 +110,8 @@ class Model {
         undoableDB.performUndoableAction(name, before: nil, transactionFunc)
     }
     
+    /// MARK: - Items
+    
     /// Adds a new row to the `items` relation.
     private func addItem(_ title: String) {
         // Use UUIDs to uniquely identify rows
@@ -144,19 +146,6 @@ class Model {
         })
     }
     
-    /// Adds a new row to the `tags` relation.
-    private func addTag(_ name: String) {
-        // Use UUIDs to uniquely identify rows
-        let id = RelationValue(uuidString())
-        
-        tags.asyncAdd([
-            Tag.id: id,
-            Tag.name: RelationValue(name)
-        ])
-    }
-    
-    // MARK: - Selected Item
-    
     /// Resolves to `true` when an item is selected in the list of to-do items.
     lazy var hasSelection: AsyncReadableProperty<Bool> = {
         return self.selectedItems.nonEmpty.property()
@@ -178,6 +167,20 @@ class Model {
         )
     }
 
+    /// Returns a property that reflects the completed status for the given relation.
+    func itemCompleted(_ relation: Relation, initialValue: String?) -> AsyncReadWriteProperty<CheckState> {
+        return self.undoableBidiProperty(
+            action: "Change Status",
+            signal: relation.oneString(initialValue: initialValue).map{ status in
+                CheckState(parseCompleted(status))
+            },
+            update: { completed in
+                let status = statusString(pending: completed != .on, timestamp: timestampString())
+                relation.asyncUpdateString(status)
+            }
+        )
+    }
+    
     /// Returns a property that reflects the selected item's notes.
     lazy var selectedItemNotes: AsyncReadWriteProperty<String> = {
         let relation = self.selectedItems.project(Item.notes)
@@ -265,6 +268,17 @@ class Model {
             }
     }
     
+    /// Adds a new row to the `tags` relation.
+    private func addTag(_ name: String) {
+        // Use UUIDs to uniquely identify rows
+        let id = RelationValue(uuidString())
+        
+        tags.asyncAdd([
+            Tag.id: id,
+            Tag.name: RelationValue(name)
+        ])
+    }
+    
     /// Creates a new tag and applies it to the given to-do item.
     func addNewTag(named name: String, to itemID: String) {
         // TODO: Create ItemID and TagID value types
@@ -322,4 +336,8 @@ func displayString(from timestampString: String) -> String {
 
 private func statusString(pending: Bool, timestamp: String) -> String {
     return "\(pending ? 1 : 0) \(timestamp)"
+}
+
+private func parseCompleted(_ status: String) -> Bool {
+    return status.hasPrefix("0")
 }

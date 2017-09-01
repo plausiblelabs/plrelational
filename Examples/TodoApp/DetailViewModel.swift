@@ -23,7 +23,13 @@ class DetailViewModel {
             .property()
         self.itemID.start()
     }
-    
+
+    /// The completed status of the item.
+    lazy var itemCompleted: AsyncReadWriteProperty<CheckState> = {
+        let relation = self.model.selectedItems.project(Item.status)
+        return self.model.itemCompleted(relation, initialValue: nil)
+    }()
+
     /// The item's title.  This is a read/write property that is backed by UndoableDatabase, so any changes
     /// made to it in the text field can be rolled back by the user.
     lazy var itemTitle: AsyncReadWriteProperty<String> = {

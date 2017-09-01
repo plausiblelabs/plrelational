@@ -30,13 +30,22 @@ class ChecklistViewModel {
             cellIdentifier: { _ in "Cell" }
         )
     }()
-    
+
+    /// Returns a read/write property that resolves to the completed status for
+    /// the given to-do item
+    func itemCompleted(for row: Row) -> AsyncReadWriteProperty<CheckState> {
+        let itemID = row[Item.id]
+        let initialValue: String? = row[Item.status].get()
+        let relation = self.model.items.select(Item.id *== itemID).project(Item.status)
+        return self.model.itemCompleted(relation, initialValue: initialValue)
+    }
+
     /// Returns a read/write property that resolves to the title for the given to-do item.
     func itemTitle(for row: Row) -> AsyncReadWriteProperty<String> {
         let itemID = row[Item.id]
         let initialValue: String? = row[Item.title].get()
-        let textRelation = self.model.items.select(Item.id *== itemID).project(Item.title)
-        return self.model.itemTitle(textRelation, initialValue: initialValue)
+        let relation = self.model.items.select(Item.id *== itemID).project(Item.title)
+        return self.model.itemTitle(relation, initialValue: initialValue)
     }
     
     /// Returns a property that resolves to the list of tags for the given to-do item.

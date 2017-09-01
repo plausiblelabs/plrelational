@@ -40,6 +40,10 @@ class ChecklistView: NSView {
         listView.configureCell = { view, row in
             let cellView = view as! ChecklistCellView
             
+            let checkbox = cellView.checkbox!
+            checkbox.checkState.unbindAll()
+            checkbox.checkState <~> model.itemCompleted(for: row)
+            
             let textField = cellView.textField as! TextField
             textField.string.unbindAll()
             textField.string <~> model.itemTitle(for: row)
@@ -56,6 +60,7 @@ class ChecklistView: NSView {
 }
 
 class ChecklistCellView: NSTableCellView {
+    @IBOutlet var checkbox: Checkbox!
     @IBOutlet var detailLabel: Label!
 }
 

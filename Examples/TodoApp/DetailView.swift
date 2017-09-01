@@ -52,6 +52,7 @@ class DetailView: BackgroundView {
         notesTextView.textContainerInset = NSMakeSize(0, 4)
 
         // Bind to our view model
+        checkbox.checkState <~> model.itemCompleted
         titleField.string <~> model.itemTitle
         
         tagComboBox.items <~ model.availableTags
