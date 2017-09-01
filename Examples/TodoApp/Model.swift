@@ -114,7 +114,6 @@ class Model {
 
         // Use a string representation of the current time to make our life easier
         let now = timestampString()
-        let created = RelationValue(now)
         
         // Here we cheat a little.  Because ArrayProperty currently only knows how to
         // sort on a single attribute (temporary limitation), we cram two things --
@@ -123,14 +122,14 @@ class Model {
         // in the list with pending items at top and completed items at bottom, with
         // pending items sorted with most recently added items at top, and completed
         // items sorted with most recently completed items at top.
-        let status = RelationValue(statusString(pending: true, timestamp: now))
+        let status = statusString(pending: true, timestamp: now)
         
         items.asyncAdd([
             Item.id: id,
-            Item.title: RelationValue(title),
-            Item.created: created,
+            Item.title: title,
+            Item.created: now,
             Item.status: status,
-            Item.notes: RelationValue("")
+            Item.notes: ""
         ])
     }
     
@@ -270,7 +269,7 @@ class Model {
         
         tags.asyncAdd([
             Tag.id: id,
-            Tag.name: RelationValue(name)
+            Tag.name: name
         ])
     }
     
@@ -281,7 +280,7 @@ class Model {
         performUndoableAction("Add New Tag", {
             self.tags.asyncAdd([
                 Tag.id: tagID,
-                Tag.name: RelationValue(name)
+                Tag.name: name
             ])
             
             self.itemTags.asyncAdd([
