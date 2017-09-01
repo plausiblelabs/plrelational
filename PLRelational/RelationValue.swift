@@ -122,6 +122,13 @@ extension String: RelationValueConvertible {
 }
 
 /// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
+extension Data: RelationValueConvertible {
+    public var relationValue: RelationValue {
+        return RelationValue(self)
+    }
+}
+
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 extension Int: RelationValueConvertible {
     public var relationValue: RelationValue  {
         return RelationValue(Int64(self))
