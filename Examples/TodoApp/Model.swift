@@ -254,7 +254,7 @@ class Model {
     /// of tags that have been applied to the given to-do item.
     func tagsString(for itemID: ItemID) -> AsyncReadableProperty<String> {
         return self.itemTags
-            .select(Item.id *== itemID.relationValue)
+            .select(Item.id *== itemID)
             .join(self.tags)
             .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
             .fullArray()
