@@ -88,11 +88,6 @@ class Model {
             .fullArray()
         self.allTags.start()
 
-        // XXX: Temporarily add some initial data for testing purposes
-        addItem("One")
-        addItem("Two")
-        addItem("Three")
-        
         // Add a couple default tags
         // TODO: Only do this if creating the database for the first time
         addTag("home")
