@@ -233,20 +233,20 @@ class PlistDirectoryRelationTests: XCTestCase {
         XCTAssertEqual(r1.contains(["first": "Steve", "last": "Jobs", "job": "Senator"]).ok, false)
         XCTAssertEqual(r1.contains(["first": "Billybob", "last": "Jobs", "job": "CEO"]).ok, false)
         
-        XCTAssertEqual(r1.contains(["first": .null, "last": 42, "job": 666.0]).ok, true)
-        XCTAssertEqual(r1.contains(["first": .null, "last": "Jobs", "job": "CEO"]).ok, false)
+        XCTAssertEqual(r1.contains(["first": RelationValue.null, "last": 42, "job": 666.0]).ok, true)
+        XCTAssertEqual(r1.contains(["first": RelationValue.null, "last": "Jobs", "job": "CEO"]).ok, false)
         
-        XCTAssertEqual(r1.contains(["first": 0, "last": 0, "job": .blob([1, 2, 3, 4, 5])]).ok, true)
-        XCTAssertEqual(r1.contains(["first": 0, "last": 0, "job": .blob([1, 2, 3, 4, 6])]).ok, false)
-        XCTAssertEqual(r1.contains(["first": 1, "last": 0, "job": .blob([1, 2, 3, 4, 5])]).ok, false)
+        XCTAssertEqual(r1.contains(["first": 0, "last": 0, "job": RelationValue.blob([1, 2, 3, 4, 5])]).ok, true)
+        XCTAssertEqual(r1.contains(["first": 0, "last": 0, "job": RelationValue.blob([1, 2, 3, 4, 6])]).ok, false)
+        XCTAssertEqual(r1.contains(["first": 1, "last": 0, "job": RelationValue.blob([1, 2, 3, 4, 5])]).ok, false)
         
         XCTAssertEqual(r1.contains(["first": 0.0, "last": 0, "job": 0]).ok, true)
         XCTAssertEqual(r1.contains(["first": 0.0, "last": 0, "job": 1]).ok, false)
         XCTAssertEqual(r1.contains(["first": 0.1, "last": 0, "job": 0]).ok, false)
         
-        XCTAssertEqual(r1.contains(["first": .blob([1, 2, 3, 4, 5]), "last": 0, "job": 0]).ok, true)
-        XCTAssertEqual(r1.contains(["first": .blob([1, 2, 3, 4, 5]), "last": 0, "job": 1]).ok, false)
-        XCTAssertEqual(r1.contains(["first": .blob([1, 2, 3, 4, 6]), "last": 0, "job": 0]).ok, false)
+        XCTAssertEqual(r1.contains(["first": RelationValue.blob([1, 2, 3, 4, 5]), "last": 0, "job": 0]).ok, true)
+        XCTAssertEqual(r1.contains(["first": RelationValue.blob([1, 2, 3, 4, 5]), "last": 0, "job": 1]).ok, false)
+        XCTAssertEqual(r1.contains(["first": RelationValue.blob([1, 2, 3, 4, 6]), "last": 0, "job": 0]).ok, false)
     }
     
     func testContainsWithEmptyRelationAndUnsetURL() {

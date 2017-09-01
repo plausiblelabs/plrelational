@@ -1063,7 +1063,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         _ = flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
         
         for i in 0..<100 {
-            _ = flights.update(Attribute("number") *== 1, newValues: ["pilot": .text("Jones \(i)")])
+            _ = flights.update(Attribute("number") *== 1, newValues: ["pilot": "Jones \(i)"])
             if i % 2 == 0 {
                 _ = flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
             } else {
@@ -1088,7 +1088,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         _ = flights.add(["number": 1, "pilot": "Jones", "equipment": "777"])
         
         for i in 0..<100 {
-            _ = flights.update(Attribute("number") *== 1, newValues: ["pilot": .text("Jones \(i)")])
+            _ = flights.update(Attribute("number") *== 1, newValues: ["pilot": "Jones \(i)"])
             if i % 2 == 0 {
                 _ = flights.add(["number": 2, "pilot": "Smith", "equipment": "787"])
             } else {
@@ -1112,7 +1112,7 @@ class ChangeLoggingDatabaseTests: DBTestCase {
         
         for i: Int64 in 0..<10000 {
             _ = r.delete(Attribute("a") *== i - 1)
-            _ = r.add(["a": .integer(i)])
+            _ = r.add(["a": i])
             
             DispatchQueue.concurrentPerform(iterations: 2, execute: { _ in
                 for row in r.rows() {

@@ -687,7 +687,7 @@ class RelationObservationTests: DBTestCase {
                 "id": RelationValue(id),
                 "type": "coll",
                 "name": RelationValue(name),
-                "parent": .null,
+                "parent": RelationValue.null,
                 "order": RelationValue(order)
             ]
             _ = collections.add(row)

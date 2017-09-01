@@ -13,7 +13,7 @@ class DetailViewModel {
     private let model: Model
     
     /// The selected item ID, cached in this property for easy access.
-    private let itemID: AsyncReadableProperty<String?>
+    private let itemID: AsyncReadableProperty<ItemID?>
     
     init(model: Model) {
         self.model = model
@@ -21,6 +21,7 @@ class DetailViewModel {
         self.itemID = self.model.selectedItemIDs
             .oneStringOrNil()
             .property()
+            .map{ $0.map(ItemID.init) }
         self.itemID.start()
     }
 
@@ -92,7 +93,7 @@ class DetailViewModel {
     
     /// Returns a read/write property that resolves to the name for the given tag.
     func tagName(for row: Row) -> AsyncReadWriteProperty<String> {
-        let tagID: String = row[Tag.id].get()!
+        let tagID = TagID(row)
         let name: String? = row[Tag.name].get()
         return self.model.tagName(for: tagID, initialValue: name)
     }
@@ -102,13 +103,13 @@ class DetailViewModel {
         return mutableValueProperty(Set())
     }()
     
-    private func addExistingTagToSelected(tagID: String) {
+    private func addExistingTagToSelected(tagID: TagID) {
         self.model.addExistingTag(tagID, to: itemID.value!!)
     }
 
     /// Adds an existing tag to the selected to-do item.
     lazy var addExistingTagToSelectedItem: ActionProperty<RelationValue> = ActionProperty { tagID in
-        self.addExistingTagToSelected(tagID: tagID.get()!)
+        self.addExistingTagToSelected(tagID: TagID(tagID))
     }
 
     private func addNewTagToSelected(with name: String) {
@@ -121,7 +122,7 @@ class DetailViewModel {
         if let index = existingIndex {
             // A tag already exists with the given name, so apply that tag rather than creating a new one
             let elem = model.allTags.value![index]
-            let tagID: String = elem.data[Tag.id].get()!
+            let tagID = TagID(elem.data)
             model.addExistingTag(tagID, to: itemID)
         } else {
             // No tag exists with that name, so create a new tag and apply it to this item

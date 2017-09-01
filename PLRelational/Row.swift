@@ -114,9 +114,13 @@ public struct Row: Hashable, Sequence {
 }
 
 extension Row: ExpressibleByDictionaryLiteral {
-    public init(dictionaryLiteral elements: (Attribute, RelationValue)...) {
-        self.init(values: elements.map({ (key: $0, value: $1) }))
+    public init(dictionaryLiteral elements: (Attribute, RelationValueConvertible)...) {
+        self.init(values: elements.map({ (key: $0, value: $1.relationValue) }))
     }
+//    
+//    public init(_ dict: [Attribute: RelationValueConvertible]) {
+//        self.init(values: dict.map({ (key: $0, value: $1.relationValue) }))
+//    }
 }
 
 public func ==(a: Row, b: Row) -> Bool {

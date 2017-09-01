@@ -53,7 +53,7 @@ class PlistDatabaseTests: XCTestCase {
             _ = objects.add(["id": 1, "name": "Group"])
             _ = objects.add(["id": 2, "name": "Page1"])
             _ = objects.add(["id": 3, "name": "Page2"])
-            _ = docItems.add(["id": 1, "parent": .null, "order": 5.0])
+            _ = docItems.add(["id": 1, "parent": RelationValue.null, "order": 5.0])
             _ = docItems.add(["id": 2, "parent": 1, "order": 5.0])
             _ = docItems.add(["id": 3, "parent": 1, "order": 7.0])
             _ = objectData.add(["id": 2, "value": "Write about Page1 here."])
