@@ -122,39 +122,40 @@ extension PlistFileRelation {
     ///             file. If no URL is provided, this is a precondition failure. If an URL
     ///             is provided but the file doesn't exist or isn't readable, this is an error.
     ///             If true, then the file doesn't have to exist. If it does exist, its contents
-    ///             are ignored and will be overwritten when saving.
+    ///             are loaded into the relation.
     ///   - codec: A DataCodec used to encode and decode the plist on disk.
     /// - Returns: The newly created file relation, or an error if creation failed.
     public static func withFile(_ url: URL?, scheme: Scheme, primaryKeys: [Attribute], create: Bool, codec: DataCodec? = nil) -> Result<PlistFileRelation, RelationError> {
         if let url = url {
             // We have a URL, so we are either opening an existing relation or creating a new one at a specific location;
-            if !create {
-                // We are opening a relation, so let's require its existence at init time
-                do {
-                    let data = try Data(contentsOf: url, options: [])
-                    let decodedDataResult = codec?.decode(data) ?? .Ok(data)
-                    return try decodedDataResult.then({
-                        let plist = try PropertyListSerialization.propertyList(from: $0, options: [], format: nil)
-                        guard let dict = plist as? NSDictionary else { return .Err(Error.unknownTopLevelObject(unknownObject: plist)) }
-                        
-                        guard let values = dict["values"] else { return .Err(Error.missingValues) }
-                        guard let array = values as? NSArray else { return .Err(Error.unknownValuesObject(unknownObject: values)) }
-                        
-                        let relationValueResults = array.map({
-                            Row.fromPlist($0).then({
-                                return $0.scheme == scheme
-                                    ? .Ok($0)
-                                    : .Err(Error.schemeMismatch(foundScheme: $0.scheme))
-                            })
-                        })
-                        let relationValuesResult = mapOk(relationValueResults, { $0 })
-                        return relationValuesResult.map({
-                            let r = PlistFileRelation(scheme: scheme, primaryKeys: primaryKeys, url: url, codec: codec, isTransient: false)
-                            r.values.unionInPlace($0)
-                            return r
+            do {
+                let data = try Data(contentsOf: url, options: [])
+                let decodedDataResult = codec?.decode(data) ?? .Ok(data)
+                return try decodedDataResult.then({
+                    let plist = try PropertyListSerialization.propertyList(from: $0, options: [], format: nil)
+                    guard let dict = plist as? NSDictionary else { return .Err(Error.unknownTopLevelObject(unknownObject: plist)) }
+                    
+                    guard let values = dict["values"] else { return .Err(Error.missingValues) }
+                    guard let array = values as? NSArray else { return .Err(Error.unknownValuesObject(unknownObject: values)) }
+                    
+                    let relationValueResults = array.map({
+                        Row.fromPlist($0).then({
+                            return $0.scheme == scheme
+                                ? .Ok($0)
+                                : .Err(Error.schemeMismatch(foundScheme: $0.scheme))
                         })
                     })
-                } catch {
+                    let relationValuesResult = mapOk(relationValueResults, { $0 })
+                    return relationValuesResult.map({
+                        let r = PlistFileRelation(scheme: scheme, primaryKeys: primaryKeys, url: url, codec: codec, isTransient: false)
+                        r.values.unionInPlace($0)
+                        return r
+                    })
+                })
+            } catch {
+                // If create is true and the error is file not found, then the error is not fatal.
+                // Let execution proceed. Otherwise, return the error.
+                if !(create && error.isFileNotFound) {
                     return .Err(error)
                 }
             }

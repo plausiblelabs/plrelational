@@ -90,6 +90,19 @@ class PlistFileRelationTests: XCTestCase {
         AssertEqual(r1, r2)
     }
     
+    func testCreatePreservesExistingData() {
+        let url = tmpURL()
+        
+        let r1Result = PlistFileRelation.withFile(url, scheme: ["n"], primaryKeys: [], create: true)
+        XCTAssertNil(r1Result.err)
+        XCTAssertNil(r1Result.ok?.add(["n": 1]).err)
+        XCTAssertNil(r1Result.ok?.save().err)
+        
+        let r2Result = PlistFileRelation.withFile(url, scheme: ["n"], primaryKeys: [], create: true)
+        XCTAssertNil(r2Result.err)
+        AssertEqual(r1Result.ok, r2Result.ok)
+    }
+    
     func testCodec() {
         struct PrefixCodec: DataCodec {
             static let prefix = "testprefix"
