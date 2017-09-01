@@ -77,7 +77,7 @@ private class CustomListView: ListView<RowArrayElement> {
 private let padX: CGFloat = 1
 private let cornerRadius: CGFloat = 4
 private let strongColor: NSColor = NSColor(red: 41.0/255.0, green: 191.0/255.0, blue: 250.0/255.0, alpha: 1.0)
-private let weakColor: NSColor = NSColor(white: 0.83, alpha: 1.0)
+private let weakColor: NSColor = strongColor.withAlphaComponent(0.5)
 
 private class OutlineRowView: NSTableRowView {
     let rowHeight: CGFloat

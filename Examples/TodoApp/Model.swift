@@ -177,7 +177,19 @@ class Model {
             }
         )
     }
-    
+
+    /// Returns a property that reflects the selected item's notes.
+    lazy var selectedItemNotes: AsyncReadWriteProperty<String> = {
+        let relation = self.selectedItems.project(Item.notes)
+        return self.undoableBidiProperty(
+            action: "Change Notes",
+            signal: relation.oneString(),
+            update: {
+                relation.asyncUpdateString($0)
+            }
+        )
+    }()
+
     /// Deletes the row associated with the selected item and clears the selection.  This demonstrates
     /// the use of `cascadingDelete`, which is kind of overkill for this particular case but does show
     /// how easy it can be to clean up related data.

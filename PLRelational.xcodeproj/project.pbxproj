@@ -97,6 +97,7 @@
 		3799AB4C1F57C8960075570F /* DetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3799AB4A1F57C8960075570F /* DetailView.xib */; };
 		3799AB4E1F58B3F70075570F /* EmphemeralComboBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3799AB4D1F58B3F70075570F /* EmphemeralComboBox.swift */; };
 		3799AB501F58D3000075570F /* EphemeralTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3799AB4F1F58D3000075570F /* EphemeralTextField.swift */; };
+		3799AB521F591D170075570F /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3799AB511F591D170075570F /* TextView.swift */; };
 		37A1CE6E1D1081980067870D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE6D1D1081980067870D /* AppDelegate.swift */; };
 		37A1CE701D1081980067870D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37A1CE6F1D1081980067870D /* Assets.xcassets */; };
 		37A1CE731D1081980067870D /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37A1CE711D1081980067870D /* MainMenu.xib */; };
@@ -854,6 +855,7 @@
 		3799AB4B1F57C8960075570F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/DetailView.xib; sourceTree = "<group>"; };
 		3799AB4D1F58B3F70075570F /* EmphemeralComboBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmphemeralComboBox.swift; sourceTree = "<group>"; };
 		3799AB4F1F58D3000075570F /* EphemeralTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EphemeralTextField.swift; sourceTree = "<group>"; };
+		3799AB511F591D170075570F /* TextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
 		37A1CE591D08A2240067870D /* MenuItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MenuItem.swift; sourceTree = "<group>"; };
 		37A1CE5C1D08C3110067870D /* ColorPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ColorPickerView.swift; sourceTree = "<group>"; };
 		37A1CE5F1D08C70D0067870D /* Color.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
@@ -1715,6 +1717,7 @@
 				37A9A37B1F06B65C00B35559 /* SegmentedControl.swift */,
 				3761369C1CFBA42100F572C5 /* StepperView.swift */,
 				37C611321CD7F80F001DAF59 /* TextField.swift */,
+				3799AB511F591D170075570F /* TextView.swift */,
 			);
 			name = Controls;
 			sourceTree = "<group>";
@@ -3693,6 +3696,7 @@
 				37B441B21E89AAB800C8C336 /* TextField.swift in Sources */,
 				374DAEC41E8C2A3900FF245B /* UndoManager.swift in Sources */,
 				37B441A61E89AAB800C8C336 /* ExtOutlineView.swift in Sources */,
+				3799AB521F591D170075570F /* TextView.swift in Sources */,
 				37B441A31E89AAB800C8C336 /* ListView.swift in Sources */,
 				37B441A51E89AAB800C8C336 /* SectionedTreeView.swift in Sources */,
 				37B441B11E89AAB800C8C336 /* StepperView.swift in Sources */,

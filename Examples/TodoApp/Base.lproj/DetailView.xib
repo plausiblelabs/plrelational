@@ -11,6 +11,7 @@
                 <outlet property="checkbox" destination="Je6-pU-989" id="eKf-3r-Qqo"/>
                 <outlet property="createdOnLabel" destination="eSX-Ec-zI8" id="ALN-ss-dJn"/>
                 <outlet property="deleteButton" destination="INn-4A-JZl" id="b7b-e2-AKo"/>
+                <outlet property="notesTextView" destination="omy-AB-AMe" id="MqR-0k-oQ9"/>
                 <outlet property="tagComboBox" destination="eHh-EJ-2bL" id="kOu-N9-EyE"/>
                 <outlet property="tagsOutlineView" destination="PCB-AS-Leo" id="ONZ-UX-9Ya"/>
                 <outlet property="titleField" destination="mvH-2r-sMI" id="LDp-sk-Dzo"/>
@@ -56,7 +57,7 @@
                         <rect key="frame" x="1" y="1" width="248" height="80"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" indentationMarkerFollowsCell="NO" outlineTableColumn="gsP-uL-Bsu" id="PCB-AS-Leo">
+                            <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowSizeStyle="automatic" viewBased="YES" indentationPerLevel="16" indentationMarkerFollowsCell="NO" outlineTableColumn="gsP-uL-Bsu" id="PCB-AS-Leo">
                                 <rect key="frame" x="0.0" y="0.0" width="248" height="80"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <size key="intercellSpacing" width="2" height="3"/>
@@ -126,7 +127,7 @@
                         <rect key="frame" x="1" y="1" width="247" height="98"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView ambiguous="YES" importsGraphics="NO" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" smartInsertDelete="YES" id="omy-AB-AMe">
+                            <textView ambiguous="YES" importsGraphics="NO" usesFontPanel="YES" findStyle="panel" continuousSpellChecking="YES" allowsUndo="YES" usesRuler="YES" allowsNonContiguousLayout="YES" quoteSubstitution="YES" dashSubstitution="YES" smartInsertDelete="YES" id="omy-AB-AMe" customClass="TextView" customModule="PLBindableControls">
                                 <rect key="frame" x="0.0" y="0.0" width="247" height="98"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>

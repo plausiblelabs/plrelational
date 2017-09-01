@@ -27,10 +27,15 @@ class DetailViewModel {
     /// The item's title.  This is a read/write property that is backed by UndoableDatabase, so any changes
     /// made to it in the text field can be rolled back by the user.
     lazy var itemTitle: AsyncReadWriteProperty<String> = {
-        let textRelation = self.model.selectedItems.project(Item.title)
-        return self.model.itemTitle(textRelation, initialValue: nil)
+        let titleRelation = self.model.selectedItems.project(Item.title)
+        return self.model.itemTitle(titleRelation, initialValue: nil)
     }()
-    
+
+    /// The item's notes.
+    lazy var itemNotes: AsyncReadWriteProperty<String> = {
+        return self.model.selectedItemNotes
+    }()
+
     /// The text that appears in the "Created on <date>" label.  This demonstrates the use of `map` to
     /// convert the raw timestamp string (as stored in the relation) to a display-friendly string.
     lazy var createdOn: AsyncReadableProperty<String> = {
