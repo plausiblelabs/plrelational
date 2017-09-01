@@ -646,7 +646,7 @@ class RelationTests: DBTestCase {
     func testAsyncRowsPostprocessing() {
         let r = MakeRelation(["n"])
         for i: Int64 in 0 ..< 20 {
-            _ = r.add(["n": .integer(i)])
+            _ = r.add(["n": i])
         }
         
         let runloop = CFRunLoopGetCurrent()
@@ -668,7 +668,7 @@ class RelationTests: DBTestCase {
         CFRunLoopRun()
         _ = group.wait(timeout: DispatchTime.distantFuture)
         
-        XCTAssertEqual((0 ..< 20).map({ ["n": .integer($0)] }), output)
+        XCTAssertEqual((0 ..< 20).map({ ["n": $0] }), output)
     }
 
     func testAsyncWorkSharing() {
@@ -791,7 +791,7 @@ class RelationTests: DBTestCase {
                 "id": RelationValue(id),
                 "type": "coll",
                 "name": RelationValue(name),
-                "parent": .null,
+                "parent": RelationValue.null,
                 "order": RelationValue(order)
             ]
             _ = collections.add(row)
@@ -1003,7 +1003,7 @@ class RelationTests: DBTestCase {
         var r2 = ConcreteRelation(scheme: ["w"])
         
         for i: Int64 in 1...10 {
-            _ = r1.add(["n": .integer(i)])
+            _ = r1.add(["n": i])
         }
         
         _ = r2.add(["w": "teapot"])
@@ -1028,7 +1028,7 @@ class RelationTests: DBTestCase {
         let r2 = db.getOrCreateRelation("words", scheme: ["w"]).ok!
         
         for i: Int64 in 1...10 {
-            _ = r1.add(["n": .integer(i)])
+            _ = r1.add(["n": i])
         }
         
         _ = r2.add(["w": "teapot"])

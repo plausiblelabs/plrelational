@@ -213,9 +213,9 @@ class QueryOptimizerTests: XCTestCase {
     }
     
     func testJoinDerivativeOptimization() {
-        let rm = InstrumentedSelectableRelation(scheme: ["m"], values: Set((1 ... 20).map({ ["m": .integer($0)] })))
+        let rm = InstrumentedSelectableRelation(scheme: ["m"], values: Set((1 ... 20).map({ ["m": $0] })))
             .setDebugName("rm")
-        let rn = InstrumentedSelectableRelation(scheme: ["n"], values: Set((10 ... 30).map({ ["n": .integer($0)] })))
+        let rn = InstrumentedSelectableRelation(scheme: ["n"], values: Set((10 ... 30).map({ ["n": $0] })))
             .setDebugName("rn")
         let joined = rm.equijoin(rn, matching: ["m": "n"])
             .setDebugName("joined")
@@ -239,7 +239,7 @@ class QueryOptimizerTests: XCTestCase {
     }
     
     func testJoinedJoinWithOneRelationOptimization() {
-        let instrumented = InstrumentedSelectableRelation(scheme: ["n"], values: Set((0 ..< 100).map({ ["n": .integer($0)] }))).setDebugName("instrumented")
+        let instrumented = InstrumentedSelectableRelation(scheme: ["n"], values: Set((0 ..< 100).map({ ["n": $0] }))).setDebugName("instrumented")
         let tiny = MakeRelation(["n"], [1]).setDebugName("tiny")
         
         let selected = instrumented.select(Attribute("n") *< 10).setDebugName("selected")
@@ -273,7 +273,7 @@ class QueryOptimizerTests: XCTestCase {
     }
     
     func testCachedJoinedJoinWithOneRelationOptimization() {
-        let instrumented = InstrumentedSelectableRelation(scheme: ["n"], values: Set((0 ..< 100).map({ ["n": .integer($0)] }))).setDebugName("instrumented")
+        let instrumented = InstrumentedSelectableRelation(scheme: ["n"], values: Set((0 ..< 100).map({ ["n": $0] }))).setDebugName("instrumented")
         let tiny = MakeRelation(["n"], [1]).setDebugName("tiny")
         
         let selected = instrumented.select(Attribute("n") *< 10).setDebugName("selected")

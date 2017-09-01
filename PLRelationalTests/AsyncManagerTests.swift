@@ -353,8 +353,8 @@ class AsyncManagerTests: DBTestCase {
         let remover = r.addAsyncObserver(observer, postprocessor: sortByAttribute("n"))
         observer.assertChanges({ r.asyncAdd(["n": 1]) },
                                expectedContents: [["n": 1]])
-        observer.assertChanges({ for i: Int64 in 2..<20 { r.asyncAdd(["n": .integer(i)]) } },
-                               expectedContents: (1..<20).map({ ["n": .integer($0)] }))
+        observer.assertChanges({ for i: Int64 in 2..<20 { r.asyncAdd(["n": i]) } },
+                               expectedContents: (1..<20).map({ ["n": $0] }))
         observer.assertChanges({ r.asyncDelete(true) },
                                expectedContents: [])
         remover()

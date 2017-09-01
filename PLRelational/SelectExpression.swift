@@ -21,18 +21,7 @@ extension Attribute: SelectExpression {
 /// A protocol for select expressions which are always constant values.
 /// In other words, the return value from `valueWithRow` does not depend
 /// the `Row` passed in.
-public protocol SelectExpressionConstantValue: SelectExpression {
-    /// The actual value this expression contains. This value must match
-    /// the value returned by `valueWithRow`. The protocol provides a
-    /// default implementation for `valueWithRow` which returns this.
-    var relationValue: RelationValue { get }
-}
-
-/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
-extension RelationValue: SelectExpressionConstantValue {
-    public var relationValue: RelationValue {
-        return self
-    }
+public protocol SelectExpressionConstantValue: SelectExpression, RelationValueConvertible {
 }
 
 /// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
@@ -43,32 +32,19 @@ extension SelectExpressionConstantValue {
 }
 
 /// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
-extension String: SelectExpressionConstantValue {
-    public var relationValue: RelationValue {
-        return RelationValue(self)
-    }
-}
+extension RelationValue: SelectExpressionConstantValue {}
 
 /// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
-extension Int: SelectExpressionConstantValue {
-    public var relationValue: RelationValue  {
-        return RelationValue(Int64(self))
-    }
-}
+extension String: SelectExpressionConstantValue {}
 
 /// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
-extension Int64: SelectExpressionConstantValue {
-    public var relationValue: RelationValue {
-        return RelationValue(self)
-    }
-}
+extension Int: SelectExpressionConstantValue {}
 
 /// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
-extension Bool: SelectExpressionConstantValue {
-    public var relationValue: RelationValue {
-        return RelationValue.boolValue(self)
-    }
-}
+extension Int64: SelectExpressionConstantValue {}
+
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
+extension Bool: SelectExpressionConstantValue {}
 
 extension SelectExpression {
     /// If the SelectExpression is a SelectExpressionConstantValue, returns its boolean value.

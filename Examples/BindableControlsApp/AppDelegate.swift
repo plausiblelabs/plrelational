@@ -90,7 +90,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 "id": RelationValue(id),
                 "name": RelationValue(name),
                 "friendly": RelationValue(Int64(friendly ? 1 : 0)),
-                "best_friend": .null,
+                "best_friend": RelationValue.null,
                 "fav_day": dayValue,
                 "fav_color": colorValue,
                 "rocks": RelationValue(rocks),

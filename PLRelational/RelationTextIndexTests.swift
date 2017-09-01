@@ -21,12 +21,12 @@ class RelationTextIndexTests: XCTestCase {
         
         let content = MemoryTableRelation(scheme: ["id", "text"])
         for (id, text) in testData {
-            XCTAssertNil(content.add(["id": .text(id), "text": .text(text)]).err)
+            XCTAssertNil(content.add(["id": id, "text": text]).err)
         }
         
         let ids = MemoryTableRelation(scheme: ["id"])
         for (id, _) in testData {
-            XCTAssertNil(ids.add(["id": .text(id)]).err)
+            XCTAssertNil(ids.add(["id": id]).err)
         }
         
         let columnConfig = RelationTextIndex.ColumnConfig(snippetAttribute: "snippet", textExtractor: { (row: Row) in .Ok(row["text"].get()!) })
@@ -125,7 +125,7 @@ class RelationTextIndexTests: XCTestCase {
         
         let content = MemoryTableRelation(scheme: ["id", "text", "title"])
         for (id, text, title) in testData {
-            XCTAssertNil(content.add(["id": .integer(Int64(id)), "text": .text(text), "title": .text(title)]).err)
+            XCTAssertNil(content.add(["id": Int64(id), "text": text, "title": title]).err)
         }
         
         let ids = content.project(["id"])
@@ -386,7 +386,7 @@ class RelationTextIndexTests: XCTestCase {
         
         for (index, (searchTerm, text)) in testCases.enumerated() {
             searchRelations.append((text, r.search(searchTerm).join(content).project("text")))
-            content.asyncAdd(["id": .integer(Int64(index)), "text": .text(text)])
+            content.asyncAdd(["id": Int64(index), "text": text])
         }
         
         let group = DispatchGroup()
@@ -397,7 +397,7 @@ class RelationTextIndexTests: XCTestCase {
             group.enter()
             var done = false
             let remover = searchRelation.addAsyncObserver(Observer(callback: {
-                if !done && $0 == [["text": .text(expected)]] {
+                if !done && $0 == [["text": expected]] {
                     done = true
                     group.leave()
                 }
@@ -437,7 +437,7 @@ private class Observer: AsyncRelationContentCoalescedObserver {
 private func AssertMatches(_ query: String, file: StaticString = #file, line: UInt = #line, _ items: (Bool, String)...) {
     let content = MemoryTableRelation(scheme: ["id", "include", "text"])
     for (index, (include, text)) in items.enumerated() {
-        XCTAssertNil(content.add(["id": .integer(Int64(index)), "include": RelationValue.boolValue(include), "text": .text(text)]).err, file: file, line: line)
+        XCTAssertNil(content.add(["id": Int64(index), "include": RelationValue.boolValue(include), "text": text]).err, file: file, line: line)
     }
     
     let ids = content.project(["id"])

@@ -14,7 +14,7 @@ public struct IndexedSet<Element: IndexableValue> {
     // not smart enough to do that when the containers are placed directly in the Dictionary, which results
     // in atrocious performance. Boxing it in a class fixes that. Hopefully this will be fixed in Swift 4
     // and then we can remove this.
-    fileprivate var index: [Element.Index: MutableBox<[Element.Value: MutableBox<Set<Element>>]>]
+    fileprivate var index: [Element.Index: MutableBox<[Element.IndexedValue: MutableBox<Set<Element>>]>]
     fileprivate var allValues: Set<Element>
 }
 
@@ -38,7 +38,7 @@ extension IndexedSet {
     /// The given key must be one of the primary keys used to initialize the set,
     /// otherwise the call will crash.
     /// If no elements have the given value for the given key, the empty set is returned.
-    public func values(matchingKey: Element.Index, value: Element.Value) -> Set<Element> {
+    public func values(matchingKey: Element.Index, value: Element.IndexedValue) -> Set<Element> {
         return index[matchingKey]!.value[value]?.value ?? []
     }
     
@@ -77,7 +77,7 @@ extension IndexedSet: Sequence {
 }
 
 extension IndexedSet {
-    fileprivate mutating func add(indexedValue: Element.Value, element: Element, toDictionary: inout [Element.Value: MutableBox<Set<Element>>]) {
+    fileprivate mutating func add(indexedValue: Element.IndexedValue, element: Element, toDictionary: inout [Element.IndexedValue: MutableBox<Set<Element>>]) {
         if let box = toDictionary[indexedValue] {
             box.value.insert(element)
         } else {
@@ -85,7 +85,7 @@ extension IndexedSet {
         }
     }
     
-    fileprivate mutating func remove(indexedValue: Element.Value, element: Element, fromDictionary: inout [Element.Value: MutableBox<Set<Element>>]) {
+    fileprivate mutating func remove(indexedValue: Element.IndexedValue, element: Element, fromDictionary: inout [Element.IndexedValue: MutableBox<Set<Element>>]) {
         let box = fromDictionary[indexedValue]
         let removed = box?.value.remove(element)
         
@@ -101,10 +101,13 @@ extension IndexedSet {
 /// Protocol for values that can be stored in IndexedSet.
 public protocol IndexableValue: Hashable {
     associatedtype Index: Hashable
-    associatedtype Value: Hashable
+    // Note: This has the "Indexed" prefix to avoid colliding with other associated types (e.g. Row wants to conform to both
+    // ExpressibleByDictionaryLiteral and IndexableValue, but use a different "Value" type for each, and this would not
+    // be possible if both are declared using the name "Value")
+    associatedtype IndexedValue: Hashable
     
     /// Return a value for a given index.
-    func value(index: Index) -> Value
+    func value(index: Index) -> IndexedValue
 }
 
 /// :nodoc: Implementation detail (will be made non-public eventually)

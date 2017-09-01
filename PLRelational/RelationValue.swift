@@ -5,7 +5,6 @@
 
 import Foundation
 
-
 /// Values which can be stored in a Relation. These are just the SQLite data types,
 /// Plus a "not found" value for when an attribute doesn't exist at all.
 /// We might want to do our own thing and not hew so closely to SQLite's way....
@@ -100,6 +99,53 @@ extension RelationValue: CustomStringConvertible {
         case .blob(let x): return String(describing: x)
         case .notFound: return "<value not found>"
         }
+    }
+}
+
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
+public protocol RelationValueConvertible {
+    var relationValue: RelationValue { get }
+}
+
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
+extension RelationValue: RelationValueConvertible {
+    public var relationValue: RelationValue {
+        return self
+    }
+}
+
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
+extension String: RelationValueConvertible {
+    public var relationValue: RelationValue {
+        return RelationValue(self)
+    }
+}
+
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
+extension Int: RelationValueConvertible {
+    public var relationValue: RelationValue  {
+        return RelationValue(Int64(self))
+    }
+}
+
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
+extension Int64: RelationValueConvertible {
+    public var relationValue: RelationValue {
+        return RelationValue(self)
+    }
+}
+
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
+extension Double: RelationValueConvertible {
+    public var relationValue: RelationValue {
+        return RelationValue(self)
+    }
+}
+
+/// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
+extension Bool: RelationValueConvertible {
+    public var relationValue: RelationValue {
+        return RelationValue.boolValue(self)
     }
 }
 

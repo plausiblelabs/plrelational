@@ -35,7 +35,7 @@ enum SelectedItem {
     static let id = Item.id
     fileprivate static var spec: Spec { return .transient(name: "selected_item", scheme: [id], primaryKeys: [id]) }
 }
-    
+
 class Model {
     
     let items: TransactionalRelation
@@ -110,11 +110,10 @@ class Model {
     /// Adds a new row to the `items` relation.
     private func addItem(_ title: String) {
         // Use UUIDs to uniquely identify rows
-        let id = RelationValue(uuidString())
+        let id = ItemID()
 
         // Use a string representation of the current time to make our life easier
         let now = timestampString()
-        let created = RelationValue(now)
         
         // Here we cheat a little.  Because ArrayProperty currently only knows how to
         // sort on a single attribute (temporary limitation), we cram two things --
@@ -123,14 +122,14 @@ class Model {
         // in the list with pending items at top and completed items at bottom, with
         // pending items sorted with most recently added items at top, and completed
         // items sorted with most recently completed items at top.
-        let status = RelationValue(statusString(pending: true, timestamp: now))
+        let status = statusString(pending: true, timestamp: now)
         
         items.asyncAdd([
             Item.id: id,
-            Item.title: RelationValue(title),
-            Item.created: created,
+            Item.title: title,
+            Item.created: now,
             Item.status: status,
-            Item.notes: RelationValue("")
+            Item.notes: ""
         ])
     }
     
@@ -201,7 +200,7 @@ class Model {
                     if relation === self.selectedItemIDs {
                         // This row was deleted from `selectedItemIDs`; delete corresponding rows from
                         // `items` and `itemTags`
-                        let itemID = row[SelectedItem.id]
+                        let itemID = ItemID(row)
                         return [
                             (self.items, Item.id *== itemID),
                             (self.itemTags, ItemTag.itemID *== itemID)
@@ -237,9 +236,9 @@ class Model {
     }()
 
     /// Returns a property that reflects the tag name.
-    func tagName(for tagID: String, initialValue: String?) -> AsyncReadWriteProperty<String> {
+    func tagName(for tagID: TagID, initialValue: String?) -> AsyncReadWriteProperty<String> {
         let tagNameRelation = self.tags
-            .select(Tag.id *== RelationValue(tagID))
+            .select(Tag.id *== tagID)
             .project(Tag.name)
         return self.undoableBidiProperty(
             action: "Change Tag Name",
@@ -252,9 +251,9 @@ class Model {
     
     /// Returns a property that resolves to a string containing a comma-separated list
     /// of tags that have been applied to the given to-do item.
-    func tagsString(for itemID: String) -> AsyncReadableProperty<String> {
+    func tagsString(for itemID: ItemID) -> AsyncReadableProperty<String> {
         return self.itemTags
-            .select(Item.id *== RelationValue(itemID))
+            .select(Item.id *== itemID)
             .join(self.tags)
             .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
             .fullArray()
@@ -266,45 +265,74 @@ class Model {
     /// Adds a new row to the `tags` relation.
     private func addTag(_ name: String) {
         // Use UUIDs to uniquely identify rows
-        let id = RelationValue(uuidString())
+        let id = TagID()
         
         tags.asyncAdd([
             Tag.id: id,
-            Tag.name: RelationValue(name)
+            Tag.name: name
         ])
     }
     
     /// Creates a new tag and applies it to the given to-do item.
-    func addNewTag(named name: String, to itemID: String) {
-        // TODO: Create ItemID and TagID value types
-        let tagID = RelationValue(uuidString())
+    func addNewTag(named name: String, to itemID: ItemID) {
+        let tagID = TagID()
         
         performUndoableAction("Add New Tag", {
             self.tags.asyncAdd([
                 Tag.id: tagID,
-                Tag.name: RelationValue(name)
+                Tag.name: name
             ])
             
             self.itemTags.asyncAdd([
-                ItemTag.itemID: RelationValue(itemID),
+                ItemTag.itemID: itemID,
                 ItemTag.tagID: tagID
             ])
         })
     }
     
     /// Applies an existing tag to the given to-do item.
-    func addExistingTag(_ tagID: String, to itemID: String) {
+    func addExistingTag(_ tagID: TagID, to itemID: ItemID) {
         performUndoableAction("Add Tag", {
             self.itemTags.asyncAdd([
-                ItemTag.itemID: RelationValue(itemID),
-                ItemTag.tagID: RelationValue(tagID)
+                ItemTag.itemID: itemID,
+                ItemTag.tagID: tagID
             ])
         })
     }
 }
 
-private func uuidString() -> String {
-    return UUID().uuidString
+class BaseID {
+    private let uuid: String
+    
+    init() {
+        self.uuid = UUID().uuidString
+    }
+    
+    init(_ stringValue: String) {
+        self.uuid = stringValue
+    }
+    
+    init(_ relationValue: RelationValue) {
+        self.uuid = relationValue.get()!
+    }
+    
+    var relationValue: RelationValue {
+        return uuid.relationValue
+    }
+}
+
+extension BaseID: SelectExpressionConstantValue {}
+
+class ItemID: BaseID {
+    convenience init(_ row: Row) {
+        self.init(row[Item.id])
+    }
+}
+
+class TagID: BaseID {
+    convenience init(_ row: Row) {
+        self.init(row[Tag.id])
+    }
 }
 
 private let timestampFormatter: DateFormatter = {
