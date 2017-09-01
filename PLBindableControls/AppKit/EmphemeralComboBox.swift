@@ -49,25 +49,15 @@ open class EphemeralComboBox: NSComboBox, NSComboBoxDelegate {
         action = #selector(stringCommitted(_:))
     }
     
-    @objc open func comboBoxSelectionIsChanging(_ notification: Notification) {
-        if poppedUp && indexOfSelectedItem >= 0 {
-            // An item was selected by clicking a popup item.  We immediately notify and deselect
-            // the item to prevent it from appearing in the text field.
-            notifyItemSelected(at: indexOfSelectedItem)
-        }
-    }
-    
-    @objc open func comboBoxSelectionDidChange(_ notification: Notification) {
-    }
-    
     @objc open func comboBoxWillPopUp(_ notification: Notification) {
         poppedUp = true
     }
     
     @objc open func comboBoxWillDismiss(_ notification: Notification) {
         if poppedUp && indexOfSelectedItem >= 0 {
-            // An item was selected by pressing enter after the item was highlighted.  We immediately
-            // notify and deselect the item to prevent it from appearing in the text field.
+            // An item was selected by clicking a popup item or by pressing enter after the item
+            // was highlighted.  We immediately notify and deselect the item to prevent it from
+            // appearing in the text field.
             notifyItemSelected(at: indexOfSelectedItem)
         }
         poppedUp = false
