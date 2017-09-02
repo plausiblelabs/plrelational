@@ -52,13 +52,19 @@ class DetailView: BackgroundView {
         notesTextView.textContainerInset = NSMakeSize(0, 4)
 
         // Bind to our view model
+        
+        // REQ-7
         checkbox.checkState <~> model.itemCompleted
+        
+        // REQ-8
         titleField.string <~> model.itemTitle
         
+        // REQ-9
         tagComboBox.items <~ model.availableTags
         tagComboBox.selectedItemID ~~> model.addExistingTagToSelectedItem
         tagComboBox.committedString ~~> model.addNewTagToSelectedItem
         
+        // REQ-10
         tagsListView = ListView(model: model.tagsListViewModel, outlineView: tagsOutlineView)
         tagsListView.selection <~> model.selectedTagID
         tagsListView.configureCell = { view, row in
@@ -66,10 +72,14 @@ class DetailView: BackgroundView {
             textField.string.unbindAll()
             textField.string <~> model.tagName(for: row)
         }
-        
+
+        // REQ-11
         notesTextView.text <~> model.itemNotes
         
+        // REQ-12
         createdOnLabel.string <~ model.createdOn
+        
+        // REQ-13
         deleteButton.clicks ~~> model.deleteItem
     }
     

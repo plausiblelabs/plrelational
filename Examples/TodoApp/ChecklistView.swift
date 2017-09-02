@@ -32,22 +32,28 @@ class ChecklistView: NSView {
         outlineView.backgroundColor = .clear
         
         // Bind to our view model
+        
+        // REQ-1
         newItemField.strings ~~> model.addNewItem
         
+        // REQ-2
         listView = CustomListView(model: model.itemsListModel, outlineView: outlineView)
         listView.animateChanges = true
         listView.selection <~> model.itemsListSelection
         listView.configureCell = { view, row in
             let cellView = view as! ChecklistCellView
             
+            // REQ-3
             let checkbox = cellView.checkbox!
             checkbox.checkState.unbindAll()
             checkbox.checkState <~> model.itemCompleted(for: row)
             
+            // REQ-4
             let textField = cellView.textField as! TextField
             textField.string.unbindAll()
             textField.string <~> model.itemTitle(for: row)
             
+            // REQ-5
             let detailLabel = cellView.detailLabel!
             detailLabel.string.unbindAll()
             detailLabel.string <~ model.itemTags(for: row)

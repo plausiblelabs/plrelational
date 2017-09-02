@@ -42,7 +42,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let detailViewModel = DetailViewModel(model: model)
         detailView = DetailView(frame: detailContainer.bounds, model: detailViewModel)
         detailContainer.addSubview(detailView)
-        
+
+        // REQ-6
         // Toggle the "No Selection" label and detail view depending on the selection state
         detailView.visible <~ model.hasSelection
         noSelectionLabel.visible <~ not(model.hasSelection)

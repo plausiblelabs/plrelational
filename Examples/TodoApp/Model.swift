@@ -97,16 +97,19 @@ class Model {
 
     /// MARK: - Undo Support
     
+    // TODO: Docs
     func undoableBidiProperty<T>(action: String, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
         return undoableDB.bidiProperty(action: action, signal: signal, update: update)
     }
     
+    // TODO: Docs
     func performUndoableAction(_ name: String, _ transactionFunc: @escaping (Void) -> Void) {
         undoableDB.performUndoableAction(name, before: nil, transactionFunc)
     }
     
     /// MARK: - Items
     
+    /// REQ-1
     /// Adds a new row to the `items` relation.
     private func addItem(_ title: String) {
         // Use UUIDs to uniquely identify rows
@@ -133,34 +136,15 @@ class Model {
         ])
     }
     
+    /// REQ-1
     /// Adds a new row to the `items` relation.  This is an undoable action.
     func addNewItem(with title: String) {
         performUndoableAction("New Item", {
             self.addItem(title)
         })
     }
-    
-    /// Resolves to `true` when an item is selected in the list of to-do items.
-    lazy var hasSelection: AsyncReadableProperty<Bool> = {
-        return self.selectedItems.nonEmpty.property()
-    }()
-    
-    /// Resolves to the item that is selected in the list of to-do items.
-    lazy var selectedItems: Relation = {
-        return self.selectedItemIDs.join(self.items)
-    }()
-    
-    /// Returns a property that reflects the item title.
-    func itemTitle(_ relation: Relation, initialValue: String?) -> AsyncReadWriteProperty<String> {
-        return self.undoableBidiProperty(
-            action: "Change Item Title",
-            signal: relation.oneString(initialValue: initialValue),
-            update: {
-                relation.asyncUpdateString($0)
-            }
-        )
-    }
 
+    /// REQ-3 / REQ-7
     /// Returns a property that reflects the completed status for the given relation.
     func itemCompleted(_ relation: Relation, initialValue: String?) -> AsyncReadWriteProperty<CheckState> {
         return self.undoableBidiProperty(
@@ -174,7 +158,126 @@ class Model {
             }
         )
     }
+
+    /// REQ-4 / REQ-8
+    /// Returns a property that reflects the item title.
+    func itemTitle(_ relation: Relation, initialValue: String?) -> AsyncReadWriteProperty<String> {
+        return self.undoableBidiProperty(
+            action: "Change Title",
+            signal: relation.oneString(initialValue: initialValue),
+            update: {
+                relation.asyncUpdateString($0)
+            }
+        )
+    }
+
+    // MARK: - List Selection
     
+    /// REQ-6
+    /// Resolves to `true` when an item is selected in the list of to-do items.
+    lazy var hasSelection: AsyncReadableProperty<Bool> = {
+        return self.selectedItems.nonEmpty.property()
+    }()
+    
+    /// REQ-6
+    /// Resolves to the item that is selected in the list of to-do items.
+    lazy var selectedItems: Relation = {
+        return self.selectedItemIDs.join(self.items)
+    }()
+    
+    // MARK: - Tags
+    
+    /// REQ-5
+    /// Returns a property that resolves to a string containing a comma-separated list
+    /// of tags that have been applied to the given to-do item.
+    func tagsString(for itemID: ItemID) -> AsyncReadableProperty<String> {
+        return self.itemTags
+            .select(Item.id *== itemID)
+            .join(self.tags)
+            .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
+            .fullArray()
+            .map{ elems in
+                return elems.map{ elem -> String in elem.data[Tag.name].get()! }.joined(separator: ", ")
+        }
+    }
+    
+    /// REQ-9
+    /// Resolves to the set of tags that are associated with the selected to-do item
+    /// (assumes there is either zero or one selected items).
+    lazy var tagsForSelectedItem: Relation = {
+        return self.selectedItemIDs
+            .join(self.itemTags)
+            .join(self.tags)
+            .project([Tag.id, Tag.name])
+    }()
+
+    /// REQ-9
+    /// Resolves to the set of tags that are not yet associated with the selected to-do
+    /// item, i.e., the available tags.
+    lazy var availableTagsForSelectedItem: Relation = {
+        // This is simply "all tags" minus "already applied tags", nice!
+        return self.tags
+            .difference(self.tagsForSelectedItem)
+    }()
+
+    /// REQ-9
+    /// Adds a new row to the `tags` relation.
+    private func addTag(_ name: String) {
+        let id = TagID()
+        
+        tags.asyncAdd([
+            Tag.id: id,
+            Tag.name: name
+        ])
+    }
+    
+    /// REQ-9
+    /// Creates a new tag and applies it to the given to-do item.
+    func addNewTag(named name: String, to itemID: ItemID) {
+        let tagID = TagID()
+        
+        performUndoableAction("Add New Tag", {
+            self.tags.asyncAdd([
+                Tag.id: tagID,
+                Tag.name: name
+            ])
+            
+            self.itemTags.asyncAdd([
+                ItemTag.itemID: itemID,
+                ItemTag.tagID: tagID
+            ])
+        })
+    }
+
+    /// REQ-9
+    /// Applies an existing tag to the given to-do item.
+    func addExistingTag(_ tagID: TagID, to itemID: ItemID) {
+        performUndoableAction("Add Tag", {
+            self.itemTags.asyncAdd([
+                ItemTag.itemID: itemID,
+                ItemTag.tagID: tagID
+            ])
+        })
+    }
+    
+    /// REQ-10
+    /// Returns a property that reflects the tag name.
+    func tagName(for tagID: TagID, initialValue: String?) -> AsyncReadWriteProperty<String> {
+        let tagNameRelation = self.tags
+            .select(Tag.id *== tagID)
+            .project(Tag.name)
+        return self.undoableBidiProperty(
+            action: "Change Tag Name",
+            signal: tagNameRelation.oneString(initialValue: initialValue),
+            update: {
+                tagNameRelation.asyncUpdateString($0)
+            }
+        )
+    }
+    
+    // MARK: - Notes
+    
+    /// REQ-11
     /// Returns a property that reflects the selected item's notes.
     lazy var selectedItemNotes: AsyncReadWriteProperty<String> = {
         let relation = self.selectedItems.project(Item.notes)
@@ -186,7 +289,10 @@ class Model {
             }
         )
     }()
-
+    
+    // MARK: - Delete
+    
+    /// REQ-12
     /// Deletes the row associated with the selected item and clears the selection.  This demonstrates
     /// the use of `cascadingDelete`, which is kind of overkill for this particular case but does show
     /// how easy it can be to clean up related data.
@@ -213,90 +319,6 @@ class Model {
                 update: { _ in return [] },
                 completionCallback: { _ in }
             )
-        })
-    }
-    
-    // MARK: - Tags
-    
-    /// Resolves to the set of tags that are associated with the selected to-do item
-    /// (assumes there is either zero or one selected items).
-    lazy var tagsForSelectedItem: Relation = {
-        return self.selectedItemIDs
-            .join(self.itemTags)
-            .join(self.tags)
-            .project([Tag.id, Tag.name])
-    }()
-    
-    /// Resolves to the set of tags that are not yet associated with the selected to-do
-    /// item, i.e., the available tags.
-    lazy var availableTagsForSelectedItem: Relation = {
-        // This is simply "all tags" minus "already applied tags", nice!
-        return self.tags
-            .difference(self.tagsForSelectedItem)
-    }()
-
-    /// Returns a property that reflects the tag name.
-    func tagName(for tagID: TagID, initialValue: String?) -> AsyncReadWriteProperty<String> {
-        let tagNameRelation = self.tags
-            .select(Tag.id *== tagID)
-            .project(Tag.name)
-        return self.undoableBidiProperty(
-            action: "Change Tag Name",
-            signal: tagNameRelation.oneString(initialValue: initialValue),
-            update: {
-                tagNameRelation.asyncUpdateString($0)
-            }
-        )
-    }
-    
-    /// Returns a property that resolves to a string containing a comma-separated list
-    /// of tags that have been applied to the given to-do item.
-    func tagsString(for itemID: ItemID) -> AsyncReadableProperty<String> {
-        return self.itemTags
-            .select(Item.id *== itemID)
-            .join(self.tags)
-            .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
-            .fullArray()
-            .map{ elems in
-                return elems.map{ elem -> String in elem.data[Tag.name].get()! }.joined(separator: ", ")
-            }
-    }
-    
-    /// Adds a new row to the `tags` relation.
-    private func addTag(_ name: String) {
-        // Use UUIDs to uniquely identify rows
-        let id = TagID()
-        
-        tags.asyncAdd([
-            Tag.id: id,
-            Tag.name: name
-        ])
-    }
-    
-    /// Creates a new tag and applies it to the given to-do item.
-    func addNewTag(named name: String, to itemID: ItemID) {
-        let tagID = TagID()
-        
-        performUndoableAction("Add New Tag", {
-            self.tags.asyncAdd([
-                Tag.id: tagID,
-                Tag.name: name
-            ])
-            
-            self.itemTags.asyncAdd([
-                ItemTag.itemID: itemID,
-                ItemTag.tagID: tagID
-            ])
-        })
-    }
-    
-    /// Applies an existing tag to the given to-do item.
-    func addExistingTag(_ tagID: TagID, to itemID: ItemID) {
-        performUndoableAction("Add Tag", {
-            self.itemTags.asyncAdd([
-                ItemTag.itemID: itemID,
-                ItemTag.tagID: tagID
-            ])
         })
     }
 }
