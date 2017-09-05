@@ -87,15 +87,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             }
             
             let row: Row = [
-                "id": RelationValue(id),
-                "name": RelationValue(name),
-                "friendly": RelationValue(Int64(friendly ? 1 : 0)),
+                "id": id,
+                "name": name,
+                "friendly": Int64(friendly ? 1 : 0),
                 "best_friend": RelationValue.null,
                 "fav_day": dayValue,
                 "fav_color": colorValue,
-                "rocks": RelationValue(rocks),
-                "parent": .null,
-                "order": RelationValue(order)
+                "rocks": rocks,
+                "parent": RelationValue.null,
+                "order": order
             ]
             _  = persons.add(row)
             

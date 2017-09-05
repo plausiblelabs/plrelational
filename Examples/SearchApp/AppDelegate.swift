@@ -28,7 +28,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         
         // Prepare the undo manager
         nsUndoManager = SPUndoManager()
-        let undoManager = PLBindableControls.UndoManager(nsmanager: nsUndoManager)
+        let undoManager = PLRelationalBinding.UndoManager(nsmanager: nsUndoManager)
         
         // Bind the views to the view model
         model = ViewModel(undoManager: undoManager)

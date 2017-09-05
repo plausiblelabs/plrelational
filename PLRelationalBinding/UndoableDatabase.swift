@@ -5,7 +5,6 @@
 
 import Foundation
 import PLRelational
-import PLRelationalBinding
 
 public class UndoableDatabase {
     

@@ -48,7 +48,7 @@ class Model {
     private let db: TransactionalDatabase
     let undoableDB: UndoableDatabase
 
-    init(undoManager: PLBindableControls.UndoManager) {
+    init(undoManager: PLRelationalBinding.UndoManager) {
         let specs: [Spec] = [
             Item.spec,
             Tag.spec,

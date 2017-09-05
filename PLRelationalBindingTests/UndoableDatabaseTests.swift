@@ -4,7 +4,6 @@
 //
 
 import XCTest
-import PLBindableControls
 import PLRelational
 import PLRelationalBinding
 
@@ -54,7 +53,7 @@ class UndoableDatabaseTests: BindingTestCase {
                 XCTAssertNil(r.add(row.ok!).err)
         }
         
-        let undoManager = PLBindableControls.UndoManager()
+        let undoManager = PLRelationalBinding.UndoManager()
         let undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
         
         let group = DispatchGroup()
@@ -111,7 +110,7 @@ class UndoableDatabaseTests: BindingTestCase {
         _ = r.add(["name": "Bob"])
         _ = r.add(["name": "Chuck"])
         
-        let undoManager = PLBindableControls.UndoManager()
+        let undoManager = PLRelationalBinding.UndoManager()
         let undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
         
         let property = r.undoableAllRelationValues(undoableDB, "Change Names")
@@ -141,7 +140,7 @@ class UndoableDatabaseTests: BindingTestCase {
         let r = db["r"]
         _ = r.add(["name": "Abraham"])
         
-        let undoManager = PLBindableControls.UndoManager()
+        let undoManager = PLRelationalBinding.UndoManager()
         let undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
         
         let property = r.undoableOneString(undoableDB, "Change Name")
@@ -171,7 +170,7 @@ class UndoableDatabaseTests: BindingTestCase {
         let r = db["r"]
         _ = r.add(["num": "1"])
         
-        let undoManager = PLBindableControls.UndoManager()
+        let undoManager = PLRelationalBinding.UndoManager()
         let undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
         
         let property = r.undoableTransformedString(undoableDB, "Change Number", fromString: { Int($0)! }, toString: { String($0) })

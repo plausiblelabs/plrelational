@@ -18,7 +18,7 @@ class ViewModel {
     private let transactionalDB: TransactionalDatabase
     private let undoableDB: UndoableDatabase
     
-    init(undoManager: PLBindableControls.UndoManager) {
+    init(undoManager: PLRelationalBinding.UndoManager) {
         
         func makeDB() -> (path: String, db: SQLiteDatabase) {
             let tmp = "/tmp" as NSString

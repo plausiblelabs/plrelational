@@ -9,7 +9,7 @@ import PLRelationalBinding
 import PLBindableControls
 
 typealias DB = DocDatabase
-typealias PLUndoManager = PLBindableControls.UndoManager
+typealias PLUndoManager = PLRelationalBinding.UndoManager
 
 class DocDatabase {
     

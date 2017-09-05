@@ -71,12 +71,6 @@
 		374363011EA673FC004982B0 /* InternedUTF8String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */; };
 		374363021EA6741C004982B0 /* SetSubtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */; };
 		374363031EA67432004982B0 /* SelectExpressionAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB823B1E96A67D00B80CAE /* SelectExpressionAnalysis.swift */; };
-		374DAEBE1E8C28E700FF245B /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
-		374DAEBF1E8C28EA00FF245B /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
-		374DAEC21E8C28FC00FF245B /* UndoableDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374DAEBC1E8C28E100FF245B /* UndoableDatabaseTests.swift */; };
-		374DAEC31E8C28FC00FF245B /* UndoableDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374DAEBC1E8C28E100FF245B /* UndoableDatabaseTests.swift */; };
-		374DAEC41E8C2A3900FF245B /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
-		374DAEC51E8C2A3C00FF245B /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
 		37501AFA1EB7BE6D0085B281 /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371243B81D00B6C100E9BCFF /* Image.swift */; };
 		37501AFD1EB7BFE60085B281 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37501AFC1EB7BFE60085B281 /* ImageView.swift */; };
 		37504B3B1DC6995100CEE4D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37504B3A1DC6995100CEE4D4 /* AppDelegate.swift */; };
@@ -96,6 +90,13 @@
 		3788C0EA1F5F29E2005920FD /* Identifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788C0E91F5F29E2005920FD /* Identifiers.swift */; };
 		3788C0EE1F5F340C005920FD /* BindingTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707DA1CFE262700710C80 /* BindingTestCase.swift */; };
 		3788C0EF1F5F340E005920FD /* BindingTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707DA1CFE262700710C80 /* BindingTestCase.swift */; };
+		3788C0F21F5F3D7C005920FD /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
+		3788C0F31F5F3D7E005920FD /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
+		3788C0F41F5F3D82005920FD /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
+		3788C0F51F5F3D84005920FD /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707791CF7B2CB00710C80 /* UndoableDatabase.swift */; };
+		3788C0F61F5F3D88005920FD /* UndoableDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374DAEBC1E8C28E100FF245B /* UndoableDatabaseTests.swift */; };
+		3788C0F71F5F3D8B005920FD /* UndoableDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 374DAEBC1E8C28E100FF245B /* UndoableDatabaseTests.swift */; };
+		3788C0F81F5F3E75005920FD /* ErrorConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C26AAAE01F5A01DA001452AB /* ErrorConvenience.swift */; };
 		3799AB491F57C43C0075570F /* ChecklistView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3799AB471F57C43C0075570F /* ChecklistView.xib */; };
 		3799AB4C1F57C8960075570F /* DetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3799AB4A1F57C8960075570F /* DetailView.xib */; };
 		3799AB4E1F58B3F70075570F /* EmphemeralComboBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3799AB4D1F58B3F70075570F /* EmphemeralComboBox.swift */; };
@@ -823,7 +824,7 @@
 		374AE9731D91C2FC007D1366 /* StoredRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StoredRelation.swift; sourceTree = "<group>"; };
 		374AE9751D91DBC7007D1366 /* PlistDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlistDatabase.swift; sourceTree = "<group>"; };
 		374AE9791D9205DC007D1366 /* PlistDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistDatabaseTests.swift; path = PLRelationalTests/PlistDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
-		374DAEBC1E8C28E100FF245B /* UndoableDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UndoableDatabaseTests.swift; path = PLBindableControlsTests/Shared/UndoableDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
+		374DAEBC1E8C28E100FF245B /* UndoableDatabaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = UndoableDatabaseTests.swift; path = PLRelationalBindingTests/UndoableDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
 		37501AFC1EB7BFE60085B281 /* ImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		37504B381DC6995100CEE4D4 /* Visualizer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Visualizer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		37504B3A1DC6995100CEE4D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -1352,6 +1353,7 @@
 				37A4A2811D307435005CAEA5 /* Change Handling */,
 				37A1CEE11D147A970067870D /* Relation Extensions */,
 				372707BC1CFE24C600710C80 /* Utilities */,
+				37C611401CD94772001DAF59 /* Undo */,
 				372707CC1CFE25AF00710C80 /* PLRelationalBindingTests */,
 			);
 			path = PLRelationalBinding;
@@ -1637,7 +1639,6 @@
 				37A1CE5F1D08C70D0067870D /* Color.swift */,
 				371243B81D00B6C100E9BCFF /* Image.swift */,
 				37A4A2411D21A613005CAEA5 /* TextProperty.swift */,
-				37C611401CD94772001DAF59 /* Undo */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -3327,14 +3328,12 @@
 				37C48DAC1E8C6787000BDE70 /* TreeView.swift in Sources */,
 				37501AFA1EB7BE6D0085B281 /* Image.swift in Sources */,
 				37D6F0931E8ECDB0003255FE /* SectionedTreeView.swift in Sources */,
-				374DAEBF1E8C28EA00FF245B /* UndoableDatabase.swift in Sources */,
 				373070FF1EB84F4200FC0E13 /* Switch.swift in Sources */,
 				37BEE30B1EDF88CF00D15285 /* Slider.swift in Sources */,
 				37D6F08F1E8D7862003255FE /* Bindable.swift in Sources */,
 				37C48DAA1E8C676A000BDE70 /* TextProperty.swift in Sources */,
 				37D6F08C1E8D6CD4003255FE /* Label.swift in Sources */,
 				37501AFD1EB7BFE60085B281 /* ImageView.swift in Sources */,
-				374DAEBE1E8C28E700FF245B /* UndoManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3342,7 +3341,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				374DAEC31E8C28FC00FF245B /* UndoableDatabaseTests.swift in Sources */,
 				3788C0EF1F5F340E005920FD /* BindingTestCase.swift in Sources */,
 				37C48D3A1E8C37C9000BDE70 /* DBTestCase.swift in Sources */,
 			);
@@ -3425,6 +3423,7 @@
 				374316081F42354100128F5A /* Async.swift in Sources */,
 				37B440461E899A0200C8C336 /* StoredRelation.swift in Sources */,
 				37B4404E1E899A0A00C8C336 /* RowPlist.swift in Sources */,
+				3788C0F81F5F3E75005920FD /* ErrorConvenience.swift in Sources */,
 				37B440C31E899A7300C8C336 /* StringPad.swift in Sources */,
 				37B440B91E899A7300C8C336 /* ObserverSet.swift in Sources */,
 				37B440A61E899A7200C8C336 /* CollectionConvenience.swift in Sources */,
@@ -3644,12 +3643,14 @@
 				37B4411A1E89A11C00C8C336 /* AsyncProperty.swift in Sources */,
 				37B4412C1E89A12E00C8C336 /* TreeProperty.swift in Sources */,
 				37B441081E89A10200C8C336 /* RelationSignal.swift in Sources */,
+				3788C0F41F5F3D82005920FD /* UndoableDatabase.swift in Sources */,
 				37B4413B1E89A14200C8C336 /* RelationMutation.swift in Sources */,
 				37B441061E89A10200C8C336 /* Signal.swift in Sources */,
 				37B441461E89A15200C8C336 /* ArrayBinarySearch.swift in Sources */,
 				37B4411C1E89A11C00C8C336 /* RelationAsyncProperty.swift in Sources */,
 				37B441101E89A11100C8C336 /* Property.swift in Sources */,
 				37B441071E89A10200C8C336 /* SignalOperations.swift in Sources */,
+				3788C0F21F5F3D7C005920FD /* UndoManager.swift in Sources */,
 				37B4413C1E89A14200C8C336 /* RelationChangeParts.swift in Sources */,
 				37B4412D1E89A12E00C8C336 /* RelationTreeProperty.swift in Sources */,
 				37B441471E89A15200C8C336 /* ArraySafeIndex.swift in Sources */,
@@ -3667,6 +3668,7 @@
 			files = (
 				37B441321E89A13200C8C336 /* RelationArrayPropertyTests.swift in Sources */,
 				37B441411E89A14A00C8C336 /* RelationMutationTests.swift in Sources */,
+				3788C0F71F5F3D8B005920FD /* UndoableDatabaseTests.swift in Sources */,
 				37B441221E89A12200C8C336 /* RelationAsyncPropertyTests.swift in Sources */,
 				37B441401E89A14A00C8C336 /* RelationExtractTypedTests.swift in Sources */,
 				37B441501E89A16C00C8C336 /* ChangeHandlerTests.swift in Sources */,
@@ -3696,12 +3698,14 @@
 				37B4411D1E89A11D00C8C336 /* AsyncProperty.swift in Sources */,
 				37B441301E89A12E00C8C336 /* TreeProperty.swift in Sources */,
 				37B4410B1E89A10300C8C336 /* RelationSignal.swift in Sources */,
+				3788C0F51F5F3D84005920FD /* UndoableDatabase.swift in Sources */,
 				37B4413E1E89A14200C8C336 /* RelationMutation.swift in Sources */,
 				37B441091E89A10300C8C336 /* Signal.swift in Sources */,
 				37B441491E89A15200C8C336 /* ArrayBinarySearch.swift in Sources */,
 				37B4411F1E89A11D00C8C336 /* RelationAsyncProperty.swift in Sources */,
 				37B441131E89A11200C8C336 /* Property.swift in Sources */,
 				37B4410A1E89A10300C8C336 /* SignalOperations.swift in Sources */,
+				3788C0F31F5F3D7E005920FD /* UndoManager.swift in Sources */,
 				37B4413F1E89A14200C8C336 /* RelationChangeParts.swift in Sources */,
 				37B441311E89A12E00C8C336 /* RelationTreeProperty.swift in Sources */,
 				37B4414A1E89A15200C8C336 /* ArraySafeIndex.swift in Sources */,
@@ -3719,6 +3723,7 @@
 			files = (
 				37B441341E89A13300C8C336 /* RelationArrayPropertyTests.swift in Sources */,
 				37B441441E89A14B00C8C336 /* RelationMutationTests.swift in Sources */,
+				3788C0F61F5F3D88005920FD /* UndoableDatabaseTests.swift in Sources */,
 				37B441251E89A12300C8C336 /* RelationAsyncPropertyTests.swift in Sources */,
 				37B441431E89A14B00C8C336 /* RelationExtractTypedTests.swift in Sources */,
 				37B441511E89A16D00C8C336 /* ChangeHandlerTests.swift in Sources */,
@@ -3747,7 +3752,6 @@
 				37B441A71E89AAB800C8C336 /* TableView.swift in Sources */,
 				37B441A11E89AAB800C8C336 /* ProgressIndicator.swift in Sources */,
 				37B441B21E89AAB800C8C336 /* TextField.swift in Sources */,
-				374DAEC41E8C2A3900FF245B /* UndoManager.swift in Sources */,
 				37B441A61E89AAB800C8C336 /* ExtOutlineView.swift in Sources */,
 				3799AB521F591D170075570F /* TextView.swift in Sources */,
 				37B441A31E89AAB800C8C336 /* ListView.swift in Sources */,
@@ -3768,7 +3772,6 @@
 				37B441AE1E89AAB800C8C336 /* ComboBox.swift in Sources */,
 				37B441B01E89AAB800C8C336 /* PopUpButton.swift in Sources */,
 				37B4419E1E89AAB800C8C336 /* BackgroundView.swift in Sources */,
-				374DAEC51E8C2A3C00FF245B /* UndoableDatabase.swift in Sources */,
 				37B441A81E89AAB800C8C336 /* Button.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3777,7 +3780,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				374DAEC21E8C28FC00FF245B /* UndoableDatabaseTests.swift in Sources */,
 				3788C0EE1F5F340C005920FD /* BindingTestCase.swift in Sources */,
 				37B441931E89A79900C8C336 /* DBTestCase.swift in Sources */,
 			);
