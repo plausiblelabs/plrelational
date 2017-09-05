@@ -27,8 +27,6 @@ class ChecklistViewModel {
     lazy var itemsListModel: ListViewModel<RowArrayElement> = {
         return ListViewModel(
             data: self.model.items.arrayProperty(idAttr: Item.id, orderAttr: Item.status, descending: true),
-            contextMenu: nil,
-            move: nil,
             cellIdentifier: { _ in "Cell" }
         )
     }()
@@ -65,10 +63,7 @@ class ChecklistViewModel {
     /// even selection changes can be undone (which admittedly is taking things
     /// to an extreme but we'll keep it like this for demonstration purposes).
     lazy var itemsListSelection: AsyncReadWriteProperty<Set<RelationValue>> = {
-        return self.model.undoableBidiProperty(
-            action: "Change Selection",
-            signal: self.model.selectedItemIDs.allRelationValues(),
-            update: { self.model.selectedItemIDs.asyncReplaceValues(Array($0)) }
-        )
+        return self.model.selectedItemIDs
+            .undoableAllRelationValues(self.model.undoableDB, "Change Selection")
     }()
 }

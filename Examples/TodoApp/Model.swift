@@ -46,7 +46,7 @@ class Model {
     let allTags: AsyncReadableProperty<[RowArrayElement]>
     
     private let db: TransactionalDatabase
-    private let undoableDB: UndoableDatabase
+    let undoableDB: UndoableDatabase
 
     init(undoManager: PLBindableControls.UndoManager) {
         let specs: [Spec] = [
@@ -95,18 +95,6 @@ class Model {
         addTag("urgent")
     }
 
-    /// MARK: - Undo Support
-    
-    // TODO: Docs
-    func undoableBidiProperty<T>(action: String, signal: Signal<T>, update: @escaping (T) -> Void) -> AsyncReadWriteProperty<T> {
-        return undoableDB.bidiProperty(action: action, signal: signal, update: update)
-    }
-    
-    // TODO: Docs
-    func performUndoableAction(_ name: String, _ transactionFunc: @escaping (Void) -> Void) {
-        undoableDB.performUndoableAction(name, before: nil, transactionFunc)
-    }
-    
     /// MARK: - Items
     
     /// REQ-1
@@ -139,7 +127,7 @@ class Model {
     /// REQ-1
     /// Adds a new row to the `items` relation.  This is an undoable action.
     func addNewItem(with title: String) {
-        performUndoableAction("New Item", {
+        undoableDB.performUndoableAction("New Item", {
             self.addItem(title)
         })
     }
@@ -147,28 +135,17 @@ class Model {
     /// REQ-3 / REQ-7
     /// Returns a property that reflects the completed status for the given relation.
     func itemCompleted(_ relation: Relation, initialValue: String?) -> AsyncReadWriteProperty<CheckState> {
-        return self.undoableBidiProperty(
-            action: "Change Status",
-            signal: relation.oneString(initialValue: initialValue).map{ status in
-                CheckState(parseCompleted(status))
-            },
-            update: { completed in
-                let status = statusString(pending: completed != .on, timestamp: timestampString())
-                relation.asyncUpdateString(status)
-            }
+        return relation.undoableTransformedString(
+            undoableDB, "Change Status", initialValue: initialValue,
+            fromString: { CheckState(parseCompleted($0)) },
+            toString: { statusString(pending: $0 != .on, timestamp: timestampString()) }
         )
     }
 
     /// REQ-4 / REQ-8
     /// Returns a property that reflects the item title.
     func itemTitle(_ relation: Relation, initialValue: String?) -> AsyncReadWriteProperty<String> {
-        return self.undoableBidiProperty(
-            action: "Change Title",
-            signal: relation.oneString(initialValue: initialValue),
-            update: {
-                relation.asyncUpdateString($0)
-            }
-        )
+        return relation.undoableOneString(undoableDB, "Change Title", initialValue: initialValue)
     }
 
     // MARK: - List Selection
@@ -198,7 +175,7 @@ class Model {
             .fullArray()
             .map{ elems in
                 return elems.map{ elem -> String in elem.data[Tag.name].get()! }.joined(separator: ", ")
-        }
+            }
     }
     
     /// REQ-9
@@ -236,7 +213,7 @@ class Model {
     func addNewTag(named name: String, to itemID: ItemID) {
         let tagID = TagID()
         
-        performUndoableAction("Add New Tag", {
+        undoableDB.performUndoableAction("Add New Tag", {
             self.tags.asyncAdd([
                 Tag.id: tagID,
                 Tag.name: name
@@ -252,7 +229,7 @@ class Model {
     /// REQ-9
     /// Applies an existing tag to the given to-do item.
     func addExistingTag(_ tagID: TagID, to itemID: ItemID) {
-        performUndoableAction("Add Tag", {
+        undoableDB.performUndoableAction("Add Tag", {
             self.itemTags.asyncAdd([
                 ItemTag.itemID: itemID,
                 ItemTag.tagID: tagID
@@ -263,16 +240,10 @@ class Model {
     /// REQ-10
     /// Returns a property that reflects the tag name.
     func tagName(for tagID: TagID, initialValue: String?) -> AsyncReadWriteProperty<String> {
-        let tagNameRelation = self.tags
+        return self.tags
             .select(Tag.id *== tagID)
             .project(Tag.name)
-        return self.undoableBidiProperty(
-            action: "Change Tag Name",
-            signal: tagNameRelation.oneString(initialValue: initialValue),
-            update: {
-                tagNameRelation.asyncUpdateString($0)
-            }
-        )
+            .undoableOneString(undoableDB, "Change Tag Name", initialValue: initialValue)
     }
     
     // MARK: - Notes
@@ -280,14 +251,9 @@ class Model {
     /// REQ-11
     /// Returns a property that reflects the selected item's notes.
     lazy var selectedItemNotes: AsyncReadWriteProperty<String> = {
-        let relation = self.selectedItems.project(Item.notes)
-        return self.undoableBidiProperty(
-            action: "Change Notes",
-            signal: relation.oneString(),
-            update: {
-                relation.asyncUpdateString($0)
-            }
-        )
+        return self.selectedItems
+            .project(Item.notes)
+            .undoableOneString(self.undoableDB, "Change Notes")
     }()
     
     // MARK: - Delete
@@ -297,7 +263,7 @@ class Model {
     /// the use of `cascadingDelete`, which is kind of overkill for this particular case but does show
     /// how easy it can be to clean up related data.
     func deleteSelectedItem() {
-        performUndoableAction("Delete Item", {
+        undoableDB.performUndoableAction("Delete Item", {
             // We initiate the cascading delete by removing all rows from `selectedItemIDs`
             self.selectedItemIDs.cascadingDelete(
                 true, // `true` here means "all rows"
@@ -320,40 +286,6 @@ class Model {
                 completionCallback: { _ in }
             )
         })
-    }
-}
-
-class BaseID {
-    private let uuid: String
-    
-    init() {
-        self.uuid = UUID().uuidString
-    }
-    
-    init(_ stringValue: String) {
-        self.uuid = stringValue
-    }
-    
-    init(_ relationValue: RelationValue) {
-        self.uuid = relationValue.get()!
-    }
-    
-    var relationValue: RelationValue {
-        return uuid.relationValue
-    }
-}
-
-extension BaseID: SelectExpressionConstantValue {}
-
-class ItemID: BaseID {
-    convenience init(_ row: Row) {
-        self.init(row[Item.id])
-    }
-}
-
-class TagID: BaseID {
-    convenience init(_ row: Row) {
-        self.init(row[Tag.id])
     }
 }
 

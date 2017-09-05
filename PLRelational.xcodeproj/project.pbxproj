@@ -93,6 +93,9 @@
 		3788C0991F577C63005920FD /* ChecklistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788C0981F577C63005920FD /* ChecklistViewModel.swift */; };
 		3788C09B1F577C82005920FD /* DetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788C09A1F577C82005920FD /* DetailView.swift */; };
 		3788C09D1F577C8F005920FD /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788C09C1F577C8F005920FD /* DetailViewModel.swift */; };
+		3788C0EA1F5F29E2005920FD /* Identifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788C0E91F5F29E2005920FD /* Identifiers.swift */; };
+		3788C0EE1F5F340C005920FD /* BindingTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707DA1CFE262700710C80 /* BindingTestCase.swift */; };
+		3788C0EF1F5F340E005920FD /* BindingTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707DA1CFE262700710C80 /* BindingTestCase.swift */; };
 		3799AB491F57C43C0075570F /* ChecklistView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3799AB471F57C43C0075570F /* ChecklistView.xib */; };
 		3799AB4C1F57C8960075570F /* DetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3799AB4A1F57C8960075570F /* DetailView.xib */; };
 		3799AB4E1F58B3F70075570F /* EmphemeralComboBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3799AB4D1F58B3F70075570F /* EmphemeralComboBox.swift */; };
@@ -851,6 +854,7 @@
 		3788C09A1F577C82005920FD /* DetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailView.swift; sourceTree = "<group>"; };
 		3788C09C1F577C8F005920FD /* DetailViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
 		3788C0E41F5B7668005920FD /* README.markdown */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.markdown; sourceTree = "<group>"; };
+		3788C0E91F5F29E2005920FD /* Identifiers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Identifiers.swift; sourceTree = "<group>"; };
 		37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncPropertyOperations.swift; sourceTree = "<group>"; };
 		37941D8D1DB8191200F5508F /* AsyncPropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyOperationsTests.swift; path = PLRelationalBindingTests/AsyncPropertyOperationsTests.swift; sourceTree = SOURCE_ROOT; };
 		3799AB481F57C43C0075570F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/ChecklistView.xib; sourceTree = "<group>"; };
@@ -1648,6 +1652,54 @@
 			name = "Outline Views";
 			sourceTree = "<group>";
 		};
+		3788C0E51F5F297A005920FD /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				3788C0E91F5F29E2005920FD /* Identifiers.swift */,
+				37AEC40F1F577064004E5487 /* Model.swift */,
+			);
+			name = Model;
+			sourceTree = "<group>";
+		};
+		3788C0E61F5F2982005920FD /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				37AEC4021F576E51004E5487 /* MainMenu.xib */,
+				3788C0E71F5F298D005920FD /* Checklist */,
+				3788C0E81F5F2993005920FD /* Detail */,
+			);
+			name = UI;
+			sourceTree = "<group>";
+		};
+		3788C0E71F5F298D005920FD /* Checklist */ = {
+			isa = PBXGroup;
+			children = (
+				3788C0981F577C63005920FD /* ChecklistViewModel.swift */,
+				3788C0961F577C43005920FD /* ChecklistView.swift */,
+				3799AB471F57C43C0075570F /* ChecklistView.xib */,
+			);
+			name = Checklist;
+			sourceTree = "<group>";
+		};
+		3788C0E81F5F2993005920FD /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				3788C09C1F577C8F005920FD /* DetailViewModel.swift */,
+				3788C09A1F577C82005920FD /* DetailView.swift */,
+				3799AB4A1F57C8960075570F /* DetailView.xib */,
+			);
+			name = Detail;
+			sourceTree = "<group>";
+		};
+		3788C0EB1F5F2BE8005920FD /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				37AEC3F91F576D18004E5487 /* Assets.xcassets */,
+				37AEC3FE1F576D18004E5487 /* Info.plist */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		37A1CE6C1D1081980067870D /* SearchApp */ = {
 			isa = PBXGroup;
 			children = (
@@ -1812,16 +1864,9 @@
 			children = (
 				3788C0E41F5B7668005920FD /* README.markdown */,
 				37AEC3F51F576D18004E5487 /* AppDelegate.swift */,
-				3788C0981F577C63005920FD /* ChecklistViewModel.swift */,
-				3788C0961F577C43005920FD /* ChecklistView.swift */,
-				3799AB471F57C43C0075570F /* ChecklistView.xib */,
-				3788C09C1F577C8F005920FD /* DetailViewModel.swift */,
-				3788C09A1F577C82005920FD /* DetailView.swift */,
-				3799AB4A1F57C8960075570F /* DetailView.xib */,
-				37AEC40F1F577064004E5487 /* Model.swift */,
-				37AEC4021F576E51004E5487 /* MainMenu.xib */,
-				37AEC3F91F576D18004E5487 /* Assets.xcassets */,
-				37AEC3FE1F576D18004E5487 /* Info.plist */,
+				3788C0E51F5F297A005920FD /* Model */,
+				3788C0E61F5F2982005920FD /* UI */,
+				3788C0EB1F5F2BE8005920FD /* Supporting Files */,
 			);
 			path = TodoApp;
 			sourceTree = "<group>";
@@ -3298,6 +3343,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				374DAEC31E8C28FC00FF245B /* UndoableDatabaseTests.swift in Sources */,
+				3788C0EF1F5F340E005920FD /* BindingTestCase.swift in Sources */,
 				37C48D3A1E8C37C9000BDE70 /* DBTestCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3337,6 +3383,7 @@
 				3788C09D1F577C8F005920FD /* DetailViewModel.swift in Sources */,
 				3788C0991F577C63005920FD /* ChecklistViewModel.swift in Sources */,
 				3788C0971F577C43005920FD /* ChecklistView.swift in Sources */,
+				3788C0EA1F5F29E2005920FD /* Identifiers.swift in Sources */,
 				3788C09B1F577C82005920FD /* DetailView.swift in Sources */,
 				37AEC4101F577064004E5487 /* Model.swift in Sources */,
 			);
@@ -3731,6 +3778,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				374DAEC21E8C28FC00FF245B /* UndoableDatabaseTests.swift in Sources */,
+				3788C0EE1F5F340C005920FD /* BindingTestCase.swift in Sources */,
 				37B441931E89A79900C8C336 /* DBTestCase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

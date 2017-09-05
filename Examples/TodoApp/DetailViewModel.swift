@@ -95,8 +95,6 @@ class DetailViewModel {
     lazy var tagsListViewModel: ListViewModel<RowArrayElement> = {
         return ListViewModel(
             data: self.itemTags,
-            contextMenu: nil,
-            move: nil,
             cellIdentifier: { _ in "Cell" }
         )
     }()
