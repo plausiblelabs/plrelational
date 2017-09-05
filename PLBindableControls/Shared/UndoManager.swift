@@ -57,90 +57,6 @@ public class UndoManager {
 // The following is pulled from:
 //   https://github.com/andrewshand/SPUndoManager
 
-extension Array {
-    func atIndex(_ index: Int) -> Element? {
-        if index >= 0 && index < count {
-            return self[index]
-        }
-        return nil
-    }
-    
-    func each(_ function: (_ element: Element) -> Void) {
-        for e in self {
-            function(e)
-        }
-    }
-    
-    func eachForwards(_ function: (_ element: Element) -> Void) {
-        for i in 0 ..< self.count {
-            function(self[i])
-        }
-    }
-    
-    func eachBackwards(_ function: (_ element: Element) -> Void) {
-        for i in (0..<self.count).reversed() {
-            function(self[i])
-        }
-    }
-}
-
-public func undoableFrom<T>(_ undoable: (T, Undoable)) -> Undoable {
-    return undoable.1
-}
-
-/// Only use when you're sure the action should definitely be undoable, possibly
-/// good way of testing things
-public func undoableForceFrom<T>(_ undoable: (T, Undoable?)) -> Undoable {
-    return undoable.1!
-}
-
-public func ignoreUndo<T>(_ undoable: (T, Undoable)) -> T {
-    return undoable.0
-}
-
-//public func registerUndo<T>(undoable: (T, Undoable)) -> T {
-//
-//    SPUndoManagerGet()?.registerChange(undoable.1)
-//    return undoable.0
-//}
-//
-//public func registerUndo<T>(undoable: (T, Undoable?)) -> T {
-//
-//    if let undoable = undoable.1 {
-//        SPUndoManagerGet()?.registerChange(undoable)
-//    }
-//    return undoable.0
-//}
-//
-//public func beginUndoGrouping(description: String) {
-//    SPUndoManagerGet()?.beginUndoGrouping(description)
-//}
-//
-//public func endUndoGrouping() {
-//    SPUndoManagerGet()?.endUndoGrouping()
-//}
-//
-//public func cancelUndoGrouping() {
-//    SPUndoManagerGet()?.cancelUndoGrouping()
-//}
-//
-//public func groupUndoActions(description: String, closure: () -> ()) {
-//    beginUndoGrouping(description)
-//    closure()
-//    endUndoGrouping()
-//}
-//
-//public func groupUndoActions(description: String, closure: () -> Bool) {
-//    beginUndoGrouping(description)
-//
-//    if (closure()) {
-//        endUndoGrouping()
-//    }
-//    else {
-//        cancelUndoGrouping()
-//    }
-//}
-
 protocol SPUndoManagerAction {
     
     var done: Bool { get }
@@ -152,7 +68,7 @@ protocol SPUndoManagerAction {
 class SPUndoManagerStandardAction : SPUndoManagerAction, CustomStringConvertible {
     
     /// Assumes action already performed
-    init(undoManager: SPUndoManager, description: String, forwards: @escaping Closure, backwards: @escaping Closure) {
+    init(undoManager: SPUndoManager, description: String, forwards: @escaping () -> Void, backwards: @escaping () -> Void) {
         self.undoManager = undoManager
         self.forwards = forwards
         self.backwards = backwards
@@ -162,8 +78,8 @@ class SPUndoManagerStandardAction : SPUndoManagerAction, CustomStringConvertible
     
     weak var undoManager: SPUndoManager?
     var done: Bool
-    var backwards: Closure
-    var forwards: Closure
+    var backwards: () -> Void
+    var forwards: () -> Void
     var description: String
     
     func undo() {
@@ -189,63 +105,11 @@ class SPUndoManagerStandardAction : SPUndoManagerAction, CustomStringConvertible
     }
 }
 
-
-class SPUndoManagerSuperDynamicAction : SPUndoManagerAction {
-    
-    var undoable: Undoable
-    var description: String
-    
-    /// Assumes action performed, in 'done' state by default
-    init(undoable: Undoable) {
-        self.undoable = undoable
-        self.description = undoable.description
-        self.done = true
-    }
-    
-    var done: Bool
-    func undo() {
-        assert(done)
-        self.undoable = undoable.undo()
-        done = false
-    }
-    func redo() {
-        assert(!done)
-        self.undoable = undoable.undo()
-        done = true
-    }
-}
-
-class SPUndoManagerGroupAction : SPUndoManagerAction {
-    
-    init(description: String) {
-        self.description = description
-    }
-    
-    var done: Bool = false
-    var nestedActions = [SPUndoManagerAction]()
-    
-    func undo() {
-        assert(done)
-        self.nestedActions.eachBackwards { $0.undo() }
-        done = false
-    }
-    
-    func redo() {
-        assert(!done)
-        self.nestedActions.eachForwards { $0.redo() }
-        done = true
-    }
-    
-    var description: String
-}
-
-public typealias Closure = () -> Void
-
 open class SPUndoManager : Foundation.UndoManager {
     weak var delegate: UndoManagerDelegate?
     
     /// Add a change to be undone with separate forwards and backwards transformers.
-    open func registerChange(_ description: String, forwards: @escaping Closure, backwards: @escaping Closure) {
+    open func registerChange(_ description: String, forwards: @escaping () -> Void, backwards: @escaping () -> Void) {
         let action = SPUndoManagerStandardAction(undoManager: self, description: description, forwards: forwards, backwards: backwards)
         register(action: action)
     }
@@ -267,20 +131,4 @@ open class SPUndoManager : Foundation.UndoManager {
         let safeToRedo = delegate?.safeToRedo() ?? true
         return safeToRedo && super.canRedo
     }
-}
-
-/// A forever undoable struct, should always return the inverse operation of itself
-public struct Undoable {
-    public init(description: String, undo: @escaping () -> Undoable) {
-        self.description = description
-        self.undo = undo
-    }
-    
-    var description: String
-    var undo: () -> Undoable
-    
-    /// Will register with document's SPUndoManager if available
-    //    public func registerUndo() {
-    //        SPUndoManagerGet()?.registerChange(self)
-    //    }
 }
