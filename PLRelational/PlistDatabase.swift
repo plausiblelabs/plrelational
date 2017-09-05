@@ -133,16 +133,18 @@ public class PlistDatabase: StoredDatabase {
     
     /// Iterates over all managed relations and saves each one to disk, if needed.
     public func saveRelations() -> Result<(), RelationError> {
-        var result: Result<(), RelationError> = .Ok(())
-        relations.withValue{
-            for managed in $0.values {
-                if let saveError = managed.relation.save().err {
-                    result = .Err(saveError)
-                    break
+        return validateRelations().then({
+            var result: Result<(), RelationError> = .Ok(())
+            relations.withValue{
+                for managed in $0.values {
+                    if let saveError = managed.relation.save().err {
+                        result = .Err(saveError)
+                        break
+                    }
                 }
             }
-        }
-        return result
+            return result
+        })
     }
     
     public func addSaveObserver(_ observer: @escaping (URL) -> Void) {
