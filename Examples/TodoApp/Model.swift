@@ -127,7 +127,7 @@ class Model {
     /// REQ-1
     /// Adds a new row to the `items` relation.  This is an undoable action.
     func addNewItem(with title: String) {
-        undoableDB.performUndoableAction("New Item", {
+        undoableDB.performUndoableAction("Add Item", {
             self.addItem(title)
         })
     }

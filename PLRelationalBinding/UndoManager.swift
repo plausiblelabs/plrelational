@@ -116,6 +116,7 @@ open class SPUndoManager : Foundation.UndoManager {
     
     fileprivate func register(action: SPUndoManagerStandardAction) {
         registerUndo(withTarget: self, selector: #selector(performStandardAction), object: action)
+        setActionName(action.description)
     }
     
     @objc func performStandardAction(_ action: Any?) {
