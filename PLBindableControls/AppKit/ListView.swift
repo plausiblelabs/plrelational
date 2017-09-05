@@ -15,8 +15,8 @@ public struct ListViewModel<E: ArrayElement> {
 
     public init(
         data: ArrayProperty<E>,
-        contextMenu: ((E.Data) -> ContextMenu?)?,
-        move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)?,
+        contextMenu: ((E.Data) -> ContextMenu?)? = nil,
+        move: ((_ srcIndex: Int, _ dstIndex: Int) -> Void)? = nil,
         cellIdentifier: @escaping (E.Data) -> String)
     {
         self.data = data
@@ -64,7 +64,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     public var configureCell: ((NSTableCellView, E.Data) -> Void)?
     
     private var arrayObserverRemoval: ObserverRemoval?
-    //private var selfInitiatedSelectionChange = false
+    private var selfInitiatedSelectionChange = false
     
     /// Whether to animate insert/delete changes with a fade.
     public var animateChanges = false
@@ -186,14 +186,13 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     }
     
     open func outlineViewSelectionDidChange(_ notification: Notification) {
-        // TODO: Do we need this flag anymore?
-//        if selfInitiatedSelectionChange {
-//            return
-//        }
+        if selfInitiatedSelectionChange {
+            return
+        }
 
-//        selfInitiatedSelectionChange = true
+        selfInitiatedSelectionChange = true
         selection.changed(transient: false)
-//        selfInitiatedSelectionChange = false
+        selfInitiatedSelectionChange = false
     }
 
     // MARK: Property observers
@@ -241,12 +240,15 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
             }
         }
 
-        // XXX: This prevents a call to selection.set(); we need to figure out a better way, so that
-        // if the selection changes as a result of e.g. deleting an item, we update our selection
-        // state, but do it in a way that doesn't go through the undo manager
-        //selfInitiatedSelectionChange = true
+        // XXX: If rows are being deleted, calling `endUpdates` may result in a selection change that ends
+        // up with a call to `outlineViewSelectionDidChange`.  Using this `selfInitiated` guard prevents
+        // us from calling `selection.changed()` there which (if selection is bound to a Relation-backed
+        // property) may cause re-entrant calls into `AsyncManager` and will trigger a precondition
+        // failure in `ShimContentObserver.relationWillChange`.  So until we figure out what's going on
+        // and how to solve it properly, we'll use this guard to prevent crashes.
+        selfInitiatedSelectionChange = true
         outlineView.endUpdates()
-        //selfInitiatedSelectionChange = false
+        selfInitiatedSelectionChange = false
         
         if let row = rowToSelectAndEdit {
             // Select the newly inserted row
