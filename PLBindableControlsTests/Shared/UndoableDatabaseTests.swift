@@ -6,8 +6,9 @@
 import XCTest
 import PLBindableControls
 import PLRelational
+import PLRelationalBinding
 
-class UndoableDatabaseTests: DBTestCase {
+class UndoableDatabaseTests: BindingTestCase {
     func testTreeDelete() {
         let sqlite = makeDB().db
         XCTAssertNil(sqlite.getOrCreateRelation("r", scheme: ["id", "parent"]).err)
@@ -99,5 +100,96 @@ class UndoableDatabaseTests: DBTestCase {
         
         AssertEqual(r, testData)
     }
-}
+    
+    func testAllRelationValues() {
+        let sqlite = makeDB().db
+        XCTAssertNil(sqlite.getOrCreateRelation("r", scheme: ["name"]).err)
+        
+        let db = TransactionalDatabase(sqlite)
+        let r = db["r"]
+        _ = r.add(["name": "Alice"])
+        _ = r.add(["name": "Bob"])
+        _ = r.add(["name": "Chuck"])
+        
+        let undoManager = PLBindableControls.UndoManager()
+        let undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
+        
+        let property = r.undoableAllRelationValues(undoableDB, "Change Names")
+        
+        property.start()
+        awaitIdle()
+        XCTAssertEqual(property.value!, ["Alice", "Bob", "Chuck"])
 
+        // XXX: This is a quick-and-dirty way of poking new values into `property`
+        let tmp: MutableValueProperty<Set<RelationValue>> = mutableValueProperty([])
+        let binding = tmp <~> property
+        tmp.change(["Fred"])
+        binding.unbind()
+        awaitIdle()
+        XCTAssertEqual(property.value!, ["Fred"])
+        
+        undoManager.undo()
+        awaitIdle()
+        XCTAssertEqual(property.value!, ["Alice", "Bob", "Chuck"])
+    }
+    
+    func testOneString() {
+        let sqlite = makeDB().db
+        XCTAssertNil(sqlite.getOrCreateRelation("r", scheme: ["name"]).err)
+        
+        let db = TransactionalDatabase(sqlite)
+        let r = db["r"]
+        _ = r.add(["name": "Abraham"])
+        
+        let undoManager = PLBindableControls.UndoManager()
+        let undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
+        
+        let property = r.undoableOneString(undoableDB, "Change Name")
+
+        property.start()
+        awaitIdle()
+        XCTAssertEqual(property.value!, "Abraham")
+        
+        // XXX: This is a quick-and-dirty way of poking new values into `property`
+        let tmp: MutableValueProperty<String> = mutableValueProperty("")
+        let binding = tmp <~> property
+        tmp.change("Abe")
+        binding.unbind()
+        awaitIdle()
+        XCTAssertEqual(property.value!, "Abe")
+        
+        undoManager.undo()
+        awaitIdle()
+        XCTAssertEqual(property.value!, "Abraham")
+    }
+    
+    func testTransformedString() {
+        let sqlite = makeDB().db
+        XCTAssertNil(sqlite.getOrCreateRelation("r", scheme: ["num"]).err)
+        
+        let db = TransactionalDatabase(sqlite)
+        let r = db["r"]
+        _ = r.add(["num": "1"])
+        
+        let undoManager = PLBindableControls.UndoManager()
+        let undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
+        
+        let property = r.undoableTransformedString(undoableDB, "Change Number", fromString: { Int($0)! }, toString: { String($0) })
+        
+        property.start()
+        awaitIdle()
+        XCTAssertEqual(property.value!, 1)
+        
+        // XXX: This is a quick-and-dirty way of poking new values into `property`
+        let tmp: MutableValueProperty<Int> = mutableValueProperty(0)
+        let binding = tmp <~> property
+        tmp.change(42)
+        binding.unbind()
+        awaitIdle()
+        XCTAssertEqual(property.value!, 42)
+        
+        undoManager.undo()
+        awaitIdle()
+        XCTAssertEqual(property.value!, 1)
+    }
+}
