@@ -260,7 +260,7 @@ class Model {
     
     // MARK: - Delete
     
-    /// REQ-12
+    /// REQ-13
     /// Deletes the row associated with the selected item and
     /// clears the selection.  This demonstrates the use of
     /// `cascadingDelete`, which is kind of overkill for this

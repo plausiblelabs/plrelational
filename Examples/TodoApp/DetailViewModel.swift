@@ -36,8 +36,9 @@ class DetailViewModel {
     }()
 
     /// REQ-8
-    /// The item's title.  This is a read/write property that is backed by UndoableDatabase, so any changes
-    /// made to it in the text field can be rolled back by the user.
+    /// The item's title.  This is a read/write property that is backed
+    /// by UndoableDatabase, so any changes made to it in the text field
+    /// can be rolled back by the user.
     lazy var itemTitle: AsyncReadWriteProperty<String> = {
         let titleRelation = self.model.selectedItems.project(Item.title)
         return self.model.itemTitle(titleRelation, initialValue: nil)
@@ -122,8 +123,9 @@ class DetailViewModel {
     }()
 
     /// REQ-12
-    /// The text that appears in the "Created on <date>" label.  This demonstrates the use of `map` to
-    /// convert the raw timestamp string (as stored in the relation) to a display-friendly string.
+    /// The text that appears in the "Created on <date>" label.  This
+    /// demonstrates the use of `map` to convert the raw timestamp string
+    /// (as stored in the relation) to a display-friendly string.
     lazy var createdOn: AsyncReadableProperty<String> = {
         return self.model.selectedItems
             .project(Item.created)
@@ -136,8 +138,9 @@ class DetailViewModel {
     }()
     
     /// REQ-13
-    /// Deletes the selected item.  This demonstrates the use of `ActionProperty` to expose an imperative
-    /// (side effect producing) action as a property that can easily be bound to a `Button`.
+    /// Deletes the selected item.  This demonstrates the use of
+    /// `ActionProperty` to expose an imperative (side effect producing)
+    /// action as a property that can easily be bound to a `Button`.
     lazy var deleteItem: ActionProperty<()> = ActionProperty { _ in
         self.model.deleteSelectedItem()
     }
