@@ -100,21 +100,22 @@ class Model {
     /// REQ-1
     /// Adds a new row to the `items` relation.
     private func addItem(_ title: String) {
-        // Use UUIDs to uniquely identify rows
+        // Use UUIDs to uniquely identify rows.  Note that we can pass `id` directly
+        // when initializing the row because `ItemID` conforms to the
+        // `RelationValueConvertible` protocol.
         let id = ItemID()
 
         // Use a string representation of the current time to make our life easier
         let now = timestampString()
         
-        // Here we cheat a little.  Because ArrayProperty currently only knows how to
-        // sort on a single attribute (temporary limitation), we cram two things --
+        // Here we cheat a little.  ArrayProperty currently only knows how to sort
+        // on a single attribute (temporary limitation), we cram two things -- the
         // completed flag and the timestamp of the action -- into a single string of
         // the form "<0/1> <timestamp>".  This allows us to keep to-do items sorted
-        // in the list with pending items at top and completed items at bottom, with
-        // pending items sorted with most recently added items at top, and completed
-        // items sorted with most recently completed items at top.
+        // in the list with pending items at top and completed ones at bottom.
         let status = statusString(pending: true, timestamp: now)
         
+        // Insert a row into the `items` relation
         items.asyncAdd([
             Item.id: id,
             Item.title: title,
@@ -165,22 +166,23 @@ class Model {
     // MARK: - Tags
     
     /// REQ-5
-    /// Returns a property that resolves to a string containing a comma-separated list
-    /// of tags that have been applied to the given to-do item.
+    /// Returns a property that resolves to a string containing a comma-separated
+    /// list of tags that have been applied to the given to-do item.
     func tagsString(for itemID: ItemID) -> AsyncReadableProperty<String> {
         return self.itemTags
             .select(Item.id *== itemID)
             .join(self.tags)
             .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
             .fullArray()
-            .map{ elems in
-                return elems.map{ elem -> String in elem.data[Tag.name].get()! }.joined(separator: ", ")
+            .map{ $0
+                .map{ elem -> String in elem.data[Tag.name].get()! }
+                .joined(separator: ", ")
             }
     }
     
     /// REQ-9
-    /// Resolves to the set of tags that are associated with the selected to-do item
-    /// (assumes there is either zero or one selected items).
+    /// Resolves to the set of tags that are associated with the selected to-do
+    /// item (assumes there is either zero or one selected items).
     lazy var tagsForSelectedItem: Relation = {
         return self.selectedItemIDs
             .join(self.itemTags)
@@ -189,8 +191,8 @@ class Model {
     }()
 
     /// REQ-9
-    /// Resolves to the set of tags that are not yet associated with the selected to-do
-    /// item, i.e., the available tags.
+    /// Resolves to the set of tags that are not yet associated with the
+    /// selected to-do item, i.e., the available tags.
     lazy var availableTagsForSelectedItem: Relation = {
         // This is simply "all tags" minus "already applied tags", nice!
         return self.tags
@@ -259,19 +261,25 @@ class Model {
     // MARK: - Delete
     
     /// REQ-12
-    /// Deletes the row associated with the selected item and clears the selection.  This demonstrates
-    /// the use of `cascadingDelete`, which is kind of overkill for this particular case but does show
-    /// how easy it can be to clean up related data.
+    /// Deletes the row associated with the selected item and
+    /// clears the selection.  This demonstrates the use of
+    /// `cascadingDelete`, which is kind of overkill for this
+    /// particular case but does show how easy it can be to
+    /// clean up related data with a single call.
     func deleteSelectedItem() {
         undoableDB.performUndoableAction("Delete Item", {
-            // We initiate the cascading delete by removing all rows from `selectedItemIDs`
+            // We initiate the cascading delete by first removing
+            // all rows from `selectedItemIDs`
             self.selectedItemIDs.cascadingDelete(
                 true, // `true` here means "all rows"
-                affectedRelations: [self.items, self.selectedItemIDs, self.itemTags],
+                affectedRelations: [
+                    self.items, self.selectedItemIDs, self.itemTags
+                ],
                 cascade: { (relation, row) in
                     if relation === self.selectedItemIDs {
-                        // This row was deleted from `selectedItemIDs`; delete corresponding rows from
-                        // `items` and `itemTags`
+                        // This row was deleted from `selectedItemIDs`;
+                        // delete corresponding rows from `items`
+                        // and `itemTags`
                         let itemID = ItemID(row)
                         return [
                             (self.items, Item.id *== itemID),

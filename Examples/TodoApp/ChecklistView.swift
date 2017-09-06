@@ -37,9 +37,9 @@ class ChecklistView: NSView {
         newItemField.strings ~~> model.addNewItem
         
         // REQ-2
-        listView = CustomListView(model: model.itemsListModel, outlineView: outlineView)
+        listView = CustomListView(model: model.itemsListModel,
+                                  outlineView: outlineView)
         listView.animateChanges = true
-        listView.selection <~> model.itemsListSelection
         listView.configureCell = { view, row in
             let cellView = view as! ChecklistCellView
             
@@ -58,6 +58,9 @@ class ChecklistView: NSView {
             detailLabel.string.unbindAll()
             detailLabel.string <~ model.itemTags(for: row)
         }
+
+        // REQ-6
+        listView.selection <~> model.itemsListSelection
     }
     
     required init?(coder: NSCoder) {

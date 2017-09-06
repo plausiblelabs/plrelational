@@ -26,35 +26,38 @@ class ChecklistViewModel {
     /// The model for the list of to-do items.
     lazy var itemsListModel: ListViewModel<RowArrayElement> = {
         return ListViewModel(
-            data: self.model.items.arrayProperty(idAttr: Item.id, orderAttr: Item.status, descending: true),
+            data: self.model.items.arrayProperty(idAttr: Item.id,
+                                                 orderAttr: Item.status,
+                                                 descending: true),
             cellIdentifier: { _ in "Cell" }
         )
     }()
 
     /// REQ-3
     /// Returns a read/write property that resolves to the completed status for
-    /// the given to-do item
+    /// the given to-do item.
     func itemCompleted(for row: Row) -> AsyncReadWriteProperty<CheckState> {
-        let itemID = ItemID(row[Item.id])
+        let itemID = ItemID(row)
         let initialValue: String? = row[Item.status].get()
         let relation = self.model.items.select(Item.id *== itemID).project(Item.status)
         return self.model.itemCompleted(relation, initialValue: initialValue)
     }
 
     /// REQ-4
-    /// Returns a read/write property that resolves to the title for the given to-do item.
+    /// Returns a read/write property that resolves to the title for the given
+    /// to-do item.
     func itemTitle(for row: Row) -> AsyncReadWriteProperty<String> {
-        let itemID = ItemID(row[Item.id])
+        let itemID = ItemID(row)
         let initialValue: String? = row[Item.title].get()
         let relation = self.model.items.select(Item.id *== itemID).project(Item.title)
         return self.model.itemTitle(relation, initialValue: initialValue)
     }
     
     /// REQ-5
-    /// Returns a property that resolves to the list of tags for the given to-do item.
+    /// Returns a property that resolves to the list of tags for the given
+    /// to-do item.
     func itemTags(for row: Row) -> AsyncReadableProperty<String> {
-        let itemID = ItemID(row)
-        return self.model.tagsString(for: itemID)
+        return self.model.tagsString(for: ItemID(row))
     }
     
     /// REQ-6
