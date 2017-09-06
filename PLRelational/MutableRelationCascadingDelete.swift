@@ -30,7 +30,7 @@ extension MutableRelation {
         affectedRelations: [MutableRelation],
         cascade: @escaping (MutableRelation, Row) -> [(MutableRelation, SelectExpression)],
         update: @escaping (MutableRelation, Row) -> [CascadingUpdate] = { _ in [] },
-        completionCallback: @escaping (Result<Void, RelationError>) -> Void) {
+        completionCallback: @escaping (Result<Void, RelationError>) -> Void = { _ in }) {
         
         let context = AsyncManager.currentInstance.runloopDispatchContext()
         func callCompletion(_ result: Result<Void, RelationError>) {
@@ -114,7 +114,7 @@ extension MutableRelation {
         parentAttribute: Attribute,
         childAttribute: Attribute,
         update: @escaping (MutableRelation, Row) -> [CascadingUpdate] = { _ in [] },
-        completionCallback: @escaping (Result<Void, RelationError>) -> Void) {
+        completionCallback: @escaping (Result<Void, RelationError>) -> Void = { _ in }) {
         let cascade = { (relation: MutableRelation, row: Row) -> [(MutableRelation, SelectExpression)] in
             let cascadingValue = row[parentAttribute]
             let cascadingQuery = childAttribute *== cascadingValue

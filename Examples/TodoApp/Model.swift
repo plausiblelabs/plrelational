@@ -289,9 +289,7 @@ class Model {
                         // Nothing else to clean up
                         return []
                     }
-                },
-                update: { _ in return [] },
-                completionCallback: { _ in }
+                }
             )
         })
     }
