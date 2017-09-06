@@ -152,15 +152,15 @@ class Model {
     // MARK: - List Selection
     
     /// REQ-6
-    /// Resolves to `true` when an item is selected in the list of to-do items.
-    lazy var hasSelection: AsyncReadableProperty<Bool> = {
-        return self.selectedItems.nonEmpty.property()
-    }()
-    
-    /// REQ-6
     /// Resolves to the item that is selected in the list of to-do items.
     lazy var selectedItems: Relation = {
         return self.selectedItemIDs.join(self.items)
+    }()
+    
+    /// REQ-6
+    /// Resolves to `true` when an item is selected in the list of to-do items.
+    lazy var hasSelection: AsyncReadableProperty<Bool> = {
+        return self.selectedItems.nonEmpty.property()
     }()
     
     // MARK: - Tags

@@ -65,7 +65,8 @@ class DetailView: BackgroundView {
         tagComboBox.committedString ~~> model.addNewTagToSelectedItem
         
         // REQ-10
-        tagsListView = ListView(model: model.tagsListViewModel, outlineView: tagsOutlineView)
+        tagsListView = ListView(model: model.tagsListViewModel,
+                                outlineView: tagsOutlineView)
         tagsListView.selection <~> model.selectedTagID
         tagsListView.configureCell = { view, row in
             let textField = view.textField as! TextField
