@@ -16,7 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @IBOutlet var empNameLabel: Label!
     @IBOutlet var empDeptLabel: Label!
     
-    private var nsUndoManager: SPUndoManager!
+    private var undoManager: PLRelationalBinding.UndoManager!
     private var model: ViewModel!
     private var listView: ListView<RowArrayElement>!
     
@@ -24,8 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.delegate = self
         
         // Prepare the undo manager
-        nsUndoManager = SPUndoManager()
-        let undoManager = PLRelationalBinding.UndoManager(nsmanager: nsUndoManager)
+        undoManager = UndoManager()
         
         // Bind the views to the view model
         model = ViewModel(undoManager: undoManager)
@@ -45,6 +44,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     
     func windowWillReturnUndoManager(_ window: NSWindow) -> Foundation.UndoManager? {
-        return nsUndoManager
+        return undoManager.native
     }
 }

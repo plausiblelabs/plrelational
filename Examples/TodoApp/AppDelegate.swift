@@ -16,7 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     @IBOutlet weak var detailContainer: NSView!
     @IBOutlet weak var noSelectionLabel: Label!
     
-    private var nsUndoManager: SPUndoManager!
+    private var undoManager: PLRelationalBinding.UndoManager!
 
     private var checklistView: ChecklistView!
     private var detailView: DetailView!
@@ -27,8 +27,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.delegate = self
         
         // Prepare the undo manager
-        nsUndoManager = SPUndoManager()
-        let undoManager = PLRelationalBinding.UndoManager(nsmanager: nsUndoManager)
+        undoManager = UndoManager()
 
         // Initialize our model
         model = Model(undoManager: undoManager)
@@ -51,6 +50,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     
     func windowWillReturnUndoManager(_ window: NSWindow) -> Foundation.UndoManager? {
-        return nsUndoManager
+        return undoManager.native
     }
 }

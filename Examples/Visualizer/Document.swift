@@ -38,7 +38,7 @@ class Document: NSDocument {
         // Prepare the undo manager
         _undoManager = UndoManager()
         _undoManager.delegate = self
-        self.undoManager = _undoManager.systemUndoManager
+        self.undoManager = _undoManager.native
     }
     
     override class func autosavesInPlace() -> Bool {

@@ -21,7 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var comboBox: ComboBox<String>!
     private var colorPicker: ColorPickerView!
 
-    private var nsUndoManager: SPUndoManager!
+    private var undoManager: PLRelationalBinding.UndoManager!
     private var listView: ListView<RowArrayElement>!
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -64,8 +64,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let selectedPersonsRocks = selectedPersons.project(["rocks"])
         
         // Prepare the undo manager
-        nsUndoManager = SPUndoManager()
-        let undoManager = UndoManager(nsmanager: nsUndoManager)
+        undoManager = UndoManager()
         let undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
 
         // Add some test persons
@@ -218,6 +217,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     
     func windowWillReturnUndoManager(_ window: NSWindow) -> Foundation.UndoManager? {
-        return nsUndoManager
+        return undoManager.native
     }
 }

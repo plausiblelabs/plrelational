@@ -23,16 +23,12 @@ public class UndoManager {
         }
     }
     
-    public var systemUndoManager: Foundation.UndoManager {
+    public var native: Foundation.UndoManager {
         return nsmanager
     }
     
     public init() {
         self.nsmanager = SPUndoManager()
-    }
-    
-    public init(nsmanager: SPUndoManager) {
-        self.nsmanager = nsmanager
     }
     
     public func registerChange(name: String, perform: Bool, forward: @escaping () -> Void, backward: @escaping () -> Void) {
@@ -65,7 +61,7 @@ protocol SPUndoManagerAction {
     var description: String { get }
 }
 
-class SPUndoManagerStandardAction : SPUndoManagerAction, CustomStringConvertible {
+private class SPUndoManagerStandardAction : SPUndoManagerAction, CustomStringConvertible {
     
     /// Assumes action already performed
     init(undoManager: SPUndoManager, description: String, forwards: @escaping () -> Void, backwards: @escaping () -> Void) {
@@ -105,7 +101,7 @@ class SPUndoManagerStandardAction : SPUndoManagerAction, CustomStringConvertible
     }
 }
 
-open class SPUndoManager : Foundation.UndoManager {
+private class SPUndoManager : Foundation.UndoManager {
     weak var delegate: UndoManagerDelegate?
     
     /// Add a change to be undone with separate forwards and backwards transformers.
