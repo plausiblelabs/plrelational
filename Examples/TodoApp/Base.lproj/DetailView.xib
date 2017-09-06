@@ -157,9 +157,9 @@
                     </textFieldCell>
                 </textField>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="INn-4A-JZl" customClass="Button" customModule="PLBindableControls">
-                    <rect key="frame" x="196" y="10" width="80" height="32"/>
+                    <rect key="frame" x="246" y="17" width="24" height="24"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="push" title="Delete" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="RVr-yE-laP">
+                    <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="trash" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="RVr-yE-laP">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -167,4 +167,7 @@
             </subviews>
         </customView>
     </objects>
+    <resources>
+        <image name="trash" width="24" height="24"/>
+    </resources>
 </document>

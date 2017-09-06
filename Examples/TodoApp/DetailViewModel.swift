@@ -73,12 +73,14 @@ class DetailViewModel {
             return name == rowName
         })
         if let index = existingIndex {
-            // A tag already exists with the given name, so apply that tag rather than creating a new one
+            // A tag already exists with the given name, so apply that tag
+            // rather than creating a new one
             let elem = self.model.allTags.value![index]
             let tagID = TagID(elem.data)
             self.model.addExistingTag(tagID, to: itemID)
         } else {
-            // No tag exists with that name, so create a new tag and apply it to this item
+            // No tag exists with that name, so create a new tag and apply
+            // it to this item
             self.model.addNewTag(named: name, to: itemID)
         }
     }
