@@ -172,12 +172,10 @@ class Model {
         return self.itemTags
             .select(Item.id *== itemID)
             .join(self.tags)
-            .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
-            .fullArray()
-            .map{ $0
-                .map{ elem -> String in elem.data[Tag.name].get()! }
-                .joined(separator: ", ")
-            }
+            .project(Tag.name)
+            .allStrings()
+            .map{ $0.sorted().joined(separator: ", ") }
+            .property()
     }
     
     /// REQ-9

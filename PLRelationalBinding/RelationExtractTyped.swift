@@ -40,7 +40,13 @@ extension Relation {
     public func allValues<V: Hashable>(_ transform: @escaping (Row) -> V?) -> Signal<Set<V>> {
         return signal(initialValue: nil, { $0.extractAllValues(from: $1, transform) })
     }
-    
+
+    /// Returns a Signal, sourced from this relation, that delivers a set of all strings for the
+    /// single attribute.
+    public func allStrings() -> Signal<Set<String>> {
+        return signal(initialValue: nil, { $0.extractAllValuesForSingleAttribute(from: $1, { $0.get() }) })
+    }
+
     /// Returns a Signal, sourced from this relation, that delivers a single row if there is exactly one,
     /// otherwise delivers nil.
     public func oneRow() -> Signal<Row?> {
