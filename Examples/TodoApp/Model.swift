@@ -10,30 +10,55 @@ import PLBindableControls
 
 private typealias Spec = PlistDatabase.RelationSpec
 
+/// Scheme for the `item` relation that holds the to-do items.
 enum Item {
     static let id = Attribute("item_id")
     static let title = Attribute("title")
     static let created = Attribute("created")
     static let status = Attribute("status")
     static let notes = Attribute("notes")
-    fileprivate static var spec: Spec { return .file(name: "item", path: "items.plist", scheme: [id, title, created, status, notes], primaryKeys: [id]) }
+    fileprivate static var spec: Spec { return .file(
+        name: "item",
+        path: "items.plist",
+        scheme: [id, title, created, status, notes],
+        primaryKeys: [id]
+    )}
 }
 
+/// Scheme for the `tag` relation that holds the named tags.
 enum Tag {
     static let id = Attribute("tag_id")
     static let name = Attribute("name")
-    fileprivate static var spec: Spec { return .file(name: "tag", path: "tags.plist", scheme: [id, name], primaryKeys: [id]) }
+    fileprivate static var spec: Spec { return .file(
+        name: "tag",
+        path: "tags.plist",
+        scheme: [id, name],
+        primaryKeys: [id]
+    )}
 }
 
+/// Scheme for the `item_tag` relation that associates zero
+/// or more tags with a to-do item.
 enum ItemTag {
     static let itemID = Item.id
     static let tagID = Tag.id
-    fileprivate static var spec: Spec { return .file(name: "item_tag", path: "item_tags.plist", scheme: [itemID, tagID], primaryKeys: [itemID, tagID]) }
+    fileprivate static var spec: Spec { return .file(
+        name: "item_tag",
+        path: "item_tags.plist",
+        scheme: [itemID, tagID],
+        primaryKeys: [itemID, tagID]
+    )}
 }
 
+/// Scheme for the `selected_item` relation that maintains
+/// the selection state for the list of to-do items.
 enum SelectedItem {
     static let id = Item.id
-    fileprivate static var spec: Spec { return .transient(name: "selected_item", scheme: [id], primaryKeys: [id]) }
+    fileprivate static var spec: Spec { return .transient(
+        name: "selected_item",
+        scheme: [id],
+        primaryKeys: [id]
+    )}
 }
 
 class Model {
@@ -66,9 +91,10 @@ class Model {
 
         // Wrap it in a TransactionalDatabase so that we can use snapshots
         let db = TransactionalDatabase(plistDB)
+        self.db = db
         
         // Wrap that in an UndoableDatabase for easy undo/redo support
-        let undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
+        self.undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
 
         // Make references to our source relations
         func relation(for spec: Spec) -> TransactionalRelation {
@@ -79,9 +105,6 @@ class Model {
         itemTags = relation(for: ItemTag.spec)
         selectedItemIDs = relation(for: SelectedItem.spec)
         
-        self.db = db
-        self.undoableDB = undoableDB
-
         // Keep the set of all tags cached for easy access
         self.allTags = tags
             .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
@@ -170,7 +193,7 @@ class Model {
     /// list of tags that have been applied to the given to-do item.
     func tagsString(for itemID: ItemID) -> AsyncReadableProperty<String> {
         return self.itemTags
-            .select(Item.id *== itemID)
+            .select(ItemTag.itemID *== itemID)
             .join(self.tags)
             .project(Tag.name)
             .allStrings()
