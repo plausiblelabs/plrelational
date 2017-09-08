@@ -47,10 +47,10 @@ class DetailViewModel {
     // MARK: - Tags
 
     /// REQ-9
-    /// The tags that are available (i.e., not already applied) for the selected to-do
-    /// item, sorted by name.  We use `fullArray` so that the entire array is delivered
-    /// any time there is a change; this helps to make it compatible with
-    /// the `EphemeralComboBox` class.
+    /// The tags that are available (i.e., not already applied) for the selected
+    /// to-do item, sorted by name.  We use `fullArray` so that the entire array
+    /// is delivered any time there is a change; this helps to make it
+    /// compatible with the `EphemeralComboBox` class.
     lazy var availableTags: AsyncReadableProperty<[RowArrayElement]> = {
         return self.model.availableTagsForSelectedItem
             .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
@@ -131,12 +131,9 @@ class DetailViewModel {
     lazy var createdOn: AsyncReadableProperty<String> = {
         return self.model.selectedItems
             .project(Item.created)
-            .oneStringOrNil()
+            .oneString()
+            .map{ "Created on \(displayString(from: $0))" }
             .property()
-            .map{
-                let date = $0.map(displayString) ?? "Unknown"
-                return "Created on \(date)"
-            }
     }()
     
     /// REQ-13

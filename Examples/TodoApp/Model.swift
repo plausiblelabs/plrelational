@@ -334,7 +334,7 @@ private let dateFormatter: DateFormatter = {
 }()
 
 func displayString(from timestampString: String) -> String {
-    let date = timestampFormatter.date(from: timestampString)!
+    let date = timestampFormatter.date(from: timestampString) ?? Date()
     return dateFormatter.string(from: date)
 }
 
