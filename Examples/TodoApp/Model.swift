@@ -81,18 +81,17 @@ class Model {
             SelectedItem.spec
         ]
 
-        // Create a new database or open an existing one (stored on disk using plists)
-        // TODO: Open existing if present
-        let tmp = "/tmp" as NSString
-        let dbname = "TodoApp.db"
-        let path = tmp.appendingPathComponent(dbname)
-        _ = try? FileManager.default.removeItem(atPath: path)
+        // Create a database or open an existing one (stored on disk using plists)
+        let path = "/tmp/TodoApp.db"
+        let dbExisted = FileManager.default.fileExists(atPath: path)
         let plistDB = PlistDatabase.create(URL(fileURLWithPath: path), specs).ok!
 
-        // Wrap it in a TransactionalDatabase so that we can use snapshots
+        // Wrap it in a TransactionalDatabase so that we can use snapshots, and
+        // enable auto-save so that all changes are persisted to disk as needed
         let db = TransactionalDatabase(plistDB)
+        db.saveOnTransactionEnd = true
         self.db = db
-        
+
         // Wrap that in an UndoableDatabase for easy undo/redo support
         self.undoableDB = UndoableDatabase(db: db, undoManager: undoManager)
 
@@ -111,11 +110,12 @@ class Model {
             .fullArray()
         self.allTags.start()
 
-        // Add a couple default tags
-        // TODO: Only do this if creating the database for the first time
-        addTag("home")
-        addTag("work")
-        addTag("urgent")
+        if !dbExisted {
+            // Add a couple default tags
+            addTag("home")
+            addTag("work")
+            addTag("urgent")
+        }
     }
 
     /// MARK: - Items
