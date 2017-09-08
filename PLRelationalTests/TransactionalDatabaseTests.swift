@@ -625,4 +625,45 @@ class TransactionalDatabaseTests: DBTestCase {
         
         remover()
     }
+    
+    func testAutosaveOnTransaction() {
+        let runloop = CFRunLoopGetCurrent()
+        
+        let specs: [PlistDatabase.RelationSpec] = [
+            .file(name: "x", path: "x.plist", scheme: ["n"], primaryKeys: ["n"])
+        ]
+        let plistDB1 = makePlistDB("x", ["n"])
+        let db = TransactionalDatabase(plistDB1)
+        db.saveOnTransactionEnd = true
+        let r = db["x"]
+        
+        let removal = AsyncManager.currentInstance.addStateObserver({
+            if $0 == .idle {
+                CFRunLoopStop(runloop)
+            }
+        })
+        defer { removal() }
+        
+        func verify(rows: Set<Row>, line: UInt = #line) {
+            AsyncManager.currentInstance.registerCheckpoint({})
+            CFRunLoopRun()
+            
+            let plistDB2 = PlistDatabase.create(plistDB1.root, specs).ok!
+            let expected = ConcreteRelation(scheme: ["n"], values: rows)
+            AssertEqual(plistDB2["x"], expected, line: line)
+        }
+        
+        verify(rows: [])
+        
+        r.asyncAdd(["n": 1])
+        verify(rows: [["n": 1]])
+        
+        r.asyncAdd(["n": 2])
+        r.asyncAdd(["n": 3])
+        r.asyncUpdate(Attribute("n") *== 1, newValues: ["n": 4])
+        verify(rows: [["n": 2], ["n": 3], ["n": 4]])
+        
+        r.asyncDelete(Attribute("n") *== 3)
+        verify(rows: [["n": 2], ["n": 4]])
+    }
 }

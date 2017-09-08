@@ -20,6 +20,11 @@ open class TransactionalDatabase {
     
     var transactionCounter: UInt64 = 0
     
+    /// When set to true, the database will ask the underlying `ChangeLoggingDatabase`
+    /// to save at the end of each transaction. This will typically result in the changes
+    /// being saved out to disk, depending on the database underlying `ChangeLoggingDatabase`.
+    public var saveOnTransactionEnd = false
+    
     public init(_ db: ChangeLoggingDatabase) {
         self.changeLoggingDatabase = db
     }
@@ -87,7 +92,11 @@ open class TransactionalDatabase {
             transactionCounter += 1
             transactionLock.unlock()
             
-            return .Ok()
+            if saveOnTransactionEnd {
+                return changeLoggingDatabase.save()
+            } else {
+                return .Ok()
+            }
         })
         
         if result.ok != nil {
