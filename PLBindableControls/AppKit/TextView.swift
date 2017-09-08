@@ -14,23 +14,41 @@ open class TextView: NSTextView, NSTextViewDelegate {
         },
         set: { [unowned self] value, _ in
             self.string = value
+            // XXX: Without the following sometimes part of the text will disappear, not sure why yet
+            self.layoutManager?.invalidateLayout(forCharacterRange: NSMakeRange(0, value.characters.count), actualCharacterRange: nil)
         }
     )
     public var text: ReadWriteProperty<String> { return _text }
     
+    private var previousString: String?
+    
     public override init(frame: NSRect) {
         super.init(frame: frame)
-        
-        self.delegate = self
+        configure()
     }
     
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
-        
-        self.delegate = self
+        configure()
     }
     
+    private func configure() {
+        // XXX: Keep built-in undo support disabled until we decide how to make it play
+        // nicely with our own undo stuff
+        self.allowsUndo = false
+        self.delegate = self
+    }
+
+    open func textDidBeginEditing(_ notification: Notification) {
+        previousString = self.string ?? ""
+    }
+
     open func textDidEndEditing(_ notification: Notification) {
-        _text.changed(transient: false)
+        if let previousString = previousString {
+            if self.string != previousString {
+                _text.changed(transient: false)
+            }
+        }
+        previousString = nil
     }
 }
