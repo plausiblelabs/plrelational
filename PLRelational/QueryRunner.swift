@@ -511,8 +511,11 @@ open class QueryRunner {
             // The larger input is the other one.
             let largerInput = smallerInput == 0 ? 1 : 0
             
-            let smallerAttributes = smallerInput == 0 ? matching.keys : matching.values
-            let largerAttributes = smallerInput == 0 ? matching.values : matching.keys
+            let matchingKeys = Array(matching.keys)
+            let matchingValues = Array(matching.values)
+            
+            let smallerAttributes = smallerInput == 0 ? matchingKeys : matchingValues
+            let largerAttributes = smallerInput == 0 ? matchingValues : matchingKeys
             let largerToSmallerRenaming = smallerInput == 0 ? matching.inverted : matching
             
             // It's common to join identical attributes, so filter out any renames which "rename"
@@ -550,8 +553,8 @@ open class QueryRunner {
             extraState = ExtraState(
                 keyed: keyed,
                 largerIndex: 1 - smallerInput,
-                largerAttributes: Array(largerAttributes),
-                largerToSmallerRenaming: Dictionary(largerToSmallerRenamingWithoutNoops as [(Attribute, Attribute)])) // For some reason, Swift 3 currently fails to infer generic types without this pointless cast
+                largerAttributes: largerAttributes,
+                largerToSmallerRenaming: largerToSmallerRenamingWithoutNoops) // For some reason, Swift 3 currently fails to infer generic types without this pointless cast
             nodeStates[nodeIndex].setExtraState(extraState)
         }
         
