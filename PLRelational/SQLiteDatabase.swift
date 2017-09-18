@@ -179,7 +179,7 @@ extension SQLiteDatabase {
                 return .Err(error)
             }
             precondition(rows.isEmpty, "Unexpected result from \(sql) query: \(rows)")
-            return .Ok()
+            return .Ok(())
         })
     }
     
@@ -281,7 +281,7 @@ extension SQLiteDatabase {
     }
     
     public func transaction(_ transactionFunction: () -> TransactionResult) -> Result<Void, RelationError> {
-        return self.transaction({ Void -> ((), TransactionResult) in
+        return self.transaction({ () -> ((), TransactionResult) in
             let result = transactionFunction()
             return ((), result)
         })

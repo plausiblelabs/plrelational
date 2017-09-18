@@ -100,7 +100,7 @@ public struct ConcreteRelation: Relation {
             }
             _ = self.add(rowToAdd)
         }
-        return .Ok()
+        return .Ok(())
     }
     
     public func contains(_ row: Row) -> Result<Bool, RelationError> {

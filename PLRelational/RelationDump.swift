@@ -104,7 +104,7 @@ extension Relation {
         var name = String(describing: type(of: self))
         if name.hasSuffix("Relation") {
             let sliceIndex = name.characters.index(name.endIndex, offsetBy: -"Relation".characters.count)
-            name = name.substring(to: sliceIndex)
+            name = String(name[..<sliceIndex])
         }
         
         let substrings = getChildRelationsForDump().map({ "\($0): \($1.simpleDumpString())" })

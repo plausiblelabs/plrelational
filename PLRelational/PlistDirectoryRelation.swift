@@ -161,7 +161,7 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
             let removed = ConcreteRelation(scheme: self.scheme, values: toUpdate - withUpdates)
             notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .directChange)
             
-            return .Ok()
+            return .Ok(())
         })
     }
     
@@ -191,7 +191,7 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
                 let url = plistURL(forKeyValue: key)
                 writeCache.delete(url: url, key: key)
             }
-            return .Ok()
+            return .Ok(())
         })
     }
     
@@ -250,7 +250,7 @@ extension PlistDirectoryRelation {
         let hash = SHA256(valueData)
         let hexHash = hexString(hash, uppercase: false)
         
-        let prefix = hexHash.substring(to: hexHash.characters.index(hexHash.startIndex, offsetBy: PlistDirectoryRelation.filePrefixLength))
+        let prefix = String(hexHash[..<hexHash.index(hexHash.startIndex, offsetBy: PlistDirectoryRelation.filePrefixLength)])
         
         return baseURL
             .appendingPathComponent(prefix, isDirectory: true)

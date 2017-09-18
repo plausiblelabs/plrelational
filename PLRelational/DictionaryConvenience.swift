@@ -35,7 +35,7 @@ extension Dictionary {
 /// :nodoc: Implementation detail (will be made non-public eventually)
 /// Combine a dictionary and some collection of key/value pairs, which may be a second dictionary.
 /// Any keys that exist in both will have the value from the second parameter in the result.
-public func +<K: Hashable, V, Seq: Sequence>(a: [K: V], b: Seq) -> [K: V] where Seq.Iterator.Element == (K, V) {
+public func +<K, V, Seq: Sequence>(a: [K: V], b: Seq) -> [K: V] where Seq.Iterator.Element == (K, V) {
     var result = a
     for (k, v) in b {
         result[k] = v

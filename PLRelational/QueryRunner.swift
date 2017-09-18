@@ -199,7 +199,7 @@ open class QueryRunner {
     fileprivate func pumpInitiator() -> Result<Void, RelationError> {
         guard let nodeIndex = getInitiatorIndex() else {
             done = true
-            return .Ok()
+            return .Ok(())
         }
         
         let db = nodeStates[nodeIndex].transactionalDatabase
@@ -257,7 +257,7 @@ open class QueryRunner {
             fatalError("Unknown initiator operation \(firstLine)")
         }
         
-        return .Ok()
+        return .Ok(())
     }
     
     fileprivate func getRowGeneratorRows(_ initiatorIndex: Int, _ generatorGetter: () -> AnyIterator<Result<Set<Row>, RelationError>>) -> Result<Set<Row>, RelationError>? {

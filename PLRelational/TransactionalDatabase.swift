@@ -95,7 +95,7 @@ open class TransactionalDatabase {
             if saveOnTransactionEnd {
                 return changeLoggingDatabase.save()
             } else {
-                return .Ok()
+                return .Ok(())
             }
         })
         
@@ -177,7 +177,7 @@ open class TransactionalDatabase {
             relation.notifyChangeObservers(change, kind: .directChange)
         }
         
-        return .Ok()
+        return .Ok(())
     }
     
     open func asyncRestoreSnapshot(_ snapshot: TransactionalDatabaseSnapshot) {
@@ -202,7 +202,7 @@ open class TransactionalDatabase {
                 return result
             }
         }
-        return .Ok()
+        return .Ok(())
     }
     
     open func asyncApply(delta: TransactionalDatabaseDelta) {

@@ -14,7 +14,7 @@ public typealias RelationObject = Relation & AnyObject
 
 /// A protocol defining a relation, which is conceptually a set of `Row`s, all of which have
 /// the same scheme.
-public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
+public protocol Relation: PlaygroundMonospace {
     /// The relation's scheme.
     var scheme: Scheme { get }
     
@@ -220,7 +220,7 @@ extension Relation {
         let planner = QueryPlanner(roots: [(self, DirectDispatchContext().wrap(outputCallback))])
         let runner = QueryRunner(planner: planner)
         
-        let generator = AnyIterator({ Void -> Result<Set<Row>, RelationError>? in
+        let generator = AnyIterator({ () -> Result<Set<Row>, RelationError>? in
             if runner.done { return nil }
             
             runner.pump()

@@ -101,7 +101,7 @@ extension MutableRelation {
                     }
                 }
             }
-            callCompletion(.Ok())
+            callCompletion(.Ok(()))
             return nil
         })
     }

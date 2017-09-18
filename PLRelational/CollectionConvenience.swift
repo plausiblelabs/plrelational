@@ -31,14 +31,14 @@ public extension RangeReplaceableCollection {
 }
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
-public extension Collection where Iterator.Element: Equatable, Indices.Iterator.Element == Index {
+public extension Collection where Iterator.Element: Equatable {
     func indexesOf(_ element: Iterator.Element) -> [Index] {
         return indices.filter({ self[$0] == element })
     }
 }
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
-public extension MutableCollection where Iterator.Element: Equatable, Indices.Iterator.Element == Index {
+public extension MutableCollection where Iterator.Element: Equatable {
     mutating func replace(_ element: Iterator.Element, with: Iterator.Element) {
         for i in indices {
             if self[i] == element {
@@ -49,7 +49,7 @@ public extension MutableCollection where Iterator.Element: Equatable, Indices.It
 }
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
-public extension MutableCollection where Indices.Iterator.Element == Index{
+public extension MutableCollection {
     mutating func mutatingForEach(_ f: (inout Iterator.Element) -> Void) {
         for i in indices {
             f(&self[i])
@@ -89,7 +89,7 @@ public extension Array where Element: Comparable {
             
         case 2:
             if self[0] > self[1] {
-                swap(&self[0], &self[1])
+                self.swapAt(0, 1)
             }
             
         default:
@@ -131,11 +131,11 @@ public extension Array where Element: Equatable {
 }
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
-public func +<T: Hashable>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
+public func +<T>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
     return lhs.union(rhs)
 }
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
-public func -<T: Hashable>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
+public func -<T>(lhs: Set<T>, rhs: Set<T>) -> Set<T> {
     return lhs.fastSubtracting(rhs)
 }
