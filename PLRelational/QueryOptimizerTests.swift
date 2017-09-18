@@ -325,7 +325,7 @@ private class InstrumentedSelectableRelation: Relation {
     }
 
     func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
-        return .Ok()
+        return .Ok(())
     }
 
     func contains(_ row: Row) -> Result<Bool, RelationError> {
