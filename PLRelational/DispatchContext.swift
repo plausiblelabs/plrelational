@@ -7,16 +7,16 @@ import Foundation
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
 public protocol DispatchContext {
-    func async(_ f: @escaping (Void) -> Void)
+    func async(_ f: @escaping () -> Void)
 }
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
 extension CFRunLoop: DispatchContext {
-    public func async(_ f: @escaping (Void) -> Void) {
+    public func async(_ f: @escaping () -> Void) {
         async(inModes: [.commonModes], f)
     }
     
-    public func async(inModes: [CFRunLoopMode], _ f: @escaping (Void) -> Void) {
+    public func async(inModes: [CFRunLoopMode], _ f: @escaping () -> Void) {
         let cfmodes = inModes.map({ $0.rawValue }) as CFArray
         CFRunLoopPerformBlock(self, cfmodes, f)
         CFRunLoopWakeUp(self)
@@ -42,7 +42,7 @@ public struct RunLoopDispatchContext: DispatchContext {
         self.modes = modes
     }
     
-    public func async(_ f: @escaping (Void) -> Void) {
+    public func async(_ f: @escaping () -> Void) {
         if executeReentrantImmediately && CFRunLoopGetCurrent() === runloop {
             f()
         } else {
@@ -58,7 +58,7 @@ public struct DirectDispatchContext: DispatchContext {
     public init() {
     }
     
-    public func async(_ f: @escaping (Void) -> Void) {
+    public func async(_ f: @escaping () -> Void) {
         f()
     }
 }
@@ -75,7 +75,7 @@ public struct DispatchQueueContext: DispatchContext {
         self.init(queue: DispatchQueue(label: label, attributes: []))
     }
     
-    public func async(_ f: @escaping (Void) -> Void) {
+    public func async(_ f: @escaping () -> Void) {
         queue.async(execute: f)
     }
 }

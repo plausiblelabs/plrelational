@@ -22,7 +22,7 @@ import Foundation
 /// `Relation`s used for async operations must not also be used for synchronous operations
 /// at the same time.
 public final class AsyncManager: PerThreadInstance {
-    public typealias ObservationRemover = (Void) -> Void
+    public typealias ObservationRemover = () -> Void
     
     fileprivate var pendingActions: [Action] = []
     fileprivate var observedInfo: ObjectDictionary<AnyObject, ObservedRelationInfo> = [:]
@@ -128,7 +128,7 @@ public final class AsyncManager: PerThreadInstance {
     
     /// Register a function to be called as part of the sequence of performing enqueued async actions.
     /// This allows the sequence of execution to be monitored for e.g. computing deltas for operations.
-    public func registerCheckpoint(_ checkpoint: @escaping (Void) -> Void) {
+    public func registerCheckpoint(_ checkpoint: @escaping () -> Void) {
         registerCustomAction(affectedRelations: [], { checkpoint(); return nil })
     }
     
@@ -136,7 +136,7 @@ public final class AsyncManager: PerThreadInstance {
     /// In order for notifications to work, any relations that might be affected in the custom action must be passed in
     /// to `affectedRelations`. It's acceptable to pass in a relation that ends up not being affected. This will generate
     /// a spurious but harmless empty change notification.
-    public func registerCustomAction(affectedRelations: [MutableRelation], _ action: @escaping (Void) -> RelationError?) {
+    public func registerCustomAction(affectedRelations: [MutableRelation], _ action: @escaping () -> RelationError?) {
         register(action: .customAction(action: action, affectedRelations: affectedRelations))
     }
     
@@ -295,7 +295,7 @@ public final class AsyncManager: PerThreadInstance {
             // observer derivatives with those changes as they come in. Also locate all
             // TransactionalDatabases referenced within so we can begin and end transactions.
             var databases: ObjectSet<TransactionalDatabase> = []
-            var removals: [(Void) -> Void] = []
+            var removals: [() -> Void] = []
             for (_, info) in observedInfo {
                 let derivative = info.derivative
                 derivative.clearVariables()
@@ -597,7 +597,7 @@ extension AsyncManager {
         case restoreSnapshot(TransactionalDatabase, TransactionalDatabaseSnapshot)
         case applyDelta(TransactionalDatabase, TransactionalDatabaseDelta)
         case query(Relation, DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>)
-        case customAction(action: (Void) -> RelationError?, affectedRelations: [MutableRelation])
+        case customAction(action: () -> RelationError?, affectedRelations: [MutableRelation])
     }
     
     fileprivate class ObservedRelationInfo {

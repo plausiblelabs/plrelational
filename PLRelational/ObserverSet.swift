@@ -22,7 +22,7 @@ open class ObserverSet<Parameters>: CustomStringConvertible {
     
     fileprivate var queue = DispatchQueue(label: "com.mikeash.ObserverSet", attributes: [])
     
-    fileprivate func synchronized(_ f: (Void) -> Void) {
+    fileprivate func synchronized(_ f: () -> Void) {
         queue.sync(execute: f)
     }
     

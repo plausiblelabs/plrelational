@@ -145,7 +145,7 @@ final class InlineRow: ManagedBuffer<InlineRowHeader, InlineRowElement> {
     
     var count: Int {
         return withUnsafeMutablePointers({
-            return $0.0.pointee.count
+            return $0.pointee.count
         })
     }
     
@@ -296,7 +296,7 @@ extension InlineRow: Hashable {
     
     var hashValue: Int {
         return withUnsafeMutablePointers({
-            $0.0.pointee.hash.value
+            $0.pointee.hash.value
         })
     }
 }

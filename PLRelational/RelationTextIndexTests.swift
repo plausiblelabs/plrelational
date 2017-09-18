@@ -241,7 +241,7 @@ class RelationTextIndexTests: XCTestCase {
         })
         let hovercraftRemover = hovercraft.project("id").addAsyncObserver(hovercraftObserver)
         
-        func test(change: (Void) -> Void, princess: Set<Row>, hovercraft: Set<Row>, line: UInt = #line) {
+        func test(change: () -> Void, princess: Set<Row>, hovercraft: Set<Row>, line: UInt = #line) {
             NSLog("%@", "Test \(line)")
             princessExpected = princess
             hovercraftExpected = hovercraft
@@ -319,7 +319,7 @@ class RelationTextIndexTests: XCTestCase {
         })
         let hovercraftRemover = hovercraft.project("id").addAsyncObserver(hovercraftObserver)
         
-        func test(change: (Void) -> Void, princess: Set<Row>, hovercraft: Set<Row>, line: UInt = #line) {
+        func test(change: () -> Void, princess: Set<Row>, hovercraft: Set<Row>, line: UInt = #line) {
             NSLog("%@", "Test \(line)")
             princessExpected = princess
             hovercraftExpected = hovercraft

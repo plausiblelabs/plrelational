@@ -114,7 +114,7 @@ extension InternedUTF8String {
             
             var hash: UInt64 = 14695981039346656037
             Data.updateHash(&hash, pointer: ptr, length: length)
-            self.hash = Int(truncatingBitPattern: hash)
+            self.hash = Int(truncatingIfNeeded: hash)
         }
         
         public static func ==(lhs: Data, rhs: Data) -> Bool {

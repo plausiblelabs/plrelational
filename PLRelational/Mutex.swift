@@ -12,7 +12,7 @@ public struct Mutex {
     fileprivate let lock = NSLock()
     
     /// Call the given function with the lock locked, automatically unlocking before returning or throwing.
-    public func locked<T>(_ f: (Void) throws -> T) rethrows -> T {
+    public func locked<T>(_ f: () throws -> T) rethrows -> T {
         lock.lock()
         defer { lock.unlock() }
         return try f()

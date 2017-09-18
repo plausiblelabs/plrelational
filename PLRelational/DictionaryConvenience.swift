@@ -12,7 +12,7 @@ extension Dictionary where Value: Hashable {
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
 extension Dictionary {
-    public mutating func getOrCreate(_ key: Key, defaultValue: @autoclosure (Void) -> Value) -> Value {
+    public mutating func getOrCreate(_ key: Key, defaultValue: @autoclosure () -> Value) -> Value {
         if let value = self[key] {
             return value
         } else {
@@ -22,7 +22,7 @@ extension Dictionary {
         }
     }
     
-    public subscript(key: Key, defaultValue defaultValue: @autoclosure (Void) -> Value) -> Value {
+    public subscript(key: Key, defaultValue defaultValue: @autoclosure () -> Value) -> Value {
         mutating get {
             return getOrCreate(key, defaultValue: defaultValue())
         }

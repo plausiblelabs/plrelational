@@ -14,6 +14,6 @@ public enum TransactionResult {
 public protocol StoredDatabase {
     func storedRelation(forName name: String) -> StoredRelation?
     
-    func transaction<Return>(_ transactionFunction: (Void) -> (Return, TransactionResult)) -> Result<Return, RelationError>
+    func transaction<Return>(_ transactionFunction: () -> (Return, TransactionResult)) -> Result<Return, RelationError>
     func resultNeedsRetry<T>(_ result: Result<T, RelationError>) -> Bool
 }

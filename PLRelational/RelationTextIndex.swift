@@ -674,7 +674,7 @@ private func xOpen(tokenizer: UnsafeMutablePointer<sqlite3_tokenizer>?, input: U
         return string.lowercased()
     }
     
-    let tagger = NSLinguisticTagger(tagSchemes: [NSLinguisticTagSchemeTokenType], options: 0)
+    let tagger = NSLinguisticTagger(tagSchemes: [NSLinguisticTagScheme.tokenType], options: 0)
     tagger.string = string
 
     // Consider reinstating this in some distant future when we figure out how to make stemming work
@@ -689,7 +689,7 @@ private func xOpen(tokenizer: UnsafeMutablePointer<sqlite3_tokenizer>?, input: U
 //    })
     
     tagger.enumerateTags(in: range,
-                         scheme: NSLinguisticTagSchemeTokenType,
+                         scheme: NSLinguisticTagScheme.tokenType,
                          options: [.omitWhitespace, .omitPunctuation, .omitOther],
                          using: {
         tag, tokenRange, sentenceRange, stop in

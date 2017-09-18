@@ -38,13 +38,13 @@ class RWLock {
         pthread_rwlock_unlock(lock)
     }
     
-    func read<T>(_ f: (Void) -> T) -> T {
+    func read<T>(_ f: () -> T) -> T {
         readLock()
         defer { unlock() }
         return f()
     }
     
-    func write<T>(_ f: (Void) -> T) -> T {
+    func write<T>(_ f: () -> T) -> T {
         writeLock()
         defer { unlock() }
         return f()

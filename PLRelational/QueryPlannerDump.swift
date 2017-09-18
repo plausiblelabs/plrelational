@@ -6,7 +6,7 @@
 #if os(OSX)
     import AppKit
     private func open(_ filename: String) {
-        NSWorkspace.shared().openFile(filename, withApplication: "Graphviz")
+        NSWorkspace.shared.openFile(filename, withApplication: "Graphviz")
     }
 #elseif os(iOS)
     import UIKit

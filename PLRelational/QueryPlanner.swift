@@ -184,9 +184,9 @@ extension QueryPlanner {
     }
     
     enum Operation {
-        case rowGenerator((Void) -> AnyIterator<Result<Set<Row>, RelationError>>)
+        case rowGenerator(() -> AnyIterator<Result<Set<Row>, RelationError>>)
         case selectableGenerator((SelectExpression) -> AnyIterator<Result<Set<Row>, RelationError>>)
-        case rowSet((Void) -> Set<Row>)
+        case rowSet(() -> Set<Row>)
         
         case union
         case intersection

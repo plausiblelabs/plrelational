@@ -88,7 +88,7 @@ public class PlistDatabase: StoredDatabase {
         return relations.withValue({ $0[name]?.relation })
     }
     
-    public func transaction<Return>(_ transactionFunction: (Void) -> (Return, TransactionResult)) -> Result<Return, RelationError> {
+    public func transaction<Return>(_ transactionFunction: () -> (Return, TransactionResult)) -> Result<Return, RelationError> {
         // Ensure that all relations have a valid URL before we continue
         switch validateRelations() {
         case .Ok:

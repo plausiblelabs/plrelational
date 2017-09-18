@@ -40,4 +40,4 @@ public class RemovableFunctionSet<Params>: RemovableSet<(Params) -> Void> {
     }
 }
 
-public typealias RemovableSetRemover = (Void) -> Void
+public typealias RemovableSetRemover = () -> Void

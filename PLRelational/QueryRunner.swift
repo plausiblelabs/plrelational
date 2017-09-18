@@ -260,7 +260,7 @@ open class QueryRunner {
         return .Ok()
     }
     
-    fileprivate func getRowGeneratorRows(_ initiatorIndex: Int, _ generatorGetter: (Void) -> AnyIterator<Result<Set<Row>, RelationError>>) -> Result<Set<Row>, RelationError>? {
+    fileprivate func getRowGeneratorRows(_ initiatorIndex: Int, _ generatorGetter: () -> AnyIterator<Result<Set<Row>, RelationError>>) -> Result<Set<Row>, RelationError>? {
         let generator = initiatorGenerators.getOrCreate(initiatorIndex, defaultValue: generatorGetter())
         return generator.next()
     }
@@ -833,7 +833,7 @@ extension QueryRunner {
             }
         }
         
-        mutating func getExtraState<T>(_ calculate: (Void) -> T) -> T {
+        mutating func getExtraState<T>(_ calculate: () -> T) -> T {
             if let state = extraState {
                 return state as! T
             } else {

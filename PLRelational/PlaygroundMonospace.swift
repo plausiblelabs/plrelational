@@ -17,7 +17,7 @@ extension PlaygroundMonospace {
     public var customPlaygroundQuickLook: PlaygroundQuickLook {
 #if os(macOS)
         let attrstr = NSAttributedString(string: self.description,
-                                         attributes: [NSFontAttributeName: NSFont(name: "Monaco", size: 9)!])
+                                         attributes: [NSAttributedStringKey.font: NSFont(name: "Monaco", size: 9)!])
 #else
         let attrstr = NSAttributedString(string: self.description)
 #endif

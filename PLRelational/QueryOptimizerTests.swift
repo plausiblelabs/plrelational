@@ -320,7 +320,7 @@ private class InstrumentedSelectableRelation: Relation {
     
     var rowsProvided = 0
     
-    func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void) {
+    func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> (() -> Void) {
         return {}
     }
 

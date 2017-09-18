@@ -126,7 +126,7 @@ class ObjectMap<Value> {
         }
     }
     
-    func getOrCreate(_ obj: AnyObject, defaultValue: @autoclosure (Void) -> Value) -> Value {
+    func getOrCreate(_ obj: AnyObject, defaultValue: @autoclosure () -> Value) -> Value {
         reallocateIfNecessary()
         let key = keyForObject(obj)
         let (firstEmptyOrMatch, firstDead) = indexForKey(key, table, capacity)

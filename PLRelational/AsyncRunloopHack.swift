@@ -35,7 +35,7 @@ public class AsyncRunloopHack {
     }
     
     private func hack() {
-        let observer = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, 0, { _ in self.beforeWaiting() })
+        let observer = CFRunLoopObserverCreateWithHandler(nil, CFRunLoopActivity.beforeWaiting.rawValue, true, 0, { _, _ in self.beforeWaiting() })
         CFRunLoopAddObserver(CFRunLoopGetCurrent(), observer, CFRunLoopMode.commonModes)
         manager.addRunloopMode(runloopMode)
         

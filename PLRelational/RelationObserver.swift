@@ -12,8 +12,8 @@ public protocol RelationObserver {
 
 class WeakRelationObserverProxy: RelationObserver {
     fileprivate weak var target: (RelationObserver & AnyObject)?
-    fileprivate var targetRemoval: (Void) -> Void = { fatalError("Proxy deallocated, but target removal function never set.") }
-    fileprivate var relationRemoval: (Void) -> Void = { fatalError("Observer method called, but relation removal function never set.") }
+    fileprivate var targetRemoval: () -> Void = { fatalError("Proxy deallocated, but target removal function never set.") }
+    fileprivate var relationRemoval: () -> Void = { fatalError("Observer method called, but relation removal function never set.") }
     
     init(target: RelationObserver & AnyObject) {
         self.target = target
