@@ -52,7 +52,7 @@ public struct Color: Hashable {
         }
         let comps = stringComps.map{ s -> CGFloat in
             if let f = NumberFormatter().number(from: s) {
-                let floatVal = CGFloat(f)
+                let floatVal = CGFloat(truncating: f)
                 if floatVal < 0.0 {
                     return 0.0
                 } else if floatVal > 1.0 {
