@@ -2825,7 +2825,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0830;
-				LastUpgradeCheck = 0830;
+				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = "Plausible Labs Cooperative, Inc.";
 				TargetAttributes = {
 					372707E71CFE2C7E00710C80 = {
