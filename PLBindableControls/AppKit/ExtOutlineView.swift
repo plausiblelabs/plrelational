@@ -15,7 +15,7 @@ open class ExtOutlineView: NSOutlineView {
         // XXX: The following prevents the text field from becoming first responder if it is right-clicked
         // (which should instead cause the context menu to be shown)
         if let event = event {
-            if event.type == .rightMouseDown || (event.type == .leftMouseDown && event.modifierFlags.contains(.control)) {
+            if event.type == .rightMouseDown || (event.type == .leftMouseDown && event.modifierFlags.contains(NSEvent.ModifierFlags.control)) {
                 return false
             } else {
                 return super.validateProposedFirstResponder(responder, for: event)

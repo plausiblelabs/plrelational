@@ -47,7 +47,7 @@ open class SegmentedControl<T: Equatable>: NSSegmentedControl {
         fatalError("NSCoding not supported")
     }
     
-    func selectionChanged(_ control: Any?) {
+    @objc func selectionChanged(_ control: Any?) {
         let value: T?
         if selectedSegment >= 0 {
             value = segments[selectedSegment].value

@@ -77,11 +77,11 @@ public enum CheckState: String { case
     public var nsValue: Int {
         switch self {
         case .on:
-            return NSOnState
+            return NSOnState.rawValue
         case .off:
-            return NSOffState
+            return NSOffState.rawValue
         case .mixed:
-            return NSMixedState
+            return NSMixedState.rawValue
         }
     }
 #endif

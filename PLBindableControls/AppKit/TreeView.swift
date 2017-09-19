@@ -81,7 +81,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
         outlineView.dataSource = self
         
         // Enable drag-and-drop
-        outlineView.register(forDraggedTypes: [pasteboardType])
+        outlineView.registerForDraggedTypes([NSPasteboard.PasteboardType(rawValue: pasteboardType)])
         outlineView.verticalMotionCanBeginDrag = true
         
         // Load the initial data
@@ -132,14 +132,14 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
         
         let node = item as! N
         let pboardItem = NSPasteboardItem()
-        pboardItem.setPropertyList(node.id.toPlist(), forType: pasteboardType)
+        pboardItem.setPropertyList(node.id.toPlist(), forType: NSPasteboard.PasteboardType(rawValue: pasteboardType))
         return pboardItem
     }
     
     open func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: Any?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyList(forType: pasteboardType) {
+        if let idPlist = pboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: pasteboardType)) {
             let nodeID = N.ID.fromPlist(idPlist as AnyObject)!
             let currentParent = model.data.parentForID(nodeID)
             let proposedParent = proposedItem as? N
@@ -178,7 +178,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     open func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyList(forType: pasteboardType), let move = model.move {
+        if let idPlist = pboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: pasteboardType)), let move = model.move {
             let nodeID = N.ID.fromPlist(idPlist as AnyObject)!
             
             let currentParent = model.data.parentForID(nodeID)
@@ -203,7 +203,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     open func outlineView(_ outlineView: NSOutlineView, viewFor viewForTableColumn: NSTableColumn?, item: Any) -> NSView? {
         let node = item as! N
         let identifier = model.cellIdentifier(node.data)
-        let view = outlineView.make(withIdentifier: identifier, owner: self) as! NSTableCellView
+        let view = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: identifier), owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
             let cellText = model.cellText(node.data)
             textField.bind(cellText)
@@ -240,7 +240,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     
     open func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
         // TODO: Make this configurable
-        return outlineView.make(withIdentifier: "RowView", owner: self) as? NSTableRowView
+        return outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "RowView"), owner: self) as? NSTableRowView
     }
     
     open func outlineViewSelectionDidChange(_ notification: Notification) {
@@ -284,7 +284,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     // MARK: Property observers
 
     private func treeChanged(_ changes: [TreeChange<N>]) {
-        let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : []
+        let animation: NSTableView.AnimationOptions = animateChanges ? [NSTableView.AnimationOptions.effectFade] : []
 
         // Get the current set of IDs from the `selection` property and then use those to restore
         // the selection state after the changes are processed; this ensures that we select items

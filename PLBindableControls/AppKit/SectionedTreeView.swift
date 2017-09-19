@@ -154,7 +154,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
         outlineView.dataSource = self
 
         // Enable drag-and-drop
-        outlineView.register(forDraggedTypes: [pasteboardType])
+        outlineView.registerForDraggedTypes([NSPasteboard.PasteboardType(rawValue: pasteboardType)])
         outlineView.verticalMotionCanBeginDrag = true
 
         model.start()
@@ -178,7 +178,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     
     func outlineView(_ outlineView: NSOutlineView, viewFor viewForTableColumn: NSTableColumn?, item: Any) -> NSView? {
         let identifier = model.cellIdentifier(item)
-        let view = outlineView.make(withIdentifier: identifier, owner: nil) as? NSTableCellView
+        let view = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: identifier), owner: nil) as? NSTableCellView
         if let textField = view?.textField as? TextField {
             let cellText = model.cellText(item)
             textField.bind(cellText)
@@ -194,11 +194,11 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     
     func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
         let identifier = "RowView"
-        if let rowView = outlineView.make(withIdentifier: identifier, owner: self) {
+        if let rowView = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: identifier), owner: self) {
             return rowView as? NSTableRowView
         } else {
             let rowView = self.rowView?(NSZeroRect, outlineRowHeight)
-            rowView?.identifier = identifier
+            rowView?.identifier = NSUserInterfaceItemIdentifier(rawValue: identifier)
             return rowView
         }
     }
@@ -277,14 +277,14 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
         }
         
         let pboardItem = NSPasteboardItem()
-        pboardItem.setPropertyList(plist, forType: pasteboardType)
+        pboardItem.setPropertyList(plist, forType: NSPasteboard.PasteboardType(rawValue: pasteboardType))
         return pboardItem
     }
     
     func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: Any?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
         
-        if let pathPlist = pboard.propertyList(forType: pasteboardType) {
+        if let pathPlist = pboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: pasteboardType)) {
             if model.isDropAllowed(plist: pathPlist, proposedItem: proposedItem, proposedChildIndex: proposedIndex) {
                 return .move
             }
@@ -296,7 +296,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
         
-        guard let pathPlist = pboard.propertyList(forType: pasteboardType) else {
+        guard let pathPlist = pboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: pasteboardType)) else {
             return false
         }
         
@@ -306,7 +306,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     // MARK: SectionedTreeViewModelDelegate protocol
     
     func sectionedTreeViewModelTreeChanged(_ changes: [SectionedTreeChange]) {
-        let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : NSTableViewAnimationOptions()
+        let animation: NSTableView.AnimationOptions = animateChanges ? [NSTableView.AnimationOptions.effectFade] : NSTableView.AnimationOptions()
         
         // Get the current set of IDs from the `selection` property and then use those to restore
         // the selection state after the changes are processed; this ensures that we select items

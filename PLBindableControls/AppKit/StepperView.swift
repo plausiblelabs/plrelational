@@ -88,7 +88,7 @@ open class StepperView: NSControl, NSTextFieldDelegate {
         stepper.frame = stepperFrame
     }
     
-    func controlChanged(_ sender: AnyObject) {
+    @objc func controlChanged(_ sender: AnyObject) {
         let newValue: Int
         if let textField = sender as? NSTextField {
             newValue = textField.integerValue

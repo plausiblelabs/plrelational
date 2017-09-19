@@ -29,7 +29,7 @@ open class ColorPanel {
     deinit {
         // XXX: Ugh, should only do this if `self` is the current target, but no way to determine that.  We may need to change
         // ColorPanel to be a singleton :(
-        let colorPanel = NSColorPanel.shared()
+        let colorPanel = NSColorPanel.shared
         colorPanel.setTarget(nil)
         colorPanel.setAction(nil)
     }
@@ -37,7 +37,7 @@ open class ColorPanel {
     private func updateColorPanel(newColor: Color?, makeVisible: Bool) {
         ignorePanelUpdates = true
         
-        let colorPanel = NSColorPanel.shared()
+        let colorPanel = NSColorPanel.shared
         colorPanel.setTarget(self)
         colorPanel.setAction(#selector(colorPanelChanged(_:)))
         if let nscolor = newColor?.nscolor {

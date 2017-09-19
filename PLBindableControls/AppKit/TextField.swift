@@ -13,7 +13,7 @@ open class TextField: NSTextField, NSTextFieldDelegate {
     private lazy var changeHandler: ChangeHandler = ChangeHandler(
         onLock: { [weak self] in
             guard let strongSelf = self else { return }
-            strongSelf.timer = Timer.scheduledTimer(timeInterval: 0.5, target: strongSelf, selector: #selector(timerFired), userInfo: nil, repeats: false)
+            strongSelf.timer = Timer.scheduledTimer(timeInterval: 0.5, target: strongSelf, selector: #selector(self?.timerFired), userInfo: nil, repeats: false)
         },
         onUnlock: { [weak self] in
             guard let strongSelf = self else { return }

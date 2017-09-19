@@ -69,7 +69,7 @@ open class EphemeralComboBox: NSComboBox, NSComboBoxDelegate {
         deselectItem(at: index)
     }
     
-    func stringCommitted(_ sender: NSComboBox) {
+    @objc func stringCommitted(_ sender: NSComboBox) {
         if self.stringValue.isEmpty {
             // Nothing to do when the string is empty
             return

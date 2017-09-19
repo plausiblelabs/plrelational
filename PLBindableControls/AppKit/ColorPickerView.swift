@@ -291,7 +291,7 @@ private func colorSwatchImage(_ color: Color, f: ((NSRect) -> ())? = nil) -> Ima
 /// Draws a color swatch into the current graphics context.
 private func drawSwatch(_ rect: NSRect, color: NSColor) {
     NSColor.black.setFill()
-    NSRectFill(rect)
+    rect.fill()
     
     let path = NSBezierPath()
     path.move(to: NSMakePoint(rect.minX, rect.minY))
@@ -302,7 +302,7 @@ private func drawSwatch(_ rect: NSRect, color: NSColor) {
     path.fill()
     
     color.setFill()
-    NSRectFillUsingOperation(rect, .sourceOver)
+    rect.fill(using: .sourceOver)
 }
 
 private class OpacityFormatter: NumberFormatter {
@@ -342,7 +342,7 @@ private class OpacityFormatter: NumberFormatter {
         }
         
         if s.hasSuffix("%") {
-            s = s[s.startIndex..<s.characters.index(before: s.endIndex)]
+            s = String(s[s.startIndex..<s.characters.index(before: s.endIndex)])
         }
         
         if let intValue = Int(s) {
@@ -351,7 +351,7 @@ private class OpacityFormatter: NumberFormatter {
             }
         }
         
-        NSBeep()
+        NSSound.beep()
         return false
     }
 }

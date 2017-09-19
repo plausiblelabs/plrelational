@@ -27,7 +27,7 @@ open class EphemeralTextField: NSTextField {
         action = #selector(stringCommitted(_:))
     }
     
-    func stringCommitted(_ sender: NSTextField) {
+    @objc func stringCommitted(_ sender: NSTextField) {
         if !self.stringValue.isEmpty {
             self._strings.notifyValueChanging(self.stringValue)
             self.stringValue = ""
