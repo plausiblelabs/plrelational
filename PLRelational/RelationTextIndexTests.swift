@@ -45,9 +45,16 @@ class RelationTextIndexTests: XCTestCase {
             ["id": "6E15A045-A870-491C-B3DE-ACC6E360FFF8",
              "snippet": "FOR MORE INFORMATION ABOUT \u{2}PRINCESSES\u{3}, CONSULT YOUR LOCAL LIBRARIAN."]
         ]
-        let hovercraftExpected: Set<Row> = [
+        
+        // iOS 11 (and maybe macOS 10.13) tokenizes 气垫船 as one word. iOS 10 and macOS 10.12
+        // tokenize it as "气垫" and "船" separately. Accommodate both possibilities here.
+        let hovercraftExpected1: Set<Row> = [
             ["id": "2477DFB5-FC3C-4191-B64B-B92270D653D8",
              "snippet": "我的\u{2}气垫\u{3}\u{2}船\u{3}装满了鳝鱼."]
+        ]
+        let hovercraftExpected2: Set<Row> = [
+            ["id": "2477DFB5-FC3C-4191-B64B-B92270D653D8",
+             "snippet": "我的\u{2}气垫船\u{3}装满了鳝鱼."]
         ]
         let group = DispatchGroup()
         
@@ -68,7 +75,7 @@ class RelationTextIndexTests: XCTestCase {
         var hovercraftDone = false
         let hovercraftObserver = Observer(callback: {
             hovercraftRows = $0
-            if $0 == hovercraftExpected && !hovercraftDone {
+            if ($0 == hovercraftExpected1 || $0 == hovercraftExpected2) && !hovercraftDone {
                 hovercraftDone = true
                 group.leave()
             }
@@ -79,7 +86,9 @@ class RelationTextIndexTests: XCTestCase {
         CFRunLoopRunOrFail()
         
         XCTAssertEqual(princessRows, princessExpected)
-        XCTAssertEqual(hovercraftRows, hovercraftExpected)
+        if hovercraftRows != hovercraftExpected1 && hovercraftRows != hovercraftExpected2 {
+            XCTFail("Got rows \(hovercraftRows), expected either \(hovercraftExpected1) or \(hovercraftExpected2)")
+        }
         
         AssertStructuredSnippets(rows: princessRows, attribute: "snippet", snippets:
             (false, false, "I am a pretty princess.", [14 ..< 22]),
@@ -87,9 +96,15 @@ class RelationTextIndexTests: XCTestCase {
             (false, false, "For more information about princesses, consult your local librarian.", [27 ..< 37]),
             (false, false, "FOR MORE INFORMATION ABOUT PRINCESSES, CONSULT YOUR LOCAL LIBRARIAN.", [27 ..< 37])
         )
-        AssertStructuredSnippets(rows: hovercraftRows, attribute: "snippet", snippets:
-            (false, false, "我的气垫船装满了鳝鱼.", [2 ..< 4, 4 ..< 5])
-        )
+        if hovercraftRows == hovercraftExpected1 {
+            AssertStructuredSnippets(rows: hovercraftRows, attribute: "snippet", snippets:
+                (false, false, "我的气垫船装满了鳝鱼.", [2 ..< 4, 4 ..< 5])
+            )
+        } else {
+            AssertStructuredSnippets(rows: hovercraftRows, attribute: "snippet", snippets:
+                (false, false, "我的气垫船装满了鳝鱼.", [2 ..< 5])
+            )
+        }
         
         group.enter()
         princess.query = "librarian"
@@ -105,8 +120,10 @@ class RelationTextIndexTests: XCTestCase {
         CFRunLoopRunOrFail()
         
         XCTAssertEqual(princessRows, princessExpected)
-        XCTAssertEqual(hovercraftRows, hovercraftExpected)
-        
+        if hovercraftRows != hovercraftExpected1 && hovercraftRows != hovercraftExpected2 {
+            XCTFail("Got rows \(hovercraftRows), expected either \(hovercraftExpected1) or \(hovercraftExpected2)")
+        }
+
         AssertStructuredSnippets(rows: princessRows, attribute: "snippet", snippets:
             (false, false, "For more information about princesses, consult your local librarian.", [58 ..< 67]),
             (false, false, "FOR MORE INFORMATION ABOUT PRINCESSES, CONSULT YOUR LOCAL LIBRARIAN.", [58 ..< 67])
