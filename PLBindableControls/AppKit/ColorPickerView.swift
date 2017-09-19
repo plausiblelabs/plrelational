@@ -114,7 +114,7 @@ private class ColorPickerModel {
         // XXX: We use `valueChanging: { true }` so that binding observers are notified even
         // when the item is changing from .Custom to .Custom; this is all because of the funky
         // .Custom handling in `==` for ColorItem, need to revisit this...
-        let colorItem: MutableValueProperty<ColorItem?> = mutableValueProperty(nil, valueChanging: { _ in true })
+        let colorItem: MutableValueProperty<ColorItem?> = mutableValueProperty(nil, valueChanging: { _, _ in true })
         let customColor: ReadableProperty<Color?> = colorItem.map{
             switch $0 {
             case .some(.custom(let color)):

@@ -8,16 +8,16 @@ import PLRelationalBinding
 
 open class Button: NSButton {
 
-    public private(set) lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] in
-        self?.isHidden = !$0.0
+    public private(set) lazy var visible: BindableProperty<Bool> = WriteOnlyProperty(set: { [weak self] value, _ in
+        self?.isHidden = !value
     })
 
     public private(set) lazy var disabled: BindableProperty<Bool> = WriteOnlyProperty(set: { [unowned self] value, _ in
         self.isEnabled = !value
     })
 
-    public private(set) lazy var string: BindableProperty<String> = WriteOnlyProperty(set: { [weak self] in
-        self?.title = $0.0
+    public private(set) lazy var string: BindableProperty<String> = WriteOnlyProperty(set: { [weak self] value, _ in
+        self?.title = value
     })
 
     private let _clicks = SourceSignal<()>()
