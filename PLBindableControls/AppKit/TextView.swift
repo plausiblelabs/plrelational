@@ -10,7 +10,7 @@ open class TextView: NSTextView, NSTextViewDelegate {
 
     private lazy var _text: ExternalValueProperty<String> = ExternalValueProperty(
         get: { [unowned self] in
-            self.string ?? ""
+            self.string
         },
         set: { [unowned self] value, _ in
             self.string = value
@@ -40,7 +40,7 @@ open class TextView: NSTextView, NSTextViewDelegate {
     }
 
     open func textDidBeginEditing(_ notification: Notification) {
-        previousString = self.string ?? ""
+        previousString = self.string
     }
 
     open func textDidEndEditing(_ notification: Notification) {
