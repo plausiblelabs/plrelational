@@ -23,9 +23,9 @@ public class Binding {
     // TODO: Find a better solution
     private var signalOwner: AnyObject?
 
-    private var removal: ((Void) -> Void)?
+    private var removal: (() -> Void)?
     
-    init(signalOwner: AnyObject, removal: @escaping (Void) -> Void) {
+    init(signalOwner: AnyObject, removal: @escaping () -> Void) {
         self.signalOwner = signalOwner
         self.removal = removal
     }
@@ -394,7 +394,7 @@ open class ReadWriteProperty<T>: BindableProperty<T>, ReadablePropertyType {
 /// :nodoc: Should be re-implemented as a convenience initializer
 /// Returns a ReadableProperty whose value never changes.
 public func constantValueProperty<T>(_ value: T) -> ReadableProperty<T> {
-    return ReadableProperty(signal: ConstantSignal<T>(value), changing: { _ in false })
+    return ReadableProperty(signal: ConstantSignal<T>(value), changing: { _, _ in false })
 }
 
 /// A concrete read/write property whose value can be mutated directly.
