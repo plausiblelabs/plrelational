@@ -21,7 +21,7 @@ public struct TreePath<N: TreeNode> {
 }
 
 extension TreePath: Equatable {}
-public func ==<N: TreeNode>(a: TreePath<N>, b: TreePath<N>) -> Bool {
+public func ==<N>(a: TreePath<N>, b: TreePath<N>) -> Bool {
     return a.parent?.id == b.parent?.id && a.index == b.index
 }
 
@@ -46,7 +46,7 @@ public enum TreeChange<N: TreeNode> { case
 }
 
 extension TreeChange: Equatable {}
-public func ==<N: TreeNode>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
+public func ==<N>(a: TreeChange<N>, b: TreeChange<N>) -> Bool {
     switch (a, b) {
     // TODO: Compare node structures for the .Initial case?
     case (.initial, .initial): return true
