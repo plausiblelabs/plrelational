@@ -49,7 +49,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     private let outlineView: NSOutlineView
     
     /// Private pasteboard type that limits drag and drop to this specific outline view.
-    private let pasteboardType: String
+    private let pasteboardType: NSPasteboard.PasteboardType
 
     private lazy var selection: MutableValueProperty<Set<N.ID>> = mutableValueProperty(Set(), { [unowned self] selectedIDs, _ in
         self.selectItems(selectedIDs)
@@ -67,7 +67,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     public init(model: TreeViewModel<N>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
-        self.pasteboardType = "PLBindableControls.TreeView.pasteboard.\(ProcessInfo.processInfo.globallyUniqueString)"
+        self.pasteboardType = NSPasteboard.PasteboardType("PLBindableControls.TreeView.pasteboard.\(ProcessInfo.processInfo.globallyUniqueString)")
         
         super.init()
         
@@ -81,7 +81,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
         outlineView.dataSource = self
         
         // Enable drag-and-drop
-        outlineView.register(forDraggedTypes: [pasteboardType])
+        outlineView.registerForDraggedTypes([pasteboardType])
         outlineView.verticalMotionCanBeginDrag = true
         
         // Load the initial data
@@ -202,8 +202,8 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     
     open func outlineView(_ outlineView: NSOutlineView, viewFor viewForTableColumn: NSTableColumn?, item: Any) -> NSView? {
         let node = item as! N
-        let identifier = model.cellIdentifier(node.data)
-        let view = outlineView.make(withIdentifier: identifier, owner: self) as! NSTableCellView
+        let identifier = NSUserInterfaceItemIdentifier(model.cellIdentifier(node.data))
+        let view = outlineView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
         if let textField = view.textField as? TextField {
             let cellText = model.cellText(node.data)
             textField.bind(cellText)
@@ -240,7 +240,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     
     open func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
         // TODO: Make this configurable
-        return outlineView.make(withIdentifier: "RowView", owner: self) as? NSTableRowView
+        return outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("RowView"), owner: self) as? NSTableRowView
     }
     
     open func outlineViewSelectionDidChange(_ notification: Notification) {
@@ -284,7 +284,7 @@ open class TreeView<N: TreeNode>: NSObject, NSOutlineViewDataSource, ExtOutlineV
     // MARK: Property observers
 
     private func treeChanged(_ changes: [TreeChange<N>]) {
-        let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : []
+        let animation: NSTableView.AnimationOptions = animateChanges ? [.effectFade] : []
 
         // Get the current set of IDs from the `selection` property and then use those to restore
         // the selection state after the changes are processed; this ensures that we select items

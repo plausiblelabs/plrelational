@@ -6,17 +6,15 @@
 import AppKit
 import PLRelational
 
-private let titleFont = NSFont.systemFont(ofSize: NSFont.systemFontSize() + 1)
-private let textFont = NSFont.systemFont(ofSize: NSFont.systemFontSize() - 1)
+private let titleFont = NSFont.systemFont(ofSize: NSFont.systemFontSize + 1)
+private let textFont = NSFont.systemFont(ofSize: NSFont.systemFontSize - 1)
 private let titleColor = NSColor.black
 private let textColor = NSColor.darkGray
 private let highlightColor = NSColor.yellow
 
 private extension String {
     func nsRange(from range: Range<Index>) -> NSRange {
-        let lower = UTF16View.Index(range.lowerBound, within: utf16)
-        let upper = UTF16View.Index(range.upperBound, within: utf16)
-        return NSRange(location: utf16.startIndex.distance(to: lower), length: lower.distance(to: upper))
+        return NSRange(location: range.lowerBound.encodedOffset, length: range.upperBound.encodedOffset - range.lowerBound.encodedOffset)
     }
 }
 
@@ -38,7 +36,7 @@ enum SearchResult {
             // Set background color for matched text
             let attrStr = NSMutableAttributedString(string: snippet.string)
             for range in snippet.matches {
-                attrStr.addAttribute(NSBackgroundColorAttributeName, value: highlightColor, range: snippet.string.nsRange(from: range))
+                attrStr.addAttribute(.backgroundColor, value: highlightColor, range: snippet.string.nsRange(from: range))
             }
             
             // Add ellipses as needed
@@ -50,13 +48,13 @@ enum SearchResult {
             }
             
             // Apply font and foreground color attributes for the full string
-            var attrs: [String: Any] = [:]
+            var attrs: [NSAttributedStringKey: Any] = [:]
             if title {
-                attrs[NSFontAttributeName] = titleFont
-                attrs[NSForegroundColorAttributeName] = titleColor
+                attrs[.font] = titleFont
+                attrs[.foregroundColor] = titleColor
             } else {
-                attrs[NSFontAttributeName] = textFont
-                attrs[NSForegroundColorAttributeName] = textColor
+                attrs[.font] = textFont
+                attrs[.foregroundColor] = textColor
             }
             attrStr.addAttributes(attrs, range: NSMakeRange(0, attrStr.length))
             
@@ -77,7 +75,7 @@ enum SearchResult {
         /// Add some breathing room
         let style = NSMutableParagraphStyle()
         style.lineSpacing = 4.0
-        attrStr.addAttribute(NSParagraphStyleAttributeName, value: style, range: NSMakeRange(0, attrStr.length))
+        attrStr.addAttribute(.paragraphStyle, value: style, range: NSMakeRange(0, attrStr.length))
         
         return attrStr
     }

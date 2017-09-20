@@ -202,7 +202,7 @@ open class SQLiteTableRelation: SQLiteRelation, StoredRelation {
                     precondition(array.isEmpty, "Unexpected results from DELETE FROM statement: \(array)")
                     self.notifyChangeObservers(RelationChange(added: nil, removed: willDelete), kind: .directChange)
                     
-                    return .Ok()
+                    return .Ok(())
                 })
             })
         } else {
@@ -231,7 +231,7 @@ open class SQLiteTableRelation: SQLiteRelation, StoredRelation {
                     
                     let updated = willUpdate.withUpdate(newValues)
                     self.notifyChangeObservers(RelationChange(added: updated, removed: willUpdate), kind: .directChange)
-                    return .Ok()
+                    return .Ok(())
                 })
             })
         } else {

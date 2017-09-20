@@ -5,7 +5,7 @@
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
 extension IteratorProtocol {
-    public func concat<OtherGen: IteratorProtocol>(_ other: OtherGen) -> ConcatGenerator<Self, OtherGen> where OtherGen.Element == Self.Element {
+    public func concat<OtherGen: IteratorProtocol>(_ other: OtherGen) -> ConcatGenerator<Self, OtherGen> {
         return ConcatGenerator(self, other)
     }
 }

@@ -23,6 +23,6 @@ class OutlineRowView: NSTableRowView {
         selectionRect.size.height = rowHeight
         let color = self.isEmphasized ? VisualizerColors.strongHighlight : VisualizerColors.weakHighlight
         color.setFill()
-        NSRectFill(selectionRect)
+        selectionRect.fill()
     }
 }

@@ -563,7 +563,7 @@ class PropertyTests: XCTestCase {
             observer.notifyValueChanging(0)
         }
         
-        var property: ReadableProperty<Int>? = ReadableProperty(signal: source, changing: { _ in return true })
+        var property: ReadableProperty<Int>? = ReadableProperty(signal: source, changing: { _, _ in return true })
         weak var weakProperty: ReadableProperty<Int>? = property
         
         XCTAssertNotNil(weakProperty)

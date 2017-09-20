@@ -128,7 +128,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     private let outlineView: NSOutlineView
 
     /// Private pasteboard type that limits drag and drop to this specific outline view.
-    private let pasteboardType: String
+    private let pasteboardType: NSPasteboard.PasteboardType
     
     private lazy var selection: MutableValueProperty<Set<M.Path>> = mutableValueProperty(Set(), { selectedPaths, _ in
         self.selectItems(selectedPaths)
@@ -143,7 +143,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     init(model: M, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
-        self.pasteboardType = "PLBindableControls.SectionedTreeView.pasteboard.\(ProcessInfo.processInfo.globallyUniqueString)"
+        self.pasteboardType = NSPasteboard.PasteboardType("PLBindableControls.SectionedTreeView.pasteboard.\(ProcessInfo.processInfo.globallyUniqueString)")
 
         super.init()
         
@@ -154,7 +154,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
         outlineView.dataSource = self
 
         // Enable drag-and-drop
-        outlineView.register(forDraggedTypes: [pasteboardType])
+        outlineView.registerForDraggedTypes([pasteboardType])
         outlineView.verticalMotionCanBeginDrag = true
 
         model.start()
@@ -177,8 +177,8 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     // MARK: ExtOutlineViewDelegate
     
     func outlineView(_ outlineView: NSOutlineView, viewFor viewForTableColumn: NSTableColumn?, item: Any) -> NSView? {
-        let identifier = model.cellIdentifier(item)
-        let view = outlineView.make(withIdentifier: identifier, owner: nil) as? NSTableCellView
+        let identifier = NSUserInterfaceItemIdentifier(model.cellIdentifier(item))
+        let view = outlineView.makeView(withIdentifier: identifier, owner: nil) as? NSTableCellView
         if let textField = view?.textField as? TextField {
             let cellText = model.cellText(item)
             textField.bind(cellText)
@@ -193,8 +193,8 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     }
     
     func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
-        let identifier = "RowView"
-        if let rowView = outlineView.make(withIdentifier: identifier, owner: self) {
+        let identifier = NSUserInterfaceItemIdentifier("RowView")
+        if let rowView = outlineView.makeView(withIdentifier: identifier, owner: self) {
             return rowView as? NSTableRowView
         } else {
             let rowView = self.rowView?(NSZeroRect, outlineRowHeight)
@@ -306,7 +306,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     // MARK: SectionedTreeViewModelDelegate protocol
     
     func sectionedTreeViewModelTreeChanged(_ changes: [SectionedTreeChange]) {
-        let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : NSTableViewAnimationOptions()
+        let animation: NSTableView.AnimationOptions = animateChanges ? [.effectFade] : []
         
         // Get the current set of IDs from the `selection` property and then use those to restore
         // the selection state after the changes are processed; this ensures that we select items

@@ -116,7 +116,7 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
             return nil
         }
         
-        var cellView = tableView.make(withIdentifier: column.identifier, owner: nil) as? CellView
+        var cellView = tableView.makeView(withIdentifier: column.identifier, owner: nil) as? CellView
         if cellView == nil {
             let cell = CellView(frame: NSMakeRect(0, 0, column.width, tableView.rowHeight))
             cell.identifier = column.identifier
@@ -140,7 +140,7 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
     // MARK: Property observers
     
     private func arrayChanged(_ arrayChanges: [ArrayChange<E>]) {
-        let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : []
+        let animation: NSTableView.AnimationOptions = animateChanges ? [.effectFade] : []
 
         var rowToSelectAndEdit: Int?
         
@@ -203,7 +203,7 @@ private class TableColumn<M: TableColumnModel>: NSTableColumn {
     
     fileprivate init(model: M) {
         self.model = model
-        super.init(identifier: model.identifierString)
+        super.init(identifier: NSUserInterfaceItemIdentifier(model.identifierString))
     }
     
     required init(coder: NSCoder) {
@@ -224,7 +224,7 @@ private class CellView: NSTableCellView {
         _textField.isBezeled = false
         _textField.drawsBackground = false
         _textField.lineBreakMode = .byTruncatingTail
-        _textField.autoresizingMask = [.viewWidthSizable]
+        _textField.autoresizingMask = [.width]
         addSubview(_textField)
         
         self.textField = _textField

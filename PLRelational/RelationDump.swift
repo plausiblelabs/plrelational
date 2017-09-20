@@ -6,7 +6,7 @@
 #if os(OSX)
     import AppKit
     private func open(_ filename: String) {
-        NSWorkspace.shared().openFile(filename, withApplication: "Graphviz")
+        NSWorkspace.shared.openFile(filename, withApplication: "Graphviz")
     }
 #elseif os(iOS)
     import UIKit
@@ -104,7 +104,7 @@ extension Relation {
         var name = String(describing: type(of: self))
         if name.hasSuffix("Relation") {
             let sliceIndex = name.characters.index(name.endIndex, offsetBy: -"Relation".characters.count)
-            name = name.substring(to: sliceIndex)
+            name = String(name[..<sliceIndex])
         }
         
         let substrings = getChildRelationsForDump().map({ "\($0): \($1.simpleDumpString())" })
@@ -191,7 +191,7 @@ extension Relation {
                 let id = ObjectIdentifier(obj)
                 let idString = String(format: "_%lx", UInt(bitPattern: id))
                 if !seenIDs.contains(id) {
-                    let type = String(describing: type(of: r))
+                    let type = String(describing: Swift.type(of: r))
                     let name = options.contains(.showAddress) ? type + " " + idString : type
                     var label = ([name] + supplemental).joined(separator: "\n")
                     if options.contains(.showContents) {

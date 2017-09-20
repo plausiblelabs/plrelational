@@ -16,7 +16,7 @@ public class UndoableDatabase {
         self.undoManager = undoManager
     }
     
-    public func performUndoableAction(_ name: String, before: TransactionalDatabaseSnapshot? = nil, _ transactionFunc: @escaping (Void) -> Void) {
+    public func performUndoableAction(_ name: String, before: TransactionalDatabaseSnapshot? = nil, _ transactionFunc: @escaping () -> Void) {
         let deltaPromise = Promise<TransactionalDatabaseDelta>()
         
         var before: TransactionalDatabaseSnapshot!

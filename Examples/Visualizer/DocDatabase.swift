@@ -140,11 +140,11 @@ class DocDatabase {
         self.transactional = transactional
     }
     
-    func performUndoableAction(_ name: String, _ transactionFunc: @escaping (Void) -> Void) {
+    func performUndoableAction(_ name: String, _ transactionFunc: @escaping () -> Void) {
         performUndoableAction(name, before: nil, transactionFunc)
     }
     
-    func performUndoableAction(_ name: String, before: TransactionalDatabaseSnapshot?, _ transactionFunc: @escaping (Void) -> Void) {
+    func performUndoableAction(_ name: String, before: TransactionalDatabaseSnapshot?, _ transactionFunc: @escaping () -> Void) {
         if isBusy {
             print("WARNING: Performing action `\(name)` while database is busy; are you sure this is safe?")
         }

@@ -40,7 +40,7 @@ open class Slider: UISlider {
         self.addTarget(self, action: #selector(updatedState(_:)), for: .valueChanged)
     }
     
-    func updatedState(_ sender: Slider) {
+    @objc func updatedState(_ sender: Slider) {
         // TODO: Use transient: true if isContinuous==true and the value is still changing?
         _bindable_value.changed(transient: false)
     }

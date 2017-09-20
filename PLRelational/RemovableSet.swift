@@ -23,7 +23,7 @@ public class RemovableSet<T>: Sequence {
         }
     }
     
-    public func makeIterator() -> LazyMapIterator<DictionaryIterator<UInt64, T>, T> {
+    public func makeIterator() -> IndexingIterator<Dictionary<UInt64, T>.Values> {
         return contents.values.makeIterator()
     }
 }
@@ -40,4 +40,4 @@ public class RemovableFunctionSet<Params>: RemovableSet<(Params) -> Void> {
     }
 }
 
-public typealias RemovableSetRemover = (Void) -> Void
+public typealias RemovableSetRemover = () -> Void

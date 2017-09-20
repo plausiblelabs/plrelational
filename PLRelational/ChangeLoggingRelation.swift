@@ -99,7 +99,7 @@ public class ChangeLoggingRelation {
             
             notifyChangeObservers($0, kind: .directChange)
             
-            return .Ok()
+            return .Ok(())
         })
     }
 }
@@ -269,7 +269,7 @@ extension ChangeLoggingRelation {
             }
             
             baseBookmark = currentBookmark
-            return .Ok()
+            return .Ok(())
         })
     }
 }

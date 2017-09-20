@@ -14,7 +14,7 @@ public typealias RelationObject = Relation & AnyObject
 
 /// A protocol defining a relation, which is conceptually a set of `Row`s, all of which have
 /// the same scheme.
-public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
+public protocol Relation: PlaygroundMonospace {
     /// The relation's scheme.
     var scheme: Scheme { get }
     
@@ -34,7 +34,7 @@ public protocol Relation: CustomStringConvertible, PlaygroundMonospace {
     /// changes. The return value is a function which removes the observation when
     /// invoked. The caller can use that function to cancel the observation when
     /// it no longer needs it.
-    func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void)
+    func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> (() -> Void)
 
     // MARK: Core relational algebra
     
@@ -127,7 +127,7 @@ public enum RelationContentProvider {
     /// The `approximateCount` associated value is an optional approximate count of the number of rows in the
     /// `Relation`. Providing a value here can help the query optimizer/runner be more efficient. If `nil` is
     /// provided for this value, then it will be assumed that the number of rows in the `Relation` is large.
-    case generator((Void) -> AnyIterator<Result<Set<Row>, RelationError>>, approximateCount: Double?)
+    case generator(() -> AnyIterator<Result<Set<Row>, RelationError>>, approximateCount: Double?)
     
     /// The `Relation` produces values by providing a generator which can be filtered, hopefully efficiently,
     /// with a `SelectExpression`. The query optimizer/runner will take advantage of this to request only
@@ -147,7 +147,7 @@ public enum RelationContentProvider {
     ///
     /// The `approximateCount` associated value describes the approximate number of rows in the `Relation`, as
     /// described in `generator`.
-    case set((Void) -> Swift.Set<Row>, approximateCount: Double?)
+    case set(() -> Swift.Set<Row>, approximateCount: Double?)
     
     /// The `Relation` doesn't contain any values, but represents the result of applying the given operator to
     /// the given `Relation` operands.
@@ -183,7 +183,7 @@ extension Relation {
 /// :nodoc: Implementation detail (will be made non-public eventually); also related to synchronous APIs, which are de-emphasized
 extension Relation {
     /// A shortcut that adds a change observer for all kinds.
-    public func addChangeObserver(_ observer: RelationObserver) -> ((Void) -> Void) {
+    public func addChangeObserver(_ observer: RelationObserver) -> (() -> Void) {
         return addChangeObserver(observer, kinds: [.directChange, .dependentChange])
     }
 }
@@ -220,7 +220,7 @@ extension Relation {
         let planner = QueryPlanner(roots: [(self, DirectDispatchContext().wrap(outputCallback))])
         let runner = QueryRunner(planner: planner)
         
-        let generator = AnyIterator({ Void -> Result<Set<Row>, RelationError>? in
+        let generator = AnyIterator({ () -> Result<Set<Row>, RelationError>? in
             if runner.done { return nil }
             
             runner.pump()
@@ -496,14 +496,14 @@ extension Relation {
 
 /// :nodoc: Implementation detail (will be made non-public eventually); also related to synchronous APIs, which are de-emphasized
 extension Relation {
-    public func addChangeObserver(_ f: @escaping (RelationChange) -> Void) -> ((Void) -> Void) {
+    public func addChangeObserver(_ f: @escaping (RelationChange) -> Void) -> (() -> Void) {
         let x = addChangeObserver(SimpleRelationObserverProxy(f: f))
         return x
     }
     
     public func addWeakChangeObserver<T: AnyObject>(_ target: T, method: @escaping (T) -> (RelationChange) -> Void) {
-        var relationRemove: ((Void) -> Void)? = nil
-        var deallocRemove: ((Void) -> Void)? = nil
+        var relationRemove: (() -> Void)? = nil
+        var deallocRemove: (() -> Void)? = nil
         
         relationRemove = self.addChangeObserver({ [weak target] in
             if let target = target {

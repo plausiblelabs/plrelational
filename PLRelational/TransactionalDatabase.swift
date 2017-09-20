@@ -95,7 +95,7 @@ open class TransactionalDatabase {
             if saveOnTransactionEnd {
                 return changeLoggingDatabase.save()
             } else {
-                return .Ok()
+                return .Ok(())
             }
         })
         
@@ -177,7 +177,7 @@ open class TransactionalDatabase {
             relation.notifyChangeObservers(change, kind: .directChange)
         }
         
-        return .Ok()
+        return .Ok(())
     }
     
     open func asyncRestoreSnapshot(_ snapshot: TransactionalDatabaseSnapshot) {
@@ -202,21 +202,21 @@ open class TransactionalDatabase {
                 return result
             }
         }
-        return .Ok()
+        return .Ok(())
     }
     
     open func asyncApply(delta: TransactionalDatabaseDelta) {
         AsyncManager.currentInstance.registerApplyDelta(self, delta: delta)
     }
     
-    open func transaction(_ transactionFunction: (Void) -> Void) {
+    open func transaction(_ transactionFunction: () -> Void) {
         beginTransaction()
         transactionFunction()
         // TODO: error checking?
         _ = endTransaction()
     }
     
-    open func transactionWithSnapshots(_ transactionFunction: (Void) -> Void) -> (before: TransactionalDatabaseSnapshot, after: TransactionalDatabaseSnapshot) {
+    open func transactionWithSnapshots(_ transactionFunction: () -> Void) -> (before: TransactionalDatabaseSnapshot, after: TransactionalDatabaseSnapshot) {
         let before = takeSnapshot()
         transaction(transactionFunction)
         let after = takeSnapshot()
@@ -285,7 +285,7 @@ public class TransactionalRelation: MutableRelation, RelationDefaultChangeObserv
         self.notifyChangeObservers(change, kind: .directChange)
     }
     
-    func wrapInTransactionIfNecessary<T>(_ f: (Void) -> T) -> T {
+    func wrapInTransactionIfNecessary<T>(_ f: () -> T) -> T {
         if let db = db , !db.inTransactionThread {
             db.beginTransaction()
             defer { _ = db.endTransaction() } // TODO: error handling?

@@ -195,7 +195,7 @@ class StageView: BackgroundView {
     }()
 
     private lazy var selectedFilterOp: MutableValueProperty<FilterOp?> = {
-        return mutableValueProperty(FilterOp.none, { _ in self.selectedCombineOp.change(CombineOp.none) })
+        return mutableValueProperty(FilterOp.none, { _, _ in self.selectedCombineOp.change(CombineOp.none) })
     }()
 
     private lazy var filterAttrPopupVisible: ReadableProperty<Bool> = {
@@ -234,7 +234,7 @@ class StageView: BackgroundView {
     }()
     
     private lazy var selectedCombineOp: MutableValueProperty<CombineOp?> = {
-        return mutableValueProperty(CombineOp.none, { _ in self.selectedFilterOp.change(FilterOp.none) })
+        return mutableValueProperty(CombineOp.none, { _, _ in self.selectedFilterOp.change(FilterOp.none) })
     }()
     
     private lazy var filterOutput: ReadableProperty<Output?> = {

@@ -40,7 +40,7 @@ open class Switch: UISwitch {
         self.addTarget(self, action: #selector(updatedState(_:)), for: .valueChanged)
     }
     
-    func updatedState(_ sender: Switch) {
+    @objc func updatedState(_ sender: Switch) {
         _bindable_on.changed(transient: false)
     }
 }

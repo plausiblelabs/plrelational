@@ -31,7 +31,7 @@ public struct RelationDefaultChangeObserverImplementationData {
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
 extension RelationDefaultChangeObserverImplementation {
-    public func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void) {
+    public func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> (() -> Void) {
         let id = changeObserverData.nextID
         changeObserverData.nextID += 1
         

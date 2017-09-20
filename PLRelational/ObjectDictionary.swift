@@ -29,7 +29,7 @@ struct ObjectDictionary<Key: AnyObject, Value>: Sequence, ExpressibleByDictionar
         }
     }
     
-    subscript(key: Key, defaultValue defaultValue: @autoclosure (Void) -> Value) -> Value {
+    subscript(key: Key, defaultValue defaultValue: @autoclosure () -> Value) -> Value {
         mutating get {
             return getOrCreate(key, defaultValue: defaultValue())
         }
@@ -38,7 +38,7 @@ struct ObjectDictionary<Key: AnyObject, Value>: Sequence, ExpressibleByDictionar
         }
     }
     
-    mutating func getOrCreate(_ key: Key, defaultValue: @autoclosure (Void) -> Value) -> Value {
+    mutating func getOrCreate(_ key: Key, defaultValue: @autoclosure () -> Value) -> Value {
         if let value = self[key] {
             return value
         } else {

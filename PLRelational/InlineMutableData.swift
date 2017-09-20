@@ -80,7 +80,7 @@ extension InlineMutableData: Hashable {
                 self.updateHash(&newHash, pointer: elementPtr, length: headerPtr.pointee.length)
                 headerPtr.pointee.hash = newHash
             }
-            return Int(truncatingBitPattern: headerPtr.pointee.hash)
+            return Int(truncatingIfNeeded: headerPtr.pointee.hash)
         })
     }
 }

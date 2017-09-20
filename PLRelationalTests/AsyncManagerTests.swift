@@ -43,7 +43,7 @@ class AsyncManagerTests: DBTestCase {
         class TriggerRelation: Relation {
             var debugName: String?
             
-            var onGetRowsCallback: (Void) -> Void = {}
+            var onGetRowsCallback: () -> Void = {}
             
             var scheme: Scheme {
                 return ["n"]
@@ -64,7 +64,7 @@ class AsyncManagerTests: DBTestCase {
                 fatalError("unimplemented")
             }
             
-            func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void) {
+            func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> (() -> Void) {
                 return {}
             }
         }
@@ -394,7 +394,7 @@ class AsyncManagerTests: DBTestCase {
                 fatalError("We don't do updates here")
             }
             
-            func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void) {
+            func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> (() -> Void) {
                 return {}
             }
         }
@@ -1059,7 +1059,7 @@ class AsyncManagerTests: DBTestCase {
 }
 
 private class TestAsyncChangeObserver: AsyncRelationChangeObserver {
-    static func assertChanges(_ relation: Relation, change: (Void) -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>, file: StaticString = #file, line: UInt = #line) {
+    static func assertChanges(_ relation: Relation, change: () -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>, file: StaticString = #file, line: UInt = #line) {
         let observer = TestAsyncChangeObserver()
         let remover = relation.addAsyncObserver(observer)
         change()
@@ -1071,7 +1071,7 @@ private class TestAsyncChangeObserver: AsyncRelationChangeObserver {
         remover()
     }
     
-    static func assertNoChanges(to: Relation, changingRelation: Relation, file: StaticString = #file, line: UInt = #line, change: (Void) -> Void) {
+    static func assertNoChanges(to: Relation, changingRelation: Relation, file: StaticString = #file, line: UInt = #line, change: () -> Void) {
         let observer = TestAsyncChangeObserver()
         let remover1 = to.addAsyncObserver(observer)
         let remover2 = changingRelation.addAsyncObserver(TestAsyncChangeObserver()) // Just for the CFRunLoopStop it will do
@@ -1116,7 +1116,7 @@ private class TestAsyncChangeObserver: AsyncRelationChangeObserver {
 }
 
 private class TestAsyncChangeCoalescedObserver: AsyncRelationChangeCoalescedObserver {
-    static func assertChanges(_ relation: Relation, change: (Void) -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>, file: StaticString = #file, line: UInt = #line) {
+    static func assertChanges(_ relation: Relation, change: () -> Void, expectedAdded: Set<Row>, expectedRemoved: Set<Row>, file: StaticString = #file, line: UInt = #line) {
         let observer = TestAsyncChangeCoalescedObserver()
         let remover = relation.addAsyncObserver(observer)
         change()
@@ -1144,7 +1144,7 @@ private class TestAsyncChangeCoalescedObserver: AsyncRelationChangeCoalescedObse
 }
 
 private class TestAsyncContentObserver: AsyncRelationContentObserver {
-    static func assertChanges(_ relation: Relation, change: (Void) -> Void, expectedContents: Set<Row>, file: StaticString = #file, line: UInt = #line) {
+    static func assertChanges(_ relation: Relation, change: () -> Void, expectedContents: Set<Row>, file: StaticString = #file, line: UInt = #line) {
         let observer = TestAsyncContentObserver()
         let remover = relation.addAsyncObserver(observer)
         change()
@@ -1176,7 +1176,7 @@ private class TestAsyncContentObserver: AsyncRelationContentObserver {
 }
 
 private class TestAsyncContentCoalescedObserver: AsyncRelationContentCoalescedObserver {
-    static func assertChanges(_ relation: Relation, change: (Void) -> Void, expectedContents: Set<Row>) {
+    static func assertChanges(_ relation: Relation, change: () -> Void, expectedContents: Set<Row>) {
         let observer = TestAsyncContentCoalescedObserver()
         let remover = relation.addAsyncObserver(observer)
         observer.assertChanges(change, expectedContents: expectedContents)
@@ -1186,7 +1186,7 @@ private class TestAsyncContentCoalescedObserver: AsyncRelationContentCoalescedOb
     var willChangeCount = 0
     var result: Result<Set<Row>, RelationError>?
     
-    func assertChanges(_ change: (Void) -> Void, expectedContents: Set<Row>, file: StaticString = #file, line: UInt = #line) {
+    func assertChanges(_ change: () -> Void, expectedContents: Set<Row>, file: StaticString = #file, line: UInt = #line) {
         change()
         CFRunLoopRunOrFail(file: file, line: line)
         
@@ -1208,7 +1208,7 @@ private class TestAsyncContentCoalescedObserver: AsyncRelationContentCoalescedOb
 }
 
 private class TestAsyncContentCoalescedArrayObserver: AsyncRelationContentCoalescedObserver {
-    static func assertChanges(_ relation: Relation, change: (Void) -> Void, postprocessor: @escaping (Set<Row>) -> [Row], expectedContents: [Row], file: StaticString = #file, line: UInt = #line) {
+    static func assertChanges(_ relation: Relation, change: () -> Void, postprocessor: @escaping (Set<Row>) -> [Row], expectedContents: [Row], file: StaticString = #file, line: UInt = #line) {
         let observer = TestAsyncContentCoalescedArrayObserver()
         let remover = relation.addAsyncObserver(observer, postprocessor: postprocessor)
         observer.assertChanges(change, expectedContents: expectedContents, file: file, line: line)
@@ -1218,7 +1218,7 @@ private class TestAsyncContentCoalescedArrayObserver: AsyncRelationContentCoales
     var willChangeCount = 0
     var result: Result<[Row], RelationError>?
     
-    func assertChanges(_ change: (Void) -> Void, expectedContents: [Row], file: StaticString = #file, line: UInt = #line) {
+    func assertChanges(_ change: () -> Void, expectedContents: [Row], file: StaticString = #file, line: UInt = #line) {
         change()
         CFRunLoopRunOrFail(file: file, line: line)
         

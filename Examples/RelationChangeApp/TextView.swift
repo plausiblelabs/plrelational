@@ -9,7 +9,7 @@ import PLBindableControls
 
 class TextView: NSTextView {
     
-    lazy var text: BindableProperty<String> = WriteOnlyProperty(set: { [weak self] in
-        self?.string = $0.0
+    lazy var text: BindableProperty<String> = WriteOnlyProperty(set: { [weak self] value, _ in
+        self?.string = value
     })
 }

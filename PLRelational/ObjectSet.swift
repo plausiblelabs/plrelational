@@ -50,7 +50,7 @@ struct ObjectSetWrapper<T: AnyObject>: Hashable {
     }
 }
 
-func ==<T: AnyObject>(a: ObjectSetWrapper<T>, b: ObjectSetWrapper<T>) -> Bool {
+func ==<T>(a: ObjectSetWrapper<T>, b: ObjectSetWrapper<T>) -> Bool {
     return a.object === b.object
 }
 

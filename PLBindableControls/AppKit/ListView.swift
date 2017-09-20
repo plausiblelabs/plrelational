@@ -34,7 +34,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     private let outlineView: NSOutlineView
 
     /// Private pasteboard type that limits drag and drop to this specific outline view.
-    private let pasteboardType: String
+    private let pasteboardType: NSPasteboard.PasteboardType
 
     private var elements: [E] {
         return model.data.elements
@@ -79,7 +79,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     public init(model: ListViewModel<E>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
-        self.pasteboardType = "PLBindableControls.ListView.pasteboard.\(ProcessInfo.processInfo.globallyUniqueString)"
+        self.pasteboardType = NSPasteboard.PasteboardType("PLBindableControls.ListView.pasteboard.\(ProcessInfo.processInfo.globallyUniqueString)")
 
         super.init()
         
@@ -92,7 +92,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         outlineView.dataSource = self
         
         // Enable drag-and-drop
-        outlineView.register(forDraggedTypes: [pasteboardType])
+        outlineView.registerForDraggedTypes([pasteboardType])
         outlineView.verticalMotionCanBeginDrag = true
         
         // Load the initial data
@@ -161,8 +161,8 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
 
     open func outlineView(_ outlineView: NSOutlineView, viewFor viewForTableColumn: NSTableColumn?, item: Any) -> NSView? {
         let element = item as! E
-        let identifier = model.cellIdentifier(element.data)
-        let view = outlineView.make(withIdentifier: identifier, owner: self) as! NSTableCellView
+        let identifier = NSUserInterfaceItemIdentifier(model.cellIdentifier(element.data))
+        let view = outlineView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
         configureCell?(view, element.data)
         return view
     }
@@ -182,7 +182,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     
     open func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
         // TODO: Make this configurable
-        return outlineView.make(withIdentifier: "RowView", owner: self) as? NSTableRowView
+        return outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("RowView"), owner: self) as? NSTableRowView
     }
     
     open func outlineViewSelectionDidChange(_ notification: Notification) {
@@ -198,7 +198,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     // MARK: Property observers
 
     private func arrayChanged(_ arrayChanges: [ArrayChange<E>]) {
-        let animation: NSTableViewAnimationOptions = animateChanges ? [.effectFade] : []
+        let animation: NSTableView.AnimationOptions = animateChanges ? [.effectFade] : []
 
         var rowToSelectAndEdit: Int?
         

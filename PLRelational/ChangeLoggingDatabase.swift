@@ -37,13 +37,13 @@ public class ChangeLoggingDatabase {
             for (_, relation) in changeLoggingRelations {
                 let result = relation.save()
                 if storedDatabase.resultNeedsRetry(result) {
-                    return (.Ok(), .retry)
+                    return (.Ok(()), .retry)
                 }
                 if let err = result.err {
                     return (.Err(err), .rollback)
                 }
             }
-            return (.Ok(), .commit)
+            return (.Ok(()), .commit)
         }).then({ $0 })
     }
 }
@@ -114,7 +114,7 @@ extension ChangeLoggingDatabase {
             relation.notifyObserversTransactionEnded(.directChange)
         }
 
-        return .Ok()
+        return .Ok(())
     }
 }
 
@@ -157,7 +157,7 @@ extension ChangeLoggingDatabase {
             relation.notifyChangeObservers(change, kind: .directChange)
         }
         
-        return .Ok()
+        return .Ok(())
     }
     
     /// A wrapper function that performs a transaction and provides before and after snapshots to the caller.
@@ -187,6 +187,6 @@ extension ChangeLoggingDatabase {
                 return result
             }
         }
-        return .Ok()
+        return .Ok(())
     }
 }

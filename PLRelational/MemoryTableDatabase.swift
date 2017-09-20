@@ -31,7 +31,7 @@ public class MemoryTableDatabase: StoredDatabase {
         return relation
     }
     
-    public func transaction<Return>(_ transactionFunction: (Void) -> (Return, TransactionResult)) -> Result<Return, RelationError> {
+    public func transaction<Return>(_ transactionFunction: () -> (Return, TransactionResult)) -> Result<Return, RelationError> {
         return .Ok(transactionFunction().0)
     }
     

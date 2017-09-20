@@ -79,7 +79,7 @@ class EditorView: BackgroundView {
         // Add the content view
         let chainView = BackgroundView(frame: self.bounds)
         chainView.backgroundColor = NSColor(white: 0.98, alpha: 1.0)
-        chainView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
+        chainView.autoresizingMask = [.width, .height]
         addSubview(chainView)
         self.contentView = chainView
         

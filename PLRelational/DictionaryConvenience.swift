@@ -12,7 +12,7 @@ extension Dictionary where Value: Hashable {
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
 extension Dictionary {
-    public mutating func getOrCreate(_ key: Key, defaultValue: @autoclosure (Void) -> Value) -> Value {
+    public mutating func getOrCreate(_ key: Key, defaultValue: @autoclosure () -> Value) -> Value {
         if let value = self[key] {
             return value
         } else {
@@ -22,7 +22,7 @@ extension Dictionary {
         }
     }
     
-    public subscript(key: Key, defaultValue defaultValue: @autoclosure (Void) -> Value) -> Value {
+    public subscript(key: Key, defaultValue defaultValue: @autoclosure () -> Value) -> Value {
         mutating get {
             return getOrCreate(key, defaultValue: defaultValue())
         }
@@ -35,7 +35,7 @@ extension Dictionary {
 /// :nodoc: Implementation detail (will be made non-public eventually)
 /// Combine a dictionary and some collection of key/value pairs, which may be a second dictionary.
 /// Any keys that exist in both will have the value from the second parameter in the result.
-public func +<K: Hashable, V, Seq: Sequence>(a: [K: V], b: Seq) -> [K: V] where Seq.Iterator.Element == (K, V) {
+public func +<K, V, Seq: Sequence>(a: [K: V], b: Seq) -> [K: V] where Seq.Iterator.Element == (K, V) {
     var result = a
     for (k, v) in b {
         result[k] = v

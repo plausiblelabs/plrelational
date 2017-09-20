@@ -393,7 +393,7 @@ extension IntermediateRelation {
                 return result
             }
         }
-        return .Ok()
+        return .Ok(())
     }
     
     func intersectionUpdate(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
@@ -413,7 +413,7 @@ extension IntermediateRelation {
                 return .Err(err)
             }
         }
-        return .Ok()
+        return .Ok(())
     }
     
     func differenceUpdate(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
@@ -431,7 +431,7 @@ extension IntermediateRelation {
                 return .Err(err)
             }
         }
-        return .Ok()
+        return .Ok(())
     }
     
     func selectUpdate(_ query: SelectExpression, newValues: Row, expression: SelectExpression) -> Result<Void, RelationError> {
@@ -460,7 +460,7 @@ extension IntermediateRelation {
                 return .Err(err)
             }
         }
-        return .Ok()
+        return .Ok(())
     }
     
     func renameUpdate(_ query: SelectExpression, newValues: Row, renames: [Attribute: Attribute]) -> Result<Void, RelationError> {
@@ -503,7 +503,7 @@ extension IntermediateRelation {
                 return .Err(err)
             }
         }
-        return .Ok()
+        return .Ok(())
     }
     
     func uniqueUpdate(_ query: SelectExpression, newValues: Row, attribute: Attribute, value: RelationValue) -> Result<Void, RelationError> {
@@ -511,7 +511,7 @@ extension IntermediateRelation {
             if $0 {
                 return operands[0].update(query, newValues: newValues)
             } else {
-                return .Ok()
+                return .Ok(())
             }
         })
     }

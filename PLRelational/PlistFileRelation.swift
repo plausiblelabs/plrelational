@@ -81,7 +81,7 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
         
         notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .directChange)
         
-        return .Ok()
+        return .Ok(())
     }
     
     public func add(_ row: Row) -> Result<Int64, RelationError> {
@@ -96,7 +96,7 @@ public class PlistFileRelation: PlistRelation, RelationDefaultChangeObserverImpl
         let toDelete = self.valuesMatching(expression: query)
         values.subtractInPlace(toDelete)
         notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .directChange)
-        return .Ok()
+        return .Ok(())
     }
 }
 

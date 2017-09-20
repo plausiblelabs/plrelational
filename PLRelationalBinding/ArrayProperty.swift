@@ -26,7 +26,7 @@ public enum ArrayChange<E: ArrayElement> { case
 }
 
 extension ArrayChange: Equatable {}
-public func ==<E: ArrayElement>(a: ArrayChange<E>, b: ArrayChange<E>) -> Bool {
+public func ==<E>(a: ArrayChange<E>, b: ArrayChange<E>) -> Bool {
     switch (a, b) {
     case let (.initial(a), .initial(b)): return a == b
     case let (.insert(a), .insert(b)): return a == b

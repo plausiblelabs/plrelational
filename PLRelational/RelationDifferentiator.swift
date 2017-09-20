@@ -138,7 +138,13 @@ extension RelationDifferentiator {
     
     fileprivate func derivativeOf(_ relation: Relation) -> RelationChange {
         if let obj = asObject(relation) {
-            return derivativeMap.getOrCreate(obj, defaultValue: rawDerivativeOf(relation))
+            if let change = derivativeMap[obj] {
+                return change
+            } else {
+                let change = rawDerivativeOf(relation)
+                derivativeMap[obj] = change
+                return change
+            }
         } else {
             return rawDerivativeOf(relation)
         }

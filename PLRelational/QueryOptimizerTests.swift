@@ -320,12 +320,12 @@ private class InstrumentedSelectableRelation: Relation {
     
     var rowsProvided = 0
     
-    func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void) {
+    func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> (() -> Void) {
         return {}
     }
 
     func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
-        return .Ok()
+        return .Ok(())
     }
 
     func contains(_ row: Row) -> Result<Bool, RelationError> {

@@ -310,7 +310,7 @@ class SignalOperationsTests: BindingTestCase {
         
         let then = source.then{ count += 1 }
         
-        let removal = then.observeValueChanging{ _ in }
+        let removal = then.observeValueChanging{ _, _ in }
         XCTAssertEqual(count, 0)
         
         source.notifyValueChanging(false)

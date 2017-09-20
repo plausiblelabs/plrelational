@@ -281,7 +281,7 @@ private extension RelationTextIndex {
                     }
                     
                     log("completed asyncUpdate for \(relation.query)")
-                    return .Ok()
+                    return .Ok(())
                 })
             }).err
         })
@@ -331,7 +331,7 @@ private extension RelationTextIndex {
                     precondition(array.isEmpty, "Unexpected results from INSERT INTO statement: \(array)")
                     log("Setting content for \(pageID) succeeded")
                     self.asyncUpdateAll()
-                    return .Ok()
+                    return .Ok(())
                 }
             })
         })
@@ -529,7 +529,7 @@ private class RelationTextIndexObserver: AsyncRelationChangeCoalescedObserver {
             for (attribute, value) in row {
                 if let string = value.get() as String? {
                     if let lastIndex = string.characters.index(of: "\n") ?? string.index(string.startIndex, offsetBy: 40, limitedBy: string.endIndex) {
-                        result[attribute] = .text(string.substring(to: lastIndex) + "…")
+                        result[attribute] = .text(string[..<lastIndex] + "…")
                     }
                 }
             }
@@ -564,7 +564,7 @@ private func setupTokenizer(db: SQLiteDatabase) -> Result<Void, RelationError> {
     return db.executeQuery("SELECT fts3_tokenizer(?, ?)", [.text(tokenizerName), .blob(pointerData)], bindBlobsRaw: true).then({
         let rows = Array($0)
         precondition(rows.count == 1, "Unexpected result from SELECT fts3_tokenizer call: \(rows)")
-        return .Ok()
+        return .Ok(())
     })
 }
 
@@ -674,7 +674,7 @@ private func xOpen(tokenizer: UnsafeMutablePointer<sqlite3_tokenizer>?, input: U
         return string.lowercased()
     }
     
-    let tagger = NSLinguisticTagger(tagSchemes: [NSLinguisticTagSchemeTokenType], options: 0)
+    let tagger = NSLinguisticTagger(tagSchemes: [NSLinguisticTagScheme.tokenType], options: 0)
     tagger.string = string
 
     // Consider reinstating this in some distant future when we figure out how to make stemming work
@@ -689,7 +689,7 @@ private func xOpen(tokenizer: UnsafeMutablePointer<sqlite3_tokenizer>?, input: U
 //    })
     
     tagger.enumerateTags(in: range,
-                         scheme: NSLinguisticTagSchemeTokenType,
+                         scheme: NSLinguisticTagScheme.tokenType,
                          options: [.omitWhitespace, .omitPunctuation, .omitOther],
                          using: {
         tag, tokenRange, sentenceRange, stop in

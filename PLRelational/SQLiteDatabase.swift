@@ -179,7 +179,7 @@ extension SQLiteDatabase {
                 return .Err(error)
             }
             precondition(rows.isEmpty, "Unexpected result from \(sql) query: \(rows)")
-            return .Ok()
+            return .Ok(())
         })
     }
     
@@ -252,7 +252,7 @@ extension SQLiteDatabase {
 }
 
 extension SQLiteDatabase {
-    public func transaction<Return>(_ transactionFunction: (Void) -> (Return, TransactionResult)) -> Result<Return, RelationError> {
+    public func transaction<Return>(_ transactionFunction: () -> (Return, TransactionResult)) -> Result<Return, RelationError> {
         // TODO: it might make sense to pass a new DB into the object, but in fact changes affect the original database object.
         // This will matter if the caller tries to access the original database during the transaction and expects it not to
         // reflect the new changes.
@@ -280,8 +280,8 @@ extension SQLiteDatabase {
         return result
     }
     
-    public func transaction(_ transactionFunction: (Void) -> TransactionResult) -> Result<Void, RelationError> {
-        return self.transaction({ Void -> ((), TransactionResult) in
+    public func transaction(_ transactionFunction: () -> TransactionResult) -> Result<Void, RelationError> {
+        return self.transaction({ () -> ((), TransactionResult) in
             let result = transactionFunction()
             return ((), result)
         })

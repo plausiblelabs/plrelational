@@ -21,7 +21,7 @@ public class Image {
     }
 
     public init?(named name: String) {
-        guard let nsimage = NSImage(named: name) else { return nil }
+        guard let nsimage = NSImage(named: NSImage.Name(name)) else { return nil }
         self.nsimage = nsimage
     }
 #else

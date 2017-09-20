@@ -35,7 +35,7 @@ open class Checkbox: NSButton {
             // Only allow mixed state if we are starting in a mixed state; otherwise we
             // use simple two-state mode
             self.allowsMixedState = value == .mixed
-            self.state = value.nsValue
+            self.state = NSControl.StateValue(rawValue: value.nsValue)
         }
 //        changeHandler: self.changeHandler
     )
@@ -68,7 +68,7 @@ open class Checkbox: NSButton {
     }
     
     open override func accessibilityValue() -> Any? {
-        return CheckState(state).rawValue
+        return CheckState(state)
     }
     
     @objc private func timerFired() {

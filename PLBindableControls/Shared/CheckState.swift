@@ -36,16 +36,16 @@ public enum CheckState: String { case
     }
     
 #if os(macOS)
-    public init(_ nsValue: Int) {
+    public init(_ nsValue: NSControl.StateValue) {
         switch nsValue {
-        case NSMixedState:
+        case .mixed:
             self = .mixed
-        case NSOffState:
+        case .off:
             self = .off
-        case NSOnState:
+        case .on:
             self = .on
         default:
-            preconditionFailure("Must be one of {NSMixedState, NSOnState, NSOffState}")
+            preconditionFailure("Must be one of NSControl.StateValue.{mixed, off, on}")
         }
     }
 #endif
@@ -77,11 +77,11 @@ public enum CheckState: String { case
     public var nsValue: Int {
         switch self {
         case .on:
-            return NSOnState
+            return NSControl.StateValue.on.rawValue
         case .off:
-            return NSOffState
+            return NSControl.StateValue.off.rawValue
         case .mixed:
-            return NSMixedState
+            return NSControl.StateValue.mixed.rawValue
         }
     }
 #endif

@@ -45,7 +45,7 @@ open class TextField: UITextField, UITextFieldDelegate {
         previousCommittedValue = self.text
     }
     
-    func textFieldChanged(_ sender: UITextField) {
+    @objc func textFieldChanged(_ sender: UITextField) {
         if deliverTransientChanges {
             _bindable_text.changed(transient: true)
         }

@@ -41,12 +41,12 @@ class Document: NSDocument {
         self.undoManager = _undoManager.native
     }
     
-    override class func autosavesInPlace() -> Bool {
+    override class var autosavesInPlace: Bool {
         return false
     }
     
-    override var windowNibName: String? {
-        return "Document"
+    override var windowNibName: NSNib.Name? {
+        return NSNib.Name("Document")
     }
     
     override func read(from url: URL, ofType typeName: String) throws {
@@ -59,7 +59,7 @@ class Document: NSDocument {
         }
     }
     
-    override func writeSafely(to url: URL, ofType typeName: String, for saveOperation: NSSaveOperationType) throws {
+    override func writeSafely(to url: URL, ofType typeName: String, for saveOperation: NSDocument.SaveOperationType) throws {
         // TODO
     }
     
@@ -90,11 +90,11 @@ class Document: NSDocument {
         leftSidebarView.visible <~ docModel.leftSidebarVisible
         
         editorView = EditorView(frame: contentView.bounds, model: docModel)
-        editorView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
+        editorView.autoresizingMask = [.width, .height]
         contentView.addSubview(editorView)
         
         sidebarView = SidebarView(frame: rightSidebarView.bounds, model: docModel)
-        sidebarView.autoresizingMask = [.viewHeightSizable]
+        sidebarView.autoresizingMask = [.height]
         rightSidebarView.addSubview(sidebarView)
         rightSidebarView.visible <~ docModel.rightSidebarVisible
         

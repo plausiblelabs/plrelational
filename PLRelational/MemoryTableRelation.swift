@@ -48,7 +48,7 @@ open class MemoryTableRelation: Relation, StoredRelation, RelationDefaultChangeO
         
         notifyChangeObservers(RelationChange(added: added, removed: removed), kind: .directChange)
         
-        return .Ok()
+        return .Ok(())
     }
     
     open func add(_ row: Row) -> Result<Int64, RelationError> {
@@ -63,7 +63,7 @@ open class MemoryTableRelation: Relation, StoredRelation, RelationDefaultChangeO
         let toDelete = Set(values.lazy.filter({ query.valueWithRow($0).boolValue }))
         values.fastSubtract(toDelete)
         notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .directChange)
-        return .Ok()
+        return .Ok(())
     }
     
     open func delete(_ row: Row) {

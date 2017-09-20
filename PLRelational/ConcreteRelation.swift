@@ -100,7 +100,7 @@ public struct ConcreteRelation: Relation {
             }
             _ = self.add(rowToAdd)
         }
-        return .Ok()
+        return .Ok(())
     }
     
     public func contains(_ row: Row) -> Result<Bool, RelationError> {
@@ -129,9 +129,9 @@ public struct ConcreteRelation: Relation {
 //        return (one, two)
 //    }
     
-    public func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> ((Void) -> Void) {
+    public func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> (() -> Void) {
         //fatalError("Change observation isn't implemented for ConcreteRelation. Its implementation as a value type makes that weird. We might change that if we ever need it.")
-        return { _ in }
+        return {}
     }
 }
 

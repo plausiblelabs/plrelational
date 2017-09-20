@@ -12,8 +12,8 @@ import PLBindableControls
 class ResultsListView: ListView<RowArrayElement> {
     
     override func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
-        let identifier = "RowView"
-        if let rowView = outlineView.make(withIdentifier: identifier, owner: self) {
+        let identifier = NSUserInterfaceItemIdentifier("RowView")
+        if let rowView = outlineView.makeView(withIdentifier: identifier, owner: self) {
             return rowView as? NSTableRowView
         } else {
             let rowView = OutlineRowView(frame: NSZeroRect, rowHeight: outlineView.rowHeight)
@@ -41,6 +41,6 @@ private class OutlineRowView: NSTableRowView {
         selectionRect.size.height = rowHeight
         let color = NSColor(red: 178.0/255.0, green: 223.0/255.0, blue: 255.0/255.0, alpha: 1.0)
         color.setFill()
-        NSRectFill(selectionRect)
+        selectionRect.fill()
     }
 }

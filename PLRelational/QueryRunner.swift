@@ -199,7 +199,7 @@ open class QueryRunner {
     fileprivate func pumpInitiator() -> Result<Void, RelationError> {
         guard let nodeIndex = getInitiatorIndex() else {
             done = true
-            return .Ok()
+            return .Ok(())
         }
         
         let db = nodeStates[nodeIndex].transactionalDatabase
@@ -257,10 +257,10 @@ open class QueryRunner {
             fatalError("Unknown initiator operation \(firstLine)")
         }
         
-        return .Ok()
+        return .Ok(())
     }
     
-    fileprivate func getRowGeneratorRows(_ initiatorIndex: Int, _ generatorGetter: (Void) -> AnyIterator<Result<Set<Row>, RelationError>>) -> Result<Set<Row>, RelationError>? {
+    fileprivate func getRowGeneratorRows(_ initiatorIndex: Int, _ generatorGetter: () -> AnyIterator<Result<Set<Row>, RelationError>>) -> Result<Set<Row>, RelationError>? {
         let generator = initiatorGenerators.getOrCreate(initiatorIndex, defaultValue: generatorGetter())
         return generator.next()
     }
@@ -443,10 +443,10 @@ open class QueryRunner {
         // Once it is complete, we can stream buffer[0] through.
         guard nodeStates[nodeIndex].inputBuffers[1].eof else { return }
         
-        let rhsMap = nodeStates[nodeIndex].getExtraState({ () -> ObjectMap<()> in
+        let rhsMap = nodeStates[nodeIndex].getExtraState({ nodeState -> ObjectMap<()> in
             // Note: we pull the rows here but we do *not* pop them. The map doesn't keep the rows
             // alive, so we need to keep those objects alive by holding onto the rows elsewhere.
-            let rows = nodeStates[nodeIndex].inputBuffers[1].rows
+            let rows = nodeState.inputBuffers[1].rows
             let map = ObjectMap<()>(capacity: rows.count)
             for row in rows {
                 map[row.inlineRow] = ()
@@ -511,8 +511,11 @@ open class QueryRunner {
             // The larger input is the other one.
             let largerInput = smallerInput == 0 ? 1 : 0
             
-            let smallerAttributes = smallerInput == 0 ? matching.keys : matching.values
-            let largerAttributes = smallerInput == 0 ? matching.values : matching.keys
+            let matchingKeys = Array(matching.keys)
+            let matchingValues = Array(matching.values)
+            
+            let smallerAttributes = smallerInput == 0 ? matchingKeys : matchingValues
+            let largerAttributes = smallerInput == 0 ? matchingValues : matchingKeys
             let largerToSmallerRenaming = smallerInput == 0 ? matching.inverted : matching
             
             // It's common to join identical attributes, so filter out any renames which "rename"
@@ -550,8 +553,8 @@ open class QueryRunner {
             extraState = ExtraState(
                 keyed: keyed,
                 largerIndex: 1 - smallerInput,
-                largerAttributes: Array(largerAttributes),
-                largerToSmallerRenaming: Dictionary(largerToSmallerRenamingWithoutNoops as [(Attribute, Attribute)])) // For some reason, Swift 3 currently fails to infer generic types without this pointless cast
+                largerAttributes: largerAttributes,
+                largerToSmallerRenaming: largerToSmallerRenamingWithoutNoops) // For some reason, Swift 3 currently fails to infer generic types without this pointless cast
             nodeStates[nodeIndex].setExtraState(extraState)
         }
         
@@ -577,7 +580,7 @@ open class QueryRunner {
     }
     
     func processAggregate(_ nodeIndex: Int, _ inputIndex: Int, _ attribute: Attribute, _ initialValue: RelationValue?, _ agg: (RelationValue?, [Row]) -> Result<RelationValue, RelationError>) {
-        var soFar = nodeStates[nodeIndex].getExtraState({ initialValue })
+        var soFar = nodeStates[nodeIndex].getExtraState({ _ in initialValue })
         let rows = nodeStates[nodeIndex].inputBuffers[inputIndex].popAll()
         if !rows.isEmpty {
             let aggregated = agg(soFar, rows)
@@ -833,11 +836,11 @@ extension QueryRunner {
             }
         }
         
-        mutating func getExtraState<T>(_ calculate: (Void) -> T) -> T {
+        mutating func getExtraState<T>(_ calculate: (NodeState) -> T) -> T {
             if let state = extraState {
                 return state as! T
             } else {
-                let state = calculate()
+                let state = calculate(self)
                 setExtraState(state)
                 return state
             }
