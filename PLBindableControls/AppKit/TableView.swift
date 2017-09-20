@@ -82,7 +82,7 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
         for columnModel in model.columns {
             let column = TableColumn(model: columnModel)
             column.width = columnModel.width
-            column.resizingMask = NSTableColumn.ResizingOptions.autoresizingMask
+            column.resizingMask = .autoresizingMask
             column.headerCell.stringValue = columnModel.title
             tableView.addTableColumn(column)
         }
@@ -140,7 +140,7 @@ public class TableView<C: TableColumnModel, E: ArrayElement>: NSObject, NSTableV
     // MARK: Property observers
     
     private func arrayChanged(_ arrayChanges: [ArrayChange<E>]) {
-        let animation: NSTableView.AnimationOptions = animateChanges ? [NSTableView.AnimationOptions.effectFade] : []
+        let animation: NSTableView.AnimationOptions = animateChanges ? [.effectFade] : []
 
         var rowToSelectAndEdit: Int?
         
@@ -203,7 +203,7 @@ private class TableColumn<M: TableColumnModel>: NSTableColumn {
     
     fileprivate init(model: M) {
         self.model = model
-        super.init(identifier: NSUserInterfaceItemIdentifier(rawValue: model.identifierString))
+        super.init(identifier: NSUserInterfaceItemIdentifier(model.identifierString))
     }
     
     required init(coder: NSCoder) {
@@ -224,7 +224,7 @@ private class CellView: NSTableCellView {
         _textField.isBezeled = false
         _textField.drawsBackground = false
         _textField.lineBreakMode = .byTruncatingTail
-        _textField.autoresizingMask = [NSView.AutoresizingMask.width]
+        _textField.autoresizingMask = [.width]
         addSubview(_textField)
         
         self.textField = _textField

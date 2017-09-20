@@ -34,7 +34,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     private let outlineView: NSOutlineView
 
     /// Private pasteboard type that limits drag and drop to this specific outline view.
-    private let pasteboardType: String
+    private let pasteboardType: NSPasteboard.PasteboardType
 
     private var elements: [E] {
         return model.data.elements
@@ -79,7 +79,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     public init(model: ListViewModel<E>, outlineView: NSOutlineView) {
         self.model = model
         self.outlineView = outlineView
-        self.pasteboardType = "PLBindableControls.ListView.pasteboard.\(ProcessInfo.processInfo.globallyUniqueString)"
+        self.pasteboardType = NSPasteboard.PasteboardType("PLBindableControls.ListView.pasteboard.\(ProcessInfo.processInfo.globallyUniqueString)")
 
         super.init()
         
@@ -92,7 +92,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         outlineView.dataSource = self
         
         // Enable drag-and-drop
-        outlineView.registerForDraggedTypes([NSPasteboard.PasteboardType(rawValue: pasteboardType)])
+        outlineView.registerForDraggedTypes([pasteboardType])
         outlineView.verticalMotionCanBeginDrag = true
         
         // Load the initial data
@@ -124,14 +124,14 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
         
         let element = item as! E
         let pboardItem = NSPasteboardItem()
-        pboardItem.setPropertyList(element.id.toPlist(), forType: NSPasteboard.PasteboardType(rawValue: pasteboardType))
+        pboardItem.setPropertyList(element.id.toPlist(), forType: pasteboardType)
         return pboardItem
     }
     
     open func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: Any?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: pasteboardType)) {
+        if let idPlist = pboard.propertyList(forType: pasteboardType) {
             let elementID = E.ID.fromPlist(idPlist as AnyObject)!
             if let srcIndex = model.data.indexForID(elementID) {
                 if proposedIndex >= 0 && proposedIndex != srcIndex && proposedIndex != srcIndex + 1 {
@@ -146,7 +146,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     open func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
         let pboard = info.draggingPasteboard()
         
-        if let idPlist = pboard.propertyList(forType: NSPasteboard.PasteboardType(rawValue: pasteboardType)), let move = model.move {
+        if let idPlist = pboard.propertyList(forType: pasteboardType), let move = model.move {
             let elementID = E.ID.fromPlist(idPlist as AnyObject)!
             if let srcIndex = model.data.indexForID(elementID) {
                 move(srcIndex, index)
@@ -161,8 +161,8 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
 
     open func outlineView(_ outlineView: NSOutlineView, viewFor viewForTableColumn: NSTableColumn?, item: Any) -> NSView? {
         let element = item as! E
-        let identifier = model.cellIdentifier(element.data)
-        let view = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: identifier), owner: self) as! NSTableCellView
+        let identifier = NSUserInterfaceItemIdentifier(model.cellIdentifier(element.data))
+        let view = outlineView.makeView(withIdentifier: identifier, owner: self) as! NSTableCellView
         configureCell?(view, element.data)
         return view
     }
@@ -182,7 +182,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     
     open func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
         // TODO: Make this configurable
-        return outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: "RowView"), owner: self) as? NSTableRowView
+        return outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier("RowView"), owner: self) as? NSTableRowView
     }
     
     open func outlineViewSelectionDidChange(_ notification: Notification) {
@@ -198,7 +198,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     // MARK: Property observers
 
     private func arrayChanged(_ arrayChanges: [ArrayChange<E>]) {
-        let animation: NSTableView.AnimationOptions = animateChanges ? [NSTableView.AnimationOptions.effectFade] : []
+        let animation: NSTableView.AnimationOptions = animateChanges ? [.effectFade] : []
 
         var rowToSelectAndEdit: Int?
         
