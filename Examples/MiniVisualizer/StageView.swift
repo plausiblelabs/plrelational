@@ -162,10 +162,10 @@ class StageView: BackgroundView {
         combineOpPopup.selectedObject <~> self.selectedCombineOp
         combineView.addSubview(combineOpPopup)
         
-        let filterTrackingArea = NSTrackingArea(rect: filterFrame, options: [.activeInKeyWindow, .mouseEnteredAndExited], owner: self, userInfo: ["key": "filter"])
+        let filterTrackingArea = NSTrackingArea(rect: filterFrame, options: [NSTrackingArea.Options.activeInKeyWindow, NSTrackingArea.Options.mouseEnteredAndExited], owner: self, userInfo: ["key": "filter"])
         self.addTrackingArea(filterTrackingArea)
 
-        let combineTrackingArea = NSTrackingArea(rect: combineFrame, options: [.activeInKeyWindow, .mouseEnteredAndExited], owner: self, userInfo: ["key": "combine"])
+        let combineTrackingArea = NSTrackingArea(rect: combineFrame, options: [NSTrackingArea.Options.activeInKeyWindow, NSTrackingArea.Options.mouseEnteredAndExited], owner: self, userInfo: ["key": "combine"])
         self.addTrackingArea(combineTrackingArea)
 
         filterOffset <~ not(filterVisible)
@@ -195,7 +195,7 @@ class StageView: BackgroundView {
     }()
 
     private lazy var selectedFilterOp: MutableValueProperty<FilterOp?> = {
-        return mutableValueProperty(FilterOp.none, { _ in self.selectedCombineOp.change(CombineOp.none) })
+        return mutableValueProperty(FilterOp.none, { _, _ in self.selectedCombineOp.change(CombineOp.none) })
     }()
 
     private lazy var filterAttrPopupVisible: ReadableProperty<Bool> = {
@@ -234,7 +234,7 @@ class StageView: BackgroundView {
     }()
     
     private lazy var selectedCombineOp: MutableValueProperty<CombineOp?> = {
-        return mutableValueProperty(CombineOp.none, { _ in self.selectedFilterOp.change(FilterOp.none) })
+        return mutableValueProperty(CombineOp.none, { _, _ in self.selectedFilterOp.change(FilterOp.none) })
     }()
     
     private lazy var filterOutput: ReadableProperty<Output?> = {
