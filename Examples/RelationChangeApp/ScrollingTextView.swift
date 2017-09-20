@@ -55,8 +55,8 @@ class ScrollingTextView: BackgroundView {
         self.backgroundColor = .white
     }
 
-    lazy var index: BindableProperty<Int> = WriteOnlyProperty(set: { [weak self] in
-        self?.scrollToIndex($0.0)
+    lazy var index: BindableProperty<Int> = WriteOnlyProperty(set: { [weak self] value, _ in
+        self?.scrollToIndex(value)
     })
     
     private func scrollToIndex(_ index: Int) {

@@ -2859,6 +2859,7 @@
 					};
 					374315E81F420B5200128F5A = {
 						DevelopmentTeam = NM4ZX45CU5;
+						LastSwiftMigration = 0900;
 					};
 					37504B371DC6995100CEE4D4 = {
 						CreatedOnToolsVersion = 8.0;
@@ -4262,7 +4263,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationChangeApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -4279,7 +4280,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationChangeApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
