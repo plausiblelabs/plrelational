@@ -36,7 +36,7 @@ enum SearchResult {
             // Set background color for matched text
             let attrStr = NSMutableAttributedString(string: snippet.string)
             for range in snippet.matches {
-                attrStr.addAttribute(NSAttributedStringKey.backgroundColor, value: highlightColor, range: snippet.string.nsRange(from: range))
+                attrStr.addAttribute(.backgroundColor, value: highlightColor, range: snippet.string.nsRange(from: range))
             }
             
             // Add ellipses as needed
@@ -50,11 +50,11 @@ enum SearchResult {
             // Apply font and foreground color attributes for the full string
             var attrs: [NSAttributedStringKey: Any] = [:]
             if title {
-                attrs[NSAttributedStringKey.font] = titleFont
-                attrs[NSAttributedStringKey.foregroundColor] = titleColor
+                attrs[.font] = titleFont
+                attrs[.foregroundColor] = titleColor
             } else {
-                attrs[NSAttributedStringKey.font] = textFont
-                attrs[NSAttributedStringKey.foregroundColor] = textColor
+                attrs[.font] = textFont
+                attrs[.foregroundColor] = textColor
             }
             attrStr.addAttributes(attrs, range: NSMakeRange(0, attrStr.length))
             
@@ -75,7 +75,7 @@ enum SearchResult {
         /// Add some breathing room
         let style = NSMutableParagraphStyle()
         style.lineSpacing = 4.0
-        attrStr.addAttribute(NSAttributedStringKey.paragraphStyle, value: style, range: NSMakeRange(0, attrStr.length))
+        attrStr.addAttribute(.paragraphStyle, value: style, range: NSMakeRange(0, attrStr.length))
         
         return attrStr
     }

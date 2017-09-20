@@ -162,10 +162,10 @@ class StageView: BackgroundView {
         combineOpPopup.selectedObject <~> self.selectedCombineOp
         combineView.addSubview(combineOpPopup)
         
-        let filterTrackingArea = NSTrackingArea(rect: filterFrame, options: [NSTrackingArea.Options.activeInKeyWindow, NSTrackingArea.Options.mouseEnteredAndExited], owner: self, userInfo: ["key": "filter"])
+        let filterTrackingArea = NSTrackingArea(rect: filterFrame, options: [.activeInKeyWindow, .mouseEnteredAndExited], owner: self, userInfo: ["key": "filter"])
         self.addTrackingArea(filterTrackingArea)
 
-        let combineTrackingArea = NSTrackingArea(rect: combineFrame, options: [NSTrackingArea.Options.activeInKeyWindow, NSTrackingArea.Options.mouseEnteredAndExited], owner: self, userInfo: ["key": "combine"])
+        let combineTrackingArea = NSTrackingArea(rect: combineFrame, options: [.activeInKeyWindow, .mouseEnteredAndExited], owner: self, userInfo: ["key": "combine"])
         self.addTrackingArea(combineTrackingArea)
 
         filterOffset <~ not(filterVisible)

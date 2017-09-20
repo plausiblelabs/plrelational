@@ -12,12 +12,12 @@ import PLBindableControls
 class ResultsListView: ListView<RowArrayElement> {
     
     override func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
-        let identifier = "RowView"
-        if let rowView = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: identifier), owner: self) {
+        let identifier = NSUserInterfaceItemIdentifier("RowView")
+        if let rowView = outlineView.makeView(withIdentifier: identifier, owner: self) {
             return rowView as? NSTableRowView
         } else {
             let rowView = OutlineRowView(frame: NSZeroRect, rowHeight: outlineView.rowHeight)
-            rowView.identifier = NSUserInterfaceItemIdentifier(rawValue: identifier)
+            rowView.identifier = identifier
             return rowView
         }
     }
