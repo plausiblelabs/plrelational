@@ -33,13 +33,13 @@ class SidebarView: BackgroundView {
         addSubview(segmentedControl)
         
         contentView = BackgroundView(frame: NSMakeRect(0, 43, frame.width, frame.height - 43))
-        contentView.autoresizingMask = [.viewHeightSizable]
+        contentView.autoresizingMask = [.height]
         addSubview(contentView)
         
         let codeSegmentView = CodeSegmentView(frame: contentView.bounds, model: model)
-        codeSegmentView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
+        codeSegmentView.autoresizingMask = [.width, .height]
         let propsSegmentView = PropsSegmentView(frame: contentView.bounds, model: model)
-        propsSegmentView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
+        propsSegmentView.autoresizingMask = [.width, .height]
         contentView.addSubview(codeSegmentView)
         
         segmentedControl.setAction({ [weak self] control in
@@ -101,7 +101,7 @@ class BaseSegmentView: BackgroundView {
         
         scrollView = ScrollView(frame: self.bounds)
         scrollView.drawsBackground = false
-        scrollView.autoresizingMask = [.viewWidthSizable, .viewHeightSizable]
+        scrollView.autoresizingMask = [NSView.AutoresizingMask.width, NSView.AutoresizingMask.height]
         scrollView.visible <~ model.itemSelected
         addSubview(scrollView)
         
@@ -111,7 +111,7 @@ class BaseSegmentView: BackgroundView {
         noSelectionLabel.textColor = NSColor.darkGray
         noSelectionLabel.visible <~ model.itemNotSelected
         noSelectionLabel.sizeToFit()
-        noSelectionLabel.autoresizingMask = [.viewMinXMargin, .viewMaxXMargin, .viewMinYMargin, .viewMaxYMargin]
+        noSelectionLabel.autoresizingMask = [.minXMargin, .maxXMargin, .minYMargin, .maxYMargin]
         var f = noSelectionLabel.frame
         f.origin.x = round(frame.midX - (f.width * 0.5))
         f.origin.y = round(frame.midY - (f.height * 0.5))
@@ -144,7 +144,7 @@ private class CodeSegmentView: BaseSegmentView {
         textView.textContainer?.containerSize.width = scrollView.contentSize.width
         textView.textContainer?.containerSize.height = CGFloat.greatestFiniteMagnitude
         textView.textContainer?.widthTracksTextView = true
-        textView.autoresizingMask = [ .viewWidthSizable ]
+        textView.autoresizingMask = [ .width ]
         
         scrollView.documentView = textView
     }
