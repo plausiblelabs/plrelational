@@ -24,7 +24,7 @@ class ChecklistView: NSView {
         super.init(frame: frame)
         
         // Load the xib and bind to it
-        Bundle.main.loadNibNamed("ChecklistView", owner: self, topLevelObjects: nil)
+        Bundle.main.loadNibNamed(NSNib.Name(rawValue: "ChecklistView"), owner: self, topLevelObjects: nil)
         view.frame = self.bounds
         addSubview(view)
         
@@ -78,11 +78,11 @@ private class CustomListView: ListView<RowArrayElement> {
     
     override func outlineView(_ outlineView: NSOutlineView, rowViewForItem item: Any) -> NSTableRowView? {
         let identifier = "RowView"
-        if let rowView = outlineView.make(withIdentifier: identifier, owner: self) {
+        if let rowView = outlineView.makeView(withIdentifier: NSUserInterfaceItemIdentifier(rawValue: identifier), owner: self) {
             return rowView as? NSTableRowView
         } else {
             let rowView = OutlineRowView(frame: NSZeroRect, rowHeight: outlineView.rowHeight)
-            rowView.identifier = identifier
+            rowView.identifier = NSUserInterfaceItemIdentifier(rawValue: identifier)
             return rowView
         }
     }
