@@ -101,7 +101,7 @@ class BaseSegmentView: BackgroundView {
         
         scrollView = ScrollView(frame: self.bounds)
         scrollView.drawsBackground = false
-        scrollView.autoresizingMask = [NSView.AutoresizingMask.width, NSView.AutoresizingMask.height]
+        scrollView.autoresizingMask = [.width, .height]
         scrollView.visible <~ model.itemSelected
         addSubview(scrollView)
         
