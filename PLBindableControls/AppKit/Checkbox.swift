@@ -29,7 +29,7 @@ open class Checkbox: NSButton {
 
     private lazy var _checkState: ExternalValueProperty<CheckState> = ExternalValueProperty(
         get: { [unowned self] in
-            return CheckState(self.state.rawValue)
+            return CheckState(self.state)
         },
         set: { [unowned self] value, _ in
             // Only allow mixed state if we are starting in a mixed state; otherwise we
@@ -68,7 +68,7 @@ open class Checkbox: NSButton {
     }
     
     open override func accessibilityValue() -> Any? {
-        return CheckState(state.rawValue)
+        return CheckState(state)
     }
     
     @objc private func timerFired() {
