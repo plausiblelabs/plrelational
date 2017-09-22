@@ -35,7 +35,7 @@ open class Checkbox: NSButton {
             // Only allow mixed state if we are starting in a mixed state; otherwise we
             // use simple two-state mode
             self.allowsMixedState = value == .mixed
-            self.state = NSControl.StateValue(rawValue: value.nsValue)
+            self.state = value.nsValue
         }
 //        changeHandler: self.changeHandler
     )

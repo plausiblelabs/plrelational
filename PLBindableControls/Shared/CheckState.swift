@@ -73,15 +73,15 @@ public enum CheckState: String { case
     }
     
 #if os(macOS)
-    /// The Cocoa-defined integer value that corresponds to this CheckState (NSOnState, NSOffState, or NSMixedState).
-    public var nsValue: Int {
+    /// The Cocoa-defined value that corresponds to this CheckState (NSOnState, NSOffState, or NSMixedState).
+    public var nsValue: NSControl.StateValue {
         switch self {
         case .on:
-            return NSControl.StateValue.on.rawValue
+            return .on
         case .off:
-            return NSControl.StateValue.off.rawValue
+            return .off
         case .mixed:
-            return NSControl.StateValue.mixed.rawValue
+            return .mixed
         }
     }
 #endif
