@@ -854,7 +854,7 @@ extension AsyncManager {
     private func efficientRows(fromRelation: Relation) -> Set<Row>? {
         switch fromRelation {
         case let r as MemoryTableRelation where !hasPendingChanges(forRelation: r):
-            return r.values
+            return r.values.allValues
         case let r as CachingRelation:
             return r.cache
         default:

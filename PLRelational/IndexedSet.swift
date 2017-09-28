@@ -15,7 +15,7 @@ public struct IndexedSet<Element: IndexableValue> {
     // in atrocious performance. Boxing it in a class fixes that. Hopefully this will be fixed in Swift 4
     // and then we can remove this.
     fileprivate var index: [Element.Index: MutableBox<[Element.IndexedValue: MutableBox<Set<Element>>]>]
-    fileprivate var allValues: Set<Element>
+    public var allValues: Set<Element>
 }
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
@@ -94,6 +94,96 @@ extension IndexedSet {
         if removed != nil && box?.value.isEmpty == true {
             fromDictionary.removeValue(forKey: indexedValue)
         }
+    }
+}
+
+/// These methods integrate with `SelectExpression` to efficiently pull out values based on
+/// expressions that are suitable for it.
+extension IndexedSet where Element == Row {
+    /// Attempt to reduce a `SelectExpression` to a set of equality statements on our primary keys.
+    /// On success, the return value is an array of attribute/value pairs, where the `SelectExpression`
+    /// is equivalent to the logical OR of `attribute *== value` for each pair. If the `SelectExpression`
+    /// cannot be reduced that way, then this method returns `nil`.
+    func primaryKeyEquality(expression: SelectExpression) -> [(attribute: Attribute, value: RelationValue)]? {
+        if case let op as SelectExpressionBinaryOperator = expression {
+            switch op.op {
+            case is EqualityComparator:
+                if let attr = op.lhs as? Attribute, let value = op.rhs as? SelectExpressionConstantValue, primaryKeys.contains(attr) {
+                    return [(attr, value.relationValue)]
+                }
+                if let attr = op.rhs as? Attribute, let value = op.lhs as? SelectExpressionConstantValue, primaryKeys.contains(attr) {
+                    return [(attr, value.relationValue)]
+                }
+                
+            case is OrComparator:
+                if let lhsEquality = primaryKeyEquality(expression: op.lhs), let rhsEquality = primaryKeyEquality(expression: op.rhs) {
+                    return lhsEquality + rhsEquality
+                }
+                
+            default: break
+            }
+        }
+        return nil
+    }
+    
+    /// Attempt to efficiently fetch a set of values matching the given `SelectExpression`.
+    /// If the values matching the `SelectExpression` can be computed efficiently, returns
+    /// a set of matching values. Otherwise returns nil.
+    func efficientValuesSet(expression: SelectExpression) -> Set<Row>? {
+        // TODO: we probably also want to handle cases where the expression is
+        // multiple primary key values ORed together.
+        if expression as? Bool == false {
+            return []
+        } else if let equality = primaryKeyEquality(expression: expression) {
+            var result = Set<Row>()
+            for (attribute, value) in equality {
+                result.formUnion(values(matchingKey: attribute, value: value))
+            }
+            return result
+        } else {
+            return nil
+        }
+    }
+    
+    /// Fetch the set of values matching the given `SelectExpression`. This is computed efficiently
+    /// from the index if possible, and computed with a brute-force filter if not.
+    func valuesMatching(expression: SelectExpression) -> Set<Row> {
+        return efficientValuesSet(expression: expression)
+            ?? values.filter({ expression.valueWithRow($0).boolValue })
+    }
+    
+    /// A `RelationContentProvider` which will provide the contents of this set.
+    var contentProvider: RelationContentProvider {
+        return .efficientlySelectableGenerator({ expression in
+            if expression.constantBoolValue == false {
+                return AnyIterator([].makeIterator())
+            } else if expression.constantBoolValue == true {
+                return AnyIterator([.Ok(self.values)].makeIterator())
+            } else if let rows = self.efficientValuesSet(expression: expression) {
+                return AnyIterator([.Ok(rows)].makeIterator())
+            } else {
+                IndexedSet.logInefficientScan(self, expression)
+                let filtered = self.values.filter({
+                    expression.valueWithRow($0).boolValue
+                })
+                return AnyIterator(filtered.map({ .Ok([$0]) }).makeIterator())
+            }
+        }, approximateCount: {
+            // TODO: efficientValuesSet may become less efficient for complex selects,
+            // so we might want to change this then.
+            return Double(self.efficientValuesSet(expression: $0)?.count ?? self.values.count)
+        })
+    }
+    
+    private static let logInefficientScans = false
+    
+    private static func logInefficientScan(_ r: IndexedSet, _ expression: SelectExpression) {
+        guard logInefficientScans else { return }
+        
+        print("Inefficiently scanning \(r.values.count) rows for \(expression)")
+        
+        // Dummy call to efficientValuesSet so we can step into it in the debugger.
+        _ = r.efficientValuesSet(expression: expression)
     }
 }
 

@@ -267,8 +267,8 @@ private extension RelationTextIndex {
                     log("asyncUpdate for \(relation.query) got rows \(rows)")
                     let rows = Set(rows.lazy.map({ $0.renameAttributes([Attribute.pageID: self.contentIDAttribute]) }))
                     
-                    let added = rows - relation.values
-                    let removed = relation.values - rows
+                    let added = rows - relation.values.allValues
+                    let removed = relation.values.allValues - rows
                     
                     removed.forEach(relation.delete)
                     

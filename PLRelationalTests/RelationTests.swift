@@ -1158,7 +1158,7 @@ class RelationTests: DBTestCase {
             [30, 3],
             [300, 30],
             [301, 30]
-        ).values
+        ).values.allValues
         
         AssertEqual(r, expectedRemaining)
         XCTAssertNotNil(observer.changes)
@@ -1316,7 +1316,7 @@ class RelationTests: DBTestCase {
             [30, 3],
             [300, 30],
             [301, 30]
-            ).values
+        ).values.allValues
         
         AssertEqual(r1, expectedRemaining1)
         XCTAssertNotNil(observer1.changes)
@@ -1338,7 +1338,7 @@ class RelationTests: DBTestCase {
             [100, "Timmy"],
             [200, "Timothy"],
             [300, "Thomas"]
-            ).values
+        ).values.allValues
         
         AssertEqual(r2, expectedRemaining2)
         XCTAssertNotNil(observer2.changes)
@@ -1360,7 +1360,7 @@ class RelationTests: DBTestCase {
             ["Timmy"],
             ["Timothy"],
             ["Thomas"]
-            ).values
+        ).values.allValues
         
         AssertEqual(r3, expectedRemaining3)
         XCTAssertNotNil(observer3.changes)
@@ -1534,7 +1534,7 @@ class RelationTests: DBTestCase {
             [30, 3],
             [300, 30],
             [301, 30]
-            ).values
+        ).values.allValues
         
         AssertEqual(r1, expectedRemaining1)
         XCTAssertNotNil(observer1.changes)
@@ -1556,7 +1556,7 @@ class RelationTests: DBTestCase {
             [100, "Timmy"],
             [200, "Timothy"],
             [300, "Thomas"]
-            ).values
+        ).values.allValues
         
         AssertEqual(r2, expectedRemaining2)
         XCTAssertNotNil(observer2.changes)
@@ -1578,7 +1578,7 @@ class RelationTests: DBTestCase {
             ["Timmy"],
             ["Timothy"],
             ["Thomas"]
-            ).values
+        ).values.allValues
         
         AssertEqual(r3, expectedRemaining3)
         XCTAssertNotNil(observer3.changes)

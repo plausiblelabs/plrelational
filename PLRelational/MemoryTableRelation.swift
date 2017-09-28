@@ -10,26 +10,27 @@
 open class MemoryTableRelation: Relation, StoredRelation, RelationDefaultChangeObserverImplementation {
     open let scheme: Scheme
     
-    public var values: Set<Row> = []
+    public var values: IndexedSet<Row>!
     
     open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     
     public var debugName: String?
     
-    public init(scheme: Scheme) {
+    public init(scheme: Scheme, primaryKeys: Set<Attribute> = []) {
         self.scheme = scheme
+        self.values = IndexedSet(primaryKeys: primaryKeys)
     }
     
     public static func copyRelation(_ other: Relation) -> Result<MemoryTableRelation, RelationError> {
         return mapOk(other.rows(), { $0 }).map({
             let r = MemoryTableRelation(scheme: other.scheme)
-            r.values = Set($0)
+            r.values.unionInPlace($0)
             return r
         })
     }
     
     open var contentProvider: RelationContentProvider {
-        return .set({ self.values }, approximateCount: Double(self.values.count))
+        return values.contentProvider
     }
     
     open func contains(_ row: Row) -> Result<Bool, RelationError> {
@@ -38,10 +39,10 @@ open class MemoryTableRelation: Relation, StoredRelation, RelationDefaultChangeO
     
     open func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
         let toUpdate = Set(values.filter({ query.valueWithRow($0).boolValue }))
-        values.subtract(toUpdate)
+        values.subtractInPlace(toUpdate)
         
         let updated = Set(toUpdate.map({ $0.rowWithUpdate(newValues) }))
-        values.formUnion(updated)
+        values.unionInPlace(updated)
         
         let added = ConcreteRelation(scheme: scheme, values: updated - toUpdate)
         let removed = ConcreteRelation(scheme: scheme, values: toUpdate - updated)
@@ -53,7 +54,7 @@ open class MemoryTableRelation: Relation, StoredRelation, RelationDefaultChangeO
     
     open func add(_ row: Row) -> Result<Int64, RelationError> {
         if !values.contains(row) {
-            values.insert(row)
+            values.add(element: row)
             notifyChangeObservers(RelationChange(added: ConcreteRelation(row), removed: nil), kind: .directChange)
         }
         return .Ok(0)
@@ -61,14 +62,14 @@ open class MemoryTableRelation: Relation, StoredRelation, RelationDefaultChangeO
     
     open func delete(_ query: SelectExpression) -> Result<Void, RelationError> {
         let toDelete = Set(values.lazy.filter({ query.valueWithRow($0).boolValue }))
-        values.fastSubtract(toDelete)
+        values.subtractInPlace(toDelete)
         notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(scheme: scheme, values: toDelete)), kind: .directChange)
         return .Ok(())
     }
     
     open func delete(_ row: Row) {
         if values.contains(row) {
-            values.remove(row)
+            values.remove(element: row)
             notifyChangeObservers(RelationChange(added: nil, removed: ConcreteRelation(row)), kind: .directChange)
         }
     }
@@ -87,6 +88,6 @@ public func MakeRelation(_ attributes: [Attribute], _ rowValues: [RelationValue]
         return Row(values: Dictionary(zip(attributes, values)))
     })
     let r = MemoryTableRelation(scheme: scheme)
-    r.values = Set(rows)
+    r.values.unionInPlace(rows)
     return r
 }
