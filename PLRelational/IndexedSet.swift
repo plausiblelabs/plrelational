@@ -7,19 +7,20 @@
 /// A set that can quickly look up elements based on the values of certain keys.
 /// Initialize it with a set of primary keys. Later, elements holding a particular
 /// value for a primary key can be looked up quickly.
-public struct IndexedSet<Element: IndexableValue> {
+///
+/// NOTE: NOT a value type. It's too hard to make it a value type with the `MutableBox`
+/// stuff going on. Once we can remove that, we can change this back to a struct.
+public class IndexedSet<Element: IndexableValue> {
     public let primaryKeys: Set<Element.Index>
     
     // MutableBox is used here to allow for in-place mutation of the nested containers. Swift is currently
     // not smart enough to do that when the containers are placed directly in the Dictionary, which results
-    // in atrocious performance. Boxing it in a class fixes that. Hopefully this will be fixed in Swift 4
-    // and then we can remove this.
+    // in atrocious performance. Boxing it in a class fixes that. Hopefully this will be fixed in some
+    // future Swift version and then we can remove this.
+    // Test case: https://gist.github.com/mikeash/a6ebc8cc4cb630c1893fd2909bb11d86
     fileprivate var index: [Element.Index: MutableBox<[Element.IndexedValue: MutableBox<Set<Element>>]>]
     public var allValues: Set<Element>
-}
 
-/// :nodoc: Implementation detail (will be made non-public eventually)
-extension IndexedSet {
     /// Initialize a set with the given primary keys. These keys will be indexed
     /// and elements with matching values for those keys can be quickly retrieved.
     public init<S: Sequence>(primaryKeys: S) where S.Iterator.Element == Element.Index {
@@ -27,7 +28,10 @@ extension IndexedSet {
         index = Dictionary(primaryKeys.map({ ($0, MutableBox([:])) }))
         allValues = []
     }
-    
+}
+
+/// :nodoc: Implementation detail (will be made non-public eventually)
+extension IndexedSet {
     /// Retrieve all elements stored in the set.
     var values: Set<Element> {
         return allValues
@@ -42,27 +46,28 @@ extension IndexedSet {
         return index[matchingKey]!.value[value]?.value ?? []
     }
     
-    public mutating func add(element: Element) {
+    public func add(element: Element) {
         allValues.insert(element)
         for indexKey in index.keys {
+            MutableBox.uniq(&index[indexKey])
             add(indexedValue: element.value(index: indexKey), element: element, toDictionary: &index[indexKey]!.value)
         }
     }
     
-    public mutating func remove(element: Element) {
+    public func remove(element: Element) {
         allValues.remove(element)
         for indexKey in index.keys {
             remove(indexedValue: element.value(index: indexKey), element: element, fromDictionary: &index[indexKey]!.value)
         }
     }
     
-    public mutating func unionInPlace<S: Sequence>(_ elements: S) where S.Iterator.Element == Element {
+    public func unionInPlace<S: Sequence>(_ elements: S) where S.Iterator.Element == Element {
         for element in elements {
             self.add(element: element)
         }
     }
     
-    public mutating func subtractInPlace<S: Sequence>(_ elements: S) where S.Iterator.Element == Element {
+    public func subtractInPlace<S: Sequence>(_ elements: S) where S.Iterator.Element == Element {
         for element in elements {
             self.remove(element: element)
         }
@@ -77,7 +82,7 @@ extension IndexedSet: Sequence {
 }
 
 extension IndexedSet {
-    fileprivate mutating func add(indexedValue: Element.IndexedValue, element: Element, toDictionary: inout [Element.IndexedValue: MutableBox<Set<Element>>]) {
+    fileprivate func add(indexedValue: Element.IndexedValue, element: Element, toDictionary: inout [Element.IndexedValue: MutableBox<Set<Element>>]) {
         if let box = toDictionary[indexedValue] {
             box.value.insert(element)
         } else {
@@ -85,7 +90,7 @@ extension IndexedSet {
         }
     }
     
-    fileprivate mutating func remove(indexedValue: Element.IndexedValue, element: Element, fromDictionary: inout [Element.IndexedValue: MutableBox<Set<Element>>]) {
+    fileprivate func remove(indexedValue: Element.IndexedValue, element: Element, fromDictionary: inout [Element.IndexedValue: MutableBox<Set<Element>>]) {
         let box = fromDictionary[indexedValue]
         let removed = box?.value.remove(element)
         

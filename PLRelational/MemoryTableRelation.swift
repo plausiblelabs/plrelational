@@ -75,8 +75,8 @@ open class MemoryTableRelation: Relation, StoredRelation, RelationDefaultChangeO
     }
     
     open func copy() -> MemoryTableRelation {
-        let copy = MemoryTableRelation(scheme: scheme)
-        copy.values = values
+        let copy = MemoryTableRelation(scheme: scheme, primaryKeys: values.primaryKeys)
+        copy.values.unionInPlace(values.allValues)
         return copy
     }
 }
