@@ -49,7 +49,6 @@ extension IndexedSet {
     public func add(element: Element) {
         allValues.insert(element)
         for indexKey in index.keys {
-            MutableBox.uniq(&index[indexKey])
             add(indexedValue: element.value(index: indexKey), element: element, toDictionary: &index[indexKey]!.value)
         }
     }
