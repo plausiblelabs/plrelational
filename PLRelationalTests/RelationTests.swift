@@ -96,7 +96,20 @@ class RelationTests: DBTestCase {
                         ["B"],
                         ["1"]))
     }
-    
+
+    func testProjectRenamed() {
+        let a = MakeRelation(
+            ["A", "B"],
+            ["X", "1"],
+            ["Y", "1"]
+        )
+        
+        AssertEqual(a.projectRenamed(["B": "C"]),
+                    MakeRelation(
+                        ["C"],
+                        ["1"]))
+    }
+
     func testSimpleMutation() {
         let FLIGHTS = MakeRelation(
             ["NUMBER", "FROM",   "TO",          "DEPARTS", "ARRIVES"],

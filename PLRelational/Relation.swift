@@ -55,6 +55,10 @@ public protocol Relation: PlaygroundMonospace {
     func renameAttributes(_ renames: [Attribute: Attribute]) -> Relation
     func renamePrime() -> Relation
     
+    /// Return a new `Relation` that projects and renames the `Attribute`s in the keys of `renames`
+    /// to the corresponding values.  This is a shorthand for `project` followed by `renameAttributes`.
+    func projectRenamed(_ renames: [Attribute: Attribute]) -> Relation
+    
     /// Return a new `Relation` which represents the union of this `Relation` and another one.
     func union(_ other: Relation) -> Relation
     
@@ -429,6 +433,12 @@ extension Relation {
     public func renamePrime() -> Relation {
         let renames = Dictionary(scheme.attributes.map({ ($0, Attribute($0.name + "'")) }))
         return renameAttributes(renames)
+    }
+    
+    public func projectRenamed(_ renames: [Attribute: Attribute]) -> Relation {
+        return self
+            .project(Scheme(attributes: Set(renames.keys)))
+            .renameAttributes(renames)
     }
 }
 
