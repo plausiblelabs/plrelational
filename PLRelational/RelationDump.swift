@@ -184,8 +184,17 @@ extension Relation {
                 {
                     return nil
                 }
-                let valueString = String(describing: $1).replacingOccurrences(of: "\"", with: "\\\"")
-                return "\($0): \(valueString)"
+                let valueString: String
+                switch $1 {
+                case let opt as String:
+                    valueString = opt
+                case nil:
+                    valueString = "nil"
+                default:
+                    valueString = String(describing: $1)
+                }
+                let valueStringEscaped = valueString.replacingOccurrences(of: "\"", with: "\\\"")
+                return "\($0): \(valueStringEscaped)"
             })
             if let obj = asObject(r) {
                 let id = ObjectIdentifier(obj)
