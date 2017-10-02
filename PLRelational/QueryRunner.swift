@@ -712,7 +712,9 @@ extension QueryRunner {
             nodes[i].parentIndexes = [newIndex]
         }
         
-        nodes.append(QueryPlanner.Node(op: nodes[index].op, scheme: nodes[index].scheme, approximateCount: nodes[index].approximateCount))
+        var node = QueryPlanner.Node(op: nodes[index].op, scheme: nodes[index].scheme, approximateCount: nodes[index].approximateCount)
+        node.debugName = nodes[index].debugName
+        nodes.append(node)
         nodes[newIndex].childIndexes = newChildren
         if QueryPlanner.isInitiator(op: nodes[newIndex].op) {
             activeInitiatorIndexes.append(newIndex)
