@@ -78,6 +78,10 @@ extension IndexedSet: Sequence {
     public func makeIterator() -> SetIterator<Element> {
         return allValues.makeIterator()
     }
+    
+    public func contains(_ element: Element) -> Bool {
+        return allValues.contains(element)
+    }
 }
 
 extension IndexedSet {
