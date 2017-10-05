@@ -466,6 +466,12 @@
 		C243FAE01F056E210015DE85 /* QueryPlannerDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDB1D1C7BA0006B6278 /* QueryPlannerDump.swift */; };
 		C243FAE21F0599FC0015DE85 /* RelationDifferentiatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C243FAE11F0599FC0015DE85 /* RelationDifferentiatorTests.swift */; };
 		C243FAE31F0599FC0015DE85 /* RelationDifferentiatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C243FAE11F0599FC0015DE85 /* RelationDifferentiatorTests.swift */; };
+		C2442E731F8577E0009277A2 /* TypedAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2442E721F8577E0009277A2 /* TypedAttribute.swift */; };
+		C2442E751F8579DB009277A2 /* TypedRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2442E741F8579DB009277A2 /* TypedRelation.swift */; };
+		C2442E771F858026009277A2 /* TypedRelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2442E761F858026009277A2 /* TypedRelationTests.swift */; };
+		C2442E781F858026009277A2 /* TypedRelationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2442E761F858026009277A2 /* TypedRelationTests.swift */; };
+		C2442E791F858029009277A2 /* TypedRelation.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2442E741F8579DB009277A2 /* TypedRelation.swift */; };
+		C2442E7A1F85802B009277A2 /* TypedAttribute.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2442E721F8577E0009277A2 /* TypedAttribute.swift */; };
 		C25BB38D1ED4AE79002FC659 /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
 		C25ECC6C1F042E5B00CBB798 /* DJBHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */; };
 		C25ECC851F053A9A00CBB798 /* DJBHash.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25ECC6B1F042E5B00CBB798 /* DJBHash.swift */; };
@@ -1032,6 +1038,9 @@
 		C23BC0551D24629E00188F86 /* SmallInlineArray.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SmallInlineArray.swift; sourceTree = "<group>"; };
 		C2402BC91E856F37001EB905 /* IndexedSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IndexedSet.swift; sourceTree = "<group>"; };
 		C243FAE11F0599FC0015DE85 /* RelationDifferentiatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiatorTests.swift; sourceTree = "<group>"; };
+		C2442E721F8577E0009277A2 /* TypedAttribute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypedAttribute.swift; sourceTree = "<group>"; };
+		C2442E741F8579DB009277A2 /* TypedRelation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypedRelation.swift; sourceTree = "<group>"; };
+		C2442E761F858026009277A2 /* TypedRelationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypedRelationTests.swift; sourceTree = "<group>"; };
 		C2478CF81E773F0B00C3FB05 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		C2478CF91E773F9300C3FB05 /* module-sqlite3-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "module-sqlite3-include.h"; sourceTree = "<group>"; };
 		C2478CFA1E773FEB00C3FB05 /* module-commoncrypto-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "module-commoncrypto-include.h"; sourceTree = "<group>"; };
@@ -2155,6 +2164,7 @@
 			isa = PBXGroup;
 			children = (
 				374AE96C1D91B836007D1366 /* Core */,
+				C2442E711F8577CF009277A2 /* Typed Relations */,
 				374AE96B1D91B7A3007D1366 /* Memory Relations */,
 				374AE9651D91B5B1007D1366 /* Stored Relations */,
 				C277E7FB1CDA908E00B7B8F6 /* Logging Relations */,
@@ -2170,6 +2180,16 @@
 				C22921E61CD12CF100518184 /* PLRelationalTests */,
 			);
 			path = PLRelational;
+			sourceTree = "<group>";
+		};
+		C2442E711F8577CF009277A2 /* Typed Relations */ = {
+			isa = PBXGroup;
+			children = (
+				C2442E721F8577E0009277A2 /* TypedAttribute.swift */,
+				C2442E741F8579DB009277A2 /* TypedRelation.swift */,
+				C2442E761F858026009277A2 /* TypedRelationTests.swift */,
+			);
+			name = "Typed Relations";
 			sourceTree = "<group>";
 		};
 		C24C4A661E2673F800482726 /* Graphs */ = {
@@ -3452,7 +3472,9 @@
 				37B440AC1E899A7200C8C336 /* DictionaryCreation.swift in Sources */,
 				37B440B41E899A7200C8C336 /* NSURLConvenience.swift in Sources */,
 				37B4405F1E899A2000C8C336 /* ChangeLoggingRelation.swift in Sources */,
+				C2442E7A1F85802B009277A2 /* TypedAttribute.swift in Sources */,
 				37B440B61E899A7300C8C336 /* ObjectDictionary.swift in Sources */,
+				C2442E791F858029009277A2 /* TypedRelation.swift in Sources */,
 				37B4401A1E8999D200C8C336 /* IntermediateRelation.swift in Sources */,
 				37B440721E899A3300C8C336 /* QueryPlanner.swift in Sources */,
 				37B4407C1E899A4400C8C336 /* BookmarkableGraph.swift in Sources */,
@@ -3545,6 +3567,7 @@
 				C22B16111E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */,
 				37B440221E8999D800C8C336 /* RelationTests.swift in Sources */,
 				37B440341E8999EF00C8C336 /* RelationObservationTests.swift in Sources */,
+				C2442E781F858026009277A2 /* TypedRelationTests.swift in Sources */,
 				37B440C91E899A7800C8C336 /* InlineMutableDataTests.swift in Sources */,
 				37B440621E899A2400C8C336 /* ChangeLoggingRelationTests.swift in Sources */,
 				37B440631E899A2400C8C336 /* TransactionalDatabaseTests.swift in Sources */,
@@ -3579,6 +3602,7 @@
 				37B4406B1E899A3100C8C336 /* QueryPlanner.swift in Sources */,
 				37B4407A1E899A4300C8C336 /* BookmarkableGraph.swift in Sources */,
 				37B4405B1E899A2000C8C336 /* ChangeLoggingDatabase.swift in Sources */,
+				C2442E751F8579DB009277A2 /* TypedRelation.swift in Sources */,
 				C22B160B1E8E98E70053AD9D /* InternedUTF8String.swift in Sources */,
 				37B440851E899A7200C8C336 /* ConsistentPRNG.swift in Sources */,
 				37B440181E8999D200C8C336 /* SelectExpression.swift in Sources */,
@@ -3586,6 +3610,7 @@
 				37B440471E899A0900C8C336 /* PlistDatabase.swift in Sources */,
 				37B440671E899A3100C8C336 /* AsyncManager.swift in Sources */,
 				37B4409A1E899A7200C8C336 /* PlaygroundMonospace.swift in Sources */,
+				C2442E731F8577E0009277A2 /* TypedAttribute.swift in Sources */,
 				37B4408E1E899A7200C8C336 /* InlineMutableData.swift in Sources */,
 				37B440241E8999DB00C8C336 /* RelationRecursiveSelect.swift in Sources */,
 				37B4403F1E8999FB00C8C336 /* SimpleDatabase.swift in Sources */,
@@ -3667,6 +3692,7 @@
 				C22B16101E92B1800053AD9D /* QueryOptimizerTests.swift in Sources */,
 				37B440211E8999D700C8C336 /* RelationTests.swift in Sources */,
 				37B440331E8999EE00C8C336 /* RelationObservationTests.swift in Sources */,
+				C2442E771F858026009277A2 /* TypedRelationTests.swift in Sources */,
 				37B440C71E899A7700C8C336 /* InlineMutableDataTests.swift in Sources */,
 				37B440651E899A2500C8C336 /* ChangeLoggingRelationTests.swift in Sources */,
 				37B440661E899A2500C8C336 /* TransactionalDatabaseTests.swift in Sources */,
