@@ -55,6 +55,28 @@ public extension TypedAttributeValue where Self: RelationValueConvertible {
     }
 }
 
+public extension Row {
+    /// Retrieve the value in this row for a given typed attribute, or an error if the value can't
+    /// be retrieved or decoded.
+    subscript<Attr: TypedAttribute>(attribute: Attr.Type) -> Result<Attr.Value, RelationError> {
+        get {
+            return Attr.Value.make(from: self[attribute.name])
+        }
+    }
+    
+    /// Retrieve or set the value in this row for a given typed attribute. On error, nil is
+    /// returned. Setting nil for a typed attribute will remove the attribute and value from
+    /// the `Row`.
+    subscript<Attr: TypedAttribute>(attribute: Attr.Type) -> Attr.Value? {
+        get {
+            return self[attribute].ok
+        }
+        set {
+            self[attribute.name] = newValue?.toRelationValue ?? .notFound
+        }
+    }
+}
+
 extension Int64: TypedAttributeValue {
     public static func make(from: RelationValue) -> Result<Int64, RelationError> {
         return from.int64OrError()

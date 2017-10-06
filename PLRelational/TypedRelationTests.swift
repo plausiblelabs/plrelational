@@ -69,6 +69,24 @@ class TypedRelationTests: XCTestCase {
         
         Async.awaitAsyncCompletion()
     }
+    
+    func testRowSubscript() {
+        let row1: Row = ["id": 1, "name": "Timmy"]
+        var row2: Row = ["id": "Stanley", "name": "Stanley"]
+        
+        enum id: TypedAttribute {
+            typealias Value = Int64
+        }
+        
+        XCTAssertEqual(row1[id.self], 1)
+        XCTAssertEqual(row1[id.self].ok, 1)
+        XCTAssertNil(row2[id.self])
+        XCTAssertNil(row2[id.self].ok)
+        row2[id.self] = 42
+        XCTAssertEqual(row2[id.self], 42)
+        row2[id.self] = nil
+        XCTAssertNil(row2[id.self])
+    }
 }
 
 private struct UUID: TypedAttributeValue {
