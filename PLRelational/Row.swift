@@ -37,7 +37,7 @@ public struct Row: Hashable, Sequence {
         }
         set {
             var d = Dictionary(inlineRow)
-            d[attribute] = newValue
+            d[attribute] = newValue == .notFound ? nil : newValue
             inlineRow = InlineRow.internSequence(d)
         }
     }
