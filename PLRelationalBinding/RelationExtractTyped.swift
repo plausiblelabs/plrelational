@@ -435,3 +435,23 @@ extension Relation {
         return AnyIterator(self.rows().lazy.flatMap{ $0.ok }.makeIterator())
     }
 }
+
+extension TypedRelation {
+    public func oneValueOrNil() -> Signal<Attr.Value?> {
+        return self.oneValueOrNil({ Attr.Value.make(from: $0).ok })
+    }
+    
+    public func oneValue(orDefault: Attr.Value, initialValue: Attr.Value?) -> Signal<Attr.Value> {
+        return self.oneValue({ Attr.Value.make(from: $0) .ok }, orDefault: orDefault, initialValue: initialValue)
+    }
+    
+    public func allValues() -> Signal<Set<Attr.Value>> {
+        return self.allValues({ return $0[Attr.self] })
+    }
+}
+
+extension TypedRelation where Attr.Value: TypedAttributeDefaultedValue {
+    public func oneValue(initialValue: Attr.Value?) -> Signal<Attr.Value> {
+        return self.oneValue(orDefault: Attr.Value.defaultValue, initialValue: initialValue)
+    }
+}

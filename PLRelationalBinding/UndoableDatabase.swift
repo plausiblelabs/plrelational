@@ -110,3 +110,20 @@ extension Relation {
         )
     }
 }
+
+extension TypedRelation {
+    public func undoableOneValue(_ db: UndoableDatabase, _ action: String, orDefault: Attr.Value, initialValue:
+        Attr.Value? = nil) -> AsyncReadWriteProperty<Attr.Value> {
+        return db.bidiProperty(
+            action: action,
+            signal: self.oneValue(orDefault: orDefault, initialValue: initialValue),
+            update: { self.asyncUpdateValue($0.toRelationValue) })
+    }
+}
+
+extension TypedRelation where Attr.Value: TypedAttributeDefaultedValue {
+    public func undoableOneValue(_ db: UndoableDatabase, _ action: String, initialValue:
+        Attr.Value? = nil) -> AsyncReadWriteProperty<Attr.Value> {
+        return undoableOneValue(db, action, orDefault: Attr.Value.defaultValue, initialValue: initialValue)
+    }
+}
