@@ -742,6 +742,8 @@ extension AsyncManager {
     /// The return value is an array of variable/predicate pairs. The predicate indicates
     /// how the variable may be filtered, and if no filter is computed, it will be nil.
     fileprivate func getUpdatePredicates(forRelation relation: Relation, predicate: SelectExpression, newValues: Row?) -> [(RelationDerivative.Variable, SelectExpression?)] {
+        // TODO: this fails if Relation is not a class. Do we want to support that? If not, should we warn against
+        // writing struct Relations?
         let initial = linearGetUpdatePredicates(forRelation: relation, predicate: predicate, newValues: newValues)
         
         let followingStart = initial.last!.0

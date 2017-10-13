@@ -4,30 +4,9 @@
 //
 
 /// A `Relation` whose scheme is a single typed attribute.
-public struct TypedRelation<Attr: TypedAttribute>: Relation {
-    /// The underlying untyped `Relation` which provides our data.
-    var wrapped: Relation
-    
-    public var scheme: Scheme {
-        return wrapped.scheme
-    }
-    
-    public var contentProvider: RelationContentProvider {
-        return .underlying(wrapped)
-    }
-    
-    public var debugName: String?
-    
-    public func contains(_ row: Row) -> Result<Bool, RelationError> {
-        return wrapped.contains(row)
-    }
-    
-    public mutating func update(_ query: SelectExpression, newValues: Row) -> Result<Void, RelationError> {
-        return wrapped.update(query, newValues: newValues)
-    }
-    
-    public func addChangeObserver(_ observer: RelationObserver, kinds: [RelationObservationKind]) -> (() -> Void) {
-        return wrapped.addChangeObserver(observer, kinds: kinds)
+public class TypedRelation<Attr: TypedAttribute>: IntermediateRelation {
+    convenience init(wrapping: Relation) {
+        self.init(op: .union, operands: [wrapping])
     }
 }
 
@@ -73,7 +52,7 @@ public extension Relation {
     /// Project this `Relation` onto a scheme of a single typed attribute, and return the projection as a
     /// `TypedRelation` for that attribute.
     func project<Attr: TypedAttribute>(_ typedAttribute: Attr.Type = Attr.self) -> TypedRelation<Attr> {
-        return TypedRelation(wrapped: self.project(Attr.attribute), debugName: nil)
+        return TypedRelation(wrapping: self.project(Attr.attribute))
     }
 }
 
