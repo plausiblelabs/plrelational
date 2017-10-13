@@ -41,6 +41,15 @@ public protocol TypedAttributeValue: Hashable {
     var toRelationValue: RelationValue { get }
 }
 
+public protocol TypedAttributeDefaultedValue: TypedAttributeValue {
+    static var defaultValue: Self { get }
+}
+
+public protocol TypedStringAttribute: TypedAttribute {}
+public extension TypedStringAttribute {
+    typealias Value = String
+}
+
 /// Errors that can be returned from `TypedAttributeValue.make`
 public enum TypedAttributeValueError: RelationError {
     /// The `RelationValue` didn't contain the expected raw type (e.g. provided an int64 instead of text).
@@ -89,16 +98,26 @@ extension Double: TypedAttributeValue {
     }
 }
 
-extension String: TypedAttributeValue {
+extension String: TypedAttributeDefaultedValue {
     public static func make(from: RelationValue) -> Result<String, RelationError> {
         return from.stringOrError()
     }
+    
+    public static var defaultValue: String { return "" }
 }
 
 extension Data: TypedAttributeValue {
     public static func make(from: RelationValue) -> Result<Data, RelationError> {
         return from.blobOrError().map(Data.init)
     }
+}
+
+public func *==<T: TypedAttribute>(lhs: T.Type, rhs: SelectExpression) -> SelectExpression {
+    return lhs.attribute *== rhs
+}
+
+public func *==<T: TypedAttribute>(lhs: SelectExpression, rhs: T.Type) -> SelectExpression {
+    return lhs *== rhs.attribute
 }
 
 /// Helpers for getting specific types out of a `RelationValue`.
