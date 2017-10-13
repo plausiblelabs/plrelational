@@ -21,6 +21,14 @@ extension Result {
         }
     }
     
+    /// Provide the result value for success, and fatal error for failure.
+    public var forcedOK: T {
+        switch self {
+        case .Ok(let t): return t
+        case .Err(let err): fatalError("Unexpectedly found error when force unwrapping \(type(of: self)): \(err)")
+        }
+    }
+    
     /// Provide the error value for errors, and `nil` for success.
     public var err: E? {
         switch self {
