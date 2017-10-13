@@ -119,6 +119,12 @@ extension Row: ExpressibleByDictionaryLiteral {
     }
 }
 
+extension Row: ExpressibleByArrayLiteral {
+    public init(arrayLiteral elements: (Attribute, RelationValueConvertible)...) {
+        self.init(values: elements.map({ (key: $0, value: $1.relationValue) }))
+    }
+}
+
 public func ==(a: Row, b: Row) -> Bool {
     return a.inlineRow === b.inlineRow
 }

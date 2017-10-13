@@ -29,6 +29,12 @@ public extension TypedAttribute {
     }
 }
 
+public extension TypedAttribute {
+    static func pair(_ value : Value) -> (Attribute, RelationValueConvertible) {
+        return (attribute, value.toRelationValue)
+    }
+}
+
 /// A type which can be used as the value for a typed attribute. These must be convertible
 /// to/from a RelationValue, and must also be Hashable so they can be stored in sets.
 public protocol TypedAttributeValue: Hashable {
