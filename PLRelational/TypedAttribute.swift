@@ -14,11 +14,11 @@ public protocol TypedAttribute {
     
     /// The underlying untyped `Attribute` for this typed attribute. By default, it's the name of the
     /// conforming type with Swift's little "#1" extras stripped off.
-    static var name: Attribute { get }
+    static var attribute: Attribute { get }
 }
 
 public extension TypedAttribute {
-    static var name: Attribute {
+    static var attribute: Attribute {
         let s = String(describing: self)
         // Some types get names like "someType #1". Slice off the suffix.
         if let index = s.index(of: " ") {
@@ -60,7 +60,7 @@ public extension Row {
     /// be retrieved or decoded.
     subscript<Attr: TypedAttribute>(attribute: Attr.Type) -> Result<Attr.Value, RelationError> {
         get {
-            return Attr.Value.make(from: self[attribute.name])
+            return Attr.Value.make(from: self[attribute.attribute])
         }
     }
     
@@ -72,7 +72,7 @@ public extension Row {
             return self[attribute].ok
         }
         set {
-            self[attribute.name] = newValue?.toRelationValue ?? .notFound
+            self[attribute.attribute] = newValue?.toRelationValue ?? .notFound
         }
     }
 }

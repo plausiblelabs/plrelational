@@ -72,8 +72,8 @@ public extension TypedRelation {
 public extension Relation {
     /// Project this `Relation` onto a scheme of a single typed attribute, and return the projection as a
     /// `TypedRelation` for that attribute.
-    func project<Attr: TypedAttribute>() -> TypedRelation<Attr> {
-        return TypedRelation(wrapped: self.project(Attr.name), debugName: nil)
+    func project<Attr: TypedAttribute>(_ typedAttribute: Attr.Type = Attr.self) -> TypedRelation<Attr> {
+        return TypedRelation(wrapped: self.project(Attr.attribute), debugName: nil)
     }
 }
 
@@ -87,7 +87,7 @@ private extension TypedAttribute {
     static func makeValues(_ rows: Set<Row>) -> Result<Set<Self.Value>, RelationError> {
         var set = Set<Self.Value>(minimumCapacity: rows.count)
         for row in rows {
-            switch Self.Value.make(from: row[Self.name]) {
+            switch Self.Value.make(from: row[Self.attribute]) {
             case .Ok(let value): set.insert(value)
             case .Err(let err): return .Err(err)
             }
