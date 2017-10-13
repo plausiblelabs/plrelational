@@ -51,7 +51,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         self.orderAttr = orderAttr
         self.tag = tag
         
-        let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: self.parentAttr, tag: tag)
+        let rootNode = RowTreeNode(id: -1, row: .empty, parentAttr: self.parentAttr, tag: tag)
         
         self.sourceSignal = PipeSignal()
         
@@ -78,7 +78,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
                         }
                         
                         // Use order attribute from underlying relation to nest child nodes under parent elements
-                        let rootNode = RowTreeNode(id: -1, row: Row(), parentAttr: self.parentAttr, tag: self.tag)
+                        let rootNode = RowTreeNode(id: -1, row: .empty, parentAttr: self.parentAttr, tag: self.tag)
                         for node in nodeDict.values {
                             let parentNode = nodeDict[node.data[self.parentAttr]] ?? rootNode
                             _ = parentNode.children.insertSorted(node, {$0.data[self.orderAttr]}, <)
