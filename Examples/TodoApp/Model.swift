@@ -12,52 +12,58 @@ private typealias Spec = PlistDatabase.RelationSpec
 
 /// Scheme for the `item` relation that holds the to-do items.
 enum Item {
-    static let id = Attribute("item_id")
-    static let title = Attribute("title")
-    static let created = Attribute("created")
-    static let status = Attribute("status")
-    static let notes = Attribute("notes")
+    enum id: TypedStringAttribute {
+        static var attribute: Attribute = "item_id"
+    }
+    enum title: TypedStringAttribute {}
+    enum created: TypedStringAttribute {}
+    enum status: TypedStringAttribute {}
+    enum notes: TypedStringAttribute {}
     fileprivate static var spec: Spec { return .file(
         name: "item",
         path: "items.plist",
-        scheme: [id, title, created, status, notes],
-        primaryKeys: [id]
+        scheme: [id.attribute, title.attribute, created.attribute, status.attribute, notes.attribute],
+        primaryKeys: [id.attribute]
     )}
 }
 
 /// Scheme for the `tag` relation that holds the named tags.
 enum Tag {
-    static let id = Attribute("tag_id")
-    static let name = Attribute("name")
+    typealias Value = String
+    
+    enum id: TypedStringAttribute {
+        static var attribute: Attribute = "tag_id"
+    }
+    enum name: TypedStringAttribute {}
     fileprivate static var spec: Spec { return .file(
         name: "tag",
         path: "tags.plist",
-        scheme: [id, name],
-        primaryKeys: [id]
+        scheme: [id.attribute, name.attribute],
+        primaryKeys: [id.attribute]
     )}
 }
 
 /// Scheme for the `item_tag` relation that associates zero
 /// or more tags with a to-do item.
 enum ItemTag {
-    static let itemID = Item.id
-    static let tagID = Tag.id
+    typealias itemID = Item.id
+    typealias tagID = Tag.id
     fileprivate static var spec: Spec { return .file(
         name: "item_tag",
         path: "item_tags.plist",
-        scheme: [itemID, tagID],
-        primaryKeys: [itemID, tagID]
+        scheme: [itemID.attribute, tagID.attribute],
+        primaryKeys: [itemID.attribute, tagID.attribute]
     )}
 }
 
 /// Scheme for the `selected_item` relation that maintains
 /// the selection state for the list of to-do items.
 enum SelectedItem {
-    static let id = Item.id
+    typealias id = Item.id
     fileprivate static var spec: Spec { return .transient(
         name: "selected_item",
-        scheme: [id],
-        primaryKeys: [id]
+        scheme: [id.attribute],
+        primaryKeys: [id.attribute]
     )}
 }
 
@@ -84,7 +90,7 @@ class Model {
         // Create a database or open an existing one (stored on disk using plists)
         let path = "/tmp/TodoApp.db"
         let dbExisted = FileManager.default.fileExists(atPath: path)
-        let plistDB = PlistDatabase.create(URL(fileURLWithPath: path), specs).ok!
+        let plistDB = PlistDatabase.create(URL(fileURLWithPath: path), specs).forcedOK
 
         // Wrap it in a TransactionalDatabase so that we can use snapshots, and
         // enable auto-save so that all changes are persisted to disk as needed
@@ -106,7 +112,7 @@ class Model {
         
         // Keep the set of all tags cached for easy access
         self.allTags = tags
-            .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
+            .arrayProperty(idAttr: Tag.id.attribute, orderAttr: Tag.name.attribute)
             .fullArray()
         self.allTags.start()
 
@@ -140,11 +146,11 @@ class Model {
         
         // Insert a row into the `items` relation
         items.asyncAdd([
-            Item.id: id,
-            Item.title: title,
-            Item.created: now,
-            Item.status: status,
-            Item.notes: ""
+            Item.id.attribute: id,
+            Item.title.attribute: title,
+            Item.created.attribute: now,
+            Item.status.attribute: status,
+            Item.notes.attribute: ""
         ])
     }
     
@@ -193,10 +199,10 @@ class Model {
     /// list of tags that have been applied to the given to-do item.
     func tagsString(for itemID: ItemID) -> AsyncReadableProperty<String> {
         return self.itemTags
-            .select(ItemTag.itemID *== itemID)
+            .select(ItemTag.itemID.self *== itemID)
             .join(self.tags)
-            .project(Tag.name)
-            .allStrings()
+            .project(Tag.name.self)
+            .allValues()
             .map{ $0.sorted().joined(separator: ", ") }
             .property()
     }
@@ -208,7 +214,7 @@ class Model {
         return self.selectedItemIDs
             .join(self.itemTags)
             .join(self.tags)
-            .project([Tag.id, Tag.name])
+            .project([Tag.id.attribute, Tag.name.attribute])
     }()
 
     /// REQ-9
@@ -226,8 +232,8 @@ class Model {
         let id = TagID()
         
         tags.asyncAdd([
-            Tag.id: id,
-            Tag.name: name
+            Tag.id.attribute: id,
+            Tag.name.attribute: name
         ])
     }
     
@@ -238,13 +244,13 @@ class Model {
         
         undoableDB.performUndoableAction("Add New Tag", {
             self.tags.asyncAdd([
-                Tag.id: tagID,
-                Tag.name: name
+                Tag.id.attribute: tagID,
+                Tag.name.attribute: name
             ])
             
             self.itemTags.asyncAdd([
-                ItemTag.itemID: itemID,
-                ItemTag.tagID: tagID
+                ItemTag.itemID.attribute: itemID,
+                ItemTag.tagID.attribute: tagID
             ])
         })
     }
@@ -254,8 +260,8 @@ class Model {
     func addExistingTag(_ tagID: TagID, to itemID: ItemID) {
         undoableDB.performUndoableAction("Add Tag", {
             self.itemTags.asyncAdd([
-                ItemTag.itemID: itemID,
-                ItemTag.tagID: tagID
+                ItemTag.itemID.attribute: itemID,
+                ItemTag.tagID.attribute: tagID
             ])
         })
     }
@@ -264,9 +270,9 @@ class Model {
     /// Returns a property that reflects the tag name.
     func tagName(for tagID: TagID, initialValue: String?) -> AsyncReadWriteProperty<String> {
         return self.tags
-            .select(Tag.id *== tagID)
-            .project(Tag.name)
-            .undoableOneString(undoableDB, "Change Tag Name", initialValue: initialValue)
+            .select(Tag.id.self *== tagID)
+            .project(Tag.name.self)
+            .undoableOneValue(undoableDB, "Change Tag Name", initialValue: initialValue)
     }
     
     // MARK: - Notes
@@ -275,8 +281,8 @@ class Model {
     /// Returns a property that reflects the selected item's notes.
     lazy var selectedItemNotes: AsyncReadWriteProperty<String> = {
         return self.selectedItems
-            .project(Item.notes)
-            .undoableOneString(self.undoableDB, "Change Notes")
+            .project(Item.notes.self)
+            .undoableOneValue(self.undoableDB, "Change Notes")
     }()
     
     // MARK: - Delete
@@ -303,8 +309,8 @@ class Model {
                         // and `itemTags`
                         let itemID = ItemID(row)
                         return [
-                            (self.items, Item.id *== itemID),
-                            (self.itemTags, ItemTag.itemID *== itemID)
+                            (self.items, Item.id.self *== itemID),
+                            (self.itemTags, ItemTag.itemID.self *== itemID)
                         ]
                     } else {
                         // Nothing else to clean up

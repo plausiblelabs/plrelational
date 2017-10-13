@@ -32,7 +32,7 @@ class BaseID {
 class ItemID: BaseID {
     /// Shorthand for extracting an `ItemID` from an `Item` row.
     convenience init(_ row: Row) {
-        self.init(row[Item.id])
+        self.init(row[Item.id.attribute])
     }
 }
 
@@ -40,7 +40,7 @@ class ItemID: BaseID {
 class TagID: BaseID {
     /// Shorthand for extracting a `TagID` from an `Tag` row.
     convenience init(_ row: Row) {
-        self.init(row[Tag.id])
+        self.init(row[Tag.id.attribute])
     }
 }
 

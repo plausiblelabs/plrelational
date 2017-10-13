@@ -26,8 +26,8 @@ class ChecklistViewModel {
     /// The model for the list of to-do items.
     lazy var itemsListModel: ListViewModel<RowArrayElement> = {
         return ListViewModel(
-            data: self.model.items.arrayProperty(idAttr: Item.id,
-                                                 orderAttr: Item.status,
+            data: self.model.items.arrayProperty(idAttr: Item.id.attribute,
+                                                 orderAttr: Item.status.attribute,
                                                  descending: true),
             cellIdentifier: { _ in "Cell" }
         )
@@ -38,8 +38,8 @@ class ChecklistViewModel {
     /// the given to-do item.
     func itemCompleted(for row: Row) -> AsyncReadWriteProperty<CheckState> {
         let itemID = ItemID(row)
-        let initialValue: String? = row[Item.status].get()
-        let relation = self.model.items.select(Item.id *== itemID).project(Item.status)
+        let initialValue: String? = row[Item.status.self]
+        let relation = self.model.items.select(Item.id.self *== itemID).project() as Item.status.Relation
         return self.model.itemCompleted(relation, initialValue: initialValue)
     }
 
@@ -48,8 +48,8 @@ class ChecklistViewModel {
     /// to-do item.
     func itemTitle(for row: Row) -> AsyncReadWriteProperty<String> {
         let itemID = ItemID(row)
-        let initialValue: String? = row[Item.title].get()
-        let relation = self.model.items.select(Item.id *== itemID).project(Item.title)
+        let initialValue: String? = row[Item.title.self]
+        let relation = self.model.items.select(Item.id.self *== itemID).project() as Item.title.Relation
         return self.model.itemTitle(relation, initialValue: initialValue)
     }
     

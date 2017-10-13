@@ -31,7 +31,7 @@ class DetailViewModel {
     /// REQ-7
     /// The completed status of the item.
     lazy var itemCompleted: AsyncReadWriteProperty<CheckState> = {
-        let relation = self.model.selectedItems.project(Item.status)
+        let relation = self.model.selectedItems.project() as Item.status.Relation
         return self.model.itemCompleted(relation, initialValue: nil)
     }()
 
@@ -40,7 +40,7 @@ class DetailViewModel {
     /// by UndoableDatabase, so any changes made to it in the text field
     /// can be rolled back by the user.
     lazy var itemTitle: AsyncReadWriteProperty<String> = {
-        let titleRelation = self.model.selectedItems.project(Item.title)
+        let titleRelation = self.model.selectedItems.project() as Item.title.Relation
         return self.model.itemTitle(titleRelation, initialValue: nil)
     }()
 
@@ -53,7 +53,7 @@ class DetailViewModel {
     /// compatible with the `EphemeralComboBox` class.
     lazy var availableTags: AsyncReadableProperty<[RowArrayElement]> = {
         return self.model.availableTagsForSelectedItem
-            .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
+            .arrayProperty(idAttr: Tag.id.attribute, orderAttr: Tag.name.attribute)
             .fullArray()
     }()
     
@@ -69,7 +69,7 @@ class DetailViewModel {
         // See if a tag already exists with the given name
         let itemID = self.itemID.value!!
         let existingIndex = self.model.allTags.value?.index(where: {
-            let rowName: String = $0.data[Tag.name].get()!
+            let rowName: String = $0.data[Tag.name.attribute].get()!
             return name == rowName
         })
         if let index = existingIndex {
@@ -89,7 +89,7 @@ class DetailViewModel {
     /// The tags associated with the selected to-do item, sorted by name.
     private lazy var itemTags: ArrayProperty<RowArrayElement> = {
         return self.model.tagsForSelectedItem
-            .arrayProperty(idAttr: Tag.id, orderAttr: Tag.name)
+            .arrayProperty(idAttr: Tag.id.attribute, orderAttr: Tag.name.attribute)
     }()
     
     /// REQ-10
@@ -106,7 +106,7 @@ class DetailViewModel {
     /// Returns a read/write property that resolves to the name for the given tag.
     func tagName(for row: Row) -> AsyncReadWriteProperty<String> {
         let tagID = TagID(row)
-        let name: String? = row[Tag.name].get()
+        let name: String? = row[Tag.name.attribute].get()
         return self.model.tagName(for: tagID, initialValue: name)
     }
     
@@ -130,7 +130,7 @@ class DetailViewModel {
     /// (as stored in the relation) to a display-friendly string.
     lazy var createdOn: AsyncReadableProperty<String> = {
         return self.model.selectedItems
-            .project(Item.created)
+            .project(Item.created.self)
             .oneString()
             .map{ "Created on \(displayString(from: $0))" }
             .property()
