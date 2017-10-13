@@ -12,8 +12,9 @@ private typealias Spec = PlistDatabase.RelationSpec
 
 /// Scheme for the `item` relation that holds the to-do items.
 enum Item {
-    enum id: TypedStringAttribute {
+    enum id: TypedAttribute {
         static var attribute: Attribute = "item_id"
+        typealias Value = ItemID
     }
     enum title: TypedStringAttribute {}
     enum created: TypedStringAttribute {}
@@ -31,8 +32,9 @@ enum Item {
 enum Tag {
     typealias Value = String
     
-    enum id: TypedStringAttribute {
+    enum id: TypedAttribute {
         static var attribute: Attribute = "tag_id"
+        typealias Value = TagID
     }
     enum name: TypedStringAttribute {}
     fileprivate static var spec: Spec { return .file(
@@ -146,11 +148,11 @@ class Model {
         
         // Insert a row into the `items` relation
         items.asyncAdd([
-            Item.id.attribute: id,
-            Item.title.attribute: title,
-            Item.created.attribute: now,
-            Item.status.attribute: status,
-            Item.notes.attribute: ""
+            Item.id.pair(id),
+            Item.title.pair(title),
+            Item.created.pair(now),
+            Item.status.pair(status),
+            Item.notes.pair("")
         ])
     }
     
@@ -232,8 +234,8 @@ class Model {
         let id = TagID()
         
         tags.asyncAdd([
-            Tag.id.attribute: id,
-            Tag.name.attribute: name
+            Tag.id.pair(id),
+            Tag.name.pair(name)
         ])
     }
     
@@ -244,13 +246,13 @@ class Model {
         
         undoableDB.performUndoableAction("Add New Tag", {
             self.tags.asyncAdd([
-                Tag.id.attribute: tagID,
-                Tag.name.attribute: name
+                Tag.id.pair(tagID),
+                Tag.name.pair(name)
             ])
             
             self.itemTags.asyncAdd([
-                ItemTag.itemID.attribute: itemID,
-                ItemTag.tagID.attribute: tagID
+                ItemTag.itemID.pair(itemID),
+                ItemTag.tagID.pair(tagID)
             ])
         })
     }
@@ -260,8 +262,8 @@ class Model {
     func addExistingTag(_ tagID: TagID, to itemID: ItemID) {
         undoableDB.performUndoableAction("Add Tag", {
             self.itemTags.asyncAdd([
-                ItemTag.itemID.attribute: itemID,
-                ItemTag.tagID.attribute: tagID
+                ItemTag.itemID.pair(itemID),
+                ItemTag.tagID.pair(tagID)
             ])
         })
     }
