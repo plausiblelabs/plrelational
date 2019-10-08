@@ -634,7 +634,7 @@ private func xCreate(argc: Int32, argv: UnsafePointer<UnsafePointer<Int8>?>?, ou
 }
 
 private func xDestroy(tokenizer: UnsafeMutablePointer<sqlite3_tokenizer>?) -> Int32 {
-    tokenizer?.deallocate(capacity: 1)
+    tokenizer?.deallocate()
     return SQLITE_OK
 }
 
@@ -735,8 +735,8 @@ private func xOpen(tokenizer: UnsafeMutablePointer<sqlite3_tokenizer>?, input: U
 
 private func xClose(cursor: UnsafeMutablePointer<sqlite3_tokenizer_cursor>?) -> Int32 {
     cursor?.withMemoryRebound(to: Cursor.self, capacity: 1, {
-        $0.deinitialize()
-        $0.deallocate(capacity: 1)
+        $0.deinitialize(count: 1)
+        $0.deallocate()
     })
     return SQLITE_OK
 }

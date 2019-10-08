@@ -35,7 +35,7 @@ class ObjectMap<Value> {
             let key = ptr.pointee.key
             // Destroy all entries that aren't empty or dead
             if key != EMPTY && key != DEAD {
-                ptr.deinitialize()
+                ptr.deinitialize(count: 1)
             }
         }
         free(table)
@@ -117,7 +117,7 @@ class ObjectMap<Value> {
             } else {
                 let index = firstEmptyOrMatch
                 if table[index].key == key {
-                    (table + index).deinitialize()
+                    (table + index).deinitialize(count: 1)
                     table[index].key = DEAD
                     count -= 1
                     deadCount += 1
