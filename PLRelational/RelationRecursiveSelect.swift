@@ -45,8 +45,9 @@ public struct RecursiveQuery: Hashable {
         self.value = value
     }
     
-    public var hashValue: Int {
-        return DJBHash.hash(values: [attr.hashValue, value.hashValue])
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(attr)
+        hasher.combine(value)
     }
 }
 

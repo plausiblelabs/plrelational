@@ -8,8 +8,8 @@ import sqlite3
 open class SQLiteRelation: Relation, RelationDefaultChangeObserverImplementation {
     let db: SQLiteDatabase
     
-    open let tableName: String
-    open let scheme: Scheme
+    public let tableName: String
+    public let scheme: Scheme
     
     open var changeObserverData = RelationDefaultChangeObserverImplementationData()
     

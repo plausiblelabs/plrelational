@@ -342,7 +342,7 @@ private class OpacityFormatter: NumberFormatter {
         }
         
         if s.hasSuffix("%") {
-            s = String(s[s.startIndex..<s.characters.index(before: s.endIndex)])
+            s = String(s[s.startIndex..<s.index(before: s.endIndex)])
         }
         
         if let intValue = Int(s) {

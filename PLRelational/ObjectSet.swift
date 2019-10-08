@@ -45,8 +45,8 @@ public struct ObjectSet<T: AnyObject>: Sequence {
 struct ObjectSetWrapper<T: AnyObject>: Hashable {
     var object: T
     
-    var hashValue: Int {
-        return ObjectIdentifier(object).hashValue
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(object))
     }
 }
 

@@ -63,7 +63,7 @@ public protocol SectionedTreeViewModelDelegate: class {
 public protocol SectionedTreeViewModel: class {
     associatedtype Path: Hashable
     
-    weak var delegate: SectionedTreeViewModelDelegate? { get set }
+    var delegate: SectionedTreeViewModelDelegate? { get set }
     var selection: AsyncReadWriteProperty<Set<Path>> { get }
     var selectionExclusiveMode: Bool { get set }
     
@@ -282,7 +282,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     }
     
     func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: Any?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
-        let pboard = info.draggingPasteboard()
+        let pboard = info.draggingPasteboard
         
         if let pathPlist = pboard.propertyList(forType: pasteboardType) {
             if model.isDropAllowed(plist: pathPlist, proposedItem: proposedItem, proposedChildIndex: proposedIndex) {
@@ -294,7 +294,7 @@ fileprivate class Impl<M: SectionedTreeViewModel>: NSObject, NSOutlineViewDataSo
     }
     
     func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
-        let pboard = info.draggingPasteboard()
+        let pboard = info.draggingPasteboard
         
         guard let pathPlist = pboard.propertyList(forType: pasteboardType) else {
             return false

@@ -474,10 +474,11 @@ public func mutableValueProperty<T: Equatable>(_ initialValue: T?, _ didSet: Bin
     return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
 }
 
-/// :nodoc: Should be re-implemented as a convenience initializer
-public func mutableValueProperty<T: Equatable>(_ initialValue: [T], _ didSet: BindableProperty<[T]>.Setter? = nil) -> MutableValueProperty<[T]> {
-    return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
-}
+// TODO: After migrating to Swift 5, this appears to crash the compiler, needs investigation
+///// :nodoc: Should be re-implemented as a convenience initializer
+//public func mutableValueProperty<T: Equatable>(_ initialValue: [T], _ didSet: BindableProperty<[T]>.Setter? = nil) -> MutableValueProperty<[T]> {
+//    return MutableValueProperty(initialValue, changeHandler: ChangeHandler(), valueChanging: valueChanging, didSet: didSet)
+//}
 
 /// A read/write property whose storage is maintained external to the property.  This is mainly useful for compatibility
 /// with existing UI frameworks.  For example, an ExternalValueProperty may be used to add binding support to an existing

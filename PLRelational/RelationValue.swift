@@ -77,14 +77,26 @@ public func <(a: RelationValue, b: RelationValue) -> Bool {
 }
 
 extension RelationValue: Hashable {
-    public var hashValue: Int {
+    public func hash(into hasher: inout Hasher) {
         switch self {
-        case .null: return 0
-        case .integer(let x): return DJBHash.hash(values: [1, x.hashValue])
-        case .real(let x): return DJBHash.hash(values: [2, x.hashValue])
-        case .text(let x): return DJBHash.hash(values: [3, x.hashValue])
-        case .blob(let x): return DJBHash.hash(values: [4, x.hashValueFromElements])
-        case .notFound: return 5
+        case .null:
+            hasher.combine(0)
+        case .integer(let x):
+            hasher.combine(1)
+            hasher.combine(x)
+        case .real(let x):
+            hasher.combine(2)
+            hasher.combine(x)
+        case .text(let x):
+            hasher.combine(3)
+            hasher.combine(x)
+        case .blob(let x):
+            hasher.combine(4)
+            for element in x {
+                hasher.combine(element)
+            }
+        case .notFound:
+            hasher.combine(5)
         }
     }
 }
@@ -179,10 +191,7 @@ extension RelationValue {
     
     /// Create a new byte array value from the contents of `data`.
     public init(_ data: Data) {
-        let count = data.count
-        self = data.withUnsafeBytes({
-            .blob(Array(UnsafeBufferPointer(start: $0, count: count)))
-        })
+        self = .blob([UInt8](data))
     }
     
     /// Create a new byte array value from the contents of `sequence`.

@@ -38,7 +38,7 @@ extension RelationChange {
                 added = adds
             }
             // TODO: Error handling
-            addedRows = added.rows().flatMap{$0.ok}
+            addedRows = added.rows().compactMap{$0.ok}
         } else {
             addedRows = []
         }
@@ -46,7 +46,7 @@ extension RelationChange {
         let updatedRows: [Row]
         if let adds = self.added, let removes = self.removed {
             let updated = removes.project([idAttr]).join(adds)
-            updatedRows = updated.rows().flatMap{$0.ok}
+            updatedRows = updated.rows().compactMap{$0.ok}
         } else {
             updatedRows = []
         }
@@ -60,7 +60,7 @@ extension RelationChange {
             } else {
                 removed = removes
             }
-            deletedRows = removed.rows().flatMap{$0.ok}
+            deletedRows = removed.rows().compactMap{$0.ok}
             deletedIDs = deletedRows.map{$0[idAttr]}
         } else {
             deletedRows = []
@@ -81,7 +81,7 @@ public func partsOf(_ set: RowChange, idAttr: Attribute) -> RelationChangeParts 
     var updatedRows: [Row] = []
     for row in set.added {
         let id = row[idAttr]
-        if let index = deletedRows.index(where: { $0[idAttr] == id }) {
+        if let index = deletedRows.firstIndex(where: { $0[idAttr] == id }) {
             // A row with this identifier appears in both sets, so it must've been updated; the added set
             // will contain the new row contents
             updatedRows.append(row)

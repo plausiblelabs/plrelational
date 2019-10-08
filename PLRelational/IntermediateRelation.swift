@@ -10,7 +10,7 @@ open class IntermediateRelation: Relation, RelationDefaultChangeObserverImplemen
     var op: Operator
     var operands: [Relation] {
         didSet {
-            let objs = operands.flatMap(asObject)
+            let objs = operands.compactMap(asObject)
             if objs.contains(where: { $0 === self }) {
                 fatalError()
             }

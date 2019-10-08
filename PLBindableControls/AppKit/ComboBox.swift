@@ -41,11 +41,11 @@ open class ComboBox<T: Equatable>: NSComboBox, NSComboBoxDelegate {
         }
     }
     
-    open override func controlTextDidBeginEditing(_ obj: Notification) {
+    open func controlTextDidBeginEditing(_ obj: Notification) {
         previousCommittedValue = objectValue as? T
     }
 
-    open override func controlTextDidEndEditing(_ obj: Notification) {
+    open func controlTextDidEndEditing(_ obj: Notification) {
         // Note that controlTextDidBeginEditing may not be called if the user gives focus to the text field
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value

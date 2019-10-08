@@ -47,6 +47,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var observerRemovals: [ObserverRemoval] = []
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        // XXX: We're not ready for dark mode yet
+        if #available(macOS 10.14, *) {
+            NSApp.appearance = NSAppearance(named: .aqua)
+        }
+
         window.delegate = self
 
         // Initialize our view model
@@ -118,7 +123,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
                         })
                     }
                 case let .valueChanging(changes, _):
-                    let changeTypes = changes.flatMap{ (change) -> ChangeType? in
+                    let changeTypes = changes.compactMap{ (change) -> ChangeType? in
                         switch change {
                         case .initial: return nil
                         case .insert: return .insert

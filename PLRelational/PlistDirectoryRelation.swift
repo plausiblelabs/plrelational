@@ -219,7 +219,7 @@ public class PlistDirectoryRelation: PlistRelation, RelationDefaultChangeObserve
             writeCache.toDelete.remove(urlOrKey)
         }
         
-        for url in writeCache.toDelete.lazy.flatMap({ $0.urlValue }) {
+        for url in writeCache.toDelete.lazy.compactMap({ $0.urlValue }) {
             do {
                 try FileManager.default.removeItem(at: url)
                 for observer in saveObservers {
@@ -292,7 +292,7 @@ extension PlistDirectoryRelation {
                 return .Err(NSError.fileNotFound)
             }
             
-            let modDate = flatten(try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate)
+            let modDate = flatten(((try? url.resourceValues(forKeys: [.contentModificationDateKey]).contentModificationDate) as Date??))
             if let entry = readCache[url] {
                 if modDate == entry.date {
                     return .Ok(entry.row)
@@ -369,7 +369,7 @@ extension PlistDirectoryRelation {
         if let url = url {
             if !(url as NSURL).checkResourceIsReachableAndReturnError(nil) {
                 // If the directory doesn't even exist, then just return URLs in the write cache.
-                return AnyIterator(writeCache.toWrite.keys.lazy.flatMap({ $0.urlValue }).map(Result.Ok).makeIterator())
+                return AnyIterator(writeCache.toWrite.keys.lazy.compactMap({ $0.urlValue }).map(Result.Ok).makeIterator())
             }
         }
         
@@ -380,7 +380,7 @@ extension PlistDirectoryRelation {
             return false
         })
         
-        var writeCacheURLIterator: Optional = writeCache.toWrite.keys.lazy.flatMap({ $0.urlValue }).makeIterator()
+        var writeCacheURLIterator: Optional = writeCache.toWrite.keys.lazy.compactMap({ $0.urlValue }).makeIterator()
         let writeCacheDeleted = writeCache.toDelete
         
         return AnyIterator({
@@ -433,7 +433,7 @@ extension PlistDirectoryRelation {
     }
     
     fileprivate func filteredRowGenerator(primaryKeyValues: [RelationValue]) -> AnyIterator<Result<Set<Row>, RelationError>> {
-        let rows = primaryKeyValues.lazy.flatMap({ value -> Result<Set<Row>, RelationError>? in
+        let rows = primaryKeyValues.lazy.compactMap({ value -> Result<Set<Row>, RelationError>? in
             let result = self.readRow(primaryKey: value)
             switch result {
             case .Ok(nil):
@@ -454,10 +454,10 @@ extension PlistDirectoryRelation {
             case standardizedURL(URL)
             case key(RelationValue)
             
-            var hashValue: Int {
+            func hash(into hasher: inout Hasher) {
                 switch self {
-                case .standardizedURL(let url): return url.hashValue
-                case .key(let value): return ~value.hashValue
+                case .standardizedURL(let url): hasher.combine(url)
+                case .key(let value): hasher.combine(value)
                 }
             }
             

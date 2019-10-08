@@ -89,7 +89,7 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         self.delegate = self
     }
     
-    open override func controlTextDidBeginEditing(_ obj: Notification) {
+    open func controlTextDidBeginEditing(_ obj: Notification) {
         //Swift.print("CONTROL DID BEGIN EDITING!")
         _string.exclusiveMode = true
         _optString.exclusiveMode = true
@@ -97,7 +97,7 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         previousValue = stringValue
     }
     
-    open override func controlTextDidChange(_ notification: Notification) {
+    open func controlTextDidChange(_ notification: Notification) {
         //Swift.print("CONTROL DID CHANGE!")
         if deliverTransientChanges {
             if usingOpt {
@@ -109,7 +109,7 @@ open class TextField: NSTextField, NSTextFieldDelegate {
         previousValue = stringValue
     }
     
-    open override func controlTextDidEndEditing(_ obj: Notification) {
+    open func controlTextDidEndEditing(_ obj: Notification) {
         // Note that controlTextDidBeginEditing may not be called if the user gives focus to the text field
         // but resigns first responder without typing anything, so we only commit the value if the user
         // actually typed something that differs from the previous value

@@ -129,7 +129,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     }
     
     open func outlineView(_ outlineView: NSOutlineView, validateDrop info: NSDraggingInfo, proposedItem: Any?, proposedChildIndex proposedIndex: Int) -> NSDragOperation {
-        let pboard = info.draggingPasteboard()
+        let pboard = info.draggingPasteboard
         
         if let idPlist = pboard.propertyList(forType: pasteboardType) {
             let elementID = E.ID.fromPlist(idPlist as AnyObject)!
@@ -144,7 +144,7 @@ open class ListView<E: ArrayElement>: NSObject, NSOutlineViewDataSource, ExtOutl
     }
 
     open func outlineView(_ outlineView: NSOutlineView, acceptDrop info: NSDraggingInfo, item: Any?, childIndex index: Int) -> Bool {
-        let pboard = info.draggingPasteboard()
+        let pboard = info.draggingPasteboard
         
         if let idPlist = pboard.propertyList(forType: pasteboardType), let move = model.move {
             let elementID = E.ID.fromPlist(idPlist as AnyObject)!

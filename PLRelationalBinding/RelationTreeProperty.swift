@@ -179,7 +179,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
     private func onDelete(_ id: RelationValue) -> Change? {
 
         func deleteNode(_ node: Node, _ nodes: inout [Node]) -> Int {
-            let index = nodes.index(where: {$0 === node})!
+            let index = nodes.firstIndex(where: {$0 === node})!
             nodes.remove(at: index)
             return index
         }
@@ -250,7 +250,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         let dstParent = optDstParent ?? root
 
         // Remove the node from its current parent
-        let srcIndex = srcParent.children.index(where: { $0 === node })!
+        let srcIndex = srcParent.children.firstIndex(where: { $0 === node })!
         srcParent.children.remove(at: srcIndex)
         
         // Insert the node in its new parent
@@ -337,7 +337,7 @@ class RelationTreeProperty: TreeProperty<RowTreeNode> {
         let parentNode = parentForNode(previousNode) ?? root
         
         let nextNode: Node?
-        if let indexOfPrevious = parentNode.children.index(where: {$0.id == previous}) {
+        if let indexOfPrevious = parentNode.children.firstIndex(where: {$0.id == previous}) {
             let indexOfNext = indexOfPrevious + 1
             if indexOfNext < parentNode.children.count {
                 nextNode = parentNode.children[indexOfNext]

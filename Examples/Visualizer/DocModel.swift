@@ -160,7 +160,7 @@ class DocModel {
                 guard let plistBlob: [UInt8] = row[DB.RelationModelData.Plist.a].get() else {
                     return .Err(DocModelError(message: "Invalid plist data"))
                 }
-                guard let model = RelationModel.fromPlistData(Data(bytes: plistBlob)) else {
+                guard let model = RelationModel.fromPlistData(Data(plistBlob)) else {
                     return .Err(DocModelError(message: "Failed to decode RelationModel plist data"))
                 }
                 

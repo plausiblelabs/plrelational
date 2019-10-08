@@ -25,6 +25,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var listView: ListView<RowArrayElement>!
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        // XXX: We're not ready for dark mode yet
+        if #available(macOS 10.14, *) {
+            NSApp.appearance = NSAppearance(named: .aqua)
+        }
+
         // By default, NSColor is set to "ignore alpha" which means that color wells
         // strip alpha, dragged-and-dropped colors lose alpha, and other assorted
         // whatever. We turn this off here, because we actually want our color wells

@@ -23,7 +23,7 @@ public class RemovableSet<T>: Sequence {
         }
     }
     
-    public func makeIterator() -> IndexingIterator<Dictionary<UInt64, T>.Values> {
+    public func makeIterator() -> Dictionary<UInt64, T>.Values.Iterator {
         return contents.values.makeIterator()
     }
 }

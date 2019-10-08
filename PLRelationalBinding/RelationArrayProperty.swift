@@ -111,7 +111,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
         // so that changes are reported deterministically
         var indexes: [Int] = []
         for id in insertedIDs {
-            if let index = elements.index(where: { $0.id == id }) {
+            if let index = elements.firstIndex(where: { $0.id == id }) {
                 indexes.append(index)
             }
         }
@@ -122,7 +122,7 @@ class RelationArrayProperty: ArrayProperty<RowArrayElement> {
 
     fileprivate func onDelete(_ ids: [RelationValue], changes: inout [Change]) {
         for id in ids {
-            if let index = elements.index(where: { $0.id == id }) {
+            if let index = elements.firstIndex(where: { $0.id == id }) {
                 elements.remove(at: index)
                 changes.append(.delete(index))
             }

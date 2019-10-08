@@ -24,7 +24,7 @@ class ChecklistView: NSView {
         super.init(frame: frame)
         
         // Load the xib and bind to it
-        Bundle.main.loadNibNamed(NSNib.Name("ChecklistView"), owner: self, topLevelObjects: nil)
+        Bundle.main.loadNibNamed("ChecklistView", owner: self, topLevelObjects: nil)
         view.frame = self.bounds
         addSubview(view)
         

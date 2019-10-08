@@ -24,6 +24,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var model: Model!
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        // XXX: We're not ready for dark mode yet
+        if #available(macOS 10.14, *) {
+            NSApp.appearance = NSAppearance(named: .aqua)
+        }
+        
         window.delegate = self
         
         // Prepare the undo manager

@@ -60,7 +60,7 @@ open class ArrayProperty<Element: ArrayElement>: AsyncReadablePropertyType {
     
     /// Returns the index of the element with the given ID, relative to the sorted elements array.
     public func indexForID(_ id: Element.ID) -> Int? {
-        return elements.index(where: { $0.id == id })
+        return elements.firstIndex(where: { $0.id == id })
     }
 
     /// Returns the element with the given ID.

@@ -29,7 +29,7 @@ class DetailView: BackgroundView {
         super.init(frame: frame)
         
         // Load the xib and bind to it
-        Bundle.main.loadNibNamed(NSNib.Name("DetailView"), owner: self, topLevelObjects: nil)
+        Bundle.main.loadNibNamed("DetailView", owner: self, topLevelObjects: nil)
         view.frame = self.bounds
         addSubview(view)
         

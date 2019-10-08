@@ -382,7 +382,7 @@ extension RelationDifferentiator {
 
 extension RelationDifferentiator {
     fileprivate func union(_ relations: [Relation?]) -> Relation? {
-        let nonnil = relations.flatMap({ $0 })
+        let nonnil = relations.compactMap({ $0 })
         if nonnil.isEmpty {
             return nil
         } else if nonnil.count == 1 {
@@ -393,7 +393,7 @@ extension RelationDifferentiator {
     }
     
     fileprivate func intersection(_ relations: [Relation?]) -> Relation? {
-        let nonnil = relations.flatMap({ $0 })
+        let nonnil = relations.compactMap({ $0 })
         if nonnil.isEmpty || nonnil.count != relations.count {
             return nil
         } else if nonnil.count == 1 {

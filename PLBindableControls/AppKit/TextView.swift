@@ -15,7 +15,7 @@ open class TextView: NSTextView, NSTextViewDelegate {
         set: { [unowned self] value, _ in
             self.string = value
             // XXX: Without the following sometimes part of the text will disappear, not sure why yet
-            self.layoutManager?.invalidateLayout(forCharacterRange: NSMakeRange(0, value.characters.count), actualCharacterRange: nil)
+            self.layoutManager?.invalidateLayout(forCharacterRange: NSMakeRange(0, value.count), actualCharacterRange: nil)
         }
     )
     public var text: ReadWriteProperty<String> { return _text }

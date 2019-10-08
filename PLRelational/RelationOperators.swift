@@ -20,16 +20,6 @@ public func +(lhs: Relation?, rhs: Relation?) -> Relation? {
     }
 }
 
-/// Union a possibly-nil relation with a non-nil Relation.
-public func +(lhs: Relation, rhs: Relation?) -> Relation {
-    return rhs.map(lhs.union) ?? lhs
-}
-
-/// Union a possibly-nil relation with a non-nil Relation.
-public func +(lhs: Relation?, rhs: Relation) -> Relation {
-    return lhs.map(rhs.union) ?? rhs
-}
-
 /// Subtract two possibly-nil relations. The result is nil if the lhs is nil, the lhs
 /// is returned if the rhs is nil, and the difference is returned if both exist.
 public func -(lhs: Relation?, rhs: Relation?) -> Relation? {

@@ -30,8 +30,11 @@ public struct Color: Hashable {
             self.a = a
         }
         
-        public var hashValue: Int {
-            return DJBHash.hash(values: [r.hashValue, g.hashValue, b.hashValue, a.hashValue])
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(r)
+            hasher.combine(g)
+            hasher.combine(b)
+            hasher.combine(a)
         }
     }
     
@@ -71,8 +74,8 @@ public struct Color: Hashable {
         return Color(r: components.r, g: components.g, b: components.b, a: newAlpha)
     }
     
-    public var hashValue: Int {
-        return components.hashValue
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(components)
     }
     
     public var stringValue: String {

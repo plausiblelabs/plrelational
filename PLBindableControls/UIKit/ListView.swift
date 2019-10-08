@@ -35,7 +35,7 @@ open class ListView<M: ListViewModel>: NSObject, UITableViewDataSource, UITableV
     public weak var delegate: ListViewDelegate?
 
     /// The animation style to use when a row is inserted or deleted.
-    public var rowAnimation: UITableViewRowAnimation = .automatic
+    public var rowAnimation: UITableView.RowAnimation = .automatic
     
     private lazy var selection: MutableValueProperty<M.Element.ID?> = mutableValueProperty(nil, { selectedID, _ in
         self.selectItem(selectedID, animated: true, scroll: false)

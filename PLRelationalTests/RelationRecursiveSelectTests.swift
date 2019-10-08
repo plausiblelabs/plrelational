@@ -45,7 +45,6 @@ class RelationRecursiveSelectTests: DBTestCase {
         func idsForReferenced(_ attr: Attribute, in row: Row) -> [RelationValue] {
             let refdIDsString: String = row[attr].get()!
             return refdIDsString
-                .characters
                 .split{ $0 == " " }
                 .map{ RelationValue(Int64(String($0))!) }
         }

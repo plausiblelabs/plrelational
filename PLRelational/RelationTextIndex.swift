@@ -203,17 +203,14 @@ extension RelationTextIndex {
                 && lhs.matches == rhs.matches
         }
         
-        public var hashValue: Int {
-            var hash = DJBHash()
-            hash.combine(ellipsisAtStart.hashValue)
-            hash.combine(ellipsisAtEnd.hashValue)
-            hash.combine(string.hashValue)
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(ellipsisAtStart)
+            hasher.combine(ellipsisAtEnd)
+            hasher.combine(string)
             
             // String.Index isn't Hashable and doesn't have any convenient way to extract a value.
             // We'll just punt on it. Hopefully the rest will be sufficiently unique.
-            hash.combine(matches.count)
-            
-            return hash.value
+            hasher.combine(matches.count)
         }
     }
 }
@@ -528,7 +525,7 @@ private class RelationTextIndexObserver: AsyncRelationChangeCoalescedObserver {
             var result = row
             for (attribute, value) in row {
                 if let string = value.get() as String? {
-                    if let lastIndex = string.characters.index(of: "\n") ?? string.index(string.startIndex, offsetBy: 40, limitedBy: string.endIndex) {
+                    if let lastIndex = string.firstIndex(of: "\n") ?? string.index(string.startIndex, offsetBy: 40, limitedBy: string.endIndex) {
                         result[attribute] = .text(string[..<lastIndex] + "…")
                     }
                 }
@@ -616,12 +613,10 @@ private struct IntermediateToken: Hashable, Comparable {
         return false
     }
     
-    var hashValue: Int {
-        var hash = DJBHash()
-        hash.combine(string.hashValue)
-        hash.combine(range.location)
-        hash.combine(range.length)
-        return hash.value
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(string)
+        hasher.combine(range.location)
+        hasher.combine(range.length)
     }
 }
 
@@ -634,12 +629,21 @@ private func xCreate(argc: Int32, argv: UnsafePointer<UnsafePointer<Int8>?>?, ou
 }
 
 private func xDestroy(tokenizer: UnsafeMutablePointer<sqlite3_tokenizer>?) -> Int32 {
-    tokenizer?.deallocate(capacity: 1)
+    tokenizer?.deallocate()
     return SQLITE_OK
 }
 
 private func xOpen(tokenizer: UnsafeMutablePointer<sqlite3_tokenizer>?, input: UnsafePointer<Int8>?, nBytes: Int32, outCursor: UnsafeMutablePointer<UnsafeMutablePointer<sqlite3_tokenizer_cursor>?>?) -> Int32 {
-    let inputLength = nBytes >= 0 ? Int(nBytes) : Int(strlen(input))
+    let inputLength: Int
+    if nBytes >= 0 {
+        inputLength = Int(nBytes)
+    } else {
+        if let input = input {
+            inputLength = Int(strlen(input))
+        } else {
+            inputLength = 0
+        }
+    }
     let maybeString: String? = input?.withMemoryRebound(to: UInt8.self, capacity: inputLength, {
         let buffer = UnsafeBufferPointer(start: $0, count: inputLength)
         return String(bytes: buffer, encoding: .utf8)
@@ -726,8 +730,8 @@ private func xOpen(tokenizer: UnsafeMutablePointer<sqlite3_tokenizer>?, input: U
 
 private func xClose(cursor: UnsafeMutablePointer<sqlite3_tokenizer_cursor>?) -> Int32 {
     cursor?.withMemoryRebound(to: Cursor.self, capacity: 1, {
-        $0.deinitialize()
-        $0.deallocate(capacity: 1)
+        $0.deinitialize(count: 1)
+        $0.deallocate()
     })
     return SQLITE_OK
 }

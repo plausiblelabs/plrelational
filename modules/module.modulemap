@@ -3,9 +3,3 @@ module sqlite3 [system] {
     link "sqlite3"
     export *
 }
-
-module CommonCrypto [system] {
-    header "module-commoncrypto-include.h"
-    link "System"
-    export *
-}

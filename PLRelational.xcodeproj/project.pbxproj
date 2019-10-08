@@ -27,6 +27,9 @@
 		3707532C1F103173009C3700 /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
 		3707532E1F1034F0009C3700 /* SearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707532D1F1034F0009C3700 /* SearchResult.swift */; };
 		370753301F104FA4009C3700 /* ResultsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707532F1F104FA4009C3700 /* ResultsListView.swift */; };
+		3709DD7C234D387C009F794B /* PLBindableControls.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B441611E89A49A00C8C336 /* PLBindableControls.framework */; };
+		3709DD7D234D387C009F794B /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43FFA1E8997EB00C8C336 /* PLRelational.framework */; };
+		3709DD7E234D387C009F794B /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
 		370F88081E8F004C0043B903 /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370F88061E8F00440043B903 /* ListView.swift */; };
 		3710A68F1DDCF93C0070EC29 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A68E1DDCF93C0070EC29 /* SidebarView.swift */; };
 		3710A6911DDCFA330070EC29 /* SidebarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A6901DDCFA330070EC29 /* SidebarModel.swift */; };
@@ -50,9 +53,6 @@
 		37412EB51F100AE2002F131A /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43FFA1E8997EB00C8C336 /* PLRelational.framework */; };
 		37412EB61F100AE2002F131A /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
 		37412EB91F100F3D002F131A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37412EB71F100F3D002F131A /* MainMenu.xib */; };
-		374315E41F420B0C00128F5A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 374315DE1F420B0C00128F5A /* Assets.xcassets */; };
-		374315E51F420B0C00128F5A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 374315DF1F420B0C00128F5A /* MainMenu.xib */; };
-		374315E61F420B0C00128F5A /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 374315E11F420B0C00128F5A /* Info.plist */; };
 		374315F31F420B5200128F5A /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43FFA1E8997EB00C8C336 /* PLRelational.framework */; };
 		374315F41F420B5200128F5A /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
 		374315F51F420B5200128F5A /* PLBindableControls.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B441611E89A49A00C8C336 /* PLBindableControls.framework */; };
@@ -253,7 +253,6 @@
 		37B4407F1E899A4F00C8C336 /* RelationActivityLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF3F1CF49AFE009E28E0 /* RelationActivityLogging.swift */; };
 		37B440801E899A4F00C8C336 /* RelationDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B339DD1CEA54E7008568E9 /* RelationDump.swift */; };
 		37B440811E899A5100C8C336 /* RelationActivityLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF3F1CF49AFE009E28E0 /* RelationActivityLogging.swift */; };
-		37B440831E899A7200C8C336 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		37B440841E899A7200C8C336 /* CollectionConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */; };
 		37B440851E899A7200C8C336 /* ConsistentPRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */; };
 		37B440861E899A7200C8C336 /* Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E26B1D805E230039923C /* Crypto.swift */; };
@@ -287,7 +286,6 @@
 		37B440A21E899A7200C8C336 /* UnsafePointerReadWrite.swift in Sources */ = {isa = PBXBuildFile; fileRef = C29C28351D872BEA001E20E7 /* UnsafePointerReadWrite.swift */; };
 		37B440A31E899A7200C8C336 /* ValueWithDestructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921AF1CCFEB6D00518184 /* ValueWithDestructor.swift */; };
 		37B440A41E899A7200C8C336 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921AD1CCFABA300518184 /* Result.swift */; };
-		37B440A51E899A7200C8C336 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		37B440A61E899A7200C8C336 /* CollectionConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */; };
 		37B440A71E899A7200C8C336 /* ConsistentPRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */; };
 		37B440A81E899A7200C8C336 /* Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E26B1D805E230039923C /* Crypto.swift */; };
@@ -491,7 +489,6 @@
 		C2935C621F1002D200441B6A /* RelationTextIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2935C5D1F1002CC00441B6A /* RelationTextIndexTests.swift */; };
 		C2935C631F1002D200441B6A /* RelationTextIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2935C5D1F1002CC00441B6A /* RelationTextIndexTests.swift */; };
 		C2A78A1D1ED4A84D0021ACCF /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
-		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2EB823C1E96A67D00B80CAE /* SelectExpressionAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB823B1E96A67D00B80CAE /* SelectExpressionAnalysis.swift */; };
 		C2F13CE31E8D4ECD001376D8 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
 		C2F13CE51E8D7F8D001376D8 /* SetSubtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */; };
@@ -518,6 +515,27 @@
 			proxyType = 1;
 			remoteGlobalIDString = 37B441601E89A49A00C8C336;
 			remoteInfo = "PLBindableControls-macOS";
+		};
+		3709DD76234D3866009F794B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B441601E89A49A00C8C336;
+			remoteInfo = "PLBindableControls-macOS";
+		};
+		3709DD78234D3866009F794B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B43FF91E8997EB00C8C336;
+			remoteInfo = "PLRelational-macOS";
+		};
+		3709DD7A234D3866009F794B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B440D21E899F7600C8C336;
+			remoteInfo = "PLRelationalBinding-macOS";
 		};
 		372707F71CFE2C7E00710C80 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -816,7 +834,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */,
 			);
 			name = "Copy Embedded Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -918,7 +935,6 @@
 		3788C0F91F60764B005920FD /* trash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = trash.png; sourceTree = "<group>"; };
 		3788C0FC1F6077A7005920FD /* trash@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "trash@2x.png"; sourceTree = "<group>"; };
 		378A2D211F8FFA75009F3EF8 /* TodoClientApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoClientApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		378A2D221F8FFA75009F3EF8 /* TodoApp copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "TodoApp copy-Info.plist"; path = "/Users/campbell/Projects/vp/plrelational/TodoApp copy-Info.plist"; sourceTree = "<absolute>"; };
 		37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncPropertyOperations.swift; sourceTree = "<group>"; };
 		37941D8D1DB8191200F5508F /* AsyncPropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyOperationsTests.swift; path = PLRelationalBindingTests/AsyncPropertyOperationsTests.swift; sourceTree = SOURCE_ROOT; };
 		3799AB481F57C43C0075570F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/ChecklistView.xib; sourceTree = "<group>"; };
@@ -1057,7 +1073,6 @@
 		C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteDatabase.swift; sourceTree = "<group>"; };
 		C22921961CC7E9E300518184 /* SQLiteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteRelation.swift; sourceTree = "<group>"; };
 		C22921A71CCE587900518184 /* RelationValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValue.swift; sourceTree = "<group>"; };
-		C22921A91CCE605D00518184 /* ArrayHashing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayHashing.swift; sourceTree = "<group>"; };
 		C22921AD1CCFABA300518184 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		C22921AF1CCFEB6D00518184 /* ValueWithDestructor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueWithDestructor.swift; sourceTree = "<group>"; };
 		C22921B51CD10BA800518184 /* ObserverSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObserverSet.swift; sourceTree = "<group>"; };
@@ -1086,7 +1101,6 @@
 		C243FAE11F0599FC0015DE85 /* RelationDifferentiatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiatorTests.swift; sourceTree = "<group>"; };
 		C2478CF81E773F0B00C3FB05 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		C2478CF91E773F9300C3FB05 /* module-sqlite3-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "module-sqlite3-include.h"; sourceTree = "<group>"; };
-		C2478CFA1E773FEB00C3FB05 /* module-commoncrypto-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "module-commoncrypto-include.h"; sourceTree = "<group>"; };
 		C24C4A641E255D4000482726 /* ChangeLoggingRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeLoggingRelationTests.swift; path = ../PLRelationalTests/ChangeLoggingRelationTests.swift; sourceTree = "<group>"; };
 		C24C4A671E26740C00482726 /* BookmarkableGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarkableGraph.swift; sourceTree = "<group>"; };
 		C24C4A691E26940400482726 /* BookmarkableGraphTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BookmarkableGraphTests.swift; path = ../PLRelationalTests/BookmarkableGraphTests.swift; sourceTree = "<group>"; };
@@ -1145,7 +1159,6 @@
 		C2CFC35A1D7F36DE00389373 /* RowPlist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RowPlist.swift; sourceTree = "<group>"; };
 		C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistFileRelationTests.swift; path = PLRelationalTests/PlistFileRelationTests.swift; sourceTree = SOURCE_ROOT; };
 		C2D21C4B1E6F324000261764 /* Label.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Label.swift; sourceTree = "<group>"; };
-		C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswiftSwiftOnoneSupport.dylib; path = Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/libswiftSwiftOnoneSupport.dylib; sourceTree = DEVELOPER_DIR; };
 		C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectDictionary.swift; sourceTree = "<group>"; };
 		C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QueryRunnerTests.swift; path = PLRelationalTests/QueryRunnerTests.swift; sourceTree = SOURCE_ROOT; };
 		C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiator.swift; sourceTree = "<group>"; };
@@ -1164,6 +1177,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3709DD7D234D387C009F794B /* PLRelational.framework in Frameworks */,
+				3709DD7E234D387C009F794B /* PLRelationalBinding.framework in Frameworks */,
+				3709DD7C234D387C009F794B /* PLBindableControls.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2211,7 +2227,6 @@
 			children = (
 				C2478CF81E773F0B00C3FB05 /* module.modulemap */,
 				C2478CF91E773F9300C3FB05 /* module-sqlite3-include.h */,
-				C2478CFA1E773FEB00C3FB05 /* module-commoncrypto-include.h */,
 				C2935C911F10058D00441B6A /* SQLiteTokenizerAPI.h */,
 			);
 			name = "Custom Module Map";
@@ -2236,9 +2251,7 @@
 				37F1D9B41DCD3D1C004D4AAD /* Example Apps */,
 				370753A21F2FAE43009C3700 /* Documentation */,
 				C22BF12D1CBC348500D3FE59 /* Products */,
-				C2D4A8491D88789A001D9971 /* Swift library workaround */,
 				37B4419A1E89AA7E00C8C336 /* Frameworks */,
-				378A2D221F8FFA75009F3EF8 /* TodoApp copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2348,7 +2361,6 @@
 		C2BD298F1CD250B30081FD05 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				C22921A91CCE605D00518184 /* ArrayHashing.swift */,
 				C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */,
 				C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */,
 				C2B6E26B1D805E230039923C /* Crypto.swift */,
@@ -2406,14 +2418,6 @@
 				C2CFC35A1D7F36DE00389373 /* RowPlist.swift */,
 			);
 			name = Plist;
-			sourceTree = "<group>";
-		};
-		C2D4A8491D88789A001D9971 /* Swift library workaround */ = {
-			isa = PBXGroup;
-			children = (
-				C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */,
-			);
-			name = "Swift library workaround";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -2476,6 +2480,9 @@
 			buildRules = (
 			);
 			dependencies = (
+				3709DD79234D3866009F794B /* PBXTargetDependency */,
+				3709DD7B234D3866009F794B /* PBXTargetDependency */,
+				3709DD77234D3866009F794B /* PBXTargetDependency */,
 			);
 			name = BindableControlsApp;
 			productName = BindableControlsApp;
@@ -2995,75 +3002,76 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0830;
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 1110;
 				ORGANIZATIONNAME = "Plausible Labs Cooperative, Inc.";
 				TargetAttributes = {
 					372707E71CFE2C7E00710C80 = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
+						ProvisioningStyle = Automatic;
 					};
 					372707F51CFE2C7E00710C80 = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						TestTargetID = 372707E71CFE2C7E00710C80;
 					};
 					37412E801F100848002F131A = {
 						CreatedOnToolsVersion = 8.3.3;
-						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37412E901F100848002F131A = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 37412E801F100848002F131A;
 					};
 					37412E9B1F100848002F131A = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 37412E801F100848002F131A;
 					};
 					374315E81F420B5200128F5A = {
-						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
+						ProvisioningStyle = Automatic;
 					};
 					37504B371DC6995100CEE4D4 = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37504B4A1DC6995100CEE4D4 = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 37504B371DC6995100CEE4D4;
 					};
 					37504B551DC6995100CEE4D4 = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 37504B371DC6995100CEE4D4;
 					};
 					3777D5C41E8C199C006D147D = {
 						CreatedOnToolsVersion = 8.2.1;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					3777D5CC1E8C199D006D147D = {
 						CreatedOnToolsVersion = 8.2.1;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37A1CE6A1D1081980067870D = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
+						ProvisioningStyle = Automatic;
 					};
 					37A1CE781D1081980067870D = {
 						CreatedOnToolsVersion = 7.3;
@@ -3075,7 +3083,7 @@
 					};
 					37AEC3F21F576D18004E5487 = {
 						CreatedOnToolsVersion = 8.3.3;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37B43F1B1E898BAD00C8C336 = {
@@ -3088,12 +3096,12 @@
 					};
 					37B43FF91E8997EB00C8C336 = {
 						CreatedOnToolsVersion = 8.2.1;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37B440011E8997EB00C8C336 = {
 						CreatedOnToolsVersion = 8.2.1;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37B440D21E899F7600C8C336 = {
@@ -3102,26 +3110,27 @@
 					};
 					37B440DA1E899F7600C8C336 = {
 						CreatedOnToolsVersion = 8.2.1;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37B440EE1E899FB700C8C336 = {
 						CreatedOnToolsVersion = 8.2.1;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37B440F61E899FB700C8C336 = {
 						CreatedOnToolsVersion = 8.2.1;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37B441601E89A49A00C8C336 = {
 						CreatedOnToolsVersion = 8.2.1;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37B441681E89A49B00C8C336 = {
 						CreatedOnToolsVersion = 8.2.1;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37D4EBB21F4D01550010229E = {
@@ -3142,7 +3151,7 @@
 			};
 			buildConfigurationList = C22BF1271CBC348500D3FE59 /* Build configuration list for PBXProject "PLRelational" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
@@ -3339,9 +3348,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				374315E41F420B0C00128F5A /* Assets.xcassets in Resources */,
-				374315E51F420B0C00128F5A /* MainMenu.xib in Resources */,
-				374315E61F420B0C00128F5A /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3694,7 +3700,6 @@
 				37B4404C1E899A0A00C8C336 /* PlistDirectoryRelation.swift in Sources */,
 				37B440601E899A2000C8C336 /* TransactionalDatabase.swift in Sources */,
 				37B440311E8999EB00C8C336 /* RelationDifferentiator.swift in Sources */,
-				37B440A51E899A7200C8C336 /* ArrayHashing.swift in Sources */,
 				37B4401C1E8999D200C8C336 /* Relation.swift in Sources */,
 				37B440741E899A3300C8C336 /* QueryRunner.swift in Sources */,
 				37B4403A1E8999F700C8C336 /* RelationOperators.swift in Sources */,
@@ -3815,7 +3820,6 @@
 				37B440481E899A0900C8C336 /* PlistDirectoryRelation.swift in Sources */,
 				37B4405D1E899A2000C8C336 /* TransactionalDatabase.swift in Sources */,
 				37B4402C1E8999EA00C8C336 /* RelationDifferentiator.swift in Sources */,
-				37B440831E899A7200C8C336 /* ArrayHashing.swift in Sources */,
 				37B440141E8999D200C8C336 /* Relation.swift in Sources */,
 				C2F13CE51E8D7F8D001376D8 /* SetSubtraction.swift in Sources */,
 				37B4406D1E899A3100C8C336 /* QueryRunner.swift in Sources */,
@@ -4046,6 +4050,21 @@
 			isa = PBXTargetDependency;
 			target = 37B441601E89A49A00C8C336 /* PLBindableControls-macOS */;
 			targetProxy = 370753281F103167009C3700 /* PBXContainerItemProxy */;
+		};
+		3709DD77234D3866009F794B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B441601E89A49A00C8C336 /* PLBindableControls-macOS */;
+			targetProxy = 3709DD76234D3866009F794B /* PBXContainerItemProxy */;
+		};
+		3709DD79234D3866009F794B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B43FF91E8997EB00C8C336 /* PLRelational-macOS */;
+			targetProxy = 3709DD78234D3866009F794B /* PBXContainerItemProxy */;
+		};
+		3709DD7B234D3866009F794B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B440D21E899F7600C8C336 /* PLRelationalBinding-macOS */;
+			targetProxy = 3709DD7A234D3866009F794B /* PBXContainerItemProxy */;
 		};
 		372707F81CFE2C7E00710C80 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4346,12 +4365,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/BindableControlsApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4359,12 +4382,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/BindableControlsApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -4376,8 +4403,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = BindableControlsApp;
 			};
 			name = Debug;
@@ -4390,8 +4416,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = BindableControlsApp;
 			};
 			name = Release;
@@ -4402,15 +4427,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = NM4ZX45CU5;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/HelloWorldApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4420,14 +4446,15 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = NM4ZX45CU5;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/HelloWorldApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -4446,7 +4473,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HelloWorldApp.app/Contents/MacOS/HelloWorldApp";
 			};
 			name = Debug;
@@ -4465,7 +4492,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HelloWorldApp.app/Contents/MacOS/HelloWorldApp";
 			};
 			name = Release;
@@ -4484,7 +4511,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = HelloWorldApp;
 			};
 			name = Debug;
@@ -4502,7 +4529,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = HelloWorldApp;
 			};
 			name = Release;
@@ -4513,15 +4540,18 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = NM4ZX45CU5;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/RelationChangeApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationChangeApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4531,14 +4561,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = NM4ZX45CU5;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/RelationChangeApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationChangeApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -4549,6 +4582,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -4558,7 +4592,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.Visualizer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4569,6 +4603,7 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -4578,7 +4613,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.Visualizer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -4598,8 +4633,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Visualizer.app/Contents/MacOS/Visualizer";
 			};
 			name = Debug;
@@ -4620,8 +4654,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Visualizer.app/Contents/MacOS/Visualizer";
 			};
 			name = Release;
@@ -4641,8 +4674,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Visualizer;
 			};
 			name = Debug;
@@ -4662,8 +4694,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Visualizer;
 			};
 			name = Release;
@@ -4689,8 +4720,9 @@
 				PRODUCT_NAME = PLBindableControls;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -4718,8 +4750,9 @@
 				PRODUCT_NAME = PLBindableControls;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -4742,7 +4775,7 @@
 				PRODUCT_NAME = PLBindableControlsTests;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4761,7 +4794,7 @@
 				PRODUCT_NAME = PLBindableControlsTests;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -4772,6 +4805,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Examples/TodoClientApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -4789,6 +4823,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Examples/TodoClientApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -4803,12 +4838,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/SearchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4816,12 +4855,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/SearchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -4881,6 +4924,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/TodoApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -4888,7 +4932,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.TodoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4898,13 +4942,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/TodoApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.TodoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -4930,9 +4975,10 @@
 				PRODUCT_NAME = PLRelational;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_INCLUDE_PATHS = modules;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -4961,9 +5007,10 @@
 				PRODUCT_NAME = PLRelational;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_INCLUDE_PATHS = modules;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -5037,7 +5084,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_INCLUDE_PATHS = modules;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -5066,7 +5113,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_INCLUDE_PATHS = modules;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -5086,7 +5133,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalTests;
 				PRODUCT_NAME = PLRelationalTests;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -5104,7 +5151,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalTests;
 				PRODUCT_NAME = PLRelationalTests;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -5130,7 +5177,7 @@
 				PRODUCT_NAME = PLRelationalBinding;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -5158,7 +5205,7 @@
 				PRODUCT_NAME = PLRelationalBinding;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -5178,7 +5225,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBindingTests;
 				PRODUCT_NAME = PLRelationalBindingTests;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -5196,7 +5243,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBindingTests;
 				PRODUCT_NAME = PLRelationalBindingTests;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -5221,8 +5268,9 @@
 				PRODUCT_NAME = PLRelationalBinding;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -5250,8 +5298,9 @@
 				PRODUCT_NAME = PLRelationalBinding;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -5274,7 +5323,7 @@
 				PRODUCT_NAME = PLRelationalBindingTests;
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -5293,7 +5342,7 @@
 				PRODUCT_NAME = PLRelationalBindingTests;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -5320,7 +5369,7 @@
 				PRODUCT_NAME = PLBindableControls;
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -5348,7 +5397,7 @@
 				PRODUCT_NAME = PLBindableControls;
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
 			};
@@ -5368,7 +5417,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControlsTests;
 				PRODUCT_NAME = PLBindableControlsTests;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -5386,7 +5435,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControlsTests;
 				PRODUCT_NAME = PLBindableControlsTests;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -5396,6 +5445,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/MiniVisualizer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -5413,6 +5463,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/MiniVisualizer/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -5436,12 +5487,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -5474,6 +5527,7 @@
 				SDKROOT = macosx;
 				SWIFT_INCLUDE_PATHS = "$(TARGET_BUILD_DIR)/modules";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -5490,12 +5544,14 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
@@ -5521,6 +5577,7 @@
 				SDKROOT = macosx;
 				SWIFT_INCLUDE_PATHS = "$(TARGET_BUILD_DIR)/modules";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -5529,6 +5586,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
@@ -5540,6 +5598,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;

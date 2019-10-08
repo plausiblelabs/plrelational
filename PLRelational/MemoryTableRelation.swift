@@ -8,7 +8,7 @@
 /// this is a reference type rather than a value type, and so behaves more like we might
 /// expect a "table" to. It's also observable, in case you need that sort of thing.
 open class MemoryTableRelation: Relation, StoredRelation, RelationDefaultChangeObserverImplementation {
-    open let scheme: Scheme
+    public let scheme: Scheme
     
     public var values: IndexedSet<Row>!
     

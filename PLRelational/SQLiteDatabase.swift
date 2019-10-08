@@ -206,9 +206,12 @@ extension SQLiteDatabase {
     
     fileprivate func blobToValue(_ buffer: UnsafeBufferPointer<UInt8>) -> RelationValue {
         if buffer.count < BLOBHeaders.length { fatalError("Got a blob of length \(buffer.count) from SQLite, which isn't long enough to contain our header") }
-        if memcmp(buffer.baseAddress, BLOBHeaders.NULL, BLOBHeaders.length) == 0 {
+        guard let baseAddress = buffer.baseAddress else {
             return .null
-        } else if memcmp(buffer.baseAddress, BLOBHeaders.BLOB, BLOBHeaders.length) == 0 {
+        }
+        if memcmp(baseAddress, BLOBHeaders.NULL, BLOBHeaders.length) == 0 {
+            return .null
+        } else if memcmp(baseAddress, BLOBHeaders.BLOB, BLOBHeaders.length) == 0 {
             let remainder = buffer.suffix(from: BLOBHeaders.length)
             return .blob(Array(remainder))
         } else {

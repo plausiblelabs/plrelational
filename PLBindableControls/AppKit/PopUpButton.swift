@@ -78,7 +78,7 @@ open class PopUpButton<T: Equatable>: NSPopUpButton {
         selfInitiatedSelectionChange = true
         if let object = object, let menu = menu {
             // Find menu item that matches given object
-            let index = menu.items.index(where: {
+            let index = menu.items.firstIndex(where: {
                 let nativeItem = $0.representedObject as? NativeMenuItem<T>
                 return nativeItem?.object == object
             })

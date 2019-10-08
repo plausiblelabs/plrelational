@@ -23,7 +23,7 @@ class RWLock {
         if err != 0 {
             fatalError("pthread_rwlock_destroy returned error \(err): \(String(cString: strerror(err)) )")
         }
-        lock.deallocate(capacity: 1)
+        lock.deallocate()
     }
     
     func readLock() {
