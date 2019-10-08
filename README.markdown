@@ -74,6 +74,6 @@ The PLRelational collection of frameworks draws inspiration from and stands on t
 
 For a more in-depth introduction to these frameworks, check out [Reactive Relational Programming with PLRelational](https://plausible.coop/blog/2017/08/10/reactive-relational-programming-with-plrelational).
 
-Generated documentation is also [available online](https://opensource.plausible.coop/plrelational/docs/current) for the PLRelational and PLRelationalBinding frameworks.
+Generated documentation is also [available online](https://plausiblelabs.github.io/plrelational/docs/current) for the PLRelational and PLRelationalBinding frameworks.
 
 Enjoy!
