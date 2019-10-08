@@ -528,7 +528,7 @@ private class RelationTextIndexObserver: AsyncRelationChangeCoalescedObserver {
             var result = row
             for (attribute, value) in row {
                 if let string = value.get() as String? {
-                    if let lastIndex = string.characters.index(of: "\n") ?? string.index(string.startIndex, offsetBy: 40, limitedBy: string.endIndex) {
+                    if let lastIndex = string.firstIndex(of: "\n") ?? string.index(string.startIndex, offsetBy: 40, limitedBy: string.endIndex) {
                         result[attribute] = .text(string[..<lastIndex] + "…")
                     }
                 }

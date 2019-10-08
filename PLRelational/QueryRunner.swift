@@ -674,7 +674,7 @@ extension QueryRunner {
         nodes[result].parentIndexes = [parent]
         nodes[parent].childIndexes.replace(index, with: result)
         
-        let childParentIndex = nodes[index].parentIndexes.index(of: parent)!
+        let childParentIndex = nodes[index].parentIndexes.firstIndex(of: parent)!
         nodes[index].parentIndexes.remove(at: childParentIndex)
         nodeStates[index].parentChildIndexes.remove(at: childParentIndex)
         nodeStates[index].parentalSelectsRemaining -= 1

@@ -47,13 +47,13 @@ private func graphvizDump(nodes: [QueryPlanner.Node], showChildPointers: Bool = 
             opLines = opLines.prefix(10) + ["..."]
         }
         let opString = opLines.joined(separator: "\n")
-        let label = [nodename(index), node.debugName.map({ "NAME: \($0)" }), node.approximateCount(true).map({ "~\($0) rows" }), String(describing: node.scheme.attributes), opString].flatMap({ $0 }).joined(separator: " ")
+        let label = [nodename(index), node.debugName.map({ "NAME: \($0)" }), node.approximateCount(true).map({ "~\($0) rows" }), String(describing: node.scheme.attributes), opString].compactMap({ $0 }).joined(separator: " ")
         let aux = auxNodeInfo(index).map({ "\n\($0)" }) ?? ""
         print("\(nodename(index)) [label=\"\(label)\(aux)\"]")
         for parentIndex in node.parentIndexes {
             guard includeNode(parentIndex) else { continue }
             
-            let childIndex = nodes[parentIndex].childIndexes.index(of: index)
+            let childIndex = nodes[parentIndex].childIndexes.firstIndex(of: index)
             let childIndexString = childIndex.map(String.init) ?? "UNKNOWN CHILD INDEX"
             print("\(nodename(index)) -> \(nodename(parentIndex)) [label=\"child \(childIndexString)\" color=\(randomColor())]")
         }

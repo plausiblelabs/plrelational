@@ -390,8 +390,8 @@ public final class AsyncManager: PerThreadInstance {
                 let change = info.derivative.change
                 
                 let observersWithWillChange = info.observers.values.filter({ $0.didSendWillChange == true })
-                let relationObservers = observersWithWillChange.flatMap({ $0.relationObserver })
-                let updateObservers = observersWithWillChange.flatMap({ $0.updateObserver })
+                let relationObservers = observersWithWillChange.compactMap({ $0.relationObserver })
+                let updateObservers = observersWithWillChange.compactMap({ $0.updateObserver })
                 
                 if !relationObservers.isEmpty {
                     // If there are additions, then iterate over them and send them to the observer. Iteration is started in the
@@ -539,7 +539,7 @@ public final class AsyncManager: PerThreadInstance {
     
     /// Pull out all the databases that need locking for our current actions.
     fileprivate func getDatabases(forActions: [Action], into databases: inout ObjectSet<TransactionalDatabase>) {
-        let relations = forActions.flatMap({ action -> Relation? in
+        let relations = forActions.compactMap({ action -> Relation? in
             switch action {
             case .update(let r, _, _):
                 return r

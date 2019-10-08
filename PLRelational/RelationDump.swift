@@ -103,7 +103,7 @@ extension Relation {
     func simpleDumpString() -> String {
         var name = String(describing: type(of: self))
         if name.hasSuffix("Relation") {
-            let sliceIndex = name.characters.index(name.endIndex, offsetBy: -"Relation".characters.count)
+            let sliceIndex = name.index(name.endIndex, offsetBy: -"Relation".count)
             name = String(name[..<sliceIndex])
         }
         
@@ -176,7 +176,7 @@ extension Relation {
         print("digraph relation_graph {")
         
         func visit(_ r: Relation, nonobjectID: String) -> String {
-            let supplemental: [String] = r.getFieldsForDump().flatMap({
+            let supplemental: [String] = r.getFieldsForDump().compactMap({
                 if  ($0 == "debugName" && !options.contains(.showDebugName)) ||
                     ($0 == "derivative" && !options.contains(.showDerivative)) ||
                     ($0 == "inTransaction" && !options.contains(.showInTransaction)) ||

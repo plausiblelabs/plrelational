@@ -149,7 +149,7 @@ extension ConcreteRelation: CustomStringConvertible, PlaygroundMonospace {
             return columns.map({ row[$0].description })
         })
         let all = ([columns.map({ $0.name })] + rows)
-        let lengths = all.map({ $0.map({ $0.characters.count }) })
+        let lengths = all.map({ $0.map({ $0.count }) })
         let columnLengths = (0 ..< columns.count).map({ index in
             return lengths.map({ $0[index] }).reduce(0, Swift.max)
         })

@@ -474,7 +474,7 @@ private func AssertMatches(_ query: String, file: StaticString = #file, line: UI
     group.enter()
     var done = false
     let observer = Observer(callback: {
-        let expectedIDs = Set(expected.project("id").rows().flatMap({ $0.ok }))
+        let expectedIDs = Set(expected.project("id").rows().compactMap({ $0.ok }))
         let actualIDs = Set($0.map({ $0.rowWithAttributes(["id"]) }))
         if actualIDs == expectedIDs && !done {
             done = true

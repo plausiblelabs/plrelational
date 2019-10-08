@@ -6,7 +6,7 @@
 /// :nodoc: Implementation detail (will be made non-public eventually)
 public extension RangeReplaceableCollection where Iterator.Element: Equatable {
     mutating func remove(_ element: Iterator.Element) {
-        if let index = index(of: element) {
+        if let index = firstIndex(of: element) {
             self.remove(at: index)
         }
     }
@@ -17,7 +17,7 @@ public extension RangeReplaceableCollection {
     /// Remove ONE element matching the predicate. Don't call this if there's more than one,
     /// or you'll just confuse yourself.
     mutating func removeOne(_ predicate: (Iterator.Element) -> Bool) {
-        if let index = index(where: predicate) {
+        if let index = firstIndex(where: predicate) {
             self.remove(at: index)
         }
     }
