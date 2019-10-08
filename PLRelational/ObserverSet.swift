@@ -17,7 +17,7 @@ open class ObserverSetEntry<Parameters> {
 }
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
-open class ObserverSet<Parameters>: CustomStringConvertible {
+open class ObserverSet<Parameters> { //}: CustomStringConvertible {
     // Locking support
     
     fileprivate var queue = DispatchQueue(label: "com.mikeash.ObserverSet", attributes: [])
@@ -71,20 +71,20 @@ open class ObserverSet<Parameters>: CustomStringConvertible {
     
     // MARK: CustomStringConvertible
     
-    open var description: String {
-        var entries: [ObserverSetEntry<Parameters>] = []
-        synchronized {
-            entries = self.entries
-        }
-        
-        let strings = entries.map{
-            entry in
-            (entry.object === self
-                ? "\(entry.f)"
-                : "\(String(describing: entry.object)) \(entry.f)")
-        }
-        let joined = strings.joined(separator: ", ")
-        
-        return "\(Mirror(reflecting: self).description): (\(joined))"
-    }
+//    open var description: String {
+//        var entries: [ObserverSetEntry<Parameters>] = []
+//        synchronized {
+//            entries = self.entries
+//        }
+//
+//        let strings = entries.map{
+//            entry in
+//            (entry.object === self
+//                ? "\(entry.f)"
+//                : "\(String(describing: entry.object)) \(entry.f)")
+//        }
+//        let joined = strings.joined(separator: ", ")
+//
+//        return "\(Mirror(reflecting: self).description): (\(joined))"
+//    }
 }

@@ -191,10 +191,7 @@ extension RelationValue {
     
     /// Create a new byte array value from the contents of `data`.
     public init(_ data: Data) {
-        let count = data.count
-        self = data.withUnsafeBytes({
-            .blob(Array(UnsafeBufferPointer(start: $0, count: count)))
-        })
+        self = .blob([UInt8](data))
     }
     
     /// Create a new byte array value from the contents of `sequence`.
