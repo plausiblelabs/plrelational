@@ -1,8 +1,8 @@
 {
     "author": "Plausible Labs",
-    "author_url": "https://opensource.plausible.coop/src/projects/SWC/repos/plrelational",
+    "author_url": "https://github.com/plausiblelabs/plrelational",
     "module": "PLRelational",
-    "readme": "README.md",
+    "readme": "README.markdown",
     "theme": "fullwidth",
 
     "documentation": "Docs/*.md",
