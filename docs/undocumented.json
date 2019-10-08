@@ -1,0 +1,2658 @@
+{
+  "warnings": [
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManager.swift",
+      "line": 885,
+      "symbol": "MutableRelation.asyncAdd(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManager.swift",
+      "line": 889,
+      "symbol": "MutableRelation.asyncDelete(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 8,
+      "symbol": "RowChange",
+      "symbol_kind": "source.lang.swift.decl.typealias",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 36,
+      "symbol": "AsyncRelationChangeObserver.relationWillChange(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 37,
+      "symbol": "AsyncRelationChangeObserver.relationAddedRows(_:rows:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 38,
+      "symbol": "AsyncRelationChangeObserver.relationRemovedRows(_:rows:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 39,
+      "symbol": "AsyncRelationChangeObserver.relationError(_:error:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 40,
+      "symbol": "AsyncRelationChangeObserver.relationDidChange(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 84,
+      "symbol": "AsyncRelationChangeCoalescedObserver",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 85,
+      "symbol": "AsyncRelationChangeCoalescedObserver.relationWillChange(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 86,
+      "symbol": "AsyncRelationChangeCoalescedObserver.relationDidChange(_:result:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 93,
+      "symbol": "Relation.addAsyncObserver(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 97,
+      "symbol": "Relation.addAsyncObserver(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 102,
+      "symbol": "AsyncRelationContentObserver",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 103,
+      "symbol": "AsyncRelationContentObserver.relationWillChange(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 104,
+      "symbol": "AsyncRelationContentObserver.relationNewContents(_:rows:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 105,
+      "symbol": "AsyncRelationContentObserver.relationError(_:error:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 106,
+      "symbol": "AsyncRelationContentObserver.relationDidChange(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 119,
+      "symbol": "AsyncRelationContentCoalescedObserver",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 120,
+      "symbol": "AsyncRelationContentCoalescedObserver.PostprocessingOutput",
+      "symbol_kind": "source.lang.swift.decl.associatedtype",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 122,
+      "symbol": "AsyncRelationContentCoalescedObserver.relationWillChange(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 123,
+      "symbol": "AsyncRelationContentCoalescedObserver.relationDidChange(_:result:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 128,
+      "symbol": "Relation.addAsyncObserver(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/AsyncManagerObservation.swift",
+      "line": 149,
+      "symbol": "Relation.asyncUpdate(_:newValues:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/CachingRelation.swift",
+      "line": 43,
+      "symbol": "CachingRelation.contentProvider",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 22,
+      "symbol": "ChangeLoggingDatabase",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 27,
+      "symbol": "ChangeLoggingDatabase.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 31,
+      "symbol": "ChangeLoggingDatabase.subscript(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.subscript",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 35,
+      "symbol": "ChangeLoggingDatabase.save()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 64,
+      "symbol": "ChangeLoggingDatabase",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 65,
+      "symbol": "ChangeLoggingDatabase.Transaction",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 73,
+      "symbol": "ChangeLoggingDatabase.Transaction.subscript(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.subscript",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 85,
+      "symbol": "ChangeLoggingDatabase.transaction(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 121,
+      "symbol": "ChangeLoggingDatabase",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 122,
+      "symbol": "ChangeLoggingDatabase.takeSnapshot()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 127,
+      "symbol": "ChangeLoggingDatabase.restoreSnapshot(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 172,
+      "symbol": "ChangeLoggingDatabase.computeDelta(from:to:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingDatabase.swift",
+      "line": 183,
+      "symbol": "ChangeLoggingDatabase.apply(delta:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 37,
+      "symbol": "ChangeLoggingRelation",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 49,
+      "symbol": "ChangeLoggingRelation.changeObserverData",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 59,
+      "symbol": "ChangeLoggingRelation.init(baseRelation:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 107,
+      "symbol": "ChangeLoggingRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 120,
+      "symbol": "ChangeLoggingRelation.add(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 141,
+      "symbol": "ChangeLoggingRelation.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 235,
+      "symbol": "ChangeLoggingRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 277,
+      "symbol": "ChangeLoggingRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 278,
+      "symbol": "ChangeLoggingRelation.takeSnapshot()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 282,
+      "symbol": "ChangeLoggingRelation.restoreSnapshot(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 289,
+      "symbol": "ChangeLoggingRelation.computeDelta(from:to:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ChangeLoggingRelation.swift",
+      "line": 295,
+      "symbol": "ChangeLoggingRelation.apply(delta:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 6,
+      "symbol": "ConcreteRelation",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 8,
+      "symbol": "ConcreteRelation.values",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 14,
+      "symbol": "ConcreteRelation.init(scheme:values:defaultSort:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 21,
+      "symbol": "ConcreteRelation.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 26,
+      "symbol": "ConcreteRelation.copyRelation(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 38,
+      "symbol": "ConcreteRelation.setDefaultSort(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 44,
+      "symbol": "ConcreteRelation.sortedValues(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 56,
+      "symbol": "ConcreteRelation.add(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 62,
+      "symbol": "ConcreteRelation.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 70,
+      "symbol": "ConcreteRelation.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 79,
+      "symbol": "ConcreteRelation.update(_:newValues:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 138,
+      "symbol": "ConcreteRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/ConcreteRelation.swift",
+      "line": 145,
+      "symbol": "ConcreteRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/DataCodec.swift",
+      "line": 9,
+      "symbol": "DataCodec",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/DataCodec.swift",
+      "line": 10,
+      "symbol": "DataCodec.encode(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/DataCodec.swift",
+      "line": 11,
+      "symbol": "DataCodec.decode(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/IntermediateRelation.swift",
+      "line": 548,
+      "symbol": "Relation.mutableSelect(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableDatabase.swift",
+      "line": 14,
+      "symbol": "MemoryTableDatabase.init(relations:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableDatabase.swift",
+      "line": 19,
+      "symbol": "MemoryTableDatabase.subscript(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.subscript",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableDatabase.swift",
+      "line": 23,
+      "symbol": "MemoryTableDatabase.storedRelation(forName:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableDatabase.swift",
+      "line": 27,
+      "symbol": "MemoryTableDatabase.createRelation(_:scheme:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableDatabase.swift",
+      "line": 34,
+      "symbol": "MemoryTableDatabase.transaction(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableDatabase.swift",
+      "line": 38,
+      "symbol": "MemoryTableDatabase.resultNeedsRetry(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableRelation.swift",
+      "line": 13,
+      "symbol": "MemoryTableRelation.values",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableRelation.swift",
+      "line": 15,
+      "symbol": "MemoryTableRelation.changeObserverData",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableRelation.swift",
+      "line": 19,
+      "symbol": "MemoryTableRelation.init(scheme:primaryKeys:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableRelation.swift",
+      "line": 24,
+      "symbol": "MemoryTableRelation.copyRelation(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableRelation.swift",
+      "line": 55,
+      "symbol": "MemoryTableRelation.add(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableRelation.swift",
+      "line": 63,
+      "symbol": "MemoryTableRelation.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableRelation.swift",
+      "line": 70,
+      "symbol": "MemoryTableRelation.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableRelation.swift",
+      "line": 77,
+      "symbol": "MemoryTableRelation.copy()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MemoryTableRelation.swift",
+      "line": 84,
+      "symbol": "MakeRelation(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MutableRelation.swift",
+      "line": 6,
+      "symbol": "MutableRelation",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MutableRelation.swift",
+      "line": 7,
+      "symbol": "MutableRelation.add(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MutableRelation.swift",
+      "line": 8,
+      "symbol": "MutableRelation.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MutableRelation.swift",
+      "line": 9,
+      "symbol": "MutableRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MutableRelation.swift",
+      "line": 11,
+      "symbol": "MutableSelectRelation",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MutableRelation.swift",
+      "line": 12,
+      "symbol": "MutableSelectRelation.selectExpression",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MutableRelation.swift",
+      "line": 884,
+      "symbol": "MutableRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MutableRelationCascadingDelete.swift",
+      "line": 127,
+      "symbol": "CascadingUpdate",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/MutableRelationCascadingDelete.swift",
+      "line": 141,
+      "symbol": "CascadingUpdate.init(relation:query:attributes:fromRelation:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 17,
+      "symbol": "PlistDatabase",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 19,
+      "symbol": "PlistDatabase.RelationSpec",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 20,
+      "symbol": "PlistDatabase.RelationSpec.transient(name:scheme:primaryKeys:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 21,
+      "symbol": "PlistDatabase.RelationSpec.file(name:path:scheme:primaryKeys:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 22,
+      "symbol": "PlistDatabase.RelationSpec.directory(name:path:scheme:primaryKey:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 24,
+      "symbol": "PlistDatabase.RelationSpec.name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 32,
+      "symbol": "PlistDatabase.RelationSpec.url(withRoot:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 46,
+      "symbol": "PlistDatabase.root",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 75,
+      "symbol": "PlistDatabase.create(_:_:codec:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 79,
+      "symbol": "PlistDatabase.open(_:_:codec:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 83,
+      "symbol": "PlistDatabase.subscript(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.subscript",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 87,
+      "symbol": "PlistDatabase.storedRelation(forName:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 91,
+      "symbol": "PlistDatabase.transaction(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 103,
+      "symbol": "PlistDatabase.resultNeedsRetry(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDatabase.swift",
+      "line": 150,
+      "symbol": "PlistDatabase.addSaveObserver(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 22,
+      "symbol": "PlistDirectoryRelation",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 24,
+      "symbol": "PlistDirectoryRelation.primaryKey",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 26,
+      "symbol": "PlistDirectoryRelation.url",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 30,
+      "symbol": "PlistDirectoryRelation.changeObserverData",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 34,
+      "symbol": "PlistDirectoryRelation.saveObservers",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 168,
+      "symbol": "PlistDirectoryRelation.add(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 185,
+      "symbol": "PlistDirectoryRelation.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 198,
+      "symbol": "PlistDirectoryRelation.save()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 543,
+      "symbol": "PlistDirectoryRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 544,
+      "symbol": "PlistDirectoryRelation.Error",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 545,
+      "symbol": "PlistDirectoryRelation.Error.schemeMismatch(foundScheme:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 549,
+      "symbol": "PlistDirectoryRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 550,
+      "symbol": "PlistDirectoryRelation.replaceLocalFile(url:movingURL:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistDirectoryRelation.swift",
+      "line": 577,
+      "symbol": "PlistDirectoryRelation.deleteLocalFile(url:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 9,
+      "symbol": "PlistFileRelation",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 13,
+      "symbol": "PlistFileRelation.url",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 20,
+      "symbol": "PlistFileRelation.changeObserverData",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 24,
+      "symbol": "PlistFileRelation.saveObservers",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 57,
+      "symbol": "PlistFileRelation.add(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 65,
+      "symbol": "PlistFileRelation.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 73,
+      "symbol": "PlistFileRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 74,
+      "symbol": "PlistFileRelation.Error",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 75,
+      "symbol": "PlistFileRelation.Error.unknownTopLevelObject(unknownObject:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 76,
+      "symbol": "PlistFileRelation.Error.missingValues",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 77,
+      "symbol": "PlistFileRelation.Error.unknownValuesObject(unknownObject:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 78,
+      "symbol": "PlistFileRelation.Error.schemeMismatch(foundScheme:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 144,
+      "symbol": "PlistFileRelation.save()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 168,
+      "symbol": "PlistFileRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 169,
+      "symbol": "PlistFileRelation.replaceLocalFile(url:movingURL:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/PlistFileRelation.swift",
+      "line": 195,
+      "symbol": "PlistFileRelation.deleteLocalFile(url:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 13,
+      "symbol": "RelationObject",
+      "symbol_kind": "source.lang.swift.decl.typealias",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 41,
+      "symbol": "Relation.project(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 42,
+      "symbol": "Relation.project(dropping:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 43,
+      "symbol": "Relation.project(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 56,
+      "symbol": "Relation.renamePrime()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 84,
+      "symbol": "Relation.thetajoin(_:query:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 85,
+      "symbol": "Relation.split(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 86,
+      "symbol": "Relation.divide(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 90,
+      "symbol": "Relation.leftOuterJoin(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 94,
+      "symbol": "Relation.min(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 95,
+      "symbol": "Relation.max(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 96,
+      "symbol": "Relation.count()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 331,
+      "symbol": "Relation.project(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 341,
+      "symbol": "Relation.project(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 355,
+      "symbol": "Relation.thetajoin(_:query:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 359,
+      "symbol": "Relation.split(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 365,
+      "symbol": "Relation.divide(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 373,
+      "symbol": "Relation.leftOuterJoin(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 388,
+      "symbol": "Relation.min(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 392,
+      "symbol": "Relation.max(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 396,
+      "symbol": "Relation.count()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 417,
+      "symbol": "Relation.select(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 423,
+      "symbol": "Relation.select(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Relation.swift",
+      "line": 433,
+      "symbol": "Relation.renamePrime()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationChange.swift",
+      "line": 6,
+      "symbol": "RelationChange",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationChange.swift",
+      "line": 7,
+      "symbol": "RelationChange.added",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationChange.swift",
+      "line": 8,
+      "symbol": "RelationChange.removed",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationChange.swift",
+      "line": 10,
+      "symbol": "RelationChange.init(added:removed:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationChange.swift",
+      "line": 16,
+      "symbol": "RelationChange",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationChange.swift",
+      "line": 17,
+      "symbol": "RelationChange.copy()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationChange.swift",
+      "line": 28,
+      "symbol": "RelationChange",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationDump.swift",
+      "line": 375,
+      "symbol": "GraphvizDumpOption",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationDump.swift",
+      "line": 376,
+      "symbol": "GraphvizDumpOption.showAddress",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationDump.swift",
+      "line": 377,
+      "symbol": "GraphvizDumpOption.showContents",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationDump.swift",
+      "line": 379,
+      "symbol": "GraphvizDumpOption.showDebugName",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationDump.swift",
+      "line": 380,
+      "symbol": "GraphvizDumpOption.showDerivative",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationDump.swift",
+      "line": 381,
+      "symbol": "GraphvizDumpOption.showInTransaction",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationDump.swift",
+      "line": 382,
+      "symbol": "GraphvizDumpOption.showDidRegisterObservers",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationParts.swift",
+      "line": 39,
+      "symbol": "==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationParts.swift",
+      "line": 43,
+      "symbol": "<(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationParts.swift",
+      "line": 67,
+      "symbol": "Scheme",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationParts.swift",
+      "line": 68,
+      "symbol": "Scheme.attributes",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationParts.swift",
+      "line": 70,
+      "symbol": "Scheme.init(attributes:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationParts.swift",
+      "line": 75,
+      "symbol": "Scheme",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationParts.swift",
+      "line": 82,
+      "symbol": "==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationParts.swift",
+      "line": 86,
+      "symbol": "Scheme",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationRecursiveSelect.swift",
+      "line": 32,
+      "symbol": "RecursiveQuery",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationRecursiveSelect.swift",
+      "line": 42,
+      "symbol": "RecursiveQuery.init(relation:attr:value:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationRecursiveSelect.swift",
+      "line": 54,
+      "symbol": "==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 22,
+      "symbol": "RelationTextIndex.Error",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 23,
+      "symbol": "RelationTextIndex.Error.consistencyError(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 112,
+      "symbol": "RelationTextIndex.SearchRelation.query",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 127,
+      "symbol": "RelationTextIndex.matchStartCharacter",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 128,
+      "symbol": "RelationTextIndex.matchEndCharacter",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 129,
+      "symbol": "RelationTextIndex.ellipsesCharacter",
+      "symbol_kind": "source.lang.swift.decl.var.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 143,
+      "symbol": "RelationTextIndex.StructuredSnippet.ellipsisAtStart",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 144,
+      "symbol": "RelationTextIndex.StructuredSnippet.ellipsisAtEnd",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 146,
+      "symbol": "RelationTextIndex.StructuredSnippet.string",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 147,
+      "symbol": "RelationTextIndex.StructuredSnippet.matches",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 149,
+      "symbol": "RelationTextIndex.StructuredSnippet.init(rawString:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationTextIndex.swift",
+      "line": 227,
+      "symbol": "RelationTextIndex.ColumnConfig.init(snippetAttribute:textExtractor:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationValue.swift",
+      "line": 33,
+      "symbol": "==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RelationValue.swift",
+      "line": 46,
+      "symbol": "<(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RemovableSet.swift",
+      "line": 43,
+      "symbol": "RemovableSetRemover",
+      "symbol_kind": "source.lang.swift.decl.typealias",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Result.swift",
+      "line": 214,
+      "symbol": ">>-(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Result.swift",
+      "line": 220,
+      "symbol": ">>>-(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Row.swift",
+      "line": 122,
+      "symbol": "==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Row.swift",
+      "line": 126,
+      "symbol": "+(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/Row.swift",
+      "line": 307,
+      "symbol": "InlineRow",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RowPlist.swift",
+      "line": 10,
+      "symbol": "Row.fromPlist(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RowPlist.swift",
+      "line": 23,
+      "symbol": "Row.toPlist()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RowPlist.swift",
+      "line": 42,
+      "symbol": "RelationValue.fromEncodedPlist(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.static",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/RowPlist.swift",
+      "line": 66,
+      "symbol": "RelationValue.toEncodedPlist()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 8,
+      "symbol": "sqlite3",
+      "symbol_kind": "source.lang.swift.decl.typealias",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 21,
+      "symbol": "SQLiteDatabase",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 22,
+      "symbol": "SQLiteDatabase.db",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 26,
+      "symbol": "SQLiteDatabase.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 69,
+      "symbol": "SQLiteDatabase",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 70,
+      "symbol": "SQLiteDatabase.Error",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 71,
+      "symbol": "SQLiteDatabase.Error.code",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 72,
+      "symbol": "SQLiteDatabase.Error.message",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 86,
+      "symbol": "SQLiteDatabase",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 87,
+      "symbol": "SQLiteDatabase.escapeIdentifier(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 93,
+      "symbol": "SQLiteDatabase",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 94,
+      "symbol": "SQLiteDatabase.createRelation(_:scheme:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 111,
+      "symbol": "SQLiteDatabase.getOrCreateRelation(_:scheme:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 124,
+      "symbol": "SQLiteDatabase.storedRelation(forName:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 128,
+      "symbol": "SQLiteDatabase.subscript(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.subscript",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 133,
+      "symbol": "SQLiteDatabase",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 134,
+      "symbol": "SQLiteDatabase.executeQuery(_:_:bindBlobsRaw:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 175,
+      "symbol": "SQLiteDatabase.executeQueryWithEmptyResults(_:_:bindBlobsRaw:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 186,
+      "symbol": "SQLiteDatabase.lastInsertRowID()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 257,
+      "symbol": "SQLiteDatabase",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 258,
+      "symbol": "SQLiteDatabase.transaction(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 286,
+      "symbol": "SQLiteDatabase.transaction(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteDatabase.swift",
+      "line": 293,
+      "symbol": "SQLiteDatabase.resultNeedsRetry(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteRelation.swift",
+      "line": 8,
+      "symbol": "SQLiteRelation",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteRelation.swift",
+      "line": 11,
+      "symbol": "SQLiteRelation.tableName",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteRelation.swift",
+      "line": 14,
+      "symbol": "SQLiteRelation.changeObserverData",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteRelation.swift",
+      "line": 80,
+      "symbol": "SQLiteRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteRelation.swift",
+      "line": 160,
+      "symbol": "SQLiteTableRelation",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteRelation.swift",
+      "line": 165,
+      "symbol": "SQLiteTableRelation.onAddFirstObserver()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteRelation.swift",
+      "line": 169,
+      "symbol": "SQLiteTableRelation.add(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteRelation.swift",
+      "line": 190,
+      "symbol": "SQLiteTableRelation.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SQLiteRelation.swift",
+      "line": 213,
+      "symbol": "SQLiteTableRelation.update(_:newValues:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SelectExpressionOperators.swift",
+      "line": 15,
+      "symbol": "*==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SelectExpressionOperators.swift",
+      "line": 19,
+      "symbol": "*!=(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SelectExpressionOperators.swift",
+      "line": 23,
+      "symbol": "*<(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SelectExpressionOperators.swift",
+      "line": 27,
+      "symbol": "*<=(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SelectExpressionOperators.swift",
+      "line": 31,
+      "symbol": "*>(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SelectExpressionOperators.swift",
+      "line": 35,
+      "symbol": "*>=(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SelectExpressionOperators.swift",
+      "line": 42,
+      "symbol": "*&&(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SelectExpressionOperators.swift",
+      "line": 46,
+      "symbol": "*||(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SelectExpressionOperators.swift",
+      "line": 52,
+      "symbol": "*!(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SelectExpressionOperators.swift",
+      "line": 56,
+      "symbol": "~=(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/SimpleDatabase.swift",
+      "line": 25,
+      "symbol": "SimpleDatabase",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/StoredDatabase.swift",
+      "line": 8,
+      "symbol": "TransactionResult",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/StoredDatabase.swift",
+      "line": 9,
+      "symbol": "TransactionResult.commit",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/StoredDatabase.swift",
+      "line": 10,
+      "symbol": "TransactionResult.rollback",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/StoredDatabase.swift",
+      "line": 11,
+      "symbol": "TransactionResult.retry",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/StoredDatabase.swift",
+      "line": 14,
+      "symbol": "StoredDatabase",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/StoredDatabase.swift",
+      "line": 15,
+      "symbol": "StoredDatabase.storedRelation(forName:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/StoredDatabase.swift",
+      "line": 17,
+      "symbol": "StoredDatabase.transaction(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/StoredDatabase.swift",
+      "line": 18,
+      "symbol": "StoredDatabase.resultNeedsRetry(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/StoredRelation.swift",
+      "line": 8,
+      "symbol": "StoredRelation",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 9,
+      "symbol": "TransactionalDatabase",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 28,
+      "symbol": "TransactionalDatabase.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 32,
+      "symbol": "TransactionalDatabase.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 36,
+      "symbol": "TransactionalDatabase.subscript(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.subscript",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 49,
+      "symbol": "TransactionalDatabase.lockReading()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 53,
+      "symbol": "TransactionalDatabase.unlockReading()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 57,
+      "symbol": "TransactionalDatabase.beginTransaction()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 74,
+      "symbol": "TransactionalDatabase.endTransaction()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 130,
+      "symbol": "TransactionalDatabase.takeSnapshot()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 135,
+      "symbol": "TransactionalDatabase.restoreSnapshot(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 183,
+      "symbol": "TransactionalDatabase.asyncRestoreSnapshot(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 187,
+      "symbol": "TransactionalDatabase.computeDelta(from:to:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 198,
+      "symbol": "TransactionalDatabase.apply(delta:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 208,
+      "symbol": "TransactionalDatabase.asyncApply(delta:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 212,
+      "symbol": "TransactionalDatabase.transaction(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 219,
+      "symbol": "TransactionalDatabase.transactionWithSnapshots(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 231,
+      "symbol": "TransactionalRelation",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 236,
+      "symbol": "TransactionalRelation.changeObserverData",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 254,
+      "symbol": "TransactionalRelation.underlyingRelationForQueryExecution",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 266,
+      "symbol": "TransactionalRelation.add(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 272,
+      "symbol": "TransactionalRelation.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 299,
+      "symbol": "TransactionalRelation",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 300,
+      "symbol": "TransactionalRelation.takeSnapshot()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 304,
+      "symbol": "TransactionalRelation.rawRestoreSnapshot(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 308,
+      "symbol": "TransactionalRelation.computeDelta(from:to:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 312,
+      "symbol": "TransactionalRelation.apply(delta:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 333,
+      "symbol": "TransactionalDatabase",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelational/TransactionalDatabase.swift",
+      "line": 334,
+      "symbol": "TransactionalDatabase.dump()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 8,
+      "symbol": "ArrayElement",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 11,
+      "symbol": "==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 15,
+      "symbol": "ArrayPos",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 20,
+      "symbol": "ArrayChange",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 21,
+      "symbol": "ArrayChange.initial(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 22,
+      "symbol": "ArrayChange.insert(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 23,
+      "symbol": "ArrayChange.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 24,
+      "symbol": "ArrayChange.update(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 25,
+      "symbol": "ArrayChange.move(srcIndex:dstIndex:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 29,
+      "symbol": "==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 40,
+      "symbol": "ArrayProperty",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArrayProperty.swift",
+      "line": 44,
+      "symbol": "ArrayProperty.elements",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ArraySafeIndex.swift",
+      "line": 7,
+      "symbol": "Array.subscript(safe:)",
+      "symbol_kind": "source.lang.swift.decl.function.subscript",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/AsyncProperty.swift",
+      "line": 8,
+      "symbol": "AsyncPropertyType",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/AsyncProperty.swift",
+      "line": 16,
+      "symbol": "AsyncReadablePropertyType",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/AsyncProperty.swift",
+      "line": 18,
+      "symbol": "AsyncReadablePropertyType",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/AsyncProperty.swift",
+      "line": 35,
+      "symbol": "AsyncReadablePropertyType",
+      "symbol_kind": "source.lang.swift.decl.extension",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/AsyncProperty.swift",
+      "line": 66,
+      "symbol": "AsyncReadableProperty.init(signal:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ChangeHandler.swift",
+      "line": 16,
+      "symbol": "ChangeHandler.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/ChangeHandler.swift",
+      "line": 21,
+      "symbol": "ChangeHandler.init(onLock:onUnlock:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/CommonValue.swift",
+      "line": 12,
+      "symbol": "CommonValue.none",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/CommonValue.swift",
+      "line": 15,
+      "symbol": "CommonValue.one(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/CommonValue.swift",
+      "line": 18,
+      "symbol": "CommonValue.multi",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/CommonValue.swift",
+      "line": 61,
+      "symbol": "==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/Property.swift",
+      "line": 118,
+      "symbol": "BindableProperty.Setter",
+      "symbol_kind": "source.lang.swift.decl.typealias",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/Property.swift",
+      "line": 208,
+      "symbol": "WriteOnlyProperty.init(set:changeHandler:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/Property.swift",
+      "line": 487,
+      "symbol": "ExternalValueProperty.Getter",
+      "symbol_kind": "source.lang.swift.decl.typealias",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/Property.swift",
+      "line": 498,
+      "symbol": "ExternalValueProperty.init(get:set:changeHandler:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/Property.swift",
+      "line": 529,
+      "symbol": "ActionProperty.init(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/PropertyOperations.swift",
+      "line": 86,
+      "symbol": "MutableValueProperty.toggle(transient:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/PropertyOperations.swift",
+      "line": 97,
+      "symbol": "*||(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/PropertyOperations.swift",
+      "line": 101,
+      "symbol": "*&&(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/PropertyOperations.swift",
+      "line": 107,
+      "symbol": "*==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationArrayProperty.swift",
+      "line": 9,
+      "symbol": "RowArrayElement",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationAsyncProperty.swift",
+      "line": 8,
+      "symbol": "RelationMutationConfig",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationAsyncProperty.swift",
+      "line": 9,
+      "symbol": "RelationMutationConfig.snapshot",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationAsyncProperty.swift",
+      "line": 10,
+      "symbol": "RelationMutationConfig.update",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationAsyncProperty.swift",
+      "line": 11,
+      "symbol": "RelationMutationConfig.commit",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationAsyncProperty.swift",
+      "line": 13,
+      "symbol": "RelationMutationConfig.init(snapshot:update:commit:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationChangeParts.swift",
+      "line": 10,
+      "symbol": "RelationChangeParts",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationChangeParts.swift",
+      "line": 11,
+      "symbol": "RelationChangeParts.addedRows",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationChangeParts.swift",
+      "line": 12,
+      "symbol": "RelationChangeParts.updatedRows",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationChangeParts.swift",
+      "line": 13,
+      "symbol": "RelationChangeParts.deletedRows",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationChangeParts.swift",
+      "line": 14,
+      "symbol": "RelationChangeParts.deletedIDs",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationChangeParts.swift",
+      "line": 16,
+      "symbol": "RelationChangeParts.init(addedRows:updatedRows:deletedRows:deletedIDs:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationChangeParts.swift",
+      "line": 23,
+      "symbol": "RelationChangeParts.isEmpty",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationTreeProperty.swift",
+      "line": 9,
+      "symbol": "RowTreeNode",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationTreeProperty.swift",
+      "line": 10,
+      "symbol": "RowTreeNode.children",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/RelationTreeProperty.swift",
+      "line": 19,
+      "symbol": "RowTreeNode.parentID",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/Signal.swift",
+      "line": 8,
+      "symbol": "ObserverRemoval",
+      "symbol_kind": "source.lang.swift.decl.typealias",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/Signal.swift",
+      "line": 132,
+      "symbol": "Signal.Observer",
+      "symbol_kind": "source.lang.swift.decl.typealias",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/Signal.swift",
+      "line": 160,
+      "symbol": "SourceSignal.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/Signal.swift",
+      "line": 176,
+      "symbol": "SourceSignal.addObserver(_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/Signal.swift",
+      "line": 220,
+      "symbol": "SourceSignal.observerCount",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 8,
+      "symbol": "TreeNode",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 9,
+      "symbol": "TreeNode.children",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 10,
+      "symbol": "TreeNode.parentID",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 13,
+      "symbol": "TreePath",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 14,
+      "symbol": "TreePath.parent",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 15,
+      "symbol": "TreePath.index",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 17,
+      "symbol": "TreePath.init(parent:index:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 24,
+      "symbol": "==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 28,
+      "symbol": "TreePos",
+      "symbol_kind": "source.lang.swift.decl.struct",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 29,
+      "symbol": "TreePos.parentID",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 30,
+      "symbol": "TreePos.previousID",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 31,
+      "symbol": "TreePos.nextID",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 33,
+      "symbol": "TreePos.init(parentID:previousID:nextID:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 40,
+      "symbol": "TreeChange",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 41,
+      "symbol": "TreeChange.initial(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 42,
+      "symbol": "TreeChange.insert(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 43,
+      "symbol": "TreeChange.delete(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 44,
+      "symbol": "TreeChange.update(_:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 45,
+      "symbol": "TreeChange.move(src:dst:)",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 49,
+      "symbol": "==(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 61,
+      "symbol": "TreeProperty",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/TreeProperty.swift",
+      "line": 65,
+      "symbol": "TreeProperty.root",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoManager.swift",
+      "line": 8,
+      "symbol": "UndoManagerDelegate",
+      "symbol_kind": "source.lang.swift.decl.protocol",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoManager.swift",
+      "line": 9,
+      "symbol": "UndoManagerDelegate.safeToUndo()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoManager.swift",
+      "line": 10,
+      "symbol": "UndoManagerDelegate.safeToRedo()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoManager.swift",
+      "line": 13,
+      "symbol": "UndoManager",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoManager.swift",
+      "line": 17,
+      "symbol": "UndoManager.delegate",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoManager.swift",
+      "line": 26,
+      "symbol": "UndoManager.native",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoManager.swift",
+      "line": 30,
+      "symbol": "UndoManager.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoManager.swift",
+      "line": 34,
+      "symbol": "UndoManager.registerChange(name:perform:forward:backward:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoManager.swift",
+      "line": 44,
+      "symbol": "UndoManager.undo()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoManager.swift",
+      "line": 48,
+      "symbol": "UndoManager.redo()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoableDatabase.swift",
+      "line": 9,
+      "symbol": "UndoableDatabase",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoableDatabase.swift",
+      "line": 14,
+      "symbol": "UndoableDatabase.init(db:undoManager:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoableDatabase.swift",
+      "line": 19,
+      "symbol": "UndoableDatabase.performUndoableAction(_:before:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding/UndoableDatabase.swift",
+      "line": 45,
+      "symbol": "UndoableDatabase.bidiProperty(action:signal:update:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/Users/campbell/Projects/Plausible/plr/plrelational"
+}

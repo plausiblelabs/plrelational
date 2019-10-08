@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>PlistDirectoryRelation Class Reference</title>
+    <link rel="stylesheet" type="text/css" href="../css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="../css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="../js/jquery.min.js" defer></script>
+    <script src="../js/jazzy.js" defer></script>
+    
+    <script src="../js/lunr.min.js" defer></script>
+    <script src="../js/typeahead.jquery.js" defer></script>
+    <script src="../js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+    <a name="//apple_ref/swift/Class/PlistDirectoryRelation" class="dashAnchor"></a>
+
+    <a title="PlistDirectoryRelation Class Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="../index.html">
+          PLRelational Docs
+        </a>
+         (57% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="../search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+    
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="../index.html">PLRelational Reference</a>
+      <img class="carat" src="../img/carat.png" />
+      PlistDirectoryRelation Class Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../PLRelational%20Core.html">PLRelational Core</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/Relation.html">Relation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/Attribute.html">Attribute</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/Scheme.html">Scheme</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/Row.html">Row</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/Row/Iterator.html">– Iterator</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/RelationValue.html">RelationValue</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Memory%20Relations.html">Memory Relations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/ConcreteRelation.html">ConcreteRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MemoryTableDatabase.html">MemoryTableDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MemoryTableRelation.html">MemoryTableRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/CachingRelation.html">CachingRelation</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Stored%20Relations.html">Stored Relations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/StoredDatabase.html">StoredDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Stored%20Relations.html#/s:12PLRelational14StoredRelationP">StoredRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/PlistDatabase.html">PlistDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/PlistDatabase/RelationSpec.html">– RelationSpec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/PlistDirectoryRelation.html">PlistDirectoryRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/PlistDirectoryRelation/Error.html">– Error</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/PlistFileRelation.html">PlistFileRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/PlistFileRelation/Error.html">– Error</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SQLiteDatabase.html">SQLiteDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SQLiteDatabase/Error.html">– Error</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SQLiteRelation.html">SQLiteRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SQLiteTableRelation.html">SQLiteTableRelation</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Logging%20Relations.html">Logging Relations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ChangeLoggingDatabase.html">ChangeLoggingDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ChangeLoggingDatabase/Transaction.html">– Transaction</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ChangeLoggingRelation.html">ChangeLoggingRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/TransactionalDatabase.html">TransactionalDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/TransactionalRelation.html">TransactionalRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/TransactionResult.html">TransactionResult</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Change%20Observation.html">Change Observation</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/AsyncRelationChangeObserver.html">AsyncRelationChangeObserver</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/AsyncRelationChangeCoalescedObserver.html">AsyncRelationChangeCoalescedObserver</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/AsyncRelationContentObserver.html">AsyncRelationContentObserver</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/AsyncRelationContentCoalescedObserver.html">AsyncRelationContentCoalescedObserver</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/RelationChange.html">RelationChange</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Full%20Text%20Search.html">Full Text Search</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RelationTextIndex.html">RelationTextIndex</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RelationTextIndex/Error.html">– Error</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RelationTextIndex/SearchRelation.html">– SearchRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RelationTextIndex/StructuredSnippet.html">– StructuredSnippet</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RelationTextIndex/ColumnConfig.html">– ColumnConfig</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Relation%20Support.html">Relation Support</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SelectExpression.html">SelectExpression</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MutableRelation.html">MutableRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/MutableSelectRelation.html">MutableSelectRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/CascadingUpdate.html">CascadingUpdate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/RecursiveQuery.html">RecursiveQuery</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/DataCodec.html">DataCodec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/Result.html">Result</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Signals.html">Signals</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/SignalType.html">SignalType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/Signal.html">Signal</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/SourceSignal.html">SourceSignal</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/PipeSignal.html">PipeSignal</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/SignalEvent.html">SignalEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/SignalObserver.html">SignalObserver</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/ChangeMetadata.html">ChangeMetadata</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Properties%20and%20Binding.html">Properties and Binding</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/ReadablePropertyType.html">ReadablePropertyType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ReadableProperty.html">ReadableProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/BindableProperty.html">BindableProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/WriteOnlyProperty.html">WriteOnlyProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ReadWriteProperty.html">ReadWriteProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/MutableValueProperty.html">MutableValueProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ExternalValueProperty.html">ExternalValueProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ActionProperty.html">ActionProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/AsyncPropertyType.html">AsyncPropertyType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/AsyncReadablePropertyType.html">AsyncReadablePropertyType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/AsyncReadableProperty.html">AsyncReadableProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Properties%20and%20Binding.html#/s:19PLRelationalBinding22AsyncReadWritePropertyC">AsyncReadWriteProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/Binding.html">Binding</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/ChangeResult.html">ChangeResult</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ChangeHandler.html">ChangeHandler</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Properties%20and%20Binding.html#/s:19PLRelationalBinding2ltoiyAA0B0CAA16BindablePropertyCyxG_q_t5ValueQy_RszAA08ReadableE4TypeR_r0_lF">&lt;~(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Properties%20and%20Binding.html#/s:19PLRelationalBinding2ltoiyAA0B0CAA16BindablePropertyCyxG_q_t12SignalChangeQy_RszAA013AsyncReadableE4TypeR_5ValueQy_AIRSr0_lF">&lt;~(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Properties%20and%20Binding.html#/s:19PLRelationalBinding3ltgoiyAA0B0CAA17ReadWritePropertyCyxG_AGtlF">&lt;~&gt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Properties%20and%20Binding.html#/s:19PLRelationalBinding3ltgoiyAA0B0CAA17ReadWritePropertyCyxG_AA05AsyncdeF0CyxGtlF">&lt;~&gt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Properties%20and%20Binding.html#/s:19PLRelationalBinding3ttgoiyAA0B0CAA6SignalCyxG_AA14ActionPropertyCyxGtlF">~~&gt;(_:_:)</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Array%20Property.html">Array Property</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/ArrayProperty.html">ArrayProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Array%20Property.html#/s:19PLRelationalBinding8ArrayPosV">ArrayPos</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/ArrayChange.html">ArrayChange</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Array%20Property.html#/s:19PLRelationalBinding12ArrayElementP">ArrayElement</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Array%20Property.html#/s:19PLRelationalBinding15RowArrayElementC">RowArrayElement</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Tree%20Property.html">Tree Property</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/TreeProperty.html">TreeProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/TreePos.html">TreePos</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/TreePath.html">TreePath</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/TreeChange.html">TreeChange</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/TreeNode.html">TreeNode</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/RowTreeNode.html">RowTreeNode</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Relation-backed%20Property%20Support.html">Relation-backed Property Support</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/RelationChangeParts.html">RelationChangeParts</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Structs/RelationMutationConfig.html">RelationMutationConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/CommonValue.html">CommonValue</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Other%20Classes.html">Other Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/UndoManager.html">UndoManager</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Classes/UndoableDatabase.html">UndoableDatabase</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Other%20Enums.html">Other Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Enums/GraphvizDumpOption.html">GraphvizDumpOption</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Other%20Extensions.html">Other Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Extensions/Array.html">Array</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Other%20Functions.html">Other Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding1nopyAA21AsyncReadablePropertyCySbGxAA0cdE4TypeRzSb12SignalChangeRtzSb5ValueRtzlF">!(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational2mnopyAA16SelectExpression_pAaC_pF">*!(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational3mneoiyAA16SelectExpression_pAaC_p_AaC_ptF">*!=(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational3maaoiyAA16SelectExpression_pAaC_p_AaC_ptF">*&amp;&amp;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3maaoiyAA16ReadablePropertyCySbGx_q_tAA0dE4TypeRzAaFR_Sb5ValueRtzSbAGRt_r0_lF">*&amp;&amp;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3maaoiyAA6SignalCySbGx_q_tAA0D4TypeRzAaFR_Sb5ValueRtzSbAGRt_r0_lF">*&amp;&amp;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational2mloiyAA16SelectExpression_pAaC_p_AaC_ptF">*&lt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational3mleoiyAA16SelectExpression_pAaC_p_AaC_ptF">*&lt;=(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational3meeoiyAA16SelectExpression_pAaC_p_AaC_ptF">*==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3meeoiyAA16ReadablePropertyCySbGx_q_tAA0dE4TypeRzAaFR_SQ5ValueRpzAGQy_AHRSr0_lF">*==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3meeoiyAA6SignalCySbGx_q_tAA0D4TypeRzAaFR_SQ5ValueRpzAGQy_AHRSr0_lF">*==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational2mgoiyAA16SelectExpression_pAaC_p_AaC_ptF">*&gt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational3mgeoiyAA16SelectExpression_pAaC_p_AaC_ptF">*&gt;=(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational3moooiyAA16SelectExpression_pAaC_p_AaC_ptF">*||(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3moooiyAA16ReadablePropertyCySbGx_q_tAA0dE4TypeRzAaFR_Sb5ValueRtzSbAGRt_r0_lF">*||(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3moooiyAA6SignalCySbGx_q_tAA0D4TypeRzAaFR_Sb5ValueRtzSbAGRt_r0_lF">*||(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational1poiyAA3RowVAD_ADtF">+(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational1poiyAA8Relation_pSgAD_ADtF">+(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational1soiyAA8Relation_pSgAD_ADtF">-(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational1loiySbAA13RelationValueO_ADtF">&lt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational1loiySbAA9AttributeV_ADtF">&lt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational2eeoiySbAA13RelationValueO_ADtF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational2eeoiySbAA14RecursiveQueryV_ADtF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational2eeoiySbAA3RowV_ADtF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational2eeoiySbAA6SchemeV_ADtF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational2eeoiySbAA9AttributeV_ADtF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding2eeoiySbAA10TreeChangeOyxG_AEtAA0D4NodeRzlF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding2eeoiySbAA11ArrayChangeOyxG_AEtAA0D7ElementRzlF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding2eeoiySbAA11CommonValueOyxG_AEtSQRzlF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding2eeoiySbAA8TreePathVyxG_AEtAA0D4NodeRzlF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding2eeoiySbx_xtAA12ArrayElementRzlF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational3ggsoiyAA6ResultOyq0_q_GADyxq_G_AExXEtr1_lF">&gt;&gt;-(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational4gggsoiyAA6ResultOyytxGAE_AEyXKtlF">&gt;&gt;&gt;-(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational12MakeRelationyAA011MemoryTableC0CSayAA9AttributeVG_SayAA0C5ValueOGdtF">MakeRelation(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational10containsOkyAA6ResultOySbq0_Gx_Sbq_XEtSTRzADyq_q0_G7ElementRtzr1_lF">containsOk(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational9flatmapOkyAA6ResultOySayq0_Gq1_Gx_q0_Sgq_XEtSTRzADyq_q1_G7ElementRtzr2_lF">flatmapOk(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational13hoistOptionalyAA6ResultOyxSgq_GADyxq_GSgr0_lF">hoistOptional(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational5mapOkyAA6ResultOySayq0_Gq1_GADyxq1_G_q0_q_XEtSTRzADyq_q1_G7ElementRtzr2_lF">mapOk(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational5mapOkyAA6ResultOySayq0_Gq1_Gx_q0_q_XEtSTRzADyq_q1_G7ElementRtzr2_lF">mapOk(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3notyAA16ReadablePropertyCySbGxAA0dE4TypeRzSb5ValueRtzlF">not(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3notyAA21AsyncReadablePropertyCySbGxAA0deF4TypeRzSb12SignalChangeRtzSb5ValueRtzlF">not(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3notyAA6SignalCySbGAEF">not(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational8traverseyAA6ResultOySayq0_Gq1_Gx_ADyq0_q1_Gq_XEtSTRz7ElementQzRs_r2_lF">traverse(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3zipyAA16ReadablePropertyCy5ValueQz_AEQy_tGx_q_tAA0dE4TypeRzAaIR_r0_lF">zip(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3zipyAA21AsyncReadablePropertyCy12SignalChangeQz_AEQy_tGx_q_tAA0deF4TypeRzAaIR_5ValueQzAFRSAJQy_AGRSr0_lF">zip(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:19PLRelationalBinding3zipyAA6SignalCy5ValueQz_AEQy_tGx_q_tAA0D4TypeRzAaIR_r0_lF">zip(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational2teoiyS2b_AA16SelectExpression_ptF">~=(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Functions.html#/s:12PLRelational003hbhoiyAA8Relation_pSgAD_ADtF">∩(_:_:)</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Other%20Protocols.html">Other Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Protocols/UndoManagerDelegate.html">UndoManagerDelegate</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="../Other%20Typealiases.html">Other Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Typealiases.html#/s:19PLRelationalBinding15ObserverRemovala">ObserverRemoval</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Typealiases.html#/s:12PLRelational14RelationObjecta">RelationObject</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Typealiases.html#/s:12PLRelational19RemovableSetRemovera">RemovableSetRemover</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Typealiases.html#/s:12PLRelational9RowChangea">RowChange</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="../Other%20Typealiases.html#/s:12PLRelational7sqlite3a">sqlite3</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            <h1>PlistDirectoryRelation</h1>
+              <div class="declaration">
+                <div class="language">
+                  <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">class</span> <span class="kt">PlistDirectoryRelation</span> <span class="p">:</span> <span class="kt">PlistRelation</span><span class="p">,</span> <span class="kt">RelationDefaultChangeObserverImplementation</span></code></pre>
+
+                </div>
+              </div>
+            <p>Undocumented</p>
+
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-content">
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational8RelationP6schemeAA6SchemeVvp"></a>
+                    <a name="//apple_ref/swift/Property/scheme" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational8RelationP6schemeAA6SchemeVvp">scheme</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">scheme</span><span class="p">:</span> <span class="kt"><a href="../Structs/Scheme.html">Scheme</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational22PlistDirectoryRelationC10primaryKeyAA9AttributeVvp"></a>
+                    <a name="//apple_ref/swift/Property/primaryKey" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational22PlistDirectoryRelationC10primaryKeyAA9AttributeVvp">primaryKey</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">primaryKey</span><span class="p">:</span> <span class="kt"><a href="../Structs/Attribute.html">Attribute</a></span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational22PlistDirectoryRelationC3url10Foundation3URLVSgvp"></a>
+                    <a name="//apple_ref/swift/Property/url" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational22PlistDirectoryRelationC3url10Foundation3URLVSgvp">url</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">internal(set)</span> <span class="k">var</span> <span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational22PlistDirectoryRelationC18changeObserverDataAA0d13DefaultChangef14ImplementationG0Vvp"></a>
+                    <a name="//apple_ref/swift/Property/changeObserverData" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational22PlistDirectoryRelationC18changeObserverDataAA0d13DefaultChangef14ImplementationG0Vvp">changeObserverData</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">changeObserverData</span><span class="p">:</span> <span class="kt">RelationDefaultChangeObserverImplementationData</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational8RelationP9debugNameSSSgvp"></a>
+                    <a name="//apple_ref/swift/Property/debugName" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational8RelationP9debugNameSSSgvp">debugName</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">debugName</span><span class="p">:</span> <span class="kt">String</span><span class="p">?</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational22PlistDirectoryRelationC13saveObserversAA12RemovableSetCyy10Foundation3URLVcGvp"></a>
+                    <a name="//apple_ref/swift/Property/saveObservers" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational22PlistDirectoryRelationC13saveObserversAA12RemovableSetCyy10Foundation3URLVcGvp">saveObservers</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">let</span> <span class="nv">saveObservers</span><span class="p">:</span> <span class="kt">RemovableSet</span><span class="o">&lt;</span><span class="p">(</span><span class="kt">URL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt">Void</span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational22PlistDirectoryRelationC04withC0_6scheme10primaryKey6create5codecAA6ResultOyACs5Error_pG10Foundation3URLVSg_AA6SchemeVAA9AttributeVSbAA9DataCodec_pSgtFZ"></a>
+                    <a name="//apple_ref/swift/Method/withDirectory(_:scheme:primaryKey:create:codec:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational22PlistDirectoryRelationC04withC0_6scheme10primaryKey6create5codecAA6ResultOyACs5Error_pG10Foundation3URLVSg_AA6SchemeVAA9AttributeVSbAA9DataCodec_pSgtFZ">withDirectory(_:scheme:primaryKey:create:codec:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Create a new relation with a given directory.</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kd">func</span> <span class="nf">withDirectory</span><span class="p">(</span><span class="n">_</span> <span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">?,</span> <span class="nv">scheme</span><span class="p">:</span> <span class="kt"><a href="../Structs/Scheme.html">Scheme</a></span><span class="p">,</span> <span class="nv">primaryKey</span><span class="p">:</span> <span class="kt"><a href="../Structs/Attribute.html">Attribute</a></span><span class="p">,</span> <span class="nv">create</span><span class="p">:</span> <span class="kt">Bool</span><span class="p">,</span> <span class="nv">codec</span><span class="p">:</span> <span class="kt"><a href="../Protocols/DataCodec.html">DataCodec</a></span><span class="p">?</span> <span class="o">=</span> <span class="kc">nil</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Enums/Result.html">Result</a></span><span class="o">&lt;</span><span class="kt">PlistDirectoryRelation</span><span class="p">,</span> <span class="kt">RelationError</span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                      <div>
+                        <h4>Parameters</h4>
+                        <table class="graybox">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>url</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The URL to the directory to use. If nil, the relation is held in memory
+ and the <code><a href="../Classes/PlistDirectoryRelation.html#/s:12PLRelational22PlistDirectoryRelationC3url10Foundation3URLVSgvp">url</a></code> property must be set before calling save().</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>scheme</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The relation scheme.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>primaryKey</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>The primary key to use for the relation. A row&rsquo;s value for the primary
+        key is used to derive the filename it&rsquo;s stored under. Joins/selects
+        that use the primary key will avoid scanning the entire directory.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>create</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>If false, then a URL must be provided and an accessible directory must exist
+    in that location. If no URL is provided, that is a precondition failure. If the
+    URL is provided but no directory exists there or isn&rsquo;t accessible, an error
+    is returned. If <code>create</code> is true, then the directory can be nonexistent and
+    the url can be nil. If the directory does exist, then its contents will be
+    returned as part of the relation&rsquo;s contents. Existing data is not deleted
+    just because <code>create: true</code>.</p>
+                                </div>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>
+                                <code>
+                                <em>codec</em>
+                                </code>
+                              </td>
+                              <td>
+                                <div>
+                                  <p>A DataCodec used to encode and decode individual Row plists on disk.</p>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div>
+                        <h4>Return Value</h4>
+                        <p>The newly created directory relation, or an error if creation failed.</p>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational8RelationP15contentProviderAA0b7ContentD0Ovp"></a>
+                    <a name="//apple_ref/swift/Property/contentProvider" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational8RelationP15contentProviderAA0b7ContentD0Ovp">contentProvider</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="k">var</span> <span class="nv">contentProvider</span><span class="p">:</span> <span class="kt">RelationContentProvider</span> <span class="p">{</span> <span class="k">get</span> <span class="p">}</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational8RelationP8containsyAA6ResultOySbs5Error_pGAA3RowVF"></a>
+                    <a name="//apple_ref/swift/Method/contains(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational8RelationP8containsyAA6ResultOySbs5Error_pGAA3RowVF">contains(_:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">contains</span><span class="p">(</span><span class="n">_</span> <span class="nv">row</span><span class="p">:</span> <span class="kt"><a href="../Structs/Row.html">Row</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Enums/Result.html">Result</a></span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">RelationError</span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational8RelationP6update_9newValuesAA6ResultOyyts5Error_pGAA16SelectExpression_p_AA3RowVtF"></a>
+                    <a name="//apple_ref/swift/Method/update(_:newValues:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational8RelationP6update_9newValuesAA6ResultOyyts5Error_pGAA16SelectExpression_p_AA3RowVtF">update(_:newValues:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">update</span><span class="p">(</span><span class="n">_</span> <span class="nv">query</span><span class="p">:</span> <span class="kt"><a href="../Protocols/SelectExpression.html">SelectExpression</a></span><span class="p">,</span> <span class="nv">newValues</span><span class="p">:</span> <span class="kt"><a href="../Structs/Row.html">Row</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Enums/Result.html">Result</a></span><span class="o">&lt;</span><span class="kt">Void</span><span class="p">,</span> <span class="kt">RelationError</span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational22PlistDirectoryRelationC3addyAA6ResultOys5Int64Vs5Error_pGAA3RowVF"></a>
+                    <a name="//apple_ref/swift/Method/add(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational22PlistDirectoryRelationC3addyAA6ResultOys5Int64Vs5Error_pGAA3RowVF">add(_:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">add</span><span class="p">(</span><span class="n">_</span> <span class="nv">row</span><span class="p">:</span> <span class="kt"><a href="../Structs/Row.html">Row</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Enums/Result.html">Result</a></span><span class="o">&lt;</span><span class="kt">Int64</span><span class="p">,</span> <span class="kt">RelationError</span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational22PlistDirectoryRelationC6deleteyAA6ResultOyyts5Error_pGAA16SelectExpression_pF"></a>
+                    <a name="//apple_ref/swift/Method/delete(_:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational22PlistDirectoryRelationC6deleteyAA6ResultOyyts5Error_pGAA16SelectExpression_pF">delete(_:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">delete</span><span class="p">(</span><span class="n">_</span> <span class="nv">query</span><span class="p">:</span> <span class="kt"><a href="../Protocols/SelectExpression.html">SelectExpression</a></span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Enums/Result.html">Result</a></span><span class="o">&lt;</span><span class="kt">Void</span><span class="p">,</span> <span class="kt">RelationError</span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational22PlistDirectoryRelationC4saveAA6ResultOyyts5Error_pGyF"></a>
+                    <a name="//apple_ref/swift/Method/save()" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational22PlistDirectoryRelationC4saveAA6ResultOyyts5Error_pGyF">save()</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">save</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Enums/Result.html">Result</a></span><span class="o">&lt;</span><span class="kt">Void</span><span class="p">,</span> <span class="kt">RelationError</span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational22PlistDirectoryRelationC5ErrorO"></a>
+                    <a name="//apple_ref/swift/Enum/Error" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational22PlistDirectoryRelationC5ErrorO">Error</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                        <a href="../Classes/PlistDirectoryRelation/Error.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">enum</span> <span class="kt">Error</span> <span class="p">:</span> <span class="kt">Swift</span><span class="o">.</span><span class="kt">Error</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="task-group">
+              <ul class="item-container">
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational22PlistDirectoryRelationC16replaceLocalFile3url9movingURLAA6ResultOySbs5Error_pG10Foundation0J0V_AMtF"></a>
+                    <a name="//apple_ref/swift/Method/replaceLocalFile(url:movingURL:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational22PlistDirectoryRelationC16replaceLocalFile3url9movingURLAA6ResultOySbs5Error_pG10Foundation0J0V_AMtF">replaceLocalFile(url:movingURL:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">replaceLocalFile</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">,</span> <span class="nv">movingURL</span><span class="p">:</span> <span class="kt">URL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Enums/Result.html">Result</a></span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">Swift</span><span class="o">.</span><span class="kt"><a href="../Classes/PlistDirectoryRelation/Error.html">Error</a></span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:12PLRelational22PlistDirectoryRelationC15deleteLocalFile3urlAA6ResultOySbs5Error_pG10Foundation3URLV_tF"></a>
+                    <a name="//apple_ref/swift/Method/deleteLocalFile(url:)" class="dashAnchor"></a>
+                    <a class="token" href="#/s:12PLRelational22PlistDirectoryRelationC15deleteLocalFile3urlAA6ResultOySbs5Error_pG10Foundation3URLV_tF">deleteLocalFile(url:)</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Undocumented</p>
+
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">func</span> <span class="nf">deleteLocalFile</span><span class="p">(</span><span class="nv">url</span><span class="p">:</span> <span class="kt">URL</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kt"><a href="../Enums/Result.html">Result</a></span><span class="o">&lt;</span><span class="kt">Bool</span><span class="p">,</span> <span class="kt">Swift</span><span class="o">.</span><span class="kt"><a href="../Classes/PlistDirectoryRelation/Error.html">Error</a></span><span class="o">&gt;</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2019 <a class="link" href="https://github.com/plausiblelabs/plrelational" target="_blank" rel="external">Plausible Labs</a>. All rights reserved. (Last updated: 2019-10-08)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.11.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>

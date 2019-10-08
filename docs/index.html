@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>PLRelational  Reference</title>
+    <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="css/highlight.css" />
+    <meta charset="utf-8">
+    <script src="js/jquery.min.js" defer></script>
+    <script src="js/jazzy.js" defer></script>
+    
+    <script src="js/lunr.min.js" defer></script>
+    <script src="js/typeahead.jquery.js" defer></script>
+    <script src="js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+
+
+    <a title="PLRelational  Reference"></a>
+
+    <header class="header">
+      <p class="header-col header-col--primary">
+        <a class="header-link" href="index.html">
+          PLRelational Docs
+        </a>
+         (57% documented)
+      </p>
+    
+      <p class="header-col--secondary">
+        <form role="search" action="search.json">
+          <input type="text" placeholder="Search documentation" data-typeahead>
+        </form>
+      </p>
+    
+    
+    </header>
+
+    <p class="breadcrumbs">
+      <a class="breadcrumb" href="index.html">PLRelational Reference</a>
+      <img class="carat" src="img/carat.png" />
+      PLRelational  Reference
+    </p>
+
+    <div class="content-wrapper">
+      <nav class="navigation">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="PLRelational%20Core.html">PLRelational Core</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/Relation.html">Relation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/Attribute.html">Attribute</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/Scheme.html">Scheme</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/Row.html">Row</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/Row/Iterator.html">– Iterator</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/RelationValue.html">RelationValue</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Memory%20Relations.html">Memory Relations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/ConcreteRelation.html">ConcreteRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MemoryTableDatabase.html">MemoryTableDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MemoryTableRelation.html">MemoryTableRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/CachingRelation.html">CachingRelation</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Stored%20Relations.html">Stored Relations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/StoredDatabase.html">StoredDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Stored%20Relations.html#/s:12PLRelational14StoredRelationP">StoredRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/PlistDatabase.html">PlistDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/PlistDatabase/RelationSpec.html">– RelationSpec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/PlistDirectoryRelation.html">PlistDirectoryRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/PlistDirectoryRelation/Error.html">– Error</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/PlistFileRelation.html">PlistFileRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/PlistFileRelation/Error.html">– Error</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SQLiteDatabase.html">SQLiteDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SQLiteDatabase/Error.html">– Error</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SQLiteRelation.html">SQLiteRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SQLiteTableRelation.html">SQLiteTableRelation</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Logging%20Relations.html">Logging Relations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/ChangeLoggingDatabase.html">ChangeLoggingDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/ChangeLoggingDatabase/Transaction.html">– Transaction</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/ChangeLoggingRelation.html">ChangeLoggingRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/TransactionalDatabase.html">TransactionalDatabase</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/TransactionalRelation.html">TransactionalRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/TransactionResult.html">TransactionResult</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Change%20Observation.html">Change Observation</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/AsyncRelationChangeObserver.html">AsyncRelationChangeObserver</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/AsyncRelationChangeCoalescedObserver.html">AsyncRelationChangeCoalescedObserver</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/AsyncRelationContentObserver.html">AsyncRelationContentObserver</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/AsyncRelationContentCoalescedObserver.html">AsyncRelationContentCoalescedObserver</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/RelationChange.html">RelationChange</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Full%20Text%20Search.html">Full Text Search</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RelationTextIndex.html">RelationTextIndex</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RelationTextIndex/Error.html">– Error</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RelationTextIndex/SearchRelation.html">– SearchRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RelationTextIndex/StructuredSnippet.html">– StructuredSnippet</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RelationTextIndex/ColumnConfig.html">– ColumnConfig</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Relation%20Support.html">Relation Support</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SelectExpression.html">SelectExpression</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/MutableRelation.html">MutableRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/MutableSelectRelation.html">MutableSelectRelation</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/CascadingUpdate.html">CascadingUpdate</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/RecursiveQuery.html">RecursiveQuery</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/DataCodec.html">DataCodec</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/Result.html">Result</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Signals.html">Signals</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/SignalType.html">SignalType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/Signal.html">Signal</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/SourceSignal.html">SourceSignal</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/PipeSignal.html">PipeSignal</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/SignalEvent.html">SignalEvent</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/SignalObserver.html">SignalObserver</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/ChangeMetadata.html">ChangeMetadata</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Properties%20and%20Binding.html">Properties and Binding</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/ReadablePropertyType.html">ReadablePropertyType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/ReadableProperty.html">ReadableProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/BindableProperty.html">BindableProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/WriteOnlyProperty.html">WriteOnlyProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/ReadWriteProperty.html">ReadWriteProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/MutableValueProperty.html">MutableValueProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/ExternalValueProperty.html">ExternalValueProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/ActionProperty.html">ActionProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/AsyncPropertyType.html">AsyncPropertyType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/AsyncReadablePropertyType.html">AsyncReadablePropertyType</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/AsyncReadableProperty.html">AsyncReadableProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Properties%20and%20Binding.html#/s:19PLRelationalBinding22AsyncReadWritePropertyC">AsyncReadWriteProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/Binding.html">Binding</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/ChangeResult.html">ChangeResult</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/ChangeHandler.html">ChangeHandler</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Properties%20and%20Binding.html#/s:19PLRelationalBinding2ltoiyAA0B0CAA16BindablePropertyCyxG_q_t5ValueQy_RszAA08ReadableE4TypeR_r0_lF">&lt;~(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Properties%20and%20Binding.html#/s:19PLRelationalBinding2ltoiyAA0B0CAA16BindablePropertyCyxG_q_t12SignalChangeQy_RszAA013AsyncReadableE4TypeR_5ValueQy_AIRSr0_lF">&lt;~(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Properties%20and%20Binding.html#/s:19PLRelationalBinding3ltgoiyAA0B0CAA17ReadWritePropertyCyxG_AGtlF">&lt;~&gt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Properties%20and%20Binding.html#/s:19PLRelationalBinding3ltgoiyAA0B0CAA17ReadWritePropertyCyxG_AA05AsyncdeF0CyxGtlF">&lt;~&gt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Properties%20and%20Binding.html#/s:19PLRelationalBinding3ttgoiyAA0B0CAA6SignalCyxG_AA14ActionPropertyCyxGtlF">~~&gt;(_:_:)</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Array%20Property.html">Array Property</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/ArrayProperty.html">ArrayProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Array%20Property.html#/s:19PLRelationalBinding8ArrayPosV">ArrayPos</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/ArrayChange.html">ArrayChange</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Array%20Property.html#/s:19PLRelationalBinding12ArrayElementP">ArrayElement</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Array%20Property.html#/s:19PLRelationalBinding15RowArrayElementC">RowArrayElement</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Tree%20Property.html">Tree Property</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/TreeProperty.html">TreeProperty</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/TreePos.html">TreePos</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/TreePath.html">TreePath</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/TreeChange.html">TreeChange</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/TreeNode.html">TreeNode</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/RowTreeNode.html">RowTreeNode</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Relation-backed%20Property%20Support.html">Relation-backed Property Support</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/RelationChangeParts.html">RelationChangeParts</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Structs/RelationMutationConfig.html">RelationMutationConfig</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/CommonValue.html">CommonValue</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Other%20Classes.html">Other Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/UndoManager.html">UndoManager</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Classes/UndoableDatabase.html">UndoableDatabase</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Other%20Enums.html">Other Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Enums/GraphvizDumpOption.html">GraphvizDumpOption</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Other%20Extensions.html">Other Extensions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Extensions/Array.html">Array</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Other%20Functions.html">Other Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding1nopyAA21AsyncReadablePropertyCySbGxAA0cdE4TypeRzSb12SignalChangeRtzSb5ValueRtzlF">!(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational2mnopyAA16SelectExpression_pAaC_pF">*!(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational3mneoiyAA16SelectExpression_pAaC_p_AaC_ptF">*!=(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational3maaoiyAA16SelectExpression_pAaC_p_AaC_ptF">*&amp;&amp;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3maaoiyAA16ReadablePropertyCySbGx_q_tAA0dE4TypeRzAaFR_Sb5ValueRtzSbAGRt_r0_lF">*&amp;&amp;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3maaoiyAA6SignalCySbGx_q_tAA0D4TypeRzAaFR_Sb5ValueRtzSbAGRt_r0_lF">*&amp;&amp;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational2mloiyAA16SelectExpression_pAaC_p_AaC_ptF">*&lt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational3mleoiyAA16SelectExpression_pAaC_p_AaC_ptF">*&lt;=(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational3meeoiyAA16SelectExpression_pAaC_p_AaC_ptF">*==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3meeoiyAA16ReadablePropertyCySbGx_q_tAA0dE4TypeRzAaFR_SQ5ValueRpzAGQy_AHRSr0_lF">*==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3meeoiyAA6SignalCySbGx_q_tAA0D4TypeRzAaFR_SQ5ValueRpzAGQy_AHRSr0_lF">*==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational2mgoiyAA16SelectExpression_pAaC_p_AaC_ptF">*&gt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational3mgeoiyAA16SelectExpression_pAaC_p_AaC_ptF">*&gt;=(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational3moooiyAA16SelectExpression_pAaC_p_AaC_ptF">*||(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3moooiyAA16ReadablePropertyCySbGx_q_tAA0dE4TypeRzAaFR_Sb5ValueRtzSbAGRt_r0_lF">*||(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3moooiyAA6SignalCySbGx_q_tAA0D4TypeRzAaFR_Sb5ValueRtzSbAGRt_r0_lF">*||(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational1poiyAA3RowVAD_ADtF">+(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational1poiyAA8Relation_pSgAD_ADtF">+(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational1soiyAA8Relation_pSgAD_ADtF">-(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational1loiySbAA13RelationValueO_ADtF">&lt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational1loiySbAA9AttributeV_ADtF">&lt;(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational2eeoiySbAA13RelationValueO_ADtF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational2eeoiySbAA14RecursiveQueryV_ADtF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational2eeoiySbAA3RowV_ADtF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational2eeoiySbAA6SchemeV_ADtF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational2eeoiySbAA9AttributeV_ADtF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding2eeoiySbAA10TreeChangeOyxG_AEtAA0D4NodeRzlF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding2eeoiySbAA11ArrayChangeOyxG_AEtAA0D7ElementRzlF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding2eeoiySbAA11CommonValueOyxG_AEtSQRzlF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding2eeoiySbAA8TreePathVyxG_AEtAA0D4NodeRzlF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding2eeoiySbx_xtAA12ArrayElementRzlF">==(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational3ggsoiyAA6ResultOyq0_q_GADyxq_G_AExXEtr1_lF">&gt;&gt;-(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational4gggsoiyAA6ResultOyytxGAE_AEyXKtlF">&gt;&gt;&gt;-(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational12MakeRelationyAA011MemoryTableC0CSayAA9AttributeVG_SayAA0C5ValueOGdtF">MakeRelation(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational10containsOkyAA6ResultOySbq0_Gx_Sbq_XEtSTRzADyq_q0_G7ElementRtzr1_lF">containsOk(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational9flatmapOkyAA6ResultOySayq0_Gq1_Gx_q0_Sgq_XEtSTRzADyq_q1_G7ElementRtzr2_lF">flatmapOk(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational13hoistOptionalyAA6ResultOyxSgq_GADyxq_GSgr0_lF">hoistOptional(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational5mapOkyAA6ResultOySayq0_Gq1_GADyxq1_G_q0_q_XEtSTRzADyq_q1_G7ElementRtzr2_lF">mapOk(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational5mapOkyAA6ResultOySayq0_Gq1_Gx_q0_q_XEtSTRzADyq_q1_G7ElementRtzr2_lF">mapOk(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3notyAA16ReadablePropertyCySbGxAA0dE4TypeRzSb5ValueRtzlF">not(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3notyAA21AsyncReadablePropertyCySbGxAA0deF4TypeRzSb12SignalChangeRtzSb5ValueRtzlF">not(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3notyAA6SignalCySbGAEF">not(_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational8traverseyAA6ResultOySayq0_Gq1_Gx_ADyq0_q1_Gq_XEtSTRz7ElementQzRs_r2_lF">traverse(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3zipyAA16ReadablePropertyCy5ValueQz_AEQy_tGx_q_tAA0dE4TypeRzAaIR_r0_lF">zip(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3zipyAA21AsyncReadablePropertyCy12SignalChangeQz_AEQy_tGx_q_tAA0deF4TypeRzAaIR_5ValueQzAFRSAJQy_AGRSr0_lF">zip(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:19PLRelationalBinding3zipyAA6SignalCy5ValueQz_AEQy_tGx_q_tAA0D4TypeRzAaIR_r0_lF">zip(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational2teoiyS2b_AA16SelectExpression_ptF">~=(_:_:)</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Functions.html#/s:12PLRelational003hbhoiyAA8Relation_pSgAD_ADtF">∩(_:_:)</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Other%20Protocols.html">Other Protocols</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Protocols/UndoManagerDelegate.html">UndoManagerDelegate</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a class="nav-group-name-link" href="Other%20Typealiases.html">Other Type Aliases</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Typealiases.html#/s:19PLRelationalBinding15ObserverRemovala">ObserverRemoval</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Typealiases.html#/s:12PLRelational14RelationObjecta">RelationObject</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Typealiases.html#/s:12PLRelational19RemovableSetRemovera">RemovableSetRemover</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Typealiases.html#/s:12PLRelational9RowChangea">RowChange</a>
+              </li>
+              <li class="nav-group-task">
+                <a class="nav-group-task-link" href="Other%20Typealiases.html#/s:12PLRelational7sqlite3a">sqlite3</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+
+        <section class="section">
+          <div class="section-content">
+            
+            <h1 id='plrelational' class='heading'>PLRelational</h1>
+
+<p>PLRelational is a data storage, processing, and presentation framework based on relational algebra. It is written in Swift and is available for macOS and iOS.</p>
+<h2 id='license' class='heading'>License</h2>
+
+<p>PLRelational is released under an MIT license. See the LICENSE file for the full license.</p>
+<h2 id='quick-start' class='heading'>Quick Start</h2>
+
+<p>The repository contains <code>PLRelational.xcodeproj</code> which will build out of the box. You can manually build the frameworks and add them to your project, or you can add the PLRelational project as a dependency.</p>
+
+<p>Here is some quick code to exercise it:</p>
+<pre class="highlight plaintext"><code>import PLRelational
+import PLRelationalBinding
+import PLBindableControls
+
+// Set up relations
+let people = MemoryTableRelation(scheme: ["id", "name", "age"])
+let selectedPersonID = MemoryTableRelation(scheme: ["id"])
+let selectedPerson = people.join(selectedPersonID)
+let selectedName = selectedPerson.project("name")
+
+// Add initial data
+people.asyncAdd(["id": 1, "name": "John Doe", "age": 42])
+people.asyncAdd(["id": 2, "name": "Superman", "age": 35])
+people.asyncAdd(["id": 3, "name": "Hugh Mann", "age": 78])
+selectedPersonID.asyncAdd(["id": 2])
+
+// Query the selected name
+selectedName.asyncAllRows({ print($0) })
+// Prints "Ok(Set([[name: Superman]]))" when the data comes back
+
+// Create a property that presents the selected name relation as a single String
+let selectedNameString = selectedName.oneString().property()
+
+// Observe changes to the selected name
+let removal = selectedNameString.signal.observeValueChanging{ value, metadata in
+    print("Selected name is now \(value)")
+}
+
+// Remove the observer when done
+removal()
+
+// Create a label and bind it to the selected name
+let label = Label()
+label.string &lt;~ selectedNameString
+</code></pre>
+<h2 id='frameworks' class='heading'>Frameworks</h2>
+
+<p>The PLRelational project provides three frameworks:</p>
+
+<ul>
+<li><strong>PLRelational</strong> provides all of the core data storage and processing facilities. It includes relations backed by plists, SQLite, or stored in memory, operators on those relations, full text search facilities, asynchronous data updates and retrieval, and more.</li>
+<li><strong>PLRelationalBinding</strong> provides the reactive glue to connect PLRelational&rsquo;s relations to other entities. At its base it provides <code><a href="Classes/Signal.html">Signal</a></code> and <code>Property</code> types which are abstract data providers, as well as extensions that allow a relation to be expressed in terms of them.</li>
+<li><strong>PLBindableControls</strong> extends standard AppKit and UIKit controls to expose <code>Property</code> objects from PLRelationalBinding. This allows those controls to be linked to relations from PLRelational, which causes them to automatically reflect the current value of a relation, or update that value based on user interaction.</li>
+</ul>
+
+<p>Typically you will use all three together, but PLRelational can be used standalone, and PLRelationalBinding can be used without PLBindableControls.</p>
+<h2 id='examples' class='heading'>Examples</h2>
+
+<p>The Xcode project includes a number of example apps for macOS:</p>
+
+<ul>
+<li><strong>HelloWorldApp</strong> is the best place to start; a minimal example that demonstrates relations, binding, undo/redo, etc.</li>
+<li><strong>SearchApp</strong> demonstrates the use of <code><a href="Classes/RelationTextIndex.html">RelationTextIndex</a></code> for full text search.</li>
+<li><strong>BindableControlsApp</strong> is primarily a UI testing target for all the AppKit controls in PLBindableControls.</li>
+<li><strong>Visualizer</strong> contains the beginnings of a visual tool (very much a work in progress) for creating and debugging relations.</li>
+</ul>
+<h2 id='acknowledgements' class='heading'>Acknowledgements</h2>
+
+<p>The PLRelational collection of frameworks draws inspiration from and stands on the shoulders of many other works, chief among them the earliest relational research from E.F. Codd, et al, <a href="https://github.com/papers-we-love/papers-we-love/blob/master/design/out-of-the-tar-pit.pdf">Out of the Tar Pit</a> by Ben Moseley and Peter Marks, <a href="http://conal.net/papers/push-pull-frp">Push-Pull Functional Reactive Programming</a> by Conal Elliott, and the many incarnations of Rx such as <a href="https://github.com/ReactiveCocoa/ReactiveSwift">ReactiveSwift</a>.  Thanks also to <a href="https://twitter.com/landonfuller">Landon Fuller</a> for his continued advice and for planting the seeds that resulted in the earliest prototypes.</p>
+<h2 id='further-reading' class='heading'>Further Reading</h2>
+
+<p>For a more in-depth introduction to these frameworks, check out <a href="https://plausible.coop/blog/2017/08/10/reactive-relational-programming-with-plrelational">Reactive Relational Programming with PLRelational</a>.</p>
+
+<p>Generated documentation is also <a href="https://opensource.plausible.coop/plrelational/docs/current">available online</a> for the PLRelational and PLRelationalBinding frameworks.</p>
+
+<p>Enjoy!</p>
+
+          </div>
+        </section>
+
+
+      </article>
+    </div>
+    <section class="footer">
+      <p>&copy; 2019 <a class="link" href="https://github.com/plausiblelabs/plrelational" target="_blank" rel="external">Plausible Labs</a>. All rights reserved. (Last updated: 2019-10-08)</p>
+      <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.11.2</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+    </section>
+  </body>
+</div>
+</html>
