@@ -29,7 +29,12 @@ struct StoredRelationModel {
     
     func toRelation() -> Relation {
         let r = MemoryTableRelation(scheme: Scheme(attributes: Set(attributes)))
-        r.values = Set(rows)
+        // TODO: We used to set `r.values` directly here, but that no longer works after
+        // the Swift 5 migration; needs investigation (for now add one by one)
+        //r.values = Set(rows)
+        for row in rows {
+            _ = r.add(row)
+        }
         return r
     }
 }
@@ -328,7 +333,7 @@ extension SharedRelationModel {
         guard let stagePlists = dict["stages"] as? [Any] else { return nil }
         return SharedRelationModel(
             input: input,
-            stages: stagePlists.flatMap{ SharedRelationStage.fromPlist($0) }
+            stages: stagePlists.compactMap{ SharedRelationStage.fromPlist($0) }
         )
     }
 }

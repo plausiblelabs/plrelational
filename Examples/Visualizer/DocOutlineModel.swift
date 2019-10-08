@@ -143,9 +143,11 @@ func ==(a: DocOutlinePath, b: DocOutlinePath) -> Bool {
 }
 
 extension DocOutlinePath: Hashable {
-    var hashValue: Int {
+    func hash(into hasher: inout Hasher) {
         switch self {
-        case let .relation(did, oid, _): return DJBHash.hash(values: [did.hashValue, oid.hashValue])
+        case let .relation(did, oid, _):
+            hasher.combine(did)
+            hasher.combine(oid)
         }
     }
 }
@@ -412,7 +414,7 @@ class DocOutlineModel: SectionedTreeViewModel {
     {
         guard let delegate = delegate else { return }
         
-        let sectionedTreeChanges: [SectionedTreeChange] = changes.flatMap{
+        let sectionedTreeChanges: [SectionedTreeChange] = changes.compactMap{
             switch $0 {
             case .initial:
                 return .initial(sectionID: sectionID.sectionedTreeSectionID, path: sectionPath)
@@ -445,7 +447,7 @@ class DocOutlineModel: SectionedTreeViewModel {
     {
         guard let delegate = delegate else { return }
         
-        let sectionedTreeChanges: [SectionedTreeChange] = changes.flatMap{
+        let sectionedTreeChanges: [SectionedTreeChange] = changes.compactMap{
             switch $0 {
             case .initial:
                 return .initial(sectionID: sectionID.sectionedTreeSectionID, path: sectionPath)

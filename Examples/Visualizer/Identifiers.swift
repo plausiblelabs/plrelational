@@ -48,8 +48,8 @@ func ==(a: ObjectID, b: ObjectID) -> Bool {
 }
 
 extension ObjectID: Hashable {
-    var hashValue: Int {
-        return uuid.hashValue
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(uuid)
     }
 }
 
@@ -77,8 +77,8 @@ func ==(a: DocItemID, b: DocItemID) -> Bool {
 }
 
 extension DocItemID: Hashable {
-    var hashValue: Int {
-        return uuid.hashValue
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(uuid)
     }
 }
 
@@ -106,8 +106,8 @@ func ==(a: TabID, b: TabID) -> Bool {
 }
 
 extension TabID: Hashable {
-    var hashValue: Int {
-        return uuid.hashValue
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(uuid)
     }
 }
 
@@ -135,8 +135,8 @@ func ==(a: HistoryItemID, b: HistoryItemID) -> Bool {
 }
 
 extension HistoryItemID: Hashable {
-    var hashValue: Int {
-        return uuid.hashValue
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(uuid)
     }
 }
 
@@ -175,8 +175,8 @@ func ==(a: UUID, b: UUID) -> Bool {
 }
 
 extension UUID: Hashable {
-    var hashValue: Int {
-        return stringValue.hashValue
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(stringValue)
     }
 }
 

@@ -7,14 +7,14 @@ import AppKit
 
 
 private class ActionTrampoline: NSObject {
-    var action: (NSControl) -> Void
+    var actionFunc: (NSControl) -> Void
     
     init(action: @escaping (NSControl) -> Void) {
-        self.action = action
+        self.actionFunc = action
     }
     
     @objc func action(_ sender: NSControl) {
-        action(sender)
+        actionFunc(sender)
     }
 }
 

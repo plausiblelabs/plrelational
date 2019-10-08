@@ -935,7 +935,6 @@
 		3788C0F91F60764B005920FD /* trash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = trash.png; sourceTree = "<group>"; };
 		3788C0FC1F6077A7005920FD /* trash@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "trash@2x.png"; sourceTree = "<group>"; };
 		378A2D211F8FFA75009F3EF8 /* TodoClientApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoClientApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		378A2D221F8FFA75009F3EF8 /* TodoApp copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "TodoApp copy-Info.plist"; path = "/Users/campbell/Projects/vp/plrelational/TodoApp copy-Info.plist"; sourceTree = "<absolute>"; };
 		37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncPropertyOperations.swift; sourceTree = "<group>"; };
 		37941D8D1DB8191200F5508F /* AsyncPropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyOperationsTests.swift; path = PLRelationalBindingTests/AsyncPropertyOperationsTests.swift; sourceTree = SOURCE_ROOT; };
 		3799AB481F57C43C0075570F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/ChecklistView.xib; sourceTree = "<group>"; };
@@ -1160,7 +1159,6 @@
 		C2CFC35A1D7F36DE00389373 /* RowPlist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RowPlist.swift; sourceTree = "<group>"; };
 		C2CFC35C1D7F49D800389373 /* PlistFileRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PlistFileRelationTests.swift; path = PLRelationalTests/PlistFileRelationTests.swift; sourceTree = SOURCE_ROOT; };
 		C2D21C4B1E6F324000261764 /* Label.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Label.swift; sourceTree = "<group>"; };
-		C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswiftSwiftOnoneSupport.dylib; path = Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/libswiftSwiftOnoneSupport.dylib; sourceTree = DEVELOPER_DIR; };
 		C2DF2B9D1CFDD81100ED8695 /* ObjectDictionary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObjectDictionary.swift; sourceTree = "<group>"; };
 		C2DF2B9F1CFDE2B100ED8695 /* QueryRunnerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = QueryRunnerTests.swift; path = PLRelationalTests/QueryRunnerTests.swift; sourceTree = SOURCE_ROOT; };
 		C2DF2BA11D006E1C00ED8695 /* RelationDifferentiator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiator.swift; sourceTree = "<group>"; };
@@ -2253,9 +2251,7 @@
 				37F1D9B41DCD3D1C004D4AAD /* Example Apps */,
 				370753A21F2FAE43009C3700 /* Documentation */,
 				C22BF12D1CBC348500D3FE59 /* Products */,
-				C2D4A8491D88789A001D9971 /* Swift library workaround */,
 				37B4419A1E89AA7E00C8C336 /* Frameworks */,
-				378A2D221F8FFA75009F3EF8 /* TodoApp copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2422,14 +2418,6 @@
 				C2CFC35A1D7F36DE00389373 /* RowPlist.swift */,
 			);
 			name = Plist;
-			sourceTree = "<group>";
-		};
-		C2D4A8491D88789A001D9971 /* Swift library workaround */ = {
-			isa = PBXGroup;
-			children = (
-				C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */,
-			);
-			name = "Swift library workaround";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -3053,20 +3041,20 @@
 					37504B371DC6995100CEE4D4 = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37504B4A1DC6995100CEE4D4 = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 37504B371DC6995100CEE4D4;
 					};
 					37504B551DC6995100CEE4D4 = {
 						CreatedOnToolsVersion = 8.0;
 						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 37504B371DC6995100CEE4D4;
 					};
@@ -4604,7 +4592,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.Visualizer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4625,7 +4613,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.Visualizer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -4645,8 +4633,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Visualizer.app/Contents/MacOS/Visualizer";
 			};
 			name = Debug;
@@ -4667,8 +4654,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Visualizer.app/Contents/MacOS/Visualizer";
 			};
 			name = Release;
@@ -4688,8 +4674,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Visualizer;
 			};
 			name = Debug;
@@ -4709,8 +4694,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Visualizer;
 			};
 			name = Release;

@@ -46,7 +46,7 @@ class Document: NSDocument {
     }
     
     override var windowNibName: NSNib.Name? {
-        return NSNib.Name("Document")
+        return "Document"
     }
     
     override func read(from url: URL, ofType typeName: String) throws {
