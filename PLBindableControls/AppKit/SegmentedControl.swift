@@ -58,7 +58,7 @@ open class SegmentedControl<T: Equatable>: NSSegmentedControl {
     }
     
     private func setSelectedValue(_ value: T?) {
-        if let index = segments.index(where: { $0.value == value }) {
+        if let index = segments.firstIndex(where: { $0.value == value }) {
             setSelected(true, forSegment: index)
         } else {
             for index in 0..<segments.count {

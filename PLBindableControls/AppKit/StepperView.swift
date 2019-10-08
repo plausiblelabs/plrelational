@@ -102,7 +102,7 @@ open class StepperView: NSControl, NSTextFieldDelegate {
         _value.change(newValue, transient: false)
     }
     
-    open override func controlTextDidEndEditing(_ notification: Notification) {
+    open func controlTextDidEndEditing(_ notification: Notification) {
         let textField = notification.object! as! NSTextField
         if !textField.stringValue.isEmpty {
             controlChanged(textField)

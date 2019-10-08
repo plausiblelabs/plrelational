@@ -60,7 +60,7 @@ public protocol SectionedTreeViewModelDelegate: class {
 public protocol SectionedTreeViewModel: class {
     associatedtype Path: Hashable
     
-    weak var delegate: SectionedTreeViewModelDelegate? { get set }
+    var delegate: SectionedTreeViewModelDelegate? { get set }
     var selection: AsyncReadableProperty<Path?> { get }
     var selectionExclusiveMode: Bool { get set }
     

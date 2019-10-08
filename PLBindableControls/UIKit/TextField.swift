@@ -55,7 +55,7 @@ open class TextField: UITextField, UITextFieldDelegate {
         return true
     }
     
-    open func textFieldDidEndEditing(_ textField: UITextField, reason: UITextFieldDidEndEditingReason) {
+    open func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
         if self.text != previousCommittedValue {
             _bindable_text.changed(transient: false)
         }
