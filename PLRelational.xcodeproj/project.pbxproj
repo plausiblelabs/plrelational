@@ -27,6 +27,9 @@
 		3707532C1F103173009C3700 /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
 		3707532E1F1034F0009C3700 /* SearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707532D1F1034F0009C3700 /* SearchResult.swift */; };
 		370753301F104FA4009C3700 /* ResultsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3707532F1F104FA4009C3700 /* ResultsListView.swift */; };
+		3709DD7C234D387C009F794B /* PLBindableControls.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B441611E89A49A00C8C336 /* PLBindableControls.framework */; };
+		3709DD7D234D387C009F794B /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43FFA1E8997EB00C8C336 /* PLRelational.framework */; };
+		3709DD7E234D387C009F794B /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
 		370F88081E8F004C0043B903 /* ListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370F88061E8F00440043B903 /* ListView.swift */; };
 		3710A68F1DDCF93C0070EC29 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A68E1DDCF93C0070EC29 /* SidebarView.swift */; };
 		3710A6911DDCFA330070EC29 /* SidebarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A6901DDCFA330070EC29 /* SidebarModel.swift */; };
@@ -486,7 +489,6 @@
 		C2935C621F1002D200441B6A /* RelationTextIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2935C5D1F1002CC00441B6A /* RelationTextIndexTests.swift */; };
 		C2935C631F1002D200441B6A /* RelationTextIndexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2935C5D1F1002CC00441B6A /* RelationTextIndexTests.swift */; };
 		C2A78A1D1ED4A84D0021ACCF /* RemovableSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */; };
-		C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */ = {isa = PBXBuildFile; fileRef = C2D4A8521D887ABC001D9971 /* libswiftSwiftOnoneSupport.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C2EB823C1E96A67D00B80CAE /* SelectExpressionAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2EB823B1E96A67D00B80CAE /* SelectExpressionAnalysis.swift */; };
 		C2F13CE31E8D4ECD001376D8 /* MutableBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE21E8D4ECD001376D8 /* MutableBox.swift */; };
 		C2F13CE51E8D7F8D001376D8 /* SetSubtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2F13CE41E8D7F8D001376D8 /* SetSubtraction.swift */; };
@@ -513,6 +515,27 @@
 			proxyType = 1;
 			remoteGlobalIDString = 37B441601E89A49A00C8C336;
 			remoteInfo = "PLBindableControls-macOS";
+		};
+		3709DD76234D3866009F794B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B441601E89A49A00C8C336;
+			remoteInfo = "PLBindableControls-macOS";
+		};
+		3709DD78234D3866009F794B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B43FF91E8997EB00C8C336;
+			remoteInfo = "PLRelational-macOS";
+		};
+		3709DD7A234D3866009F794B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B440D21E899F7600C8C336;
+			remoteInfo = "PLRelationalBinding-macOS";
 		};
 		372707F71CFE2C7E00710C80 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -811,7 +834,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				C2D4A8541D887AC7001D9971 /* libswiftSwiftOnoneSupport.dylib in Copy Embedded Libraries */,
 			);
 			name = "Copy Embedded Libraries";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1157,6 +1179,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3709DD7D234D387C009F794B /* PLRelational.framework in Frameworks */,
+				3709DD7E234D387C009F794B /* PLRelationalBinding.framework in Frameworks */,
+				3709DD7C234D387C009F794B /* PLBindableControls.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2467,6 +2492,9 @@
 			buildRules = (
 			);
 			dependencies = (
+				3709DD79234D3866009F794B /* PBXTargetDependency */,
+				3709DD7B234D3866009F794B /* PBXTargetDependency */,
+				3709DD77234D3866009F794B /* PBXTargetDependency */,
 			);
 			name = BindableControlsApp;
 			productName = BindableControlsApp;
@@ -2991,36 +3019,36 @@
 				TargetAttributes = {
 					372707E71CFE2C7E00710C80 = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
+						ProvisioningStyle = Automatic;
 					};
 					372707F51CFE2C7E00710C80 = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						TestTargetID = 372707E71CFE2C7E00710C80;
 					};
 					37412E801F100848002F131A = {
 						CreatedOnToolsVersion = 8.3.3;
-						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37412E901F100848002F131A = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 37412E801F100848002F131A;
 					};
 					37412E9B1F100848002F131A = {
 						CreatedOnToolsVersion = 8.3.3;
 						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 37412E801F100848002F131A;
 					};
 					374315E81F420B5200128F5A = {
-						DevelopmentTeam = NM4ZX45CU5;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
+						ProvisioningStyle = Automatic;
 					};
 					37504B371DC6995100CEE4D4 = {
 						CreatedOnToolsVersion = 8.0;
@@ -3054,7 +3082,8 @@
 					};
 					37A1CE6A1D1081980067870D = {
 						CreatedOnToolsVersion = 7.3;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
+						ProvisioningStyle = Automatic;
 					};
 					37A1CE781D1081980067870D = {
 						CreatedOnToolsVersion = 7.3;
@@ -3066,7 +3095,7 @@
 					};
 					37AEC3F21F576D18004E5487 = {
 						CreatedOnToolsVersion = 8.3.3;
-						LastSwiftMigration = 0900;
+						LastSwiftMigration = 1110;
 						ProvisioningStyle = Automatic;
 					};
 					37B43F1B1E898BAD00C8C336 = {
@@ -4035,6 +4064,21 @@
 			target = 37B441601E89A49A00C8C336 /* PLBindableControls-macOS */;
 			targetProxy = 370753281F103167009C3700 /* PBXContainerItemProxy */;
 		};
+		3709DD77234D3866009F794B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B441601E89A49A00C8C336 /* PLBindableControls-macOS */;
+			targetProxy = 3709DD76234D3866009F794B /* PBXContainerItemProxy */;
+		};
+		3709DD79234D3866009F794B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B43FF91E8997EB00C8C336 /* PLRelational-macOS */;
+			targetProxy = 3709DD78234D3866009F794B /* PBXContainerItemProxy */;
+		};
+		3709DD7B234D3866009F794B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B440D21E899F7600C8C336 /* PLRelationalBinding-macOS */;
+			targetProxy = 3709DD7A234D3866009F794B /* PBXContainerItemProxy */;
+		};
 		372707F81CFE2C7E00710C80 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 372707E71CFE2C7E00710C80 /* BindableControlsApp */;
@@ -4334,12 +4378,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/BindableControlsApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4347,12 +4395,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/BindableControlsApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -4364,8 +4416,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = BindableControlsApp;
 			};
 			name = Debug;
@@ -4378,8 +4429,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_SWIFT3_OBJC_INFERENCE = On;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = BindableControlsApp;
 			};
 			name = Release;
@@ -4391,14 +4441,14 @@
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = NM4ZX45CU5;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/HelloWorldApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4409,13 +4459,13 @@
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = NM4ZX45CU5;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/HelloWorldApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -4434,7 +4484,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HelloWorldApp.app/Contents/MacOS/HelloWorldApp";
 			};
 			name = Debug;
@@ -4453,7 +4503,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HelloWorldApp.app/Contents/MacOS/HelloWorldApp";
 			};
 			name = Release;
@@ -4472,7 +4522,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = HelloWorldApp;
 			};
 			name = Debug;
@@ -4490,7 +4540,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = HelloWorldApp;
 			};
 			name = Release;
@@ -4501,15 +4551,18 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = NM4ZX45CU5;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/RelationChangeApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationChangeApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4519,14 +4572,17 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = NM4ZX45CU5;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/RelationChangeApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationChangeApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -4793,12 +4849,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/SearchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4806,12 +4866,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/SearchApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -4878,7 +4942,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.TodoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -4894,7 +4958,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.TodoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};

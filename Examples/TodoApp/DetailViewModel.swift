@@ -68,7 +68,7 @@ class DetailViewModel {
     lazy var addNewTagToSelectedItem: ActionProperty<String> = ActionProperty { name in
         // See if a tag already exists with the given name
         let itemID = self.itemID.value!!
-        let existingIndex = self.model.allTags.value?.index(where: {
+        let existingIndex = self.model.allTags.value?.firstIndex(where: {
             let rowName: String = $0.data[Tag.name].get()!
             return name == rowName
         })

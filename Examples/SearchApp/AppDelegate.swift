@@ -23,6 +23,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var resultsListView: ListView<RowArrayElement>!
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        // XXX: We're not ready for dark mode yet
+        if #available(macOS 10.14, *) {
+            NSApp.appearance = NSAppearance(named: .aqua)
+        }
+
         window.delegate = self
         queryField.deliverTransientChanges = true
         

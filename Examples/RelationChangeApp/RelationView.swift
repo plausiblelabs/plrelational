@@ -235,7 +235,7 @@ class RelationView: BackgroundView {
                 let animation = CABasicAnimation(keyPath: "opacity")
                 animation.fromValue = NSNumber(value: Float(fadeIn ? 0.0 : 1.0))
                 animation.toValue = NSNumber(value: Float(fadeIn ? 1.0 : 0.0))
-                animation.fillMode = kCAFillModeBoth
+                animation.fillMode = CAMediaTimingFillMode.both
                 animation.duration = duration
                 animation.isRemovedOnCompletion = true
                 view.layer!.add(animation, forKey: "opacity")
@@ -311,7 +311,7 @@ class RelationView: BackgroundView {
                 animation.toValue = NSNumber(value: Float(0.0))
                 animation.duration = duration
                 animation.beginTime = CACurrentMediaTime() + delay
-                animation.fillMode = kCAFillModeBoth
+                animation.fillMode = CAMediaTimingFillMode.both
                 animation.isRemovedOnCompletion = false
                 oldStringLabel.layer!.add(animation, forKey: "opacity")
             }

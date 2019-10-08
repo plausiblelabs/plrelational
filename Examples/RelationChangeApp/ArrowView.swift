@@ -66,7 +66,7 @@ class ArrowView: NSView {
             l.fillColor = NSColor.clear.cgColor
             l.strokeColor = color.cgColor
             l.lineWidth = lw
-            l.lineCap = kCALineCapRound
+            l.lineCap = CAShapeLayerLineCap.round
             layer!.addSublayer(l)
             return l
         }

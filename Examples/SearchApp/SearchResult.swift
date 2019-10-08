@@ -48,7 +48,7 @@ enum SearchResult {
             }
             
             // Apply font and foreground color attributes for the full string
-            var attrs: [NSAttributedStringKey: Any] = [:]
+            var attrs: [NSAttributedString.Key: Any] = [:]
             if title {
                 attrs[.font] = titleFont
                 attrs[.foregroundColor] = titleColor
