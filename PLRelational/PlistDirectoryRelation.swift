@@ -454,10 +454,10 @@ extension PlistDirectoryRelation {
             case standardizedURL(URL)
             case key(RelationValue)
             
-            var hashValue: Int {
+            func hash(into hasher: inout Hasher) {
                 switch self {
-                case .standardizedURL(let url): return url.hashValue
-                case .key(let value): return ~value.hashValue
+                case .standardizedURL(let url): hasher.combine(url)
+                case .key(let value): hasher.combine(value)
                 }
             }
             

@@ -203,17 +203,14 @@ extension RelationTextIndex {
                 && lhs.matches == rhs.matches
         }
         
-        public var hashValue: Int {
-            var hash = DJBHash()
-            hash.combine(ellipsisAtStart.hashValue)
-            hash.combine(ellipsisAtEnd.hashValue)
-            hash.combine(string.hashValue)
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(ellipsisAtStart)
+            hasher.combine(ellipsisAtEnd)
+            hasher.combine(string)
             
             // String.Index isn't Hashable and doesn't have any convenient way to extract a value.
             // We'll just punt on it. Hopefully the rest will be sufficiently unique.
-            hash.combine(matches.count)
-            
-            return hash.value
+            hasher.combine(matches.count)
         }
     }
 }
@@ -616,12 +613,10 @@ private struct IntermediateToken: Hashable, Comparable {
         return false
     }
     
-    var hashValue: Int {
-        var hash = DJBHash()
-        hash.combine(string.hashValue)
-        hash.combine(range.location)
-        hash.combine(range.length)
-        return hash.value
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(string)
+        hasher.combine(range.location)
+        hasher.combine(range.length)
     }
 }
 

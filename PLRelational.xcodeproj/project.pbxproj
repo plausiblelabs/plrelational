@@ -250,7 +250,6 @@
 		37B4407F1E899A4F00C8C336 /* RelationActivityLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF3F1CF49AFE009E28E0 /* RelationActivityLogging.swift */; };
 		37B440801E899A4F00C8C336 /* RelationDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B339DD1CEA54E7008568E9 /* RelationDump.swift */; };
 		37B440811E899A5100C8C336 /* RelationActivityLogging.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23AAF3F1CF49AFE009E28E0 /* RelationActivityLogging.swift */; };
-		37B440831E899A7200C8C336 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		37B440841E899A7200C8C336 /* CollectionConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */; };
 		37B440851E899A7200C8C336 /* ConsistentPRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */; };
 		37B440861E899A7200C8C336 /* Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E26B1D805E230039923C /* Crypto.swift */; };
@@ -284,7 +283,6 @@
 		37B440A21E899A7200C8C336 /* UnsafePointerReadWrite.swift in Sources */ = {isa = PBXBuildFile; fileRef = C29C28351D872BEA001E20E7 /* UnsafePointerReadWrite.swift */; };
 		37B440A31E899A7200C8C336 /* ValueWithDestructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921AF1CCFEB6D00518184 /* ValueWithDestructor.swift */; };
 		37B440A41E899A7200C8C336 /* Result.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921AD1CCFABA300518184 /* Result.swift */; };
-		37B440A51E899A7200C8C336 /* ArrayHashing.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921A91CCE605D00518184 /* ArrayHashing.swift */; };
 		37B440A61E899A7200C8C336 /* CollectionConvenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */; };
 		37B440A71E899A7200C8C336 /* ConsistentPRNG.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */; };
 		37B440A81E899A7200C8C336 /* Crypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B6E26B1D805E230039923C /* Crypto.swift */; };
@@ -1054,7 +1052,6 @@
 		C22921921CC6CE0A00518184 /* SQLiteDatabase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteDatabase.swift; sourceTree = "<group>"; };
 		C22921961CC7E9E300518184 /* SQLiteRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SQLiteRelation.swift; sourceTree = "<group>"; };
 		C22921A71CCE587900518184 /* RelationValue.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationValue.swift; sourceTree = "<group>"; };
-		C22921A91CCE605D00518184 /* ArrayHashing.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArrayHashing.swift; sourceTree = "<group>"; };
 		C22921AD1CCFABA300518184 /* Result.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Result.swift; sourceTree = "<group>"; };
 		C22921AF1CCFEB6D00518184 /* ValueWithDestructor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ValueWithDestructor.swift; sourceTree = "<group>"; };
 		C22921B51CD10BA800518184 /* ObserverSet.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ObserverSet.swift; sourceTree = "<group>"; };
@@ -2343,7 +2340,6 @@
 		C2BD298F1CD250B30081FD05 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				C22921A91CCE605D00518184 /* ArrayHashing.swift */,
 				C23BC0511D21C5B100188F86 /* CollectionConvenience.swift */,
 				C2B53CDF1D1DBCAE006B6278 /* ConsistentPRNG.swift */,
 				C2B6E26B1D805E230039923C /* Crypto.swift */,
@@ -3687,7 +3683,6 @@
 				37B4404C1E899A0A00C8C336 /* PlistDirectoryRelation.swift in Sources */,
 				37B440601E899A2000C8C336 /* TransactionalDatabase.swift in Sources */,
 				37B440311E8999EB00C8C336 /* RelationDifferentiator.swift in Sources */,
-				37B440A51E899A7200C8C336 /* ArrayHashing.swift in Sources */,
 				37B4401C1E8999D200C8C336 /* Relation.swift in Sources */,
 				37B440741E899A3300C8C336 /* QueryRunner.swift in Sources */,
 				37B4403A1E8999F700C8C336 /* RelationOperators.swift in Sources */,
@@ -3808,7 +3803,6 @@
 				37B440481E899A0900C8C336 /* PlistDirectoryRelation.swift in Sources */,
 				37B4405D1E899A2000C8C336 /* TransactionalDatabase.swift in Sources */,
 				37B4402C1E8999EA00C8C336 /* RelationDifferentiator.swift in Sources */,
-				37B440831E899A7200C8C336 /* ArrayHashing.swift in Sources */,
 				37B440141E8999D200C8C336 /* Relation.swift in Sources */,
 				C2F13CE51E8D7F8D001376D8 /* SetSubtraction.swift in Sources */,
 				37B4406D1E899A3100C8C336 /* QueryRunner.swift in Sources */,

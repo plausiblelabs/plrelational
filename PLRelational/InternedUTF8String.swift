@@ -96,8 +96,8 @@ public struct InternedUTF8String: Hashable, Comparable {
         }
     }
     
-    public var hashValue: Int {
-        return ptr.hashValue
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(ptr)
     }
 }
 
@@ -121,8 +121,10 @@ extension InternedUTF8String {
             return lhs.hash == rhs.hash && lhs.length == rhs.length && memcmp(lhs.ptr, rhs.ptr, lhs.length) == 0
         }
         
-        public var hashValue: Int {
-            return hash
+        // TODO: This was migrated from the pre-Swift-4.2 `hashValue` approach to use `Hasher`, but
+        // could probably be rewritten in a better way
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(hash)
         }
         
         private static func updateHash(_ hash: inout UInt64, pointer: UnsafePointer<UInt8>, length: Int) {

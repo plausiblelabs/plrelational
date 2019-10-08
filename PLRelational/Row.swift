@@ -25,10 +25,10 @@ public struct Row: Hashable, Sequence {
     /// A convenience for a row with no attributes or values.
     public static var empty = Row(values: [])
     
-    public var hashValue: Int {
-        return ObjectIdentifier(inlineRow).hashValue
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(inlineRow))
     }
-    
+
     /// Retrieve the value for a given `Attribute`. If the `Row` does not contain the `Attribute`,
     /// return `.notFound`.
     public subscript(attribute: Attribute) -> RelationValue {
@@ -294,10 +294,13 @@ extension InlineRow: Hashable {
         return true
     }
     
-    var hashValue: Int {
-        return withUnsafeMutablePointers({ header, elements in
+    // TODO: This was migrated from the pre-Swift-4.2 `hashValue` approach to use `Hasher`, but
+    // could probably be rewritten in a better way
+    func hash(into hasher: inout Hasher) {
+        let hv = withUnsafeMutablePointers({ header, elements in
             header.pointee.hash.value
         })
+        hasher.combine(hv)
     }
 }
 

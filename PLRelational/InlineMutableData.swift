@@ -71,8 +71,10 @@ class InlineMutableData: ManagedBuffer<(length: Int, capacity: Int, hash: UInt64
 }
 
 extension InlineMutableData: Hashable {
-    var hashValue: Int {
-        return withUnsafeMutablePointers({ headerPtr, elementPtr in
+    // TODO: This was migrated from the pre-Swift-4.2 `hashValue` approach to use `Hasher`, but
+    // could probably be rewritten in a better way
+    func hash(into hasher: inout Hasher) {
+        let hv: Int = withUnsafeMutablePointers({ headerPtr, elementPtr in
             // No thread safety. Will still work correctly, but may redundantly calculate
             // the hash more than once if multiple threads hit this simultaneously.
             if headerPtr.pointee.hash == 0 {
@@ -82,6 +84,7 @@ extension InlineMutableData: Hashable {
             }
             return Int(truncatingIfNeeded: headerPtr.pointee.hash)
         })
+        hasher.combine(hv)
     }
 }
 

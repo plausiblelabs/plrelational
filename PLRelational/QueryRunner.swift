@@ -886,8 +886,9 @@ extension QueryRunner {
         var nodeIndex: Int
         var inputIndex: Int
         
-        fileprivate var hashValue: Int {
-            return DJBHash.hash(values: [nodeIndex, inputIndex])
+        fileprivate func hash(into hasher: inout Hasher) {
+            hasher.combine(nodeIndex)
+            hasher.combine(inputIndex)
         }
     }
 }

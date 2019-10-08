@@ -31,8 +31,8 @@ public struct Attribute {
 }
 
 extension Attribute: Hashable, Comparable {
-    public var hashValue: Int {
-        return internedName.hashValue
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(internedName)
     }
 }
 
