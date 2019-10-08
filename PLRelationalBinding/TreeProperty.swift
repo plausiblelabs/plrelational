@@ -127,7 +127,7 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
     public func indexForID(_ id: Node.ID) -> Int? {
         if let node = nodeForID(id) {
             let parent = parentForNode(node) ?? root
-            return parent.children.index(where: {$0 === node})
+            return parent.children.firstIndex(where: {$0 === node})
         } else {
             return nil
         }
@@ -136,14 +136,14 @@ open class TreeProperty<Node: TreeNode>: AsyncReadablePropertyType {
     /// Returns the index of the given node relative to its parent.
     public func indexForNode(_ node: Node) -> Int? {
         let parent = parentForNode(node) ?? root
-        return parent.children.index(where: {$0 === node})
+        return parent.children.firstIndex(where: {$0 === node})
     }
     
     /// Returns the tree path of the given node.
     public func pathForNode(_ node: Node) -> TreePath<Node>? {
         let parent = parentForNode(node)
         let parentNode = parent ?? root
-        if let index = parentNode.children.index(where: {$0 === node}) {
+        if let index = parentNode.children.firstIndex(where: {$0 === node}) {
             return TreePath(parent: parent, index: index)
         } else {
             return nil

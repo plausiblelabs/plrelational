@@ -181,7 +181,7 @@ extension Relation {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!
         return Set(rows
-            .flatMap{transform($0[attr])})
+            .compactMap{transform($0[attr])})
     }
 
     /// Returns a set of all values for the single attribute, built from one transformed value for each non-error row
@@ -203,7 +203,7 @@ extension Relation {
     
     /// Returns a set of all values, built from one transformed value for each row in the given set.
     public func extractAllValues<V: Hashable>(from rows: AnyIterator<Row>, _ transform: @escaping (Row) -> V?) -> Set<V> {
-        return Set(rows.flatMap{transform($0)})
+        return Set(rows.compactMap{transform($0)})
     }
 
     /// Returns a set of all values, built from one transformed value for each non-error row in the relation.
@@ -432,6 +432,6 @@ extension Relation {
     
     /// Generates all non-error rows in the relation.
     public func okRows() -> AnyIterator<Row> {
-        return AnyIterator(self.rows().lazy.flatMap{ $0.ok }.makeIterator())
+        return AnyIterator(self.rows().lazy.compactMap{ $0.ok }.makeIterator())
     }
 }

@@ -27,7 +27,7 @@ class RelationAsTypedValueTests: BindingTestCase {
         XCTAssertEqual(
             r.project(["name"]).extractAllValuesForSingleAttribute{
                 let s: String = $0.get()!
-                if s.characters.count <= 3 {
+                if s.count <= 3 {
                     return "\(s)s"
                 } else {
                     return nil
