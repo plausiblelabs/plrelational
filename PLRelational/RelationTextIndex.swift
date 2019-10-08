@@ -639,7 +639,16 @@ private func xDestroy(tokenizer: UnsafeMutablePointer<sqlite3_tokenizer>?) -> In
 }
 
 private func xOpen(tokenizer: UnsafeMutablePointer<sqlite3_tokenizer>?, input: UnsafePointer<Int8>?, nBytes: Int32, outCursor: UnsafeMutablePointer<UnsafeMutablePointer<sqlite3_tokenizer_cursor>?>?) -> Int32 {
-    let inputLength = nBytes >= 0 ? Int(nBytes) : Int(strlen(input))
+    let inputLength: Int
+    if nBytes >= 0 {
+        inputLength = Int(nBytes)
+    } else {
+        if let input = input {
+            inputLength = Int(strlen(input))
+        } else {
+            inputLength = 0
+        }
+    }
     let maybeString: String? = input?.withMemoryRebound(to: UInt8.self, capacity: inputLength, {
         let buffer = UnsafeBufferPointer(start: $0, count: inputLength)
         return String(bytes: buffer, encoding: .utf8)

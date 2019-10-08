@@ -50,9 +50,6 @@
 		37412EB51F100AE2002F131A /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43FFA1E8997EB00C8C336 /* PLRelational.framework */; };
 		37412EB61F100AE2002F131A /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
 		37412EB91F100F3D002F131A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37412EB71F100F3D002F131A /* MainMenu.xib */; };
-		374315E41F420B0C00128F5A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 374315DE1F420B0C00128F5A /* Assets.xcassets */; };
-		374315E51F420B0C00128F5A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 374315DF1F420B0C00128F5A /* MainMenu.xib */; };
-		374315E61F420B0C00128F5A /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 374315E11F420B0C00128F5A /* Info.plist */; };
 		374315F31F420B5200128F5A /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43FFA1E8997EB00C8C336 /* PLRelational.framework */; };
 		374315F41F420B5200128F5A /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
 		374315F51F420B5200128F5A /* PLBindableControls.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B441611E89A49A00C8C336 /* PLBindableControls.framework */; };
@@ -1086,7 +1083,6 @@
 		C243FAE11F0599FC0015DE85 /* RelationDifferentiatorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationDifferentiatorTests.swift; sourceTree = "<group>"; };
 		C2478CF81E773F0B00C3FB05 /* module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		C2478CF91E773F9300C3FB05 /* module-sqlite3-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "module-sqlite3-include.h"; sourceTree = "<group>"; };
-		C2478CFA1E773FEB00C3FB05 /* module-commoncrypto-include.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "module-commoncrypto-include.h"; sourceTree = "<group>"; };
 		C24C4A641E255D4000482726 /* ChangeLoggingRelationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ChangeLoggingRelationTests.swift; path = ../PLRelationalTests/ChangeLoggingRelationTests.swift; sourceTree = "<group>"; };
 		C24C4A671E26740C00482726 /* BookmarkableGraph.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookmarkableGraph.swift; sourceTree = "<group>"; };
 		C24C4A691E26940400482726 /* BookmarkableGraphTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BookmarkableGraphTests.swift; path = ../PLRelationalTests/BookmarkableGraphTests.swift; sourceTree = "<group>"; };
@@ -2211,7 +2207,6 @@
 			children = (
 				C2478CF81E773F0B00C3FB05 /* module.modulemap */,
 				C2478CF91E773F9300C3FB05 /* module-sqlite3-include.h */,
-				C2478CFA1E773FEB00C3FB05 /* module-commoncrypto-include.h */,
 				C2935C911F10058D00441B6A /* SQLiteTokenizerAPI.h */,
 			);
 			name = "Custom Module Map";
@@ -3145,6 +3140,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -3339,9 +3335,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				374315E41F420B0C00128F5A /* Assets.xcassets in Resources */,
-				374315E51F420B0C00128F5A /* MainMenu.xib in Resources */,
-				374315E61F420B0C00128F5A /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5474,6 +5467,7 @@
 				SDKROOT = macosx;
 				SWIFT_INCLUDE_PATHS = "$(TARGET_BUILD_DIR)/modules";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -5521,6 +5515,7 @@
 				SDKROOT = macosx;
 				SWIFT_INCLUDE_PATHS = "$(TARGET_BUILD_DIR)/modules";
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
