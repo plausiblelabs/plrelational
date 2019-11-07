@@ -282,41 +282,41 @@ class Model {
 //            .project(Item.notes)
 //            .undoableOneString(self.undoableDB, "Change Notes")
 //    }()
-//    
-//    // MARK: - Delete
-//    
-//    /// Deletes the row associated with the selected item and
-//    /// clears the selection.  This demonstrates the use of
-//    /// `cascadingDelete`, which is kind of overkill for this
-//    /// particular case but does show how easy it can be to
-//    /// clean up related data with a single call.
-//    func deleteSelectedItem() {
-//        undoableDB.performUndoableAction("Delete Item", {
-//            // We initiate the cascading delete by first removing
-//            // all rows from `selectedItemIDs`
-//            self.selectedItemIDs.cascadingDelete(
-//                true, // `true` here means "all rows"
-//                affectedRelations: [
-//                    self.items, self.selectedItemIDs, self.itemTags
-//                ],
-//                cascade: { (relation, row) in
-//                    if relation === self.selectedItemIDs {
-//                        // This row was deleted from `selectedItemIDs`;
-//                        // delete corresponding rows from `items`
-//                        // and `itemTags`
-//                        let itemID = ItemID(row)
-//                        return [
-//                            (self.items, Item.id *== itemID),
-//                            (self.itemTags, ItemTag.itemID *== itemID)
-//                        ]
-//                    } else {
-//                        // Nothing else to clean up
-//                        return []
-//                    }
-//                }
-//            )
-//        })
-//    }
+    
+    // MARK: - Delete
+    
+    /// Deletes the row associated with the selected item and
+    /// clears the selection.  This demonstrates the use of
+    /// `cascadingDelete`, which is kind of overkill for this
+    /// particular case but does show how easy it can be to
+    /// clean up related data with a single call.
+    func deleteSelectedItem() {
+        undoableDB.performUndoableAction("Delete Item", {
+            // We initiate the cascading delete by first removing
+            // all rows from `selectedItemIDs`
+            self.selectedItemIDs.cascadingDelete(
+                true, // `true` here means "all rows"
+                affectedRelations: [
+                    self.items, self.selectedItemIDs, self.itemTags
+                ],
+                cascade: { (relation, row) in
+                    if relation === self.selectedItemIDs {
+                        // This row was deleted from `selectedItemIDs`;
+                        // delete corresponding rows from `items`
+                        // and `itemTags`
+                        let itemID = ItemID(row)
+                        return [
+                            (self.items, Item.id *== itemID),
+                            (self.itemTags, ItemTag.itemID *== itemID)
+                        ]
+                    } else {
+                        // Nothing else to clean up
+                        return []
+                    }
+                }
+            )
+        })
+    }
 }
 
 private let timestampFormatter: DateFormatter = {

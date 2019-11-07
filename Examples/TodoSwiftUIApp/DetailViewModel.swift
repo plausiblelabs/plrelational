@@ -118,4 +118,10 @@ final class DetailViewModel: ObservableObject {
             self.model.addNewTag(named: name, to: itemID)
         }
     }
+    
+    /// REQ-13
+    /// Deletes the selected item.
+    func deleteSelectedItem() {
+        self.model.deleteSelectedItem()
+    }
 }

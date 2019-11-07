@@ -26,7 +26,7 @@ struct DetailView: View {
                     Text("")
                 }
 //                Text("READONLY (\(model.itemTitle))")
-                TextField("One", text: $model.itemTitle)
+                TextField("", text: $model.itemTitle)
 //                TextField("Two", text: $model.itemTitleAgain)
 //                TextField("Two", text: $model.itemTitle)
             }
@@ -58,7 +58,9 @@ struct DetailView: View {
             HStack {
                 Text(model.createdOn)
                 Spacer()
-                Button("TRASH", action: {})
+                Button(action: model.deleteSelectedItem) {
+                    Image("trash")
+                }.buttonStyle(BorderlessButtonStyle())
             }
         }
     }
