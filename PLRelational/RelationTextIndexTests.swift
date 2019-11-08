@@ -445,7 +445,7 @@ private class Observer: AsyncRelationContentCoalescedObserver {
     
     func relationWillChange(_ relation: Relation) {}
     
-    func relationDidChange(_ relation: Relation, result: Result<Set<Row>, RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<Set<Row>, RelationError>, initiators: InitiatorTagSet) {
         if let rows = result.ok {
             callback(rows)
         }

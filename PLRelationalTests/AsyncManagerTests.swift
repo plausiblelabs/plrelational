@@ -72,8 +72,8 @@ class AsyncManagerTests: DBTestCase {
         let triggerRelation = TriggerRelation()
         triggerRelation.onGetRowsCallback = {
             DispatchQueue.main.sync(execute: {
-                AsyncManager.currentInstance.registerAdd(r, row: ["n": 2])
-                AsyncManager.currentInstance.registerAdd(r, row: ["n": 5])
+                AsyncManager.currentInstance.registerAdd(r, row: ["n": 2], initiator: nil)
+                AsyncManager.currentInstance.registerAdd(r, row: ["n": 5], initiator: nil)
             })
             triggerRelation.onGetRowsCallback = {}
         }
@@ -1056,6 +1056,144 @@ class AsyncManagerTests: DBTestCase {
         selectedRemover()
         oneNameRemover()
     }
+    
+    func testInitiatorTags() {
+        let sqliteDB = makeDB().db
+        XCTAssertNil(sqliteDB.getOrCreateRelation("person", scheme: ["id", "name"]).err)
+        XCTAssertNil(sqliteDB.getOrCreateRelation("selected_person_id", scheme: ["id"]).err)
+        
+        let db = TransactionalDatabase(sqliteDB)
+        let persons = db["person"].setDebugName("persons")
+        let selectedPersonId = db["selected_person_id"].setDebugName("selectedPersonId")
+        
+        XCTAssertNil(persons.add(["id": 1, "name": "Alice"]).err)
+        XCTAssertNil(persons.add(["id": 2, "name": "Bob"]).err)
+        
+        XCTAssertNil(selectedPersonId.add(["id": 1]).err)
+
+        let selectedPerson = selectedPersonId.join(persons).setDebugName("selectedPerson")
+        let selectedPersonName = selectedPerson.project("name").setDebugName("selectedPersonName")
+        let person1Name = persons.select(Attribute("id") *== 1).project("name").setDebugName("person1Name")
+        let person2Name = persons.select(Attribute("id") *== 2).project("name").setDebugName("person2Name")
+
+        struct Watcher {
+            let observer: TestAsyncContentCoalescedObserver
+            let remover: () -> Void
+        }
+
+        func watch(_ relation: Relation) -> Watcher {
+            let observer = TestAsyncContentCoalescedObserver()
+            let remover = relation.addAsyncObserver(observer)
+            return Watcher(observer: observer, remover: remover)
+        }
+        
+        let selectedPersonNameWatcher = watch(selectedPersonName)
+        let person1NameWatcher = watch(person1Name)
+        let person2NameWatcher = watch(person2Name)
+
+        func reset() {
+            func reset(_ watcher: Watcher) {
+                watcher.observer.willChangeCount = 0
+                watcher.observer.result = nil
+                watcher.observer.initiators = nil
+            }
+
+            reset(selectedPersonNameWatcher)
+            reset(person1NameWatcher)
+            reset(person2NameWatcher)
+        }
+
+        // Perform an update without supplying an initiator, and verify initiator set contains nil
+        // (indicating an unnamed initiator)
+        person1Name.asyncUpdate(true, newValues: ["name": "Alfred"])
+        CFRunLoopRunOrFail()
+
+        XCTAssertEqual(selectedPersonNameWatcher.observer.willChangeCount, 1)
+        XCTAssertEqual(selectedPersonNameWatcher.observer.result?.ok, [["name": "Alfred"]])
+        XCTAssertEqual(selectedPersonNameWatcher.observer.initiators, [nil])
+
+        XCTAssertEqual(person1NameWatcher.observer.willChangeCount, 1)
+        XCTAssertEqual(person1NameWatcher.observer.result?.ok, [["name": "Alfred"]])
+        XCTAssertEqual(person1NameWatcher.observer.initiators, [nil])
+
+        XCTAssertEqual(person2NameWatcher.observer.willChangeCount, 0)
+        XCTAssertNil(person2NameWatcher.observer.result)
+        XCTAssertNil(person2NameWatcher.observer.initiators)
+
+        reset()
+
+        // Perform an update directly to the underlying relation while supplying an initiator,
+        // and verify initiator set includes that tag
+        persons.asyncUpdate(Attribute("id") *== 1, newValues: ["name": "Alfonzo"], initiator: "1")
+        CFRunLoopRunOrFail()
+
+        XCTAssertEqual(selectedPersonNameWatcher.observer.result?.ok, [["name": "Alfonzo"]])
+        XCTAssertEqual(selectedPersonNameWatcher.observer.initiators, ["1"])
+
+        XCTAssertEqual(person1NameWatcher.observer.result?.ok, [["name": "Alfonzo"]])
+        XCTAssertEqual(person1NameWatcher.observer.initiators, ["1"])
+
+        XCTAssertNil(person2NameWatcher.observer.result)
+        XCTAssertNil(person2NameWatcher.observer.initiators)
+
+        reset()
+        
+        // Perform an update without supplying an initiator (again), and verify initiator set contains nil
+        // (i.e., that AsyncManager doesn't hang onto prior tags)
+        person1Name.asyncUpdate(true, newValues: ["name": "Alfred"])
+        CFRunLoopRunOrFail()
+
+        XCTAssertEqual(selectedPersonNameWatcher.observer.willChangeCount, 1)
+        XCTAssertEqual(selectedPersonNameWatcher.observer.result?.ok, [["name": "Alfred"]])
+        XCTAssertEqual(selectedPersonNameWatcher.observer.initiators, [nil])
+
+        XCTAssertEqual(person1NameWatcher.observer.willChangeCount, 1)
+        XCTAssertEqual(person1NameWatcher.observer.result?.ok, [["name": "Alfred"]])
+        XCTAssertEqual(person1NameWatcher.observer.initiators, [nil])
+
+        XCTAssertEqual(person2NameWatcher.observer.willChangeCount, 0)
+        XCTAssertNil(person2NameWatcher.observer.result)
+        XCTAssertNil(person2NameWatcher.observer.initiators)
+
+        reset()
+
+        // Perform an update indirectly through a select while supplying an initiator,
+        // and verify initiator set includes that tag
+        person1Name.asyncUpdate(true, newValues: ["name": "Albert"], initiator: "2")
+        CFRunLoopRunOrFail()
+
+        XCTAssertEqual(selectedPersonNameWatcher.observer.result?.ok, [["name": "Albert"]])
+        XCTAssertEqual(selectedPersonNameWatcher.observer.initiators, ["2"])
+
+        XCTAssertEqual(person1NameWatcher.observer.result?.ok, [["name": "Albert"]])
+        XCTAssertEqual(person1NameWatcher.observer.initiators, ["2"])
+
+        XCTAssertNil(person2NameWatcher.observer.result)
+        XCTAssertNil(person2NameWatcher.observer.initiators)
+
+        reset()
+
+        // Perform two updates (with different initiators) on the same cycle,
+        // and verify initiator set includes the relevant tag(s)
+        person1Name.asyncUpdate(true, newValues: ["name": "Aaron"], initiator: "3")
+        person1Name.asyncUpdate(true, newValues: ["name": "Adam"], initiator: "4")
+        CFRunLoopRunOrFail()
+
+        XCTAssertEqual(selectedPersonNameWatcher.observer.result?.ok, [["name": "Adam"]])
+        XCTAssertEqual(selectedPersonNameWatcher.observer.initiators, ["3", "4"])
+
+        XCTAssertEqual(person1NameWatcher.observer.result?.ok, [["name": "Adam"]])
+        XCTAssertEqual(person1NameWatcher.observer.initiators, ["3", "4"])
+
+        XCTAssertNil(person2NameWatcher.observer.result)
+        XCTAssertNil(person2NameWatcher.observer.initiators)
+
+        reset()
+
+        selectedPersonNameWatcher.remover()
+        person1NameWatcher.remover()
+        person2NameWatcher.remover()
+    }
 }
 
 private class TestAsyncChangeObserver: AsyncRelationChangeObserver {
@@ -1170,7 +1308,7 @@ private class TestAsyncContentObserver: AsyncRelationContentObserver {
         self.error = error
     }
     
-    func relationDidChange(_ relation: Relation) {
+    func relationDidChange(_ relation: Relation, initiators: InitiatorTagSet) {
         CFRunLoopStop(CFRunLoopGetCurrent())
     }
 }
@@ -1185,6 +1323,7 @@ private class TestAsyncContentCoalescedObserver: AsyncRelationContentCoalescedOb
     
     var willChangeCount = 0
     var result: Result<Set<Row>, RelationError>?
+    var initiators: InitiatorTagSet?
     
     func assertChanges(_ change: () -> Void, expectedContents: Set<Row>, file: StaticString = #file, line: UInt = #line) {
         change()
@@ -1195,14 +1334,16 @@ private class TestAsyncContentCoalescedObserver: AsyncRelationContentCoalescedOb
         
         willChangeCount = 0
         result = nil
+        initiators = nil
     }
     
     func relationWillChange(_ relation: Relation) {
         willChangeCount += 1
     }
     
-    func relationDidChange(_ relation: Relation, result: Result<Set<Row>, RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<Set<Row>, RelationError>, initiators: InitiatorTagSet) {
         self.result = result
+        self.initiators = initiators
         CFRunLoopStop(CFRunLoopGetCurrent())
     }
 }
@@ -1236,7 +1377,7 @@ private class TestAsyncContentCoalescedArrayObserver: AsyncRelationContentCoales
         willChangeCount += 1
     }
     
-    func relationDidChange(_ relation: Relation, result: Result<[Row], RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<[Row], RelationError>, initiators: InitiatorTagSet) {
         self.result = result
         CFRunLoopStop(CFRunLoopGetCurrent())
     }

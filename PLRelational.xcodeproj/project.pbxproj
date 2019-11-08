@@ -47,7 +47,6 @@
 		371BF1032360BF4C00B86E96 /* PLRelationalCombine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 371EDB57235F62720079AE5E /* PLRelationalCombine.framework */; };
 		371BF1042360BF7600B86E96 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
 		371BF1072360BFD700B86E96 /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF1062360BFD700B86E96 /* UndoableDatabase.swift */; };
-		371BF10B2360D91900B86E96 /* RelationMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEE61D147BD80067870D /* RelationMutation.swift */; };
 		371BF10D236381D500B86E96 /* EphemeralComboBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF10C236381D500B86E96 /* EphemeralComboBox.swift */; };
 		371BF1102368A19600B86E96 /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF10F2368A19600B86E96 /* ContentViewModel.swift */; };
 		371BF1122368A2F700B86E96 /* ChecklistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF1112368A2F700B86E96 /* ChecklistView.swift */; };
@@ -73,6 +72,8 @@
 		371EDB7C235F65030079AE5E /* RelationValuePublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371EDB7B235F65030079AE5E /* RelationValuePublisher.swift */; };
 		371EDB7E235F65990079AE5E /* RelationValuePublisherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371EDB7D235F65990079AE5E /* RelationValuePublisherTests.swift */; };
 		371EDB80235F69170079AE5E /* CombineTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371EDB7F235F69170079AE5E /* CombineTestCase.swift */; };
+		3720B4F42374DBCF003CF2BE /* RelationMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3720B4F32374DBCF003CF2BE /* RelationMutation.swift */; };
+		3720B4F72374DC31003CF2BE /* RelationMutationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3720B4F62374DC31003CF2BE /* RelationMutationTests.swift */; };
 		372707EB1CFE2C7E00710C80 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707EA1CFE2C7E00710C80 /* AppDelegate.swift */; };
 		372707ED1CFE2C7E00710C80 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 372707EC1CFE2C7E00710C80 /* Assets.xcassets */; };
 		372707F01CFE2C7E00710C80 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 372707EE1CFE2C7E00710C80 /* MainMenu.xib */; };
@@ -962,6 +963,8 @@
 		371EDB7B235F65030079AE5E /* RelationValuePublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelationValuePublisher.swift; sourceTree = "<group>"; };
 		371EDB7D235F65990079AE5E /* RelationValuePublisherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RelationValuePublisherTests.swift; path = PLRelationalCombineTests/RelationValuePublisherTests.swift; sourceTree = SOURCE_ROOT; };
 		371EDB7F235F69170079AE5E /* CombineTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineTestCase.swift; sourceTree = "<group>"; };
+		3720B4F32374DBCF003CF2BE /* RelationMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RelationMutation.swift; path = PLRelationalCombine/RelationMutation.swift; sourceTree = SOURCE_ROOT; };
+		3720B4F62374DC31003CF2BE /* RelationMutationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RelationMutationTests.swift; path = PLRelationalCombineTests/RelationMutationTests.swift; sourceTree = SOURCE_ROOT; };
 		3727076C1CEE60C900710C80 /* MutableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelation.swift; sourceTree = "<group>"; };
 		3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArraySafeIndex.swift; sourceTree = "<group>"; };
 		372707751CF391EC00710C80 /* TreeProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeProperty.swift; sourceTree = "<group>"; };
@@ -1689,6 +1692,7 @@
 			children = (
 				371EDB7A235F64D00079AE5E /* Publishers */,
 				371BF1342371F63800B86E96 /* Subscribers */,
+				3720B4F52374DBF8003CF2BE /* PLRelational Extensions */,
 				371BF1052360BFBB00B86E96 /* Undo */,
 				371EDB79235F63F20079AE5E /* Supporting Files */,
 				371EDB78235F63D30079AE5E /* PLRelationalCombineTests */,
@@ -1724,6 +1728,15 @@
 				371BF122236B5ADB00B86E96 /* RelationChangeSummaryTests.swift */,
 			);
 			name = Publishers;
+			sourceTree = "<group>";
+		};
+		3720B4F52374DBF8003CF2BE /* PLRelational Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				3720B4F32374DBCF003CF2BE /* RelationMutation.swift */,
+				3720B4F62374DC31003CF2BE /* RelationMutationTests.swift */,
+			);
+			name = "PLRelational Extensions";
 			sourceTree = "<group>";
 		};
 		372707731CF38FF600710C80 /* Tree Property */ = {
@@ -3856,13 +3869,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3720B4F42374DBCF003CF2BE /* RelationMutation.swift in Sources */,
 				371BF125236B600500B86E96 /* RelationChangePublisher.swift in Sources */,
 				371BF12A236CA1C000B86E96 /* RelationArrayReduce.swift in Sources */,
 				371EDB7C235F65030079AE5E /* RelationValuePublisher.swift in Sources */,
 				371BF1042360BF7600B86E96 /* UndoManager.swift in Sources */,
 				371BF12E236CBF9C00B86E96 /* ArrayBinarySearch.swift in Sources */,
 				371BF11F236B5A9300B86E96 /* RelationChangeSummary.swift in Sources */,
-				371BF10B2360D91900B86E96 /* RelationMutation.swift in Sources */,
 				371BF1072360BFD700B86E96 /* UndoableDatabase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3871,6 +3884,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3720B4F72374DC31003CF2BE /* RelationMutationTests.swift in Sources */,
 				371BF123236B5ADB00B86E96 /* RelationChangeSummaryTests.swift in Sources */,
 				371EDB7E235F65990079AE5E /* RelationValuePublisherTests.swift in Sources */,
 				371BF127236B601C00B86E96 /* RelationChangePublisherTests.swift in Sources */,

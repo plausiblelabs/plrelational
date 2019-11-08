@@ -103,7 +103,7 @@ extension MutableRelation {
             }
             callCompletion(.Ok(()))
             return nil
-        })
+        }, initiator: nil /* TODO(initiator) */)
     }
     
     /// Do a tree deletion in the relation. This will delete all rows matching the query, as well as all rows whose

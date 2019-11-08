@@ -114,4 +114,42 @@ class RelationValuePublisherTests: CombineTestCase {
         wait(for: [expectation], timeout: 5.0)
         XCTAssertTrue(values == ["cat", "kat", ""])
     }
+    
+    func testIgnoreInitiator() {
+        let r = MakeRelation(
+            ["id", "name", "friendly", "age", "pulse"],
+            [1,    "cat",  1,          5,     2.0])
+        
+        let pub = r
+            .project("name")
+            .oneString()
+            .ignoreInitiator("1")
+        
+        var values: [String] = []
+        let cancellable = pub.sink(
+            receiveCompletion: { _ in
+                XCTFail("No completion is expected")
+            },
+            receiveValue: { value in
+                values.append(value)
+            }
+        )
+        XCTAssertNotNil(cancellable)
+
+        // Verify that initial query produces "cat"
+        awaitIdle()
+        XCTAssertTrue(values == ["cat"])
+
+        // Verify that new value is published after relation is updated (when no
+        // initiator is provided)
+        _ = r.asyncUpdate(true, newValues: ["name": "kat"])
+        awaitIdle()
+        XCTAssertTrue(values == ["cat", "kat"])
+
+        // Verify that value is not published after relation is updated using the
+        // ignored initiator tag
+        _ = r.asyncUpdate(true, newValues: ["name": "qat"], initiator: "1")
+        awaitIdle()
+        XCTAssertTrue(values == ["cat", "kat"])
+    }
 }
