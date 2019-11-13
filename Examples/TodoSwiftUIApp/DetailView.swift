@@ -10,9 +10,6 @@ struct DetailView: View {
     
     @ObservedObject private var model: DetailViewModel
 
-    // TODO: Move these to ViewModel
-    @State private var notes: String = ""
-
     init(model: DetailViewModel) {
         self.model = model
     }
@@ -23,13 +20,7 @@ struct DetailView: View {
                 Toggle(isOn: $model.itemCompleted) {
                     Text(" ")
                 }
-                TextField("", text: $model.itemTitle, onEditingChanged: {
-                    Swift.print("EDITING CHANGED: \($0)")
-                }, onCommit: {
-                    Swift.print("COMMIT")
-                    self.model.commitItemTitle()
-                })
-//                TextField("", text: $model.itemTitleAgain)
+                TextField("", text: $model.itemTitle, onCommit: { self.model.commitItemTitle() })
             }
                 .padding(.bottom)
             
@@ -55,12 +46,7 @@ struct DetailView: View {
                 .padding(.bottom)
             
             Text("Notes")
-            // TODO: Multi-line TextField not yet working in SwiftUI
-            TextField("", text: $notes)
-                .multilineTextAlignment(/*@START_MENU_TOKEN@*/.leading/*@END_MENU_TOKEN@*/)
-                .lineLimit(nil) // 5?
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(minHeight: 100, maxHeight: 100, alignment: .topLeading)
+            TextView(text: $model.itemNotes, onCommit: { self.model.commitItemNotes() })
                 .padding(.bottom)
 
             HStack {

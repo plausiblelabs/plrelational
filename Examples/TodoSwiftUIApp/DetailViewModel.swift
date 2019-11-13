@@ -17,13 +17,13 @@ final class DetailViewModel: ObservableObject {
     private var itemID: ItemID?
 
     @TwoWay(onSet: .commit) var itemCompleted: Bool = false
-    
     @TwoWay(onSet: .update) var itemTitle: String = ""
-//    @TwoWay var itemTitleAgain: String = ""
 
     @Published var availableTags: [ComboBoxItem] = []
     @Published var itemTags: [String] = []
 
+    @TwoWay var itemNotes: String = ""
+    
     @Published var createdOn: String = ""
 
     private var cancellableBag = Set<AnyCancellable>()
@@ -56,12 +56,6 @@ final class DetailViewModel: ObservableObject {
             .bind(to: \._itemTitle, on: self, strategy: model.itemTitle())
             .store(in: &cancellableBag)
 
-        // XXX
-//        model.selectedItems
-//            .project(Item.title)
-//            .bind(to: \._itemTitleAgain, on: self, strategy: oneString)
-//            .store(in: &cancellableBag)
-
         // REQ-9
         // The tags that are available (i.e., not already applied) for the selected
         // to-do item, sorted by name.
@@ -85,6 +79,15 @@ final class DetailViewModel: ObservableObject {
             .bind(to: \.itemTags, on: self)
             .store(in: &cancellableBag)
 
+        // REQ-11
+        // The item's notes.  This is a two-way property that is backed
+        // by UndoableDatabase, so any changes made to it in the text view
+        // can be rolled back by the user.
+        model.selectedItems
+            .project(Item.notes)
+            .bind(to: \._itemNotes, on: self, strategy: model.itemNotes())
+            .store(in: &cancellableBag)
+        
         // REQ-12
         // The text that appears in the "Created on <date>" label.  This
         // demonstrates the use of `map` to convert the raw timestamp string
@@ -137,11 +140,20 @@ final class DetailViewModel: ObservableObject {
         }
     }
     
-    // XXX
+    /// REQ-8
+    /// Commits the current value of `itemTitle` to the underlying relation.  This should be
+    /// called from the associated TextField's `onCommit` function.
     func commitItemTitle() {
         _itemTitle.commit()
     }
-    
+
+    /// REQ-11
+    /// Commits the current value of `itemNotes` to the underlying relation.  This should be
+    /// called from the associated TextView's `onCommit` function.
+    func commitItemNotes() {
+        _itemNotes.commit()
+    }
+
     /// REQ-13
     /// Deletes the selected item.
     func deleteSelectedItem() {

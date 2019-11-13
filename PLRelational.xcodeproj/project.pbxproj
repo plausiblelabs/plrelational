@@ -166,6 +166,7 @@
 		37A47895237B372500D72A41 /* WeakTwoWayBindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47894237B372500D72A41 /* WeakTwoWayBindTests.swift */; };
 		37A47896237B836B00D72A41 /* WeakBind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF11C236A355700B86E96 /* WeakBind.swift */; };
 		37A4789A237B8B4D00D72A41 /* WeakBindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47899237B8B4D00D72A41 /* WeakBindTests.swift */; };
+		37A4789C237CC6B900D72A41 /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4789B237CC6B900D72A41 /* TextView.swift */; };
 		37A9A37E1F06B9A000B35559 /* SegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A9A37B1F06B65C00B35559 /* SegmentedControl.swift */; };
 		37AEC3F61F576D18004E5487 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AEC3F51F576D18004E5487 /* AppDelegate.swift */; };
 		37AEC3FA1F576D18004E5487 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37AEC3F91F576D18004E5487 /* Assets.xcassets */; };
@@ -1087,6 +1088,7 @@
 		37A47892237B34D000D72A41 /* WeakTwoWayBind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakTwoWayBind.swift; sourceTree = "<group>"; };
 		37A47894237B372500D72A41 /* WeakTwoWayBindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WeakTwoWayBindTests.swift; path = PLRelationalCombineTests/WeakTwoWayBindTests.swift; sourceTree = SOURCE_ROOT; };
 		37A47899237B8B4D00D72A41 /* WeakBindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WeakBindTests.swift; path = PLRelationalCombineTests/WeakBindTests.swift; sourceTree = SOURCE_ROOT; };
+		37A4789B237CC6B900D72A41 /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
 		37A4A2391D1DB343005CAEA5 /* PropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyOperations.swift; sourceTree = "<group>"; };
 		37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyOperationsTests.swift; path = PLRelationalBindingTests/PropertyOperationsTests.swift; sourceTree = SOURCE_ROOT; };
 		37A4A2411D21A613005CAEA5 /* TextProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextProperty.swift; sourceTree = "<group>"; };
@@ -1626,6 +1628,7 @@
 			isa = PBXGroup;
 			children = (
 				371BF10C236381D500B86E96 /* EphemeralComboBox.swift */,
+				37A4789B237CC6B900D72A41 /* TextView.swift */,
 			);
 			name = Private;
 			sourceTree = "<group>";
@@ -3883,6 +3886,7 @@
 				371BF1122368A2F700B86E96 /* ChecklistView.swift in Sources */,
 				371BF1102368A19600B86E96 /* ContentViewModel.swift in Sources */,
 				371EDB2A235BB68D0079AE5E /* Model.swift in Sources */,
+				37A4789C237CC6B900D72A41 /* TextView.swift in Sources */,
 				371BF10D236381D500B86E96 /* EphemeralComboBox.swift in Sources */,
 				371BF11A2369F65800B86E96 /* ChecklistItemViewModel.swift in Sources */,
 				371BF1002360BEDC00B86E96 /* DetailViewModel.swift in Sources */,

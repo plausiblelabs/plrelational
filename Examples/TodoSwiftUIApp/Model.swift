@@ -191,6 +191,12 @@ class Model {
         return undoableDB.oneString("Change Title")
     }
 
+    /// REQ-11
+    /// Returns a TwoWayStrategy that allows for changing the notes of an item.
+    func itemNotes() -> (Relation, InitiatorTag) -> UndoableOneValueStrategy<String> {
+        return undoableDB.oneString("Change Notes")
+    }
+
     // MARK: - List Selection
     
     /// Resolves to the item that is selected in the list of to-do items.
@@ -274,15 +280,6 @@ class Model {
 //            .project(Tag.name)
 //            .undoableOneString(undoableDB, "Change Tag Name", initialValue: initialValue)
 //    }
-//    
-//    // MARK: - Notes
-//    
-//    /// Returns a property that reflects the selected item's notes.
-//    lazy var selectedItemNotes: AsyncReadWriteProperty<String> = {
-//        return self.selectedItems
-//            .project(Item.notes)
-//            .undoableOneString(self.undoableDB, "Change Notes")
-//    }()
     
     // MARK: - Delete
     
