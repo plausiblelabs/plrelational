@@ -10,13 +10,16 @@ import PLRelationalCombine
 
 final class DetailViewModel: ObservableObject {
     
+    let objectWillChange = ObservableObjectPublisher()
     private let model: Model
 
     /// The selected item ID, cached in this property for easy access.
     private var itemID: ItemID?
+
+    @TwoWay var itemCompleted: Bool = false
     
-    @Published var itemTitle: String = ""
-    @Published var itemTitleAgain: String = ""
+    @TwoWay var itemTitle: String = ""
+//    @TwoWay var itemTitleAgain: String = ""
 
     @Published var availableTags: [ComboBoxItem] = []
     @Published var itemTags: [String] = []
@@ -33,20 +36,35 @@ final class DetailViewModel: ObservableObject {
             .oneStringOrNil()
             .replaceError(with: nil)
             .map{ $0.map(ItemID.init) }
-            .assign(to: \.itemID, on: self)
+            .bind(to: \.itemID, on: self)
             .store(in: &cancellableBag)
 
-        // Bind selected item title to `itemTitle`
+        // REQ-7
+        // The item's completion status.  This is a two-way property that
+        // is backed by UndoableDatabase.
+        model.selectedItems
+            .project(Item.completed)
+            .bind(to: \._itemCompleted, on: self, strategy: model.itemCompleted())
+            .store(in: &cancellableBag)
+
+        // REQ-8
+        // The item's title.  This is a two-way property that is backed
+        // by UndoableDatabase, so any changes made to it in the text field
+        // can be rolled back by the user.
         model.selectedItems
             .project(Item.title)
-            .oneString()
-            .replaceError(with: "")
-            .assign(to: \.itemTitle, on: self)
+            .bind(to: \._itemTitle, on: self, strategy: model.itemTitle())
             .store(in: &cancellableBag)
 
-        /// REQ-9
-        /// The tags that are available (i.e., not already applied) for the selected
-        /// to-do item, sorted by name.
+        // XXX
+//        model.selectedItems
+//            .project(Item.title)
+//            .bind(to: \._itemTitleAgain, on: self, strategy: oneString)
+//            .store(in: &cancellableBag)
+
+        // REQ-9
+        // The tags that are available (i.e., not already applied) for the selected
+        // to-do item, sorted by name.
         model.availableTagsForSelectedItem
             .sortedRows(idAttr: Tag.id, orderAttr: Tag.name)
             .replaceError(with: [])
@@ -55,7 +73,7 @@ final class DetailViewModel: ObservableObject {
                     ComboBoxItem(id: $0.id, string: $0.row[Tag.name].get()!)
                 }
             }
-            .assign(to: \.availableTags, on: self)
+            .bind(to: \.availableTags, on: self)
             .store(in: &cancellableBag)
 
         // REQ-10
@@ -64,7 +82,7 @@ final class DetailViewModel: ObservableObject {
             .sortedRows(idAttr: Tag.id, orderAttr: Tag.name)
             .replaceError(with: [])
             .map{ $0.compactMap{ $0.row[Tag.name].get() } }
-            .assign(to: \.itemTags, on: self)
+            .bind(to: \.itemTags, on: self)
             .store(in: &cancellableBag)
 
         // REQ-12
@@ -76,7 +94,7 @@ final class DetailViewModel: ObservableObject {
             .oneString()
             .replaceError(with: "unknown date")
             .map{ "Created on \(displayString(from: $0))" }
-            .assign(to: \.createdOn, on: self)
+            .bind(to: \.createdOn, on: self)
             .store(in: &cancellableBag)
     }
     
@@ -117,6 +135,11 @@ final class DetailViewModel: ObservableObject {
             // it to this item
             self.model.addNewTag(named: name, to: itemID)
         }
+    }
+    
+    // XXX
+    func commitItemTitle() {
+        _itemTitle.commit()
     }
     
     /// REQ-13

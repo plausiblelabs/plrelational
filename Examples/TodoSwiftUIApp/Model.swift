@@ -15,12 +15,12 @@ enum Item {
     static let id = Attribute("item_id")
     static let title = Attribute("title")
     static let created = Attribute("created")
-    static let status = Attribute("status")
+    static let completed = Attribute("completed")
     static let notes = Attribute("notes")
     fileprivate static var spec: Spec { return .file(
         name: "item",
         path: "items.plist",
-        scheme: [id, title, created, status, notes],
+        scheme: [id, title, created, completed, notes],
         primaryKeys: [id]
     )}
 }
@@ -71,7 +71,7 @@ class Model {
     var allTags: [RowArrayElement] = []
     
     private let db: TransactionalDatabase
-    let undoableDB: UndoableDatabase
+    private let undoableDB: UndoableDatabase
 
     private var cancellableBag = Set<AnyCancellable>()
 
@@ -113,7 +113,7 @@ class Model {
         tags
             .sortedRows(idAttr: Tag.id, orderAttr: Tag.name)
             .replaceError(with: [])
-            .assign(to: \.allTags, on: self)
+            .bind(to: \.allTags, on: self)
             .store(in: &cancellableBag)
 
 //        if !dbExisted {
@@ -141,19 +141,12 @@ class Model {
         // Use a string representation of the current time to make our life easier
         let timestamp = timestampString(from: created)
         
-        // Here we cheat a little.  ArrayProperty currently only knows how to sort
-        // on a single attribute (temporary limitation), we cram two things -- the
-        // completed flag and the timestamp of the action -- into a single string of
-        // the form "<0/1> <timestamp>".  This allows us to keep to-do items sorted
-        // in the list with pending items at top and completed ones at bottom.
-        let status = statusString(pending: true, timestamp: timestamp)
-        
         // Insert a row into the `items` relation
         items.asyncAdd([
             Item.id: id,
             Item.title: title,
             Item.created: timestamp,
-            Item.status: status,
+            Item.completed: RelationValue.null,
             Item.notes: ""
         ])
         
@@ -168,27 +161,35 @@ class Model {
         })
         return itemID
     }
+    
+    /// REQ-3 / REQ-7
+    /// Returns a TwoWayStrategy that allows for changing the completed status of an item.
+    func itemCompleted() -> (Relation, InitiatorTag) -> UndoableOneValueStrategy<Bool> {
+        // This is an example of an "asymmetric" two-way binding scenario.  In our `item` relation,
+        // the `completed` column contains a timestamp for when the item was marked as completed,
+        // or it will be `.null` if the item is not yet completed.  However, we want to be able
+        // to use a checkbox to control this value, so we use `UndoableOneValueStrategy` with
+        // custom read/update functions.  The read will resolve to true when the timestamp is
+        // defined, and false otherwise.  The update will store the current timestamp string
+        // when the value is true, but will store `.null` when the value if false.
+        return { relation, initiator in
+            precondition(relation.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
+            let reader: TwoWayReader<Bool> = TwoWayReader(defaultValue: false, valueFromRows: { rows in
+                relation.extractOneValue(from: AnyIterator(rows.makeIterator()), { $0.get() as String? != nil }, orDefault: false)
+            })
+            let update = { (newValue: Bool) in
+                relation.asyncUpdateNullableString(newValue ? timestampString(from: Date()) : nil)
+            }
+            return UndoableOneValueStrategy(undoableDB: self.undoableDB, action: "Change Status", relation: relation,
+                                            reader: reader, updateFunc: update)
+        }
+    }
 
-//    /// Returns a property that reflects the completed status for the given relation.
-//    func itemCompleted(_ relation: Relation, initialValue: String?) -> AsyncReadWriteProperty<CheckState> {
-//        return relation.undoableTransformedString(
-//            undoableDB, "Change Status", initialValue: initialValue,
-//            fromString: { CheckState(parseCompleted($0)) },
-//            toString: { statusString(pending: $0 != .on, timestamp: timestampString()) }
-//        )
-//    }
-
-//    /// REQ-4 / REQ-8
-//    /// Returns a property that reflects the item title.
-//    func itemTitle(_ relation: Relation, initialValue: String?) -> AsyncReadWriteProperty<String> {
-//        return relation.undoableOneString(undoableDB, "Change Title", initialValue: initialValue)
-//    }
-
-//    /// REQ-4 / REQ-8
-//    /// Returns a binding that reflects the item title.
-//    func itemTitle(_ relation: Relation) -> Binding<String> {
-//        return relation.undoableOneString(undoableDB, "Change Title")
-//    }
+    /// REQ-4 / REQ-8
+    /// Returns a TwoWayStrategy that allows for changing the title of an item.
+    func itemTitle() -> (Relation, InitiatorTag) -> UndoableOneValueStrategy<String> {
+        return undoableDB.oneString("Change Title")
+    }
 
     // MARK: - List Selection
     
@@ -339,14 +340,6 @@ private let dateFormatter: DateFormatter = {
 func displayString(from timestampString: String) -> String {
     let date = timestampFormatter.date(from: timestampString) ?? Date()
     return dateFormatter.string(from: date)
-}
-
-private func statusString(pending: Bool, timestamp: String) -> String {
-    return "\(pending ? 1 : 0) \(timestamp)"
-}
-
-private func parseCompleted(_ status: String) -> Bool {
-    return status.hasPrefix("0")
 }
 
 #if DEBUG

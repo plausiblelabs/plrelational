@@ -16,17 +16,22 @@ public class UndoableDatabase {
         self.undoManager = undoManager
     }
     
+    /// TODO: Docs
     public func performUndoableAction(_ name: String, before: TransactionalDatabaseSnapshot? = nil, _ transactionFunc: @escaping () -> Void) {
         let deltaPromise = Promise<TransactionalDatabaseDelta>()
         
-        var before: TransactionalDatabaseSnapshot!
-        AsyncManager.currentInstance.registerCheckpoint({
-            before = self.db.takeSnapshot()
-        })
+        var actualBefore: TransactionalDatabaseSnapshot!
+        if let before = before {
+            actualBefore = before
+        } else {
+            AsyncManager.currentInstance.registerCheckpoint({
+                actualBefore = self.db.takeSnapshot()
+            })
+        }
         transactionFunc()
         AsyncManager.currentInstance.registerCheckpoint({
             let after = self.db.takeSnapshot()
-            let delta = self.db.computeDelta(from: before, to: after)
+            let delta = self.db.computeDelta(from: actualBefore, to: after)
             deltaPromise.fulfill(delta)
         })
         
@@ -40,5 +45,10 @@ public class UndoableDatabase {
                 self.db.asyncApply(delta: deltaPromise.get().reversed)
             }
         )
+    }
+
+    /// TODO: Docs
+    public func takeSnapshot() -> TransactionalDatabaseSnapshot {
+        return self.db.takeSnapshot()
     }
 }

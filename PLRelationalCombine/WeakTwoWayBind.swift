@@ -3,8 +3,7 @@
 // All rights reserved.
 //
 
-// This file is based largely on the `Assign` implementation from OpenCombine, except changed to
-// allow the root to be held weakly.  See original implementation here:
+// This file is based largely on the `Assign` implementation from OpenCombine:
 //   https://github.com/broadwaylamb/OpenCombine/blob/master/Sources/OpenCombine/Subscribers/Subscribers.Assign.swift
 
 import Combine
@@ -17,24 +16,22 @@ fileprivate enum SubscriptionStatus {
 
 extension Subscribers {
 
-    public final class WeakAssign<Root, Input>: Subscriber,
-                                                Cancellable,
-                                                CustomStringConvertible,
-                                                CustomReflectable,
-                                                CustomPlaygroundDisplayConvertible
-        where Root: AnyObject
+    public final class WeakTwoWayBind<Root, Input>: Subscriber,
+                                                    Cancellable,
+                                                    CustomStringConvertible,
+                                                    CustomReflectable,
+                                                    CustomPlaygroundDisplayConvertible
+        where Root: ObservableObject, Root.ObjectWillChangePublisher == ObservableObjectPublisher
     {
-        // NOTE: this class has been audited for thread safety.
-        // Combine doesn't use any locking here.
         public typealias Failure = Never
 
         public private(set) weak var object: Root?
 
-        public let keyPath: ReferenceWritableKeyPath<Root, Input>
+        public let keyPath: ReferenceWritableKeyPath<Root, TwoWay<Input>>
 
         private var status = SubscriptionStatus.awaitingSubscription
 
-        public var description: String { return "WeakAssign \(Root.self)." }
+        public var description: String { return "WeakTwoWayBind \(Root.self)." }
 
         public var customMirror: Mirror {
             let children: [Mirror.Child] = [
@@ -47,7 +44,7 @@ extension Subscribers {
 
         public var playgroundDescription: Any { return description }
 
-        public init(object: Root, keyPath: ReferenceWritableKeyPath<Root, Input>) {
+        public init(object: Root, keyPath: ReferenceWritableKeyPath<Root, TwoWay<Input>>) {
             self.object = object
             self.keyPath = keyPath
         }
@@ -65,7 +62,7 @@ extension Subscribers {
         public func receive(_ value: Input) -> Subscribers.Demand {
             switch status {
             case .subscribed:
-                object?[keyPath: keyPath] = value
+                object?[keyPath: keyPath].rawValue = value
             case .awaitingSubscription, .terminal:
                 break
             }
@@ -89,20 +86,32 @@ extension Subscribers {
 
 extension Publisher where Self.Failure == Never {
 
-    /// Assigns each element from a Publisher to a property on an object.
+    /// Assigns output values of this Publisher to a TwoWay property on an object.
+    ///
+    /// Each output value will be set on the TwoWay via the underlying `rawValue`
+    /// property, which means that the TwoWayWriter functions will not be called as
+    /// they normally would when setting a value via the TwoWay's `wrappedValue`
+    /// property.  This approach prevents feedback loops that might otherwise occur
+    /// in two-way binding scenarios.
+    ///
     /// NOTE: Unlike `assign(to:)`, this will hold the given object weakly.
     ///
     /// - Parameters:
-    ///   - keyPath: The key path of the property to assign.
+    ///   - keyPath: The key path of the property to bind.
     ///   - object: The object on which to assign the value.
     /// - Returns: A cancellable instance; used when you end assignment
     ///   of the received value. Deallocation of the result will tear down
     ///   the subscription stream.
-    public func weakAssign<Root>(to keyPath: ReferenceWritableKeyPath<Root, Output>,
-                                 on object: Root) -> AnyCancellable
-        where Root: AnyObject
+    public func bind<Root>(to keyPath: ReferenceWritableKeyPath<Root, TwoWay<Output>>,
+                           on object: Root) -> AnyCancellable
+        where Root: ObservableObject, Root.ObjectWillChangePublisher == ObservableObjectPublisher
     {
-        let subscriber = Subscribers.WeakAssign(object: object, keyPath: keyPath)
+        // Install the given ObservableObject's objectWillChange publisher on the property wrapper
+        // so that it can report changes regardless of whether the value is changed internally
+        // (by setting rawValue) or via the public setter
+        object[keyPath: keyPath].objectWillChange = object.objectWillChange
+        
+        let subscriber = Subscribers.WeakTwoWayBind(object: object, keyPath: keyPath)
         subscribe(subscriber)
         return AnyCancellable(subscriber)
     }

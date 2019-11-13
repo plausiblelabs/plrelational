@@ -7,7 +7,7 @@ import PLRelational
 
 extension Relation {
     
-    // MARK: Asynchronous updates
+    // MARK: - Asynchronous updates
     
     /// Performs an asynchronous update using a single RelationValue.
     public func asyncUpdateValue(_ value: RelationValue, initiator: InitiatorTag? = nil) {

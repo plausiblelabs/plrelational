@@ -202,31 +202,30 @@ extension Relation {
     public func sortedRows(idAttr: Attribute, orderAttr: Attribute, descending: Bool = false) -> RelationValuePublisher<[RowArrayElement]> {
         precondition(self.scheme.attributes.isSuperset(of: [idAttr, orderAttr]))
 
-        return RelationValuePublisher(relation: self, rowsToValue: {
-            $0.extractAllRowsAsArray(from: AnyIterator($1.makeIterator()), idAttr: idAttr, orderAttr: orderAttr, descending: descending)
+        let orderFunc: (Row, Row) -> Bool
+        if descending {
+            orderFunc = { $0[orderAttr] > $1[orderAttr] }
+        } else {
+            orderFunc = { $0[orderAttr] < $1[orderAttr] }
+        }
+
+        return self.sortedRows(idAttr: idAttr, orderedBy: orderFunc)
+    }
+
+    public func sortedRows(idAttr: Attribute, orderedBy orderFunc: @escaping (Row, Row) -> Bool) -> RelationValuePublisher<[RowArrayElement]> {
+        precondition(self.scheme.attributes.contains(idAttr))
+
+        return RelationValuePublisher(relation: self, rowsToValue: { _, rows in
+            return rows
+                .sorted{ orderFunc($0, $1) }
+                .map{ RowArrayElement(id: $0[idAttr], row: $0) }
         })
     }
 }
 
 extension Relation {
     
-    // MARK: - Extract all rows
-
-    /// TODO: Docs
-    public func extractAllRowsAsArray(from rows: AnyIterator<Row>, idAttr: Attribute, orderAttr: Attribute, descending: Bool) -> [RowArrayElement] {
-        let orderFunc: (RelationValue, RelationValue) -> Bool
-        if descending {
-            orderFunc = { $0 > $1 }
-        } else {
-            orderFunc = { $0 < $1 }
-        }
-
-        return rows
-            .sorted{ orderFunc($0[orderAttr], $1[orderAttr]) }
-            .map{ RowArrayElement(id: $0[idAttr], row: $0) }
-    }
-
-    // MARK: Extract all values
+    // MARK: - Extract all values
 
     /// Returns a set of all values for the single attribute, built from one transformed value for each non-error row
     /// in the given set.
@@ -293,5 +292,17 @@ extension Relation {
     /// an empty string.
     public func extractOneString(from rows: AnyIterator<Row>) -> String {
         return extractOneStringOrNil(from: rows) ?? ""
+    }
+    
+    // MARK: - Extract one Bool
+
+    /// Returns a single boolean value if there is exactly one row in the given set, otherwise returns nil.
+    public func extractOneBoolOrNil(from rows: AnyIterator<Row>) -> Bool? {
+        return extractOneValueOrNil(from: rows, { $0.boolValue })
+    }
+    
+    /// Returns a single boolean value if there is exactly one row in the given set, otherwise returns false.
+    public func extractOneBool(from rows: AnyIterator<Row>) -> Bool {
+        return extractOneBoolOrNil(from: rows) ?? false
     }
 }

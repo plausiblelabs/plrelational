@@ -37,20 +37,44 @@ final class ChecklistViewModel: ObservableObject {
     
     init(model: Model) {
         self.model = model
+
+        func itemOrder(_ a: Row, _ b: Row) -> Bool {
+            // We sort items into two sections:
+            //   - first section has all incomplete items, with most recently created items at the top
+            //   - second section has all completed items, with most recently completed items at the top
+            let aCompleted: String? = a[Item.completed].get()
+            let bCompleted: String? = b[Item.completed].get()
+            if let aCompleted = aCompleted, let bCompleted = bCompleted {
+                // Both items were completed; make more recently completed item come first
+                return aCompleted > bCompleted
+            } else if aCompleted != nil {
+                // `a` was completed but `b` was not, so `a` will come after `b`
+                return false
+            } else if bCompleted != nil {
+                // `b` was completed but `a` was not, so `b` will come after `a`
+                return true
+            } else {
+                // Neither item was completed; make more recently created item come first
+                let aCreated: String = a[Item.created].get()!
+                let bCreated: String = b[Item.created].get()!
+                return aCreated > bCreated
+            }
+        }
         
         // REQ-2
         // The model for the list of to-do items.
         model.items
-            .sortedRows(idAttr: Item.id, orderAttr: Item.status, descending: true)
+            .sortedRows(idAttr: Item.id, orderedBy: itemOrder)
             .replaceError(with: [])
             .map{ rowArray in
                 rowArray.map{
                     print("ROW UPDATED: \($0.row)")
-                    // TODO: Fix tags and checked
-                    return ChecklistItemViewModel(model: model, id: ItemID($0.id), title: $0.row[Item.title].get()!, tags: "...")
+                    // TODO: Fix tags
+                    let completed = $0.row[Item.completed] != .null
+                    return ChecklistItemViewModel(model: model, id: ItemID($0.id), completed: completed, title: $0.row[Item.title].get()!, tags: "...")
                 }
             }
-            .assign(to: \.itemViewModels, on: self)
+            .bind(to: \.itemViewModels, on: self)
             .store(in: &cancellableBag)
     }
     

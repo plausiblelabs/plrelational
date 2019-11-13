@@ -8,7 +8,7 @@ import Combine
 import PLRelational
 @testable import PLRelationalCombine
 
-final class FakeViewModel: ObservableObject {
+private final class FakeViewModel: ObservableObject {
     private let pets: Relation
     private var cancellableBag = Set<AnyCancellable>()
 

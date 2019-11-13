@@ -12,8 +12,6 @@ struct DetailView: View {
 
     // TODO: Move these to ViewModel
     @State private var notes: String = ""
-    //@State private var tagsListSelection = Set<String>()
-    @State private var checked = false
 
     init(model: DetailViewModel) {
         self.model = model
@@ -21,14 +19,17 @@ struct DetailView: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            HStack(alignment: .lastTextBaseline) {
-                Toggle(isOn: $checked) {
-                    Text("")
+            HStack(alignment: .center) {
+                Toggle(isOn: $model.itemCompleted) {
+                    Text(" ")
                 }
-//                Text("READONLY (\(model.itemTitle))")
-                TextField("", text: $model.itemTitle)
-//                TextField("Two", text: $model.itemTitleAgain)
-//                TextField("Two", text: $model.itemTitle)
+                TextField("", text: $model.itemTitle, onEditingChanged: {
+                    Swift.print("EDITING CHANGED: \($0)")
+                }, onCommit: {
+                    Swift.print("COMMIT")
+                    self.model.commitItemTitle()
+                })
+//                TextField("", text: $model.itemTitleAgain)
             }
                 .padding(.bottom)
             
@@ -39,9 +40,16 @@ struct DetailView: View {
                 onItemSelected: { self.model.addExistingTagToSelectedItem(tagID: $0.id) }
             )
             
-            List { //(selection: $tagsListSelection) {
+            List {
                 ForEach(model.itemTags, id: \.self) { tag in
                     Text(tag)
+                        // TODO: Context menu not working well in 10.15.1, only seems
+                        // selectable if you click the thin border around the cell
+                        .contextMenu {
+                            Button(action: { /*model.removeTag()*/ } ) {
+                                Text("Remove Tag")
+                            }
+                        }
                 }
             }
                 .padding(.bottom)

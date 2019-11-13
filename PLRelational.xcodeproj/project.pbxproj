@@ -53,7 +53,6 @@
 		371BF1142368A2FF00B86E96 /* ChecklistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF1132368A2FF00B86E96 /* ChecklistViewModel.swift */; };
 		371BF1182369F64F00B86E96 /* ChecklistItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF1172369F64F00B86E96 /* ChecklistItemView.swift */; };
 		371BF11A2369F65800B86E96 /* ChecklistItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF1192369F65800B86E96 /* ChecklistItemViewModel.swift */; };
-		371BF11D236A355700B86E96 /* WeakAssign.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF11C236A355700B86E96 /* WeakAssign.swift */; };
 		371BF11F236B5A9300B86E96 /* RelationChangeSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF11E236B5A9300B86E96 /* RelationChangeSummary.swift */; };
 		371BF123236B5ADB00B86E96 /* RelationChangeSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF122236B5ADB00B86E96 /* RelationChangeSummaryTests.swift */; };
 		371BF125236B600500B86E96 /* RelationChangePublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF124236B600500B86E96 /* RelationChangePublisher.swift */; };
@@ -74,6 +73,8 @@
 		371EDB80235F69170079AE5E /* CombineTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371EDB7F235F69170079AE5E /* CombineTestCase.swift */; };
 		3720B4F42374DBCF003CF2BE /* RelationMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3720B4F32374DBCF003CF2BE /* RelationMutation.swift */; };
 		3720B4F72374DC31003CF2BE /* RelationMutationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3720B4F62374DC31003CF2BE /* RelationMutationTests.swift */; };
+		3720B4FA2375F8AE003CF2BE /* TwoWay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3720B4F92375F8AE003CF2BE /* TwoWay.swift */; };
+		3720B4FC2375F8BF003CF2BE /* TwoWayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3720B4FB2375F8BF003CF2BE /* TwoWayTests.swift */; };
 		372707EB1CFE2C7E00710C80 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 372707EA1CFE2C7E00710C80 /* AppDelegate.swift */; };
 		372707ED1CFE2C7E00710C80 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 372707EC1CFE2C7E00710C80 /* Assets.xcassets */; };
 		372707F01CFE2C7E00710C80 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 372707EE1CFE2C7E00710C80 /* MainMenu.xib */; };
@@ -161,6 +162,10 @@
 		37A1CE7E1D1081980067870D /* SearchAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE7D1D1081980067870D /* SearchAppTests.swift */; };
 		37A1CE891D1081980067870D /* SearchAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE881D1081980067870D /* SearchAppUITests.swift */; };
 		37A1CED61D11DC410067870D /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CED51D11DC410067870D /* ViewModel.swift */; };
+		37A47893237B34D000D72A41 /* WeakTwoWayBind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47892237B34D000D72A41 /* WeakTwoWayBind.swift */; };
+		37A47895237B372500D72A41 /* WeakTwoWayBindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47894237B372500D72A41 /* WeakTwoWayBindTests.swift */; };
+		37A47896237B836B00D72A41 /* WeakBind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF11C236A355700B86E96 /* WeakBind.swift */; };
+		37A4789A237B8B4D00D72A41 /* WeakBindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47899237B8B4D00D72A41 /* WeakBindTests.swift */; };
 		37A9A37E1F06B9A000B35559 /* SegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A9A37B1F06B65C00B35559 /* SegmentedControl.swift */; };
 		37AEC3F61F576D18004E5487 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AEC3F51F576D18004E5487 /* AppDelegate.swift */; };
 		37AEC3FA1F576D18004E5487 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37AEC3F91F576D18004E5487 /* Assets.xcassets */; };
@@ -944,7 +949,7 @@
 		371BF1132368A2FF00B86E96 /* ChecklistViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistViewModel.swift; sourceTree = "<group>"; };
 		371BF1172369F64F00B86E96 /* ChecklistItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistItemView.swift; sourceTree = "<group>"; };
 		371BF1192369F65800B86E96 /* ChecklistItemViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChecklistItemViewModel.swift; sourceTree = "<group>"; };
-		371BF11C236A355700B86E96 /* WeakAssign.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakAssign.swift; sourceTree = "<group>"; };
+		371BF11C236A355700B86E96 /* WeakBind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakBind.swift; sourceTree = "<group>"; };
 		371BF11E236B5A9300B86E96 /* RelationChangeSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelationChangeSummary.swift; sourceTree = "<group>"; };
 		371BF122236B5ADB00B86E96 /* RelationChangeSummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RelationChangeSummaryTests.swift; path = PLRelationalCombineTests/RelationChangeSummaryTests.swift; sourceTree = SOURCE_ROOT; };
 		371BF124236B600500B86E96 /* RelationChangePublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelationChangePublisher.swift; sourceTree = "<group>"; };
@@ -965,6 +970,8 @@
 		371EDB7F235F69170079AE5E /* CombineTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CombineTestCase.swift; sourceTree = "<group>"; };
 		3720B4F32374DBCF003CF2BE /* RelationMutation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RelationMutation.swift; path = PLRelationalCombine/RelationMutation.swift; sourceTree = SOURCE_ROOT; };
 		3720B4F62374DC31003CF2BE /* RelationMutationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = RelationMutationTests.swift; path = PLRelationalCombineTests/RelationMutationTests.swift; sourceTree = SOURCE_ROOT; };
+		3720B4F92375F8AE003CF2BE /* TwoWay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwoWay.swift; sourceTree = "<group>"; };
+		3720B4FB2375F8BF003CF2BE /* TwoWayTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TwoWayTests.swift; path = PLRelationalCombineTests/TwoWayTests.swift; sourceTree = SOURCE_ROOT; };
 		3727076C1CEE60C900710C80 /* MutableRelation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MutableRelation.swift; sourceTree = "<group>"; };
 		3727076E1CEF84FC00710C80 /* ArraySafeIndex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ArraySafeIndex.swift; sourceTree = "<group>"; };
 		372707751CF391EC00710C80 /* TreeProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TreeProperty.swift; sourceTree = "<group>"; };
@@ -1077,6 +1084,9 @@
 		37A1CEE61D147BD80067870D /* RelationMutation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationMutation.swift; sourceTree = "<group>"; };
 		37A1CEE81D147C190067870D /* RelationMutationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationMutationTests.swift; path = PLRelationalBindingTests/RelationMutationTests.swift; sourceTree = SOURCE_ROOT; };
 		37A1CEEA1D1480120067870D /* PropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyTests.swift; path = PLRelationalBindingTests/PropertyTests.swift; sourceTree = SOURCE_ROOT; };
+		37A47892237B34D000D72A41 /* WeakTwoWayBind.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakTwoWayBind.swift; sourceTree = "<group>"; };
+		37A47894237B372500D72A41 /* WeakTwoWayBindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WeakTwoWayBindTests.swift; path = PLRelationalCombineTests/WeakTwoWayBindTests.swift; sourceTree = SOURCE_ROOT; };
+		37A47899237B8B4D00D72A41 /* WeakBindTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WeakBindTests.swift; path = PLRelationalCombineTests/WeakBindTests.swift; sourceTree = SOURCE_ROOT; };
 		37A4A2391D1DB343005CAEA5 /* PropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PropertyOperations.swift; sourceTree = "<group>"; };
 		37A4A23B1D1DB3DC005CAEA5 /* PropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PropertyOperationsTests.swift; path = PLRelationalBindingTests/PropertyOperationsTests.swift; sourceTree = SOURCE_ROOT; };
 		37A4A2411D21A613005CAEA5 /* TextProperty.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextProperty.swift; sourceTree = "<group>"; };
@@ -1632,7 +1642,6 @@
 		371BF11B236A354600B86E96 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				371BF11C236A355700B86E96 /* WeakAssign.swift */,
 			);
 			name = Extensions;
 			sourceTree = "<group>";
@@ -1692,6 +1701,8 @@
 			children = (
 				371EDB7A235F64D00079AE5E /* Publishers */,
 				371BF1342371F63800B86E96 /* Subscribers */,
+				37A47897237B8B0900D72A41 /* Property Wrappers */,
+				37A47898237B8B3000D72A41 /* Binding */,
 				3720B4F52374DBF8003CF2BE /* PLRelational Extensions */,
 				371BF1052360BFBB00B86E96 /* Undo */,
 				371EDB79235F63F20079AE5E /* Supporting Files */,
@@ -2252,6 +2263,26 @@
 				37A4A2451D259DD4005CAEA5 /* RelationChangePartsTests.swift */,
 			);
 			name = "Relation Extensions";
+			sourceTree = "<group>";
+		};
+		37A47897237B8B0900D72A41 /* Property Wrappers */ = {
+			isa = PBXGroup;
+			children = (
+				3720B4F92375F8AE003CF2BE /* TwoWay.swift */,
+				3720B4FB2375F8BF003CF2BE /* TwoWayTests.swift */,
+			);
+			name = "Property Wrappers";
+			sourceTree = "<group>";
+		};
+		37A47898237B8B3000D72A41 /* Binding */ = {
+			isa = PBXGroup;
+			children = (
+				371BF11C236A355700B86E96 /* WeakBind.swift */,
+				37A47899237B8B4D00D72A41 /* WeakBindTests.swift */,
+				37A47892237B34D000D72A41 /* WeakTwoWayBind.swift */,
+				37A47894237B372500D72A41 /* WeakTwoWayBindTests.swift */,
+			);
+			name = Binding;
 			sourceTree = "<group>";
 		};
 		37A4A2811D307435005CAEA5 /* Change Handling */ = {
@@ -3852,7 +3883,6 @@
 				371BF1122368A2F700B86E96 /* ChecklistView.swift in Sources */,
 				371BF1102368A19600B86E96 /* ContentViewModel.swift in Sources */,
 				371EDB2A235BB68D0079AE5E /* Model.swift in Sources */,
-				371BF11D236A355700B86E96 /* WeakAssign.swift in Sources */,
 				371BF10D236381D500B86E96 /* EphemeralComboBox.swift in Sources */,
 				371BF11A2369F65800B86E96 /* ChecklistItemViewModel.swift in Sources */,
 				371BF1002360BEDC00B86E96 /* DetailViewModel.swift in Sources */,
@@ -3870,12 +3900,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				3720B4F42374DBCF003CF2BE /* RelationMutation.swift in Sources */,
+				37A47893237B34D000D72A41 /* WeakTwoWayBind.swift in Sources */,
 				371BF125236B600500B86E96 /* RelationChangePublisher.swift in Sources */,
 				371BF12A236CA1C000B86E96 /* RelationArrayReduce.swift in Sources */,
+				3720B4FA2375F8AE003CF2BE /* TwoWay.swift in Sources */,
 				371EDB7C235F65030079AE5E /* RelationValuePublisher.swift in Sources */,
 				371BF1042360BF7600B86E96 /* UndoManager.swift in Sources */,
 				371BF12E236CBF9C00B86E96 /* ArrayBinarySearch.swift in Sources */,
 				371BF11F236B5A9300B86E96 /* RelationChangeSummary.swift in Sources */,
+				37A47896237B836B00D72A41 /* WeakBind.swift in Sources */,
 				371BF1072360BFD700B86E96 /* UndoableDatabase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3884,14 +3917,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3720B4FC2375F8BF003CF2BE /* TwoWayTests.swift in Sources */,
 				3720B4F72374DC31003CF2BE /* RelationMutationTests.swift in Sources */,
 				371BF123236B5ADB00B86E96 /* RelationChangeSummaryTests.swift in Sources */,
+				37A47895237B372500D72A41 /* WeakTwoWayBindTests.swift in Sources */,
 				371EDB7E235F65990079AE5E /* RelationValuePublisherTests.swift in Sources */,
 				371BF127236B601C00B86E96 /* RelationChangePublisherTests.swift in Sources */,
 				371BF12C236CA1D300B86E96 /* RelationArrayReduceTests.swift in Sources */,
 				371BF128236B6E0D00B86E96 /* DBTestCase.swift in Sources */,
 				371EDB80235F69170079AE5E /* CombineTestCase.swift in Sources */,
 				371BF133236CC10600B86E96 /* ArrayBinarySearchTests.swift in Sources */,
+				37A4789A237B8B4D00D72A41 /* WeakBindTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

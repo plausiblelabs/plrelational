@@ -28,7 +28,7 @@ final class ContentViewModel: ObservableObject {
         model.selectedItems
             .nonEmpty()
             .replaceError(with: false)
-            .assign(to: \.hasSelection, on: self)
+            .bind(to: \.hasSelection, on: self)
             .store(in: &cancellableBag)
     }
     
