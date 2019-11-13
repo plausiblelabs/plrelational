@@ -14,11 +14,17 @@ public class RelationValuePublisher<T>: Publisher {
     
     public let relation: Relation
     public let ignoreInitiator: InitiatorTag?
+    public let shouldPublish: (_ oldValue: T?, _ newValue: T) -> Bool
     public let rowsToValue: (Relation, Set<Row>) -> T
     
-    init(relation: Relation, ignoreInitiator: InitiatorTag? = nil, rowsToValue: @escaping (Relation, Set<Row>) -> T) {
+    init(relation: Relation,
+         ignoreInitiator: InitiatorTag? = nil,
+         shouldPublish: @escaping (_ oldValue: T?, _ newValue: T) -> Bool,
+         rowsToValue: @escaping (Relation, Set<Row>) -> T)
+    {
         self.relation = relation
         self.ignoreInitiator = ignoreInitiator
+        self.shouldPublish = shouldPublish
         self.rowsToValue = rowsToValue
     }
 
@@ -26,7 +32,9 @@ public class RelationValuePublisher<T>: Publisher {
         // TODO: For now, each subscription makes an initial query and maintains its own relation observer.
         // Ideally we would share state between subscriptions to avoid redundant work.
         subscriber.receive(subscription: InnerSubscription(relation: relation,
-                                                           rowsToValue: rowsToValue, ignoreInitiator: ignoreInitiator,
+                                                           rowsToValue: rowsToValue,
+                                                           ignoreInitiator: ignoreInitiator,
+                                                           shouldPublish: shouldPublish,
                                                            downstream: subscriber))
     }
 }
@@ -40,18 +48,32 @@ extension RelationValuePublisher {
         private let relation: Relation
         private let rowsToValue: (Relation, Set<Row>) -> T
         private let ignoreInitiator: InitiatorTag?
-        
+        private let shouldPublish: (_ oldValue: T?, _ newValue: T) -> Bool
+
         private var downstream: Downstream?
         private var relationObserverRemoval: ObserverRemoval?
-        
+
+        // TODO: The use of `lastValue` to suppress duplicates should be revisited.
+        // The main reason it's included is that without it, some TwoWay tests would fail in
+        // cases where one TwoWay property updates an underlying relation (via setter) but
+        // other TwoWay properties derived from the same underlying relation (but with
+        // different projected attributes) would be notified of the change even though their
+        // value is not actually changing, thus causing their rawValue to be updated (and the
+        // publisher to emit) redundantly.  This all needs some more thought to make it less
+        // fragile/surprising.
+        private var lastValue: Output?
+
         init(relation: Relation,
              rowsToValue: @escaping (Relation, Set<Row>) -> T,
              ignoreInitiator: InitiatorTag?,
+             shouldPublish: @escaping (_ oldValue: T?, _ newValue: T) -> Bool,
              downstream: Downstream)
         {
             self.relation = relation
             self.rowsToValue = rowsToValue
             self.ignoreInitiator = ignoreInitiator
+            self.shouldPublish = shouldPublish
+            
             self.downstream = downstream
         }
 
@@ -86,6 +108,7 @@ extension RelationValuePublisher {
 
                     switch result {
                     case .Ok(let value):
+                        strongSelf.lastValue = value
                         _ = strongSelf.downstream?.receive(value)
                     case .Err(let error):
                         if let downstream = strongSelf.downstream {
@@ -110,6 +133,10 @@ extension RelationValuePublisher {
         func relationDidChange(_ relation: Relation, result: Result<T, RelationError>, initiators: InitiatorTagSet) {
             switch result {
             case .Ok(let value):
+                // XXX: See `lastValue` comments; should revisit this
+                let valueChanging = shouldPublish(lastValue, value)
+                lastValue = value
+                Swift.print("Relation changed: \(value) downstream=\(self.downstream) ignore=\(self.ignoreInitiator) initiators=\(initiators)")
                 let deliverValue: Bool
                 if let initiator = ignoreInitiator {
                     // Don't deliver the value if the change was initiated by (just) the given initiator
@@ -118,7 +145,7 @@ extension RelationValuePublisher {
                     // No ignored initiator, so always deliver the value
                     deliverValue = true
                 }
-                if deliverValue {
+                if valueChanging && deliverValue {
                     _ = self.downstream?.receive(value)
                 }
                 
@@ -145,12 +172,25 @@ public class RowArrayElement: Identifiable {
     }
 }
 
+func publishAlways<T>(oldValue: T?, newValue: T) -> Bool {
+    return true
+}
+
+func publishIfChanged<T: Equatable>(oldValue: T?, newValue: T) -> Bool {
+    if let oldValue = oldValue {
+        return oldValue != newValue
+    } else {
+        return true
+    }
+}
+
 extension RelationValuePublisher {
 
     /// Returns a Publisher that skips any changes for which there is exactly one initiator tag that matches the given tag.
     /// This can be used in bidirectional binding scenarios to ignore "self-initiated" changes.
     public func ignoreInitiator(_ initiator: InitiatorTag) -> RelationValuePublisher<T> {
-        return RelationValuePublisher(relation: self.relation, ignoreInitiator: initiator, rowsToValue: self.rowsToValue)
+        return RelationValuePublisher(relation: self.relation, ignoreInitiator: initiator,
+                                      shouldPublish: self.shouldPublish, rowsToValue: self.rowsToValue)
     }
 }
 
@@ -160,14 +200,14 @@ extension Relation {
 
     /// Returns a Publisher that delivers the content of this relation as a set of rows.
     public func allRows() -> RelationValuePublisher<Set<Row>> {
-        return RelationValuePublisher(relation: self, rowsToValue: {
+        return RelationValuePublisher(relation: self, shouldPublish: publishAlways, rowsToValue: {
             $1
         })
     }
 
     /// Returns a Publisher that delivers true when the set of rows is non-empty, false otherwise.
     public func nonEmpty() -> RelationValuePublisher<Bool> {
-        return RelationValuePublisher(relation: self, rowsToValue: {
+        return RelationValuePublisher(relation: self, shouldPublish: publishIfChanged, rowsToValue: {
             !$1.isEmpty
         })
     }
@@ -175,7 +215,7 @@ extension Relation {
     /// Returns a Publisher, sourced from this relation, that delivers a single string value if there is exactly
     /// one row, otherwise delivers an empty string.
     public func oneString() -> RelationValuePublisher<String> {
-        return RelationValuePublisher(relation: self, rowsToValue: {
+        return RelationValuePublisher(relation: self, shouldPublish: publishIfChanged, rowsToValue: {
             $0.extractOneString(from: AnyIterator($1.makeIterator()))
         })
     }
@@ -183,7 +223,7 @@ extension Relation {
     /// Returns a Publisher, sourced from this relation, that delivers a single string value if there is exactly
     /// one row, otherwise delivers nil.
     public func oneStringOrNil() -> RelationValuePublisher<String?> {
-        return RelationValuePublisher(relation: self, rowsToValue: {
+        return RelationValuePublisher(relation: self, shouldPublish: publishIfChanged, rowsToValue: {
             $0.extractOneStringOrNil(from: AnyIterator($1.makeIterator()))
         })
     }
@@ -191,7 +231,7 @@ extension Relation {
     /// Returns a Publisher, sourced from this relation, that delivers a set of all strings for the
     /// single attribute.
     public func allStrings() -> RelationValuePublisher<Set<String>> {
-        return RelationValuePublisher(relation: self, rowsToValue: {
+        return RelationValuePublisher(relation: self, shouldPublish: publishIfChanged, rowsToValue: {
             $0.extractAllValuesForSingleAttribute(from: AnyIterator($1.makeIterator()), { $0.get() as String? })
         })
     }
@@ -215,7 +255,7 @@ extension Relation {
     public func sortedRows(idAttr: Attribute, orderedBy orderFunc: @escaping (Row, Row) -> Bool) -> RelationValuePublisher<[RowArrayElement]> {
         precondition(self.scheme.attributes.contains(idAttr))
 
-        return RelationValuePublisher(relation: self, rowsToValue: { _, rows in
+        return RelationValuePublisher(relation: self, shouldPublish: publishAlways, rowsToValue: { _, rows in
             return rows
                 .sorted{ orderFunc($0, $1) }
                 .map{ RowArrayElement(id: $0[idAttr], row: $0) }

@@ -57,16 +57,47 @@ public struct TwoWayWriter<Value> {
         self.commitWrappedValue = commit
     }
 
-    public init(didSet: @escaping (Value) -> Void) {
+    public init(didSetOrCommit: @escaping (Value) -> Void) {
         self.willSetWrappedValue = { _, _ in }
-        self.didSetWrappedValue = didSet
-        self.commitWrappedValue = { _ in }
+        self.didSetWrappedValue = didSetOrCommit
+        self.commitWrappedValue = didSetOrCommit
     }
+}
+
+/// Controls how a `TwoWay` property behaves when its value is set via the `wrappedValue` setter.
+public enum TwoWaySetBehavior {
+    /// Do nothing when `wrappedValue` is set.
+    ///
+    /// This is useful with, for example, text editor controls, where you don't want to update the
+    /// underlying relation every time the user changes some text.
+    ///
+    /// When this behavior is used, you must manually call `commit` on the `TwoWay` wrapper to
+    /// commit the value, usually in the control's `onEditingChanged` or `onCommit` callbacks.
+    case noop
+    
+    /// Every time `wrappedValue` is set, call the writer's `didSetWrappedValue` function.
+    ///
+    /// This is useful with, for example, text field controls, where you want the value to be updated
+    /// (e.g. in an underlying relation) so that other controls will immediately see the change, but
+    /// you don't want each change committed (e.g. with an undoable transaction).
+    ///
+    /// When this behavior is used, you must manually call `commit` on the `TwoWay` wrapper to
+    /// commit the value, usually in the control's `onEditingChanged` or `onCommit` callbacks.
+    case update
+    
+    /// Every time `wrappedValue` is set, call the writer's `commitWrappedValue` function.
+    ///
+    /// This is useful with, for example, checkbox controls, where you want the value to be committed
+    /// (e.g. with an undoable transaction) each time the user toggles the button.
+    case commit
 }
 
 @propertyWrapper
 public struct TwoWay<Value> {
 
+    /// The behavior to use when this property's value is set via the `wrappedValue` setter.
+    private let onSet: TwoWaySetBehavior
+    
     /// TODO: Docs
     var rawValue: Value {
         willSet {
@@ -92,7 +123,14 @@ public struct TwoWay<Value> {
             // the external value when the underlying `rawValue` is set, which is part of the
             // solution to avoiding feedback loops in two-way binding scenarios
             Swift.print("TwoWay: wrappedValue did set: \(newValue)")
-            writer?.didSetWrappedValue(newValue)
+            switch onSet {
+            case .noop:
+                break
+            case .update:
+                writer?.didSetWrappedValue(newValue)
+            case .commit:
+                writer?.commitWrappedValue(newValue)
+            }
         }
     }
 
@@ -121,7 +159,12 @@ public struct TwoWay<Value> {
     private var publisher: Publisher?
 
     public init(wrappedValue: Value) {
+        self.init(wrappedValue: wrappedValue, onSet: .noop)
+    }
+
+    public init(wrappedValue: Value, onSet: TwoWaySetBehavior) {
         self.rawValue = wrappedValue
+        self.onSet = onSet
     }
     
     /// Commits the latest value by invoking the writer's `commitWrappedValue` function.
@@ -161,6 +204,7 @@ public struct TwoWay<Value> {
     }
 }
 
+/// TODO: Docs
 public struct OneValueStrategy<Value>: TwoWayStrategy {
     public let reader: TwoWayReader<Value>
     public let writer: TwoWayWriter<Value>
@@ -171,7 +215,7 @@ public func oneString(_ relation: Relation, _ initiator: InitiatorTag) -> OneVal
     let reader = TwoWayReader(defaultValue: "", valueFromRows: { rows in
         relation.extractOneString(from: AnyIterator(rows.makeIterator()))
     })
-    let writer = TwoWayWriter(didSet: {
+    let writer = TwoWayWriter(didSetOrCommit: {
         relation.asyncUpdateString($0, initiator: initiator)
     })
     return OneValueStrategy(reader: reader, writer: writer)
@@ -195,13 +239,7 @@ public class UndoableOneValueStrategy<Value>: TwoWayStrategy {
                 self.updateFunc(newValue)
             },
             commit: { newValue in
-                // TODO: Check whether value has changed?
-                if let before = self.before {
-                    self.undoableDB.performUndoableAction(self.action, before: before, {
-                        self.updateFunc(newValue)
-                    })
-                    self.before = nil
-                }
+                self.commitValue(newValue)
             }
         )
     }()
@@ -217,10 +255,19 @@ public class UndoableOneValueStrategy<Value>: TwoWayStrategy {
         self.updateFunc = updateFunc
         self.reader = reader
     }
+    
+    private func commitValue(_ value: Value) {
+        // TODO: Check whether value has changed?
+        if let before = self.before {
+            self.undoableDB.performUndoableAction(self.action, before: before, {
+                self.updateFunc(value)
+            })
+            self.before = nil
+        }
+    }
 }
 
 public extension UndoableDatabase {
-    // TODO: Flag for controlling whether to call update on intermediate changes (vs commit on end)
     func oneString(_ action: String) -> (Relation, InitiatorTag) -> UndoableOneValueStrategy<String> {
         return { relation, initiator in
             precondition(relation.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
@@ -256,8 +303,11 @@ extension Relation {
     public func bind<Root, Value, Strategy>(to keyPath: ReferenceWritableKeyPath<Root, TwoWay<Value>>,
                                             on object: Root,
                                             strategy strategyFunc: (Relation, InitiatorTag) -> Strategy) -> AnyCancellable
+        // TODO: The `Value: Equatable` restriction is here only because of the duplicate removal hack in
+        // RelationValuePublisher; should revisit this
+        //where Root: AnyObject, Value: Equatable, Strategy: TwoWayStrategy, Strategy.Value == Value
         where Root: ObservableObject, Root.ObjectWillChangePublisher == ObservableObjectPublisher,
-              Strategy: TwoWayStrategy, Strategy.Value == Value
+              Value: Equatable, Strategy: TwoWayStrategy, Strategy.Value == Value
     {
         // Create a unique initiator tag
         let initiator = UUID().uuidString
@@ -268,9 +318,11 @@ extension Relation {
         // Install the TwoWayWriter on the TwoWay wrapper, so that the underlying
         // relation is updated when a new value is set via the public setter
         object[keyPath: keyPath].writer = strategy.writer
-
-        return RelationValuePublisher(relation: self, ignoreInitiator: initiator, rowsToValue: { strategy.reader.valueFromRows($1) })
-            .replaceError(with: strategy.reader.defaultValue) // XXX
+        
+        return RelationValuePublisher(relation: self, ignoreInitiator: initiator,
+                                      shouldPublish: publishIfChanged,
+                                      rowsToValue: { strategy.reader.valueFromRows($1) })
+            .replaceError(with: strategy.reader.defaultValue) // TODO: Find a better solution that doesn't involve swallowing errors
             .bind(to: keyPath, on: object)
     }
 }

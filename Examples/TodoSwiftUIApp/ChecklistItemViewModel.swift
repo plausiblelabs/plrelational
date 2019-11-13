@@ -13,7 +13,7 @@ final class ChecklistItemViewModel: Identifiable, ObservableObject {
     private let model: Model
 
     let id: ItemID
-    @TwoWay var completed: Bool
+    @TwoWay(onSet: .commit) var completed: Bool = false
     @Published var title: String
     @Published var tags: String
     

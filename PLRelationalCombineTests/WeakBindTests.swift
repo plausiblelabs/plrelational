@@ -8,7 +8,7 @@ import Combine
 import PLRelational
 @testable import PLRelationalCombine
 
-class WeakTwoWayBindTests: CombineTestCase {
+class WeakBindTests: CombineTestCase {
 
     func testSomething() {
         // TODO

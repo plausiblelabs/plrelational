@@ -16,9 +16,9 @@ final class DetailViewModel: ObservableObject {
     /// The selected item ID, cached in this property for easy access.
     private var itemID: ItemID?
 
-    @TwoWay var itemCompleted: Bool = false
+    @TwoWay(onSet: .commit) var itemCompleted: Bool = false
     
-    @TwoWay var itemTitle: String = ""
+    @TwoWay(onSet: .update) var itemTitle: String = ""
 //    @TwoWay var itemTitleAgain: String = ""
 
     @Published var availableTags: [ComboBoxItem] = []
