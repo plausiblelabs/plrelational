@@ -10,7 +10,8 @@ import Foundation
 import Combine
 import PLRelational
 
-/// TODO: Docs
+/// Controls how a `TwoWay` property receives values from, and writes values to,
+/// an underlying `Relation`.
 public protocol TwoWayStrategy {
     /// TODO: Docs
     associatedtype Value
@@ -98,10 +99,10 @@ public struct TwoWay<Value> {
     /// The behavior to use when this property's value is set via the `wrappedValue` setter.
     private let onSet: TwoWaySetBehavior
     
-    /// TODO: Docs
+    /// The underlying value.  This is only set internally, either by the `wrappedValue` setter,
+    /// or by `WeakTwoWayBind` as a result of the underlying `Relation` changing.
     var rawValue: Value {
         willSet {
-//            Swift.print("TwoWay: rawValue will set: \(newValue)")
             objectWillChange?.send()
             publisher?.subject.value = newValue
         }
@@ -112,17 +113,14 @@ public struct TwoWay<Value> {
             return rawValue
         }
         set {
-//            Swift.print("TwoWay: wrappedValue will set: \(newValue)")
             writer?.willSetWrappedValue(rawValue, newValue)
             
-//            Swift.print("TwoWay: wrappedValue set: \(newValue)")
             rawValue = newValue
 
             // Note that we only set the external value (i.e., update the associated relation)
             // when the value has been set by the public `wrappedValue` setter; we don't set
             // the external value when the underlying `rawValue` is set, which is part of the
             // solution to avoiding feedback loops in two-way binding scenarios
-//            Swift.print("TwoWay: wrappedValue did set: \(newValue)")
             switch onSet {
             case .noop:
                 break
@@ -221,6 +219,17 @@ public func oneString(_ relation: Relation, _ initiator: InitiatorTag) -> OneVal
     return OneValueStrategy(reader: reader, writer: writer)
 }
 
+/// TODO: Docs
+public func oneBool(_ relation: Relation, _ initiator: InitiatorTag) -> OneValueStrategy<Bool> {
+    let reader = TwoWayReader(defaultValue: false, valueFromRows: { rows in
+        relation.extractOneBool(from: AnyIterator(rows.makeIterator()))
+    })
+    let writer = TwoWayWriter(didSetOrCommit: {
+        relation.asyncUpdateBoolean($0, initiator: initiator)
+    })
+    return OneValueStrategy(reader: reader, writer: writer)
+}
+
 public class UndoableOneValueStrategy<Value>: TwoWayStrategy {
     private let undoableDB: UndoableDatabase
     private let action: String
@@ -305,7 +314,6 @@ extension Relation {
                                             strategy strategyFunc: (Relation, InitiatorTag) -> Strategy) -> AnyCancellable
         // TODO: The `Value: Equatable` restriction is here only because of the duplicate removal hack in
         // RelationValuePublisher; should revisit this
-        //where Root: AnyObject, Value: Equatable, Strategy: TwoWayStrategy, Strategy.Value == Value
         where Root: ObservableObject, Root.ObjectWillChangePublisher == ObservableObjectPublisher,
               Value: Equatable, Strategy: TwoWayStrategy, Strategy.Value == Value
     {

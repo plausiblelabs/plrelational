@@ -5,7 +5,8 @@
 
 import PLRelational
 
-/// TODO: Docs
+/// A container that summarizes a change made to a `Relation`, breaking down the change
+/// into distinct added, updated, and deleted items.
 public struct RelationChangeSummary<T> {
     public let added: [T]
     public let updated: [T]

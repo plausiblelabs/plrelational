@@ -61,6 +61,16 @@ enum SelectedItem {
     )}
 }
 
+struct ExistingTag {
+    let id: TagID
+    let name: String
+    
+    init(_ row: Row) {
+        self.id = TagID(row)
+        self.name = row[Tag.name].get()!
+    }
+}
+
 class Model {
     
     let items: TransactionalRelation
@@ -68,7 +78,7 @@ class Model {
     let itemTags: TransactionalRelation
     let selectedItemIDs: TransactionalRelation
 
-    var allTags: [RowArrayElement] = []
+    var allTags: [ExistingTag] = []
     
     private let db: TransactionalDatabase
     private let undoableDB: UndoableDatabase
@@ -111,7 +121,7 @@ class Model {
         
         // Keep the set of all tags cached for easy access
         tags
-            .sortedRows(idAttr: Tag.id, orderAttr: Tag.name)
+            .map(ExistingTag.init, sortedBy: \.name)
             .replaceError(with: [])
             .bind(to: \.allTags, on: self)
             .store(in: &cancellableBag)

@@ -8,6 +8,7 @@ import PLRelational
 
 typealias ObserverRemoval = () -> Void
 
+/// TODO: Docs
 public class RelationValuePublisher<T>: Publisher {
     public typealias Output = T
     public typealias Failure = RelationError
@@ -136,7 +137,6 @@ extension RelationValuePublisher {
                 // XXX: See `lastValue` comments; should revisit this
                 let valueChanging = shouldPublish(lastValue, value)
                 lastValue = value
-//                Swift.print("Relation changed: \(value) downstream=\(self.downstream) ignore=\(self.ignoreInitiator) initiators=\(initiators)")
                 let deliverValue: Bool
                 if let initiator = ignoreInitiator {
                     // Don't deliver the value if the change was initiated by (just) the given initiator
@@ -161,17 +161,6 @@ extension RelationValuePublisher {
     }
 }
 
-// TODO: Find a home for this
-public class RowArrayElement: Identifiable {
-    public let id: RelationValue
-    public let row: Row
-
-    init(id: RelationValue, row: Row) {
-        self.id = id
-        self.row = row
-    }
-}
-
 func publishAlways<T>(oldValue: T?, newValue: T) -> Bool {
     return true
 }
@@ -186,7 +175,7 @@ func publishIfChanged<T: Equatable>(oldValue: T?, newValue: T) -> Bool {
 
 extension RelationValuePublisher {
 
-    /// Returns a Publisher that skips any changes for which there is exactly one initiator tag that matches the given tag.
+    /// Returns a `Publisher` that skips any changes for which there is exactly one initiator tag that matches the given tag.
     /// This can be used in bidirectional binding scenarios to ignore "self-initiated" changes.
     public func ignoreInitiator(_ initiator: InitiatorTag) -> RelationValuePublisher<T> {
         return RelationValuePublisher(relation: self.relation, ignoreInitiator: initiator,
@@ -198,21 +187,21 @@ extension Relation {
     
     // MARK: - Publishers
 
-    /// Returns a Publisher that delivers the content of this relation as a set of rows.
+    /// Returns a `Publisher` that delivers the content of this relation as a set of rows.
     public func allRows() -> RelationValuePublisher<Set<Row>> {
         return RelationValuePublisher(relation: self, shouldPublish: publishAlways, rowsToValue: {
             $1
         })
     }
 
-    /// Returns a Publisher that delivers true when the set of rows is non-empty, false otherwise.
+    /// Returns a `Publisher` that delivers true when the set of rows is non-empty, false otherwise.
     public func nonEmpty() -> RelationValuePublisher<Bool> {
         return RelationValuePublisher(relation: self, shouldPublish: publishIfChanged, rowsToValue: {
             !$1.isEmpty
         })
     }
 
-    /// Returns a Publisher, sourced from this relation, that delivers a single string value if there is exactly
+    /// Returns a `Publisher`, sourced from this relation, that delivers a single string value if there is exactly
     /// one row, otherwise delivers an empty string.
     public func oneString() -> RelationValuePublisher<String> {
         return RelationValuePublisher(relation: self, shouldPublish: publishIfChanged, rowsToValue: {
@@ -220,7 +209,7 @@ extension Relation {
         })
     }
     
-    /// Returns a Publisher, sourced from this relation, that delivers a single string value if there is exactly
+    /// Returns a `Publisher`, sourced from this relation, that delivers a single string value if there is exactly
     /// one row, otherwise delivers nil.
     public func oneStringOrNil() -> RelationValuePublisher<String?> {
         return RelationValuePublisher(relation: self, shouldPublish: publishIfChanged, rowsToValue: {
@@ -228,7 +217,7 @@ extension Relation {
         })
     }
 
-    /// Returns a Publisher, sourced from this relation, that delivers a set of all strings for the
+    /// Returns a `Publisher`, sourced from this relation, that delivers a set of all strings for the
     /// single attribute.
     public func allStrings() -> RelationValuePublisher<Set<String>> {
         return RelationValuePublisher(relation: self, shouldPublish: publishIfChanged, rowsToValue: {
@@ -236,30 +225,42 @@ extension Relation {
         })
     }
 
-    // TODO: Add comments mentioning that this is a less efficient version of RelationArrayPublisher, since it refetches
-    // the entire data set any time there is a change in the underlying relation (so it's only useful for small data sets
-    // and/or quick bootstrapping)
-    public func sortedRows(idAttr: Attribute, orderAttr: Attribute, descending: Bool = false) -> RelationValuePublisher<[RowArrayElement]> {
-        precondition(self.scheme.attributes.isSuperset(of: [idAttr, orderAttr]))
-
-        let orderFunc: (Row, Row) -> Bool
-        if descending {
-            orderFunc = { $0[orderAttr] > $1[orderAttr] }
-        } else {
-            orderFunc = { $0[orderAttr] < $1[orderAttr] }
-        }
-
-        return self.sortedRows(idAttr: idAttr, orderedBy: orderFunc)
-    }
-
-    public func sortedRows(idAttr: Attribute, orderedBy orderFunc: @escaping (Row, Row) -> Bool) -> RelationValuePublisher<[RowArrayElement]> {
-        precondition(self.scheme.attributes.contains(idAttr))
-
+    /// Returns a `Publisher`, sourced from this relation, that delivers a full, sorted array of elements.
+    /// Note that this is a less efficient version of `RelationArrayPublisher`, since it refetches
+    /// the entire data set any time there is a change in the underlying relation (so it's only useful for
+    /// small data sets and/or quick bootstrapping).
+    public func map<T>(_ mapFunc: @escaping (Row) -> T, sortedBy orderFunc: @escaping (T, T) -> Bool) -> RelationValuePublisher<[T]> {
         return RelationValuePublisher(relation: self, shouldPublish: publishAlways, rowsToValue: { _, rows in
             return rows
-                .sorted{ orderFunc($0, $1) }
-                .map{ RowArrayElement(id: $0[idAttr], row: $0) }
+                .map(mapFunc)
+                .sorted(by: orderFunc)
         })
+    }
+
+    /// Returns a `Publisher`, sourced from this relation, that delivers a full, sorted array of elements.
+    /// Note that this is a less efficient version of `RelationArrayPublisher`, since it refetches
+    /// the entire data set any time there is a change in the underlying relation (so it's only useful for
+    /// small data sets and/or quick bootstrapping).
+    public func map<T, U>(_ mapFunc: @escaping (Row) -> T, sortedBy orderPath: KeyPath<T, U>) -> RelationValuePublisher<[T]> where U: Comparable {
+        return self.map(mapFunc, sortedBy: { $0[keyPath: orderPath] < $1[keyPath: orderPath] })
+    }
+
+    /// Returns a `Publisher`, sourced from this relation, that delivers a full, sorted array of elements.
+    /// Note that this is a less efficient version of `RelationArrayPublisher`, since it refetches
+    /// the entire data set any time there is a change in the underlying relation (so it's only useful for
+    /// small data sets and/or quick bootstrapping).
+    public func mapSorted<T>(_ mapFunc: @escaping (Row) -> T) -> RelationValuePublisher<[T]> where T: Comparable {
+        return self.map(mapFunc, sortedBy: <)
+    }
+    
+    /// Returns a `Publisher`, sourced from this relation, that delivers a full, sorted array of strings
+    /// for the given attribute.
+    /// Note that this is a less efficient version of `RelationArrayPublisher`, since it refetches
+    /// the entire data set any time there is a change in the underlying relation (so it's only useful for
+    /// small data sets and/or quick bootstrapping).
+    public func sortedStrings(for attribute: Attribute) -> RelationValuePublisher<[String]> {
+        precondition(self.scheme.attributes.contains(attribute))
+        return self.mapSorted({ (row: Row) in row[attribute].get()! as String })
     }
 }
 

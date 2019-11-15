@@ -5,10 +5,12 @@
 
 import Foundation
 
-/// TODO: Docs
+/// Alias for a tag that identifies the initiator of a change (insert, update, delete)
+/// to an underlying relation.  This tag is propagated to observers and can be used
+/// to determine when a change is self-initiated, for example.
 public typealias InitiatorTag = String
 
-/// TODO: Docs
+/// Alias for a set of initiator tags.  Allows nil, which indicates an anonymous initiator.
 public typealias InitiatorTagSet = Set<InitiatorTag?>
 
 /// :nodoc: Implementation detail (will be made non-public eventually)

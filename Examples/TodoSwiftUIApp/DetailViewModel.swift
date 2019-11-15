@@ -55,26 +55,24 @@ final class DetailViewModel: ObservableObject {
             .bind(to: \._itemTitle, on: self, strategy: model.itemTitle())
             .store(in: &cancellableBag)
 
+        func comboBoxItemForTagRow(_ row: Row) -> ComboBoxItem {
+            ComboBoxItem(id: row[Tag.id], string: row[Tag.name].get()!)
+        }
+        
         // REQ-9
         // The tags that are available (i.e., not already applied) for the selected
         // to-do item, sorted by name.
         model.availableTagsForSelectedItem
-            .sortedRows(idAttr: Tag.id, orderAttr: Tag.name)
+            .map(comboBoxItemForTagRow, sortedBy: \.string)
             .replaceError(with: [])
-            .map{ rowArray in
-                rowArray.map{
-                    ComboBoxItem(id: $0.id, string: $0.row[Tag.name].get()!)
-                }
-            }
             .bind(to: \.availableTags, on: self)
             .store(in: &cancellableBag)
 
         // REQ-10
         // The tags associated with the selected to-do item, sorted by name.
         model.tagsForSelectedItem
-            .sortedRows(idAttr: Tag.id, orderAttr: Tag.name)
+            .sortedStrings(for: Tag.name)
             .replaceError(with: [])
-            .map{ $0.compactMap{ $0.row[Tag.name].get() } }
             .bind(to: \.itemTags, on: self)
             .store(in: &cancellableBag)
 
@@ -122,16 +120,12 @@ final class DetailViewModel: ObservableObject {
         }
         
         // See if a tag already exists with the given name
-        let existingTag = self.model.allTags.first(where: {
-            let rowName: String = $0.row[Tag.name].get()!
-            return name == rowName
-        })
-        
-        if let elem = existingTag {
+        let existingTag = self.model.allTags.first(where: { $0.name == name })
+
+        if let tag = existingTag {
             // A tag already exists with the given name, so apply that tag
             // rather than creating a new one
-            let tagID = TagID(elem.id)
-            self.model.addExistingTag(tagID, to: itemID)
+            self.model.addExistingTag(tag.id, to: itemID)
         } else {
             // No tag exists with that name, so create a new tag and apply
             // it to this item

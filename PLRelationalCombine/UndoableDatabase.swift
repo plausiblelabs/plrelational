@@ -6,6 +6,7 @@
 import Foundation
 import PLRelational
 
+/// TODO: Docs
 public class UndoableDatabase {
     
     private let db: TransactionalDatabase
