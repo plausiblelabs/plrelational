@@ -24,7 +24,7 @@ class RelationChangeSummaryTests: CombineTestCase {
         var set = RowChange()
         set.unionInPlace(Set(added))
         set.subtractInPlace(Set(removed))
-        let summary = set.summary(idAttr: "id")
+        let summary = set.summary(idAttr: "id", { $0 })
         
         let addedRows: Set<Row> = [
             ["id": 1, "name": "alice"],
@@ -40,5 +40,45 @@ class RelationChangeSummaryTests: CombineTestCase {
         XCTAssertEqual(Set(summary.added), addedRows)
         XCTAssertEqual(Set(summary.updated), updatedRows)
         XCTAssertEqual(Set(summary.deleted), deletedRows)
+    }
+    
+    func testNegativeSetSummaryWithMap() {
+        let added: [Row] = [
+            ["id": 1, "name": "alice"],
+            ["id": 2, "name": "bob"],
+            ["id": 3, "name": "carlos"]
+        ]
+        
+        let removed: [Row] = [
+            ["id": 3, "name": "charles"],
+            ["id": 4, "name": "donald"]
+        ]
+        
+        struct Item: Hashable, Equatable {
+            let id: Int64
+            let name: String
+        }
+        
+        var set = RowChange()
+        set.unionInPlace(Set(added))
+        set.subtractInPlace(Set(removed))
+        let summary = set.summary(idAttr: "id", {
+            Item(id: $0["id"].get()!, name: $0["name"].get()!)
+        })
+        
+        let addedItems: Set<Item> = [
+            Item(id: 1, name: "alice"),
+            Item(id: 2, name: "bob")
+        ]
+        let updatedItems: Set<Item> = [
+            Item(id: 3, name: "carlos")
+        ]
+        let deletedItems: Set<Item> = [
+            Item(id: 4, name: "donald")
+        ]
+        
+        XCTAssertEqual(Set(summary.added), addedItems)
+        XCTAssertEqual(Set(summary.updated), updatedItems)
+        XCTAssertEqual(Set(summary.deleted), deletedItems)
     }
 }

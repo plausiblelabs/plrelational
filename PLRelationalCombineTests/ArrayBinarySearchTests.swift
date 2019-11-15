@@ -24,11 +24,11 @@ class ArrayBinarySearchTests: XCTestCase {
     
     func testInsertSortedWithKeyPath() {
 
-        func insert(_ v: Int, _ vs: [Int], _ expected: [Int], _ expectedIndex: Int) {
+        func insert(_ v: Int, _ vs: [Int], _ expected: [Int], _ expectedIndex: Int, file: StaticString = #file, line: UInt = #line) {
             var mutvs = vs
             let index = mutvs.insertSorted(v, by: \.self, <)
-            XCTAssertEqual(mutvs, expected)
-            XCTAssertEqual(index, expectedIndex)
+            XCTAssertEqual(mutvs, expected, file: file, line: line)
+            XCTAssertEqual(index, expectedIndex, file: file, line: line)
         }
         
         insert(42, [], [42], 0)
@@ -42,5 +42,22 @@ class ArrayBinarySearchTests: XCTestCase {
         insert( 6, [0, 2, 4, 6], [0, 2, 4, 6, 6], 3)
         insert( 7, [0, 2, 4, 6], [0, 2, 4, 6, 7], 4)
         insert( 8, [0, 2, 4, 6], [0, 2, 4, 6, 8], 4)
+    }
+    
+    func testIsElementOrdered() {
+        
+        func verify(_ vs: [Int], _ index: Int, _ expected: Bool, file: StaticString = #file, line: UInt = #line) {
+            let actual = vs.isElementOrdered(at: index, by: \.self, <=)
+            XCTAssertEqual(actual, expected, file: file, line: line)
+        }
+        
+        verify([0], 0, true)
+        verify([1, 2, 3, 4], 0, true)
+        verify([1, 2, 3, 4], 1, true)
+        verify([1, 2, 3, 4], 2, true)
+        verify([1, 2, 3, 4], 3, true)
+        verify([1, 1, 3, 4], 0, true)
+        verify([2, 1, 3, 4], 0, false)
+        verify([1, 2, 3, 2], 3, false)
     }
 }

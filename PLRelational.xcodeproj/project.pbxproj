@@ -151,6 +151,7 @@
 		378A2D2C1F8FFAE0009F3EF8 /* DetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 37A5FE2D1F8FF9300003212C /* DetailView.xib */; };
 		378A2D2E1F8FFAF7009F3EF8 /* trash.png in Resources */ = {isa = PBXBuildFile; fileRef = 37A5FE381F8FF9300003212C /* trash.png */; };
 		378A2D2F1F8FFAF7009F3EF8 /* trash@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 37A5FE391F8FF9300003212C /* trash@2x.png */; };
+		37940205237E223800D7D399 /* LogError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37940204237E223800D7D399 /* LogError.swift */; };
 		3799AB491F57C43C0075570F /* ChecklistView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3799AB471F57C43C0075570F /* ChecklistView.xib */; };
 		3799AB4C1F57C8960075570F /* DetailView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3799AB4A1F57C8960075570F /* DetailView.xib */; };
 		3799AB4E1F58B3F70075570F /* EmphemeralComboBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3799AB4D1F58B3F70075570F /* EmphemeralComboBox.swift */; };
@@ -1052,6 +1053,7 @@
 		3788C0F91F60764B005920FD /* trash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = trash.png; sourceTree = "<group>"; };
 		3788C0FC1F6077A7005920FD /* trash@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "trash@2x.png"; sourceTree = "<group>"; };
 		378A2D211F8FFA75009F3EF8 /* TodoClientApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoClientApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		37940204237E223800D7D399 /* LogError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogError.swift; sourceTree = "<group>"; };
 		37941D8B1DB811BF00F5508F /* AsyncPropertyOperations.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AsyncPropertyOperations.swift; sourceTree = "<group>"; };
 		37941D8D1DB8191200F5508F /* AsyncPropertyOperationsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AsyncPropertyOperationsTests.swift; path = PLRelationalBindingTests/AsyncPropertyOperationsTests.swift; sourceTree = SOURCE_ROOT; };
 		3799AB481F57C43C0075570F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/ChecklistView.xib; sourceTree = "<group>"; };
@@ -1661,9 +1663,7 @@
 		371BF1342371F63800B86E96 /* Subscribers */ = {
 			isa = PBXGroup;
 			children = (
-				371BF129236CA1C000B86E96 /* RelationArrayReduce.swift */,
-				371BF12B236CA1D300B86E96 /* RelationArrayReduceTests.swift */,
-				371BF131236CBFD100B86E96 /* Private */,
+				37940202237DE31500D7D399 /* Array Reduce Subscriber */,
 			);
 			name = Subscribers;
 			sourceTree = "<group>";
@@ -1706,6 +1706,7 @@
 				371BF1342371F63800B86E96 /* Subscribers */,
 				37A47897237B8B0900D72A41 /* Property Wrappers */,
 				37A47898237B8B3000D72A41 /* Binding */,
+				37940203237E21E100D7D399 /* Other Combine Extensions */,
 				3720B4F52374DBF8003CF2BE /* PLRelational Extensions */,
 				371BF1052360BFBB00B86E96 /* Undo */,
 				371EDB79235F63F20079AE5E /* Supporting Files */,
@@ -1734,12 +1735,8 @@
 		371EDB7A235F64D00079AE5E /* Publishers */ = {
 			isa = PBXGroup;
 			children = (
-				371EDB7B235F65030079AE5E /* RelationValuePublisher.swift */,
-				371EDB7D235F65990079AE5E /* RelationValuePublisherTests.swift */,
-				371BF124236B600500B86E96 /* RelationChangePublisher.swift */,
-				371BF126236B601C00B86E96 /* RelationChangePublisherTests.swift */,
-				371BF11E236B5A9300B86E96 /* RelationChangeSummary.swift */,
-				371BF122236B5ADB00B86E96 /* RelationChangeSummaryTests.swift */,
+				37940200237DE2F700D7D399 /* Value Publisher */,
+				37940201237DE30000D7D399 /* Change Publisher */,
 			);
 			name = Publishers;
 			sourceTree = "<group>";
@@ -2129,6 +2126,44 @@
 				37AEC3FE1F576D18004E5487 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		37940200237DE2F700D7D399 /* Value Publisher */ = {
+			isa = PBXGroup;
+			children = (
+				371EDB7B235F65030079AE5E /* RelationValuePublisher.swift */,
+				371EDB7D235F65990079AE5E /* RelationValuePublisherTests.swift */,
+			);
+			name = "Value Publisher";
+			sourceTree = "<group>";
+		};
+		37940201237DE30000D7D399 /* Change Publisher */ = {
+			isa = PBXGroup;
+			children = (
+				371BF124236B600500B86E96 /* RelationChangePublisher.swift */,
+				371BF126236B601C00B86E96 /* RelationChangePublisherTests.swift */,
+				371BF11E236B5A9300B86E96 /* RelationChangeSummary.swift */,
+				371BF122236B5ADB00B86E96 /* RelationChangeSummaryTests.swift */,
+			);
+			name = "Change Publisher";
+			sourceTree = "<group>";
+		};
+		37940202237DE31500D7D399 /* Array Reduce Subscriber */ = {
+			isa = PBXGroup;
+			children = (
+				371BF129236CA1C000B86E96 /* RelationArrayReduce.swift */,
+				371BF12B236CA1D300B86E96 /* RelationArrayReduceTests.swift */,
+				371BF131236CBFD100B86E96 /* Private */,
+			);
+			name = "Array Reduce Subscriber";
+			sourceTree = "<group>";
+		};
+		37940203237E21E100D7D399 /* Other Combine Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				37940204237E223800D7D399 /* LogError.swift */,
+			);
+			name = "Other Combine Extensions";
 			sourceTree = "<group>";
 		};
 		37A1CE6C1D1081980067870D /* SearchApp */ = {
@@ -3908,6 +3943,7 @@
 				371BF125236B600500B86E96 /* RelationChangePublisher.swift in Sources */,
 				371BF12A236CA1C000B86E96 /* RelationArrayReduce.swift in Sources */,
 				3720B4FA2375F8AE003CF2BE /* TwoWay.swift in Sources */,
+				37940205237E223800D7D399 /* LogError.swift in Sources */,
 				371EDB7C235F65030079AE5E /* RelationValuePublisher.swift in Sources */,
 				371BF1042360BF7600B86E96 /* UndoManager.swift in Sources */,
 				371BF12E236CBF9C00B86E96 /* ArrayBinarySearch.swift in Sources */,

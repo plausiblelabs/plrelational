@@ -36,11 +36,11 @@ struct DetailView: View {
                     Text(tag)
                         // TODO: Context menu not working well in 10.15.1, only seems
                         // selectable if you click the thin border around the cell
-                        .contextMenu {
-                            Button(action: { /*model.removeTag()*/ } ) {
-                                Text("Remove Tag")
-                            }
-                        }
+//                        .contextMenu {
+//                            Button(action: { /*model.removeTag()*/ } ) {
+//                                Text("Remove Tag")
+//                            }
+//                        }
                 }
             }
                 .padding(.bottom)

@@ -8,12 +8,6 @@ import SwiftUI
 import PLRelational
 import PLRelationalCombine
 
-struct DummyItem: Identifiable {
-    var id: Int
-    var title: String
-    var tags: String
-}
-
 final class ChecklistViewModel: ObservableObject {
     
     private let model: Model
@@ -38,43 +32,40 @@ final class ChecklistViewModel: ObservableObject {
     init(model: Model) {
         self.model = model
 
-        func itemOrder(_ a: Row, _ b: Row) -> Bool {
+        func itemOrder(_ a: ChecklistItem, _ b: ChecklistItem) -> Bool {
             // We sort items into two sections:
             //   - first section has all incomplete items, with most recently created items at the top
             //   - second section has all completed items, with most recently completed items at the top
-            let aCompleted: String? = a[Item.completed].get()
-            let bCompleted: String? = b[Item.completed].get()
-            if let aCompleted = aCompleted, let bCompleted = bCompleted {
+            if let aCompleted = a.completed, let bCompleted = b.completed {
                 // Both items were completed; make more recently completed item come first
-                return aCompleted > bCompleted
-            } else if aCompleted != nil {
+                return aCompleted >= bCompleted
+            } else if a.completed != nil {
                 // `a` was completed but `b` was not, so `a` will come after `b`
                 return false
-            } else if bCompleted != nil {
+            } else if b.completed != nil {
                 // `b` was completed but `a` was not, so `b` will come after `a`
                 return true
             } else {
                 // Neither item was completed; make more recently created item come first
-                let aCreated: String = a[Item.created].get()!
-                let bCreated: String = b[Item.created].get()!
-                return aCreated > bCreated
+                return a.created >= b.created
             }
         }
         
         // REQ-2
         // The model for the list of to-do items.
         model.items
-            .sortedRows(idAttr: Item.id, orderedBy: itemOrder)
-            .replaceError(with: [])
-            .map{ rowArray in
-                rowArray.map{
-                    print("ROW UPDATED: \($0.row)")
-                    // TODO: Fix tags
-                    let completed = $0.row[Item.completed] != .null
-                    return ChecklistItemViewModel(model: model, id: ItemID($0.id), completed: completed, title: $0.row[Item.title].get()!, tags: "...")
+            .changes(ChecklistItem.init)
+            .logError()
+            .reduce(to: \.itemViewModels, on: self, orderBy: itemOrder) { existingItemViewModel, item in
+                // We reuse existing view model instances if provided; returning nil
+                // here means "keep using the existing view model without reinserting"
+                if let existing = existingItemViewModel {
+                    existing.item = item
+                    return nil
+                } else {
+                    return ChecklistItemViewModel(model: self.model, item: item)
                 }
             }
-            .bind(to: \.itemViewModels, on: self)
             .store(in: &cancellableBag)
     }
     

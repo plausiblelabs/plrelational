@@ -10,7 +10,6 @@ import PLRelationalCombine
 
 final class DetailViewModel: ObservableObject {
     
-    let objectWillChange = ObservableObjectPublisher()
     private let model: Model
 
     /// The selected item ID, cached in this property for easy access.

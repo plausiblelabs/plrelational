@@ -31,7 +31,7 @@ struct ChecklistItemView: View {
 struct ChecklistItemView_Previews: PreviewProvider {
     static var previews: some View {
         let model = modelForPreview()
-        let viewModel = ChecklistItemViewModel(model: model, id: ItemID("1"), completed: false, title: "Item 1", tags: "Hello")
+        let viewModel = ChecklistItemViewModel(model: model, item: ChecklistItem(id: ItemID("1"), title: "Item 1", created: "", completed: ""))
         return ChecklistItemView(model: viewModel)
             .padding()
             .previewLayout(.fixed(width: 300, height: 30))

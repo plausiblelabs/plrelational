@@ -6,23 +6,25 @@
 import Combine
 import PLRelational
 
-class RelationChangePublisher: Publisher {
+public class RelationChangePublisher<Element>: Publisher {
     
-    typealias Output = RelationChangeSummary
-    typealias Failure = RelationError
+    public typealias Output = RelationChangeSummary<Element>
+    public typealias Failure = RelationError
 
     private let relation: Relation
     private let idAttr: Attribute
+    private let mapFunc: (Row) -> Element
 
-    init(relation: Relation, idAttr: Attribute) {
+    init(relation: Relation, idAttr: Attribute, mapFunc: @escaping (Row) -> Element) {
         self.relation = relation
         self.idAttr = idAttr
+        self.mapFunc = mapFunc
     }
 
-    func receive<S>(subscriber: S) where S : Subscriber, S.Input == RelationChangeSummary, S.Failure == RelationError {
+    public func receive<S>(subscriber: S) where S : Subscriber, S.Input == RelationChangeSummary<Element>, S.Failure == RelationError {
         // TODO: For now, each subscription makes an initial query and maintains its own relation observer.
         // Ideally we would share state between subscriptions to avoid redundant work.
-        subscriber.receive(subscription: InnerSubscription(relation: relation, idAttr: idAttr, downstream: subscriber))
+        subscriber.receive(subscription: InnerSubscription(relation: relation, idAttr: idAttr, mapFunc: mapFunc, downstream: subscriber))
     }
 }
 
@@ -34,13 +36,15 @@ extension RelationChangePublisher {
     {
         private let relation: Relation
         private let idAttr: Attribute
+        private let mapFunc: (Row) -> Element
 
         private var downstream: Downstream?
         private var relationObserverRemoval: ObserverRemoval?
 
-        init(relation: Relation, idAttr: Attribute, downstream: Downstream) {
+        init(relation: Relation, idAttr: Attribute, mapFunc: @escaping (Row) -> Element, downstream: Downstream) {
             self.relation = relation
             self.idAttr = idAttr
+            self.mapFunc = mapFunc
             self.downstream = downstream
         }
 
@@ -71,7 +75,7 @@ extension RelationChangePublisher {
                 switch result {
                 case .Ok(let rows):
                     // TODO: Perhaps we should use an enum to differentiate initial set vs subsequent changes?
-                    let summary = RelationChangeSummary(added: Array(rows), updated: [], deleted: [])
+                    let summary = RelationChangeSummary(added: Array(rows.map(strongSelf.mapFunc)), updated: [], deleted: [])
                     _ = strongSelf.downstream?.receive(summary)
                 case .Err(let error):
                     if let downstream = strongSelf.downstream {
@@ -96,7 +100,7 @@ extension RelationChangePublisher {
             switch result {
             case .Ok(let change):
                 // Compute changes
-                let summary = change.summary(idAttr: idAttr)
+                let summary = change.summary(idAttr: idAttr, self.mapFunc)
                 if !summary.isEmpty {
                     _ = self.downstream?.receive(summary)
                 }
@@ -115,7 +119,7 @@ extension Relation {
 
     /// Returns a Publisher, sourced from this relation, that delivers a RelationChangeSummary for each
     /// set of changes that are made to the relation.
-    public func changes(id: Attribute = "id") -> AnyPublisher<RelationChangeSummary, RelationError> {
-        return RelationChangePublisher(relation: self, idAttr: id).eraseToAnyPublisher()
+    public func changes<Element>(id: Attribute = "id", _ mapFunc: @escaping (Row) -> Element) -> RelationChangePublisher<Element> {
+        return RelationChangePublisher(relation: self, idAttr: id, mapFunc: mapFunc)
     }
 }

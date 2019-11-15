@@ -23,6 +23,7 @@ class CombineTestCase: XCTestCase {
         let path = tmp.appendingPathComponent(dbname)
         _ = try? FileManager.default.removeItem(atPath: path)
         
+        Swift.print("Creating SQLite database at \(path)")
         let db = try! SQLiteDatabase(path)
         
         dbPaths.append(path)

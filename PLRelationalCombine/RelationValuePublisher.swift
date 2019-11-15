@@ -136,7 +136,7 @@ extension RelationValuePublisher {
                 // XXX: See `lastValue` comments; should revisit this
                 let valueChanging = shouldPublish(lastValue, value)
                 lastValue = value
-                Swift.print("Relation changed: \(value) downstream=\(self.downstream) ignore=\(self.ignoreInitiator) initiators=\(initiators)")
+//                Swift.print("Relation changed: \(value) downstream=\(self.downstream) ignore=\(self.ignoreInitiator) initiators=\(initiators)")
                 let deliverValue: Bool
                 if let initiator = ignoreInitiator {
                     // Don't deliver the value if the change was initiated by (just) the given initiator

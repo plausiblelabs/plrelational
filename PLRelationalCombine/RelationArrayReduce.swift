@@ -15,25 +15,32 @@ fileprivate enum SubscriptionStatus {
     case terminal
 }
 
-private final class RelationArrayReduce<Root, Value, OrderBy>
+/// Each element of the destination array for a `RelationArrayReduce` operation must
+/// implement this protocol.  The wrapped `Element` type should be lightweight (i.e., cheap
+/// to instantiate), while the `ElementViewModel` is class-bound and is expected to be
+/// reused when possible.
+public protocol ElementViewModel: AnyObject {
+    associatedtype Element: Identifiable
+    var element: Element { get }
+}
+
+private final class RelationArrayReduce<Root, Target>
     : Subscriber,
       Cancellable,
       CustomStringConvertible,
       CustomReflectable,
       CustomPlaygroundDisplayConvertible
-    where Root: AnyObject, OrderBy: Comparable, Value: Identifiable, Value.ID == RelationValue
+    where Root: AnyObject, Target: ElementViewModel
 {
-    public typealias Input = RelationChangeSummary
+    public typealias Input = RelationChangeSummary<Target.Element>
     public typealias Failure = Never
 
-    // TODO: This is held weakly to match WeakAssign; need to think more about the right approach here
+    // TODO: This is held weakly to match WeakBind; need to think more about the right approach here
     private weak var object: Root?
-    private let keyPath: ReferenceWritableKeyPath<Root, [Value]>
+    private let keyPath: ReferenceWritableKeyPath<Root, [Target]>
     
-    private let idAttr: Attribute
-    private let orderKeyPath: KeyPath<Value, OrderBy>
-    private let orderFunc: (OrderBy, OrderBy) -> Bool
-    private let mapFunc: (Row) -> Value
+    private let mapFunc: (_ existing: Target?, _ element: Target.Element) -> Target?
+    private let orderFunc: (Target.Element, Target.Element) -> Bool
 
     private var status = SubscriptionStatus.awaitingSubscription
 
@@ -43,8 +50,6 @@ private final class RelationArrayReduce<Root, Value, OrderBy>
         let children: [Mirror.Child] = [
             ("object", object as Any),
             ("keyPath", keyPath),
-            ("idAttr", idAttr),
-            ("orderKeyPath", orderKeyPath),
             ("status", status as Any)
         ]
         return Mirror(self, children: children)
@@ -52,22 +57,16 @@ private final class RelationArrayReduce<Root, Value, OrderBy>
 
     public var playgroundDescription: Any { return description }
 
-    public init(object: Root, keyPath: ReferenceWritableKeyPath<Root, [Value]>,
-                idAttr: Attribute, orderKeyPath: KeyPath<Value, OrderBy>, descending: Bool,
-                mapFunc: @escaping (Row) -> Value)
+    public init(object: Root, keyPath: ReferenceWritableKeyPath<Root, [Target]>,
+                mapFunc: @escaping (_ existing: Target?, _ element: Target.Element) -> Target?,
+                orderFunc: @escaping (Target.Element, Target.Element) -> Bool)
     {
         self.object = object
         self.keyPath = keyPath
-        self.idAttr = idAttr
-        self.orderKeyPath = orderKeyPath
-        if descending {
-            self.orderFunc = { $0 > $1 }
-        } else {
-            self.orderFunc = { $0 < $1 }
-        }
         self.mapFunc = mapFunc
+        self.orderFunc = orderFunc
     }
-
+    
     public func receive(subscription: Subscription) {
         switch status {
         case .subscribed, .terminal:
@@ -80,7 +79,7 @@ private final class RelationArrayReduce<Root, Value, OrderBy>
         }
     }
 
-    public func receive(_ value: RelationChangeSummary) -> Subscribers.Demand {
+    public func receive(_ value: RelationChangeSummary<Target.Element>) -> Subscribers.Demand {
         switch status {
         case .subscribed:
             if var array = object?[keyPath: keyPath] {
@@ -110,59 +109,68 @@ private final class RelationArrayReduce<Root, Value, OrderBy>
         object = nil
     }
     
-    private func insert(_ rows: [Row], into array: inout [Value]) {
-        for row in rows {
-            let elem = mapFunc(row)
-            _ = array.insertSorted(elem, by: orderKeyPath, orderFunc)
+    private func insert(_ elements: [Target.Element], into array: inout [Target]) {
+        for elem in elements {
+            if let target = mapFunc(nil, elem) {
+                _ = array.insertSorted(target, by: \.element, orderFunc)
+            }
         }
     }
 
-    private func delete(_ rows: [Row], from array: inout [Value]) {
-        for row in rows {
-            let rowId = row[idAttr]
-            if let index = array.firstIndex(where: { $0.id == rowId }) {
+    private func delete(_ elements: [Target.Element], from array: inout [Target]) {
+        for elem in elements {
+            let elemId = elem.id
+            if let index = array.firstIndex(where: { $0.element.id == elemId }) {
                 array.remove(at: index)
             }
         }
     }
 
-    private func update(_ rows: [Row], in array: inout [Value]) {
-        for row in rows {
-            let rowId = row[idAttr]
-            guard let index = array.firstIndex(where: { $0.id == rowId }) else {
+    private func update(_ elements: [Target.Element], in array: inout [Target]) {
+        for elem in elements {
+            let elemId = elem.id
+            guard let index = array.firstIndex(where: { $0.element.id == elemId }) else {
                 // TODO: Treat this as an error?
                 continue
             }
-            
-            // TODO: For now, always delete the existing item and insert a new one;
-            // this needs to be fixed to:
-            //   - allow for extracting the order attribute from the row without requiring caller to make a new element
-            //   - pass the existing item to mapFunc so that the caller can decide whether to make a new one
-            //   - use `move` in the case where it is a pure move
-            //   - otherwise update the element in place
-            array.remove(at: index)
-            let elem = mapFunc(row)
-            _ = array.insertSorted(elem, by: orderKeyPath, orderFunc)
+
+            // Get the existing target item
+            let existingTarget = array[index]
+
+            // Pass it to the map function along with the updated element data
+            let updatedTarget: Target
+            if let newTarget = mapFunc(existingTarget, elem) {
+                // The callee created a new target item
+                array[index] = newTarget
+                updatedTarget = newTarget
+            } else {
+                // The callee wants to use the existing target item
+                updatedTarget = existingTarget
+            }
+
+            // See if the order is changing.  Note that we could just always remove+insert,
+            // but the following approach is slightly more efficient in that it only moves
+            // elements if the order is actually changing, and otherwise keeps things in place.
+            let orderChanging = !array.isElementOrdered(at: index, by: \.element, orderFunc)
+            if orderChanging {
+                // TODO: Would there be any benefit to using SwiftUI's `move` extension here?
+                array.remove(at: index)
+                _ = array.insertSorted(updatedTarget, by: \.element, orderFunc)
+            }
         }
     }
 }
 
-// TODO: Preserve RelationErrors (i.e., don't force Never here)
-extension Publisher where Self.Output == RelationChangeSummary, Self.Failure == Never {
+extension Publisher where Self.Failure == Never {
 
     /// TODO: Docs
-    public func reduce<Root, Value, OrderBy>(to keyPath: ReferenceWritableKeyPath<Root, [Value]>,
-                                             on object: Root,
-                                             id idAttr: Attribute = "id",
-                                             sortedBy orderKeyPath: KeyPath<Value, OrderBy>, descending: Bool = false,
-                                             _ mapFunc: @escaping (Row) -> Value) -> AnyCancellable
-        // TODO: Relax the Value.ID == RelationValue restriction
-        where Root: AnyObject, OrderBy: Comparable, Value: Identifiable, Value.ID == RelationValue
+    public func reduce<Root, Target>(to keyPath: ReferenceWritableKeyPath<Root, [Target]>,
+                                      on object: Root,
+                                      orderBy orderFunc: @escaping (Target.Element, Target.Element) -> Bool,
+                                      _ mapFunc: @escaping (_ existing: Target?, _ element: Target.Element) -> Target?) -> AnyCancellable
+        where Root: AnyObject, Target: ElementViewModel, Self.Output == RelationChangeSummary<Target.Element>
     {
-        let subscriber = RelationArrayReduce(object: object, keyPath: keyPath,
-                                             idAttr: idAttr,
-                                             orderKeyPath: orderKeyPath, descending: descending,
-                                             mapFunc: mapFunc)
+        let subscriber = RelationArrayReduce(object: object, keyPath: keyPath, mapFunc: mapFunc, orderFunc: orderFunc)
         subscribe(subscriber)
         return AnyCancellable(subscriber)
     }

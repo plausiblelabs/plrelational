@@ -7,6 +7,48 @@ import XCTest
 import PLRelational
 @testable import PLRelationalCombine
 
+private struct TestItem: Identifiable, Equatable, CustomStringConvertible {
+    let id: Int64
+    let name: String
+
+    init(id: Int64, name: String) {
+        self.id = id
+        self.name = name
+    }
+
+    init(row: Row) {
+        self.init(id: row["id"].get()!, name: row["name"].get()!)
+    }
+
+    var description: String {
+        "Item(\(id) \(name))"
+    }
+}
+
+// XXX: Have to define this outside the test function due to:
+//   SR-3092: Function-level nested types cannot conform to Equatable
+//   https://bugs.swift.org/browse/SR-3092
+private class TestItemViewModel: ElementViewModel, Identifiable, Equatable, CustomStringConvertible {
+    var item: TestItem
+    let tag: Int
+
+    var element: TestItem { item }
+    var id: Int64 { item.id }
+
+    init(item: TestItem, tag: Int) {
+        self.item = item
+        self.tag = tag
+    }
+    
+    var description: String {
+        "ItemViewModel(\(item) tag=\(tag))"
+    }
+    
+    static func == (lhs: TestItemViewModel, rhs: TestItemViewModel) -> Bool {
+        return lhs.item == rhs.item && lhs.tag == rhs.tag
+    }
+}
+
 class RelationArrayReduceTests: CombineTestCase {
 
     override func setUp() {
@@ -27,7 +69,7 @@ class RelationArrayReduceTests: CombineTestCase {
                 "name": RelationValue(name)
             ]
         }
-        
+
         // Add one person synchronously so that there is initial data supplied by the publisher
         _ = sqliteRelation.add(row(1, "Alice"))
 
@@ -48,32 +90,22 @@ class RelationArrayReduceTests: CombineTestCase {
             AssertEqual(sqliteDB["person"]!, expected, file: file, line: line)
         }
 
-        struct TestItem: Identifiable, Equatable, CustomStringConvertible {
-            let id: RelationValue
-            let name: String
-            let tag: Int
-            
-            var description: String {
-                "Item(\(id.get()! as Int64), \(name), \(tag))"
-            }
+        func item(_ id: Int64, _ name: String, _ tag: Int) -> TestItemViewModel {
+            return TestItemViewModel(item: TestItem(id: id, name: name), tag: tag)
         }
-        
-        func item(_ id: Int64, _ name: String, _ tag: Int) -> TestItem {
-            return TestItem(id: RelationValue(id), name: name, tag: tag)
-        }
-        
+
         class TestViewModel {
             var expectation: XCTestExpectation!
 
             init() {
                 self.reset()
             }
-            
+
             func reset() {
                 expectation = XCTestExpectation(description: "Items updated")
             }
-            
-            var items: [TestItem] = [] {
+
+            var itemViewModels: [TestItemViewModel] = [] {
                 didSet {
                     expectation.fulfill()
                 }
@@ -85,26 +117,38 @@ class RelationArrayReduceTests: CombineTestCase {
         func reset() {
             vm.reset()
         }
-        
+
         func await() {
             wait(for: [vm.expectation], timeout: 5.0)
         }
 
-        func verify(_ expectedItems: [TestItem], file: StaticString = #file, line: UInt = #line) {
-            XCTAssertEqual(vm.items, expectedItems, file: file, line: line)
+        func verify(_ expectedItemViewModels: [TestItemViewModel], file: StaticString = #file, line: UInt = #line) {
+            XCTAssertEqual(vm.itemViewModels, expectedItemViewModels, file: file, line: line)
         }
-        
+
         // Subscribe to the relation change publisher
         var tag = 0
         let cancellable = r
-            .changes()
+            .changes(TestItem.init)
             // TODO: Figure out better error handling approach for these publishers/subscribers
             .replaceError(with: RelationChangeSummary(added: [], updated: [], deleted: []))
-            .reduce(to: \.items, on: vm, sortedBy: \.name) { row in
-                tag += 1
-                return TestItem(id: row["id"], name: row["name"].get()!, tag: tag)
+            .reduce(to: \.itemViewModels, on: vm, orderBy: { $0.name <= $1.name }) { existingItemViewModel, item in
+                // In this scenario, we reuse existing view model instances if provided; returning nil
+                // here means "keep using the existing view model without reinserting"
+                if let existing = existingItemViewModel {
+                    existing.item = item
+                    return nil
+                } else {
+                    tag += 1
+                    return TestItemViewModel(item: item, tag: tag)
+                }
             }
         XCTAssertNotNil(cancellable)
+        
+        verifySQLite(MakeRelation(
+            ["id", "name"],
+            [1,    "Alice"]
+        ))
 
         // Verify that initial query produces Alice
         await()
@@ -147,15 +191,15 @@ class RelationArrayReduceTests: CombineTestCase {
             [3,    "Carlos"],
             [4,    "Bob"]
         ))
-        
-        // Rename a person
+
+        // Rename a person (causing the ordering to change)
         reset()
         renamePerson(2, "Bon")
         await()
         verify([
             item(1, "Alice", 1),
             item(4, "Bob", 4),
-            item(2, "Bon", 5), // TODO: If we allow by-reference updates to items, the tag value might not change here
+            item(2, "Bon", 2),
             item(3, "Carlos", 3)
         ])
 
@@ -167,13 +211,32 @@ class RelationArrayReduceTests: CombineTestCase {
             [4,    "Bob"]
         ))
 
+        // Rename a person (without affecting order)
+        reset()
+        renamePerson(4, "Bobb")
+        await()
+        verify([
+            item(1, "Alice", 1),
+            item(4, "Bobb", 4),
+            item(2, "Bon", 2),
+            item(3, "Carlos", 3)
+        ])
+
+        verifySQLite(MakeRelation(
+            ["id", "name"],
+            [1,    "Alice"],
+            [2,    "Bon"],
+            [3,    "Carlos"],
+            [4,    "Bobb"]
+        ))
+        
         // Delete a person
         reset()
         deletePerson(1)
         await()
         verify([
-            item(4, "Bob", 4),
-            item(2, "Bon", 5),
+            item(4, "Bobb", 4),
+            item(2, "Bon", 2),
             item(3, "Carlos", 3)
         ])
 
@@ -181,7 +244,7 @@ class RelationArrayReduceTests: CombineTestCase {
             ["id", "name"],
             [2,    "Bon"],
             [3,    "Carlos"],
-            [4,    "Bob"]
+            [4,    "Bobb"]
         ))
 
         // Perform multiple inserts/updates/deletes within a single transaction
@@ -191,9 +254,9 @@ class RelationArrayReduceTests: CombineTestCase {
         renamePerson(4, "Bobby")
         await()
         verify([
-            item(4, "Bobby", 7),
+            item(4, "Bobby", 4),
             item(3, "Carlos", 3),
-            item(5, "Cate", 6)
+            item(5, "Cate", 5)
         ])
 
         verifySQLite(MakeRelation(
@@ -202,8 +265,6 @@ class RelationArrayReduceTests: CombineTestCase {
             [4,    "Bobby"],
             [5,    "Cate"]
         ))
-        
-        // TODO: Test in-place updates vs replace
 
         cancellable.cancel()
     }

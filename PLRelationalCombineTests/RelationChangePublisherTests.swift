@@ -10,6 +10,11 @@ import PLRelational
 
 class RelationChangePublisherTests: CombineTestCase {
 
+    override func setUp() {
+        super.setUp()
+        continueAfterFailure = false
+    }
+    
     func testInsertRenameDeleteSortedByName() {
         let sqliteDB = makeDB().db
         let sqliteRelation = sqliteDB.createRelation("person", scheme: ["id", "name"]).ok!
@@ -23,7 +28,25 @@ class RelationChangePublisherTests: CombineTestCase {
                 "name": RelationValue(name)
             ]
         }
-        
+
+        struct Person: Identifiable, Hashable, Equatable {
+            let id: Int64
+            let name: String
+
+            init(id: Int64, name: String) {
+                self.id = id
+                self.name = name
+            }
+
+            init(row: Row) {
+                self.init(id: row["id"].get()!, name: row["name"].get()!)
+            }
+        }
+
+        func p(_ id: Int64, _ name: String) -> Person {
+            Person(id: id, name: name)
+        }
+
         // Add one person synchronously so that there is initial data supplied by the publisher
         _ = sqliteRelation.add(row(1, "Alice"))
 
@@ -45,29 +68,29 @@ class RelationChangePublisherTests: CombineTestCase {
         }
 
         var expectation = XCTestExpectation(description: self.debugDescription)
-        var summaries: [RelationChangeSummary] = []
-        
+        var summaries: [RelationChangeSummary<Person>] = []
+
         func reset() {
             expectation = XCTestExpectation(description: self.debugDescription)
             summaries = []
         }
-        
+
         func await() {
             wait(for: [expectation], timeout: 5.0)
         }
-        
-        func verify(added: [Row], updated: [Row], deleted: [Row]) {
-            XCTAssertEqual(summaries.count, 1)
+
+        func verify(added: [Person], updated: [Person], deleted: [Person], file: StaticString = #file, line: UInt = #line) {
+            XCTAssertEqual(summaries.count, 1, file: file, line: line)
             let s = summaries[0]
-            XCTAssertEqual(Set(s.added), Set(added))
-            XCTAssertEqual(Set(s.updated), Set(updated))
-            XCTAssertEqual(Set(s.deleted), Set(deleted))
+            XCTAssertEqual(Set(s.added), Set(added), file: file, line: line)
+            XCTAssertEqual(Set(s.updated), Set(updated), file: file, line: line)
+            XCTAssertEqual(Set(s.deleted), Set(deleted), file: file, line: line)
         }
-        
+
         // Subscribe to the relation change publisher
-        let cancellable = r.changes().sink(
-            receiveCompletion: { _ in
-                XCTFail("No completion is expected")
+        let cancellable = r.changes(Person.init).sink(
+            receiveCompletion: {
+                XCTFail("No completion is expected, but we received \($0)")
             },
             receiveValue: { summary in
                 summaries.append(summary)
@@ -76,26 +99,31 @@ class RelationChangePublisherTests: CombineTestCase {
         )
         XCTAssertNotNil(cancellable)
 
+        verifySQLite(MakeRelation(
+            ["id", "name"],
+            [1,    "Alice"]
+        ))
+
         // Verify that initial query produces Alice
         await()
-        verify(added: [row(1, "Alice")], updated: [], deleted: [])
+        verify(added: [p(1, "Alice")], updated: [], deleted: [])
 
         // Insert some persons
         reset()
         addPerson(2, "Donald")
         await()
-        verify(added: [row(2, "Donald")], updated: [], deleted: [])
+        verify(added: [p(2, "Donald")], updated: [], deleted: [])
 
         reset()
         addPerson(3, "Carlos")
         await()
-        verify(added: [row(3, "Carlos")], updated: [], deleted: [])
+        verify(added: [p(3, "Carlos")], updated: [], deleted: [])
 
         reset()
         addPerson(4, "Bob")
         await()
-        verify(added: [row(4, "Bob")], updated: [], deleted: [])
-        
+        verify(added: [p(4, "Bob")], updated: [], deleted: [])
+
         verifySQLite(MakeRelation(
             ["id", "name"],
             [1,    "Alice"],
@@ -103,12 +131,12 @@ class RelationChangePublisherTests: CombineTestCase {
             [3,    "Carlos"],
             [4,    "Bob"]
         ))
-        
+
         // Rename a person
         reset()
         renamePerson(2, "Bon")
         await()
-        verify(added: [], updated: [row(2, "Bon")], deleted: [])
+        verify(added: [], updated: [p(2, "Bon")], deleted: [])
 
         verifySQLite(MakeRelation(
             ["id", "name"],
@@ -117,12 +145,12 @@ class RelationChangePublisherTests: CombineTestCase {
             [3,    "Carlos"],
             [4,    "Bob"]
         ))
-        
+
         // Delete a person
         reset()
         deletePerson(1)
         await()
-        verify(added: [], updated: [], deleted: [row(1, "Alice")])
+        verify(added: [], updated: [], deleted: [p(1, "Alice")])
 
         verifySQLite(MakeRelation(
             ["id", "name"],
@@ -138,7 +166,7 @@ class RelationChangePublisherTests: CombineTestCase {
         renamePerson(4, "Bobby")
         addPerson(5, "Donna")
         await()
-        verify(added: [row(5, "Donna"), row(6, "Cate")], updated: [row(4, "Bobby")], deleted: [row(2, "Bon")])
+        verify(added: [p(5, "Donna"), p(6, "Cate")], updated: [p(4, "Bobby")], deleted: [p(2, "Bon")])
 
         verifySQLite(MakeRelation(
             ["id", "name"],

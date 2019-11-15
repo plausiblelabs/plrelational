@@ -53,7 +53,7 @@ class RelationValuePublisherTests: CombineTestCase {
                 XCTFail("No completion is expected")
             },
             receiveValue: { value in
-                print("RECEIVED \(value)")
+//                print("RECEIVED \(value)")
                 values.append(value)
                 didChangeExpectation.fulfill()
             }
