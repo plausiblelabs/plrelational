@@ -46,7 +46,7 @@ struct EphemeralComboBox<Item: ComboBoxItem>: NSViewRepresentable {
     }
     
     func updateNSView(_ view: NSComboBox, context: Context) {
-//        print("UPDATING COMBO")
+        view.stringValue = ""
         view.removeAllItems()
         view.addItems(withObjectValues: items.map{ $0.string })
     }
@@ -62,7 +62,7 @@ class EphemeralComboBoxCoordinator: NSObject, NSComboBoxDelegate {
         self.onItemSelected = onItemSelected
         self.onCommitString = onCommitString
     }
-
+    
     @objc func comboBoxWillPopUp(_ notification: Notification) {
         poppedUp = true
     }
@@ -82,11 +82,12 @@ class EphemeralComboBoxCoordinator: NSObject, NSComboBoxDelegate {
     }
 
     private func notifyItemSelected(comboBox: NSComboBox, index: Int) {
+        // TODO: Ideally we would deselect the item and/or clear the string
+        // right away here so that it doesn't appear briefly, but that doesn't
+        // seem to work, so instead we clear the string in `updateNSView`.
+        // It seems NSComboBox sets the string directly on its cell behind
+        // the scenes and there's no easy way to intervene :(
         onItemSelected(index)
-        // TODO: Hrm, the following two lines seem to have no effect
-        comboBox.stringValue = ""
-        comboBox.deselectItem(at: index)
-//            print("DESELECT: \(comboBox.indexOfSelectedItem) \(comboBox.stringValue)")
     }
 
     @objc func stringCommitted(_ sender: NSComboBox) {
