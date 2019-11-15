@@ -15,7 +15,18 @@ struct ChecklistView: View {
     }
     
     var body: some View {
-        VStack {
+        // Disable animation for initial load
+        let animation: Animation?
+        if model.hasDisplayedItems {
+            animation = .default
+        } else {
+            if model.itemViewModels.count > 0 {
+                model.hasDisplayedItems = true
+            }
+            animation = .none
+        }
+        
+        return VStack {
             TextField("Add a to-do", text: $model.newItemTitle, onCommit: {
                 self.model.addNewItem()
             })
@@ -28,8 +39,7 @@ struct ChecklistView: View {
                         .animation(.none)
                 }
             }
-                // TODO: Disable animation for initial load
-                .animation(.default)
+                .animation(animation)
                 .environment(\.defaultMinListRowHeight, 30)
         }
     }

@@ -26,6 +26,10 @@ final class ChecklistViewModel: ObservableObject {
                 .asyncReplaceValues(itemIDs)
         }
     }
+    
+    /// Set when the view has displayed one or more items for the first time.
+    /// This is used to disable animation the first time items are displayed.
+    var hasDisplayedItems = false
 
     private var cancellableBag = Set<AnyCancellable>()
     
