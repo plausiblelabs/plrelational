@@ -73,31 +73,27 @@ private final class FakeViewModel: ObservableObject {
             ["id", "type", "name", "note"],
             [1,    "cat",  "pete", "friendly"])
 
+        func testStrategy(_ keyPath: ReferenceWritableKeyPath<FakeViewModel, TestOneStringStrategy?>) -> (Relation, InitiatorTag) -> TestOneStringStrategy {
+            return { (r, i) -> TestOneStringStrategy in
+                let s = TestOneStringStrategy(r, i)
+                self[keyPath: keyPath] = s
+                return s
+            }
+        }
+        
         pets
             .project("type")
-            .bind(to: \._petType, on: self, strategy: { (r, i) -> TestOneStringStrategy in
-                let s = TestOneStringStrategy(r, i)
-                self.typeStrategy = s
-                return s
-            })
+            .bind(to: \._petType, on: self, strategy: testStrategy(\.typeStrategy))
             .store(in: &cancellableBag)
         
         pets
             .project("name")
-            .bind(to: \._petName, on: self, strategy: { (r, i) -> TestOneStringStrategy in
-                let s = TestOneStringStrategy(r, i)
-                self.nameStrategy = s
-                return s
-            })
+            .bind(to: \._petName, on: self, strategy: testStrategy(\.nameStrategy))
             .store(in: &cancellableBag)
         
         pets
             .project("note")
-            .bind(to: \._petNote, on: self, strategy: { (r, i) -> TestOneStringStrategy in
-                let s = TestOneStringStrategy(r, i)
-                self.noteStrategy = s
-                return s
-            })
+            .bind(to: \._petNote, on: self, strategy: testStrategy(\.noteStrategy))
             .store(in: &cancellableBag)
     }
     

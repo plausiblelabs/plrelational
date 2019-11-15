@@ -79,7 +79,6 @@ final class ChecklistItemViewModel: ElementViewModel, Identifiable, ObservableOb
     }
     
     deinit {
-//        print("CANCELLING: \(id)")
         cancellableBag.forEach{ $0.cancel() }
     }
 }
