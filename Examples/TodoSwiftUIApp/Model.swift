@@ -65,7 +65,7 @@ struct ExistingTag {
     let id: TagID
     let name: String
     
-    init(_ row: Row) {
+    init(row: Row) {
         self.id = TagID(row)
         self.name = row[Tag.name].get()!
     }

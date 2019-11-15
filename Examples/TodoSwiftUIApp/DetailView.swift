@@ -30,7 +30,7 @@ struct DetailView: View {
                 onCommitString: { self.model.addNewTagToSelectedItem(name: $0) },
                 onItemSelected: { self.model.addExistingTagToSelectedItem(tagID: $0.id) }
             )
-            
+
             List {
                 ForEach(model.itemTags, id: \.self) { tag in
                     Text(tag)

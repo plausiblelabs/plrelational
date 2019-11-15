@@ -8,6 +8,16 @@ import SwiftUI
 import PLRelational
 import PLRelationalCombine
 
+struct TagItem: ComboBoxItem {
+    let id: TagID
+    let string: String
+    
+    init(row: Row) {
+        self.id = TagID(row)
+        self.string = row[Tag.name].get()!
+    }
+}
+
 final class DetailViewModel: ObservableObject {
     
     private let model: Model
@@ -18,7 +28,7 @@ final class DetailViewModel: ObservableObject {
     @TwoWay(onSet: .commit) var itemCompleted: Bool = false
     @TwoWay(onSet: .update) var itemTitle: String = ""
 
-    @Published var availableTags: [ComboBoxItem] = []
+    @Published var availableTags: [TagItem] = []
     @Published var itemTags: [String] = []
 
     @TwoWay var itemNotes: String = ""
@@ -55,15 +65,11 @@ final class DetailViewModel: ObservableObject {
             .bind(to: \._itemTitle, on: self, strategy: model.itemTitle())
             .store(in: &cancellableBag)
 
-        func comboBoxItemForTagRow(_ row: Row) -> ComboBoxItem {
-            ComboBoxItem(id: row[Tag.id], string: row[Tag.name].get()!)
-        }
-        
         // REQ-9
         // The tags that are available (i.e., not already applied) for the selected
         // to-do item, sorted by name.
         model.availableTagsForSelectedItem
-            .map(comboBoxItemForTagRow, sortedBy: \.string)
+            .map(TagItem.init, sortedBy: \.string)
             .replaceError(with: [])
             .bind(to: \.availableTags, on: self)
             .store(in: &cancellableBag)
@@ -104,12 +110,12 @@ final class DetailViewModel: ObservableObject {
     
     /// REQ-9
     /// Adds an existing tag to the selected to-do item.
-    func addExistingTagToSelectedItem(tagID: RelationValue) {
+    func addExistingTagToSelectedItem(tagID: TagID) {
         guard let itemID = self.itemID else {
             return
         }
 
-        self.model.addExistingTag(TagID(tagID), to: itemID)
+        self.model.addExistingTag(tagID, to: itemID)
     }
     
     /// REQ-9
