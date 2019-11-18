@@ -58,7 +58,7 @@ private final class FakeViewModel: ObservableObject {
     let objectWillChange = ObjectWillChangePublisher()
     
     let pets: Relation
-    private var cancellableBag = Set<AnyCancellable>()
+    private var cancellableBag = CancellableBag()
 
     var typeStrategy: TestOneStringStrategy!
     var nameStrategy: TestOneStringStrategy!
@@ -98,7 +98,7 @@ private final class FakeViewModel: ObservableObject {
     }
     
     deinit {
-        cancellableBag.forEach{ $0.cancel() }
+        cancellableBag.cancel()
     }
     
     func updatePet(type: String, name: String, note: String) {

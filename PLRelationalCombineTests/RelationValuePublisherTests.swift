@@ -10,7 +10,7 @@ import PLRelational
 
 private final class FakeViewModel: ObservableObject {
     private let pets: Relation
-    private var cancellableBag = Set<AnyCancellable>()
+    private var cancellableBag = CancellableBag()
 
     @Published var petName: String = ""
 

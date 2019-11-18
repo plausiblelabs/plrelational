@@ -35,7 +35,7 @@ final class DetailViewModel: ObservableObject {
     
     @Published var createdOn: String = ""
 
-    private var cancellableBag = Set<AnyCancellable>()
+    private var cancellableBag = CancellableBag()
 
     init(model: Model) {
         self.model = model
@@ -105,7 +105,7 @@ final class DetailViewModel: ObservableObject {
     }
     
     deinit {
-        cancellableBag.forEach{ $0.cancel() }
+        cancellableBag.cancel()
     }
     
     /// REQ-9

@@ -84,7 +84,7 @@ class Model {
     private let db: TransactionalDatabase
     private let undoableDB: UndoableDatabase
 
-    private var cancellableBag = Set<AnyCancellable>()
+    private var cancellableBag = CancellableBag()
 
     init(undoManager: PLRelationalCombine.UndoManager, path: String?) {
         let specs: [Spec] = [
@@ -140,7 +140,7 @@ class Model {
     }
 
     deinit {
-        cancellableBag.forEach{ $0.cancel() }
+        cancellableBag.cancel()
     }
 
     func addDefaultData(selectItem: Bool = false) {

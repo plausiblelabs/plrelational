@@ -52,7 +52,7 @@ final class ChecklistItemViewModel: ElementViewModel, Identifiable, ObservableOb
     @Published var title: String
     @Published var tags: String
     
-    private var cancellableBag = Set<AnyCancellable>()
+    private var cancellableBag = CancellableBag()
     
     init(model: Model, item: ChecklistItem) {
         self.model = model
@@ -79,6 +79,6 @@ final class ChecklistItemViewModel: ElementViewModel, Identifiable, ObservableOb
     }
     
     deinit {
-        cancellableBag.forEach{ $0.cancel() }
+        cancellableBag.cancel()
     }
 }

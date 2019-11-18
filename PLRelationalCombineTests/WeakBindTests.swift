@@ -14,7 +14,7 @@ class WeakBindTests: CombineTestCase {
 
         class TestObject {
             var value: String = ""
-            private var cancellableBag = Set<AnyCancellable>()
+            private var cancellableBag = CancellableBag()
 
             init(names: Relation) {
                 // This is a long-lived publisher that will continue to observe
@@ -29,7 +29,7 @@ class WeakBindTests: CombineTestCase {
             }
             
             deinit {
-                cancellableBag.forEach{ $0.cancel() }
+                cancellableBag.cancel()
             }
         }
         

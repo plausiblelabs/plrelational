@@ -31,7 +31,7 @@ final class ChecklistViewModel: ObservableObject {
     /// This is used to disable animation the first time items are displayed.
     var hasDisplayedItems = false
 
-    private var cancellableBag = Set<AnyCancellable>()
+    private var cancellableBag = CancellableBag()
     
     init(model: Model) {
         self.model = model
@@ -74,7 +74,7 @@ final class ChecklistViewModel: ObservableObject {
     }
     
     deinit {
-        cancellableBag.forEach{ $0.cancel() }
+        cancellableBag.cancel()
     }
     
     /// REQ-1

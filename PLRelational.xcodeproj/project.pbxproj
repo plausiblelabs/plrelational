@@ -166,7 +166,6 @@
 		37A47893237B34D000D72A41 /* WeakTwoWayBind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47892237B34D000D72A41 /* WeakTwoWayBind.swift */; };
 		37A47895237B372500D72A41 /* WeakTwoWayBindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47894237B372500D72A41 /* WeakTwoWayBindTests.swift */; };
 		37A47896237B836B00D72A41 /* WeakBind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF11C236A355700B86E96 /* WeakBind.swift */; };
-		37A4789A237B8B4D00D72A41 /* WeakBindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47899237B8B4D00D72A41 /* WeakBindTests.swift */; };
 		37A4789C237CC6B900D72A41 /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A4789B237CC6B900D72A41 /* TextView.swift */; };
 		37A9A37E1F06B9A000B35559 /* SegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A9A37B1F06B65C00B35559 /* SegmentedControl.swift */; };
 		37AEC3F61F576D18004E5487 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37AEC3F51F576D18004E5487 /* AppDelegate.swift */; };
@@ -513,6 +512,8 @@
 		37ED180F1E9433AF00935D39 /* BarButtonItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37ED180D1E94335900935D39 /* BarButtonItem.swift */; };
 		37ED18121E95B1CA00935D39 /* CheckState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEDB1D1358670067870D /* CheckState.swift */; };
 		37ED181C1E95B60100935D39 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE5F1D08C70D0067870D /* Color.swift */; };
+		37F1244D23833CAE00C9D006 /* CancellableBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1244C23833CAE00C9D006 /* CancellableBag.swift */; };
+		37F1244E23833E1900C9D006 /* WeakBindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47899237B8B4D00D72A41 /* WeakBindTests.swift */; };
 		37F1DA5E1DD39519004D4AAD /* RelationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1DA5D1DD39519004D4AAD /* RelationModel.swift */; };
 		C22B160B1E8E98E70053AD9D /* InternedUTF8String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */; };
 		C22B160D1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */; };
@@ -1184,6 +1185,7 @@
 		37E05C481DCDA33F005CBFE2 /* DocOutlineModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocOutlineModel.swift; sourceTree = "<group>"; };
 		37E05C4A1DCDA39F005CBFE2 /* SectionedTreeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SectionedTreeView.swift; sourceTree = "<group>"; };
 		37ED180D1E94335900935D39 /* BarButtonItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarButtonItem.swift; sourceTree = "<group>"; };
+		37F1244C23833CAE00C9D006 /* CancellableBag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CancellableBag.swift; sourceTree = "<group>"; };
 		37F1DA5D1DD39519004D4AAD /* RelationModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationModel.swift; sourceTree = "<group>"; };
 		37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationTreePropertyTests.swift; path = PLRelationalBindingTests/RelationTreePropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		47701CA01CF764CD00E3549D /* Checkbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
@@ -1573,7 +1575,6 @@
 				3709DDAC235A346E009F794B /* AppDelegate.swift */,
 				371EDB26235BB6640079AE5E /* Model */,
 				371EDB2B235BB6E90079AE5E /* UI */,
-				371BF11B236A354600B86E96 /* Extensions */,
 				371EDB2D235BB7060079AE5E /* Supporting Files */,
 				3709DDB2235A3470009F794B /* Preview Content */,
 			);
@@ -1644,13 +1645,6 @@
 			name = "Checklist Item";
 			sourceTree = "<group>";
 		};
-		371BF11B236A354600B86E96 /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Extensions;
-			sourceTree = "<group>";
-		};
 		371BF131236CBFD100B86E96 /* Private */ = {
 			isa = PBXGroup;
 			children = (
@@ -1705,7 +1699,6 @@
 				371EDB7A235F64D00079AE5E /* Publishers */,
 				371BF1342371F63800B86E96 /* Subscribers */,
 				37A47897237B8B0900D72A41 /* Property Wrappers */,
-				37A47898237B8B3000D72A41 /* Binding */,
 				37940203237E21E100D7D399 /* Other Combine Extensions */,
 				3720B4F52374DBF8003CF2BE /* PLRelational Extensions */,
 				371BF1052360BFBB00B86E96 /* Undo */,
@@ -2161,7 +2154,10 @@
 		37940203237E21E100D7D399 /* Other Combine Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				371BF11C236A355700B86E96 /* WeakBind.swift */,
+				37A47899237B8B4D00D72A41 /* WeakBindTests.swift */,
 				37940204237E223800D7D399 /* LogError.swift */,
+				37F1244C23833CAE00C9D006 /* CancellableBag.swift */,
 			);
 			name = "Other Combine Extensions";
 			sourceTree = "<group>";
@@ -2308,19 +2304,10 @@
 			children = (
 				3720B4F92375F8AE003CF2BE /* TwoWay.swift */,
 				3720B4FB2375F8BF003CF2BE /* TwoWayTests.swift */,
-			);
-			name = "Property Wrappers";
-			sourceTree = "<group>";
-		};
-		37A47898237B8B3000D72A41 /* Binding */ = {
-			isa = PBXGroup;
-			children = (
-				371BF11C236A355700B86E96 /* WeakBind.swift */,
-				37A47899237B8B4D00D72A41 /* WeakBindTests.swift */,
 				37A47892237B34D000D72A41 /* WeakTwoWayBind.swift */,
 				37A47894237B372500D72A41 /* WeakTwoWayBindTests.swift */,
 			);
-			name = Binding;
+			name = "Property Wrappers";
 			sourceTree = "<group>";
 		};
 		37A4A2811D307435005CAEA5 /* Change Handling */ = {
@@ -3950,6 +3937,7 @@
 				371BF11F236B5A9300B86E96 /* RelationChangeSummary.swift in Sources */,
 				37A47896237B836B00D72A41 /* WeakBind.swift in Sources */,
 				371BF1072360BFD700B86E96 /* UndoableDatabase.swift in Sources */,
+				37F1244D23833CAE00C9D006 /* CancellableBag.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3967,7 +3955,7 @@
 				371BF128236B6E0D00B86E96 /* DBTestCase.swift in Sources */,
 				371EDB80235F69170079AE5E /* CombineTestCase.swift in Sources */,
 				371BF133236CC10600B86E96 /* ArrayBinarySearchTests.swift in Sources */,
-				37A4789A237B8B4D00D72A41 /* WeakBindTests.swift in Sources */,
+				37F1244E23833E1900C9D006 /* WeakBindTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

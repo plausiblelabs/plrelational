@@ -17,7 +17,7 @@ final class ContentViewModel: ObservableObject {
 
     @Published var hasSelection: Bool = false
 
-    private var cancellableBag = Set<AnyCancellable>()
+    private var cancellableBag = CancellableBag()
 
     init(model: Model) {
         self.model = model
@@ -33,6 +33,6 @@ final class ContentViewModel: ObservableObject {
     }
     
     deinit {
-        cancellableBag.forEach{ $0.cancel() }
+        cancellableBag.cancel()
     }
 }
