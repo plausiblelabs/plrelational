@@ -924,14 +924,14 @@
 		3707532D1F1034F0009C3700 /* SearchResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchResult.swift; sourceTree = "<group>"; };
 		3707532F1F104FA4009C3700 /* ResultsListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResultsListView.swift; sourceTree = "<group>"; };
 		370753A31F2FAE9D009C3700 /* .jazzy.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = .jazzy.json; sourceTree = "<group>"; };
-		3709DDAA235A346E009F794B /* TodoSwiftUIApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoSwiftUIApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3709DDAA235A346E009F794B /* TodoApp-SwiftUI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TodoApp-SwiftUI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3709DDAC235A346E009F794B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3709DDAE235A346E009F794B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		3709DDB0235A3470009F794B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3709DDB3235A3470009F794B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		3709DDB6235A3470009F794B /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		3709DDB8235A3470009F794B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3709DDB9235A3470009F794B /* TodoSwiftUIApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TodoSwiftUIApp.entitlements; sourceTree = "<group>"; };
+		3709DDB9235A3470009F794B /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		370F88061E8F00440043B903 /* ListView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListView.swift; sourceTree = "<group>"; };
 		3710A68E1DDCF93C0070EC29 /* SidebarView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		3710A6901DDCFA330070EC29 /* SidebarModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SidebarModel.swift; sourceTree = "<group>"; };
@@ -1569,7 +1569,7 @@
 			name = Documentation;
 			sourceTree = "<group>";
 		};
-		3709DDAB235A346E009F794B /* TodoSwiftUIApp */ = {
+		3709DDAB235A346E009F794B /* TodoApp-SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
 				3709DDAC235A346E009F794B /* AppDelegate.swift */,
@@ -1578,7 +1578,7 @@
 				371EDB2D235BB7060079AE5E /* Supporting Files */,
 				3709DDB2235A3470009F794B /* Preview Content */,
 			);
-			path = TodoSwiftUIApp;
+			path = "TodoApp-SwiftUI";
 			sourceTree = "<group>";
 		};
 		3709DDB2235A3470009F794B /* Preview Content */ = {
@@ -1688,7 +1688,7 @@
 				3709DDB0235A3470009F794B /* Assets.xcassets */,
 				3709DDB5235A3470009F794B /* Main.storyboard */,
 				3709DDB8235A3470009F794B /* Info.plist */,
-				3709DDB9235A3470009F794B /* TodoSwiftUIApp.entitlements */,
+				3709DDB9235A3470009F794B /* App.entitlements */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -2555,16 +2555,25 @@
 			name = "View Model";
 			sourceTree = "<group>";
 		};
+		37F1244F2383446200C9D006 /* Combine+SwiftUI Examples */ = {
+			isa = PBXGroup;
+			children = (
+				3709DDAB235A346E009F794B /* TodoApp-SwiftUI */,
+			);
+			name = "Combine+SwiftUI Examples";
+			path = "Combine+SwiftUI";
+			sourceTree = "<group>";
+		};
 		37F1D9B41DCD3D1C004D4AAD /* Example Apps */ = {
 			isa = PBXGroup;
 			children = (
+				37F1244F2383446200C9D006 /* Combine+SwiftUI Examples */,
 				372707E91CFE2C7E00710C80 /* BindableControlsApp */,
 				37412E821F100848002F131A /* HelloWorldApp */,
 				374315DC1F420B0C00128F5A /* RelationChangeApp */,
 				37A1CE6C1D1081980067870D /* SearchApp */,
 				37AEC3F41F576D18004E5487 /* TodoApp */,
 				37A5FE281F8FF9300003212C /* TodoClientApp */,
-				3709DDAB235A346E009F794B /* TodoSwiftUIApp */,
 				37D4EBB41F4D01550010229E /* MiniVisualizer */,
 				37504B391DC6995100CEE4D4 /* Visualizer */,
 			);
@@ -2655,7 +2664,7 @@
 				37D4EBB31F4D01550010229E /* MiniVisualizer.app */,
 				37AEC3F31F576D18004E5487 /* TodoApp.app */,
 				378A2D211F8FFA75009F3EF8 /* TodoClientApp.app */,
-				3709DDAA235A346E009F794B /* TodoSwiftUIApp.app */,
+				3709DDAA235A346E009F794B /* TodoApp-SwiftUI.app */,
 				371EDB57235F62720079AE5E /* PLRelationalCombine.framework */,
 				371EDB76235F63670079AE5E /* PLRelationalCombineTests.xctest */,
 			);
@@ -2847,9 +2856,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		3709DDA9235A346E009F794B /* TodoSwiftUIApp */ = {
+		3709DDA9235A346E009F794B /* TodoApp-SwiftUI */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3709DDBC235A3470009F794B /* Build configuration list for PBXNativeTarget "TodoSwiftUIApp" */;
+			buildConfigurationList = 3709DDBC235A3470009F794B /* Build configuration list for PBXNativeTarget "TodoApp-SwiftUI" */;
 			buildPhases = (
 				3709DDA6235A346E009F794B /* Sources */,
 				3709DDA7235A346E009F794B /* Frameworks */,
@@ -2861,9 +2870,9 @@
 				371EDB2F235E274A0079AE5E /* PBXTargetDependency */,
 				371BF1022360BF4300B86E96 /* PBXTargetDependency */,
 			);
-			name = TodoSwiftUIApp;
+			name = "TodoApp-SwiftUI";
 			productName = TodoSwiftUIApp;
-			productReference = 3709DDAA235A346E009F794B /* TodoSwiftUIApp.app */;
+			productReference = 3709DDAA235A346E009F794B /* TodoApp-SwiftUI.app */;
 			productType = "com.apple.product-type.application";
 		};
 		371EDB34235F62720079AE5E /* PLRelationalCombine-macOS */ = {
@@ -3632,7 +3641,7 @@
 				37A1CE831D1081980067870D /* SearchAppUITests */,
 				37AEC3F21F576D18004E5487 /* TodoApp */,
 				378A2D041F8FFA75009F3EF8 /* TodoClientApp */,
-				3709DDA9235A346E009F794B /* TodoSwiftUIApp */,
+				3709DDA9235A346E009F794B /* TodoApp-SwiftUI */,
 				374315E81F420B5200128F5A /* RelationChangeApp */,
 				37D4EBB21F4D01550010229E /* MiniVisualizer */,
 				37504B371DC6995100CEE4D4 /* Visualizer */,
@@ -4934,18 +4943,18 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = Examples/TodoSwiftUIApp/TodoSwiftUIApp.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "Examples/Combine+SwiftUI/TodoApp-SwiftUI/App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"Examples/TodoSwiftUIApp/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Examples/Combine+SwiftUI/TodoApp-SwiftUI/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = Examples/TodoSwiftUIApp/Info.plist;
+				INFOPLIST_FILE = "Examples/Combine+SwiftUI/TodoApp-SwiftUI/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.TodoSwiftUIApp;
+				PRODUCT_BUNDLE_IDENTIFIER = "coop.plausible.TodoApp-SwiftUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
@@ -4961,17 +4970,17 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = Examples/TodoSwiftUIApp/TodoSwiftUIApp.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "Examples/Combine+SwiftUI/TodoApp-SwiftUI/App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"Examples/TodoSwiftUIApp/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Examples/Combine+SwiftUI/TodoApp-SwiftUI/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
-				INFOPLIST_FILE = Examples/TodoSwiftUIApp/Info.plist;
+				INFOPLIST_FILE = "Examples/Combine+SwiftUI/TodoApp-SwiftUI/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.TodoSwiftUIApp;
+				PRODUCT_BUNDLE_IDENTIFIER = "coop.plausible.TodoApp-SwiftUI";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -6338,7 +6347,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		3709DDBC235A3470009F794B /* Build configuration list for PBXNativeTarget "TodoSwiftUIApp" */ = {
+		3709DDBC235A3470009F794B /* Build configuration list for PBXNativeTarget "TodoApp-SwiftUI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				3709DDBA235A3470009F794B /* Debug */,
