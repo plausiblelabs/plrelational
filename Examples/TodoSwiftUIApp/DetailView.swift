@@ -53,7 +53,7 @@ struct DetailView: View {
                 Text(model.createdOn)
                 Spacer()
                 Button(action: model.deleteSelectedItem) {
-                    Image("trash")
+                    Image("Trash")
                 }.buttonStyle(BorderlessButtonStyle())
             }
         }

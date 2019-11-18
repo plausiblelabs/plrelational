@@ -78,14 +78,15 @@ class Model {
     let itemTags: TransactionalRelation
     let selectedItemIDs: TransactionalRelation
 
-    var allTags: [ExistingTag] = []
+    private(set) var allTags: [ExistingTag] = []
     
+    let dbAlreadyExisted: Bool
     private let db: TransactionalDatabase
     private let undoableDB: UndoableDatabase
 
     private var cancellableBag = Set<AnyCancellable>()
 
-    init(undoManager: PLRelationalCombine.UndoManager) {
+    init(undoManager: PLRelationalCombine.UndoManager, path: String?) {
         let specs: [Spec] = [
             Item.spec,
             Tag.spec,
@@ -93,18 +94,29 @@ class Model {
             SelectedItem.spec
         ]
 
-        // Create a database or open an existing one (stored on disk using plists)
-        // TODO: In Catalina we can no longer access /tmp directly; should use a better temp path here
-        let path = "~/tmp/TodoSwiftUIApp.db"
-        // XXX: Start with a fresh database each time, for now
-        _ = try? FileManager.default.removeItem(atPath: path)
-        let dbExisted = FileManager.default.fileExists(atPath: path)
-        let plistDB = PlistDatabase.create(URL(fileURLWithPath: path), specs).ok!
+        let dbUrl: URL?
+        if let path = path {
+            // Create a database or open an existing one (stored on disk using plists)
+            dbUrl = URL(fileURLWithPath: path)
+            
+            // Set a flagAdd some default data the first time the database is created
+            dbAlreadyExisted = FileManager.default.fileExists(atPath: path)
+        } else {
+            // When path is nil, we will create an in-memory (plist compatible) database
+            // only, which is useful for previews
+            dbUrl = nil
+            
+            // Always add default data in this case
+            dbAlreadyExisted = false
+        }
+        let plistDB = PlistDatabase.create(dbUrl, specs).ok!
 
-        // Wrap it in a TransactionalDatabase so that we can use snapshots, and
-        // enable auto-save so that all changes are persisted to disk as needed
+        // Wrap it in a TransactionalDatabase so that we can use snapshots
         let db = TransactionalDatabase(plistDB)
-        db.saveOnTransactionEnd = true
+        if dbUrl != nil {
+            // Enable auto-save so that all changes are persisted to disk as needed
+            db.saveOnTransactionEnd = true
+        }
         self.db = db
 
         // Wrap that in an UndoableDatabase for easy undo/redo support
@@ -125,18 +137,38 @@ class Model {
             .replaceError(with: [])
             .bind(to: \.allTags, on: self)
             .store(in: &cancellableBag)
-
-//        if !dbExisted {
-            // Add a couple default tags
-//            addTag("home")
-//            addTag("work")
-//            addTag("school")
-//            addTag("urgent")
-//        }
     }
 
     deinit {
         cancellableBag.forEach{ $0.cancel() }
+    }
+
+    func addDefaultData(selectItem: Bool = false) {
+        // Add a couple default tags
+        let tagHome = addTag("home")
+        let tagWork = addTag("work")
+        let tagUrgent = addTag("urgent")
+        _ = addTag("school")
+
+        func addExisting(tag: TagID, to item: ItemID) {
+            self.itemTags.asyncAdd([
+                ItemTag.itemID: item,
+                ItemTag.tagID: tag
+            ])
+        }
+        
+        // Also add some default items
+        let item1 = addItem("Item 1", created: Date(timeIntervalSinceNow: -3600 * 72))
+        addExisting(tag: tagHome, to: item1)
+        addExisting(tag: tagUrgent, to: item1)
+        let item2 = addItem("Item 2", created: Date(timeIntervalSinceNow: -3600 * 48))
+        addExisting(tag: tagWork, to: item2)
+
+        if selectItem {
+            selectedItemIDs.asyncAdd([
+                SelectedItem.id: item1
+            ])
+        }
     }
     
     /// MARK: - Items
@@ -247,13 +279,15 @@ class Model {
     }()
 
     /// Adds a new row to the `tags` relation.
-    private func addTag(_ name: String) {
+    private func addTag(_ name: String) -> TagID {
         let id = TagID()
         
         tags.asyncAdd([
             Tag.id: id,
             Tag.name: name
         ])
+        
+        return id
     }
     
     /// Creates a new tag and applies it to the given to-do item.
@@ -282,14 +316,6 @@ class Model {
             ])
         })
     }
-    
-//    /// Returns a property that reflects the tag name.
-//    func tagName(for tagID: TagID, initialValue: String?) -> AsyncReadWriteProperty<String> {
-//        return self.tags
-//            .select(Tag.id *== tagID)
-//            .project(Tag.name)
-//            .undoableOneString(undoableDB, "Change Tag Name", initialValue: initialValue)
-//    }
     
     // MARK: - Delete
     
@@ -352,20 +378,8 @@ func displayString(from timestampString: String) -> String {
 #if DEBUG
 func modelForPreview() -> Model {
     let undoManager = PLRelationalCombine.UndoManager()
-    let model = Model(undoManager: undoManager)
-    
-    let item1 = model.addNewItem(with: "Item 1")
-    model.addNewTag(named: "home", to: item1)
-    model.addNewTag(named: "urgent", to: item1)
-
-    let item2 = model.addNewItem(with: "Item 2")
-    model.addNewTag(named: "personal", to: item2)
-
-    // XXX: Select an item (this is a hack just for testing out Combine stuff)
-    model.selectedItemIDs.asyncAdd([
-        SelectedItem.id: item1
-    ])
-
+    let model = Model(undoManager: undoManager, path: nil)
+    model.addDefaultData(selectItem: true)
     return model
 }
 #endif
