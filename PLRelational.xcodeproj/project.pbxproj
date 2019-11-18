@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -38,7 +38,6 @@
 		3710A6971DDCFAD00070EC29 /* ScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A6961DDCFAD00070EC29 /* ScrollView.swift */; };
 		3710A69A1DDD16CA0070EC29 /* RelationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A6981DDD16A80070EC29 /* RelationViewModel.swift */; };
 		3710A69C1DDD18E10070EC29 /* AsyncState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3710A69B1DDD18E10070EC29 /* AsyncState.swift */; };
-		371BF1042360BF7600B86E96 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C611411CD94784001DAF59 /* UndoManager.swift */; };
 		371BF1072360BFD700B86E96 /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF1062360BFD700B86E96 /* UndoableDatabase.swift */; };
 		371BF11F236B5A9300B86E96 /* RelationChangeSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF11E236B5A9300B86E96 /* RelationChangeSummary.swift */; };
 		371BF123236B5ADB00B86E96 /* RelationChangeSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF122236B5ADB00B86E96 /* RelationChangeSummaryTests.swift */; };
@@ -102,6 +101,8 @@
 		37504B5B1DC6995100CEE4D4 /* VisualizerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37504B5A1DC6995100CEE4D4 /* VisualizerUITests.swift */; };
 		375699461DCDACB600EA0D8C /* Box.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375699451DCDACB600EA0D8C /* Box.swift */; };
 		375699481DCDAD1B00EA0D8C /* DocModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375699471DCDAD1B00EA0D8C /* DocModel.swift */; };
+		3759DADC2383547600CB5E45 /* PLRelationalCombine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37F1252A2383505000C9D006 /* PLRelationalCombine.framework */; platformFilter = ios; };
+		3759DADD238354BE00CB5E45 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		3777D5CE1E8C199D006D147D /* PLBindableControls.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3777D5C51E8C199C006D147D /* PLBindableControls.framework */; };
 		3788C0971F577C43005920FD /* ChecklistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788C0961F577C43005920FD /* ChecklistView.swift */; };
 		3788C0991F577C63005920FD /* ChecklistViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3788C0981F577C63005920FD /* ChecklistViewModel.swift */; };
@@ -496,6 +497,34 @@
 		37ED181C1E95B60100935D39 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CE5F1D08C70D0067870D /* Color.swift */; };
 		37F1244D23833CAE00C9D006 /* CancellableBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1244C23833CAE00C9D006 /* CancellableBag.swift */; };
 		37F1244E23833E1900C9D006 /* WeakBindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47899237B8B4D00D72A41 /* WeakBindTests.swift */; };
+		37F125242383505000C9D006 /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43F1C1E898BAD00C8C336 /* PLRelational.framework */; };
+		37F12542238350D700C9D006 /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B43F1C1E898BAD00C8C336 /* PLRelational.framework */; platformFilter = ios; };
+		37F1255F238351F400C9D006 /* RelationValuePublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371EDB7B235F65030079AE5E /* RelationValuePublisher.swift */; };
+		37F12560238351F400C9D006 /* RelationChangePublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF124236B600500B86E96 /* RelationChangePublisher.swift */; };
+		37F12561238351F400C9D006 /* RelationChangeSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF11E236B5A9300B86E96 /* RelationChangeSummary.swift */; };
+		37F12562238351F400C9D006 /* RelationArrayReduce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF129236CA1C000B86E96 /* RelationArrayReduce.swift */; };
+		37F12563238351F400C9D006 /* ArrayBinarySearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF12D236CBF9C00B86E96 /* ArrayBinarySearch.swift */; };
+		37F12564238351F400C9D006 /* TwoWay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3720B4F92375F8AE003CF2BE /* TwoWay.swift */; };
+		37F12565238351F400C9D006 /* WeakTwoWayBind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47892237B34D000D72A41 /* WeakTwoWayBind.swift */; };
+		37F12566238351F400C9D006 /* WeakBind.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF11C236A355700B86E96 /* WeakBind.swift */; };
+		37F12567238351F400C9D006 /* LogError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37940204237E223800D7D399 /* LogError.swift */; };
+		37F12568238351F400C9D006 /* CancellableBag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1244C23833CAE00C9D006 /* CancellableBag.swift */; };
+		37F12569238351F400C9D006 /* RelationMutation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3720B4F32374DBCF003CF2BE /* RelationMutation.swift */; };
+		37F1256A238351F400C9D006 /* UndoableDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF1062360BFD700B86E96 /* UndoableDatabase.swift */; };
+		37F1256B238351FF00C9D006 /* RelationValuePublisherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371EDB7D235F65990079AE5E /* RelationValuePublisherTests.swift */; };
+		37F1256C238351FF00C9D006 /* RelationChangePublisherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF126236B601C00B86E96 /* RelationChangePublisherTests.swift */; };
+		37F1256D238351FF00C9D006 /* RelationChangeSummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF122236B5ADB00B86E96 /* RelationChangeSummaryTests.swift */; };
+		37F1256E238351FF00C9D006 /* RelationArrayReduceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF12B236CA1D300B86E96 /* RelationArrayReduceTests.swift */; };
+		37F1256F238351FF00C9D006 /* ArrayBinarySearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371BF12F236CBFAF00B86E96 /* ArrayBinarySearchTests.swift */; };
+		37F12570238351FF00C9D006 /* TwoWayTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3720B4FB2375F8BF003CF2BE /* TwoWayTests.swift */; };
+		37F12571238351FF00C9D006 /* WeakTwoWayBindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47894237B372500D72A41 /* WeakTwoWayBindTests.swift */; };
+		37F12572238351FF00C9D006 /* WeakBindTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A47899237B8B4D00D72A41 /* WeakBindTests.swift */; };
+		37F12573238351FF00C9D006 /* RelationMutationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3720B4F62374DC31003CF2BE /* RelationMutationTests.swift */; };
+		37F12574238351FF00C9D006 /* CombineTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 371EDB7F235F69170079AE5E /* CombineTestCase.swift */; };
+		37F12576238352D600C9D006 /* UndoableDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F12575238352D600C9D006 /* UndoableDatabaseTests.swift */; };
+		37F12577238352D600C9D006 /* UndoableDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F12575238352D600C9D006 /* UndoableDatabaseTests.swift */; };
+		37F125792383533400C9D006 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F125782383533400C9D006 /* UndoManager.swift */; };
+		37F1257A2383533400C9D006 /* UndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F125782383533400C9D006 /* UndoManager.swift */; };
 		37F1DA5E1DD39519004D4AAD /* RelationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F1DA5D1DD39519004D4AAD /* RelationModel.swift */; };
 		C22B160B1E8E98E70053AD9D /* InternedUTF8String.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160A1E8E98E70053AD9D /* InternedUTF8String.swift */; };
 		C22B160D1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22B160C1E8EA2CB0053AD9D /* InternedUTF8StringTests.swift */; };
@@ -654,6 +683,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 37504B371DC6995100CEE4D4;
 			remoteInfo = Visualizer;
+		};
+		3759DADA2383541C00CB5E45 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37F125072383505000C9D006;
+			remoteInfo = "PLRelationalCombine-iOS";
 		};
 		3777D5CF1E8C199D006D147D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -815,6 +851,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 37B441601E89A49A00C8C336;
 			remoteInfo = "PLBindableControls-macOS";
+		};
+		37F125092383505000C9D006 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C22BF1241CBC348500D3FE59 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 37B43F1B1E898BAD00C8C336;
+			remoteInfo = "PLRelational-iOS";
 		};
 		C20945D81F7311B500641E4A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1135,6 +1178,11 @@
 		37E05C4A1DCDA39F005CBFE2 /* SectionedTreeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SectionedTreeView.swift; sourceTree = "<group>"; };
 		37ED180D1E94335900935D39 /* BarButtonItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BarButtonItem.swift; sourceTree = "<group>"; };
 		37F1244C23833CAE00C9D006 /* CancellableBag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CancellableBag.swift; sourceTree = "<group>"; };
+		37F1252A2383505000C9D006 /* PLRelationalCombine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PLRelationalCombine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		37F12548238350D700C9D006 /* PLRelationalCombine-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PLRelationalCombine-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		37F12549238350D700C9D006 /* PLRelationalBinding-iOSTests copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PLRelationalBinding-iOSTests copy-Info.plist"; path = "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding-iOSTests copy-Info.plist"; sourceTree = "<absolute>"; };
+		37F12575238352D600C9D006 /* UndoableDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UndoableDatabaseTests.swift; path = PLRelationalCombineTests/UndoableDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
+		37F125782383533400C9D006 /* UndoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManager.swift; sourceTree = "<group>"; };
 		37F1DA5D1DD39519004D4AAD /* RelationModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationModel.swift; sourceTree = "<group>"; };
 		37F8FBD31CE4FC30001C7C5F /* RelationTreePropertyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RelationTreePropertyTests.swift; path = PLRelationalBindingTests/RelationTreePropertyTests.swift; sourceTree = SOURCE_ROOT; };
 		47701CA01CF764CD00E3549D /* Checkbox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Checkbox.swift; sourceTree = "<group>"; };
@@ -1490,6 +1538,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		37F125232383505000C9D006 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				37F125242383505000C9D006 /* PLRelational.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		37F12541238350D700C9D006 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				37F12542238350D700C9D006 /* PLRelational.framework in Frameworks */,
+				3759DADC2383547600CB5E45 /* PLRelationalCombine.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C27511111F20DFE3009DB9CC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -1522,7 +1587,9 @@
 		371BF1052360BFBB00B86E96 /* Undo */ = {
 			isa = PBXGroup;
 			children = (
+				37F125782383533400C9D006 /* UndoManager.swift */,
 				371BF1062360BFD700B86E96 /* UndoableDatabase.swift */,
+				37F12575238352D600C9D006 /* UndoableDatabaseTests.swift */,
 			);
 			name = Undo;
 			sourceTree = "<group>";
@@ -2471,6 +2538,7 @@
 				370753A21F2FAE43009C3700 /* Documentation */,
 				C22BF12D1CBC348500D3FE59 /* Products */,
 				37B4419A1E89AA7E00C8C336 /* Frameworks */,
+				37F12549238350D700C9D006 /* PLRelationalBinding-iOSTests copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2507,6 +2575,8 @@
 				378A2D211F8FFA75009F3EF8 /* TodoClientApp.app */,
 				371EDB57235F62720079AE5E /* PLRelationalCombine.framework */,
 				371EDB76235F63670079AE5E /* PLRelationalCombineTests.xctest */,
+				37F1252A2383505000C9D006 /* PLRelationalCombine.framework */,
+				37F12548238350D700C9D006 /* PLRelationalCombine-iOSTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2687,6 +2757,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		37B4415E1E89A49A00C8C336 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		37F125252383505000C9D006 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3244,6 +3321,43 @@
 			productReference = 37D4EBB31F4D01550010229E /* MiniVisualizer.app */;
 			productType = "com.apple.product-type.application";
 		};
+		37F125072383505000C9D006 /* PLRelationalCombine-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 37F125272383505000C9D006 /* Build configuration list for PBXNativeTarget "PLRelationalCombine-iOS" */;
+			buildPhases = (
+				37F1250A2383505000C9D006 /* Sources */,
+				37F125232383505000C9D006 /* Frameworks */,
+				37F125252383505000C9D006 /* Headers */,
+				37F125262383505000C9D006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				37F125082383505000C9D006 /* PBXTargetDependency */,
+			);
+			name = "PLRelationalCombine-iOS";
+			productName = "PLRelationalBinding-iOS";
+			productReference = 37F1252A2383505000C9D006 /* PLRelationalCombine.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		37F1252C238350D700C9D006 /* PLRelationalCombine-iOSTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 37F12545238350D700C9D006 /* Build configuration list for PBXNativeTarget "PLRelationalCombine-iOSTests" */;
+			buildPhases = (
+				37F1252F238350D700C9D006 /* Sources */,
+				37F12541238350D700C9D006 /* Frameworks */,
+				37F12544238350D700C9D006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3759DADB2383541C00CB5E45 /* PBXTargetDependency */,
+			);
+			name = "PLRelationalCombine-iOSTests";
+			productName = "PLRelationalBinding-iOSTests";
+			productReference = 37F12548238350D700C9D006 /* PLRelationalCombine-iOSTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		C27511131F20DFE3009DB9CC /* DocumentationBuilder */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C275111A1F20DFE3009DB9CC /* Build configuration list for PBXNativeTarget "DocumentationBuilder" */;
@@ -3438,6 +3552,10 @@
 				37B440011E8997EB00C8C336 /* PLRelational-macOSTests */,
 				37B43F1B1E898BAD00C8C336 /* PLRelational-iOS */,
 				37B43F231E898BAD00C8C336 /* PLRelational-iOSTests */,
+				371EDB34235F62720079AE5E /* PLRelationalCombine-macOS */,
+				371EDB5A235F63670079AE5E /* PLRelationalCombine-macOSTests */,
+				37F125072383505000C9D006 /* PLRelationalCombine-iOS */,
+				37F1252C238350D700C9D006 /* PLRelationalCombine-iOSTests */,
 				37B440D21E899F7600C8C336 /* PLRelationalBinding-macOS */,
 				37B440DA1E899F7600C8C336 /* PLRelationalBinding-macOSTests */,
 				37B440EE1E899FB700C8C336 /* PLRelationalBinding-iOS */,
@@ -3446,8 +3564,6 @@
 				37B441681E89A49B00C8C336 /* PLBindableControls-macOSTests */,
 				3777D5C41E8C199C006D147D /* PLBindableControls-iOS */,
 				3777D5CC1E8C199D006D147D /* PLBindableControls-iOSTests */,
-				371EDB34235F62720079AE5E /* PLRelationalCombine-macOS */,
-				371EDB5A235F63670079AE5E /* PLRelationalCombine-macOSTests */,
 				372707E71CFE2C7E00710C80 /* BindableControlsApp */,
 				372707F51CFE2C7E00710C80 /* BindableControlsAppUITests */,
 				37412E801F100848002F131A /* HelloWorldApp */,
@@ -3697,6 +3813,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		37F125262383505000C9D006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		37F12544238350D700C9D006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
@@ -3725,9 +3855,9 @@
 				371BF125236B600500B86E96 /* RelationChangePublisher.swift in Sources */,
 				371BF12A236CA1C000B86E96 /* RelationArrayReduce.swift in Sources */,
 				3720B4FA2375F8AE003CF2BE /* TwoWay.swift in Sources */,
+				37F125792383533400C9D006 /* UndoManager.swift in Sources */,
 				37940205237E223800D7D399 /* LogError.swift in Sources */,
 				371EDB7C235F65030079AE5E /* RelationValuePublisher.swift in Sources */,
-				371BF1042360BF7600B86E96 /* UndoManager.swift in Sources */,
 				371BF12E236CBF9C00B86E96 /* ArrayBinarySearch.swift in Sources */,
 				371BF11F236B5A9300B86E96 /* RelationChangeSummary.swift in Sources */,
 				37A47896237B836B00D72A41 /* WeakBind.swift in Sources */,
@@ -3748,6 +3878,7 @@
 				371BF127236B601C00B86E96 /* RelationChangePublisherTests.swift in Sources */,
 				371BF12C236CA1D300B86E96 /* RelationArrayReduceTests.swift in Sources */,
 				371BF128236B6E0D00B86E96 /* DBTestCase.swift in Sources */,
+				37F12576238352D600C9D006 /* UndoableDatabaseTests.swift in Sources */,
 				371EDB80235F69170079AE5E /* CombineTestCase.swift in Sources */,
 				371BF133236CC10600B86E96 /* ArrayBinarySearchTests.swift in Sources */,
 				37F1244E23833E1900C9D006 /* WeakBindTests.swift in Sources */,
@@ -4351,6 +4482,45 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		37F1250A2383505000C9D006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				37F12564238351F400C9D006 /* TwoWay.swift in Sources */,
+				37F12565238351F400C9D006 /* WeakTwoWayBind.swift in Sources */,
+				37F12563238351F400C9D006 /* ArrayBinarySearch.swift in Sources */,
+				37F12561238351F400C9D006 /* RelationChangeSummary.swift in Sources */,
+				37F12562238351F400C9D006 /* RelationArrayReduce.swift in Sources */,
+				37F1257A2383533400C9D006 /* UndoManager.swift in Sources */,
+				37F12568238351F400C9D006 /* CancellableBag.swift in Sources */,
+				37F12560238351F400C9D006 /* RelationChangePublisher.swift in Sources */,
+				37F12567238351F400C9D006 /* LogError.swift in Sources */,
+				37F1256A238351F400C9D006 /* UndoableDatabase.swift in Sources */,
+				37F12566238351F400C9D006 /* WeakBind.swift in Sources */,
+				37F12569238351F400C9D006 /* RelationMutation.swift in Sources */,
+				37F1255F238351F400C9D006 /* RelationValuePublisher.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		37F1252F238350D700C9D006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				37F12570238351FF00C9D006 /* TwoWayTests.swift in Sources */,
+				37F12573238351FF00C9D006 /* RelationMutationTests.swift in Sources */,
+				37F1256C238351FF00C9D006 /* RelationChangePublisherTests.swift in Sources */,
+				37F12574238351FF00C9D006 /* CombineTestCase.swift in Sources */,
+				37F12571238351FF00C9D006 /* WeakTwoWayBindTests.swift in Sources */,
+				3759DADD238354BE00CB5E45 /* DBTestCase.swift in Sources */,
+				37F1256E238351FF00C9D006 /* RelationArrayReduceTests.swift in Sources */,
+				37F1256D238351FF00C9D006 /* RelationChangeSummaryTests.swift in Sources */,
+				37F1256F238351FF00C9D006 /* ArrayBinarySearchTests.swift in Sources */,
+				37F12572238351FF00C9D006 /* WeakBindTests.swift in Sources */,
+				37F12577238352D600C9D006 /* UndoableDatabaseTests.swift in Sources */,
+				37F1256B238351FF00C9D006 /* RelationValuePublisherTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C27511101F20DFE3009DB9CC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -4456,6 +4626,12 @@
 			isa = PBXTargetDependency;
 			target = 37504B371DC6995100CEE4D4 /* Visualizer */;
 			targetProxy = 37504B571DC6995100CEE4D4 /* PBXContainerItemProxy */;
+		};
+		3759DADB2383541C00CB5E45 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = 37F125072383505000C9D006 /* PLRelationalCombine-iOS */;
+			targetProxy = 3759DADA2383541C00CB5E45 /* PBXContainerItemProxy */;
 		};
 		3777D5D01E8C199D006D147D /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4571,6 +4747,11 @@
 			isa = PBXTargetDependency;
 			target = 37B441601E89A49A00C8C336 /* PLBindableControls-macOS */;
 			targetProxy = 37D4EBCA1F4D02E00010229E /* PBXContainerItemProxy */;
+		};
+		37F125082383505000C9D006 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 37B43F1B1E898BAD00C8C336 /* PLRelational-iOS */;
+			targetProxy = 37F125092383505000C9D006 /* PBXContainerItemProxy */;
 		};
 		C20945D91F7311B500641E4A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -4719,7 +4900,11 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = PLRelationalCombine/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalCombine;
 				PRODUCT_NAME = PLRelationalCombine;
@@ -4749,12 +4934,17 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = PLRelationalCombine/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalCombine;
 				PRODUCT_NAME = PLRelationalCombine;
 				SKIP_INSTALL = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -4771,7 +4961,11 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = PLRelationalCombineTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalCombineTests;
 				PRODUCT_NAME = PLRelationalCombineTests;
@@ -4791,11 +4985,16 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = PLRelationalCombineTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalCombineTests;
 				PRODUCT_NAME = PLRelationalCombineTests;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -4809,7 +5008,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/BindableControlsApp/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -4826,7 +5028,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/BindableControlsApp/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -4839,7 +5044,11 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Examples/BindableControlsAppUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -4852,7 +5061,11 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Examples/BindableControlsAppUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.BindableControlsAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -4870,7 +5083,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/HelloWorldApp/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4889,7 +5105,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/HelloWorldApp/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4907,7 +5126,11 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				INFOPLIST_FILE = Examples/HelloWorldAppTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4927,7 +5150,11 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				INFOPLIST_FILE = Examples/HelloWorldAppTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4945,7 +5172,11 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				INFOPLIST_FILE = Examples/HelloWorldAppUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4964,7 +5195,11 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				INFOPLIST_FILE = Examples/HelloWorldAppUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.HelloWorldAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -4984,7 +5219,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/RelationChangeApp/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationChangeApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -5005,7 +5243,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/RelationChangeApp/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.RelationChangeApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -5026,7 +5267,10 @@
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Examples/Visualizer/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.Visualizer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -5047,11 +5291,15 @@
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Examples/Visualizer/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.Visualizer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -5067,7 +5315,11 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				INFOPLIST_FILE = Examples/VisualizerTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -5088,11 +5340,16 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				INFOPLIST_FILE = Examples/VisualizerTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Visualizer.app/Contents/MacOS/Visualizer";
 			};
@@ -5108,7 +5365,11 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				INFOPLIST_FILE = Examples/VisualizerUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -5128,11 +5389,16 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = NM4ZX45CU5;
 				INFOPLIST_FILE = Examples/VisualizerUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.VisualizerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TEST_TARGET_NAME = Visualizer;
 			};
@@ -5154,7 +5420,11 @@
 				INFOPLIST_FILE = PLBindableControls/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControls;
 				PRODUCT_NAME = PLBindableControls;
 				SDKROOT = iphoneos;
@@ -5184,13 +5454,18 @@
 				INFOPLIST_FILE = PLBindableControls/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControls;
 				PRODUCT_NAME = PLBindableControls;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -5209,7 +5484,11 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = PLBindableControlsTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControlsTests;
 				PRODUCT_NAME = PLBindableControlsTests;
 				SDKROOT = iphoneos;
@@ -5228,11 +5507,16 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = PLBindableControlsTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControlsTests;
 				PRODUCT_NAME = PLBindableControlsTests;
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -5247,7 +5531,10 @@
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Examples/TodoClientApp/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.TodoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -5265,7 +5552,10 @@
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Examples/TodoClientApp/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.TodoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -5282,7 +5572,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/SearchApp/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -5299,7 +5592,10 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = Examples/SearchApp/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -5313,7 +5609,11 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Examples/SearchAppTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SearchApp.app/Contents/MacOS/SearchApp";
@@ -5326,7 +5626,11 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Examples/SearchAppTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchAppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SearchApp.app/Contents/MacOS/SearchApp";
@@ -5338,7 +5642,11 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Examples/SearchAppUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_TARGET_NAME = SearchApp;
@@ -5350,7 +5658,11 @@
 			buildSettings = {
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Examples/SearchAppUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.SearchAppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TEST_TARGET_NAME = SearchApp;
@@ -5366,7 +5678,10 @@
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/TodoApp/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.TodoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -5384,7 +5699,10 @@
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/TodoApp/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.TodoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -5409,7 +5727,11 @@
 				INFOPLIST_FILE = "$(SRCROOT)/PLRelational/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelational;
 				PRODUCT_NAME = PLRelational;
 				SDKROOT = iphoneos;
@@ -5441,14 +5763,19 @@
 				INFOPLIST_FILE = "$(SRCROOT)/PLRelational/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelational;
 				PRODUCT_NAME = PLRelational;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_INCLUDE_PATHS = modules;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -5469,7 +5796,11 @@
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = PLRelationalTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalTests;
 				PRODUCT_NAME = PLRelationalTests;
 				SDKROOT = iphoneos;
@@ -5490,11 +5821,16 @@
 				DEVELOPMENT_TEAM = "";
 				INFOPLIST_FILE = PLRelationalTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalTests;
 				PRODUCT_NAME = PLRelationalTests;
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 4.0;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -5516,7 +5852,11 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = PLRelational/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelational;
 				PRODUCT_NAME = PLRelational;
@@ -5545,13 +5885,18 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = PLRelational/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelational;
 				PRODUCT_NAME = PLRelational;
 				SKIP_INSTALL = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_INCLUDE_PATHS = modules;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -5567,7 +5912,11 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = PLRelationalTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalTests;
 				PRODUCT_NAME = PLRelationalTests;
@@ -5585,11 +5934,16 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = PLRelationalTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalTests;
 				PRODUCT_NAME = PLRelationalTests;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -5610,7 +5964,11 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = PLRelationalBinding/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBinding;
 				PRODUCT_NAME = PLRelationalBinding;
@@ -5638,12 +5996,17 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = PLRelationalBinding/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBinding;
 				PRODUCT_NAME = PLRelationalBinding;
 				SKIP_INSTALL = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -5659,7 +6022,11 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = PLRelationalBindingTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBindingTests;
 				PRODUCT_NAME = PLRelationalBindingTests;
@@ -5677,11 +6044,16 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = PLRelationalBindingTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBindingTests;
 				PRODUCT_NAME = PLRelationalBindingTests;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -5702,7 +6074,11 @@
 				INFOPLIST_FILE = PLRelationalBinding/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBinding;
 				PRODUCT_NAME = PLRelationalBinding;
 				SDKROOT = iphoneos;
@@ -5732,13 +6108,18 @@
 				INFOPLIST_FILE = PLRelationalBinding/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBinding;
 				PRODUCT_NAME = PLRelationalBinding;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
 				SUPPORTS_MACCATALYST = NO;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -5757,7 +6138,11 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = PLRelationalBindingTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBindingTests;
 				PRODUCT_NAME = PLRelationalBindingTests;
 				SDKROOT = iphoneos;
@@ -5776,11 +6161,16 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = PLRelationalBindingTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalBindingTests;
 				PRODUCT_NAME = PLRelationalBindingTests;
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -5802,7 +6192,11 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = PLBindableControls/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControls;
 				PRODUCT_NAME = PLBindableControls;
@@ -5830,12 +6224,17 @@
 				FRAMEWORK_VERSION = A;
 				INFOPLIST_FILE = PLBindableControls/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControls;
 				PRODUCT_NAME = PLBindableControls;
 				SKIP_INSTALL = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -5851,7 +6250,11 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = PLBindableControlsTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControlsTests;
 				PRODUCT_NAME = PLBindableControlsTests;
@@ -5869,11 +6272,16 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = PLBindableControlsTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLBindableControlsTests;
 				PRODUCT_NAME = PLBindableControlsTests;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -5887,7 +6295,10 @@
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/MiniVisualizer/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.MiniVisualizer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -5905,11 +6316,132 @@
 				CODE_SIGN_IDENTITY = "-";
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = "$(SRCROOT)/Examples/MiniVisualizer/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.MiniVisualizer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
+			};
+			name = Release;
+		};
+		37F125282383505000C9D006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = PLRelationalCombine/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalCombine;
+				PRODUCT_NAME = PLRelationalCombine;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		37F125292383505000C9D006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CODE_SIGN_IDENTITY = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = PLRelationalCombine/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalCombine;
+				PRODUCT_NAME = PLRelationalCombine;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		37F12546238350D700C9D006 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = PLRelationalCombineTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalCombineTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		37F12547238350D700C9D006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = PLRelationalCombineTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = coop.plausible.PLRelationalCombineTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -6014,8 +6546,9 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_INCLUDE_PATHS = "$(TARGET_BUILD_DIR)/modules";
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -6320,6 +6853,24 @@
 			buildConfigurations = (
 				37D4EBBF1F4D01550010229E /* Debug */,
 				37D4EBC01F4D01550010229E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		37F125272383505000C9D006 /* Build configuration list for PBXNativeTarget "PLRelationalCombine-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37F125282383505000C9D006 /* Debug */,
+				37F125292383505000C9D006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		37F12545238350D700C9D006 /* Build configuration list for PBXNativeTarget "PLRelationalCombine-iOSTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				37F12546238350D700C9D006 /* Debug */,
+				37F12547238350D700C9D006 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
