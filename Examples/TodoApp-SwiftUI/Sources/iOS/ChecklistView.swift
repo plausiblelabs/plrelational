@@ -4,7 +4,12 @@
 //
 
 import SwiftUI
-import PLRelationalCombine
+
+struct DummyView: View {
+    var body: some View {
+        Text("Hi")
+    }
+}
 
 struct ChecklistView: View {
     
@@ -16,6 +21,7 @@ struct ChecklistView: View {
     
     var body: some View {
         // Disable animation for initial load
+        // TODO: This seems to have no effect on iOS
         let animation: Animation?
         if model.hasDisplayedItems {
             animation = .default
@@ -23,24 +29,32 @@ struct ChecklistView: View {
             if model.itemViewModels.count > 0 {
                 model.hasDisplayedItems = true
             }
-            animation = .none
+            animation = nil
         }
         
-        return VStack {
-            TextField("Add a to-do", text: $model.newItemTitle, onCommit: {
+        return VStack(spacing: 0) {
+            TextField("Add a task", text: $model.newItemTitle, onCommit: {
                 self.model.addNewItem()
             })
-                .padding(.bottom, 10)
+            .padding()
+            
+            Divider()
             
             List(selection: $model.selectedItem) {
                 ForEach(self.model.itemViewModels) { itemViewModel in
-                    ChecklistItemView(model: itemViewModel)
-                        .frame(minWidth: 0, maxWidth: .infinity)
-                        .animation(.none)
+                    NavigationLink(destination: DetailView(model: self.model.detailViewModel),
+                                   tag: itemViewModel.item.id,
+                                   selection: self.$model.selectedItem)
+                    {
+                        ChecklistItemView(model: itemViewModel)
+                            .frame(minWidth: 0, maxWidth: .infinity)
+                            .animation(.none)
+                    }
                 }
+                .onDelete(perform: self.model.deleteItems)
             }
-                .animation(animation)
-                .environment(\.defaultMinListRowHeight, 30)
+            .animation(animation)
+            .environment(\.defaultMinListRowHeight, ChecklistItemView.rowHeight)
         }
     }
 }

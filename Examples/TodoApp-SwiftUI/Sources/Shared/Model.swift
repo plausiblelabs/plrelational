@@ -143,7 +143,7 @@ class Model {
         cancellableBag.cancel()
     }
 
-    func addDefaultData(selectItem: Bool = false) {
+    func addDefaultData(selectItem: Bool = false) -> [ItemID] {
         // Add a couple default tags
         let tagHome = addTag("home")
         let tagWork = addTag("work")
@@ -163,12 +163,15 @@ class Model {
         addExisting(tag: tagUrgent, to: item1)
         let item2 = addItem("Item 2", created: Date(timeIntervalSinceNow: -3600 * 48))
         addExisting(tag: tagWork, to: item2)
+        let item3 = addItem("Item 3", created: Date(timeIntervalSinceNow: -3600 * 24))
 
         if selectItem {
             selectedItemIDs.asyncAdd([
                 SelectedItem.id: item1
             ])
         }
+        
+        return [item1, item2, item3]
     }
     
     /// MARK: - Items
@@ -277,6 +280,17 @@ class Model {
         return self.tags
             .difference(self.tagsForSelectedItem)
     }()
+    
+    /// Resolves to the set of all tags, including an extra column that will contain
+    /// the selected item's ID if it is associated with the tag, otherwise null.
+    lazy var allTagsWithSelectedItemID: Relation = {
+        // Compute relation of all tags associated with the selected item
+        let allTagsForSelectedItem = self.selectedItemIDs
+            .join(self.itemTags)
+        
+        return self.tags
+            .leftOuterJoin(allTagsForSelectedItem)
+    }()
 
     /// Adds a new row to the `tags` relation.
     private func addTag(_ name: String) -> TagID {
@@ -316,7 +330,17 @@ class Model {
             ])
         })
     }
-    
+
+    /// Removes an existing tag from the given to-do item.
+    func removeExistingTag(_ tagID: TagID, from itemID: ItemID) {
+        undoableDB.performUndoableAction("Remove Tag", {
+            self.itemTags.asyncDelete(
+                ItemTag.itemID *== itemID.relationValue *&&
+                ItemTag.tagID *== tagID.relationValue
+            )
+        })
+    }
+
     // MARK: - Delete
     
     /// Deletes the row associated with the selected item and
@@ -351,6 +375,75 @@ class Model {
             )
         })
     }
+    
+    /// Deletes the row associated with the given item and
+    /// clears the selection.
+    func deleteItem(_ itemID: ItemID) {
+        undoableDB.performUndoableAction("Delete Item", {
+            // We initiate the cascading delete by first removing
+            // the row from the `items` relation
+            self.items.cascadingDelete(
+                Item.id *== itemID,
+                affectedRelations: [
+                    self.items, self.selectedItemIDs, self.itemTags
+                ],
+                cascade: { (relation, row) in
+                    if relation === self.items {
+                        // This row was deleted from `items`; delete
+                        // corresponding rows from `selectedItemIDs`
+                        // and `itemTags`
+                        return [
+                            (self.selectedItemIDs, SelectedItem.id *== itemID),
+                            (self.itemTags, ItemTag.itemID *== itemID)
+                        ]
+                    } else {
+                        // Nothing else to clean up
+                        return []
+                    }
+                }
+            )
+        })
+    }
+}
+
+struct ChecklistItem: Identifiable {
+    let id: ItemID
+    let title: String
+    let created: String
+    let completed: String?
+    
+    init(id: ItemID, title: String, created: String, completed: String?) {
+        self.id = id
+        self.title = title
+        self.created = created
+        self.completed = completed
+    }
+    
+    init(row: Row) {
+        self.id = ItemID(row[Item.id])
+        self.title = row[Item.title].get()!
+        self.created = row[Item.created].get()!
+        self.completed = row[Item.completed].get()
+    }
+}
+
+func itemOrder(_ a: ChecklistItem, _ b: ChecklistItem) -> Bool {
+    // We sort items into two sections:
+    //   - first section has all incomplete items, with most recently created items at the top
+    //   - second section has all completed items, with most recently completed items at the top
+    if let aCompleted = a.completed, let bCompleted = b.completed {
+        // Both items were completed; make more recently completed item come first
+        return aCompleted >= bCompleted
+    } else if a.completed != nil {
+        // `a` was completed but `b` was not, so `a` will come after `b`
+        return false
+    } else if b.completed != nil {
+        // `b` was completed but `a` was not, so `b` will come after `a`
+        return true
+    } else {
+        // Neither item was completed; make more recently created item come first
+        return a.created >= b.created
+    }
 }
 
 private let timestampFormatter: DateFormatter = {
@@ -376,10 +469,13 @@ func displayString(from timestampString: String) -> String {
 }
 
 #if DEBUG
-func modelForPreview() -> Model {
+func modelForPreviewWithIds() -> (Model, [ItemID]) {
     let undoManager = PLRelationalCombine.UndoManager()
     let model = Model(undoManager: undoManager, path: nil)
-    model.addDefaultData(selectItem: true)
-    return model
+    let itemIds = model.addDefaultData(selectItem: true)
+    return (model, itemIds)
+}
+func modelForPreview() -> Model {
+    return modelForPreviewWithIds().0
 }
 #endif

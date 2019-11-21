@@ -12,6 +12,8 @@ final class ChecklistViewModel: ObservableObject {
     
     private let model: Model
     
+    let detailViewModel: DetailViewModel
+    
     @Published var newItemTitle: String = ""
     @Published var itemViewModels: [ChecklistItemViewModel] = []
     @Published var selectedItem: ItemID? {
@@ -35,26 +37,8 @@ final class ChecklistViewModel: ObservableObject {
     
     init(model: Model) {
         self.model = model
+        self.detailViewModel = DetailViewModel(model: model)
 
-        func itemOrder(_ a: ChecklistItem, _ b: ChecklistItem) -> Bool {
-            // We sort items into two sections:
-            //   - first section has all incomplete items, with most recently created items at the top
-            //   - second section has all completed items, with most recently completed items at the top
-            if let aCompleted = a.completed, let bCompleted = b.completed {
-                // Both items were completed; make more recently completed item come first
-                return aCompleted >= bCompleted
-            } else if a.completed != nil {
-                // `a` was completed but `b` was not, so `a` will come after `b`
-                return false
-            } else if b.completed != nil {
-                // `b` was completed but `a` was not, so `b` will come after `a`
-                return true
-            } else {
-                // Neither item was completed; make more recently created item come first
-                return a.created >= b.created
-            }
-        }
-        
         // REQ-2
         // The model for the list of to-do items.
         model.items
@@ -89,5 +73,14 @@ final class ChecklistViewModel: ObservableObject {
         
         // Clear the text field
         newItemTitle = ""
+    }
+    
+    /// Delete the items in the given index set.
+    func deleteItems(_ items: IndexSet) {
+        // TODO: For now we assume there's only one item
+        if let index = items.first {
+            let itemViewModel = itemViewModels[index]
+            model.deleteItem(itemViewModel.item.id)
+        }
     }
 }

@@ -4,7 +4,6 @@
 //
 
 import SwiftUI
-import PLRelationalCombine
 
 struct ChecklistItemView: View {
 

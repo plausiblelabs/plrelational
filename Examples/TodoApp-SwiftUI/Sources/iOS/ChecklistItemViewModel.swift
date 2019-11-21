@@ -8,27 +8,6 @@ import SwiftUI
 import PLRelational
 import PLRelationalCombine
 
-struct ChecklistItem: Identifiable {
-    let id: ItemID
-    let title: String
-    let created: String
-    let completed: String?
-    
-    init(id: ItemID, title: String, created: String, completed: String?) {
-        self.id = id
-        self.title = title
-        self.created = created
-        self.completed = completed
-    }
-    
-    init(row: Row) {
-        self.id = ItemID(row[Item.id])
-        self.title = row[Item.title].get()!
-        self.created = row[Item.created].get()!
-        self.completed = row[Item.completed].get()
-    }
-}
-
 final class ChecklistItemViewModel: ElementViewModel, Identifiable, ObservableObject {
     
     private let model: Model

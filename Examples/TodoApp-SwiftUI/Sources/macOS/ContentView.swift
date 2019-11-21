@@ -4,7 +4,6 @@
 //
 
 import SwiftUI
-import PLRelationalCombine
 
 struct ContentView: View {
     
@@ -32,9 +31,9 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity)
                 }
             }
-                .frame(minWidth: 290, minHeight: 400)
+            .frame(minWidth: 290, minHeight: 400)
         }
-            .padding()
+        .padding()
     }
 }
 

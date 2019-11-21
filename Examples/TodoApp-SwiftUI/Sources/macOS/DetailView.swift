@@ -4,7 +4,6 @@
 //
 
 import SwiftUI
-import PLRelationalCombine
 
 struct DetailView: View {
     
@@ -34,16 +33,9 @@ struct DetailView: View {
             List {
                 ForEach(model.itemTags, id: \.self) { tag in
                     Text(tag)
-                        // TODO: Context menu not working well in 10.15.1, only seems
-                        // selectable if you click the thin border around the cell
-//                        .contextMenu {
-//                            Button(action: { /*model.removeTag()*/ } ) {
-//                                Text("Remove Tag")
-//                            }
-//                        }
                 }
             }
-                .padding(.bottom)
+            .padding(.bottom)
             
             Text("Notes")
             TextView(text: $model.itemNotes, onCommit: { self.model.commitItemNotes() })
