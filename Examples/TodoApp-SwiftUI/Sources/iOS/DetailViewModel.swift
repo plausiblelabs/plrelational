@@ -93,10 +93,4 @@ final class DetailViewModel: ObservableObject {
     func commitItemNotes() {
         _itemNotes.commit()
     }
-//
-//    /// REQ-13
-//    /// Deletes the selected item.
-//    func deleteSelectedItem() {
-//        self.model.deleteSelectedItem()
-//    }
 }

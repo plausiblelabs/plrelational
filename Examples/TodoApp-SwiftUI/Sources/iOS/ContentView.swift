@@ -8,7 +8,6 @@ import SwiftUI
 struct ContentView: View {
     
     @ObservedObject private var model: ContentViewModel
-//    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     
     init(model: ContentViewModel) {
         self.model = model
@@ -18,7 +17,10 @@ struct ContentView: View {
         NavigationView {
             ChecklistView(model: model.checklistViewModel)
                 .navigationBarTitle("To Do", displayMode: .inline)
-            DetailView(model: model.checklistViewModel.detailViewModel)
+            // TODO: On iPad, the following would be the preferred way
+            // of having a split master/detail view, but for now we'll
+            // focus on iPhone
+//            DetailView(model: model.checklistViewModel.detailViewModel)
         }
     }
 }

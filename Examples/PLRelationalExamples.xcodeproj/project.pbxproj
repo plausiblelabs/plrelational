@@ -11,6 +11,7 @@
 		3739BB092385F49300A69DEB /* TagsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3739BB082385F49300A69DEB /* TagsViewModel.swift */; };
 		3739BB0B2385F50100A69DEB /* TagItemViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3739BB0A2385F50100A69DEB /* TagItemViewModel.swift */; };
 		3739BB0D2385F66600A69DEB /* TagItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3739BB0C2385F66600A69DEB /* TagItemView.swift */; };
+		3739BB1B2386149E00A69DEB /* TextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3739BB1A2386149E00A69DEB /* TextView.swift */; };
 		3759DB142384687100CB5E45 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3759DB132384687100CB5E45 /* AppDelegate.swift */; };
 		3759DB162384687100CB5E45 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3759DB152384687100CB5E45 /* SceneDelegate.swift */; };
 		3759DB182384687100CB5E45 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3759DB172384687100CB5E45 /* ContentView.swift */; };
@@ -310,6 +311,7 @@
 		3739BB082385F49300A69DEB /* TagsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagsViewModel.swift; sourceTree = "<group>"; };
 		3739BB0A2385F50100A69DEB /* TagItemViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagItemViewModel.swift; sourceTree = "<group>"; };
 		3739BB0C2385F66600A69DEB /* TagItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagItemView.swift; sourceTree = "<group>"; };
+		3739BB1A2386149E00A69DEB /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
 		3759DB112384687100CB5E45 /* TodoApp-SwiftUI-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TodoApp-SwiftUI-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3759DB132384687100CB5E45 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3759DB152384687100CB5E45 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -526,6 +528,7 @@
 			isa = PBXGroup;
 			children = (
 				3759DB4E2384935800CB5E45 /* CheckButton.swift */,
+				3739BB1A2386149E00A69DEB /* TextView.swift */,
 			);
 			name = Private;
 			sourceTree = "<group>";
@@ -1033,6 +1036,7 @@
 				3739BB092385F49300A69DEB /* TagsViewModel.swift in Sources */,
 				3759DB182384687100CB5E45 /* ContentView.swift in Sources */,
 				3759DB462384740000CB5E45 /* ChecklistItemView.swift in Sources */,
+				3739BB1B2386149E00A69DEB /* TextView.swift in Sources */,
 				3739BB072385F37E00A69DEB /* TagsView.swift in Sources */,
 				3759DB412384738E00CB5E45 /* ChecklistView.swift in Sources */,
 			);

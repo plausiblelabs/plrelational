@@ -18,14 +18,19 @@ final class ChecklistViewModel: ObservableObject {
     @Published var itemViewModels: [ChecklistItemViewModel] = []
     @Published var selectedItem: ItemID? {
         didSet {
-            let itemIDs: [RelationValue]
+            // XXX: When the back button is tapped on the detail screen,
+            // NavigationLink will clear the selected item right away,
+            // before we have a chance to commit text changes (apparently
+            // the selection change happens before the end editing event
+            // is sent.  As a workaround, we won't actually clear the
+            // selection at the relation level.  This needs more thought.
+            // Maybe it's just not a good idea to rely on the end editing
+            // event to fire in order to commit text (vs having an explicit
+            // save button or something).
             if let itemID = selectedItem {
-                itemIDs = [itemID.relationValue]
-            } else {
-                itemIDs = []
+                self.model.selectedItemIDs
+                    .asyncReplaceValues([itemID.relationValue])
             }
-            self.model.selectedItemIDs
-                .asyncReplaceValues(itemIDs)
         }
     }
     

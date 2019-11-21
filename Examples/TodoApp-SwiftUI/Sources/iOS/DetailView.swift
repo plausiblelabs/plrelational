@@ -30,7 +30,11 @@ struct DetailView: View {
         return VStack(alignment: .leading) {
             HStack(alignment: .center) {
                 CheckButton(isOn: $model.itemCompleted)
-                TextField("", text: $model.itemTitle, onCommit: { self.model.commitItemTitle() })
+                TextField("", text: $model.itemTitle, onEditingChanged: { editing in
+                    if !editing {
+                        self.model.commitItemTitle()
+                    }
+                })
             }
             .frame(maxHeight: 40)
 
@@ -56,9 +60,8 @@ struct DetailView: View {
             
             divider()
             label("NOTES")
-//            TextView(text: $model.itemNotes, onCommit: { self.model.commitItemNotes() })
-//                .padding(.bottom)
-            Spacer()
+            TextView(text: $model.itemNotes, onCommit: { self.model.commitItemNotes() })
+                .padding(.bottom)
 
             divider()
             label(model.createdOn)
