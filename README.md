@@ -15,7 +15,7 @@ The repository contains `PLRelational.xcodeproj` which will build out of the box
 The PLRelational project provides two primary frameworks:
 
 * **PLRelational** provides all of the core data storage and processing facilities. It includes relations backed by plists, SQLite, or stored in memory, operators on those relations, full text search facilities, asynchronous data updates and retrieval, and more.
-* **PLRelationalCombine** builds on the PLRelational and Combine frameworks to present relations as a stream of values and/or changes. It also includes support for bidirectional bindings
+* **PLRelationalCombine** builds on the PLRelational and Combine frameworks with publishers that present relations as a stream of values and/or changes. It also includes array-optimized publishers, support for bidirectional bindings via the `@TwoWay` property wrapper, and more.
 
 _Note that this repository contains sources for two other legacy frameworks, PLRelationalBinding and PLBindableControls.  These were originally developed (back in 2015-16) as experimental reactive/binding layers that provide the reactive glue to connect PLRelational with AppKit/UIKit.  With the advent of the Combine and SwiftUI frameworks in 2019, those legacy frameworks are no longer worth maintaining and will be retired in the near future._
 
