@@ -321,8 +321,6 @@ let masterPreview = MasterView(model: masterViewModel)
     .frame(width: 200, height: 160)
 masterPreview
 
-
-
 /*:
  ### 3. Define the "detail" View and View Model
  
@@ -404,8 +402,6 @@ let detailPreview = DetailView(model: detailViewModel)
     .frame(width: 200, height: 200)
 detailPreview
 
-
-
 /*:
  ### 4. Tie it all together
  
@@ -448,8 +444,6 @@ contentViewModel.masterViewModel.selectedEmployeeId = 3
 Async.awaitAsyncCompletion()
 contentView
 
-
-
 /*:
  ### 5. Play with the live view
  
@@ -469,7 +463,7 @@ PlaygroundPage.current.setLiveView(liveContentView)
 // enter or change focus to a different field.
 // Uncomment and run the following to see a
 // simulation of that kind of edit.
-DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-    detailViewModel.lastName = "Appleby"
-    detailViewModel.commitLastName()
-}
+//DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+//    detailViewModel.lastName = "Appleby"
+//    detailViewModel.commitLastName()
+//}
