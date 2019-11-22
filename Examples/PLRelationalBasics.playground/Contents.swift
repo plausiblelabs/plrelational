@@ -9,8 +9,12 @@ PlaygroundPage.current.needsIndefiniteExecution = true
  ## Building a model with relations
  
  The first step in building an application with _PLRelational_ is to\
- define our model, which entails describing each `Relation` and\
+ define its model, which entails describing each `Relation` and\
  populating them with some initial data.
+ 
+ For this example, we'll define one relation that contains employee\
+ data for Springfield Nuclear Power Plant, and another to hold some\
+ department names.
 */
 
 import PLRelational
@@ -18,7 +22,6 @@ import PLRelational
 // Describe the relations
 let employees = MakeRelation(["emp_id", "first_name", "last_name", "dept_id"])
 let departments = MakeRelation(["dept_id", "title"])
-let selectedEmployeeID = MakeRelation(["emp_id"])
 
 // Add some departments
 func addDepartment(_ id: Int64, _ title: String) {
@@ -71,11 +74,12 @@ let homer = employees
     .project("first_name")
 homer
 
-// Simulate a master/detail application by marking an employee
+// Simulate a master/detail application by marking Homer
 // as "selected"
+let selectedEmployeeID = MakeRelation(["emp_id"])
 selectedEmployeeID.add(["emp_id": 3])
 
-// Create a complex relation by joining the three original
+// Create a complex relation by joining the three source
 // relations; this will contain the selected person's name and
 // department info
 let selectedEmployee = selectedEmployeeID
@@ -89,7 +93,7 @@ let selectedEmployeeBadge = selectedEmployee
     .projectRenamed(["first_name": "first", "title": "dept_title"])
 selectedEmployeeBadge
 
-// Now change the "selected" employee in the original relation
+// Now change the "selected" employee in the source relation
 // and see that our derived "badge" relation reflects the
 // updated values
 selectedEmployeeID.update(true, newValues: ["emp_id": 1])
@@ -108,12 +112,11 @@ selectedEmployeeBadge
  but it's often easier to think in terms of a reactive "stream"\
  like what the _Combine_ framework offers.
 
- _PLRelational_ includes _Combine_ extensions like custom publishers\
+ _PLRelational_ includes _Combine_ extensions (i.e., custom publishers)\
  that make it possible to subscribe to the contents of a `Relation`\
  and transform those contents in various ways.
 */
 
-import SwiftUI
 import PLRelationalCombine
 
 // In the following chain, `oneString` will create a `Publisher`
@@ -129,16 +132,16 @@ var cancellable = selectedEmployee
         latestFirstName = $0
     }
 
-// This is just a way to wait for PLRelational's async
+// (This is just a way to wait for PLRelational's async
 // operations to complete synchronously; not typically
-// used in real applications
+// used in real applications)
 Async.awaitAsyncCompletion()
 
 // The current value ("Montgomery") should have been delivered to
 // our `sink` (after the initial asynchronous query has finished)
 latestFirstName
 
-// Make "Lenny" the selected employee, and see that the publisher
+// Make Lenny the selected employee, and see that the publisher
 // emits the new "first name" value.  Note that we're using the
 // `asyncUpdateInteger` convenience, which is a useful shorthand
 // for updating a single-attribute relation.
@@ -266,12 +269,15 @@ let model = Model(
  `selectedEmployeeID`  relation.  The detail view will then update\
  itself automatically to reflect the selected employee.
 */
+import SwiftUI
+
 class MasterViewModel: ObservableObject {
     @Published var employees: [Employee] = []
     var selectedEmployeeId: Int64? {
         didSet {
             // Update the underlying relation when the list selection changes
-            self.model.selectedEmployeeID.asyncReplaceInteger(selectedEmployeeId)
+            self.model.selectedEmployeeID
+                .asyncReplaceInteger(selectedEmployeeId)
         }
     }
     
@@ -302,15 +308,20 @@ struct MasterView: View {
             ForEach(model.employees) { emp in
                 Text("\(emp.lastName), \(emp.firstName)")
                     .frame(minWidth: 100, maxWidth: .infinity, alignment: .leading)
+                    .animation(nil)
             }
         }
-        .frame(maxWidth: 200, maxHeight: 200)
+        .animation(.default)
     }
 }
 
 let masterViewModel = MasterViewModel(model: model)
 Async.awaitAsyncCompletion()
 let masterPreview = MasterView(model: masterViewModel)
+    .frame(width: 200, height: 160)
+masterPreview
+
+
 
 /*:
  ### 3. Define the "detail" View and View Model
@@ -321,16 +332,19 @@ let masterPreview = MasterView(model: masterViewModel)
  Note the use of _PLRelational's_ `@TwoWay` property wrapper.  This is\
  similar to _Combine's_ `@Published`, except that it allows for\
  plugging in different behaviors when the value is set via the property's\
- setter.  The `bind` function lets you specify a "strategy" that takes care\
- of reading values from the underlying relation, and writing values\
- back to that relation.  It also handles the special logic that prevents\
- feedback loops that would otherwise occur when the underlying\
- relation is updated.
+ setter.
+ 
+ The `bind` function works in conjunction with `@TwoWay` and lets\
+ you specify a "strategy" that takes care of reading values from the\
+ underlying relation, and writing values back to that relation.  It also\
+ handles the special logic that prevents feedback loops that might\
+ otherwise occur when the underlying relation is updated.
 */
 class DetailViewModel: ObservableObject {
     @TwoWay var firstName: String = ""
     @TwoWay var lastName: String = ""
     @Published var department: String = ""
+    
     private var cancellableBag = CancellableBag()
     
     init(model: Model) {
@@ -381,13 +395,15 @@ struct DetailView: View {
             Spacer()
         }
         .padding()
-        .frame(maxWidth: 200, maxHeight: 200)
     }
 }
 
 let detailViewModel = DetailViewModel(model: model)
 Async.awaitAsyncCompletion()
 let detailPreview = DetailView(model: detailViewModel)
+    .frame(width: 200, height: 200)
+detailPreview
+
 
 
 /*:
@@ -397,27 +413,22 @@ let detailPreview = DetailView(model: detailViewModel)
  view on the right.
 */
 
-class ContentViewModel: ObservableObject {
+struct ContentViewModel {
     let masterViewModel: MasterViewModel
     let detailViewModel: DetailViewModel
-    
-    init(masterViewModel: MasterViewModel, detailViewModel: DetailViewModel) {
-        self.masterViewModel = masterViewModel
-        self.detailViewModel = detailViewModel
-    }
 }
 
 struct ContentView: View {
-    @ObservedObject var model: ContentViewModel
+    var model: ContentViewModel
 
     var body: some View {
         HStack(spacing: 0) {
             MasterView(model: model.masterViewModel)
+                .frame(minWidth: 160)
             DetailView(model: model.detailViewModel)
                 .frame(minWidth: 180)
         }
         .padding()
-            .frame(width: 350, height: 180)
     }
 }
 
@@ -426,6 +437,8 @@ let contentViewModel = ContentViewModel(
     detailViewModel: detailViewModel
 )
 let contentView = ContentView(model: contentViewModel)
+    .frame(width: 340, height: 180)
+contentView
 
 // TODO: Unfortunately, SwiftUI's List view doesn't
 // seem to update its selection highlighting when
@@ -435,5 +448,28 @@ contentViewModel.masterViewModel.selectedEmployeeId = 3
 Async.awaitAsyncCompletion()
 contentView
 
+
+
+/*:
+ ### 5. Play with the live view
+ 
+ Load the UI we just built into the playground's "live view",\
+ then select different employees in the list view and watch\
+ the detail view update in response.
+*/
+
+// Run to here to see this UI in the live view
 let liveContentView = ContentView(model: contentViewModel)
+    .frame(width: 340, height: 220)
 PlaygroundPage.current.setLiveView(liveContentView)
+
+// You can also type in the text fields to change
+// the selected employee's name, and see that the
+// list view updates automatically when you hit
+// enter or change focus to a different field.
+// Uncomment and run the following to see a
+// simulation of that kind of edit.
+DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+    detailViewModel.lastName = "Appleby"
+    detailViewModel.commitLastName()
+}
