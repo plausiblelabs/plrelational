@@ -35,8 +35,7 @@ populating them with some initial data.
 import PLRelational
 
 // Describe the relations
-let employees = MakeRelation(["emp_id", "first_name",
-                              "last_name", "dept_id"])
+let employees = MakeRelation(["emp_id", "first_name", "last_name", "dept_id"])
 let departments = MakeRelation(["dept_id", "title"])
 
 // Add some departments
@@ -53,9 +52,7 @@ addDepartment(2, "Safety")
 print(departments)
 
 // Add some employees
-func addEmployee(_ id: Int64, _ first: String,
-                 _ last: String, _ deptID: Int64)
-{
+func addEmployee(_ id: Int64, _ first: String, _ last: String, _ deptID: Int64) {
     employees.add([
         "emp_id": id,
         "first_name": first,
@@ -76,9 +73,9 @@ print(employees)
 ### Playing with relations
 
 Now that we've defined some relations, we can have fun
-with relational algebra.  Use join to combine relations,
-select to narrow the focus on a subset of rows, and
-project to focus on a subset of attributes ("columns").
+with relational algebra.  Use `join` to combine relations,
+`select` to narrow the focus on a subset of rows, and
+`project` to focus on a subset of attributes ("columns").
 
 These are just a few of the relational algebra operators
 that are provided with PLRelational.
@@ -167,10 +164,11 @@ print(employees)
 cancellable.cancel()
 ```
 
-#### Using PLRelational[Combine] + SwiftUI to build a UI
+### Using PLRelational[Combine] + SwiftUI to build a UI
 
-This is a small form, with editable text fields for the person's first and last
-name, and a label that display's the employee's department.
+Here is an example of using SwiftUI to build a small form,
+with editable text fields for the person's first and last
+name, and a label that displays the employee's department.
 
 Note the use of PLRelational's `@TwoWay` property wrapper.  This is
 similar to Combine's `@Published`, except that it allows for
@@ -200,7 +198,7 @@ class DetailViewModel: ObservableObject {
             .bind(to: \._firstName, on: self, strategy: oneString)
             .store(in: &cancellableBag)
 
-        // The selected employee's first name (read/write)
+        // The selected employee's last name (read/write)
         model.selectedEmployee
             .project("last_name")
             .bind(to: \._lastName, on: self, strategy: oneString)
@@ -265,7 +263,14 @@ The PLRelational collection of frameworks draws inspiration from and stands on t
 
 ## Further Reading
 
-For a more in-depth introduction to these frameworks, check out [Reactive Relational Programming with PLRelational](https://plausible.coop/blog/2017/08/10/reactive-relational-programming-with-plrelational).
+For more depth on these frameworks, check out the following blog posts:
+* [Reactive Relational Programming with PLRelational](https://plausible.coop/blog/2017/08/10/reactive-relational-programming-with-plrelational)
+* [An Introduction to Relational Algebra Using PLRelational](https://plausible.coop/blog/2017/08/24/intro-to-relational-algebra-using-plrelational)
+* [PLRelational: Observing Change](https://plausible.coop/blog/2017/08/29/plrelational-observing-change)
+* [PLRelational: Storage Formats](https://plausible.coop/blog/2017/09/07/plrelational-storage-formats)
+* [Let's Build with PLRelational, Part 1](https://plausible.coop/blog/2017/09/18/build-with-plrelational-part-1)
+* [Let's Build with PLRelational, Part 2](https://plausible.coop/blog/2017/09/28/build-with-plrelational-part-2)
+* [PLRelational: Query Optimization and Execution](https://plausible.coop/blog/2017/10/03/plrelational-query-optimization)
 
 Generated documentation is also [available online](https://plausiblelabs.github.io/plrelational/docs/current) for the PLRelational and PLRelationalBinding frameworks.
 

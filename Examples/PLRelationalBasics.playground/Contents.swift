@@ -327,7 +327,7 @@ masterPreview
  ### 3. Define the "detail" View and View Model
  
  This is a small form, with editable text fields for the person's first and last\
- name, and a label that display's the employee's department.
+ name, and a label that displays the employee's department.
  
  Note the use of _PLRelational's_ `@TwoWay` property wrapper.  This is\
  similar to _Combine's_ `@Published`, except that it allows for\
@@ -354,7 +354,7 @@ class DetailViewModel: ObservableObject {
             .bind(to: \._firstName, on: self, strategy: oneString)
             .store(in: &cancellableBag)
 
-        // The selected employee's first name (read/write)
+        // The selected employee's last name (read/write)
         model.selectedEmployee
             .project("last_name")
             .bind(to: \._lastName, on: self, strategy: oneString)
