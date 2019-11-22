@@ -312,6 +312,7 @@
 		3739BB0A2385F50100A69DEB /* TagItemViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagItemViewModel.swift; sourceTree = "<group>"; };
 		3739BB0C2385F66600A69DEB /* TagItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagItemView.swift; sourceTree = "<group>"; };
 		3739BB1A2386149E00A69DEB /* TextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextView.swift; sourceTree = "<group>"; };
+		3739BB1C2386FEA600A69DEB /* PLRelationalBasics.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = PLRelationalBasics.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		3759DB112384687100CB5E45 /* TodoApp-SwiftUI-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TodoApp-SwiftUI-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3759DB132384687100CB5E45 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3759DB152384687100CB5E45 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -536,6 +537,7 @@
 		37F124502383493E00C9D006 = {
 			isa = PBXGroup;
 			children = (
+				3739BB1C2386FEA600A69DEB /* PLRelationalBasics.playground */,
 				3759DAE02384661000CB5E45 /* TodoApp-SwiftUI */,
 				37F1249823834CB900C9D006 /* Dependencies */,
 				37F1245C23834A2400C9D006 /* Products */,

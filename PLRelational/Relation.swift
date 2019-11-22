@@ -5,6 +5,9 @@
 
 import Foundation
 
+#if os(macOS)
+import AppKit
+#endif
 
 /// :nodoc: Elided from docs to reduce clutter for now; part of "official" API but may be reworked in the near future
 /// Silly placeholder until we figure out what the error type should actually look like.
@@ -14,7 +17,7 @@ public typealias RelationObject = Relation & AnyObject
 
 /// A protocol defining a relation, which is conceptually a set of `Row`s, all of which have
 /// the same scheme.
-public protocol Relation: PlaygroundMonospace {
+public protocol Relation: CustomStringConvertible, CustomPlaygroundDisplayConvertible {
     /// The relation's scheme.
     var scheme: Scheme { get }
     
@@ -501,6 +504,32 @@ extension Relation {
         let padded = all.map({ zip(columnLengths, $0).map({ $1.pad(to: $0, with: " ") }) })
         let joined = padded.map({ $0.joined(separator: "  ") })
         return joined.joined(separator: "\n")
+    }
+    
+    public var playgroundDescription: Any {
+        if #available(OSX 10.12, *) {
+            let pad: CGFloat = 8
+            
+            let attrStr = NSAttributedString(string: self.description, attributes: [.font: NSFont(name: "Monaco", size: 9)!])
+            let textField = NSTextField(labelWithAttributedString: attrStr)
+            textField.textColor = NSColor.white
+            textField.sizeToFit()
+
+            let viewW = Swift.max(200, textField.frame.width + (pad * 2))
+            let viewH = Swift.max(40, textField.frame.height + (pad * 2))
+            let viewFrame = NSMakeRect(0, 0, viewW, viewH)
+            let view = NSView(frame: viewFrame)
+            
+            var textFrame = textField.frame
+            textFrame.origin.x = pad
+            textFrame.origin.y = viewFrame.height - textFrame.height - pad
+            textField.frame = textFrame
+            view.addSubview(textField)
+            
+            return view
+        } else {
+            return self.description
+        }
     }
 }
 

@@ -75,21 +75,6 @@ class BindingTestCase: XCTestCase {
     
     /// Synchronously waits for AsyncManager to return to an `idle` state.
     func awaitIdle() {
-        if AsyncManager.currentInstance.state == .idle {
-            return
-        }
-        
-        let runloop = CFRunLoopGetCurrent()
-        var wentIdle = false
-        let stateObserverRemover = AsyncManager.currentInstance.addStateObserver({
-            if $0 == .idle {
-                wentIdle = true
-                CFRunLoopStop(runloop)
-            }
-        })
-        while !wentIdle {
-            CFRunLoopRun()
-        }
-        stateObserverRemover()
+        Async.awaitAsyncCompletion()
     }
 }

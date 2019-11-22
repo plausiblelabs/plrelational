@@ -44,7 +44,7 @@ extension Relation {
     }
 }
 
-extension TransactionalRelation {
+extension MutableRelation {
     /// Replaces the rows in this relation (asynchronously) by performing a delete-all followed by an add for each row.
     public func asyncReplaceRows(_ rows: [Row], initiator: InitiatorTag? = nil) {
         self.asyncDelete(true, initiator: initiator)
@@ -58,8 +58,31 @@ extension TransactionalRelation {
         precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
         let attr = self.scheme.attributes.first!
         self.asyncDelete(true, initiator: initiator)
-        for id in values {
-            self.asyncAdd([attr: id], initiator: initiator)
+        for value in values {
+            self.asyncAdd([attr: value], initiator: initiator)
         }
+    }
+
+    /// Replaces the rows in this relation (asynchronously) by performing a delete-all followed by an add if the given
+    /// value is defined.
+    public func asyncReplaceValue(_ value: RelationValue?, initiator: InitiatorTag? = nil) {
+        precondition(self.scheme.attributes.count == 1, "Relation must contain exactly one attribute")
+        let attr = self.scheme.attributes.first!
+        self.asyncDelete(true, initiator: initiator)
+        if let value = value {
+            self.asyncAdd([attr: value], initiator: initiator)
+        }
+    }
+
+    /// Replaces the rows in this relation (asynchronously) by performing a delete-all followed by an add if the given
+    /// string value is defined.
+    public func asyncReplaceString(_ value: String?, initiator: InitiatorTag? = nil) {
+        asyncReplaceValue(value.map{ RelationValue($0) })
+    }
+
+    /// Replaces the rows in this relation (asynchronously) by performing a delete-all followed by an add if the given
+    /// integer value is defined.
+    public func asyncReplaceInteger(_ value: Int64?, initiator: InitiatorTag? = nil) {
+        asyncReplaceValue(value.map{ RelationValue($0) })
     }
 }

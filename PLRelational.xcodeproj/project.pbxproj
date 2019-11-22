@@ -300,7 +300,6 @@
 		37B440971E899A7200C8C336 /* ObserverSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22921B51CD10BA800518184 /* ObserverSet.swift */; };
 		37B440981E899A7200C8C336 /* OptionalFlatten.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25D63401DDF5F3000135E20 /* OptionalFlatten.swift */; };
 		37B440991E899A7200C8C336 /* PerThreadInstance.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C6308C1D355B7500AD44C1 /* PerThreadInstance.swift */; };
-		37B4409A1E899A7200C8C336 /* PlaygroundMonospace.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */; };
 		37B4409B1E899A7200C8C336 /* Promise.swift in Sources */ = {isa = PBXBuildFile; fileRef = C283FFCF1E805101000CDED9 /* Promise.swift */; };
 		37B4409C1E899A7200C8C336 /* RWLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CBA1D197814006B6278 /* RWLock.swift */; };
 		37B4409D1E899A7200C8C336 /* SetPowerSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C257C7511CBEBF6300234A89 /* SetPowerSet.swift */; };
@@ -349,7 +348,6 @@
 		37B440CA1E899A7800C8C336 /* ObjectMapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B53CDD1D1DBC3F006B6278 /* ObjectMapTests.swift */; };
 		37B440CB1E899BB000C8C336 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
 		37B440CC1E899BB200C8C336 /* DBTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = C277E8041CDBD2A000B7B8F6 /* DBTestCase.swift */; };
-		37B440CD1E899DB900C8C336 /* PlaygroundMonospace.swift in Sources */ = {isa = PBXBuildFile; fileRef = C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */; };
 		37B440DC1E899F7600C8C336 /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440D31E899F7600C8C336 /* PLRelationalBinding.framework */; };
 		37B440F81E899FB700C8C336 /* PLRelationalBinding.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37B440EF1E899FB700C8C336 /* PLRelationalBinding.framework */; };
 		37B441061E89A10200C8C336 /* Signal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A1CEDD1D1469720067870D /* Signal.swift */; };
@@ -1180,7 +1178,6 @@
 		37F1244C23833CAE00C9D006 /* CancellableBag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CancellableBag.swift; sourceTree = "<group>"; };
 		37F1252A2383505000C9D006 /* PLRelationalCombine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PLRelationalCombine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		37F12548238350D700C9D006 /* PLRelationalCombine-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PLRelationalCombine-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		37F12549238350D700C9D006 /* PLRelationalBinding-iOSTests copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "PLRelationalBinding-iOSTests copy-Info.plist"; path = "/Users/campbell/Projects/Plausible/plr/plrelational/PLRelationalBinding-iOSTests copy-Info.plist"; sourceTree = "<absolute>"; };
 		37F12575238352D600C9D006 /* UndoableDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UndoableDatabaseTests.swift; path = PLRelationalCombineTests/UndoableDatabaseTests.swift; sourceTree = SOURCE_ROOT; };
 		37F125782383533400C9D006 /* UndoManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UndoManager.swift; sourceTree = "<group>"; };
 		37F1DA5D1DD39519004D4AAD /* RelationModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationModel.swift; sourceTree = "<group>"; };
@@ -1206,7 +1203,6 @@
 		C22B160F1E92B17F0053AD9D /* QueryOptimizerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryOptimizerTests.swift; sourceTree = "<group>"; };
 		C22BF1361CBC349400D3FE59 /* DictionaryConvenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryConvenience.swift; sourceTree = "<group>"; };
 		C22BF1371CBC349400D3FE59 /* DictionaryCreation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DictionaryCreation.swift; sourceTree = "<group>"; };
-		C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaygroundMonospace.swift; sourceTree = "<group>"; };
 		C22BF1391CBC349400D3FE59 /* Relation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Relation.swift; sourceTree = "<group>"; };
 		C22BF13A1CBC349400D3FE59 /* StringPad.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringPad.swift; sourceTree = "<group>"; };
 		C23AAF3F1CF49AFE009E28E0 /* RelationActivityLogging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RelationActivityLogging.swift; sourceTree = "<group>"; };
@@ -2538,7 +2534,6 @@
 				370753A21F2FAE43009C3700 /* Documentation */,
 				C22BF12D1CBC348500D3FE59 /* Products */,
 				37B4419A1E89AA7E00C8C336 /* Frameworks */,
-				37F12549238350D700C9D006 /* PLRelationalBinding-iOSTests copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -2681,7 +2676,6 @@
 				C22921B51CD10BA800518184 /* ObserverSet.swift */,
 				C25D63401DDF5F3000135E20 /* OptionalFlatten.swift */,
 				C2C6308C1D355B7500AD44C1 /* PerThreadInstance.swift */,
-				C22BF1381CBC349400D3FE59 /* PlaygroundMonospace.swift */,
 				C283FFCF1E805101000CDED9 /* Promise.swift */,
 				C2A78A1C1ED4A84D0021ACCF /* RemovableSet.swift */,
 				C2B53CBA1D197814006B6278 /* RWLock.swift */,
@@ -4102,7 +4096,6 @@
 				37B440B01E899A7200C8C336 /* InlineMutableData.swift in Sources */,
 				37B440261E8999DC00C8C336 /* RelationRecursiveSelect.swift in Sources */,
 				37B440421E8999FD00C8C336 /* SimpleDatabase.swift in Sources */,
-				37B440CD1E899DB900C8C336 /* PlaygroundMonospace.swift in Sources */,
 				37B440701E899A3300C8C336 /* AsyncRunloopHack.swift in Sources */,
 				37B4401E1E8999D200C8C336 /* RelationValue.swift in Sources */,
 				37B4404D1E899A0A00C8C336 /* PlistFileRelation.swift in Sources */,
@@ -4220,7 +4213,6 @@
 				37B440991E899A7200C8C336 /* PerThreadInstance.swift in Sources */,
 				37B440471E899A0900C8C336 /* PlistDatabase.swift in Sources */,
 				37B440671E899A3100C8C336 /* AsyncManager.swift in Sources */,
-				37B4409A1E899A7200C8C336 /* PlaygroundMonospace.swift in Sources */,
 				37B4408E1E899A7200C8C336 /* InlineMutableData.swift in Sources */,
 				37B440241E8999DB00C8C336 /* RelationRecursiveSelect.swift in Sources */,
 				37B4403F1E8999FB00C8C336 /* SimpleDatabase.swift in Sources */,

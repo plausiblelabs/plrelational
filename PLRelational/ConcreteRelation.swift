@@ -142,7 +142,7 @@ extension ConcreteRelation: ExpressibleByDictionaryLiteral {
     }
 }
 
-extension ConcreteRelation: CustomStringConvertible, PlaygroundMonospace {
+extension ConcreteRelation: CustomStringConvertible {
     public var description: String {
         let columns = scheme.attributes.sorted()
         let rows = sortedValues(defaultSort).map({ row -> [String] in
