@@ -236,7 +236,8 @@ private extension RelationTextIndex {
     ///
     /// - Parameters:
     ///   - relation: The Relation to update.
-    func asyncUpdate(relation: SearchRelation) {
+    ///   - initiator: An optional tag that identifies the initiator of the update.
+    func asyncUpdate(relation: SearchRelation, initiator: InitiatorTag? = nil) {
         log("starting asyncUpdate for \(relation.query)")
         
         AsyncManager.currentInstance.registerCustomAction(affectedRelations: [relation], {
@@ -281,7 +282,7 @@ private extension RelationTextIndex {
                     return .Ok(())
                 })
             }).err
-        })
+        }, initiator: initiator)
     }
     
     /// Update all match Relations which currently exist.

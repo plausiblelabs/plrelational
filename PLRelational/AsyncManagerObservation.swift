@@ -103,7 +103,7 @@ public protocol AsyncRelationContentObserver {
     func relationWillChange(_ relation: Relation)
     func relationNewContents(_ relation: Relation, rows: Set<Row>)
     func relationError(_ relation: Relation, error: RelationError)
-    func relationDidChange(_ relation: Relation)
+    func relationDidChange(_ relation: Relation, initiators: InitiatorTagSet)
 }
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
@@ -120,7 +120,7 @@ public protocol AsyncRelationContentCoalescedObserver {
     associatedtype PostprocessingOutput
     
     func relationWillChange(_ relation: Relation)
-    func relationDidChange(_ relation: Relation, result: Result<PostprocessingOutput, RelationError>)
+    func relationDidChange(_ relation: Relation, result: Result<PostprocessingOutput, RelationError>, initiators: InitiatorTagSet)
 }
 
 
@@ -146,8 +146,8 @@ public extension Relation {
     
     // MARK: Updates
     
-    func asyncUpdate(_ query: SelectExpression, newValues: Row) {
-        AsyncManager.currentInstance.registerUpdate(self, query: query, newValues: newValues)
+    func asyncUpdate(_ query: SelectExpression, newValues: Row, initiator: String? = nil) {
+        AsyncManager.currentInstance.registerUpdate(self, query: query, newValues: newValues, initiator: initiator)
     }
 }
 
@@ -190,7 +190,7 @@ private class ShimContentObserver<T: AsyncRelationContentCoalescedObserver>: Asy
         self.error = error
     }
     
-    func relationDidChange(_ relation: Relation) {
+    func relationDidChange(_ relation: Relation, initiators: InitiatorTagSet) {
         precondition(changing)
         changing = false
         
@@ -198,6 +198,6 @@ private class ShimContentObserver<T: AsyncRelationContentCoalescedObserver>: Asy
         coalescedRows.removeAll()
         
         let postprocessedResult = result.map(postprocess)
-        coalescedObserver.withWrapped({ $0.relationDidChange(relation, result: postprocessedResult) })
+        coalescedObserver.withWrapped({ $0.relationDidChange(relation, result: postprocessedResult, initiators: initiators) })
     }
 }

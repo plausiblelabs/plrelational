@@ -61,7 +61,7 @@ extension CachingRelation {
             owner?.cache = nil
         }
         
-        func relationDidChange(_ relation: Relation, result: Result<Set<Row>, RelationError>) {
+        func relationDidChange(_ relation: Relation, result: Result<Set<Row>, RelationError>, initiators: InitiatorTagSet) {
             print("Relation did change to \(result)")
             owner?.setRows(result)
         }

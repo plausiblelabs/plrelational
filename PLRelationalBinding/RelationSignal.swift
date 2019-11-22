@@ -115,7 +115,7 @@ extension RelationSignal: AsyncRelationContentCoalescedObserver {
         self.beginPossibleAsyncChange()
     }
 
-    func relationDidChange(_ relation: Relation, result: Result<T, RelationError>) {
+    func relationDidChange(_ relation: Relation, result: Result<T, RelationError>, initiators: InitiatorTagSet) {
         switch result {
         case .Ok(let newValue):
             if !isRepeat(newValue) {

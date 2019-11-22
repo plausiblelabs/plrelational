@@ -5,6 +5,13 @@
 
 import Foundation
 
+/// Alias for a tag that identifies the initiator of a change (insert, update, delete)
+/// to an underlying relation.  This tag is propagated to observers and can be used
+/// to determine when a change is self-initiated, for example.
+public typealias InitiatorTag = String
+
+/// Alias for a set of initiator tags.  Allows nil, which indicates an anonymous initiator.
+public typealias InitiatorTagSet = Set<InitiatorTag?>
 
 /// :nodoc: Implementation detail (will be made non-public eventually)
 /// A class which manages asynchronous operations on `Relation`s. `Relation` provides
@@ -97,18 +104,18 @@ public final class AsyncManager: PerThreadInstance {
     }
     
     /// Register an update operation with the manager.
-    public func registerUpdate(_ relation: Relation, query: SelectExpression, newValues: Row) {
-        register(action: .update(relation, query, newValues))
+    public func registerUpdate(_ relation: Relation, query: SelectExpression, newValues: Row, initiator: InitiatorTag?) {
+        register(action: .update(relation, query, newValues, initiator))
     }
     
     /// Register an add operation with the manager.
-    public func registerAdd(_ relation: MutableRelation, row: Row) {
-        register(action: .add(relation, row))
+    public func registerAdd(_ relation: MutableRelation, row: Row, initiator: InitiatorTag?) {
+        register(action: .add(relation, row, initiator))
     }
     
     /// Register a delete operation with the manager.
-    public func registerDelete(_ relation: MutableRelation, query: SelectExpression) {
-        register(action: .delete(relation, query))
+    public func registerDelete(_ relation: MutableRelation, query: SelectExpression, initiator: InitiatorTag?) {
+        register(action: .delete(relation, query, initiator))
     }
     
     /// Register a restore snapshot operation with the manager.
@@ -128,16 +135,16 @@ public final class AsyncManager: PerThreadInstance {
     
     /// Register a function to be called as part of the sequence of performing enqueued async actions.
     /// This allows the sequence of execution to be monitored for e.g. computing deltas for operations.
-    public func registerCheckpoint(_ checkpoint: @escaping () -> Void) {
-        registerCustomAction(affectedRelations: [], { checkpoint(); return nil })
+    public func registerCheckpoint(_ checkpoint: @escaping () -> Void, initiator: InitiatorTag? = nil) {
+        registerCustomAction(affectedRelations: [], { checkpoint(); return nil }, initiator: initiator)
     }
     
     /// Register a custom action. This allows asyncifying more complex operations than just update/add/delete/whatever.
     /// In order for notifications to work, any relations that might be affected in the custom action must be passed in
     /// to `affectedRelations`. It's acceptable to pass in a relation that ends up not being affected. This will generate
     /// a spurious but harmless empty change notification.
-    public func registerCustomAction(affectedRelations: [MutableRelation], _ action: @escaping () -> RelationError?) {
-        register(action: .customAction(action: action, affectedRelations: affectedRelations))
+    public func registerCustomAction(affectedRelations: [MutableRelation], _ action: @escaping () -> RelationError?, initiator: InitiatorTag?) {
+        register(action: .customAction(action: action, affectedRelations: affectedRelations, initiator: initiator))
     }
     
     private func register(action: Action, atBeginning: Bool = false) {
@@ -148,21 +155,21 @@ public final class AsyncManager: PerThreadInstance {
         }
         
         switch action {
-        case .add(let relation, let row):
-            registerChange(relation, predicate: SelectExpressionFromRow(row), newValues: row)
-        case .delete(let relation, let query):
-            registerChange(relation, predicate: query, newValues: nil)
-        case .update(let relation, let query, let newValues):
-            registerChange(relation, predicate: query, newValues: newValues)
+        case .add(let relation, let row, let initiator):
+            registerChange(relation, predicate: SelectExpressionFromRow(row), newValues: row, initiator: initiator)
+        case .delete(let relation, let query, let initiator):
+            registerChange(relation, predicate: query, newValues: nil, initiator: initiator)
+        case .update(let relation, let query, let newValues, let initiator):
+            registerChange(relation, predicate: query, newValues: newValues, initiator: initiator)
         case .restoreSnapshot(let database, _), .applyDelta(let database, _):
             for (_, relation) in database.relations {
-                registerChange(relation, predicate: true, newValues: nil)
+                registerChange(relation, predicate: true, newValues: nil, initiator: nil /* TODO(initiator) */)
             }
         case .query:
             break
-        case .customAction(_, let affectedRelations):
+        case .customAction(_, let affectedRelations, let initiator):
             for relation in affectedRelations {
-                registerChange(relation, predicate: true, newValues: nil)
+                registerChange(relation, predicate: true, newValues: nil, initiator: initiator)
             }
         }
         
@@ -203,14 +210,14 @@ public final class AsyncManager: PerThreadInstance {
         }
     }
     
-    fileprivate func registerChange(_ relation: Relation, predicate: SelectExpression, newValues: Row?) {
+    fileprivate func registerChange(_ relation: Relation, predicate: SelectExpression, newValues: Row?, initiator: String?) {
         if state != .running {
-            sendWillChange(relation, predicate: predicate, newValues: newValues)
+            sendWillChange(relation, predicate: predicate, newValues: newValues, initiator: initiator)
             scheduleExecutionIfNeeded()
         }
     }
     
-    fileprivate func sendWillChange(_ relation: Relation, predicate: SelectExpression, newValues: Row?) {
+    fileprivate func sendWillChange(_ relation: Relation, predicate: SelectExpression, newValues: Row?, initiator: String?) {
         for (variable, predicate) in getUpdatePredicates(forRelation: relation, predicate: predicate, newValues: newValues) {
             if variable is IntermediateRelation { continue }
             
@@ -219,6 +226,12 @@ public final class AsyncManager: PerThreadInstance {
                     if let filter = entry.filter, let predicate = predicate, canProveInconsistent(predicate, filter) {
                         continue
                     }
+
+                    // Add the initator to the set; note that we allow `nil` tags in the set,
+                    // which can be used to indicate that the initiator is unnamed/unknown
+                    entry.observedRelationInfo.initiators.insert(initiator)
+                    
+                    // Send willChange for any observers that haven't been sent one yet
                     var willChangeRelationObservers: [DispatchContextWrapped<AsyncRelationChangeObserver>] = []
                     var willChangeUpdateObservers: [DispatchContextWrapped<AsyncRelationContentObserver>] = []
                     entry.observedRelationInfo.observers.mutatingForEach({
@@ -242,21 +255,21 @@ public final class AsyncManager: PerThreadInstance {
     fileprivate func sendWillChangeForAllPendingActions() {
         for action in pendingActions {
             switch action {
-            case .add(let relation, let row):
-                sendWillChange(relation, predicate: SelectExpressionFromRow(row), newValues: row)
-            case .delete(let relation, let query):
-                sendWillChange(relation, predicate: query, newValues: nil)
-            case .update(let relation, let query, let newValues):
-                sendWillChange(relation, predicate: query, newValues: newValues)
+            case .add(let relation, let row, let initiator):
+                sendWillChange(relation, predicate: SelectExpressionFromRow(row), newValues: row, initiator: initiator)
+            case .delete(let relation, let query, let initiator):
+                sendWillChange(relation, predicate: query, newValues: nil, initiator: initiator)
+            case .update(let relation, let query, let newValues, let initiator):
+                sendWillChange(relation, predicate: query, newValues: newValues, initiator: initiator)
             case .restoreSnapshot(let database, _), .applyDelta(let database, _):
                 for (_, relation) in database.relations {
-                    sendWillChange(relation, predicate: true, newValues: nil)
+                    sendWillChange(relation, predicate: true, newValues: nil, initiator: nil /* TODO(initiator) */)
                 }
             case .query:
                 break
-            case .customAction(_, let affectedRelations):
+            case .customAction(_, let affectedRelations, let initiator):
                 for relation in affectedRelations {
-                    sendWillChange(relation, predicate: true, newValues: nil)
+                    sendWillChange(relation, predicate: true, newValues: nil, initiator: initiator)
                 }
             }
         }
@@ -333,14 +346,14 @@ public final class AsyncManager: PerThreadInstance {
             for action in actions {
                 let error: RelationError?
                 switch action {
-                case .update(let relation, let query, let newValues):
+                case .update(let relation, let query, let newValues, _):
                     var mutableRelation = relation
                     let result = mutableRelation.update(query, newValues: newValues)
                     error = result.err
-                case .add(let relation, let row):
+                case .add(let relation, let row, _):
                     let result = relation.add(row)
                     error = result.err
-                case .delete(let relation, let query):
+                case .delete(let relation, let query, _):
                     let result = relation.delete(query)
                     error = result.err
                 case .restoreSnapshot(let database, let snapshot):
@@ -358,7 +371,7 @@ public final class AsyncManager: PerThreadInstance {
                     error = database.apply(delta: delta).err
                 case .query:
                     error = nil
-                case .customAction(let call, _):
+                case .customAction(let call, _, _):
                     error = call()
                 }
                 
@@ -487,10 +500,13 @@ public final class AsyncManager: PerThreadInstance {
                         // All content observers currently being worked on need a didChange followed by a willChange
                         // so that they know they're getting new content, not additional content.
                         for (observedRelationObj, info) in observedInfo {
+                            // TODO: Hmm, we don't seem to have a good way to clear out the original initiator
+                            // tags while retaining new tags for those pending actions that came in; for now
+                            // I guess we will leave all tags in place and clear them out at the end
                             for (_, observer) in info.observers {
                                 if observer.didSendWillChange {
                                     observer.updateObserver?.withWrapped({
-                                        $0.relationDidChange(observedRelationObj as! Relation)
+                                        $0.relationDidChange(observedRelationObj as! Relation, initiators: info.initiators)
                                         $0.relationWillChange(observedRelationObj as! Relation)
                                     })
                                 }
@@ -503,24 +519,26 @@ public final class AsyncManager: PerThreadInstance {
                         self.state = .stopping
                         
                         // Reset observers and send didChange to them.
-                        var entriesWithWillChange: [(Relation, ObservedRelationInfo.ObserverEntry)] = []
+                        var entriesWithWillChange: [(Relation, ObservedRelationInfo.ObserverEntry, InitiatorTagSet)] = []
                         for (observedRelationObj, info) in observedInfo {
+                            let initiators = info.initiators
+                            info.initiators.removeAll()
                             info.derivative.clearVariables()
                             
                             let relation = observedRelationObj as! Relation
                             info.observers.mutatingForEach({
                                 if $0.didSendWillChange {
                                     $0.didSendWillChange = false
-                                    entriesWithWillChange.append((relation, $0))
+                                    entriesWithWillChange.append((relation, $0, initiators))
                                 }
                             })
                         }
                         
-                        for (relation, entry) in entriesWithWillChange {
+                        for (relation, entry, initiators) in entriesWithWillChange {
                             entry.relationObserver?.withWrapped({ $0.relationDidChange(relation) })
-                            entry.updateObserver?.withWrapped({ $0.relationDidChange(relation) })
+                            entry.updateObserver?.withWrapped({ $0.relationDidChange(relation, initiators: initiators) })
                         }
-                        
+
                         // Suck out any pending actions that were queued up by didChange calls so we
                         // can add them back in after changing state.
                         let pendingActions = self.pendingActions
@@ -541,9 +559,9 @@ public final class AsyncManager: PerThreadInstance {
     fileprivate func getDatabases(forActions: [Action], into databases: inout ObjectSet<TransactionalDatabase>) {
         let relations = forActions.compactMap({ action -> Relation? in
             switch action {
-            case .update(let r, _, _):
+            case .update(let r, _, _, _):
                 return r
-            case .add(let r, _), .delete(let r, _):
+            case .add(let r, _, _), .delete(let r, _, _):
                 return r
             default:
                 return nil
@@ -591,13 +609,13 @@ extension AsyncManager {
 
 extension AsyncManager {
     fileprivate enum Action {
-        case update(Relation, SelectExpression, Row)
-        case add(MutableRelation, Row)
-        case delete(MutableRelation, SelectExpression)
+        case update(Relation, SelectExpression, Row, InitiatorTag?)
+        case add(MutableRelation, Row, InitiatorTag?)
+        case delete(MutableRelation, SelectExpression, InitiatorTag?)
         case restoreSnapshot(TransactionalDatabase, TransactionalDatabaseSnapshot)
         case applyDelta(TransactionalDatabase, TransactionalDatabaseDelta)
         case query(Relation, DispatchContextWrapped<(Result<Set<Row>, RelationError>) -> Void>)
-        case customAction(action: () -> RelationError?, affectedRelations: [MutableRelation])
+        case customAction(action: () -> RelationError?, affectedRelations: [MutableRelation], initiator: InitiatorTag?)
     }
     
     fileprivate class ObservedRelationInfo {
@@ -610,6 +628,7 @@ extension AsyncManager {
         let derivative: RelationDerivative
         var observers: [UInt64: ObserverEntry] = [:]
         var currentObserverID: UInt64 = 0
+        var initiators: InitiatorTagSet = []
         
         init(derivative: RelationDerivative) {
             self.derivative = derivative
@@ -869,9 +888,9 @@ extension AsyncManager {
         
         for change in pendingActions {
             switch change {
-            case .update(let r, _, _): if obj === asObject(r) { return true }
-            case .add(let r, _): if obj === r { return true }
-            case .delete(let r, _): if obj === r { return true }
+            case .update(let r, _, _, _): if obj === asObject(r) { return true }
+            case .add(let r, _, _): if obj === r { return true }
+            case .delete(let r, _, _): if obj === r { return true }
                 
             default: break
             }
@@ -882,11 +901,11 @@ extension AsyncManager {
 }
 
 public extension MutableRelation {
-    func asyncAdd(_ row: Row) {
-        AsyncManager.currentInstance.registerAdd(self, row: row)
+    func asyncAdd(_ row: Row, initiator: InitiatorTag? = nil) {
+        AsyncManager.currentInstance.registerAdd(self, row: row, initiator: initiator)
     }
     
-    func asyncDelete(_ query: SelectExpression) {
-        AsyncManager.currentInstance.registerDelete(self, query: query)
+    func asyncDelete(_ query: SelectExpression, initiator: InitiatorTag? = nil) {
+        AsyncManager.currentInstance.registerDelete(self, query: query, initiator: initiator)
     }
 }
