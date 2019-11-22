@@ -24,7 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Initialize our model
         model = Model(undoManager: undoManager, path: "/tmp/TodoApp-SwiftUI.db")
         if !model.dbAlreadyExisted {
-            model.addDefaultData()
+            _ = model.addDefaultData()
         }
 
         // Create the SwiftUI view that provides the window contents

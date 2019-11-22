@@ -46,7 +46,6 @@
 		37F1249023834B9000C9D006 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37F1248B23834B9000C9D006 /* Assets.xcassets */; };
 		37F1249123834B9000C9D006 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 37F1248D23834B9000C9D006 /* Preview Assets.xcassets */; };
 		37F1249223834B9000C9D006 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 37F1248E23834B9000C9D006 /* Main.storyboard */; };
-		37F1249723834C3D00C9D006 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 37F1249623834C3D00C9D006 /* Info.plist */; };
 		37F124FF23834CE800C9D006 /* PLRelational.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37F124BD23834CCB00C9D006 /* PLRelational.framework */; };
 		37F1250023834CEC00C9D006 /* PLRelationalCombine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37F124D523834CCB00C9D006 /* PLRelationalCombine.framework */; };
 /* End PBXBuildFile section */
@@ -1009,7 +1008,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37F1249723834C3D00C9D006 /* Info.plist in Resources */,
 				37F1249223834B9000C9D006 /* Main.storyboard in Resources */,
 				37F1249123834B9000C9D006 /* Preview Assets.xcassets in Resources */,
 				37F1249023834B9000C9D006 /* Assets.xcassets in Resources */,

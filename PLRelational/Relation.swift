@@ -507,6 +507,7 @@ extension Relation {
     }
     
     public var playgroundDescription: Any {
+#if os(macOS)
         if #available(OSX 10.12, *) {
             let pad: CGFloat = 8
             
@@ -530,6 +531,9 @@ extension Relation {
         } else {
             return self.description
         }
+#else
+        return self.description
+#endif
     }
 }
 
