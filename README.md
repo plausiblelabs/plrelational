@@ -8,7 +8,7 @@ PLRelational is released under an MIT license. See the LICENSE file for the full
 
 ## Quick Start
 
-The repository contains `PLRelational.xcodeproj` which will build out of the box. You can manually build the frameworks and add them to your project, or you can add the PLRelational project as a dependency.
+The repository contains Xcode projects under `PLRelational` and `PLRelationalCombine`, both of which will build out of the box. You can manually build the frameworks and add them to your project, or you can add the PLRelational project as a dependency.
 
 ## Frameworks
 
@@ -249,9 +249,9 @@ The `PLRelationalExamples` Xcode project includes a number of example apps:
 
 * **TodoApp-SwiftUI** is a realistic to-do app built with PLRelational[Combine] and SwiftUI, that runs on both macOS and iOS.
 
-Additionally, there are some AppKit-based apps for macOS that were developed using the legacy PLRelationalBinding framework.  These will be migrated to use PLRelationalCombine + SwiftUI in due time:
+Additionally, there are some AppKit-based apps for macOS (under `Legacy/Examples`) that were developed using the legacy PLRelationalBinding framework.  These will be migrated to use PLRelationalCombine + SwiftUI in due time:
 
-* **HelloWorldApp** is the best place to start; a minimal example that demonstrates relations, binding, undo/redo, etc.
+* **HelloWorldApp** is a minimal example that demonstrates relations, binding, undo/redo, etc.
 * **TodoApp** is a good example of using PLRelational to build a real-world, working to-do app.
 * **SearchApp** demonstrates the use of `RelationTextIndex` for full text search.
 * **BindableControlsApp** is primarily a UI testing target for all the AppKit controls in PLBindableControls.
