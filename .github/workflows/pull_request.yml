@@ -1,0 +1,40 @@
+name: Pull Request
+
+on: pull_request
+
+jobs:
+  test:
+
+    name: Test on ${{ matrix.name }}
+    runs-on: macOS-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # GitHub Actions requires a single row to be added to the build matrix.
+        # For more info:
+        #   https://help.github.com/en/articles/workflow-syntax-for-github-actions
+        # This approach based on:
+        #   https://github.com/DaanDeMeyer/reproc/blob/master/.github/workflows/main.yml
+        name: [
+          macOS,
+          iOS
+        ]
+
+        include:
+          - name: macOS
+            destination: 'platform=macOS'
+
+          - name: iOS
+            destination: 'platform=iOS Simulator,name=iPhone 11,OS=13.1'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Select Xcode 11.1
+        run: sudo xcode-select -switch /Applications/Xcode_11.1.app
+      - name: Build and Test
+        run: |
+          cd PLRelationalCombine
+          xcodebuild clean test -scheme PLRelational-${{ matrix.name }} -destination "${{ matrix.destination }}"
+          xcodebuild clean test -scheme PLRelationalCombine-${{ matrix.name }} -destination "${{ matrix.destination }}"
