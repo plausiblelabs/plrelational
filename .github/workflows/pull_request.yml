@@ -35,22 +35,22 @@ jobs:
       - name: Select Xcode 11.1
         run: sudo xcode-select -switch /Applications/Xcode_11.1.app
 
-      - name: Build + Test > PLRelational
+      - name: PLRelational
         run: |
           cd PLRelational
           xcodebuild clean test -scheme PLRelational-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
 
-      - name: Build + Test > PLRelationalCombine
+      - name: PLRelationalCombine
         run: |
           cd PLRelationalCombine
           xcodebuild clean test -scheme PLRelationalCombine-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
 
-      - name: Build > TodoApp-SwiftUI
+      - name: Examples > TodoApp-SwiftUI
         run: |
           cd Examples
           xcodebuild clean build -scheme TodoApp-SwiftUI-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
 
-      - name: Build + Test > PLRelationalBinding (Legacy)
+      - name: Legacy > PLRelationalBinding
         run: |
           cd Legacy
           xcodebuild clean test -scheme PLRelationalBinding-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
