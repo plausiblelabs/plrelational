@@ -1,5 +1,7 @@
 # PLRelational
 
+![Build Status](https://github.com/plausiblelabs/plrelational/workflows/Build/badge.svg?event=push)
+
 PLRelational is a data storage, processing, and presentation framework based on relational algebra. It is written in Swift and is available for macOS and iOS.
 
 ## License
