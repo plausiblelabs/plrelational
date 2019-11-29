@@ -1,6 +1,13 @@
-name: Pull Request
+name: Build
 
-on: pull_request
+# Run this on pushes to `master`, or when a pull request is opened against `master`
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
 
 jobs:
   test:
