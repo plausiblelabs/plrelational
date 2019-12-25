@@ -45,19 +45,19 @@ jobs:
       - name: PLRelational
         run: |
           cd PLRelational
-          xcodebuild clean test -scheme PLRelational-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
+          set -o pipefail && xcodebuild clean test -scheme PLRelational-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
 
       - name: PLRelationalCombine
         run: |
           cd PLRelationalCombine
-          xcodebuild clean test -scheme PLRelationalCombine-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
+          set -o pipefail && xcodebuild clean test -scheme PLRelationalCombine-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
 
       - name: Examples > TodoApp-SwiftUI
         run: |
           cd Examples
-          xcodebuild clean build -scheme TodoApp-SwiftUI-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
+          set -o pipefail && xcodebuild clean build -scheme TodoApp-SwiftUI-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
 
       - name: Legacy > PLRelationalBinding
         run: |
           cd Legacy
-          xcodebuild clean test -scheme PLRelationalBinding-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
+          set -o pipefail && xcodebuild clean test -scheme PLRelationalBinding-${{ matrix.name }} -destination "${{ matrix.destination }}" | xcpretty
